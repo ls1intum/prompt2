@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "module": "CommonJS",
+    "target": "es6",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "typeRoots": ["./node_modules/@types", "./@types"],
+  },
+  "include": ["**/*.ts", "**/*.tsx", "src/index.js"]
+}

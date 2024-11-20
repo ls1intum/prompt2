@@ -5,7 +5,8 @@
         "packages": [
             "core",
             "shared_component_library",
-            "shared-library"
+            "shared-library",
+            "template_component"
         ]
     },
     "scripts": {

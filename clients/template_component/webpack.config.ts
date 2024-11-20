@@ -10,7 +10,6 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import packageJson from './package.json'
 //import sharedLibraryPackageJson from '../shared-library/package.json'
 
-// TODO: specify the version for react in shared dependencies
 const config: (env: Record<string, string>) => Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
@@ -30,7 +29,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: 3000,
+      port: 3001,
       client: {
         progress: true,
       },
@@ -43,37 +42,12 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           use: 'ts-loader',
           exclude: /node_modules/,
         },
-        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-        {
-          test: /\.scss$/,
-          use: [
-            'style-loader',
-            {
-              loader: 'css-loader',
-              options: {
-                import: false,
-                modules: true,
-              },
-            },
-            'sass-loader',
-          ],
-          include: /\.module\.scss$/,
-        },
-        {
-          test: /\.scss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
-          exclude: /\.module\.scss$/,
-        },
-        {
-          test: /\.(png|jp(e*)g|svg|gif)$/,
-          use: ['file-loader'],
-        },
       ],
     },
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: '/',
+      publicPath: 'auto',
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -83,10 +57,10 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
     },
     plugins: [
       new container.ModuleFederationPlugin({
-        name: 'core',
-        remotes: {
-          template_component: 'template_component@http://localhost:3001/remoteEntry.js',
-
+        name: 'template_component',
+        filename: 'remoteEntry.js',
+        exposes: {
+          './App': './src/App',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
@@ -111,9 +85,6 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           minifyURLs: true,
         },
       }),
-      new CopyPlugin({
-        patterns: [{ from: 'public' }],
-      }),
       new DefinePlugin({
         'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
         'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
@@ -123,46 +94,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           getVariable('REACT_APP_KEYCLOAK_REALM_NAME'),
         ),
       }),
-      IS_PERF && new BundleAnalyzerPlugin(),
-      new CleanWebpackPlugin(),
-      !IS_DEV &&
-        new CompressionPlugin({
-          filename: '[path][base].gz',
-          algorithm: 'gzip',
-          test: /\.(js|css|html|svg)$/,
-          threshold: 10240,
-          minRatio: 0.8,
-        }),
     ].filter(Boolean),
-    optimization: {
-      minimize: !IS_DEV,
-      runtimeChunk: {
-        name: 'runtime',
-      },
-      splitChunks: {
-        chunks: 'async',
-        minSize: 30000,
-        minChunks: 1,
-        maxAsyncRequests: 5,
-        maxInitialRequests: 3,
-        cacheGroups: {
-          default: {
-            name: 'common',
-            chunks: 'initial',
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-          },
-        },
-      },
-      minimizer: [`...`, new CssMinimizerPlugin()],
-    },
     cache: {
       type: 'filesystem',
     },
