@@ -1,0 +1,19 @@
+{
+    "name": "prompt-module-federation",
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "core",
+            "shared_component_library",
+            "shared-library"
+        ]
+    },
+    "scripts": {
+        "start": "lerna run --parallel start",
+        "build": "lerna run build"
+    },
+    "devDependencies": {
+        "lerna": "^4.0.0"
+    },
+    "packageManager": "yarn@4.1.0"
+}
