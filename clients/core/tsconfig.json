@@ -13,6 +13,11 @@
     "skipLibCheck": true,
     "noImplicitAny": false,
     "typeRoots": ["./node_modules/@types", "./@types"],
+    // for shadcn config
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/index.js"]
 }

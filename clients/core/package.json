@@ -11,9 +11,15 @@
         "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
     },
     "dependencies": {
+        "@radix-ui/react-slot": "^1.1.0",
+        "@shadcn/ui": "^0.0.4",
+        "css-loader": "^7.1.2",
         "external-remotes-plugin": "^1.0.0",
         "jwt-decode": "^4.0.0",
         "keycloak-js": "^22.0.5",
+        "postcss": "^8.4.49",
+        "postcss-loader": "^8.1.1",
+        "postcss-preset-env": "^10.1.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.23.1",

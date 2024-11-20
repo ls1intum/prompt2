@@ -44,6 +44,15 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           use: 'ts-loader',
           exclude: /node_modules/,
         },
+        {
+          test: /\.css$/i,
+          include: path.resolve(__dirname, 'src'),
+          use: [
+            'style-loader',  // Injects styles into DOM
+            'css-loader',    // Resolves CSS imports
+            'postcss-loader' // Processes Tailwind and other PostCSS plugins
+          ],
+        },
       ],
     },
     output: {
