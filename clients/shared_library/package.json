@@ -1,0 +1,10 @@
+{
+    "name": "shared_library",
+    "version": "0.0.1",
+    "private": true,
+    "main": "./index.js",
+    "dependencies": {
+        "react": "^18.3.1"
+    },
+    "packageManager": "yarn@4.1.0"
+}

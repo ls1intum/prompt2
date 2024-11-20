@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "npmClient": "yarn",
+  "packages": [
+    "core",
+    "template_component"
+  ]
+}
