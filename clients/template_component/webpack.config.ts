@@ -1,12 +1,7 @@
 import path from 'path'
 import { Configuration, container, DefinePlugin } from 'webpack'
-import CompressionPlugin from 'compression-webpack-plugin'
-import CopyPlugin from 'copy-webpack-plugin'
 import 'webpack-dev-server'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import packageJson from './package.json'
 //import sharedLibraryPackageJson from '../shared-library/package.json'
 
@@ -14,7 +9,6 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
-  const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
 
   return {

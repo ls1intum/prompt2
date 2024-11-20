@@ -86,7 +86,6 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         name: 'core',
         remotes: {
           template_component: 'template_component@http://localhost:3001/remoteEntry.js',
-
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

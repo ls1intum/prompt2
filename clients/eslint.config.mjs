@@ -8,6 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
+import fs from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -16,6 +17,16 @@ const compat = new FlatCompat({
   recommendedConfig: js.configs.recommended,
   allConfig: js.configs.all,
 })
+
+const getTsConfigPaths = () => {
+  const workspaceFolders = ['core', 'template_component'] // Adjust to match your workspaces
+  return workspaceFolders
+    .map((folder) => {
+      const configPath = path.resolve(__dirname, folder, 'tsconfig.json')
+      return fs.existsSync(configPath) ? configPath : null
+    })
+    .filter(Boolean)
+}
 
 export default [
   ...fixupConfigRules(
@@ -27,7 +38,12 @@ export default [
     ),
   ),
   {
-    files: ['src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx'],
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+    ignores: [
+      'node_modules/**', // Ignore node_modules
+      '**/dist/**', // Ignore distribution folders
+      '**/build/**', // Ignore build folders
+    ],
 
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
@@ -50,7 +66,7 @@ export default [
           jsx: true,
         },
 
-        project: ['tsconfig.json'],
+        project: getTsConfigPaths(), // Dynamically resolve all tsconfig.json files
       },
     },
 
