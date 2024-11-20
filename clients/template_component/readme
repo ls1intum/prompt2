@@ -1,0 +1,17 @@
+# Template components
+This shall serve as template component, that you can duplicate for any new component you want to create. 
+
+# How copy the template
+1. public folder
+    -> change the 'TODO' in 'template.html' to change the title of the website
+    (do NOT rename the file 'template.html') 
+
+2. Adjust the webpack.config.ts
+   1. change the port to some free address
+   2. rename the name ("template_component")of the app under plugins > ModuleFederationPlugin > name 
+   3. Define all components you want to be exported under exposes
+
+3. Add it to the client>package.json under workspace>packages
+
+# How to use the new component
+TODO
