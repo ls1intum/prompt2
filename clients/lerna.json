@@ -1,5 +1,8 @@
 {
   "version": "1.0.0",
   "npmClient": "yarn",
-  "useWorkspaces": true
+  "packages": [
+    "core",
+    "template_component"
+  ]
 }
