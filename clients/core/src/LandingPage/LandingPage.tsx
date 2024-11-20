@@ -1,10 +1,8 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { LogIn } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { Header } from './components/Header'
 import { CourseCard } from './components/CourseCard'
 import { Footer } from './components/Footer'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 // TODO replace with actual course data
 const courses = [
@@ -45,11 +43,21 @@ export function LandingPage(): JSX.Element {
 
           <section className='mb-16'>
             <h3 className='text-2xl font-semibold text-gray-800 mb-6'>Available Courses</h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-              {courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
+            {courses.length != 0 ? (
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+                {courses.map((course) => (
+                  <CourseCard key={course.id} course={course} />
+                ))}
+              </div>
+            ) : (
+              <Alert>
+                <AlertCircle className='h-4 w-4' />
+                <AlertTitle>No Open Applications</AlertTitle>
+                <AlertDescription>
+                  No applications are currently open. Please check back later.
+                </AlertDescription>
+              </Alert>
+            )}
           </section>
         </div>
       </main>
