@@ -11398,7 +11398,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "shared_library@workspace:shared_library"
   dependencies:
+    "@radix-ui/react-slot": "npm:^1.1.0"
+    "@shadcn/ui": "npm:^0.0.4"
+    class-variance-authority: "npm:^0.7.0"
+    clsx: "npm:^2.1.1"
+    lucide-react: "npm:^0.460.0"
     react: "npm:^18.3.1"
+    tailwind-merge: "npm:^2.5.4"
+    tailwindcss: "npm:^3.4.15"
+    tailwindcss-animate: "npm:^1.0.7"
   languageName: unknown
   linkType: soft
 

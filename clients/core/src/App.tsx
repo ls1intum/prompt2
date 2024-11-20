@@ -1,7 +1,7 @@
 import React from 'react'
 import ErrorBoundary from './ErrorBoundary'
 const TemplateComponent = React.lazy(() => import('template_component/App'))
-import { Button } from '../components/ui/button'
+import { Button } from '@/components/ui/button'
 
 export const App = (): JSX.Element => {
   return (

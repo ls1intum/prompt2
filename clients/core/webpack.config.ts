@@ -9,7 +9,7 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import ExternalTemplateRemotesPlugin from 'external-remotes-plugin'
 import packageJson from './package.json'
-//import sharedLibraryPackageJson from '../shared-library/package.json'
+import sharedLibraryPackageJson from '../shared_library/package.json'
 
 // TODO: specify the version for react in shared dependencies
 const config: (env: Record<string, string>) => Configuration = (env) => {
@@ -46,11 +46,14 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         },
         {
           test: /\.css$/i,
-          include: path.resolve(__dirname, 'src'),
+          include: [
+            path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, '../shared_library/src'),
+          ],
           use: [
-            'style-loader',  // Injects styles into DOM
-            'css-loader',    // Resolves CSS imports
-            'postcss-loader' // Processes Tailwind and other PostCSS plugins
+            'style-loader', // Injects styles into DOM
+            'css-loader', // Resolves CSS imports
+            'postcss-loader', // Processes Tailwind and other PostCSS plugins
           ],
         },
       ],
@@ -63,7 +66,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
       alias: {
-        'shared-library': path.resolve(__dirname, '../shared-library'),
+        '@': path.resolve(__dirname, '../shared_library'),
       },
     },
     plugins: [
@@ -75,9 +78,9 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
-          // 'shared-library': {
-          //   requiredVersion: sharedLibraryPackageJson.version,
-          // },
+          shared_library: {
+            requiredVersion: sharedLibraryPackageJson.version,
+          },
         },
       }),
       new ExternalTemplateRemotesPlugin(),

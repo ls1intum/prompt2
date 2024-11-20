@@ -19,7 +19,7 @@ const compat = new FlatCompat({
 })
 
 const getTsConfigPaths = () => {
-  const workspaceFolders = ['core', 'template_component'] // Adjust to match your workspaces
+  const workspaceFolders = ['core', 'template_component', 'shared_library'] // TODO: replace with dynamic workspace detection
   return workspaceFolders
     .map((folder) => {
       const configPath = path.resolve(__dirname, folder, 'tsconfig.json')
