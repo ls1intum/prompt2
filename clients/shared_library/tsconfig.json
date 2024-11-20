@@ -1,3 +1,4 @@
+// DO NOT REMOVE - this is required for eslint and shadcn to be able to add new components
 {
   "compilerOptions": {
     "outDir": "./dist/",
@@ -18,5 +19,5 @@
       "@/*": ["../shared_library/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/index.js", "tailwind.config.js"],
+
 }

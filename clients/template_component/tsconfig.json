@@ -13,6 +13,10 @@
     "skipLibCheck": true,
     "noImplicitAny": false,
     "typeRoots": ["./node_modules/@types", "./@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../shared_library/*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/index.js"]
+  "include": ["**/*.ts", "**/*.tsx", "src/index.js",  "tailwind.config.js"]
 }
