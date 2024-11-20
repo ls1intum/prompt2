@@ -2,7 +2,7 @@ import path from 'path'
 import { Configuration, container, DefinePlugin } from 'webpack'
 import 'webpack-dev-server'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import packageJson from './package.json'
+import packageJson from '../package.json'
 //import sharedLibraryPackageJson from '../shared-library/package.json'
 
 const config: (env: Record<string, string>) => Configuration = (env) => {
