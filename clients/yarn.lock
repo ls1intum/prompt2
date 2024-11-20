@@ -3089,6 +3089,7 @@ __metadata:
     compression-webpack-plugin: "npm:^11.1.0"
     css-minimizer-webpack-plugin: "npm:^7.0.0"
     dotenv-webpack: "npm:^8.1.0"
+    external-remotes-plugin: "npm:^1.0.0"
     html-webpack-plugin: "npm:^5.6.0"
     jwt-decode: "npm:^4.0.0"
     keycloak-js: "npm:^22.0.5"
@@ -4855,6 +4856,17 @@ __metadata:
     iconv-lite: "npm:^0.4.24"
     tmp: "npm:^0.0.33"
   checksum: 10c0/c98f1ba3efdfa3c561db4447ff366a6adb5c1e2581462522c56a18bf90dfe4da382f9cd1feee3e330108c3595a854b218272539f311ba1b3298f841eb0fbf339
+  languageName: node
+  linkType: hard
+
+"external-remotes-plugin@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "external-remotes-plugin@npm:1.0.0"
+  dependencies:
+    webpack-sources: "npm:^2.2.0"
+  peerDependencies:
+    webpack: ^5
+  checksum: 10c0/ec9a714f77e8bdadfb70adb037ca64d157f05c920adcc6079ddb72ceff4f283f6a3abf908823d9ed7f7b0816e877df4d102e256ee053942d1580c80b93b1c80f
   languageName: node
   linkType: hard
 
@@ -9989,6 +10001,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"source-list-map@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "source-list-map@npm:2.0.1"
+  checksum: 10c0/2e5e421b185dcd857f46c3c70e2e711a65d717b78c5f795e2e248c9d67757882ea989b80ebc08cf164eeeda5f4be8aa95d3b990225070b2daaaf3257c5958149
+  languageName: node
+  linkType: hard
+
 "source-map-js@npm:^1.0.1, source-map-js@npm:^1.2.1":
   version: 1.2.1
   resolution: "source-map-js@npm:1.2.1"
@@ -11348,6 +11367,16 @@ __metadata:
     flat: "npm:^5.0.2"
     wildcard: "npm:^2.0.0"
   checksum: 10c0/b607c84cabaf74689f965420051a55a08722d897bdd6c29cb0b2263b451c090f962d41ecf8c9bf56b0ab3de56e65476ace0a8ecda4f4a4663684243d90e0512b
+  languageName: node
+  linkType: hard
+
+"webpack-sources@npm:^2.2.0":
+  version: 2.3.1
+  resolution: "webpack-sources@npm:2.3.1"
+  dependencies:
+    source-list-map: "npm:^2.0.1"
+    source-map: "npm:^0.6.1"
+  checksum: 10c0/caf56a9a478eca7e77feca2b6ddc7673f1384eb870280014b300c40cf42abca656f639ff58a8d55a889a92a810ae3c22e71e578aa38fde416e8c2e6827a6ddfd
   languageName: node
   linkType: hard
 

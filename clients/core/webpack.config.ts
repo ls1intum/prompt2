@@ -7,6 +7,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import ExternalTemplateRemotesPlugin from 'external-remotes-plugin'
 import packageJson from './package.json'
 //import sharedLibraryPackageJson from '../shared-library/package.json'
 
@@ -43,37 +44,12 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           use: 'ts-loader',
           exclude: /node_modules/,
         },
-        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-        {
-          test: /\.scss$/,
-          use: [
-            'style-loader',
-            {
-              loader: 'css-loader',
-              options: {
-                import: false,
-                modules: true,
-              },
-            },
-            'sass-loader',
-          ],
-          include: /\.module\.scss$/,
-        },
-        {
-          test: /\.scss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
-          exclude: /\.module\.scss$/,
-        },
-        {
-          test: /\.(png|jp(e*)g|svg|gif)$/,
-          use: ['file-loader'],
-        },
       ],
     },
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: '/',
+      publicPath: 'auto',
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -85,7 +61,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       new container.ModuleFederationPlugin({
         name: 'core',
         remotes: {
-          template_component: 'template_component@http://localhost:3001/remoteEntry.js',
+          template_component: 'template_component@[templateComponent2Url]/remoteEntry.js',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
@@ -95,6 +71,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           // },
         },
       }),
+      new ExternalTemplateRemotesPlugin(),
       new HtmlWebpackPlugin({
         template: 'public/template.html',
         minify: {
