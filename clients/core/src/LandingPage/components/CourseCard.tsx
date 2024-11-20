@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { DeadlineInfo } from './DeadlineInfo'
 
 // todo fix this in the data model and import an actual course here!!
 interface CourseCardProps {
@@ -10,6 +11,7 @@ interface CourseCardProps {
     type: string
     ects: number
     semester: string
+    deadline: Date
   }
 }
 
@@ -25,6 +27,7 @@ export const CourseCard = ({ course }: CourseCardProps): JSX.Element => (
           <span className='text-sm font-medium'>{course.ects} ECTS</span>
         </div>
         <p className='text-sm text-gray-600'>{course.semester}</p>
+        <DeadlineInfo deadline={course.deadline} />
       </div>
       <Button className='w-full'>Apply Now</Button>
     </CardContent>

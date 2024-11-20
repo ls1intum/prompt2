@@ -6,21 +6,37 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 // TODO replace with actual course data
 const courses = [
-  { id: 1, name: 'iPratikum', type: 'Practical Course', ects: 10, semester: 'Winter 2024' },
+  {
+    id: 1,
+    name: 'iPratikum',
+    type: 'Practical Course',
+    ects: 10,
+    semester: 'Winter 2024',
+    deadline: new Date('2024-12-15'),
+  },
   {
     id: 2,
     name: 'Agile Project Management',
     type: 'Practical Course',
     ects: 10,
     semester: 'Winter 2024',
+    deadline: new Date('2024-12-10'),
   },
-  { id: 3, name: 'Teaching iOS', type: 'Seminar', ects: 5, semester: 'Winter 2024' },
+  {
+    id: 3,
+    name: 'Teaching iOS',
+    type: 'Seminar',
+    ects: 5,
+    semester: 'Winter 2024',
+    deadline: new Date('2024-11-24'),
+  },
   {
     id: 4,
     name: 'Interactive Learning',
     type: 'Practical Course',
     ects: 10,
     semester: 'Winter 2024',
+    deadline: new Date('2024-11-24'),
   },
 ]
 
