@@ -6,6 +6,6 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM course;
 
 -- name: CreateCourse :one
-INSERT INTO course (id, name, start_date, end_date, semester_tag, meta_data)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
 RETURNING *;

@@ -1,0 +1,46 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: prompt-core-server
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USER=prompt-postgres
+      - DB_PASSWORD=prompt-postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=prompt
+      - SSL_MODE=disable
+      - SERVER_ADDRESS=0.0.0.0:8080
+
+  db:
+    image: 'postgres:15.2-alpine'
+    container_name: prompt-core-db
+    environment:
+      - POSTGRES_USER=prompt-postgres
+      - POSTGRES_PASSWORD=prompt-postgres
+      - POSTGRES_DB=prompt
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0
+    container_name: prompt-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    entrypoint: /opt/keycloak/bin/kc.sh start-dev
+    ports:
+      - "8081:8080"
+  
+
