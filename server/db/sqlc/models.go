@@ -119,11 +119,12 @@ type CourseParticipation struct {
 }
 
 type CoursePhase struct {
-	ID             uuid.UUID   `json:"id"`
-	CourseID       uuid.UUID   `json:"course_id"`
-	Name           pgtype.Text `json:"name"`
-	MetaData       []byte      `json:"meta_data"`
-	IsInitialPhase bool        `json:"is_initial_phase"`
+	ID                uuid.UUID   `json:"id"`
+	CourseID          uuid.UUID   `json:"course_id"`
+	Name              pgtype.Text `json:"name"`
+	MetaData          []byte      `json:"meta_data"`
+	IsInitialPhase    bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID pgtype.UUID `json:"course_phase_type_id"`
 }
 
 type CoursePhaseGraph struct {
@@ -137,6 +138,11 @@ type CoursePhaseParticipation struct {
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	Passed                pgtype.Bool `json:"passed"`
 	MetaData              []byte      `json:"meta_data"`
+}
+
+type CoursePhaseType struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type Student struct {
