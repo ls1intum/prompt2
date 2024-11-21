@@ -39,13 +39,13 @@ CREATE TABLE course_phase (
   name 		          text,
   meta_data         jsonb,
   is_initial_phase  boolean NOT NULL,
-  course_phase_type_id     uuid,
+  course_phase_type_id     uuid NOT NULL,
   CONSTRAINT fk_course
     FOREIGN KEY (course_id) 
     REFERENCES course(id) ON DELETE CASCADE,
   CONSTRAINT fk_phase_type 
     FOREIGN KEY (course_phase_type_id) 
-    REFERENCES course_phase_type(id) ON DELETE SET NULL
+    REFERENCES course_phase_type(id)
 );
 
 CREATE UNIQUE INDEX unique_initial_phase_per_course

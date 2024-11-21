@@ -13,17 +13,18 @@ import (
 )
 
 const createCoursePhase = `-- name: CreateCoursePhase :one
-INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data, course_phase_type_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, course_id, name, meta_data, is_initial_phase, course_phase_type_id
 `
 
 type CreateCoursePhaseParams struct {
-	ID             uuid.UUID   `json:"id"`
-	CourseID       uuid.UUID   `json:"course_id"`
-	Name           pgtype.Text `json:"name"`
-	IsInitialPhase bool        `json:"is_initial_phase"`
-	MetaData       []byte      `json:"meta_data"`
+	ID                uuid.UUID   `json:"id"`
+	CourseID          uuid.UUID   `json:"course_id"`
+	Name              pgtype.Text `json:"name"`
+	IsInitialPhase    bool        `json:"is_initial_phase"`
+	MetaData          []byte      `json:"meta_data"`
+	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
 }
 
 func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhaseParams) (CoursePhase, error) {
@@ -33,6 +34,7 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 		arg.Name,
 		arg.IsInitialPhase,
 		arg.MetaData,
+		arg.CoursePhaseTypeID,
 	)
 	var i CoursePhase
 	err := row.Scan(

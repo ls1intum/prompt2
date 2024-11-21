@@ -124,7 +124,7 @@ type CoursePhase struct {
 	Name              pgtype.Text `json:"name"`
 	MetaData          []byte      `json:"meta_data"`
 	IsInitialPhase    bool        `json:"is_initial_phase"`
-	CoursePhaseTypeID pgtype.UUID `json:"course_phase_type_id"`
+	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
 }
 
 type CoursePhaseGraph struct {
