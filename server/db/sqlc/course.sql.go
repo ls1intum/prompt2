@@ -13,9 +13,9 @@ import (
 )
 
 const createCourse = `-- name: CreateCourse :one
-INSERT INTO course (id, name, start_date, end_date, semester_tag, meta_data)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, name, start_date, end_date, semester_tag, meta_data
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, meta_data
 `
 
 type CreateCourseParams struct {
@@ -24,6 +24,8 @@ type CreateCourseParams struct {
 	StartDate   pgtype.Date `json:"start_date"`
 	EndDate     pgtype.Date `json:"end_date"`
 	SemesterTag pgtype.Text `json:"semester_tag"`
+	CourseType  CourseType  `json:"course_type"`
+	Ects        pgtype.Int4 `json:"ects"`
 	MetaData    []byte      `json:"meta_data"`
 }
 
@@ -34,6 +36,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		arg.StartDate,
 		arg.EndDate,
 		arg.SemesterTag,
+		arg.CourseType,
+		arg.Ects,
 		arg.MetaData,
 	)
 	var i Course
@@ -43,13 +47,15 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.StartDate,
 		&i.EndDate,
 		&i.SemesterTag,
+		&i.CourseType,
+		&i.Ects,
 		&i.MetaData,
 	)
 	return i, err
 }
 
 const getAllCourses = `-- name: GetAllCourses :many
-SELECT id, name, start_date, end_date, semester_tag, meta_data FROM course
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, meta_data FROM course
 `
 
 func (q *Queries) GetAllCourses(ctx context.Context) ([]Course, error) {
@@ -67,6 +73,8 @@ func (q *Queries) GetAllCourses(ctx context.Context) ([]Course, error) {
 			&i.StartDate,
 			&i.EndDate,
 			&i.SemesterTag,
+			&i.CourseType,
+			&i.Ects,
 			&i.MetaData,
 		); err != nil {
 			return nil, err
@@ -80,7 +88,7 @@ func (q *Queries) GetAllCourses(ctx context.Context) ([]Course, error) {
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, meta_data FROM course
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, meta_data FROM course
 WHERE id = $1 LIMIT 1
 `
 
@@ -93,6 +101,8 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 		&i.StartDate,
 		&i.EndDate,
 		&i.SemesterTag,
+		&i.CourseType,
+		&i.Ects,
 		&i.MetaData,
 	)
 	return i, err

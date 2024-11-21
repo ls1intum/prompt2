@@ -12,6 +12,49 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CourseType string
+
+const (
+	CourseTypeLecture         CourseType = "lecture"
+	CourseTypeSeminar         CourseType = "seminar"
+	CourseTypePracticalcourse CourseType = "practical course"
+)
+
+func (e *CourseType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CourseType(s)
+	case string:
+		*e = CourseType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CourseType: %T", src)
+	}
+	return nil
+}
+
+type NullCourseType struct {
+	CourseType CourseType `json:"course_type"`
+	Valid      bool       `json:"valid"` // Valid is true if CourseType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCourseType) Scan(value interface{}) error {
+	if value == nil {
+		ns.CourseType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CourseType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCourseType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.CourseType), nil
+}
+
 type Gender string
 
 const (
@@ -109,6 +152,8 @@ type Course struct {
 	StartDate   pgtype.Date `json:"start_date"`
 	EndDate     pgtype.Date `json:"end_date"`
 	SemesterTag pgtype.Text `json:"semester_tag"`
+	CourseType  CourseType  `json:"course_type"`
+	Ects        pgtype.Int4 `json:"ects"`
 	MetaData    []byte      `json:"meta_data"`
 }
 

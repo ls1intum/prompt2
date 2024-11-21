@@ -7,6 +7,12 @@ CREATE TYPE gender AS ENUM (
   'prefer_not_to_say'
 );
 
+CREATE TYPE course_type as ENUM (
+  'lecture',
+  'seminar',
+  'practical course'
+);
+
 -- UK data standard for full name is 70 chars and for mail 255 chars
 CREATE TABLE student (
  	id 			      uuid PRIMARY KEY, 
@@ -25,6 +31,8 @@ CREATE TABLE course (
   start_date    date,
   end_date      date,
   semester_tag  text, 
+  course_type   course_type NOT NULL,
+  ects          int,
   meta_data     jsonb
 );
 
