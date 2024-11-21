@@ -1,5 +1,5 @@
 import { format, differenceInDays } from 'date-fns'
-import { Calendar } from 'lucide-react'
+import { Clock } from 'lucide-react'
 
 export const DeadlineInfo = ({ deadline }: { deadline: Date }): JSX.Element => {
   const today = new Date()
@@ -9,8 +9,8 @@ export const DeadlineInfo = ({ deadline }: { deadline: Date }): JSX.Element => {
   return (
     <div className={`space-y-1 ${isDeadlineClose ? 'text-red-600' : 'text-gray-600'}`}>
       <div className='flex items-center space-x-2'>
-        <Calendar className='h-4 w-4 flex-shrink-0' />
-        <p className='text-sm font-medium'>Deadline: {format(deadline, 'MMMM d, yyyy')}</p>
+        <Clock className='h-4 w-4 flex-shrink-0' />
+        <p className='text-sm font-medium'>Apply by {format(deadline, 'MMMM d, yyyy')}</p>
       </div>
       <p className={`text-xs ${isDeadlineClose ? 'font-semibold' : ''} pl-6`}>
         {daysUntilDeadline > 0
