@@ -4,18 +4,17 @@ import { CourseCard } from './components/CourseCard'
 import { Footer } from './components/Footer'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
-import { getOpenCourses } from '../network/open_course_applications'
-import { Course } from 'src/interfaces/open_course_applications'
+import { getAllCourses } from '@/network/course'
+import { Course } from '@/interfaces/course'
 
 export function LandingPage(): JSX.Element {
   const {
     data: courses,
     isPending,
     isError,
-    error,
   } = useQuery<Course[]>({
     queryKey: ['courses'],
-    queryFn: () => getOpenCourses(),
+    queryFn: () => getAllCourses(),
   })
 
   console.log(courses)

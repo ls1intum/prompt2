@@ -1,7 +1,7 @@
-import { Course } from '../interfaces/open_course_applications'
+import { Course } from '@/interfaces/course'
 import { notAuthenticatedAxiosInstance } from '@/network/configService'
 
-export const getOpenCourses = async (): Promise<Course[]> => {
+export const getAllCourses = async (): Promise<Course[]> => {
   try {
     console.log('getCourses')
     return (await notAuthenticatedAxiosInstance.get(`/api/courses/`)).data
