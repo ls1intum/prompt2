@@ -13,6 +13,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student"
+	"github.com/niclasheun/prompt2.0/utils"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 	//service.CreateNewServices(*query, conn)
 
 	router := gin.Default()
+	router.Use(utils.CORS())
 
 	api := router.Group("/api")
 	api.GET("/hello", func(c *gin.Context) {
