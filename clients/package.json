@@ -34,7 +34,8 @@
         "tailwind-merge": "^2.5.4",
         "tailwindcss-animate": "^1.0.7",
         "ts-loader": "^9.5.1",
-        "ts-node": "^10.9.2"
+        "ts-node": "^10.9.2",
+        "zustand": "^5.0.1"
     },
     "devDependencies": {
         "@eslint/compat": "^1.2.2",
