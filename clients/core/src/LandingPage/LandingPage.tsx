@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
 import { getAllCourses } from '@/network/course'
 import { Course } from '@/interfaces/course'
+import { useKeycloak } from '@/keycloak/useKeycloak'
 
 export function LandingPage(): JSX.Element {
   const {
@@ -16,6 +17,8 @@ export function LandingPage(): JSX.Element {
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
   })
+
+  const keycloakValue = useKeycloak()
 
   console.log(courses)
 
