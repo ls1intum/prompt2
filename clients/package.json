@@ -21,6 +21,7 @@
         "clsx": "^2.1.1",
         "css-loader": "^7.1.2",
         "date-fns": "^4.1.0",
+        "jwt-decode": "^4.0.0",
         "keycloak-js": "22.0.5",
         "lucide-react": "^0.460.0",
         "postcss": "^8.4.49",
