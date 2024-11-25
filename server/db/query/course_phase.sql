@@ -7,8 +7,8 @@ SELECT * FROM course_phase
 WHERE course_id = $1;
 
 -- name: CreateCoursePhase :one
-INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data, course_phase_type_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: UpdateCoursePhase :exec

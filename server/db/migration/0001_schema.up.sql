@@ -7,6 +7,12 @@ CREATE TYPE gender AS ENUM (
   'prefer_not_to_say'
 );
 
+CREATE TYPE course_type as ENUM (
+  'lecture',
+  'seminar',
+  'practical course'
+);
+
 -- UK data standard for full name is 70 chars and for mail 255 chars
 CREATE TABLE student (
  	id 			      uuid PRIMARY KEY, 
@@ -25,7 +31,14 @@ CREATE TABLE course (
   start_date    date,
   end_date      date,
   semester_tag  text, 
+  course_type   course_type NOT NULL,
+  ects          int,
   meta_data     jsonb
+);
+
+CREATE TABLE course_phase_type (
+    id uuid PRIMARY KEY,
+    name text UNIQUE NOT NULL
 );
 
 CREATE TABLE course_phase (
@@ -34,9 +47,13 @@ CREATE TABLE course_phase (
   name 		          text,
   meta_data         jsonb,
   is_initial_phase  boolean NOT NULL,
+  course_phase_type_id     uuid NOT NULL,
   CONSTRAINT fk_course
     FOREIGN KEY (course_id) 
-    REFERENCES course(id)
+    REFERENCES course(id) ON DELETE CASCADE,
+  CONSTRAINT fk_phase_type 
+    FOREIGN KEY (course_phase_type_id) 
+    REFERENCES course_phase_type(id)
 );
 
 CREATE UNIQUE INDEX unique_initial_phase_per_course
@@ -49,10 +66,10 @@ CREATE TABLE course_participation (
   student_id      uuid NOT NULL,
   CONSTRAINT fk_student
     FOREIGN KEY (student_id) 
-    REFERENCES student(id),
+    REFERENCES student(id) ON DELETE CASCADE,
   CONSTRAINT fk_course
     FOREIGN KEY (course_id) 
-    REFERENCES course(id),
+    REFERENCES course(id) ON DELETE CASCADE,
   CONSTRAINT unique_course_participation 
     UNIQUE (course_id, student_id)
 );
@@ -65,10 +82,10 @@ CREATE TABLE course_phase_participation (
   meta_data               jsonb,
   CONSTRAINT fk_course_participation
     FOREIGN KEY (course_participation_id) 
-    REFERENCES course_participation(id),
+    REFERENCES course_participation(id) ON DELETE CASCADE,
   CONSTRAINT fk_course_phase
     FOREIGN KEY (course_phase_id)
-    REFERENCES course_phase(id),
+    REFERENCES course_phase(id) ON DELETE CASCADE,
   CONSTRAINT unique_course_phase_participation 
     UNIQUE (course_participation_id, course_phase_id)
 );
@@ -80,10 +97,10 @@ CREATE TABLE course_phase_graph (
   to_course_phase_id    uuid     NOT NULL,
   CONSTRAINT fk_from_course_phase
     FOREIGN KEY (from_course_phase_id)
-    REFERENCES course_phase(id),
+    REFERENCES course_phase(id) ON DELETE CASCADE,
   CONSTRAINT fk_to_course_phase
     FOREIGN KEY (to_course_phase_id)
-    REFERENCES course_phase(id),
+    REFERENCES course_phase(id) ON DELETE CASCADE,
   CONSTRAINT unique_from_course_phase UNIQUE (from_course_phase_id),
   CONSTRAINT unique_to_course_phase UNIQUE (to_course_phase_id)
 );
@@ -101,7 +118,7 @@ CREATE TABLE application_question_text (
   order_num int,
   CONSTRAINT fk_course_phase
     FOREIGN KEY (course_phase_id)
-    REFERENCES course_phase(id)
+    REFERENCES course_phase(id) ON DELETE CASCADE
 );
 
 CREATE TABLE application_question_multi_select (
@@ -118,7 +135,7 @@ CREATE TABLE application_question_multi_select (
   order_num int,
   CONSTRAINT fk_course_phase
     FOREIGN KEY (course_phase_id)
-    REFERENCES course_phase(id)
+    REFERENCES course_phase(id) ON DELETE CASCADE
 );
 
 CREATE TABLE application_answer_text (
@@ -128,10 +145,10 @@ CREATE TABLE application_answer_text (
   answer text,
   CONSTRAINT fk_application_question
     FOREIGN KEY (application_question_id)
-    REFERENCES application_question_text(id),
+    REFERENCES application_question_text(id) ON DELETE CASCADE,
   CONSTRAINT fk_course_phase_participation
     FOREIGN KEY (course_phase_participation_id)
-    REFERENCES course_phase_participation(id),
+    REFERENCES course_phase_participation(id) ON DELETE CASCADE,
   CONSTRAINT unique_application_answer_text
     UNIQUE (course_phase_participation_id, application_question_id)
   
@@ -144,10 +161,10 @@ CREATE TABLE application_answer_multi_select (
   answer text[],
   CONSTRAINT fk_application_question
     FOREIGN KEY (application_question_id)
-    REFERENCES application_question_multi_select(id),
+    REFERENCES application_question_multi_select(id) ON DELETE CASCADE, 
   CONSTRAINT fk_course_phase_participation
     FOREIGN KEY (course_phase_participation_id)
-    REFERENCES course_phase_participation(id),
+    REFERENCES course_phase_participation(id) ON DELETE CASCADE,
   CONSTRAINT unique_application_answer_multi_select
     UNIQUE (course_phase_participation_id, application_question_id)
 );
@@ -158,7 +175,7 @@ CREATE TABLE application_assessment (
   score int,
   CONSTRAINT fk_course_phase_participation
     FOREIGN KEY (course_phase_participation_id)
-    REFERENCES course_phase_participation(id)
+    REFERENCES course_phase_participation(id) ON DELETE CASCADE
 );
 
 COMMIT;

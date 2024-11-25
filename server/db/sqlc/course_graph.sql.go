@@ -40,29 +40,30 @@ func (q *Queries) DeleteCourseGraph(ctx context.Context, courseID uuid.UUID) err
 
 const getCoursePhaseSequence = `-- name: GetCoursePhaseSequence :many
 WITH RECURSIVE phase_sequence AS (
-    SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, 1 AS sequence_order
+    SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, 1 AS sequence_order
     FROM course_phase cp
     WHERE cp.course_id = $1 AND cp.is_initial_phase = true
 
     UNION ALL
 
-    SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, ps.sequence_order + 1 AS sequence_order
+    SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, ps.sequence_order + 1 AS sequence_order
     FROM course_phase cp
     INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
     INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
 )
-SELECT id, course_id, name, meta_data, is_initial_phase, sequence_order
+SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id, sequence_order
 FROM phase_sequence
 ORDER BY sequence_order
 `
 
 type GetCoursePhaseSequenceRow struct {
-	ID             uuid.UUID   `json:"id"`
-	CourseID       uuid.UUID   `json:"course_id"`
-	Name           pgtype.Text `json:"name"`
-	MetaData       []byte      `json:"meta_data"`
-	IsInitialPhase bool        `json:"is_initial_phase"`
-	SequenceOrder  int32       `json:"sequence_order"`
+	ID                uuid.UUID   `json:"id"`
+	CourseID          uuid.UUID   `json:"course_id"`
+	Name              pgtype.Text `json:"name"`
+	MetaData          []byte      `json:"meta_data"`
+	IsInitialPhase    bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
+	SequenceOrder     int32       `json:"sequence_order"`
 }
 
 func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID) ([]GetCoursePhaseSequenceRow, error) {
@@ -80,6 +81,7 @@ func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID
 			&i.Name,
 			&i.MetaData,
 			&i.IsInitialPhase,
+			&i.CoursePhaseTypeID,
 			&i.SequenceOrder,
 		); err != nil {
 			return nil, err
@@ -93,7 +95,7 @@ func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID
 }
 
 const getNotOrderedCoursePhases = `-- name: GetNotOrderedCoursePhases :many
-SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase
+SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id
 FROM course_phase cp
 WHERE cp.course_id = $1
   AND cp.is_initial_phase = FALSE
@@ -120,6 +122,7 @@ func (q *Queries) GetNotOrderedCoursePhases(ctx context.Context, courseID uuid.U
 			&i.Name,
 			&i.MetaData,
 			&i.IsInitialPhase,
+			&i.CoursePhaseTypeID,
 		); err != nil {
 			return nil, err
 		}

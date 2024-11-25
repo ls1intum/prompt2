@@ -13,6 +13,8 @@ type CreateCourse struct {
 	EndDate     pgtype.Date   `json:"end_date"`
 	SemesterTag pgtype.Text   `json:"semester_tag"`
 	MetaData    meta.MetaData `json:"meta_data"`
+	CourseType  db.CourseType `json:"course_type"`
+	Ects        pgtype.Int4   `json:"ects"`
 	//TODO: CoursePhases []coursePhaseDTO.CoursePhase `json:"course_phases"`
 }
 
@@ -29,5 +31,7 @@ func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {
 		EndDate:     c.EndDate,
 		SemesterTag: c.SemesterTag,
 		MetaData:    metaData,
+		CourseType:  c.CourseType,
+		Ects:        c.Ects,
 	}, nil
 }

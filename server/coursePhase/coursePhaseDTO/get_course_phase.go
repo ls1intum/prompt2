@@ -7,11 +7,12 @@ import (
 )
 
 type CoursePhase struct {
-	ID             uuid.UUID     `json:"id"`
-	CourseID       uuid.UUID     `json:"course_id"`
-	Name           string        `json:"name"`
-	IsInitialPhase bool          `json:"is_initial_phase"`
-	MetaData       meta.MetaData `json:"meta_data"`
+	ID                uuid.UUID     `json:"id"`
+	CourseID          uuid.UUID     `json:"course_id"`
+	Name              string        `json:"name"`
+	IsInitialPhase    bool          `json:"is_initial_phase"`
+	MetaData          meta.MetaData `json:"meta_data"`
+	CoursePhaseTypeID uuid.UUID     `json:"course_phase_type_id"`
 }
 
 func GetCoursePhaseDTOFromDBModel(model db.CoursePhase) (CoursePhase, error) {
@@ -21,10 +22,11 @@ func GetCoursePhaseDTOFromDBModel(model db.CoursePhase) (CoursePhase, error) {
 	}
 
 	return CoursePhase{
-		ID:             model.ID,
-		CourseID:       model.CourseID,
-		Name:           model.Name.String,
-		IsInitialPhase: model.IsInitialPhase,
-		MetaData:       metaData,
+		ID:                model.ID,
+		CourseID:          model.CourseID,
+		Name:              model.Name.String,
+		IsInitialPhase:    model.IsInitialPhase,
+		MetaData:          metaData,
+		CoursePhaseTypeID: model.CoursePhaseTypeID,
 	}, nil
 }
