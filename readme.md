@@ -16,7 +16,7 @@ PROMPT 2.0 is designed around the principle that a course consists of a sequence
 ### Server
 - Implements a **service-based architecture** with the core written in **Go**.
 - The core provides essential functionality for managing courses.
-- Each course phase type may have its its own **dedicated service**, encapsulating the logic and operations specific to that phase type. These services may or may not be stateless. 
+- Each course phase type may have its own **dedicated service**, encapsulating the logic and operations specific to that phase type. These services may or may not be stateless. 
 
 
 ### Additional Components

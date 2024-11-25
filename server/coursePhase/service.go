@@ -31,6 +31,7 @@ func UpdateCoursePhase(ctx context.Context, coursePhase coursePhaseDTO.UpdateCou
 		return err
 	}
 
+	dbModel.ID = coursePhase.ID
 	return CoursePhaseServiceSingleton.queries.UpdateCoursePhase(ctx, dbModel)
 }
 

@@ -13,17 +13,18 @@ import (
 )
 
 const createCoursePhase = `-- name: CreateCoursePhase :one
-INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, course_id, name, meta_data, is_initial_phase
+INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data, course_phase_type_id)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, course_id, name, meta_data, is_initial_phase, course_phase_type_id
 `
 
 type CreateCoursePhaseParams struct {
-	ID             uuid.UUID   `json:"id"`
-	CourseID       uuid.UUID   `json:"course_id"`
-	Name           pgtype.Text `json:"name"`
-	IsInitialPhase bool        `json:"is_initial_phase"`
-	MetaData       []byte      `json:"meta_data"`
+	ID                uuid.UUID   `json:"id"`
+	CourseID          uuid.UUID   `json:"course_id"`
+	Name              pgtype.Text `json:"name"`
+	IsInitialPhase    bool        `json:"is_initial_phase"`
+	MetaData          []byte      `json:"meta_data"`
+	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
 }
 
 func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhaseParams) (CoursePhase, error) {
@@ -33,6 +34,7 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 		arg.Name,
 		arg.IsInitialPhase,
 		arg.MetaData,
+		arg.CoursePhaseTypeID,
 	)
 	var i CoursePhase
 	err := row.Scan(
@@ -41,12 +43,13 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 		&i.Name,
 		&i.MetaData,
 		&i.IsInitialPhase,
+		&i.CoursePhaseTypeID,
 	)
 	return i, err
 }
 
 const getAllCoursePhaseForCourse = `-- name: GetAllCoursePhaseForCourse :many
-SELECT id, course_id, name, meta_data, is_initial_phase FROM course_phase
+SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id FROM course_phase
 WHERE course_id = $1
 `
 
@@ -65,6 +68,7 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 			&i.Name,
 			&i.MetaData,
 			&i.IsInitialPhase,
+			&i.CoursePhaseTypeID,
 		); err != nil {
 			return nil, err
 		}
@@ -77,7 +81,7 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 }
 
 const getCoursePhase = `-- name: GetCoursePhase :one
-SELECT id, course_id, name, meta_data, is_initial_phase FROM course_phase
+SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id FROM course_phase
 WHERE id = $1 LIMIT 1
 `
 
@@ -90,6 +94,7 @@ func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (CoursePhase
 		&i.Name,
 		&i.MetaData,
 		&i.IsInitialPhase,
+		&i.CoursePhaseTypeID,
 	)
 	return i, err
 }

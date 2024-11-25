@@ -31,7 +31,7 @@ A boilerplate component structure for creating new course phase modules:
 - **Structure:**
   - `src/interface`: Interfaces specific to the component.
   - `src/network`: Network request handlers specific to the component.
-  - `src/hierarchy/SamplePage`:
+  - `src/<SUBSYSTEM_NAME>/SamplePage`:
     - `components`: Folder for all React components specific to this page.
     - `samplePage.tsx`: Main file for the sample page implementation.
   - `src/utilities`: (Careful - many utilities might be useful to move to the shared library)
