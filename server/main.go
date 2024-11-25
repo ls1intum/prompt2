@@ -15,6 +15,7 @@ import (
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student"
 	log "github.com/sirupsen/logrus"
+	"github.com/niclasheun/prompt2.0/utils"
 )
 
 func getDatabaseURL() string {
@@ -63,6 +64,7 @@ func main() {
 	query := db.New(conn)
 
 	router := gin.Default()
+	router.Use(utils.CORS())
 
 	api := router.Group("/api")
 	api.GET("/hello", func(c *gin.Context) {

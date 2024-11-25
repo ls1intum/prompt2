@@ -1,9 +1,0 @@
-# Prompt 2.0 Core
-
-## How to run
-All the following commands should be run from /clients
-1. Install the dependencies
- yarn install
-
-2. Run the app
- yarn run dev
