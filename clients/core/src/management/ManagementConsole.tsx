@@ -1,16 +1,20 @@
 import { useKeycloak } from '@/keycloak/useKeycloak'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import UnauthorizedPage from './components/UnauthorizedPage'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { AppSidebar } from '../Sidebar/app-sidebar'
+import { WelcomePage } from './components/WelcomePage'
+import { LoadingPage } from '@/components/LoadingPage'
+import React from 'react'
 
-export const ManagementRoot = (): JSX.Element => {
+export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
   const isLoading = !(keycloak && user)
+  const hasChildren = React.Children.count(children) > 0
 
   if (isLoading) {
-    return <Loader2 className='h-8 w-8 animate-spin text-primary bg-center' />
+    return <LoadingPage />
   }
 
   // TODO update with what was passed to this page
@@ -19,13 +23,9 @@ export const ManagementRoot = (): JSX.Element => {
   }
 
   return (
-    <div>
-      <h1>Management Console</h1>
-      <p>Welcome, {user?.firstName}!</p>
-      {permissions.map((permission) => (
-        <p key={permission}>{permission}</p>
-      ))}
-      <button onClick={logout}>Logout</button>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      {hasChildren ? children : <WelcomePage />}
+    </SidebarProvider>
   )
 }

@@ -6,8 +6,6 @@ const TemplateComponent = React.lazy(() => import('template_component/App'))
 import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
-import { Page } from './Sidebar/page'
-import UnauthorizedPage from './management/components/UnauthorizedPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,10 +22,7 @@ export const App = (): JSX.Element => {
         <BrowserRouter>
           <Routes>
             <Route path='/' element={<LandingPage />} />
-            <Route path='/management' element={<ManagementRoot></ManagementRoot>} />
-            <Route path='/management/application' element={<ManagementRoot>
-              <UnauthorizedPage />
-            </ManagementRoot>} />
+            <Route path='/management' element={<ManagementRoot />} />
             <Route
               path='/template'
               element={
@@ -38,7 +33,6 @@ export const App = (): JSX.Element => {
                 </ErrorBoundary>
               }
             />
-            <Route path='/sidebar' element={<Page />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
