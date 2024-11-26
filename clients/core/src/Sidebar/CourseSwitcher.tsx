@@ -54,7 +54,9 @@ export function CourseSwitcher({
             side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
           >
-            <DropdownMenuLabel className='text-xs text-muted-foreground'>Teams</DropdownMenuLabel>
+            <DropdownMenuLabel className='text-xs text-muted-foreground'>
+              Active Courses
+            </DropdownMenuLabel>
             {teams.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}

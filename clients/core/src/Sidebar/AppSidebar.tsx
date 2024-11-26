@@ -1,65 +1,51 @@
+'use client'
+
 import * as React from 'react'
 import {
-  AudioWaveform,
   BookOpen,
   Bot,
   Command,
   Frame,
-  GalleryVerticalEnd,
+  HomeIcon,
+  LifeBuoy,
   Map,
   PieChart,
+  Send,
   Settings2,
   SquareTerminal,
 } from 'lucide-react'
 
-import { NavMain } from './components/user/NavMain'
-import { NavUserMenu } from './components/user/NavUserMenu'
-import { CourseSwitcher } from './CourseSwitcher'
+import { NavMain } from './components/NavMain'
+import { NavUserMenu } from './components/NavUserMenu'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
-  SidebarRail,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
+import { Label } from '@/components/ui/label'
 
-// This is sample data.
 const data = {
   user: {
     name: 'shadcn',
     email: 'm@example.com',
     avatar: '/avatars/shadcn.jpg',
   },
-  teams: [
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Evil Corp.',
-      logo: Command,
-      plan: 'Free',
-    },
-  ],
   navMain: [
     {
       title: 'Playground',
-      url: '/management',
+      url: '#',
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: 'History',
-          url: '#',
-        },
-        {
-          title: 'Matze',
           url: '#',
         },
         {
@@ -138,23 +124,6 @@ const data = {
       ],
     },
   ],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: Map,
-    },
-  ],
 }
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -162,18 +131,92 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element {
+  // TODO this will be replaced with router logic
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
+  const { setOpen } = useSidebar()
+
   return (
-    <Sidebar collapsible='icon' {...props}>
-      <SidebarHeader>
-        <CourseSwitcher teams={data.teams} />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUserMenu onLogout={onLogout} />
-      </SidebarFooter>
-      <SidebarRail />
+    <Sidebar
+      collapsible='icon'
+      className='overflow-hidden [&>[data-sidebar=sidebar]]:flex-row'
+      //variant='inset'
+      {...props}
+    >
+      {/* This is the first sidebar */}
+      <Sidebar
+        collapsible='none'
+        className='!w-[calc(var(--sidebar-width-icon)_+_1px)] min-w-[calc(var(--sidebar-width-icon)_+_1px)] border-r'
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size='lg'
+                asChild
+                className='min-w-12 min-h-12 md:p-0'
+                tooltip={{
+                  children: 'Home',
+                  hidden: false,
+                }}
+              >
+                <a href='#'>
+                  <div className='flex aspect-square size-12 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
+                    <HomeIcon className='size-4' />
+                  </div>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent className='px-1.5 md:px-0'>
+              <SidebarMenu>
+                {data.navMain.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      size='lg'
+                      tooltip={{
+                        children: item.title,
+                        hidden: false,
+                      }}
+                      onClick={() => {
+                        setActiveItem(item)
+                        setOpen(true)
+                      }}
+                      isActive={activeItem.title === item.title}
+                      className='min-w-12 min-h-12 md:p-0'
+                    >
+                      <div className='flex aspect-square size-12 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
+                        <item.icon className='size-8' />
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUserMenu onLogout={onLogout} />
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* This is the second sidebar */}
+      {/* We disable collapsible and let it fill remaining space */}
+      <Sidebar collapsible='none' className='hidden flex-0 md:flex'>
+        <SidebarHeader className='gap-3.5 border-b p-4'>
+          <div className='flex w-full items-center justify-between'>
+            <div className='text-base font-medium text-foreground'>{activeItem.title}</div>
+            <Label className='flex items-center gap-2 text-sm'></Label>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup className='px-0'>
+            <SidebarGroupContent></SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
     </Sidebar>
   )
 }
