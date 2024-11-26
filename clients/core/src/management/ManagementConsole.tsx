@@ -24,7 +24,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar onLogout={logout} />
       {hasChildren ? children : <WelcomePage />}
     </SidebarProvider>
   )

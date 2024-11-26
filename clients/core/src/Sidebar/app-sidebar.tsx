@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 
 import { NavMain } from './nav-main'
-import { NavUser } from './nav-user'
+import { NavUserMenu } from './components/user/NavUserMenu'
 import { TeamSwitcher } from './team-switcher'
 import {
   Sidebar,
@@ -153,7 +153,11 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>): JSX.Element {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  onLogout: () => void
+}
+
+export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element {
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
@@ -163,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>): 
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUserMenu onLogout={onLogout} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
