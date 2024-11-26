@@ -61,7 +61,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: 'auto',
+      publicPath: '/',
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
