@@ -12,9 +12,9 @@ import {
   SquareTerminal,
 } from 'lucide-react'
 
-import { NavMain } from './nav-main'
+import { NavMain } from './components/user/NavMain'
 import { NavUserMenu } from './components/user/NavUserMenu'
-import { TeamSwitcher } from './team-switcher'
+import { CourseSwitcher } from './CourseSwitcher'
 import {
   Sidebar,
   SidebarContent,
@@ -56,6 +56,10 @@ const data = {
       items: [
         {
           title: 'History',
+          url: '#',
+        },
+        {
+          title: 'Matze',
           url: '#',
         },
         {
@@ -161,7 +165,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <CourseSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
