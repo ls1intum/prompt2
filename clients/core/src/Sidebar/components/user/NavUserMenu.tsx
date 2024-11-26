@@ -15,7 +15,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { NavAvatar } from './navAvatar'
+import { NavAvatar } from './NavAvatar'
 
 interface NavUserProps {
   onLogout: () => void
