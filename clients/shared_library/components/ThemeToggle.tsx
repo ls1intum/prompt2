@@ -1,13 +1,17 @@
 import * as React from "react"
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Moon, Sun, Monitor } from 'lucide-react'
 
+import { Button } from "@/components/ui/button"
 import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useDarkMode } from "@/contexts/DarkModeProvider"
 
 export function ThemeToggle() {
-  const [theme, setTheme] = React.useState<'system' | 'light' | 'dark'>('system')
+  const { theme, setTheme } = useDarkMode()
 
   const handleThemeChange = (value: string) => {
     if (value) {
@@ -17,35 +21,29 @@ export function ThemeToggle() {
   }
 
   return (
-      <ToggleGroup
-        variant="outline"
-        type="single"
-        value={theme}
-        onValueChange={handleThemeChange}
-        className="bg-background/50 backdrop-blur-xl border rounded-full p-0.5"
-      >
-        <ToggleGroupItem 
-          value="system" 
-          aria-label="System theme"
-          className="rounded-full data-[state=on]:bg-muted"
-        >
-          <Monitor className="h-1 w-1" />
-        </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="light" 
-          aria-label="Light theme"
-          className="rounded-full data-[state=on]:bg-muted"
-        >
-          <Sun className="h-1 w-1" />
-        </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="dark" 
-          aria-label="Dark theme"
-          className="rounded-full data-[state=on]:bg-muted"
-        >
-          <Moon className="h-1 w-1" />
-        </ToggleGroupItem>
-      </ToggleGroup>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon" className="w-[120px]">
+          {theme === "light" && <Sun className="h-4 w-4" />}
+          {theme === "dark" && <Moon className="h-4 w-4" />}
+          {theme === "system" && <Monitor className="h-4 w-4" />}
+          <span className="ml-2">{theme?.charAt(0).toUpperCase() + theme?.slice(1)}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          <Sun className="mr-2 h-4 w-4" />
+          <span>Light</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          <Moon className="mr-2 h-4 w-4" />
+          <span>Dark</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          <Monitor className="mr-2 h-4 w-4" />
+          <span>System</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
-

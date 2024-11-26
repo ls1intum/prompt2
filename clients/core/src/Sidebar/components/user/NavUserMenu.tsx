@@ -57,12 +57,15 @@ export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <div className='flex items-center px-0.5 py-0.5 justify-between'>
-                <span className="text-sm font-medium mr-2">Theme</span>
-                <ThemeToggle />
+            <div className='p-2'>
+              <p className='text-sm text-muted-foreground mb-3'>Preferences</p>
+              <div className='flex flex-col gap-4'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-sm'>Theme</span>
+                  <ThemeToggle />
+                </div>
               </div>
-            </DropdownMenuGroup>
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout}>
               <LogOut />
