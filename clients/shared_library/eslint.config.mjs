@@ -6,5 +6,6 @@ export default [
     // Optionally add any subfolder-specific rules or settings
     files: ['**/*.ts', '**/*.tsx'],
     rules: {},
+    ignorePatterns: ['components/ui/**'],
   },
 ]
