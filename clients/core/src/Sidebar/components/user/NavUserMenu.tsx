@@ -1,4 +1,4 @@
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react'
+import { ChevronsUpDown, LogOut, Sparkles } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { NavAvatar } from './NavAvatar'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface NavUserProps {
   onLogout: () => void
@@ -57,18 +58,10 @@ export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              <div className='flex items-center px-0.5 py-0.5 justify-between'>
+                <span className="text-sm font-medium mr-2">Theme</span>
+                <ThemeToggle />
+              </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout}>
