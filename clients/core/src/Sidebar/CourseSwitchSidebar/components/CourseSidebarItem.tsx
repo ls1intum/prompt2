@@ -2,6 +2,7 @@ import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/
 import { Course } from '@/interfaces/course'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import DynamicIcon from '@/components/DynamicIcon'
+import { useMemo } from 'react'
 
 // Todo move somewhere else
 const subtleColors = [
@@ -28,6 +29,14 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const isActive = course.id === selectedCourse?.id
   const bgColor = course.meta_data?.['bg-color'] || subtleColors['bg-grey-100']
   const iconName = course.meta_data?.['icon'] || 'graduation-cap'
+
+  const MemoizedIcon = useMemo(() => {
+    return (
+      <div className='size-6'>
+        <DynamicIcon name={iconName} />
+      </div>
+    )
+  }, [iconName])
 
   return (
     <SidebarMenuItem key={course.id}>
@@ -58,9 +67,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
                 ${bgColor}
             `}
           >
-            <div className='size-6'>
-              <DynamicIcon name={iconName} />
-            </div>
+            <div className='size-6'>{MemoizedIcon}</div>
           </div>
         </div>
       </SidebarMenuButton>
