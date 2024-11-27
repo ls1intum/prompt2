@@ -32,7 +32,7 @@ export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0'
+              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground min-h-12 min-w-12 p-0'
             >
               <NavAvatar />
               <ChevronsUpDown className='ml-auto size-4' />

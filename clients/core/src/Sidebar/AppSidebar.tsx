@@ -39,22 +39,25 @@ const data = {
   },
   navMain: [
     {
-      title: 'Playground',
+      title: 'iPraktikum',
       url: '#',
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: 'History',
+          title: 'Application',
           url: '#',
+          icon: Settings2,
         },
         {
-          title: 'Starred',
+          title: 'Intro Course',
           url: '#',
+          icon: Settings2,
         },
         {
           title: 'Settings',
           url: '#',
+          icon: Settings2,
         },
       ],
     },
@@ -66,14 +69,17 @@ const data = {
         {
           title: 'Genesis',
           url: '#',
+          icon: Settings2,
         },
         {
           title: 'Explorer',
           url: '#',
+          icon: Settings2,
         },
         {
           title: 'Quantum',
           url: '#',
+          icon: Settings2,
         },
       ],
     },
@@ -139,7 +145,6 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
     <Sidebar
       collapsible='icon'
       className='overflow-hidden [&>[data-sidebar=sidebar]]:flex-row'
-      //variant='inset'
       {...props}
     >
       {/* This is the first sidebar */}
@@ -153,7 +158,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
               <SidebarMenuButton
                 size='lg'
                 asChild
-                className='min-w-12 min-h-12 md:p-0'
+                className='min-w-12 min-h-12 p-0'
                 tooltip={{
                   children: 'Home',
                   hidden: false,
@@ -161,7 +166,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
               >
                 <a href='#'>
                   <div className='flex aspect-square size-12 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-                    <HomeIcon className='size-4' />
+                    <HomeIcon className='size-6' />
                   </div>
                 </a>
               </SidebarMenuButton>
@@ -170,7 +175,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupContent className='px-1.5 md:px-0'>
+            <SidebarGroupContent className='px-0'>
               <SidebarMenu>
                 {data.navMain.map((item) => (
                   <SidebarMenuItem key={item.title}>
@@ -185,10 +190,10 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
                         setOpen(true)
                       }}
                       isActive={activeItem.title === item.title}
-                      className='min-w-12 min-h-12 md:p-0'
+                      className='min-w-12 min-h-12 p-0'
                     >
                       <div className='flex aspect-square size-12 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-                        <item.icon className='size-8' />
+                        <item.icon className='size-6' />
                       </div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -204,7 +209,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
 
       {/* This is the second sidebar */}
       {/* We disable collapsible and let it fill remaining space */}
-      <Sidebar collapsible='none' className='hidden flex-0 md:flex'>
+      <Sidebar collapsible='none' className='flex-1 flex'>
         <SidebarHeader className='gap-3.5 border-b p-4'>
           <div className='flex w-full items-center justify-between'>
             <div className='text-base font-medium text-foreground'>{activeItem.title}</div>
@@ -213,7 +218,20 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className='px-0'>
-            <SidebarGroupContent></SidebarGroupContent>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {activeItem.items?.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
