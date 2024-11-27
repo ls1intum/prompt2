@@ -17,7 +17,7 @@ export function NavAvatar(): JSX.Element {
 
   return (
     <>
-      <Avatar className='h-12 w-12 rounded-lg'>
+      <Avatar className='h-10 w-10 rounded-lg'>
         <AvatarImage src={getGravatarUrl(userEmail)} alt={userName} />
         <AvatarFallback className='rounded-lg'>{initials}</AvatarFallback>
       </Avatar>

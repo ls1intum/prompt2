@@ -1,7 +1,15 @@
 'use client'
 
 import * as React from 'react'
-import { BookOpen, Bot, Settings2, SquareTerminal } from 'lucide-react'
+import {
+  BellElectric,
+  BookOpen,
+  Bot,
+  FileUser,
+  Settings2,
+  SquareTerminal,
+  Users,
+} from 'lucide-react'
 
 import { Sidebar, useSidebar } from '@/components/ui/sidebar'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
@@ -23,12 +31,31 @@ const data = {
         {
           title: 'Application',
           url: '#',
-          icon: Settings2,
+          icon: FileUser,
+          items: [
+            {
+              title: 'Dashboard',
+              url: '#',
+            },
+            {
+              title: 'Applications',
+              url: '#',
+            },
+            {
+              title: 'Application Questions',
+              url: '#',
+            },
+          ],
         },
         {
           title: 'Intro Course',
           url: '#',
-          icon: Settings2,
+          icon: BellElectric,
+        },
+        {
+          title: 'Team Phase',
+          url: '#',
+          icon: Users,
         },
         {
           title: 'Settings',
