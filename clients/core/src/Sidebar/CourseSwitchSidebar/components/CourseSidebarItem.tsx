@@ -1,8 +1,8 @@
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { Course } from '@/interfaces/course'
-import { useCourseStore } from '@/zustand/useCourseStore'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 // Todo move somewhere else
 const subtleColors = [
@@ -24,9 +24,10 @@ interface CourseSidebarItemProps {
 
 export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Element => {
   const { setOpen } = useSidebar()
-  const { selectedCourse, setSelectedCourse } = useCourseStore()
+  const navigate = useNavigate()
+  const { courseId } = useParams<{ courseId: string }>()
 
-  const isActive = course.id === selectedCourse?.id
+  const isActive = course.id === courseId
   const bgColor = course.meta_data?.['bg-color'] || subtleColors['bg-grey-100']
   const iconName = course.meta_data?.['icon'] || 'graduation-cap'
 
@@ -47,8 +48,8 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
           hidden: false,
         }}
         onClick={() => {
-          setSelectedCourse(course)
           setOpen(true)
+          navigate(`/management/course/${course.id}`)
         }}
         isActive={isActive}
         className='min-w-12 min-h-12 p-0'

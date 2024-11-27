@@ -64,6 +64,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     return <UnauthorizedPage />
   }
 
+  // TODO do course id management here
+  // store latest selected course in local storage
+  // check authorization
+  // if course non existent or unauthorized, show error page
+
+
   return (
     <DarkModeProvider>
       <SidebarProvider>
@@ -86,7 +92,9 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
               </Breadcrumb>
             </div>
           </header>
-          {hasChildren ? children : <WelcomePage />}
+          <div className='flex flex-1 flex-col gap-4 p-4'>
+            {hasChildren ? children : <WelcomePage />}
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </DarkModeProvider>

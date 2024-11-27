@@ -7,7 +7,7 @@ export const WelcomePage = () => {
         <CardHeader>
           <CardTitle>
             <img
-              src='prompt_logo.svg'
+              src='/prompt_logo.svg'
               alt='Prompt Logo'
               width='120'
               height='120'

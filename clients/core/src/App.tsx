@@ -6,6 +6,8 @@ const TemplateComponent = React.lazy(() => import('template_component/App'))
 import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
+import { CourseOverview } from './Course/CourseOverview'
+import { WelcomePage } from './management/components/WelcomePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +25,15 @@ export const App = (): JSX.Element => {
           <Routes>
             <Route path='/' element={<LandingPage />} />
             <Route path='/management' element={<ManagementRoot />} />
+            <Route path='/management/general' element={<ManagementRoot />} />
+            <Route
+              path='/management/course/:courseId'
+              element={
+                <ManagementRoot>
+                  <CourseOverview />
+                </ManagementRoot>
+              }
+            />
             <Route
               path='/template'
               element={

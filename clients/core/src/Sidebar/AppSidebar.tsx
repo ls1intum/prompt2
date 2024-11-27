@@ -14,7 +14,6 @@ import {
 import { Sidebar } from '@/components/ui/sidebar'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
 import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
-import { useCourseStore } from '@/zustand/useCourseStore'
 
 const data = {
   user: {
@@ -142,7 +141,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element {
   // TODO this will be replaced with router logic
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
+  const [activeItem] = React.useState(data.navMain[0])
 
   return (
     <Sidebar

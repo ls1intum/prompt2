@@ -7,11 +7,17 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { HomeIcon } from 'lucide-react'
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const SidebarHeaderComponent = () => {
   const { setOpen } = useSidebar()
-  const { selectedCourse, setSelectedCourse } = useCourseStore()
+
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isActive = location.pathname.startsWith('/management/general')
+  console.log('isActive', isActive)
+  console.log('location.pathname', location.pathname)
 
   return (
     <SidebarHeader>
@@ -27,13 +33,13 @@ const SidebarHeaderComponent = () => {
             }}
             onClick={() => {
               setOpen(true)
-              setSelectedCourse()
+              navigate('/management/general')
             }}
-            isActive={!selectedCourse}
+            isActive={isActive}
           >
             <div
               className={`relative flex aspect-square size-12 items-center justify-center ${
-                !selectedCourse
+                isActive
                   ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-secondary'
                   : ''
               }`}
@@ -41,7 +47,7 @@ const SidebarHeaderComponent = () => {
               <div
                 className={`
                   flex aspect-square items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground 
-                  ${!selectedCourse ? 'size-12' : 'size-10'}
+                  ${isActive ? 'size-12' : 'size-10'}
                   `}
               >
                 <HomeIcon className='size-6' />
