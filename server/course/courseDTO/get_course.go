@@ -14,6 +14,8 @@ type Course struct {
 	StartDate   pgtype.Date   `json:"start_date"`
 	EndDate     pgtype.Date   `json:"end_date"`
 	SemesterTag pgtype.Text   `json:"semester_tag"`
+	Ects        pgtype.Int4   `json:"ects"`
+	CourseType  string        `json:"course_type"`
 	MetaData    meta.MetaData `json:"meta_data"`
 }
 
@@ -30,6 +32,8 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		StartDate:   model.StartDate,
 		EndDate:     model.EndDate,
 		SemesterTag: model.SemesterTag,
+		Ects:        model.Ects,
+		CourseType:  string(model.CourseType),
 		MetaData:    metaData,
 	}, nil
 }

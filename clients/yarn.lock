@@ -2389,6 +2389,52 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-toggle-group@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@radix-ui/react-toggle-group@npm:1.1.0"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.0"
+    "@radix-ui/react-context": "npm:1.1.0"
+    "@radix-ui/react-direction": "npm:1.1.0"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+    "@radix-ui/react-roving-focus": "npm:1.1.0"
+    "@radix-ui/react-toggle": "npm:1.1.0"
+    "@radix-ui/react-use-controllable-state": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/041ac1ba365cbf237588649d3b0afb45057fa8b2d26c35fbdbf4c39affb959a53ec2a65bb5ffde76fc95b03835d487f5dfc40c2a83605740608b2b7768becde4
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toggle@npm:1.1.0, @radix-ui/react-toggle@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@radix-ui/react-toggle@npm:1.1.0"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.0"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+    "@radix-ui/react-use-controllable-state": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/68af7280b88e1696f0c5b2dfbb53473d45ccc960dc8ae3326aed6086945696f2a4a9d73305a80cd945fb9d33ccf756a3162041d5e89bb713aa5a5231b636b010
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-tooltip@npm:^1.1.4":
   version: 1.1.4
   resolution: "@radix-ui/react-tooltip@npm:1.1.4"
@@ -3929,7 +3975,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.3.1":
+"base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10c0/f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
@@ -4394,13 +4440,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "client@workspace:core"
   dependencies:
-    "@tanstack/react-query": "npm:^5.61.0"
-    axios: "npm:^1.7.7"
     clean-webpack-plugin: "npm:^4.0.0"
     compression-webpack-plugin: "npm:^11.1.0"
     css-minimizer-webpack-plugin: "npm:^7.0.0"
     external-remotes-plugin: "npm:^1.0.0"
     html-webpack-plugin: "npm:^5.6.0"
+    sha256: "npm:^0.2.0"
     webpack: "npm:^5.91.0"
     webpack-bundle-analyzer: "npm:^4.10.2"
     webpack-cli: "npm:^5.1.4"
@@ -4754,6 +4799,20 @@ __metadata:
   bin:
     conventional-recommended-bump: cli.js
   checksum: 10c0/649e6230be7e96e057a542a2695710aeaee356297d307691b3398e0f18d596b4a5b3ba56307755e779d8687a13b2466844300c649eb23f44fe5f1db9f923f3f4
+  languageName: node
+  linkType: hard
+
+"convert-hex@npm:~0.1.0":
+  version: 0.1.0
+  resolution: "convert-hex@npm:0.1.0"
+  checksum: 10c0/80b5c3f4db67b9fcad6c7539997117c5ee41f8142bc82bddda5da0d699dbed33ab8c1e86a075867468766702330cac4c559930ae371c953e4ae46118f3578d06
+  languageName: node
+  linkType: hard
+
+"convert-string@npm:~0.1.0":
+  version: 0.1.0
+  resolution: "convert-string@npm:0.1.0"
+  checksum: 10c0/eb737865fbb216cb823e465d819452c2c5a60cc0ad9da9bd9d699ba8178c4ff6186501f75af43c420bbe25e5ccac7f27ff1011640ab77e0227f6b992bfb043bd
   languageName: node
   linkType: hard
 
@@ -8138,6 +8197,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "js-sha256@npm:0.9.0"
+  checksum: 10c0/f20b9245f6ebe666f42ca05536f777301132fb1aa7fbc22f10578fa302717a6cca507344894efdeaf40a011256eb2f7d517b94ac7105bd5cf087fa61551ad634
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -8278,6 +8344,23 @@ __metadata:
     object.assign: "npm:^4.1.4"
     object.values: "npm:^1.1.6"
   checksum: 10c0/a32679e9cb55469cb6d8bbc863f7d631b2c98b7fc7bf172629261751a6e7bc8da6ae374ddb74d5fbd8b06cf0eb4572287b259813d92b36e384024ed35e4c13e1
+  languageName: node
+  linkType: hard
+
+"jwt-decode@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jwt-decode@npm:4.0.0"
+  checksum: 10c0/de75bbf89220746c388cf6a7b71e56080437b77d2edb29bae1c2155048b02c6b8c59a3e5e8d6ccdfd54f0b8bda25226e491a4f1b55ac5f8da04cfbadec4e546c
+  languageName: node
+  linkType: hard
+
+"keycloak-js@npm:22.0.5":
+  version: 22.0.5
+  resolution: "keycloak-js@npm:22.0.5"
+  dependencies:
+    base64-js: "npm:^1.5.1"
+    js-sha256: "npm:^0.9.0"
+  checksum: 10c0/d377d8f3bb062d052e10c119f4eacdb9f34b9aedc76a1050c1d9201bcbf78dc8e089e6609af4c4dc6e9118969236ca7e4f458224f89d1273937b5b27b128c9c5
   languageName: node
   linkType: hard
 
@@ -11101,6 +11184,8 @@ __metadata:
     eslint-plugin-react: "npm:^7.34.2"
     eslint-plugin-react-hooks: "npm:^4.6.2"
     html-webpack-plugin: "npm:^5.6.0"
+    jwt-decode: "npm:^4.0.0"
+    keycloak-js: "npm:22.0.5"
     lerna: "npm:^4.0.0"
     lucide-react: "npm:^0.460.0"
     postcss: "npm:^8.4.49"
@@ -11121,6 +11206,7 @@ __metadata:
     webpack: "npm:^5.91.0"
     webpack-cli: "npm:^5.1.4"
     webpack-dev-server: "npm:^5.0.4"
+    zustand: "npm:^5.0.1"
   languageName: unknown
   linkType: soft
 
@@ -12113,6 +12199,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sha256@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "sha256@npm:0.2.0"
+  dependencies:
+    convert-hex: "npm:~0.1.0"
+    convert-string: "npm:~0.1.0"
+  checksum: 10c0/4ba9822cb88138b8416c1a428779e7aebeae3e317cb428d99cb254e6f841869fb8f868cf2ba965e1a7070ce5bbeccb625947caa983a0df7355cad8f014e35060
+  languageName: node
+  linkType: hard
+
 "shallow-clone@npm:^3.0.0":
   version: 3.0.1
   resolution: "shallow-clone@npm:3.0.1"
@@ -12133,6 +12229,8 @@ __metadata:
     "@radix-ui/react-label": "npm:^2.1.0"
     "@radix-ui/react-separator": "npm:^1.1.0"
     "@radix-ui/react-slot": "npm:^1.1.0"
+    "@radix-ui/react-toggle": "npm:^1.1.0"
+    "@radix-ui/react-toggle-group": "npm:^1.1.0"
     "@radix-ui/react-tooltip": "npm:^1.1.4"
     "@shadcn/ui": "npm:^0.0.4"
     class-variance-authority: "npm:^0.7.0"
@@ -14219,5 +14317,26 @@ __metadata:
   version: 3.23.8
   resolution: "zod@npm:3.23.8"
   checksum: 10c0/8f14c87d6b1b53c944c25ce7a28616896319d95bc46a9660fe441adc0ed0a81253b02b5abdaeffedbeb23bdd25a0bf1c29d2c12dd919aef6447652dd295e3e69
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "zustand@npm:5.0.1"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/b4239c8bf3988bfdaaed1c48f3958d0b047b721c4908a76bd78e73387d107963cda774541cf303c2ea89261481c995aa6666e7e77c30717ad440cdb499d9e5ca
   languageName: node
   linkType: hard
