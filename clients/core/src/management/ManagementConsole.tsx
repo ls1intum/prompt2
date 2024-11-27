@@ -21,13 +21,14 @@ import {
   BreadcrumbSeparator,
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
+import DarkModeProvider from '@/contexts/DarkModeProvider'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
   const hasChildren = React.Children.count(children) > 0
 
-  const { selectedCourse, setCourses } = useCourseStore()
+  const { setCourses } = useCourseStore()
 
   // getting the courses
   const {
@@ -64,28 +65,30 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar onLogout={logout} />
-      <SidebarInset>
-        <header className='flex h-16 shrink-0 items-center gap-2'>
-          <div className='flex items-center gap-2 px-4'>
-            <SidebarTrigger className='-ml-1' />
-            <Separator orientation='vertical' className='mr-2 h-4' />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className='hidden md:block'>
-                  <BreadcrumbLink href='#'>Building Your Application</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className='hidden md:block' />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        {hasChildren ? children : <WelcomePage />}
-      </SidebarInset>
-    </SidebarProvider>
+    <DarkModeProvider>
+      <SidebarProvider>
+        <AppSidebar onLogout={logout} />
+        <SidebarInset>
+          <header className='flex h-16 shrink-0 items-center gap-2'>
+            <div className='flex items-center gap-2 px-4'>
+              <SidebarTrigger className='-ml-1' />
+              <Separator orientation='vertical' className='mr-2 h-4' />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className='hidden md:block'>
+                    <BreadcrumbLink href='#'>Building Your Application</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className='hidden md:block' />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </header>
+          {hasChildren ? children : <WelcomePage />}
+        </SidebarInset>
+      </SidebarProvider>
+    </DarkModeProvider>
   )
 }

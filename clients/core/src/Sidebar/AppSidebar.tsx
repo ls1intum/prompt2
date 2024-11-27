@@ -11,9 +11,10 @@ import {
   Users,
 } from 'lucide-react'
 
-import { Sidebar, useSidebar } from '@/components/ui/sidebar'
+import { Sidebar } from '@/components/ui/sidebar'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
-import { CourseSwitchSidebar } from './CourseSwitchSidebar'
+import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
+import { useCourseStore } from '@/zustand/useCourseStore'
 
 const data = {
   user: {
@@ -142,7 +143,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element {
   // TODO this will be replaced with router logic
   const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const { setOpen } = useSidebar()
 
   return (
     <Sidebar
@@ -151,13 +151,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
       {...props}
     >
       {/* This is the first sidebar */}
-      <CourseSwitchSidebar
-        data={data}
-        activeItem={activeItem}
-        setActiveItem={setActiveItem}
-        setOpen={setOpen}
-        onLogout={onLogout}
-      />
+      <CourseSwitchSidebar onLogout={onLogout} />
       <InsideCourseSidebar activeItem={activeItem} />
     </Sidebar>
   )

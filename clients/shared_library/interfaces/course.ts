@@ -6,4 +6,5 @@ export interface Course {
   course_type: string
   ects: number
   semester_tag: string
+  meta_data: Array<JSON>
 }

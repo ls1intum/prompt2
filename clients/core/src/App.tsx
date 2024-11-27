@@ -6,7 +6,6 @@ const TemplateComponent = React.lazy(() => import('template_component/App'))
 import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
-import DarkModeProvider from '@/contexts/DarkModeProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,28 +17,26 @@ const queryClient = new QueryClient({
 
 export const App = (): JSX.Element => {
   return (
-    <DarkModeProvider>
-      <KeycloakProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <Routes>
-              <Route path='/' element={<LandingPage />} />
-              <Route path='/management' element={<ManagementRoot />} />
-              <Route
-                path='/template'
-                element={
-                  <ErrorBoundary fallback={<div>TemplateComponent is unavailable.</div>}>
-                    <React.Suspense fallback={<div>Loading...</div>}>
-                      <TemplateComponent />
-                    </React.Suspense>
-                  </ErrorBoundary>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
-        </QueryClientProvider>
-      </KeycloakProvider>
-    </DarkModeProvider>
+    <KeycloakProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<LandingPage />} />
+            <Route path='/management' element={<ManagementRoot />} />
+            <Route
+              path='/template'
+              element={
+                <ErrorBoundary fallback={<div>TemplateComponent is unavailable.</div>}>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <TemplateComponent />
+                  </React.Suspense>
+                </ErrorBoundary>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </KeycloakProvider>
   )
 }
 
