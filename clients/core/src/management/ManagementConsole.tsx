@@ -11,7 +11,6 @@ import { Course } from '@/interfaces/course'
 import { getAllCourses } from '@/network/course'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { ErrorPage } from '@/components/ErrorPage'
-import { NoCourseSelectedPage } from './components/NoCourseSelectedPage'
 import { Separator } from '@/components/ui/separator'
 import {
   Breadcrumb,
@@ -22,10 +21,13 @@ import {
   BreadcrumbList,
 } from '@/components/ui/breadcrumb'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
+import { useParams } from 'react-router-dom'
+import CourseNotFound from './components/CourseNotFound'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
+  const courseId = useParams<{ courseId: string }>()
   const hasChildren = React.Children.count(children) > 0
 
   const { setCourses } = useCourseStore()
@@ -69,12 +71,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   // check authorization
   // if course non existent or unauthorized, show error page
 
-
   return (
     <DarkModeProvider>
       <SidebarProvider>
         <AppSidebar onLogout={logout} />
         <SidebarInset>
+          {courseId.courseId && <CourseNotFound courseId={courseId.courseId} />}
           <header className='flex h-16 shrink-0 items-center gap-2'>
             <div className='flex items-center gap-2 px-4'>
               <SidebarTrigger className='-ml-1' />
