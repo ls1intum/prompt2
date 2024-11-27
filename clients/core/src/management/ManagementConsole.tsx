@@ -70,13 +70,17 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   // store latest selected course in local storage
   // check authorization
   // if course non existent or unauthorized, show error page
+  const courseExists = fetchedCourses.some((course) => course.id === courseId.courseId)
+  console.log(fetchedCourses)
 
   return (
     <DarkModeProvider>
       <SidebarProvider>
         <AppSidebar onLogout={logout} />
         <SidebarInset>
-          {courseId.courseId && <CourseNotFound courseId={courseId.courseId} />}
+          {courseId.courseId && !courseExists && (
+            <CourseNotFound courseId={courseId.courseId || ''} />
+          )}
           <header className='flex h-16 shrink-0 items-center gap-2'>
             <div className='flex items-center gap-2 px-4'>
               <SidebarTrigger className='-ml-1' />
