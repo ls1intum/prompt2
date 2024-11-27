@@ -6,7 +6,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
 } from '@/components/ui/sidebar'
-import { NavUserMenu } from '../components/NavUserMenu'
+import { NavUserMenu } from './components/NavUserMenu'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
