@@ -22,7 +22,9 @@ interface CollapsableSidebarMenuItemProps {
   }[]
 }
 
-export const SidebarMenuItemCollapsable = (props: CollapsableSidebarMenuItemProps): JSX.Element => {
+export const InsideSidebarMenuItemCollapsable = (
+  props: CollapsableSidebarMenuItemProps,
+): JSX.Element => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 

@@ -8,7 +8,7 @@ interface SidebarMenuItemProps {
   title: string
 }
 
-export const CourseSidebarMenuItem = (props: SidebarMenuItemProps): JSX.Element => {
+export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps): JSX.Element => {
   const navigate = useNavigate()
 
   return (

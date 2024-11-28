@@ -1,35 +1,25 @@
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from '@/components/ui/sidebar'
-import { ChevronRight, Gauge, Settings, Settings2 } from 'lucide-react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { CourseSidebarMenuItem } from './components/CourseSidebarMenuItem'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { SidebarMenuItemCollapsable } from './components/SidebarMenuItemCollapsable'
+import { SidebarMenu } from '@/components/ui/sidebar'
+import { Gauge, Settings } from 'lucide-react'
+import { useLocation, useParams } from 'react-router-dom'
+import { InsideSidebarMenuItem } from '../components/InsideSidebarMenuItem'
 
 export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const location = useLocation()
-  const navigate = useNavigate()
 
   const rootPath = `/management/course/${courseId}/`
   const courseSubpath = location.pathname.split(rootPath)[1] || ''
 
   return (
     <SidebarMenu>
-      <CourseSidebarMenuItem
-        isActive={false}
+      <InsideSidebarMenuItem
+        isActive={courseSubpath === ''}
         goToPath={rootPath}
-        icon={<Settings />}
+        icon={<Gauge />}
         title='Overview'
       />
       {/** TODO: add submodules here */}
-      <SidebarMenuItemCollapsable
+      <InsideSidebarMenuItem
         isActive={courseSubpath === 'settings'}
         goToPath={rootPath + 'settings'}
         icon={<Settings />}
@@ -45,7 +35,8 @@ export const InsideCourseSidebar = (): JSX.Element => {
             isActive: courseSubpath === 'modules/2',
             title: 'Module 2',
           },
-        ]} /> 
+        ]}
+      />
     </SidebarMenu>
   )
 }
