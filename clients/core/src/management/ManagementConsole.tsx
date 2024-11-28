@@ -66,6 +66,8 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     return <UnauthorizedPage />
   }
 
+  // TODO: when calling /management -> check for course in local storage, else redirect to /management/general
+
   // TODO do course id management here
   // store latest selected course in local storage
   // check authorization
