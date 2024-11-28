@@ -5,8 +5,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  SidebarMenuAction,
 } from '@/components/ui/sidebar'
-import { Settings, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -39,19 +40,22 @@ export const InsideSidebarMenuItemCollapsable = (
         className='group/collapsible'
       >
         <SidebarMenuItem>
+          <SidebarMenuButton
+            tooltip={props.title}
+            onClick={() => {
+              navigate(props.goToPath)
+              setIsOpen(true)
+            }}
+            isActive={props.isActive}
+          >
+            {props.icon}
+            <span>{props.title}</span>
+          </SidebarMenuButton>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton tooltip={props.title} onClick={() => navigate(props.goToPath)}>
-              <Settings />
-              <span>{props.title}</span>
-              <ChevronRight
-                className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90'
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  setIsOpen((prev) => !prev)
-                }}
-              />
-            </SidebarMenuButton>
+            <SidebarMenuAction className='data-[state=open]:rotate-90'>
+              <ChevronRight />
+              <span className='sr-only'>Toggle</span>
+            </SidebarMenuAction>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
