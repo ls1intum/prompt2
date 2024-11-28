@@ -1,7 +1,7 @@
 import { SidebarMenu } from '@/components/ui/sidebar'
-import { Gauge, Settings } from 'lucide-react'
+import { FileUser, Gauge, Settings } from 'lucide-react'
 import { useLocation, useParams } from 'react-router-dom'
-import { InsideSidebarMenuItem } from '../components/InsideSidebarMenuItem'
+import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
 
 export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -17,6 +17,12 @@ export const InsideCourseSidebar = (): JSX.Element => {
         goToPath={rootPath}
         icon={<Gauge />}
         title='Overview'
+      />
+      <InsideSidebarMenuItem
+        isActive={courseSubpath === 'application'}
+        goToPath={rootPath + 'application'}
+        icon={<FileUser />}
+        title='Application Phase'
       />
       {/** TODO: add submodules here */}
       <InsideSidebarMenuItem
