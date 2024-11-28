@@ -67,6 +67,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         filename: 'remoteEntry.js',
         exposes: {
           './routers': './routers',
+          './sidebar': './sidebar',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

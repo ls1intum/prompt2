@@ -2,6 +2,8 @@ import { SidebarMenu } from '@/components/ui/sidebar'
 import { FileUser, Gauge, Settings } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
+import { TemplateSidebar } from '../../Router/TemplateSidebar'
+import { Suspense } from 'react'
 
 export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -31,6 +33,9 @@ export const InsideCourseSidebar = (): JSX.Element => {
           },
         ]}
       />
+      <Suspense fallback={<div>Fallback</div>}>
+        <TemplateSidebar title='TemplatePhase' baseRoot={rootPath + 'template'} />
+      </Suspense>
     </SidebarMenu>
   )
 }
