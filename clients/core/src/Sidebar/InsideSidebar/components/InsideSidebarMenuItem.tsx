@@ -3,12 +3,10 @@ import { InsideSidebarMenuItemCollapsable } from './InsideSidebarMenuItemCollaps
 
 interface InsideSidebarMenuItemProps {
   goToPath: string
-  isActive: boolean
   icon: JSX.Element
   title: string
   subitems?: {
     goToPath: string
-    isActive: boolean
     title: string
   }[]
 }

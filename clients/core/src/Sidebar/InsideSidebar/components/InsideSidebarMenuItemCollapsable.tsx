@@ -9,16 +9,14 @@ import {
 } from '@/components/ui/sidebar'
 import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 interface CollapsableSidebarMenuItemProps {
   goToPath: string
-  isActive: boolean
   icon: JSX.Element
   title: string
   subitems?: {
     goToPath: string
-    isActive: boolean
     title: string
   }[]
 }
@@ -28,6 +26,7 @@ export const InsideSidebarMenuItemCollapsable = (
 ): JSX.Element => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = useLocation().pathname
 
   return (
     <SidebarMenuItem>
@@ -46,7 +45,7 @@ export const InsideSidebarMenuItemCollapsable = (
               navigate(props.goToPath)
               setIsOpen(true)
             }}
-            isActive={props.isActive}
+            isActive={props.goToPath === pathname}
           >
             {props.icon}
             <span>{props.title}</span>
