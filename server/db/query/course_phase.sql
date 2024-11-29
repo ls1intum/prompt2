@@ -1,10 +1,15 @@
 -- name: GetCoursePhase :one
-SELECT * FROM course_phase
-WHERE id = $1 LIMIT 1;
+SELECT cp.*, cpt.name AS course_phase_type_name
+FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.id = $1
+LIMIT 1;
 
 -- name: GetAllCoursePhaseForCourse :many
-SELECT * FROM course_phase
-WHERE course_id = $1;
+SELECT cp.*, cpt.name AS course_phase_type_name
+FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.course_id = $1;
 
 -- name: CreateCoursePhase :one
 INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data, course_phase_type_id)

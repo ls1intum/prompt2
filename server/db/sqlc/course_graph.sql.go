@@ -51,19 +51,21 @@ WITH RECURSIVE phase_sequence AS (
     INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
     INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
 )
-SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id, sequence_order
-FROM phase_sequence
-ORDER BY sequence_order
+SELECT ps.id, ps.course_id, ps.name, ps.meta_data, ps.is_initial_phase, ps.course_phase_type_id, ps.sequence_order, cpt.name AS course_phase_type_name
+FROM phase_sequence ps
+INNER JOIN course_phase_type cpt ON ps.course_phase_type_id = cpt.id
+ORDER BY ps.sequence_order
 `
 
 type GetCoursePhaseSequenceRow struct {
-	ID                uuid.UUID   `json:"id"`
-	CourseID          uuid.UUID   `json:"course_id"`
-	Name              pgtype.Text `json:"name"`
-	MetaData          []byte      `json:"meta_data"`
-	IsInitialPhase    bool        `json:"is_initial_phase"`
-	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
-	SequenceOrder     int32       `json:"sequence_order"`
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	MetaData            []byte      `json:"meta_data"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	SequenceOrder       int32       `json:"sequence_order"`
+	CoursePhaseTypeName string      `json:"course_phase_type_name"`
 }
 
 func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID) ([]GetCoursePhaseSequenceRow, error) {
@@ -83,6 +85,7 @@ func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID
 			&i.IsInitialPhase,
 			&i.CoursePhaseTypeID,
 			&i.SequenceOrder,
+			&i.CoursePhaseTypeName,
 		); err != nil {
 			return nil, err
 		}
@@ -95,8 +98,9 @@ func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID
 }
 
 const getNotOrderedCoursePhases = `-- name: GetNotOrderedCoursePhases :many
-SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id
+SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
 FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
   AND cp.is_initial_phase = FALSE
   AND NOT EXISTS (
@@ -107,15 +111,25 @@ WHERE cp.course_id = $1
   )
 `
 
-func (q *Queries) GetNotOrderedCoursePhases(ctx context.Context, courseID uuid.UUID) ([]CoursePhase, error) {
+type GetNotOrderedCoursePhasesRow struct {
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	MetaData            []byte      `json:"meta_data"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	CoursePhaseTypeName string      `json:"course_phase_type_name"`
+}
+
+func (q *Queries) GetNotOrderedCoursePhases(ctx context.Context, courseID uuid.UUID) ([]GetNotOrderedCoursePhasesRow, error) {
 	rows, err := q.db.Query(ctx, getNotOrderedCoursePhases, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhase
+	var items []GetNotOrderedCoursePhasesRow
 	for rows.Next() {
-		var i CoursePhase
+		var i GetNotOrderedCoursePhasesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CourseID,
@@ -123,6 +137,7 @@ func (q *Queries) GetNotOrderedCoursePhases(ctx context.Context, courseID uuid.U
 			&i.MetaData,
 			&i.IsInitialPhase,
 			&i.CoursePhaseTypeID,
+			&i.CoursePhaseTypeName,
 		); err != nil {
 			return nil, err
 		}
