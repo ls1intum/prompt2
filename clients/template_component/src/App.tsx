@@ -1,14 +1,10 @@
-import React from 'react'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { Route, Routes } from 'react-router-dom'
+import { Settings } from 'lucide-react'
+import { OverviewPage } from './OverviewPage'
+import { SettingsPage } from './SettingsPage'
 
 export const App = (): JSX.Element => {
-  return (
-    <div>
-      <Label>Template Component</Label>
-      <Button>Click me in Template Component</Button>
-    </div>
-  )
+  return <h1>Hi</h1>
 }
 
 export default App

@@ -11,7 +11,8 @@
         "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
     },
     "dependencies": {
-        "external-remotes-plugin": "^1.0.0"
+        "external-remotes-plugin": "^1.0.0",
+        "sha256": "^0.2.0"
     },
     "devDependencies": {
         "clean-webpack-plugin": "^4.0.0",

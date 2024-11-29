@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DeadlineInfo } from './DeadlineInfo'
-import { Course } from 'src/interfaces/open_course_applications'
+import { Course } from '@/interfaces/course'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 

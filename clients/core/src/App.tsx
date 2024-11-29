@@ -1,8 +1,11 @@
-import React from 'react'
-import ErrorBoundary from './ErrorBoundary'
+import React, { Suspense } from 'react'
 import { LandingPage } from './LandingPage/LandingPage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-const TemplateComponent = React.lazy(() => import('template_component/App'))
+import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ManagementRoot } from './management/ManagementConsole'
+import { CourseOverview } from './Course/CourseOverview'
+import { TemplateRoutes } from './Router/TemplateRoutes'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,12 +17,35 @@ const queryClient = new QueryClient({
 
 export const App = (): JSX.Element => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <div>
-        {/* add router here */}
-        <LandingPage />
-      </div>
-    </QueryClientProvider>
+    <KeycloakProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<LandingPage />} />
+            <Route path='/management' element={<ManagementRoot />} />
+            <Route path='/management/general' element={<ManagementRoot />} />
+            <Route
+              path='/management/course/:courseId'
+              element={
+                <ManagementRoot>
+                  <CourseOverview />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/template/*'
+              element={
+                <ManagementRoot>
+                  <Suspense fallback={<div>Fallback</div>}>
+                    <TemplateRoutes />
+                  </Suspense>
+                </ManagementRoot>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </KeycloakProvider>
   )
 }
 
