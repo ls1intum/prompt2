@@ -42,7 +42,7 @@ export const App = (): JSX.Element => {
               }
             />
             <Route
-              path='/management/course/:courseId/template/*'
+              path='/management/course/:courseId/template_component/*'
               element={
                 <ManagementRoot>
                   <Suspense fallback={<div>Fallback</div>}>

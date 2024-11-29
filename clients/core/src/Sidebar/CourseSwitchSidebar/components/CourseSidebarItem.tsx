@@ -49,7 +49,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         }}
         onClick={() => {
           setOpen(true)
-          navigate(`/management/course/${course.id}`)
+          navigate(`/management/course/${course.id}/`)
         }}
         isActive={isActive}
         className='min-w-12 min-h-12 p-0'
