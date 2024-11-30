@@ -60,7 +60,11 @@ export const InsideSidebarMenuItemCollapsable = (
             <SidebarMenuSub>
               {props.subitems?.map((subitem) => (
                 <SidebarMenuSubItem key={subitem.title}>
-                  <SidebarMenuSubButton asChild onClick={() => navigate(subitem.goToPath)}>
+                  <SidebarMenuSubButton
+                    asChild
+                    onClick={() => navigate(subitem.goToPath)}
+                    isActive={subitem.goToPath == pathname}
+                  >
                     <span>{subitem.title}</span>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
