@@ -12,14 +12,6 @@ import { getAllCourses } from '@/network/course'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { ErrorPage } from '@/components/ErrorPage'
 import { Separator } from '@/components/ui/separator'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbList,
-} from '@/components/ui/breadcrumb'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useParams } from 'react-router-dom'
 import CourseNotFound from './components/CourseNotFound'
