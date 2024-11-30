@@ -37,27 +37,28 @@ export const Breadcrumbs: React.FC = () => {
             path: `/management/general/${pathSegments.slice(2, index + 3).join('/')}`,
           })
         })
-      } else if (pathSegments[1] === 'course') {
+      } else if (pathSegments[1] === 'course' && pathSegments.length >= 3) {
         const courseId = pathSegments[2]
         const course = courses.find((c) => c.id === courseId)
         if (course) {
           breadcrumbs.push({ title: course.name, path: `/management/course/${courseId}` })
 
-          const phaseId = pathSegments[4]
-          const phase = course.course_phases.find((p) => p.id === phaseId)
-          if (phase) {
-            breadcrumbs.push({
-              title: phase.name,
-              path: `/management/course/${courseId}/${pathSegments[3]}/${phaseId}`,
+          if (pathSegments.length >= 3) {
+            const phaseId = pathSegments[3]
+            const phase = course.course_phases.find((p) => p.id === phaseId)
+            if (phase) {
+              breadcrumbs.push({
+                title: phase.name,
+                path: `/management/course/${courseId}/${phaseId}`,
+              })
+            }
+            pathSegments.slice(4).forEach((segment, index) => {
+              breadcrumbs.push({
+                title: capitalizeFirstLetter(segment),
+                path: `/management/course/${courseId}/${phaseId}/${pathSegments.slice(4, index + 5).join('/')}`,
+              })
             })
           }
-
-          pathSegments.slice(5).forEach((segment, index) => {
-            breadcrumbs.push({
-              title: capitalizeFirstLetter(segment),
-              path: `/management/course/${courseId}/${pathSegments.slice(3, index + 6).join('/')}`,
-            })
-          })
         }
       }
     }
