@@ -4,7 +4,7 @@ import { SidebarMenuItemProps } from '@/interfaces/Sidebar'
 const templateSidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',
   icon: <Construction />,
-  goToPath: '/',
+  goToPath: '',
   subitems: [
     {
       title: 'Settings',
