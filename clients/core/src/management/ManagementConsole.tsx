@@ -23,6 +23,7 @@ import {
 import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useParams } from 'react-router-dom'
 import CourseNotFound from './components/CourseNotFound'
+import { Breadcrumbs } from './Breadcrumbs/Breadcrumbs'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
@@ -87,17 +88,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
             <div className='flex items-center gap-2 px-4'>
               <SidebarTrigger className='-ml-1' />
               <Separator orientation='vertical' className='mr-2 h-4' />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className='hidden md:block'>
-                    <BreadcrumbLink href='#'>Building Your Application</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className='hidden md:block' />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              <Breadcrumbs />
             </div>
           </header>
           <div className='flex flex-1 flex-col gap-4 p-4'>
