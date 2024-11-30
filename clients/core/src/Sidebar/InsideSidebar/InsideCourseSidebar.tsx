@@ -29,7 +29,10 @@ export const InsideCourseSidebar = (): JSX.Element => {
         if (phase.course_phase_type in PhaseSidebarMapping) {
           const PhaseComponent = PhaseSidebarMapping[phase.course_phase_type]
           return (
-            <Suspense key={phase.id} fallback={<div>Loading module...</div>}>
+            <Suspense
+              key={phase.id}
+              fallback={<DisabledSidebarMenuItem key={phase.id} title={'Loading...'} />}
+            >
               <PhaseComponent rootPath={rootPath + '/' + phase.id} title={phase.name} />
             </Suspense>
           )
@@ -38,7 +41,6 @@ export const InsideCourseSidebar = (): JSX.Element => {
         }
       })}
 
-      {/** TODO: add submodules here */}
       <InsideSidebarMenuItem
         goToPath={rootPath + '/settings'}
         icon={<Settings />}

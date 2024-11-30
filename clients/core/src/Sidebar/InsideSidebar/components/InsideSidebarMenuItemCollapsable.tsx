@@ -31,14 +31,12 @@ export const InsideSidebarMenuItemCollapsable = (
   return (
     <SidebarMenuItem>
       <Collapsible
-        key={props.title}
-        asChild
         open={isOpen}
         onOpenChange={setIsOpen}
         defaultOpen={false}
-        className='group/collapsible'
+        className='group/collapsible w-full'
       >
-        <SidebarMenuItem>
+        <div className='flex items-center w-full'>
           <SidebarMenuButton
             tooltip={props.title}
             onClick={() => {
@@ -56,22 +54,22 @@ export const InsideSidebarMenuItemCollapsable = (
               <span className='sr-only'>Toggle</span>
             </SidebarMenuAction>
           </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {props.subitems?.map((subitem) => (
-                <SidebarMenuSubItem key={subitem.title}>
-                  <SidebarMenuSubButton
-                    asChild
-                    onClick={() => navigate(subitem.goToPath)}
-                    isActive={subitem.goToPath == pathname}
-                  >
-                    <span>{subitem.title}</span>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        </SidebarMenuItem>
+        </div>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {props.subitems?.map((subitem) => (
+              <SidebarMenuSubItem key={subitem.title}>
+                <SidebarMenuSubButton
+                  asChild
+                  onClick={() => navigate(subitem.goToPath)}
+                  isActive={subitem.goToPath === pathname}
+                >
+                  <span>{subitem.title}</span>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
       </Collapsible>
     </SidebarMenuItem>
   )
