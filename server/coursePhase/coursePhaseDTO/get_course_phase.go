@@ -7,26 +7,28 @@ import (
 )
 
 type CoursePhase struct {
-	ID                uuid.UUID     `json:"id"`
-	CourseID          uuid.UUID     `json:"course_id"`
-	Name              string        `json:"name"`
-	IsInitialPhase    bool          `json:"is_initial_phase"`
-	MetaData          meta.MetaData `json:"meta_data"`
-	CoursePhaseTypeID uuid.UUID     `json:"course_phase_type_id"`
+	ID                  uuid.UUID     `json:"id"`
+	CourseID            uuid.UUID     `json:"course_id"`
+	Name                string        `json:"name"`
+	IsInitialPhase      bool          `json:"is_initial_phase"`
+	MetaData            meta.MetaData `json:"meta_data"`
+	CoursePhaseTypeID   uuid.UUID     `json:"course_phase_type_id"`
+	CoursePhaseTypeName string        `json:"course_phase_type_name"`
 }
 
-func GetCoursePhaseDTOFromDBModel(model db.CoursePhase) (CoursePhase, error) {
+func GetCoursePhaseDTOFromDBModel(model db.GetCoursePhaseRow) (CoursePhase, error) {
 	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
 	if err != nil {
 		return CoursePhase{}, err
 	}
 
 	return CoursePhase{
-		ID:                model.ID,
-		CourseID:          model.CourseID,
-		Name:              model.Name.String,
-		IsInitialPhase:    model.IsInitialPhase,
-		MetaData:          metaData,
-		CoursePhaseTypeID: model.CoursePhaseTypeID,
+		ID:                  model.ID,
+		CourseID:            model.CourseID,
+		Name:                model.Name.String,
+		IsInitialPhase:      model.IsInitialPhase,
+		MetaData:            metaData,
+		CoursePhaseTypeID:   model.CoursePhaseTypeID,
+		CoursePhaseTypeName: model.CoursePhaseTypeName,
 	}, nil
 }

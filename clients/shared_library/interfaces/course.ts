@@ -1,3 +1,5 @@
+import { CoursePhase } from './course_phase'
+
 export interface Course {
   id: string
   name: string
@@ -7,4 +9,5 @@ export interface Course {
   ects: number
   semester_tag: string
   meta_data: Array<JSON>
+  course_phases: Array<CoursePhase>
 }

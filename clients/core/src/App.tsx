@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
 import { CourseOverview } from './Course/CourseOverview'
 import { TemplateRoutes } from './Router/TemplateRoutes'
+import { Application } from './Application/Application'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +34,15 @@ export const App = (): JSX.Element => {
               }
             />
             <Route
-              path='/management/course/:courseId/template/*'
+              path='/management/course/:courseId/application/*'
+              element={
+                <ManagementRoot>
+                  <Application />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/template_component/*'
               element={
                 <ManagementRoot>
                   <Suspense fallback={<div>Fallback</div>}>

@@ -1,17 +1,15 @@
-import { Settings } from 'lucide-react'
-import React from 'react'
 import { RouteObject } from 'react-router-dom'
+import OverviewPage from 'template_component/src/OverviewPage'
 import SettingsPage from 'template_component/src/SettingsPage'
-import ErrorBoundary from './ErrorBoundary'
 
 const templateRoutes: RouteObject[] = [
   {
-    path: '/settings',
-    element: (
-      <ErrorBoundary fallback={'loading failed'}>
-        <SettingsPage />
-      </ErrorBoundary>
-    ),
+    path: '/:phaseId',
+    element: <OverviewPage />,
+  },
+  {
+    path: '/:phaseId/settings',
+    element: <SettingsPage />,
   },
   // Add more routes here as needed
 ]
