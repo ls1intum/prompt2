@@ -101,7 +101,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Object.keys(CourseType).map((type) => (
+                    {Object.values(CourseType).map((type) => (
                       <SelectItem key={type} value={type}>
                         {CourseTypeDetails[type as CourseType].name}
                       </SelectItem>

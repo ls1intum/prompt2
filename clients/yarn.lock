@@ -11295,6 +11295,7 @@ __metadata:
     prettier: "npm:^3.3.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
+    react-hook-form: "npm:^7.53.2"
     react-router-dom: "npm:^6.23.1"
     sass-loader: "npm:^14.2.1"
     style-loader: "npm:^4.0.0"
