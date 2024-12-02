@@ -15,7 +15,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
 
-  const rootPath = `/management/course/${courseId}/`
+  const rootPath = `/management/course/${courseId}`
 
   const { sortedPhases } = useMemo(() => {
     const activeCourse = courses.find((c) => c.id === courseId)
@@ -34,7 +34,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
           return (
             <InsideSidebarMenuItem
               key={phase.id}
-              goToPath={rootPath + 'application/' + phase.id}
+              goToPath={rootPath + '/application/' + phase.id}
               icon={<FileUser />}
               title={phase.name}
             />
@@ -44,7 +44,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
           return (
             <Suspense key={phase.id} fallback={<div>Loading module...</div>}>
               <PhaseComponent
-                baseRoot={rootPath + phase.course_phase_type + '/' + phase.id}
+                baseRoot={rootPath + '/' + phase.course_phase_type + '/' + phase.id}
                 title={phase.name}
               />
             </Suspense>
@@ -59,16 +59,6 @@ export const InsideCourseSidebar = (): JSX.Element => {
         goToPath={rootPath + 'settings'}
         icon={<Settings />}
         title='Settings'
-        subitems={[
-          {
-            goToPath: rootPath + 'modules/1',
-            title: 'Module 1',
-          },
-          {
-            goToPath: rootPath + 'modules/2',
-            title: 'Module 2',
-          },
-        ]}
       />
     </SidebarMenu>
   )
