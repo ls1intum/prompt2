@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -6,9 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { courseFormSchema, CourseFormValues } from '../../validations/course'
+import { CourseFormValues } from '../../validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'
 import { CourseAppearanceFormValues } from 'src/validations/courseAppearance'
@@ -23,24 +21,13 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   const [coursePropertiesFormValues, setCoursePropertiesFormValues] =
     React.useState<CourseFormValues | null>(null)
 
-  const form = useForm<CourseFormValues>({
-    resolver: zodResolver(courseFormSchema),
-    defaultValues: {
-      name: '',
-      course_type: '',
-      ects: 0,
-      semester_tag: '',
-    },
-  })
-
   const onSubmit = (data: CourseAppearanceFormValues) => {
     const completeData = { ...coursePropertiesFormValues, ...data }
     console.log(completeData)
     // todo API call
     setIsOpen(false)
     setCurrentPage(1)
-    // reset the appearance form
-    form.reset()
+
     setCoursePropertiesFormValues(null) // reset the page 1 form
   }
 
@@ -53,14 +40,22 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
     setCurrentPage(1)
   }
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setIsOpen(false)
-    setCurrentPage(1)
     setCoursePropertiesFormValues(null)
+    setCurrentPage(1)
+  }, [])
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      handleCancel()
+    } else {
+      setIsOpen(open)
+    }
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className='sm:max-w-[550px]'>
         <DialogHeader>
