@@ -4,11 +4,11 @@ import SettingsPage from 'template_component/src/SettingsPage'
 
 const templateRoutes: RouteObject[] = [
   {
-    path: '/:phaseId',
+    path: '',
     element: <OverviewPage />,
   },
   {
-    path: '/:phaseId/settings',
+    path: '/settings',
     element: <SettingsPage />,
   },
   // Add more routes here as needed
