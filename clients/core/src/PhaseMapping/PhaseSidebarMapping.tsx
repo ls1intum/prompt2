@@ -1,5 +1,5 @@
 import { InsideSidebarMenuItem } from '../Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
-import { TemplateSidebar } from '../Router/TemplateSidebar'
+import { TemplateSidebar } from './ExternalSidebars/TemplateSidebar'
 import { FileUser } from 'lucide-react'
 
 const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; title: string }) => {

@@ -5,7 +5,7 @@ import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
 import { CourseOverview } from './Course/CourseOverview'
-import { TemplateRoutes } from './Router/TemplateRoutes'
+import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
 import { Application } from './Application/Application'
 import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
 

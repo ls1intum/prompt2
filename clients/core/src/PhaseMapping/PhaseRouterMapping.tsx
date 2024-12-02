@@ -1,7 +1,7 @@
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { Suspense } from 'react'
 import { useParams } from 'react-router-dom'
-import { TemplateRoutes } from '../Router/TemplateRoutes'
+import { TemplateRoutes } from './ExternalRouters/TemplateRoutes'
 import { Application } from '../Application/Application'
 
 const PhaseRouter: { [key: string]: React.FC } = {

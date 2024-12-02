@@ -1,7 +1,7 @@
 import React from 'react'
 import { SidebarMenuItemProps } from '@/interfaces/Sidebar'
-import { InsideSidebarMenuItem } from '../Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
-import { DisabledSidebarMenuItem } from '../Sidebar/InsideSidebar/components/DisabledSidebarMenuItem'
+import { InsideSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
+import { DisabledSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/DisabledSidebarMenuItem'
 
 interface TemplateSidebarProps {
   rootPath: string

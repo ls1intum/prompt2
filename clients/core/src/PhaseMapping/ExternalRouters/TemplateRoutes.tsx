@@ -2,7 +2,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import React from 'react'
 import { RouteObject, Routes, Route } from 'react-router-dom'
-import ErrorBoundary from '../ErrorBoundary'
+import ErrorBoundary from '../../ErrorBoundary'
 
 export const TemplateRoutes = React.lazy(() =>
   import('template_component/routers')
