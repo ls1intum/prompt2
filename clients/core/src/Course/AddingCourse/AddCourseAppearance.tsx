@@ -75,7 +75,8 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({ onBack
           </div>
         </div>
         <span className='text-sm text-gray-600'>
-          This is how your course icon will appear in the sidebar.
+          This is how your course icon will appear in the sidebar. <br />
+          <b>Please note:</b> it will only be displayed while the course is active.
         </span>
       </div>
 
