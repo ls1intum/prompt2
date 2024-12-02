@@ -10,7 +10,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { courseFormSchema, CourseFormValues } from '../../validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
-import { AddCourseAppearance } from './AddCourseApperance'
+import { AddCourseAppearance } from './AddCourseAppearance'
+import { CourseAppearanceFormValues } from 'src/validations/courseAppearance'
 
 interface AddCourseDialogProps {
   children: React.ReactNode
@@ -19,6 +20,8 @@ interface AddCourseDialogProps {
 export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
+  const [coursePropertiesFormValues, setCoursePropertiesFormValues] =
+    React.useState<CourseFormValues | null>(null)
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -27,19 +30,22 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       course_type: '',
       ects: 0,
       semester_tag: '',
-      color: '',
-      icon: '',
     },
   })
 
-  const onSubmit = (data: CourseFormValues) => {
+  const onSubmit = (data: CourseAppearanceFormValues) => {
+    const completeData = { ...coursePropertiesFormValues, ...data }
+    console.log(completeData)
     // todo API call
     setIsOpen(false)
     setCurrentPage(1)
+    // reset the appearance form
     form.reset()
+    setCoursePropertiesFormValues(null) // reset the page 1 form
   }
 
-  const handleNext = () => {
+  const handleNext = (data) => {
+    setCoursePropertiesFormValues(data)
     setCurrentPage(2)
   }
 
@@ -50,7 +56,7 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   const handleCancel = () => {
     setIsOpen(false)
     setCurrentPage(1)
-    form.reset()
+    setCoursePropertiesFormValues(null)
   }
 
   return (
@@ -61,9 +67,13 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
           <DialogTitle>Add a New Course</DialogTitle>
         </DialogHeader>
         {currentPage === 1 ? (
-          <AddCourseProperties form={form} onNext={handleNext} onCancel={handleCancel} />
+          <AddCourseProperties
+            onNext={handleNext}
+            onCancel={handleCancel}
+            initialValues={coursePropertiesFormValues || undefined}
+          />
         ) : (
-          <AddCourseAppearance form={form} onBack={handleBack} onSubmit={onSubmit} />
+          <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} />
         )}
       </DialogContent>
     </Dialog>

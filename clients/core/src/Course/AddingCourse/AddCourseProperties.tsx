@@ -10,30 +10,40 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { UseFormReturn } from 'react-hook-form'
-import { CourseFormValues } from '../../validations/course'
+import { courseFormSchema, CourseFormValues } from '../../validations/course'
 import { DatePickerWithRange } from '@/components/DateRangePicker'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 
 interface AddCoursePropertiesProps {
-  form: UseFormReturn<CourseFormValues>
-  onNext: () => void
+  onNext: (data: CourseFormValues) => void
   onCancel: () => void
+  initialValues?: Partial<CourseFormValues>
 }
 
 export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
-  form,
   onNext,
   onCancel,
+  initialValues,
 }) => {
+  const form = useForm<CourseFormValues>({
+    resolver: zodResolver(courseFormSchema),
+    defaultValues: {
+      name: initialValues?.name || '',
+      dateRange: initialValues?.dateRange,
+      course_type: initialValues?.course_type || '',
+      ects: initialValues?.ects || 0,
+      semester_tag: initialValues?.semester_tag || '',
+    },
+  })
+
+  const onSubmit = (data: CourseFormValues) => {
+    onNext(data)
+  }
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          onNext()
-        }}
-        className='space-y-4'
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <FormField
           control={form.control}
           name='name'

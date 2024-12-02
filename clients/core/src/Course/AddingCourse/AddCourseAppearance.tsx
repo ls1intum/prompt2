@@ -9,20 +9,27 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { UseFormReturn } from 'react-hook-form'
-import { CourseFormValues } from '../../validations/course'
+import { useForm } from 'react-hook-form'
+import {
+  CourseAppearanceFormValues,
+  courseAppearanceFormSchema,
+} from '../../validations/courseAppearance'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 interface AddCourseAppearanceProps {
-  form: UseFormReturn<CourseFormValues>
   onBack: () => void
-  onSubmit: (data: CourseFormValues) => void
+  onSubmit: (data: CourseAppearanceFormValues) => void
 }
 
-export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({
-  form,
-  onBack,
-  onSubmit,
-}) => {
+export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({ onBack, onSubmit }) => {
+  const form = useForm<CourseAppearanceFormValues>({
+    resolver: zodResolver(courseAppearanceFormSchema),
+    defaultValues: {
+      color: '',
+      icon: '',
+    },
+  })
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
