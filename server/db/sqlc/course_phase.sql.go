@@ -49,19 +49,31 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 }
 
 const getAllCoursePhaseForCourse = `-- name: GetAllCoursePhaseForCourse :many
-SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id FROM course_phase
-WHERE course_id = $1
+SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
+FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.course_id = $1
 `
 
-func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.UUID) ([]CoursePhase, error) {
+type GetAllCoursePhaseForCourseRow struct {
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	MetaData            []byte      `json:"meta_data"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	CoursePhaseTypeName string      `json:"course_phase_type_name"`
+}
+
+func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.UUID) ([]GetAllCoursePhaseForCourseRow, error) {
 	rows, err := q.db.Query(ctx, getAllCoursePhaseForCourse, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhase
+	var items []GetAllCoursePhaseForCourseRow
 	for rows.Next() {
-		var i CoursePhase
+		var i GetAllCoursePhaseForCourseRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CourseID,
@@ -69,6 +81,7 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 			&i.MetaData,
 			&i.IsInitialPhase,
 			&i.CoursePhaseTypeID,
+			&i.CoursePhaseTypeName,
 		); err != nil {
 			return nil, err
 		}
@@ -81,13 +94,26 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 }
 
 const getCoursePhase = `-- name: GetCoursePhase :one
-SELECT id, course_id, name, meta_data, is_initial_phase, course_phase_type_id FROM course_phase
-WHERE id = $1 LIMIT 1
+SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
+FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.id = $1
+LIMIT 1
 `
 
-func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (CoursePhase, error) {
+type GetCoursePhaseRow struct {
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	MetaData            []byte      `json:"meta_data"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	CoursePhaseTypeName string      `json:"course_phase_type_name"`
+}
+
+func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (GetCoursePhaseRow, error) {
 	row := q.db.QueryRow(ctx, getCoursePhase, id)
-	var i CoursePhase
+	var i GetCoursePhaseRow
 	err := row.Scan(
 		&i.ID,
 		&i.CourseID,
@@ -95,6 +121,7 @@ func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (CoursePhase
 		&i.MetaData,
 		&i.IsInitialPhase,
 		&i.CoursePhaseTypeID,
+		&i.CoursePhaseTypeName,
 	)
 	return i, err
 }

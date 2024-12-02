@@ -3,7 +3,6 @@ import { Configuration, container, DefinePlugin } from 'webpack'
 import 'webpack-dev-server'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import packageJson from '../package.json'
-import sharedLibraryPackageJson from '../shared_library/package.json'
 
 const config: (env: Record<string, string>) => Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
@@ -58,7 +57,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
       alias: {
-        '@': path.resolve(__dirname, '../shared_library'),
+        '@': path.resolve('../shared_library'),
       },
     },
     plugins: [
@@ -67,13 +66,13 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         filename: 'remoteEntry.js',
         exposes: {
           './routers': './routers',
+          './sidebar': './sidebar',
+          './OverviewPage': './src/OverviewPage',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
-          'shared-library': {
-            requiredVersion: sharedLibraryPackageJson.version,
-          },
+          'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
         },
       }),
       new HtmlWebpackPlugin({

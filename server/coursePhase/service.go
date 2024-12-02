@@ -47,5 +47,5 @@ func CreateCoursePhase(ctx context.Context, coursePhase coursePhaseDTO.CreateCou
 		return coursePhaseDTO.CoursePhase{}, err
 	}
 
-	return coursePhaseDTO.GetCoursePhaseDTOFromDBModel(createdCoursePhase)
+	return GetCoursePhaseByID(ctx, createdCoursePhase.ID)
 }

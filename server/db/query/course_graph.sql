@@ -11,13 +11,15 @@ WITH RECURSIVE phase_sequence AS (
     INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
     INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
 )
-SELECT *
-FROM phase_sequence
-ORDER BY sequence_order;
+SELECT ps.*, cpt.name AS course_phase_type_name
+FROM phase_sequence ps
+INNER JOIN course_phase_type cpt ON ps.course_phase_type_id = cpt.id
+ORDER BY ps.sequence_order;
 
 -- name: GetNotOrderedCoursePhases :many
-SELECT cp.*
+SELECT cp.*, cpt.name AS course_phase_type_name
 FROM course_phase cp
+INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
   AND cp.is_initial_phase = FALSE
   AND NOT EXISTS (

@@ -14,6 +14,7 @@ type CoursePhaseSequence struct {
 	IsInitialPhase    bool          `json:"is_initial_phase"`
 	SequenceOrder     int           `json:"sequence_order"`
 	CoursePhaseTypeID uuid.UUID     `json:"course_phase_type_id"`
+	CoursePhaseType   string        `json:"course_phase_type"`
 }
 
 func GetCoursePhaseSequenceDTOFromDBModel(model db.GetCoursePhaseSequenceRow) (CoursePhaseSequence, error) {
@@ -30,10 +31,11 @@ func GetCoursePhaseSequenceDTOFromDBModel(model db.GetCoursePhaseSequenceRow) (C
 		IsInitialPhase:    model.IsInitialPhase,
 		SequenceOrder:     int(model.SequenceOrder),
 		CoursePhaseTypeID: model.CoursePhaseTypeID,
+		CoursePhaseType:   model.CoursePhaseTypeName,
 	}, nil
 }
 
-func GetCoursePhaseSequenceDTO(orderedPhases []db.GetCoursePhaseSequenceRow, notOrderedPhases []db.CoursePhase) ([]CoursePhaseSequence, error) {
+func GetCoursePhaseSequenceDTO(orderedPhases []db.GetCoursePhaseSequenceRow, notOrderedPhases []db.GetNotOrderedCoursePhasesRow) ([]CoursePhaseSequence, error) {
 	coursePhases := make([]CoursePhaseSequence, 0, len(orderedPhases)+len(notOrderedPhases))
 	for _, phase := range orderedPhases {
 		coursePhase, err := GetCoursePhaseSequenceDTOFromDBModel(phase)
@@ -45,13 +47,14 @@ func GetCoursePhaseSequenceDTO(orderedPhases []db.GetCoursePhaseSequenceRow, not
 
 	for _, phase := range notOrderedPhases {
 		coursePhase, err := GetCoursePhaseSequenceDTOFromDBModel(db.GetCoursePhaseSequenceRow{
-			ID:                phase.ID,
-			CourseID:          phase.CourseID,
-			Name:              phase.Name,
-			MetaData:          phase.MetaData,
-			IsInitialPhase:    phase.IsInitialPhase,
-			SequenceOrder:     -1,
-			CoursePhaseTypeID: phase.CoursePhaseTypeID,
+			ID:                  phase.ID,
+			CourseID:            phase.CourseID,
+			Name:                phase.Name,
+			MetaData:            phase.MetaData,
+			IsInitialPhase:      phase.IsInitialPhase,
+			SequenceOrder:       -1,
+			CoursePhaseTypeID:   phase.CoursePhaseTypeID,
+			CoursePhaseTypeName: phase.CoursePhaseTypeName,
 		})
 		if err != nil {
 			return nil, err

@@ -9,7 +9,6 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import ExternalTemplateRemotesPlugin from 'external-remotes-plugin'
 import packageJson from '../package.json'
-import sharedLibraryPackageJson from '../shared_library/package.json'
 
 // TODO: specify the version for react in shared dependencies
 const config: (env: Record<string, string>) => Configuration = (env) => {
@@ -78,9 +77,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
-          shared_library: {
-            requiredVersion: sharedLibraryPackageJson.version,
-          },
+          'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
         },
       }),
       new ExternalTemplateRemotesPlugin(),

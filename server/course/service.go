@@ -18,15 +18,16 @@ type CourseService struct {
 
 var CourseServiceSingleton *CourseService
 
-func GetAllCourses(ctx context.Context) ([]courseDTO.Course, error) {
+func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 	courses, err := CourseServiceSingleton.queries.GetAllCourses(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	dtoCourses := make([]courseDTO.Course, 0, len(courses))
+	// TODO rewrite this cleaner!!!
+	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
 	for _, course := range courses {
-		dtoCourse, err := courseDTO.GetCourseDTOFromDBModel(course)
+		dtoCourse, err := GetCourseByID(ctx, course.ID)
 		if err != nil {
 			return nil, err
 		}
