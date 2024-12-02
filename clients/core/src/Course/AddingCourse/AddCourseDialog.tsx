@@ -59,7 +59,7 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className='sm:max-w-[550px]'>
         <DialogHeader>
-          <DialogTitle>Add a New Course</DialogTitle>
+          <DialogTitle className='text-2xl font-bold text-center'>Add a New Course</DialogTitle>
         </DialogHeader>
         {currentPage === 1 ? (
           <AddCourseProperties

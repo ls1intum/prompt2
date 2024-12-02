@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,6 +14,14 @@ import { courseFormSchema, CourseFormValues } from '../../validations/course'
 import { DatePickerWithRange } from '@/components/DateRangePicker'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CourseType, CourseTypeDetails } from '@/interfaces/course_type'
 
 interface AddCoursePropertiesProps {
   onNext: (data: CourseFormValues) => void
@@ -41,9 +49,19 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
     onNext(data)
   }
 
+  const selectedCourseType = form.watch('course_type')
+  const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
+
+  useEffect(() => {
+    const ectsValue = CourseTypeDetails[selectedCourseType]?.ects
+    if (ectsValue !== undefined) {
+      form.setValue('ects', ectsValue as number, { shouldValidate: true })
+    }
+  }, [selectedCourseType, form])
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         <FormField
           control={form.control}
           name='name'
@@ -51,7 +69,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
             <FormItem>
               <FormLabel>Course Name</FormLabel>
               <FormControl>
-                <Input placeholder='Enter course name' {...field} />
+                <Input placeholder='Enter a course name' {...field} className='w-full' />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -69,37 +87,56 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name='course_type'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Course Type</FormLabel>
-              <FormControl>
-                <Input placeholder='Enter course type' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='ects'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ECTS</FormLabel>
-              <FormControl>
-                <Input
-                  type='number'
-                  placeholder='Enter ECTS'
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <FormField
+            control={form.control}
+            name='course_type'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a course type' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.keys(CourseType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {CourseTypeDetails[type as CourseType].name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='ects'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ECTS</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='Enter ECTS'
+                    {...field}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      field.onChange(value === '' ? '' : Number(value))
+                    }}
+                    value={field.value === 0 && !isEctsDisabled ? '' : field.value}
+                    disabled={isEctsDisabled}
+                    className='w-full'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name='semester_tag'
@@ -107,13 +144,14 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
             <FormItem>
               <FormLabel>Semester Tag</FormLabel>
               <FormControl>
-                <Input placeholder='Enter semester tag' {...field} />
+                <Input placeholder='Enter a semester tag' {...field} className='w-full' />
               </FormControl>
+              <FormDescription>e.g. ios2425 or WS24/25</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className='flex justify-between space-x-2'>
+        <div className='flex justify-end space-x-4 pt-4'>
           <Button type='button' variant='outline' onClick={onCancel}>
             Cancel
           </Button>
