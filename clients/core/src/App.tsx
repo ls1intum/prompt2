@@ -5,8 +5,9 @@ import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
 import { CourseOverview } from './Course/CourseOverview'
-import { TemplateRoutes } from './Router/TemplateRoutes'
+import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
 import { Application } from './Application/Application'
+import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +31,14 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <CourseOverview />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/:phaseId/*'
+              element={
+                <ManagementRoot>
+                  <PhaseRouterMapping />
                 </ManagementRoot>
               }
             />
