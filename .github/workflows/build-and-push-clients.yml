@@ -19,10 +19,10 @@ jobs:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
-    build-args: |
-      "SERVER_HOST=prompt2.ase.cit.tum.de"
-      "KEYCLOAK_HOST=https://keycloak.ase.in.tum.de"
-      "KEYCLOAK_REALM_NAME=test"
+      build-args: |
+        "SERVER_HOST=prompt2.ase.cit.tum.de"
+        "KEYCLOAK_HOST=https://keycloak.ase.in.tum.de"
+        "KEYCLOAK_REALM_NAME=test"
       "TEMPLATE_HOST=prompt2.ase.cit.tum.de/template"
     secrets: inherit
   build-and-push-clients-template:
