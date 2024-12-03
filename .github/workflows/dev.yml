@@ -17,6 +17,4 @@ jobs:
     secrets: inherit
     with:
       environment: dev
-      VM_HOST: ${{ vars.VM_HOST }}
-      VM_USERNAME: ${{ vars.VM_USERNAME }}
 

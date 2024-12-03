@@ -6,14 +6,6 @@ on:
       environment:
         required: true
         type: string
-      VM_HOST:
-        type: string
-        required: true
-        description: "The host address of the VM"
-      VM_USERNAME:
-        type: string
-        required: true
-        description: "The user name when connecting to the VM"
       
     secrets:
       VM_SSH_PRIVATE_KEY:
@@ -39,12 +31,15 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             docker compose -f docker-compose.prod.yml --env-file=.env.prod down --remove-orphans --rmi all
-            
+
+      - name: checkout
+        uses: actions/checkout@v4
+        
       - name: Copy file to VM Host
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ inputs.VM_HOST }}
-          username: ${{ inputs.VM_USERNAME }}
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
           # Defined in the Org
           proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
@@ -58,8 +53,8 @@ jobs:
       - name: SSH to VM and create .env.prod file
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ inputs.VM_HOST }}
-          username: ${{ inputs.VM_USERNAME }}
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
           # Defined in the Org
           proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
