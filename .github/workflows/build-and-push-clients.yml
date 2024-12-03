@@ -1,8 +1,7 @@
 name: Build and Push Clients Docker Clients
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 jobs:
   build-and-push-clients-base:
@@ -20,10 +19,10 @@ jobs:
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
-        "SERVER_HOST=https://prompt2.ase.cit.tum.de"
-        "KEYCLOAK_HOST=https://keycloak.ase.in.tum.de"
-        "KEYCLOAK_REALM_NAME=test"
-        "TEMPLATE_HOST=prompt2.ase.cit.tum.de/template"
+        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+        "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
+        "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
+        "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}"
     secrets: inherit
   build-and-push-clients-template:
     needs: build-and-push-clients-base

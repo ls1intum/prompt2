@@ -1,0 +1,123 @@
+version: "1.0"
+
+services:
+  reverse-proxy:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=prompt-network"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=niclas.heun@tum.de"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--experimental.plugins.jwt.moduleName=github.com/traefik-plugins/traefik-jwt-plugin"
+      - "--experimental.plugins.jwt.version=v0.7.1"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - prompt-network
+
+  server:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:pr-16"  # todo fix this
+    container_name: prompt-server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.server.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server.middlewares=api-ratelimit"
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CLIENT_HOST
+      - SERVER_ADDRESS
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+    networks:
+      - prompt-network
+
+  db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U `${DB_USER}` -d `${DB_NAME}`"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
+  client-template-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:pr-16" # todo fix this
+    container_name: prompt-client-template-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.template.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/template`)"
+      - "traefik.http.routers.template.entrypoints=websecure"
+      - "traefik.http.routers.template.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.template-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
+  client-core:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-core:pr-16"  # todo fix this
+    container_name: prompt-client-core
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.core.rule=Host(`${SERVER_HOST}`)"
+      - "traefik.http.routers.core.entrypoints=websecure"
+      - "traefik.http.routers.core.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.core-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
+  postfix:
+    image: ghcr.io/ls1admin/postfix:latest
+    container_name: prompt-postfix
+    restart: unless-stopped
+    volumes:
+      - ./postfix-config:/config
+    hostname: ${SERVER_HOST}
+    networks:
+      - prompt-network
+
+networks:
+  # Create network manually in advance: docker network create prompt-network
+  prompt-network:
+    name: prompt-network
+    external: true

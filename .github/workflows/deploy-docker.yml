@@ -1,0 +1,92 @@
+name: Deploy a file to the VM
+
+on:
+  workflow_call:
+    inputs:
+      VM_HOST:
+        type: string
+        required: true
+        description: "The host address of the VM"
+      VM_USERNAME:
+        type: string
+        required: true
+        description: "The user name when connecting to the VM"
+      
+    secrets:
+      VM_SSH_PRIVATE_KEY:
+        required: true      
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to VM and Execute Docker-Compose Down
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          # Defined in the Org
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          script: |
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod down --remove-orphans --rmi all
+            
+      - name: Copy file to VM Host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ inputs.VM_HOST }}
+          username: ${{ inputs.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          # Defined in the Org
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          #####################
+          source: "./docker-compose.prod.yml"
+          target: /home/${{ vars.VM_USERNAME }}
+      
+      - name: SSH to VM and create .env.prod file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ inputs.VM_HOST }}
+          username: ${{ inputs.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          # Defined in the Org
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          script: |
+            touch .env.prod 
+            echo "ENVIRONMENT=${{ vars.ENVIRONMENT }}" > .env.prod
+          
+            echo "SERVER_HOST=${{ vars.SERVER_HOST }}" >> .env.prod
+            echo "CLIENT_HOST=${{ vars.CLIENT_HOST }}" >> .env.prod
+            echo "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}" >> .env.prod
+
+            echo "SERVER_ADDRESS=${{ vars.SERVER_ADDRESS }}" >> .env.prod 
+            echo "DB_HOST=${{ vars.DB_HOST }}" >> .env.prod
+            echo "DB_PORT=${{ vars.DB_PORT }}" >> .env.prod
+            echo "DB_NAME=${{ vars.DB_NAME }}" >> .env.prod
+            echo "DB_USER=${{ vars.DB_USER }}" >> .env.prod
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
+            
+            echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
+            echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
+            
+      - name: SSH to VM and Execute Docker-Compose Up
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          script: |
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod up --pull=always -d
