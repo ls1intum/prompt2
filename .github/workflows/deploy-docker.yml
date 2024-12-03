@@ -3,6 +3,9 @@ name: Deploy a file to the VM
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       VM_HOST:
         type: string
         required: true
@@ -19,6 +22,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: 
+      name: ${{ inputs.environment }}
+      url: 'https://${{ vars.SERVER_HOST }}'
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         uses: appleboy/ssh-action@v1.0.3
