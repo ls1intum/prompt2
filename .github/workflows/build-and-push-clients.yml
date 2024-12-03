@@ -23,7 +23,7 @@ jobs:
         "SERVER_HOST=prompt2.ase.cit.tum.de"
         "KEYCLOAK_HOST=https://keycloak.ase.in.tum.de"
         "KEYCLOAK_REALM_NAME=test"
-      "TEMPLATE_HOST=prompt2.ase.cit.tum.de/template"
+        "TEMPLATE_HOST=prompt2.ase.cit.tum.de/template"
     secrets: inherit
   build-and-push-clients-template:
     needs: build-and-push-clients-base
