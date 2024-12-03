@@ -151,7 +151,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
             </FormItem>
           )}
         />
-        <div className='flex justify-end space-x-4 pt-4'>
+        <div className='flex justify-between space-x-4 pt-4'>
           <Button type='button' variant='outline' onClick={onCancel}>
             Cancel
           </Button>
