@@ -1,0 +1,11 @@
+name: Build and Push Docker Image
+
+... # Add your own triggers, conditions, etc.
+
+jobs:
+  build-and-push-server-core:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: prompt-server-core # Defaults to the repository name
+      docker-file: server/Dockerfile # Defaults to Dockerfile
+    secrets: inherit
