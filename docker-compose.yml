@@ -28,6 +28,16 @@ services:
     depends_on:
       - clients-base
 
+  template_component:
+    build:
+      context: ./clients/template_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-template-component
+    ports:
+      - "3001:80"
+    depends_on:
+      - clients-base
+
   clients-base:
     build:
       context: ./clients
