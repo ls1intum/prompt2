@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PostCourse } from '@/interfaces/post_course'
 import { postNewCourse } from '../../network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
+import { AlertCircle, Loader2 } from 'lucide-react'
 
 interface AddCourseDialogProps {
   children: React.ReactNode
@@ -28,7 +29,7 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
-  const { mutate, isPending, error, isError } = useMutation({
+  const { mutate, isPending, error, isError, reset } = useMutation({
     mutationFn: (course: PostCourse) => {
       return postNewCourse(course)
     },
@@ -73,9 +74,16 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
 
   const handleCancel = useCallback(() => {
     setIsOpen(false)
-    setCoursePropertiesFormValues(null)
-    setCurrentPage(1)
   }, [])
+
+  // makes sure that window is first closed, before resetting the form
+  useEffect(() => {
+    if (!isOpen) {
+      reset()
+      setCoursePropertiesFormValues(null)
+      setCurrentPage(1)
+    }
+  }, [isOpen, reset])
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -88,28 +96,37 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      {isPending ? (
-        <div>Loading...</div>
-      ) : isError ? (
-        <DialogContent className='sm:max-w-[550px]'>
-          <div>Error: {error.message}</div>
-        </DialogContent>
-      ) : (
-        <DialogContent className='sm:max-w-[550px]'>
-          <DialogHeader>
-            <DialogTitle className='text-2xl font-bold text-center'>Add a New Course</DialogTitle>
-          </DialogHeader>
-          {currentPage === 1 ? (
-            <AddCourseProperties
-              onNext={handleNext}
-              onCancel={handleCancel}
-              initialValues={coursePropertiesFormValues || undefined}
-            />
-          ) : (
-            <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} />
-          )}
-        </DialogContent>
-      )}
+      <DialogContent className='sm:max-w-[550px]'>
+        {isPending ? (
+          <div className='flex flex-col items-center justify-center h-48'>
+            <Loader2 className='h-10 w-10 text-primary animate-spin' />
+            <p className='mt-4 text-lg font-medium text-muted-foreground'>Loading course data...</p>
+          </div>
+        ) : isError ? (
+          <div className='flex flex-col items-center justify-center h-48'>
+            <AlertCircle className='h-10 w-10 text-destructive' />
+            <p className='mt-4 text-lg font-medium text-destructive'>Error: {error.message}</p>
+            <p className='mt-2 text-sm text-muted-foreground'>
+              Please try again or contact support if the problem persists.
+            </p>
+          </div>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className='text-2xl font-bold text-center'>Add a New Course</DialogTitle>
+            </DialogHeader>
+            {currentPage === 1 ? (
+              <AddCourseProperties
+                onNext={handleNext}
+                onCancel={handleCancel}
+                initialValues={coursePropertiesFormValues || undefined}
+              />
+            ) : (
+              <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} />
+            )}
+          </>
+        )}
+      </DialogContent>
     </Dialog>
   )
 }
