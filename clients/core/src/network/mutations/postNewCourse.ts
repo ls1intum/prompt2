@@ -12,6 +12,7 @@ export const postNewCourse = async (course: PostCourse): Promise<string | undefi
       })
     ).data.id // try to get the id of the created course
   } catch (err) {
+    console.error(err)
     throw err
   }
 }
