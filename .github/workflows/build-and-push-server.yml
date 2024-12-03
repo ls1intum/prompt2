@@ -1,8 +1,7 @@
 name: Build and Push Docker Image Server
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 jobs:
   build-and-push-server-core:
