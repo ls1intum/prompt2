@@ -12,3 +12,17 @@ jobs:
       docker-file: server/Dockerfile # Defaults to Dockerfile
       docker-context: ./server
     secrets: inherit
+  build-and-push-clients-base:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base:latest
+      docker-file: clients/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients
+    secrets: inherit
+  build-and-push-clients-core:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
+      docker-file: clients/core/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients
+    secrets: inherit
