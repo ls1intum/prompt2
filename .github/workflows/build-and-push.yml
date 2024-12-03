@@ -10,4 +10,5 @@ jobs:
     with:
       image-name: prompt-server-core # Defaults to the repository name
       docker-file: server/Dockerfile # Defaults to Dockerfile
+      working-directory: server
     secrets: inherit
