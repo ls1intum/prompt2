@@ -1,6 +1,8 @@
 name: Build and Push Docker Image
 
-... # Add your own triggers, conditions, etc.
+on:
+  pull_request:
+    branches: [main]
 
 jobs:
   build-and-push-server-core:
