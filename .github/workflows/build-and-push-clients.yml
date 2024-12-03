@@ -1,0 +1,23 @@
+name: Build and Push Clients Docker Clients
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-push-clients-base:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
+      docker-file: clients/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients
+    secrets: inherit
+  build-and-push-clients-core:
+    needs: build-and-push-clients-base
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
+      docker-file: clients/core/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients
+    secrets: inherit
+

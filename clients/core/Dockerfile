@@ -1,5 +1,5 @@
 # base will be the the image build by the base dockerfile.
-FROM ghcr.io/ls1intum/prompt2/prompt-clients-core:pr-16 as build
+FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:pr-16 as build
 
 WORKDIR /app/core
 COPY . ./
