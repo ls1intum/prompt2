@@ -3,10 +3,15 @@
 FROM node:20-alpine as base
 ENV YARN_VERSION 4.0.1
 RUN yarn policies set-version $YARN_VERSION
-WORKDIR /app
 RUN yarn config set httpTimeout 300000
+
+
+WORKDIR /app
+
 COPY package.json ./
 COPY yarn.lock ./
 COPY shared_library /app/shared_library
+COPY ./nginx /app/nginx
+
 RUN yarn install
 COPY ./lerna.json ./

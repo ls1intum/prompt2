@@ -18,6 +18,22 @@ services:
       - SSL_MODE=disable
       - SERVER_ADDRESS=0.0.0.0:8080
 
+  core:
+    build:
+      context: ./clients/core
+      dockerfile: Dockerfile
+    container_name: prompt-client-core
+    ports:
+      - "3000:80"
+    depends_on:
+      - clients-base
+
+  clients-base:
+    build:
+      context: ./clients
+      dockerfile: Dockerfile
+    image: base:latest
+  
   db:
     image: 'postgres:15.2-alpine'
     container_name: prompt-core-db
