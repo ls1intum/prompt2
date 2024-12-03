@@ -18,6 +18,12 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
   const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
 
+  // get the url of the template component
+  let templateURL = getVariable('REACT_APP_TEMPLATE_HOST')
+  if (!templateURL) {
+    templateURL = 'http://localhost:3001'
+  }
+
   return {
     target: 'web',
     mode: IS_DEV ? 'development' : 'production',
@@ -72,7 +78,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       new container.ModuleFederationPlugin({
         name: 'core',
         remotes: {
-          template_component: 'template_component@[templateComponent2Url]/remoteEntry.js',
+          template_component: `template_component@${templateURL}/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
