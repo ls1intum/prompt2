@@ -18,6 +18,14 @@ jobs:
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
-      docker-context: ./clients
+      docker-context: ./clients/core
+    secrets: inherit
+  build-and-push-clients-template:
+    needs: build-and-push-clients-base
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
+      docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients/template_component
     secrets: inherit
 
