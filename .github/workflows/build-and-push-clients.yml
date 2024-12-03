@@ -20,7 +20,7 @@ jobs:
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
-        "SERVER_HOST=prompt2.ase.cit.tum.de"
+        "SERVER_HOST=https://prompt2.ase.cit.tum.de"
         "KEYCLOAK_HOST=https://keycloak.ase.in.tum.de"
         "KEYCLOAK_REALM_NAME=test"
         "TEMPLATE_HOST=prompt2.ase.cit.tum.de/template"
