@@ -1,5 +1,5 @@
 import { Construction } from 'lucide-react'
-import { SidebarMenuItemProps } from '@/interfaces/Sidebar'
+import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 
 const templateSidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',

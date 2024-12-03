@@ -14,26 +14,19 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student"
-	log "github.com/sirupsen/logrus"
 	"github.com/niclasheun/prompt2.0/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 func getDatabaseURL() string {
-	dbUser := getEnv("DB_USER", "prompt-postgres")
-	dbPassword := getEnv("DB_PASSWORD", "prompt-postgres")
-	dbHost := getEnv("DB_HOST", "localhost")
-	dbPort := getEnv("DB_PORT", "5432")
-	dbName := getEnv("DB_NAME", "prompt")
-	sslMode := getEnv("SSL_MODE", "disable")
+	dbUser := utils.GetEnv("DB_USER", "prompt-postgres")
+	dbPassword := utils.GetEnv("DB_PASSWORD", "prompt-postgres")
+	dbHost := utils.GetEnv("DB_HOST", "localhost")
+	dbPort := utils.GetEnv("DB_PORT", "5432")
+	dbName := utils.GetEnv("DB_NAME", "prompt")
+	sslMode := utils.GetEnv("SSL_MODE", "disable")
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode)
-}
-
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
 }
 
 func runMigrations(databaseURL string) {
@@ -79,6 +72,6 @@ func main() {
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 
-	serverAddress := getEnv("SERVER_ADDRESS", "localhost:8080")
+	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 	router.Run(serverAddress)
 }

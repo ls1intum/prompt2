@@ -17,9 +17,12 @@ const queryClient = new QueryClient({
   },
 })
 
+const keycloakUrl = `${process.env.REACT_APP_KEYCLOAK_HOST ?? 'http://localhost:8081'}`
+const keycloakRealmName = `${process.env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
+
 export const App = (): JSX.Element => {
   return (
-    <KeycloakProvider>
+    <KeycloakProvider keycloakRealmName={keycloakRealmName} keycloakUrl={keycloakUrl}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>

@@ -1,3 +1,5 @@
+// TODO rewrite this as context provider and re-integrate it into the shared library
+
 import axios from 'axios'
 
 export const serverBaseUrl = `${process.env.REACT_APP_SERVER_HOST ?? 'http://localhost:8080'}`
