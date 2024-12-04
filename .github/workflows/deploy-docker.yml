@@ -8,10 +8,13 @@ on:
         type: string
       core_image_tag: 
         required: true
+        type: string
       template_image_tag:
         required: true
+        type: string
       server_image_tag:
         required: true
+        type: string
       
     secrets:
       VM_SSH_PRIVATE_KEY:
