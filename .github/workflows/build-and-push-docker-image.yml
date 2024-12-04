@@ -89,5 +89,5 @@ jobs:
       
       - id: output-image-tag
         run: |
-          "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${{ steps.meta.outputs.version }}" >> "$GITHUB_OUTPUT"
       
