@@ -1,0 +1,49 @@
+name: Build and Push Clients Docker Clients
+
+on:
+  workflow_call:
+    outputs:
+      base_image_tag: 
+        description: "The tag of the base image that was built"
+        value: ${{ jobs.build-and-push-clients-base.outputs.image_tag }}
+      core_image_tag: 
+        description: "The tag of the core image that was built"
+        value: ${{ jobs.build-and-push-clients-core.outputs.image_tag }}
+      template_image_tag:
+        description: "The tag of the template component image that was built"
+        value: ${{ jobs.build-and-push-clients-template.outputs.image_tag }}
+
+jobs:
+  build-and-push-clients-base:
+    uses: ./.github/workflows/build-and-push-docker-image.yml
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
+      docker-file: clients/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients
+    secrets: inherit
+
+  build-and-push-clients-core:
+    needs: build-and-push-clients-base
+    uses: ./.github/workflows/build-and-push-docker-image.yml
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
+      docker-file: clients/core/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients/core
+      build-args: |
+        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+        "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
+        "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
+        "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}"
+    secrets: inherit
+   
+  build-and-push-clients-template:
+    needs: build-and-push-clients-base
+    uses: ./.github/workflows/build-and-push-docker-image.yml
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
+      docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients/template_component
+      build-args: |
+        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+    secrets: inherit

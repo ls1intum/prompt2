@@ -4,9 +4,6 @@ import { KeycloakContext } from './KeycloakProvider'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { jwtDecode } from 'jwt-decode'
 
-export const keycloakUrl = `${process.env.REACT_APP_KEYCLOAK_HOST ?? 'http://localhost:8081'}`
-export const keycloakRealmName = `${process.env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
-
 // Helper function to decode JWT safely
 const parseJwt = (token: string) => {
   try {
@@ -29,7 +26,7 @@ export const useKeycloak = (): { keycloak: Keycloak | undefined; logout: () => v
     throw new Error('useKeycloak must be used within a KeycloakProvider')
   }
 
-  const { keycloakValue } = context
+  const { keycloakUrl, keycloakRealmName, keycloakValue } = context
 
   const initializeKeycloak = useCallback(() => {
     const keycloak = new Keycloak({
@@ -83,7 +80,15 @@ export const useKeycloak = (): { keycloak: Keycloak | undefined; logout: () => v
       })
 
     return keycloak
-  }, [context, clearUser, clearPermissions, setUser, setPermissions])
+  }, [
+    context,
+    clearUser,
+    clearPermissions,
+    setUser,
+    setPermissions,
+    keycloakRealmName,
+    keycloakUrl,
+  ])
 
   useEffect(() => {
     if (!keycloakValue) {

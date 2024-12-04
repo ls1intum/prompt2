@@ -38,6 +38,7 @@
         "tailwindcss-animate": "^1.0.7",
         "ts-loader": "^9.5.1",
         "ts-node": "^10.9.2",
+        "ts-node-register": "^1.0.0",
         "zustand": "^5.0.1"
     },
     "devDependencies": {
