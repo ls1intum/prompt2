@@ -74,7 +74,32 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhase() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated Phase", updatedCoursePhase.Name, "Expected updated course phase name to match")
 	assert.False(suite.T(), updatedCoursePhase.IsInitialPhase, "Expected updated course phase to be an initial phase")
-	assert.Equal(suite.T(), metaData, updatedCoursePhase.MetaData, "Expected metadata to match updated data")
+	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value", "updated_key": "updated_value"}, updatedCoursePhase.MetaData, "Expected metadata to match updated data including the old data")
+}
+
+func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
+	id := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
+	jsonData := `{"test-key": "test-value-new", "updated_key": "updated_value"}`
+	var metaData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &metaData)
+	assert.NoError(suite.T(), err)
+
+	update := coursePhaseDTO.UpdateCoursePhase{
+		ID:             id,
+		Name:           "Updated Phase",
+		IsInitialPhase: false,
+		MetaData:       metaData,
+	}
+
+	err = UpdateCoursePhase(suite.ctx, update)
+	assert.NoError(suite.T(), err)
+
+	// Verify update
+	updatedCoursePhase, err := GetCoursePhaseByID(suite.ctx, id)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "Updated Phase", updatedCoursePhase.Name, "Expected updated course phase name to match")
+	assert.False(suite.T(), updatedCoursePhase.IsInitialPhase, "Expected updated course phase to be an initial phase")
+	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value-new", "updated_key": "updated_value"}, updatedCoursePhase.MetaData, "Expected metadata to match updated data including the old data")
 }
 
 func (suite *CoursePhaseTestSuite) TestCreateCoursePhase() {
