@@ -3,15 +3,15 @@ name: Build and Push Clients Docker Clients
 on:
   workflow_call:
     outputs:
-      core_image_tag: 
-        description: "The tag of the core image that was built"
-        value: ${{ jobs.build-and-push-clients-core.outputs.image_tag }}
       base_image_tag: 
         description: "The tag of the base image that was built"
-        value: ${{ jobs.build-and-push-clients-base.outputs.image_tag }}
+        value: ${{ needs.build-and-push-clients-base.outputs.image_tag }}
+      core_image_tag: 
+        description: "The tag of the core image that was built"
+        value: ${{ needs.build-and-push-clients-core.outputs.image_tag }}
       template_image_tag:
         description: "The tag of the template component image that was built"
-        value: ${{ jobs.build-and-push-clients-template.outputs.image_tag }}
+        value: ${{ needs.build-and-push-clients-template.outputs.image_tag }}
 
 jobs:
   build-and-push-clients-base:
@@ -21,8 +21,6 @@ jobs:
       docker-file: clients/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients
     secrets: inherit
-    outputs:
-      image_tag: ${{ steps.output-image-tag.outputs.image_tag }}
 
   build-and-push-clients-core:
     needs: build-and-push-clients-base
@@ -38,9 +36,7 @@ jobs:
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
         "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}"
     secrets: inherit
-    outputs:
-      image_tag: ${{ steps.output-image-tag.outputs.image_tag }}
-
+   
   build-and-push-clients-template:
     needs: build-and-push-clients-base
     uses: ./.github/workflows/build-and-push-docker-image.yml
@@ -51,5 +47,3 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}
     secrets: inherit
-    outputs:
-      image_tag: ${{ steps.output-image-tag.outputs.image_tag }}

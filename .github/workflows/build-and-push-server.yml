@@ -5,7 +5,7 @@ on:
     outputs:
       server_image_tag: 
         description: "The tag of the image that was built"
-        value: ${{ jobs.build-and-push-server-core.outputs.image_tag }}
+        value: ${{ needs.build-and-push-server-core.outputs.image_tag }}
 
 jobs:
   build-and-push-server-core:
@@ -15,6 +15,3 @@ jobs:
       docker-file: server/Dockerfile # Defaults to Dockerfile
       docker-context: ./server
     secrets: inherit
-    outputs:
-      image_tag: ${{ steps.output-image-tag.outputs.image_tag }}
-
