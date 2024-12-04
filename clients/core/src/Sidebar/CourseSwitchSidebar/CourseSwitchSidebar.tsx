@@ -10,6 +10,7 @@ import { NavUserMenu } from './components/NavUserMenu'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
+import { AddCourseButton } from './components/AddCourseSidebarItem'
 
 interface CourseSwitchSidebarProps {
   onLogout: () => void
@@ -31,6 +32,7 @@ export const CourseSwitchSidebar = ({ onLogout }: CourseSwitchSidebarProps): JSX
               {courses.map((course) => {
                 return <CourseSidebarItem key={course.id} course={course} />
               })}
+              <AddCourseButton />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
