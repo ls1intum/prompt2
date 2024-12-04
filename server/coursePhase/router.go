@@ -11,7 +11,7 @@ import (
 func setupCoursePhaseRouter(router *gin.RouterGroup) {
 	coursePhase := router.Group("/course_phases")
 	coursePhase.GET("/:uuid", getCoursePhaseByID)
-	coursePhase.POST("/", createCoursePhase)
+	coursePhase.POST("", createCoursePhase)
 	coursePhase.PUT("/:uuid", updateCoursePhase)
 }
 
