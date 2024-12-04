@@ -28,7 +28,7 @@ services:
       - prompt-network
 
   server:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:pr-16"  # todo fix this
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_IMAGE_TAG}"
     container_name: prompt-server
     labels:
       - "traefik.enable=true"
@@ -71,7 +71,7 @@ services:
       - prompt-network
 
   client-template-component:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:pr-16" # todo fix this
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component
     environment:
       - TZ=Europe/Berlin
@@ -89,7 +89,7 @@ services:
       - prompt-network
 
   client-core:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-core:pr-16"  # todo fix this
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-core:${CORE_IMAGE_TAG}"
     container_name: prompt-client-core
     environment:
       - TZ=Europe/Berlin

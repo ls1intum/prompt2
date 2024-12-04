@@ -45,5 +45,5 @@ jobs:
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/template_component
       build-args: |
-        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}
+        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
     secrets: inherit
