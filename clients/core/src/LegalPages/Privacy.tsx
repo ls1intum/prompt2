@@ -3,9 +3,15 @@ import { Section } from './components/Section'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 export default function PrivacyPage() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   return (
     <div className='container mx-auto py-8 px-4'>
       <Card className='w-full max-w-4xl mx-auto'>
