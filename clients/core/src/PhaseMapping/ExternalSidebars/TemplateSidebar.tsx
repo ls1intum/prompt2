@@ -32,7 +32,7 @@ export const TemplateSidebar = React.lazy(() =>
     .catch((): { default: React.FC } => ({
       default: () => {
         console.warn('Failed to load template routes')
-        return <DisabledSidebarMenuItem title={'Failed loading'} />
+        return <DisabledSidebarMenuItem title={'Template Not Available'} />
       },
     })),
 )

@@ -8,6 +8,9 @@ import { CourseOverview } from './Course/CourseOverview'
 import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
 import { Application } from './Application/Application'
 import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
+import PrivacyPage from './LegalPages/Privacy'
+import ImprintPage from './LegalPages/Imprint'
+import AboutPage from './LegalPages/AboutPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +29,9 @@ export const App = (): JSX.Element => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
+            <Route path='/about' element={<AboutPage />} />
+            <Route path='/privacy' element={<PrivacyPage />} />
+            <Route path='/imprint' element={<ImprintPage />} />
             <Route path='/' element={<LandingPage />} />
             <Route path='/management' element={<ManagementRoot />} />
             <Route path='/management/general' element={<ManagementRoot />} />
