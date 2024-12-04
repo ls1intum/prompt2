@@ -5,6 +5,5 @@
     "core",
     "template_component", 
     "shared_library"
-  ],
-  "useWorkspaces": true
+  ]
 }
