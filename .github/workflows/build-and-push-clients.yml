@@ -5,13 +5,13 @@ on:
     outputs:
       base_image_tag: 
         description: "The tag of the base image that was built"
-        value: ${{ needs.build-and-push-clients-base.outputs.image_tag }}
+        value: ${{ jobs.build-and-push-clients-base.outputs.image_tag }}
       core_image_tag: 
         description: "The tag of the core image that was built"
-        value: ${{ needs.build-and-push-clients-core.outputs.image_tag }}
+        value: ${{ jobs.build-and-push-clients-core.outputs.image_tag }}
       template_image_tag:
         description: "The tag of the template component image that was built"
-        value: ${{ needs.build-and-push-clients-template.outputs.image_tag }}
+        value: ${{ jobs.build-and-push-clients-template.outputs.image_tag }}
 
 jobs:
   build-and-push-clients-base:

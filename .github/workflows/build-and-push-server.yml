@@ -5,7 +5,7 @@ on:
     outputs:
       server_image_tag: 
         description: "The tag of the image that was built"
-        value: ${{ needs.build-and-push-server-core.outputs.image_tag }}
+        value: ${{ jobs.build-and-push-server-core.outputs.image_tag }}
 
 jobs:
   build-and-push-server-core:
