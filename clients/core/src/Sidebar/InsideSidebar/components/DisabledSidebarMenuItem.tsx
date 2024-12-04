@@ -18,11 +18,11 @@ export const DisabledSidebarMenuItem: React.FC<DisabledSidebarMenuItemProps> = (
         <TooltipTrigger asChild>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className='text-muted-foreground hover:bg-transparent hover:text-muted-foreground cursor-not-allowed'
+              className='text-yellow-700 dark:text-yellow-500 cursor-not-allowed'
               disabled
               aria-disabled='true'
             >
-              <AlertTriangle className='mr-2 h-4 w-4 text-warning' />
+              <AlertTriangle className='h-4 w-4 text-warning' />
               <span>{title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
