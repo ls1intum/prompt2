@@ -19,9 +19,9 @@ jobs:
       - name: Install dependencies
         run: cd ${{ matrix.directory }} && go mod download
       - name: Test with Go
-        run: go test ./${{ matrix.directory }}/... -json > TestResults-${{ matrix.directory }}.json
+        run:  cd ${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
       - name: Upload Go test results
         uses: actions/upload-artifact@v4
         with:
           name: Go-results-${{ matrix.directory }}
-          path: TestResults-${{ matrix.directory }}.json
+          path: ./${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
