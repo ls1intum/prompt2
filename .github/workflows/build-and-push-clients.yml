@@ -30,7 +30,7 @@ jobs:
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
-        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}
+        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
