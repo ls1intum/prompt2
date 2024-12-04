@@ -6,6 +6,12 @@ on:
       environment:
         required: true
         type: string
+      core_image_tag: 
+        required: true
+      template_image_tag:
+        required: true
+      server_image_tag:
+        required: true
       
     secrets:
       VM_SSH_PRIVATE_KEY:
@@ -78,6 +84,9 @@ jobs:
             
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
+            echo "SERVER_IMAGE_TAG=${{ inputs.server_image_tag }}" >> .env.prod
+            echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
+            echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             
       - name: SSH to VM and Execute Docker-Compose Up
         uses: appleboy/ssh-action@v1.0.3

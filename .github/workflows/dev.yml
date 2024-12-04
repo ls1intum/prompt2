@@ -17,4 +17,7 @@ jobs:
     secrets: inherit
     with:
       environment: dev
+      core_image_tag: ${{ needs.build-and-push-clients.outputs.core_image_tag }}
+      template_image_tag: ${{ needs.build-and-push-clients.outputs.template_image_tag }}
+      server_image_tag: ${{ needs.build-and-push-server.outputs.image_tag }}
 
