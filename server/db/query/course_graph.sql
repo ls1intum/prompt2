@@ -1,12 +1,12 @@
 -- name: GetCoursePhaseSequence :many
 WITH RECURSIVE phase_sequence AS (
-    SELECT cp.*, 1 AS sequence_order
+    SELECT cp.id, cp.course_id, cp.name, cp.is_initial_phase, cp.course_phase_type_id, 1 AS sequence_order
     FROM course_phase cp
     WHERE cp.course_id = $1 AND cp.is_initial_phase = true
 
     UNION ALL
 
-    SELECT cp.*, ps.sequence_order + 1 AS sequence_order
+    SELECT cp.id, cp.course_id, cp.name, cp.is_initial_phase, cp.course_phase_type_id, ps.sequence_order + 1 AS sequence_order
     FROM course_phase cp
     INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
     INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
