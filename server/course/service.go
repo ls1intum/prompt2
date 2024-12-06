@@ -100,7 +100,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 	}
 
 	// create new connections
-	for i, _ := range updatedPhaseOrder.OrderedPhases {
+	for i := range updatedPhaseOrder.OrderedPhases {
 		if i < len(updatedPhaseOrder.OrderedPhases)-1 {
 			err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
 				FromCoursePhaseID: updatedPhaseOrder.OrderedPhases[i],

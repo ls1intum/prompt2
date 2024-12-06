@@ -31,6 +31,16 @@ func validateCreateCourse(c courseDTO.CreateCourse) error {
 		log.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
+	if !c.SemesterTag.Valid || c.SemesterTag.String == "" {
+		errorMessage := "semester tag is required"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+	if c.CourseType == "" {
+		errorMessage := "course type is required"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
 
 	return nil
 }

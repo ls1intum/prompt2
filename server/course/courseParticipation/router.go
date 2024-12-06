@@ -11,10 +11,11 @@ import (
 func setupCourseParticipationRouter(router *gin.RouterGroup) {
 	// incoming path should be /course/:uuid/
 	courseParticipation := router.Group("/courses/:uuid/participations")
-	courseParticipation.GET("/", getCourseParticipationsForCourse)
+	courseParticipation.GET("", getCourseParticipationsForCourse)
 	courseParticipation.POST("/enroll", createCourseParticipation)
 }
 
+// TODO: in future think about how to integrate / create "passed" students from previous phases
 func getCourseParticipationsForCourse(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
