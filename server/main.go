@@ -44,8 +44,9 @@ func initKeycloak() {
 	realm := utils.GetEnv("KEYCLOAK_REALM", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
 	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
+	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
 
-	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret)
+	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient)
 	if err != nil {
 		log.Error("Failed to initialize keycloak: ", err)
 	}

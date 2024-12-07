@@ -13,23 +13,24 @@ type KeycloakClientManager struct {
 	Realm        string
 	ClientID     string
 	ClientSecret string
+	idOfClient   string
 }
 
 var KeycloakSingleton *KeycloakClientManager
 
-func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret string) error {
+func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient string) error {
 	KeycloakSingleton = &KeycloakClientManager{
 		client:       gocloak.NewClient(BaseURL),
 		BaseURL:      BaseURL,
 		Realm:        Realm,
 		ClientID:     ClientID,
 		ClientSecret: ClientSecret,
+		idOfClient:   idOfClient,
 	}
 
 	// Test Login connection
 	_, err := LoginClient(ctx)
 	return err
-
 }
 
 // TODO: think about caching token at some point
@@ -71,14 +72,14 @@ func CreateChildGroup(ctx context.Context, accessToken, groupName, parentGroupID
 
 func CreateRealmRole(ctx context.Context, accessToken, roleName string) (*gocloak.Role, error) {
 	// Creating realm role (only returns name)
-	name, err := KeycloakSingleton.client.CreateRealmRole(ctx, accessToken, KeycloakSingleton.Realm, gocloak.Role{Name: &roleName})
+	name, err := KeycloakSingleton.client.CreateClientRole(ctx, accessToken, KeycloakSingleton.Realm, KeycloakSingleton.idOfClient, gocloak.Role{Name: &roleName})
 	if err != nil {
 		log.Error("failed to create role: ", err)
 		return nil, err
 	}
 
 	// Getting the just created role
-	createdRole, err := KeycloakSingleton.client.GetRealmRole(ctx, accessToken, KeycloakSingleton.Realm, name)
+	createdRole, err := KeycloakSingleton.client.GetClientRole(ctx, accessToken, KeycloakSingleton.Realm, KeycloakSingleton.idOfClient, name)
 	if err != nil {
 		log.Error("failed to get role: ", err)
 		return nil, err

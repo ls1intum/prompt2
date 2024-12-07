@@ -16,7 +16,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 	}
 
 	// Define group and role names
-	baseGroupName := fmt.Sprintf("prompt-%s-%s", courseName, iterationName)
+	baseGroupName := fmt.Sprintf("%s-%s", courseName, iterationName)
 	subGroupNames := []string{
 		fmt.Sprintf("%s-Lecturer", baseGroupName),
 		fmt.Sprintf("%s-Editor", baseGroupName),
@@ -42,7 +42,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 		}
 
 		// Associate role with group
-		err = KeycloakSingleton.client.AddRealmRoleToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, subGroupID, []gocloak.Role{*role})
+		err = KeycloakSingleton.client.AddClientRolesToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, KeycloakSingleton.idOfClient, subGroupID, []gocloak.Role{*role})
 		if err != nil {
 			log.Error("failed to associate role with group: ", err)
 			return err
