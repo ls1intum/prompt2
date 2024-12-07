@@ -6,13 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
 func setupCourseRouter(router *gin.RouterGroup) {
 	course := router.Group("/courses")
-	course.GET("/", getAllCourses)
-	course.GET("/:uuid", getCourseByID)
-	course.POST("/", createCourse)
+	course.GET("/", keycloak.KeycloakMiddleware([]string{}), getAllCourses)
+	course.GET("/:uuid", keycloak.KeycloakMiddleware([]string{}), getCourseByID)
+	course.POST("/", keycloak.KeycloakMiddleware([]string{"courses:create"}), createCourse)
 	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
 	// TODO: course.PUT("/", updateCourse)
 }
@@ -24,7 +25,34 @@ func getAllCourses(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, courses)
+	permissions, exists := c.Get("roles")
+	if !exists {
+		handleError(c, http.StatusForbidden, err)
+		return
+	}
+
+	userRoles := make(map[string]bool)
+	for _, role := range permissions.([]interface{}) {
+		if roleStr, ok := role.(string); ok {
+			userRoles[roleStr] = true
+		}
+	}
+
+	if userRoles["courses:view-all"] {
+		c.IndentedJSON(http.StatusOK, courses)
+		return
+	}
+
+	// Filtern Sie die Kurse basierend auf den Berechtigungen
+	filteredCourses := []courseDTO.CourseWithPhases{}
+	for _, course := range courses {
+		permissionString := course.Name + "-" + course.SemesterTag + ":view"
+		if userRoles[permissionString] {
+			filteredCourses = append(filteredCourses, course)
+		}
+	}
+
+	c.IndentedJSON(http.StatusOK, filteredCourses)
 }
 
 func getCourseByID(c *gin.Context) {

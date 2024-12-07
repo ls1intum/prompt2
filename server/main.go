@@ -43,8 +43,8 @@ func initKeycloak() {
 	baseURL := utils.GetEnv("KEYCLOAK_BASE_URL", "http://localhost:8081")
 	realm := utils.GetEnv("KEYCLOAK_REALM", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
-	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "vwNKS0seQ1GrinDUilNlOh0QT7q3vyLr")
-	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "a584ca61-fa83-4e95-98b6-c5f3157ae4b4")
+	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
+	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
 
 	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient)
 	if err != nil {
@@ -79,14 +79,6 @@ func main() {
 	api.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello World",
-		})
-	})
-
-	api.GET("/admin", keycloak.KeycloakMiddleware([]string{"ipraktikum-coach"}), func(c *gin.Context) {
-		resourceAccess, _ := c.Get("resourceAccess")
-		c.JSON(200, gin.H{
-			"message":        "Welcome Admin!",
-			"resourceAccess": resourceAccess,
 		})
 	})
 

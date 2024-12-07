@@ -15,7 +15,6 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 		return err
 	}
 
-	// Define group and role names
 	baseGroupName := fmt.Sprintf("%s-%s", courseName, iterationName)
 	subGroupNames := []string{
 		fmt.Sprintf("%s-Lecturer", baseGroupName),
@@ -29,7 +28,8 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 	}
 
 	for _, roleName := range subGroupNames {
-
+		// TODO: Welche rollen sollten wir hier anlegen?
+		// Lecturer, Editor, Student oder "courses:create", "courseName-semsterTag:view"??
 		role, err := CreateRealmRole(ctx, token.AccessToken, roleName)
 		if err != nil {
 			return err

@@ -60,8 +60,14 @@ func KeycloakMiddleware(requiredRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		// Attach resourceAccess to the context for downstream handlers
-		c.Set("resourceAccess", resourceAccess)
+		// Attach prompt roles for downstream use
+		rolesVal, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})["roles"].([]interface{})
+		if !ok {
+			log.Error("Failed to extract prompt roles")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Failed to extract roles"})
+			return
+		}
+		c.Set("roles", rolesVal)
 		c.Next()
 	}
 }
