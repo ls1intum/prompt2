@@ -9,6 +9,8 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloak"
+	log "github.com/sirupsen/logrus"
 )
 
 type CourseService struct {
@@ -72,6 +74,13 @@ func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhase
 }
 
 func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO.Course, error) {
+	// start transaction to roll back if keycloak failed
+	tx, err := CourseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+	defer tx.Rollback(ctx)
+
 	createCourseParams, err := course.GetDBModel()
 	if err != nil {
 		return courseDTO.Course{}, err
@@ -83,6 +92,16 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO
 		return courseDTO.Course{}, err
 	}
 
+	// create keycloak roles
+	err = keycloak.CreateCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
+	if err != nil {
+		log.Debug("Failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to commit transaction: %w", err)
+	}
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
 }
 
