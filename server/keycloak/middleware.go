@@ -5,132 +5,140 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
-// KeycloakMiddleware creates a middleware to validate Keycloak tokens and extract resourceAccess.
+// KeycloakMiddleware creates a Gin middleware to:
+// 1. Extract and validate the Bearer token from the Authorization header.
+// 2. Verify the token using the OIDC verifier.
+// 3. Check that the token audience matches the configured client ID.
+// 4. Confirm that the user has all of the required roles.
+//
+// If any validation fails, the request is aborted with an appropriate HTTP status code.
+// On success, "resourceAccess" is attached to the context for further use.
 func KeycloakMiddleware(requiredRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract the Authorization header
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing or invalid"})
+		tokenString, err := extractBearerToken(c)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Parse the token
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Ensure the signing method is correct
-			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-
-			// Fetch Keycloak public keys
-			kid, ok := token.Header["kid"].(string)
-			if !ok {
-				return nil, fmt.Errorf("missing kid in token header")
-			}
-
-			publicKeys, err := fetchKeycloakCerts()
-			if err != nil {
-				return nil, fmt.Errorf("failed to fetch keycloak certs: %v", err)
-			}
-
-			// Find the matching key by kid
-			publicKey, ok := publicKeys[kid]
-			if !ok {
-				return nil, fmt.Errorf("no matching key found for kid: %s", kid)
-			}
-			return publicKey, nil
-		})
-
-		if err != nil || !token.Valid {
-			logrus.Error("Failed to validate token: ", err)
+		ctx := c.Request.Context()
+		idToken, err := verifier.Verify(ctx, tokenString)
+		if err != nil {
+			log.Error("Failed to validate token: ", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
-		// Extract claims
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
+		claims, err := extractClaims(idToken)
+		if err != nil {
+			log.Error("Failed to parse claims: ", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}
 
-		logrus.Info("claims: ", claims)
-
-		// Check if the token is intended for the correct client
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if !checkAudience(claims) {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token audience mismatch"})
-				return
-			}
-		}
-
-		// Extract resourceAccess
-		resourceAccess, ok := claims["resource_access"].(map[string]interface{})
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Resource access missing in token"})
+		if !checkAudience(claims, KeycloakSingleton.ClientID) {
+			log.Error("Token audience mismatch")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token audience mismatch"})
 			return
 		}
 
-		// Check roles
-		clientAccess, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Client-specific roles missing"})
+		resourceAccess, err := extractResourceAccess(claims)
+		if err != nil {
+			log.Error("Failed to extract resource access: ", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
-		roles, ok := clientAccess["roles"].([]interface{})
-		logrus.Info("roles: ", roles)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Roles missing in token"})
+		if err := checkRequiredRoles(resourceAccess, KeycloakSingleton.ClientID, requiredRoles); err != nil {
+			log.Error("Failed to check required roles: ", err)
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Convert roles to a string slice for comparison
-		userRoles := make(map[string]bool)
-		for _, role := range roles {
-			if roleStr, ok := role.(string); ok {
-				userRoles[roleStr] = true
-			}
-		}
-
-		// Verify the user has the required roles
-		for _, requiredRole := range requiredRoles {
-			if !userRoles[requiredRole] {
-				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("Missing required role: %s", requiredRole)})
-				return
-			}
-		}
-
-		// Attach resourceAccess to the context
+		// Attach resourceAccess to the context for downstream handlers
 		c.Set("resourceAccess", resourceAccess)
 		c.Next()
 	}
 }
 
-func checkAudience(claims jwt.MapClaims) bool {
+// extractBearerToken retrieves and validates the Bearer token from the request's Authorization header.
+func extractBearerToken(c *gin.Context) (string, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		return "", fmt.Errorf("authorization header missing or invalid")
+	}
+	return strings.TrimPrefix(authHeader, "Bearer "), nil
+}
+
+// extractClaims extracts claims from the verified ID token.
+func extractClaims(idToken *oidc.IDToken) (map[string]interface{}, error) {
+	var claims map[string]interface{}
+	if err := idToken.Claims(&claims); err != nil {
+		return nil, err
+	}
+	return claims, nil
+}
+
+// checkAudience ensures that the "aud" claim matches the expected client ID.
+func checkAudience(claims map[string]interface{}, expectedClientID string) bool {
 	aud, ok := claims["aud"]
 	if !ok {
 		return false
 	}
 
-	// Check if aud is a slice of strings
-	audSlice, ok := aud.([]interface{})
+	switch val := aud.(type) {
+	case string:
+		return val == expectedClientID
+	case []interface{}:
+		for _, item := range val {
+			if str, ok := item.(string); ok && str == expectedClientID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// extractResourceAccess retrieves the "resource_access" claim, which contains role information.
+func extractResourceAccess(claims map[string]interface{}) (map[string]interface{}, error) {
+	resourceAccess, ok := claims["resource_access"].(map[string]interface{})
 	if !ok {
-		return false
+		return nil, fmt.Errorf("resource access missing in token")
+	}
+	return resourceAccess, nil
+}
+
+// checkRequiredRoles ensures all required roles are present in the token's resource_access claims.
+func checkRequiredRoles(resourceAccess map[string]interface{}, clientID string, requiredRoles []string) error {
+	clientAccess, ok := resourceAccess[clientID].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("client-specific roles missing")
 	}
 
-	// Iterate over Slice and check if client id is in
-	for _, audItem := range audSlice {
-		if audStr, ok := audItem.(string); ok && audStr == KeycloakSingleton.ClientID {
-			return true
+	rolesVal, ok := clientAccess["roles"].([]interface{})
+	if !ok {
+		return fmt.Errorf("roles missing in token")
+	}
+
+	userRoles := make(map[string]bool)
+	for _, role := range rolesVal {
+		if roleStr, ok := role.(string); ok {
+			userRoles[roleStr] = true
 		}
 	}
 
-	return false
+	log.Infof("roles: %v", userRoles)
+
+	for _, requiredRole := range requiredRoles {
+		if !userRoles[requiredRole] {
+			return fmt.Errorf("missing required role: %s", requiredRole)
+		}
+	}
+
+	return nil
 }
