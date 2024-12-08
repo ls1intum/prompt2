@@ -34,10 +34,16 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
+	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
+		// No-op or add assertions for test
+		return nil
+	}
+
 	suite.cleanup = cleanup
 	suite.courseService = CourseService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries:                    *testDB.Queries,
+		conn:                       testDB.Conn,
+		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
 	}
 
 	CourseServiceSingleton = &suite.courseService
