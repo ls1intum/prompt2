@@ -128,33 +128,3 @@ func extractResourceAccess(claims map[string]interface{}) (map[string]interface{
 	}
 	return resourceAccess, nil
 }
-
-// checkRequiredRoles ensures all required roles are present in the token's resource_access claims.
-func checkRequiredRoles(resourceAccess map[string]interface{}, clientID string, requiredRoles []string) error {
-	clientAccess, ok := resourceAccess[clientID].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("client-specific roles missing")
-	}
-
-	rolesVal, ok := clientAccess["roles"].([]interface{})
-	if !ok {
-		return fmt.Errorf("roles missing in token")
-	}
-
-	userRoles := make(map[string]bool)
-	for _, role := range rolesVal {
-		if roleStr, ok := role.(string); ok {
-			userRoles[roleStr] = true
-		}
-	}
-
-	log.Infof("roles: %v", userRoles)
-
-	for _, requiredRole := range requiredRoles {
-		if !userRoles[requiredRole] {
-			return fmt.Errorf("missing required role: %s", requiredRole)
-		}
-	}
-
-	return nil
-}
