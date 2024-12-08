@@ -18,7 +18,7 @@ import (
 //
 // If any validation fails, the request is aborted with an appropriate HTTP status code.
 // On success, "resourceAccess" is attached to the context for further use.
-func KeycloakMiddleware(requiredRoles []string) gin.HandlerFunc {
+func KeycloakMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := extractBearerToken(c)
 		if err != nil {
@@ -54,20 +54,30 @@ func KeycloakMiddleware(requiredRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		if err := checkRequiredRoles(resourceAccess, KeycloakSingleton.ClientID, requiredRoles); err != nil {
-			log.Error("Failed to check required roles: ", err)
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
-			return
-		}
-
-		// Attach prompt roles for downstream use
-		rolesVal, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})["roles"].([]interface{})
+		rolesInterface, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})["roles"]
 		if !ok {
-			log.Error("Failed to extract prompt roles")
+			log.Error("Failed to extract roles from resource access")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Failed to extract roles"})
 			return
 		}
-		c.Set("roles", rolesVal)
+
+		roles, ok := rolesInterface.([]interface{})
+		if !ok {
+			log.Error("Roles are not in expected format")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid roles format"})
+			return
+		}
+
+		// Convert roles to map[string]bool for easier downstream usage
+		userRoles := make(map[string]bool)
+		for _, role := range roles {
+			if roleStr, ok := role.(string); ok {
+				userRoles[roleStr] = true
+			}
+		}
+
+		// Store the extracted roles in the context
+		c.Set("userRoles", userRoles)
 		c.Next()
 	}
 }

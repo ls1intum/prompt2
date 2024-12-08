@@ -2,14 +2,16 @@ package testutils
 
 import "github.com/gin-gonic/gin"
 
-func MockMiddleware(requiredRoles []string, mockRoles []string) gin.HandlerFunc {
+func MockMiddleware(mockRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Optionally set mock data, such as roles, for downstream handlers
-		roles := make([]interface{}, len(mockRoles))
-		for i, role := range mockRoles {
-			roles[i] = role
+		// Create a map for user roles
+		userRoles := make(map[string]bool)
+		for _, role := range mockRoles {
+			userRoles[role] = true
 		}
-		c.Set("roles", roles)
+		// Store the roles map in the context
+		c.Set("userRoles", userRoles)
 		c.Next()
 	}
 }

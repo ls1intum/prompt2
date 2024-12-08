@@ -1,18 +1,21 @@
 package course
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func setupCourseRouter(router *gin.RouterGroup, authMiddleware func([]string) gin.HandlerFunc) {
-	course := router.Group("/courses")
-	course.GET("/", authMiddleware([]string{}), getAllCourses)
-	course.GET("/:uuid", authMiddleware([]string{}), getCourseByID)
-	course.POST("/", authMiddleware([]string{"courses:create"}), createCourse)
+func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc) {
+	course := router.Group("/courses", authMiddleware())
+	course.GET("/", authMiddleware(), getAllCourses)
+	course.GET("/:uuid", authMiddleware(), getCourseByID)
+	course.POST("/", authMiddleware(), createCourse)
 	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
 	// TODO: course.PUT("/", updateCourse)
 }
@@ -24,18 +27,12 @@ func getAllCourses(c *gin.Context) {
 		return
 	}
 
-	permissions, exists := c.Get("roles")
+	rolesVal, exists := c.Get("userRoles")
 	if !exists {
-		handleError(c, http.StatusForbidden, err)
+		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
 		return
 	}
-
-	userRoles := make(map[string]bool)
-	for _, role := range permissions.([]interface{}) {
-		if roleStr, ok := role.(string); ok {
-			userRoles[roleStr] = true
-		}
-	}
+	userRoles := rolesVal.(map[string]bool)
 
 	if userRoles["courses:view-all"] {
 		c.IndentedJSON(http.StatusOK, courses)
@@ -44,10 +41,14 @@ func getAllCourses(c *gin.Context) {
 
 	// Filtern Sie die Kurse basierend auf den Berechtigungen
 	filteredCourses := []courseDTO.CourseWithPhases{}
+	allowedUsers := []string{"Lecturer", "Editor", "Student"}
 	for _, course := range courses {
-		permissionString := course.Name + "-" + course.SemesterTag + ":view"
-		if userRoles[permissionString] {
-			filteredCourses = append(filteredCourses, course)
+		for _, role := range allowedUsers {
+			desiredRole := fmt.Sprintf("%s-%s-%s", course.Name, course.SemesterTag, role)
+			if userRoles[desiredRole] {
+				filteredCourses = append(filteredCourses, course)
+				break
+			}
 		}
 	}
 
@@ -67,10 +68,27 @@ func getCourseByID(c *gin.Context) {
 		return
 	}
 
+	hasAccess, err := keycloak.CheckUserRole(c, course.Name, course.SemesterTag, []string{"Lecturer", "Editor", "Student"}, "courses:view-all")
+	if err != nil || !hasAccess {
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, course)
 }
 
 func createCourse(c *gin.Context) {
+	rolesVal, exists := c.Get("userRoles")
+	if !exists {
+		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
+		return
+	}
+	userRoles := rolesVal.(map[string]bool)
+
+	if !userRoles["courses:create"] {
+		handleError(c, http.StatusForbidden, errors.New("missing permission to create course"))
+		return
+	}
+
 	var newCourse courseDTO.CreateCourse
 	if err := c.BindJSON(&newCourse); err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -94,6 +112,18 @@ func updateCoursePhaseOrder(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// get the course data
+	course, err := GetCourseByID(c, courseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	hasAccess, err := keycloak.CheckUserRole(c, course.Name, course.SemesterTag, []string{"Lecturer"}, "courses:modify-all")
+	if err != nil || !hasAccess {
 		return
 	}
 
