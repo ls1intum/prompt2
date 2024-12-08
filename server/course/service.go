@@ -9,13 +9,14 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
 
 type CourseService struct {
 	queries db.Queries
 	conn    *pgx.Conn
+	// use dependency injection for keycloak to allow mocking
+	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName string) error
 }
 
 var CourseServiceSingleton *CourseService
@@ -93,7 +94,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO
 	}
 
 	// create keycloak roles
-	err = keycloak.CreateCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
+	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
 	if err != nil {
 		log.Debug("Failed to create keycloak roles for course: ", err)
 		return courseDTO.Course{}, err

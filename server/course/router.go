@@ -6,14 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func setupCourseRouter(router *gin.RouterGroup) {
+func setupCourseRouter(router *gin.RouterGroup, authMiddleware func([]string) gin.HandlerFunc) {
 	course := router.Group("/courses")
-	course.GET("/", keycloak.KeycloakMiddleware([]string{}), getAllCourses)
-	course.GET("/:uuid", keycloak.KeycloakMiddleware([]string{}), getCourseByID)
-	course.POST("/", keycloak.KeycloakMiddleware([]string{"courses:create"}), createCourse)
+	course.GET("/", authMiddleware([]string{}), getAllCourses)
+	course.GET("/:uuid", authMiddleware([]string{}), getCourseByID)
+	course.POST("/", authMiddleware([]string{"courses:create"}), createCourse)
 	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
 	// TODO: course.PUT("/", updateCourse)
 }

@@ -37,10 +37,16 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
+	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
+		// No-op or add assertions for test
+		return nil
+	}
+
 	suite.cleanup = cleanup
 	suite.courseService = CourseService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries:                    *testDB.Queries,
+		conn:                       testDB.Conn,
+		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
 	}
 
 	CourseServiceSingleton = &suite.courseService
@@ -48,8 +54,9 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	// Initialize router
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
-	setupCourseRouter(api)
-
+	setupCourseRouter(api, func(requiredRoles []string) gin.HandlerFunc {
+		return testutils.MockMiddleware(requiredRoles, []string{"courses:view-all", "courses:create"})
+	})
 	coursePhase.InitCoursePhaseModule(api, *testDB.Queries, testDB.Conn)
 }
 
