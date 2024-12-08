@@ -14,6 +14,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
@@ -71,6 +72,7 @@ func main() {
 	query := db.New(conn)
 
 	initKeycloak()
+	permissionValidation.InitValidationService(*query, conn)
 
 	router := gin.Default()
 	router.Use(utils.CORS())

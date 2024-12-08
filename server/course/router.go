@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc) {
@@ -62,14 +62,14 @@ func getCourseByID(c *gin.Context) {
 		return
 	}
 
-	course, err := GetCourseByID(c, id)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, []string{"Lecturer", "Editor", "Student"}, "courses:view-all")
+	if err != nil || !hasAccess {
 		return
 	}
 
-	hasAccess, err := keycloak.CheckUserRole(c, course.Name, course.SemesterTag, []string{"Lecturer", "Editor", "Student"}, "courses:view-all")
-	if err != nil || !hasAccess {
+	course, err := GetCourseByID(c, id)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -115,14 +115,7 @@ func updateCoursePhaseOrder(c *gin.Context) {
 		return
 	}
 
-	// get the course data
-	course, err := GetCourseByID(c, courseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	hasAccess, err := keycloak.CheckUserRole(c, course.Name, course.SemesterTag, []string{"Lecturer"}, "courses:modify-all")
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, []string{"Lecturer"}, "courses:modify-all")
 	if err != nil || !hasAccess {
 		return
 	}

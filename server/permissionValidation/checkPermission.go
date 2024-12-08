@@ -1,4 +1,4 @@
-package keycloak
+package permissionValidation
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CheckUserRole(c *gin.Context, courseName, semesterTag string, allowedUsers []string, adminRight ...string) (bool, error) {
+func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []string, adminRight ...string) (bool, error) {
 	// Extract user roles from context
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
@@ -30,7 +30,7 @@ func CheckUserRole(c *gin.Context, courseName, semesterTag string, allowedUsers 
 
 	// Generate the desired role keys based on input
 	for _, role := range allowedUsers {
-		desiredRole := fmt.Sprintf("%s-%s-%s", courseName, semesterTag, role)
+		desiredRole := fmt.Sprintf("%s-%s", courseIdentifier, role)
 		if userRoles[desiredRole] {
 			return true, nil // Found at least one matching role
 		}
@@ -40,5 +40,3 @@ func CheckUserRole(c *gin.Context, courseName, semesterTag string, allowedUsers 
 
 	return false, nil // No matching role found
 }
-
-// TODO add a db connection to keycloak and move the whole verificaiton into this package!!!

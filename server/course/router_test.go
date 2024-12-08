@@ -15,6 +15,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -50,6 +51,9 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	}
 
 	CourseServiceSingleton = &suite.courseService
+
+	// Init the permissionValidation service
+	permissionValidation.InitValidationService(*testDB.Queries, testDB.Conn)
 
 	// Initialize router
 	suite.router = gin.Default()
