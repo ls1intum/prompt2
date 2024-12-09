@@ -19,7 +19,7 @@ type CourseService struct {
 var CourseServiceSingleton *CourseService
 
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
-	courses, err := CourseServiceSingleton.queries.GetAllCourses(ctx)
+	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctx)
 	if err != nil {
 		return nil, err
 	}
