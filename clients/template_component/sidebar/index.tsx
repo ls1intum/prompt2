@@ -1,5 +1,6 @@
 import { Construction } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
+import { Role } from '@/interfaces/permission_roles'
 
 const templateSidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',
@@ -9,6 +10,7 @@ const templateSidebarItems: SidebarMenuItemProps = {
     {
       title: 'Settings',
       goToPath: '/settings',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
   ],
 }

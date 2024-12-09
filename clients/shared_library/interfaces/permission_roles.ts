@@ -1,10 +1,10 @@
 // Define the enum for roles
 export enum Role {
-  PROMPT_ADMIN = 'PROMPT_ADMIN',
-  PROMPT_LECTURER = 'PROMPT_LECTURER',
-  COURSE_LECTURER = 'LECTURER',
-  COURSE_EDITOR = 'EDITOR',
-  COURSE_STUDENT = 'STUDENT',
+  PROMPT_ADMIN = 'PROMPT_Admin',
+  PROMPT_LECTURER = 'PROMPT_Lecturer',
+  COURSE_LECTURER = 'Lecturer',
+  COURSE_EDITOR = 'Editor',
+  COURSE_STUDENT = 'Student',
 }
 
 // Function to get the permission string
