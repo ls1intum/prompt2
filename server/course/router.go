@@ -13,9 +13,9 @@ import (
 
 func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
-	course.GET("/", authMiddleware(), getAllCourses)
-	course.GET("/:uuid", authMiddleware(), getCourseByID)
-	course.POST("/", authMiddleware(), createCourse)
+	course.GET("/", getAllCourses)
+	course.GET("/:uuid", getCourseByID)
+	course.POST("/", createCourse)
 	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
 	// TODO: course.PUT("/", updateCourse)
 }
