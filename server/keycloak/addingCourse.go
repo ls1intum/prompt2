@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,9 +17,9 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 
 	baseGroupName := fmt.Sprintf("%s-%s", courseName, iterationName)
 	subGroupNames := []string{
-		fmt.Sprintf("%s-%s", baseGroupName, keycloak.CourseLecturer),
-		fmt.Sprintf("%s-%s", baseGroupName, keycloak.CourseEditor),
-		fmt.Sprintf("%s-%s", baseGroupName, keycloak.CourseStudent),
+		fmt.Sprintf("%s-%s", baseGroupName, CourseLecturer),
+		fmt.Sprintf("%s-%s", baseGroupName, CourseEditor),
+		fmt.Sprintf("%s-%s", baseGroupName, CourseStudent),
 	}
 
 	baseGroupID, err := CreateGroup(ctx, token.AccessToken, baseGroupName)
