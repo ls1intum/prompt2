@@ -24,9 +24,9 @@ export const ExternalSidebarComponent: React.FC<ExternalSidebarProps> = ({
   const course = courses.find((c) => c.id === courseId)
 
   let hasComponentPermission = false
-  if (sidebarElement.requiredPermissions) {
+  if (sidebarElement.requiredPermissions && sidebarElement.requiredPermissions.length > 0) {
     hasComponentPermission = sidebarElement.requiredPermissions.some((role) => {
-      permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
+      return permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
     })
   } else {
     // no permissions required

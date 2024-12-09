@@ -1,29 +1,15 @@
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import React from 'react'
-import { RouteObject, Routes, Route } from 'react-router-dom'
-import ErrorBoundary from '../../ErrorBoundary'
+import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
+import { ExternalRoutes } from './ExternalRoutes'
 
 export const TemplateRoutes = React.lazy(() =>
   import('template_component/routers')
     .then((module): { default: React.FC } => ({
       default: () => {
-        const routes: RouteObject[] = module.default || []
-        return (
-          <Routes>
-            {routes.map((route, index) => (
-              <Route
-                key={index}
-                path={route.path}
-                element={
-                  <ErrorBoundary fallback={<div>Route loading failed</div>}>
-                    {route.element}
-                  </ErrorBoundary>
-                }
-              />
-            ))}
-          </Routes>
-        )
+        const routes: ExtendedRouteObject[] = module.default || []
+        return <ExternalRoutes routes={routes} />
       },
     }))
     .catch((): { default: React.FC } => ({

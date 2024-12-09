@@ -17,7 +17,7 @@ export const PermissionRestriction = ({
 }: PermissionRestrictionProps): JSX.Element => {
   const { permissions } = useAuthStore()
   const { courses } = useCourseStore()
-  const courseId = useParams<{ courseId: string }>()
+  const courseId = useParams<{ courseId: string }>().courseId
 
   // This means something /general
   if (!courseId) {
@@ -29,11 +29,12 @@ export const PermissionRestriction = ({
   // in ManagementRoot is verified that this exists
   const course = courses.find((c) => c.id === courseId)
 
-  const hasPermission = requiredPermissions.some((role) => {
-    permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
-  })
-
-  // TODO: add is admin check
+  let hasPermission = true
+  if (requiredPermissions.length > 0) {
+    hasPermission = requiredPermissions.some((role) => {
+      return permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
+    })
+  }
 
   return <>{hasPermission ? children : <UnauthorizedPage />}</>
 }
