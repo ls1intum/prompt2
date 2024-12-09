@@ -13,6 +13,8 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
@@ -38,6 +40,19 @@ func runMigrations(databaseURL string) {
 	}
 }
 
+func initKeycloak() {
+	baseURL := utils.GetEnv("KEYCLOAK_BASE_URL", "http://localhost:8081")
+	realm := utils.GetEnv("KEYCLOAK_REALM", "prompt")
+	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
+	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
+	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
+
+	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient)
+	if err != nil {
+		log.Error("Failed to initialize keycloak: ", err)
+	}
+}
+
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -55,6 +70,9 @@ func main() {
 	defer conn.Close(context.Background())
 
 	query := db.New(conn)
+
+	initKeycloak()
+	permissionValidation.InitValidationService(*query, conn)
 
 	router := gin.Default()
 	router.Use(utils.CORS())

@@ -18,7 +18,11 @@ const parseJwt = (token: string) => {
   }
 }
 
-export const useKeycloak = (): { keycloak: Keycloak | undefined; logout: () => void } => {
+export const useKeycloak = (): {
+  keycloak: Keycloak | undefined
+  logout: () => void
+  forceTokenRefresh: () => Promise<void>
+} => {
   const context = useContext(KeycloakContext)
   const { setUser, setPermissions, clearUser, clearPermissions } = useAuthStore()
 
@@ -106,5 +110,29 @@ export const useKeycloak = (): { keycloak: Keycloak | undefined; logout: () => v
     localStorage.removeItem('refreshToken')
   }
 
-  return { keycloak: keycloakValue, logout }
+  const forceTokenRefresh = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (keycloakValue) {
+        keycloakValue
+          .updateToken(1000000) // Force immediate refresh
+          .then(() => {
+            localStorage.setItem('jwt_token', keycloakValue.token ?? '')
+            localStorage.setItem('refreshToken', keycloakValue.refreshToken ?? '')
+            resolve() // Resolve the promise on success
+          })
+          .catch((err) => {
+            console.error('Token refresh failed', err)
+            clearUser()
+            clearPermissions()
+            keycloakValue.logout({ redirectUri: window.location.origin })
+            reject(err) // Reject the promise on failure
+          })
+      } else {
+        console.warn('Keycloak instance is not initialized.')
+        reject(new Error('Keycloak instance is not initialized.'))
+      }
+    })
+  }
+
+  return { keycloak: keycloakValue, logout, forceTokenRefresh }
 }

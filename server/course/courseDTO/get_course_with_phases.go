@@ -14,7 +14,7 @@ type CourseWithPhases struct {
 	Name         string                               `json:"name"`
 	StartDate    pgtype.Date                          `json:"start_date"`
 	EndDate      pgtype.Date                          `json:"end_date"`
-	SemesterTag  pgtype.Text                          `json:"semester_tag"`
+	SemesterTag  string                               `json:"semester_tag"`
 	MetaData     meta.MetaData                        `json:"meta_data"`
 	CoursePhases []coursePhaseDTO.CoursePhaseSequence `json:"course_phases"`
 }
@@ -33,7 +33,7 @@ func GetCourseByIDFromDBModel(course db.Course) (CourseWithPhases, error) {
 		Name:         course.Name,
 		StartDate:    course.StartDate,
 		EndDate:      course.EndDate,
-		SemesterTag:  course.SemesterTag,
+		SemesterTag:  course.SemesterTag.String,
 		MetaData:     metaData,
 		CoursePhases: []coursePhaseDTO.CoursePhaseSequence{},
 	}, nil

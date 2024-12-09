@@ -1,8 +1,7 @@
 import React from 'react'
-import { InsideSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
 import { DisabledSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/DisabledSidebarMenuItem'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-
+import { ExternalSidebarComponent } from './ExternalSidebar'
 
 interface TemplateSidebarProps {
   rootPath: string
@@ -15,16 +14,10 @@ export const TemplateSidebar = React.lazy(() =>
       default: ({ title, rootPath }) => {
         const sidebarElement: SidebarMenuItemProps = module.default || {}
         return (
-          <InsideSidebarMenuItem
-            title={title || sidebarElement.title}
-            icon={sidebarElement.icon}
-            goToPath={rootPath + sidebarElement.goToPath}
-            subitems={
-              sidebarElement.subitems?.map((subitem) => ({
-                title: subitem.title,
-                goToPath: rootPath + subitem.goToPath,
-              })) || []
-            }
+          <ExternalSidebarComponent
+            title={title}
+            rootPath={rootPath}
+            sidebarElement={sidebarElement}
           />
         )
       },
