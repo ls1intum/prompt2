@@ -22,7 +22,9 @@ type CourseService struct {
 var CourseServiceSingleton *CourseService
 
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
-	courses, err := CourseServiceSingleton.queries.GetAllCourses(ctx)
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+	courses, err := CourseServiceSingleton.queries.GetAllCourses(ctxWithTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +42,10 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 }
 
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
 	// TODO: replace with query to get the course incl phases
-	course, err := CourseServiceSingleton.queries.GetCourse(ctx, id)
+	course, err := CourseServiceSingleton.queries.GetCourse(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
