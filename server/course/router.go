@@ -84,6 +84,8 @@ func createCourse(c *gin.Context) {
 	}
 	userRoles := rolesVal.(map[string]bool)
 
+	userID := c.GetString("userID")
+
 	if !userRoles["courses:create"] {
 		handleError(c, http.StatusForbidden, errors.New("missing permission to create course"))
 		return
@@ -100,7 +102,7 @@ func createCourse(c *gin.Context) {
 		return
 	}
 
-	course, err := CreateCourse(c, newCourse)
+	course, err := CreateCourse(c, newCourse, userID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

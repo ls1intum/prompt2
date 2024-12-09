@@ -9,6 +9,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -78,7 +79,7 @@ func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhase
 	return CourseWithPhases, nil
 }
 
-func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO.Course, error) {
+func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterID string) (courseDTO.Course, error) {
 	// start transaction to roll back if keycloak failed
 	tx, err := CourseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
@@ -100,7 +101,14 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO
 	// create keycloak roles
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
 	if err != nil {
-		log.Debug("Failed to create keycloak roles for course: ", err)
+		log.Error("Failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	roleString := fmt.Sprintf("%s-%s-Lecturer", createdCourse.Name, createdCourse.SemesterTag.String)
+	err = keycloak.AddUserToGroup(ctx, requesterID, keycloak.KeycloakSingleton.Realm, roleString)
+	if err != nil {
+		log.Error("Failed to assign requestor to lecturer roles for course: ", err)
 		return courseDTO.Course{}, err
 	}
 
