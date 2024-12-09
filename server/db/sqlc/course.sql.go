@@ -54,12 +54,13 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
-const getAllCourses = `-- name: GetAllCourses :many
+const getAllActiveCourses = `-- name: GetAllActiveCourses :many
 SELECT id, name, start_date, end_date, semester_tag, course_type, ects, meta_data FROM course
+WHERE end_date >= NOW() - INTERVAL '1 month'
 `
 
-func (q *Queries) GetAllCourses(ctx context.Context) ([]Course, error) {
-	rows, err := q.db.Query(ctx, getAllCourses)
+func (q *Queries) GetAllActiveCourses(ctx context.Context) ([]Course, error) {
+	rows, err := q.db.Query(ctx, getAllActiveCourses)
 	if err != nil {
 		return nil, err
 	}
