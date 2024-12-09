@@ -8,14 +8,14 @@ import (
 	"github.com/google/uuid"
 )
 
-func CheckCoursePermission(c *gin.Context, courseID uuid.UUID, allowedUsers []string, adminRight ...string) (bool, error) {
+func CheckCoursePermission(c *gin.Context, courseID uuid.UUID, allowedUsers []string) (bool, error) {
 	courseIdentifier, err := courseIdentifierStringFromCourseID(c, courseID)
 	if err != nil {
 		c.IndentedJSON(500, gin.H{"error": err.Error()})
 		return false, err
 	}
 
-	return checkUserRole(c, courseIdentifier, allowedUsers, adminRight...)
+	return checkUserRole(c, courseIdentifier, allowedUsers)
 }
 
 func courseIdentifierStringFromCourseID(ctx context.Context, uuid uuid.UUID) (string, error) {

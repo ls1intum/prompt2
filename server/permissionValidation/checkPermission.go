@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []string, adminRight ...string) (bool, error) {
+func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []string) (bool, error) {
 	// Extract user roles from context
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
@@ -23,14 +24,14 @@ func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []strin
 		return false, err
 	}
 
-	// check if the user has the required 'all' right (i.e. view-all, create-all)
-	if len(adminRight) > 0 && userRoles[adminRight[0]] {
-		return true, nil
-	}
-
 	// Generate the desired role keys based on input
 	for _, role := range allowedUsers {
-		desiredRole := fmt.Sprintf("%s-%s", courseIdentifier, role)
+		var desiredRole string = ""
+		if role == keycloak.PromptAdmin || role == keycloak.PromptLecturer {
+			desiredRole = role
+		} else {
+			desiredRole = fmt.Sprintf("%s-%s", courseIdentifier, role)
+		}
 		if userRoles[desiredRole] {
 			return true, nil // Found at least one matching role
 		}

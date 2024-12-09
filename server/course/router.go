@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
@@ -33,15 +34,14 @@ func getAllCourses(c *gin.Context) {
 		return
 	}
 	userRoles := rolesVal.(map[string]bool)
-
-	if userRoles["courses:view-all"] {
+	if userRoles[keycloak.PromptAdmin] {
 		c.IndentedJSON(http.StatusOK, courses)
 		return
 	}
 
 	// Filtern Sie die Kurse basierend auf den Berechtigungen
 	filteredCourses := []courseDTO.CourseWithPhases{}
-	allowedUsers := []string{"Lecturer", "Editor", "Student"}
+	allowedUsers := []string{keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent}
 	for _, course := range courses {
 		for _, role := range allowedUsers {
 			desiredRole := fmt.Sprintf("%s-%s-%s", course.Name, course.SemesterTag, role)
@@ -62,7 +62,7 @@ func getCourseByID(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, []string{"Lecturer", "Editor", "Student"}, "courses:view-all")
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, []string{keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent})
 	if err != nil || !hasAccess {
 		return
 	}
@@ -86,7 +86,7 @@ func createCourse(c *gin.Context) {
 
 	userID := c.GetString("userID")
 
-	if !userRoles["courses:create"] {
+	if !userRoles[keycloak.PromptAdmin] && !userRoles[keycloak.PromptLecturer] {
 		handleError(c, http.StatusForbidden, errors.New("missing permission to create course"))
 		return
 	}
@@ -117,7 +117,7 @@ func updateCoursePhaseOrder(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, []string{"Lecturer"}, "courses:modify-all")
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, []string{keycloak.CourseLecturer, keycloak.PromptAdmin})
 	if err != nil || !hasAccess {
 		return
 	}

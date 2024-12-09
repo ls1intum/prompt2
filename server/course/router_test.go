@@ -65,7 +65,7 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
 	setupCourseRouter(api, func() gin.HandlerFunc {
-		return testutils.MockMiddleware([]string{"courses:view-all", "courses:create", "iPraktikum-ios24245-Lecturer"})
+		return testutils.MockMiddleware([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"})
 	})
 	coursePhase.InitCoursePhaseModule(api, *testDB.Queries, testDB.Conn)
 }
