@@ -39,11 +39,17 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 		return nil
 	}
 
+	mockAddUserToGroup := func(ctx context.Context, userID, groupName string) error {
+		// No-op or add assertions for test
+		return nil
+	}
+
 	suite.cleanup = cleanup
 	suite.courseService = CourseService{
 		queries:                    *testDB.Queries,
 		conn:                       testDB.Conn,
 		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
+		addUserToGroup:             mockAddUserToGroup,
 	}
 
 	CourseServiceSingleton = &suite.courseService
@@ -88,7 +94,7 @@ func (suite *CourseServiceTestSuite) TestCreateCourse() {
 		Ects:        pgtype.Int4{Int32: 10, Valid: true},
 	}
 
-	createdCourse, err := CreateCourse(suite.ctx, newCourse)
+	createdCourse, err := CreateCourse(suite.ctx, newCourse, "test_user")
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newCourse.Name, createdCourse.Name, "Course name should match")
 	assert.Equal(suite.T(), "practical course", createdCourse.CourseType, "Course type should match")

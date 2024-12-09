@@ -9,7 +9,6 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,6 +17,7 @@ type CourseService struct {
 	conn    *pgx.Conn
 	// use dependency injection for keycloak to allow mocking
 	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName string) error
+	addUserToGroup             func(ctx context.Context, userID, groupName string) error
 }
 
 var CourseServiceSingleton *CourseService
@@ -106,7 +106,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	}
 
 	roleString := fmt.Sprintf("%s-%s-Lecturer", createdCourse.Name, createdCourse.SemesterTag.String)
-	err = keycloak.AddUserToGroup(ctx, requesterID, keycloak.KeycloakSingleton.Realm, roleString)
+	err = CourseServiceSingleton.addUserToGroup(ctx, requesterID, roleString)
 	if err != nil {
 		log.Error("Failed to assign requestor to lecturer roles for course: ", err)
 		return courseDTO.Course{}, err

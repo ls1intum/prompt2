@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func AddUserToGroup(ctx context.Context, userID, realm, groupName string) error {
+func AddUserToGroup(ctx context.Context, userID, groupName string) error {
 	token, err := LoginClient(ctx)
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func AddUserToGroup(ctx context.Context, userID, realm, groupName string) error 
 	}
 
 	// Retrieve groups with the search parameter
-	groups, err := KeycloakSingleton.client.GetGroups(ctx, token.AccessToken, realm, params)
+	groups, err := KeycloakSingleton.client.GetGroups(ctx, token.AccessToken, KeycloakSingleton.Realm, params)
 	if err != nil {
 		log.Error("Failed to retrieve groups: ", err)
 	}
