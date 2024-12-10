@@ -11,6 +11,7 @@ export function IconEdge({
   style = {},
   markerEnd,
   label,
+  selected,
 }: EdgeProps) {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -21,9 +22,19 @@ export function IconEdge({
     targetPosition,
   })
 
+  const highlightColor = '#8B5CF6'
+
   return (
     <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+      <BaseEdge
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{
+          ...style,
+          stroke: selected ? highlightColor : style.stroke || '#000',
+          strokeWidth: selected ? 4 : style.strokeWidth || 2,
+        }}
+      />
       <EdgeLabelRenderer>
         <div
           className='absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto nodrag nopan'

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Handle, Position } from '@xyflow/react'
+import { useState, useCallback } from 'react'
+import { Handle, Position, useReactFlow } from '@xyflow/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,23 +9,48 @@ import { Save, Pen, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 
-export function PhaseNode({ id }: { id: string }) {
+export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   const coursePhase = coursePhases.find((phase) => phase.id === id)
-  console.log('coursePhase', coursePhase)
   const [phaseData, setPhaseData] = useState<CreateCoursePhase | undefined>(coursePhase)
   const [isEditing, setIsEditing] = useState(false)
+
+  const { setNodes } = useReactFlow()
 
   // type of the selected phase:
   const phaseType = phaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
 
   const handleNameChange = (value: string) => {
-    // TODO: change !!!
     setPhaseData((prev) => (prev ? { ...prev, name: value } : undefined))
-    //Object.assign(data, { ...phaseData, name: value })
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === id) {
+          node.data = { ...node.data, name: value }
+        }
+        return node
+      }),
+    )
   }
 
+  const onNodeClick = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === id) {
+          node.selected = true
+        } else {
+          node.selected = false
+        }
+        return node
+      }),
+    )
+  }, [id, setNodes])
+
   return (
-    <Card className='w-80 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+    <Card
+      className={`w-80 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
+        selected ? 'ring-2 ring-blue-500' : ''
+      }`}
+      onClick={onNodeClick}
+    >
       <CardHeader className='p-4 flex flex-row items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50'>
         <div className='flex flex-col'>
           {isEditing ? (
