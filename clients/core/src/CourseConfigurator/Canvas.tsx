@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -22,6 +22,7 @@ import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { coursePhases, phaseTypes } from './data'
 import { UserRound, Database } from 'lucide-react'
 import { IconEdge } from './components/IconEdge'
+import { DeleteConfirmation } from './components/DeleteConfirmation'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -55,6 +56,12 @@ export function CourseConfigurator() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const { screenToFlowPosition } = useReactFlow()
+
+  // For deletion confirmation dialog
+  const [deleteDialogIsOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteConfirmationResolver, setDeleteConfirmationResolver] =
+    useState<(value: boolean) => void | null>()
+  const [toBeDeletedComponent, setToBeDeletedComponent] = useState<string>('')
 
   const onConnect = useCallback(
     (params: Edge | Connection) => {
@@ -160,6 +167,32 @@ export function CourseConfigurator() {
     },
     [screenToFlowPosition, setNodes],
   )
+  // TODO ({nodes: Node[], edges: Edge[]}) => Promise<boolean | {nodes: Node[], edges: Edge[]}({nodes: Node[], edges: Edge[]}) => Promise<boolean | {nodes: Node[], edges: Edge[]}
+  const onBeforeDelete = useCallback(
+    async ({ nodes: toBeDeletedNodes, edges: toBeDeletedEdges }) => {
+      console.log('Nodes to be deleted:', toBeDeletedNodes)
+      console.log('Edges to be deleted:', toBeDeletedEdges)
+      setDeleteDialogOpen(true)
+
+      if (toBeDeletedNodes.length > 0) {
+        setToBeDeletedComponent('a Course Phase')
+      } else {
+        setToBeDeletedComponent('an Edge')
+      }
+
+      // TODO
+      const userDecision = await new Promise<boolean>((resolve) => {
+        setDeleteConfirmationResolver(() => resolve)
+      })
+
+      if (userDecision) {
+        return { nodes: toBeDeletedNodes, edges: toBeDeletedEdges }
+      } else {
+        return false
+      }
+    },
+    [],
+  )
 
   return (
     <>
@@ -170,6 +203,7 @@ export function CourseConfigurator() {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onBeforeDelete={onBeforeDelete}
           onConnect={onConnect}
           onDrop={onDrop}
           onDragOver={onDragOver}
@@ -178,6 +212,17 @@ export function CourseConfigurator() {
           defaultEdgeOptions={edgeOptions}
           fitView
         >
+          <DeleteConfirmation
+            isOpen={deleteDialogIsOpen}
+            setOpen={setDeleteDialogOpen}
+            componentName={toBeDeletedComponent}
+            onClick={(value: boolean) => {
+              if (deleteConfirmationResolver) {
+                deleteConfirmationResolver(value)
+                setDeleteConfirmationResolver(undefined) // Clear the resolver
+              }
+            }}
+          />
           <Controls />
         </ReactFlow>
       </div>
