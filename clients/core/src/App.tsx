@@ -11,6 +11,7 @@ import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
 import PrivacyPage from './LegalPages/Privacy'
 import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
+import CourseConfiguratorPage from './CourseConfigurator/CourseConfigurator'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export const App = (): JSX.Element => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
+            <Route path='/config' element={<CourseConfiguratorPage />} />
             <Route path='/about' element={<AboutPage />} />
             <Route path='/privacy' element={<PrivacyPage />} />
             <Route path='/imprint' element={<ImprintPage />} />

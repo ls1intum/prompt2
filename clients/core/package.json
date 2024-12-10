@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "external-remotes-plugin": "^1.0.0",
+        "reactflow": "^11.11.4",
         "sha256": "^0.2.0"
     },
     "devDependencies": {
