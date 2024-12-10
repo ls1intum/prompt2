@@ -11,15 +11,22 @@ import ReactFlow, {
   Edge,
   NodeTypes,
   MarkerType,
+  EdgeTypes,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { PhaseNode } from './phase-node'
 import { Sidebar } from './sidebar'
 import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { coursePhases, phaseTypes } from './data'
+import { UserRound, Database } from 'lucide-react'
+import { IconEdge } from './IconEdge'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
+}
+
+const edgeTypes: EdgeTypes = {
+  iconEdge: IconEdge,
 }
 
 const edgeOptions = {
@@ -65,8 +72,9 @@ export function CourseConfigurator() {
             const newEdge = {
               ...params,
               ...edgeOptions,
-              type: 'participants',
+              type: 'iconEdge',
               style: { ...edgeOptions.style, stroke: '#3b82f6', strokeWidth: 3 },
+              label: <UserRound className='w-5 h-5 text-blue-500' />,
             }
             setEdges((eds) => addEdge(newEdge, eds))
           } else {
@@ -81,8 +89,9 @@ export function CourseConfigurator() {
             const newEdge = {
               ...params,
               ...edgeOptions,
-              type: 'metadata',
+              type: 'iconEdge',
               style: { ...edgeOptions.style, stroke: '#22c55e', strokeDasharray: '5,5' },
+              label: <Database className='w-5 h-5 text-green-500' />,
             }
             setEdges((eds) => addEdge(newEdge, eds))
           } else {
@@ -157,6 +166,7 @@ export function CourseConfigurator() {
             onDrop={onDrop}
             onDragOver={onDragOver}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             defaultEdgeOptions={edgeOptions}
             fitView
           >
