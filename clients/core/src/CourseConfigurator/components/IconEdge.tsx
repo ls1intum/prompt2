@@ -1,5 +1,5 @@
 import React from 'react'
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps } from 'reactflow'
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps } from '@xyflow/react'
 
 export function IconEdge({
   sourceX,

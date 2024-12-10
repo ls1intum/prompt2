@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
-import ReactFlow, {
+import { useCallback, useRef } from 'react'
+import {
+  ReactFlow,
   ReactFlowProvider,
   addEdge,
   useNodesState,
@@ -12,14 +13,15 @@ import ReactFlow, {
   NodeTypes,
   MarkerType,
   EdgeTypes,
-} from 'reactflow'
-import 'reactflow/dist/style.css'
-import { PhaseNode } from './phase-node'
-import { Sidebar } from './sidebar'
+  useReactFlow,
+} from '@xyflow/react'
+import '@xyflow/react/dist/style.css'
+import { PhaseNode } from './PhaseNode/PhaseNode'
+import { Sidebar } from './components/sidebar'
 import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { coursePhases, phaseTypes } from './data'
 import { UserRound, Database } from 'lucide-react'
-import { IconEdge } from './IconEdge'
+import { IconEdge } from './components/IconEdge'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -44,13 +46,15 @@ export function CourseConfigurator() {
     id: phase.id || `no-valid-id-${Date.now()}`,
     type: 'phaseNode',
     position: phase.position,
-    data: phase,
+    data: {},
   }))
+
+  const initialEdges: Edge[] = []
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const { screenToFlowPosition } = useReactFlow()
 
   const onConnect = useCallback(
     (params: Edge | Connection) => {
@@ -112,25 +116,29 @@ export function CourseConfigurator() {
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault()
 
-      if (reactFlowWrapper.current && reactFlowInstance) {
-        const type = event.dataTransfer.getData('application/reactflow')
-
-        if (typeof type === 'undefined' || !type) {
+      if (reactFlowWrapper.current) {
+        const coursePhaseTypeID = event.dataTransfer.getData('application/@xyflow/react')
+        if (!coursePhaseTypeID) {
+          console.log('No type found in drop event: ', coursePhaseTypeID)
           return
         }
+        console.log(coursePhaseTypeID)
 
-        const coursePhaseType = phaseTypes.find((phaseType) => phaseType.id === type)
+        const coursePhaseType = phaseTypes.find((phaseType) => phaseType.id === coursePhaseTypeID)
         if (!coursePhaseType) {
-          console.error(`Unknown course phase type: ${type}`)
+          console.error(`Unknown course phase type: ${coursePhaseTypeID}`)
           return
         }
 
-        const position = reactFlowInstance.screenToFlowPosition({
+        const position = screenToFlowPosition({
           x: event.clientX,
           y: event.clientY,
         })
 
+        const id = `no-valid-id-${Date.now()}`
+
         const coursePhase: CreateCoursePhase = {
+          id: id,
           course_id: 'some_id',
           name: `New ${coursePhaseType.name}`,
           position: position,
@@ -138,8 +146,10 @@ export function CourseConfigurator() {
           course_phase_type_id: coursePhaseType.id,
         }
 
+        Object.assign(coursePhases, coursePhases.concat(coursePhase))
+
         const newNode = {
-          id: `no-valid-id-${Date.now()}`,
+          id: id,
           type: 'phaseNode',
           position: position,
           data: coursePhase,
@@ -148,31 +158,38 @@ export function CourseConfigurator() {
         setNodes((nds) => nds.concat(newNode))
       }
     },
-    [reactFlowInstance, setNodes],
+    [screenToFlowPosition, setNodes],
   )
 
   return (
+    <>
+      <Sidebar />
+      <div className='flex-grow h-full' ref={reactFlowWrapper}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          defaultEdgeOptions={edgeOptions}
+          fitView
+        >
+          <Controls />
+        </ReactFlow>
+      </div>
+    </>
+  )
+}
+
+export const Canvas = () => {
+  return (
     <div className='flex h-full'>
       <ReactFlowProvider>
-        <Sidebar />
-        <div className='flex-grow h-full' ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            defaultEdgeOptions={edgeOptions}
-            fitView
-          >
-            <Controls />
-          </ReactFlow>
-        </div>
+        <CourseConfigurator />
       </ReactFlowProvider>
     </div>
   )

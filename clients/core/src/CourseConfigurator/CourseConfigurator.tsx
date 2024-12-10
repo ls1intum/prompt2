@@ -1,4 +1,4 @@
-import { CourseConfigurator } from './components/course-configurator'
+import { Canvas } from './Canvas'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function CourseConfiguratorPage() {
@@ -26,7 +26,7 @@ export default function CourseConfiguratorPage() {
           </CardContent>
         </Card>
         <div className='bg-white shadow-lg rounded-lg overflow-hidden' style={{ height: '70vh' }}>
-          <CourseConfigurator />
+          <Canvas />
         </div>
       </div>
     </div>

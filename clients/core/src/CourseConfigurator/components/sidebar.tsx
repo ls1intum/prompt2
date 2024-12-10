@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button'
-import { phaseTypes } from './data' // TODO replace this with a DB request
+import { phaseTypes } from '../data' // TODO replace this with a DB request
 
 export function Sidebar() {
   // TODO get this from the database
 
   const onDragStart = (event: React.DragEvent<HTMLButtonElement>, nodeType: string) => {
-    event.dataTransfer.setData('application/reactflow', nodeType)
+    event.dataTransfer.setData('application/@xyflow/react', nodeType)
     event.dataTransfer.effectAllowed = 'move'
   }
 
