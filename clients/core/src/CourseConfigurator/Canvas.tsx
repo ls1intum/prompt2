@@ -14,6 +14,7 @@ import {
   MarkerType,
   EdgeTypes,
   useReactFlow,
+  getOutgoers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './PhaseNode/PhaseNode'
@@ -56,6 +57,7 @@ export function CourseConfigurator() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const { screenToFlowPosition } = useReactFlow()
+  const { getNodes, getEdges } = useReactFlow()
 
   // For deletion confirmation dialog
   const [deleteDialogIsOpen, setDeleteDialogOpen] = useState(false)
@@ -96,7 +98,7 @@ export function CourseConfigurator() {
         } else if (sourceHandle.startsWith('metadata') && targetHandle.startsWith('metadata')) {
           const sourceNode = nodes.find((node) => node.id === params.source)
           const targetNode = nodes.find((node) => node.id === params.target)
-          if (sourceNode && targetNode && sourceNode.position.y < targetNode.position.y) {
+          if (sourceNode && targetNode) {
             const newEdge = {
               ...params,
               ...edgeOptions,
@@ -112,6 +114,31 @@ export function CourseConfigurator() {
       }
     },
     [edges, nodes, setEdges],
+  )
+
+  // use Cycle Prevention to only have valid course trees
+  const isValidConnection = useCallback(
+    (connection) => {
+      // we are using getNodes and getEdges helpers here
+      // to make sure we create isValidConnection function only once
+      const currentNodes = getNodes()
+      const currentEdges = getEdges()
+      const target = currentNodes.find((node) => node.id === connection.target)
+      const hasCycle = (node, visited = new Set()) => {
+        if (visited.has(node.id)) return false
+
+        visited.add(node.id)
+
+        for (const outgoer of getOutgoers(node, currentNodes, currentEdges)) {
+          if (outgoer.id === connection.source) return true
+          if (hasCycle(outgoer, visited)) return true
+        }
+      }
+
+      if (target?.id === connection.source) return false
+      return !hasCycle(target)
+    },
+    [getNodes, getEdges],
   )
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -210,6 +237,7 @@ export function CourseConfigurator() {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           defaultEdgeOptions={edgeOptions}
+          isValidConnection={isValidConnection}
           fitView
         >
           <DeleteConfirmation
