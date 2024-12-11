@@ -194,7 +194,7 @@ export function CourseConfigurator() {
     },
     [screenToFlowPosition, setNodes],
   )
-  // TODO ({nodes: Node[], edges: Edge[]}) => Promise<boolean | {nodes: Node[], edges: Edge[]}({nodes: Node[], edges: Edge[]}) => Promise<boolean | {nodes: Node[], edges: Edge[]}
+
   const onBeforeDelete = useCallback(
     async ({ nodes: toBeDeletedNodes, edges: toBeDeletedEdges }) => {
       console.log('Nodes to be deleted:', toBeDeletedNodes)
@@ -207,7 +207,6 @@ export function CourseConfigurator() {
         setToBeDeletedComponent('an Edge')
       }
 
-      // TODO
       const userDecision = await new Promise<boolean>((resolve) => {
         setDeleteConfirmationResolver(() => resolve)
       })

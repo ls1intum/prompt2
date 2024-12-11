@@ -26,13 +26,4 @@ export const phaseTypes: CoursePhaseType[] = [
   },
 ]
 
-export const coursePhases: CreateCoursePhase[] = [
-  {
-    id: '1',
-    name: 'Application Phase',
-    course_id: '1',
-    position: { x: 0, y: 0 },
-    course_phase_type_id: '1',
-    is_initial_phase: true,
-  },
-]
+export const coursePhases: CreateCoursePhase[] = []

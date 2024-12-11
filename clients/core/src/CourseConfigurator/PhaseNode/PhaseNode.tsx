@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Handle, Position, useReactFlow } from '@xyflow/react'
+import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,18 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
   const [isEditing, setIsEditing] = useState(false)
 
   const { setNodes } = useReactFlow()
+
+  // compute the incoming meta data
+  const connections = useHandleConnections({
+    type: 'target',
+    id: `metadata-in-${id}`,
+  })
+
+  const incomingMetaData = connections
+    .map((conn) => coursePhases.find((phase) => phase.id === conn.source)?.course_phase_type_id)
+    .map((typeId) => phaseTypes.find((type) => type.id === typeId)?.output_meta_data)
+    .filter((meta) => meta !== undefined)
+    .flat()
 
   // type of the selected phase:
   const phaseType = phaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
@@ -79,6 +91,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             metaData={phaseType.input_meta_data}
             icon={<ArrowDownToLine className='w-4 h-4 text-green-500' />}
             label='Required Input Metadata'
+            providedMetaData={incomingMetaData}
           />
         )}
 
@@ -95,7 +108,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         <Handle
           type='target'
           position={Position.Top}
-          id='participants-in'
+          id={`participants-in-${id}`}
           style={{ left: 50, top: -5 }}
           className='w-10 h-3 !bg-blue-500 rounded'
         />
@@ -104,7 +117,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         <Handle
           type='target'
           position={Position.Top}
-          id={`metadata-in-${phaseData?.name}`}
+          id={`metadata-in-${id}`}
           style={{ left: 130, top: -5 }}
           className='w-3 h-3 !bg-green-500 rounded-full'
         />
@@ -112,7 +125,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
       <Handle
         type='source'
         position={Position.Bottom}
-        id='participants-out'
+        id={`participants-out-${id}`}
         style={{ left: 50, bottom: -5 }}
         className='w-10 h-3 !bg-blue-500 rounded'
       />
@@ -120,7 +133,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         <Handle
           type='source'
           position={Position.Bottom}
-          id={`metadata-out-${phaseType.name}`}
+          id={`metadata-out-${id}`}
           style={{ left: 130, bottom: -5 }}
           className='w-3 h-3 !bg-green-500 rounded-full'
         />
