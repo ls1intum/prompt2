@@ -42,7 +42,7 @@ export const MetaDataBadges = ({
     <div className='flex items-start space-x-2 mb-2'>
       <div className='mt-1'>{icon}</div>
       <div>
-        <div className='text-xs font-semibold text-gray-600 mb-1'>{label}</div>
+        <div className='text-xs font-semibold text-secondary-foreground mb-1'>{label}</div>
         <div className='flex flex-wrap gap-1'>
           {metaData.map((item, index) => {
             const { color, icon: statusIcon, tooltip } = getMetaDataStatus(item)

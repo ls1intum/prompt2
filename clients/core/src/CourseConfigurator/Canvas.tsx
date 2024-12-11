@@ -7,6 +7,7 @@ import {
   Controls,
   NodeTypes,
   EdgeTypes,
+  Background,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './PhaseNode/PhaseNode'
@@ -18,6 +19,7 @@ import { getLayoutedElements } from './utils/getLayoutedElements'
 import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
+import { useDarkMode } from '@/contexts/DarkModeProvider'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -43,6 +45,7 @@ export function CourseConfigurator() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
+  const { theme } = useDarkMode()
 
   // For deletion confirmation dialog
   const [deleteDialogIsOpen, setDeleteDialogOpen] = useState(false)
@@ -94,6 +97,7 @@ export function CourseConfigurator() {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           isValidConnection={useValidation()}
+          colorMode={theme}
           fitView
         >
           <DeleteConfirmation
@@ -108,6 +112,7 @@ export function CourseConfigurator() {
             }}
           />
           <Controls />
+          <Background />
         </ReactFlow>
       </div>
     </>

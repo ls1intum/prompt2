@@ -64,7 +64,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         }`}
         onClick={onNodeClick}
       >
-        <CardHeader className='p-4 flex flex-row items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50'>
+        <CardHeader className='p-4 flex flex-row items-center justify-between bg-gradient-to-r from-blue-200/50 to-secondary/10 dark:from-blue-900/30 dark:to-secondary/20'>
           <div className='flex flex-col'>
             {isEditing ? (
               <Input
@@ -75,11 +75,13 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
                 onKeyPress={(e) => e.key === 'Enter' && setIsEditing((prev) => !prev)}
               />
             ) : (
-              <CardTitle className='text-lg font-bold text-gray-800 mb-2'>
+              <CardTitle className='text-lg font-bold text-primary mb-2'>
                 {phaseData?.name}
               </CardTitle>
             )}
-            <Badge className='self-start bg-indigo-100 text-indigo-800'>{phaseType?.name}</Badge>
+            <Badge variant='secondary' className='self-start'>
+              {phaseType?.name}
+            </Badge>
           </div>
           <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
             {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}

@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
-import { CourseOverview } from './Course/CourseOverview'
 import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
 import { Application } from './Application/Application'
 import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
@@ -30,7 +29,6 @@ export const App = (): JSX.Element => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-            <Route path='/config' element={<CourseConfiguratorPage />} />
             <Route path='/about' element={<AboutPage />} />
             <Route path='/privacy' element={<PrivacyPage />} />
             <Route path='/imprint' element={<ImprintPage />} />
@@ -41,7 +39,7 @@ export const App = (): JSX.Element => {
               path='/management/course/:courseId'
               element={
                 <ManagementRoot>
-                  <CourseOverview />
+                  <CourseConfiguratorPage />
                 </ManagementRoot>
               }
             />
