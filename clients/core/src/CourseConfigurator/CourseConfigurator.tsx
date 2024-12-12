@@ -5,14 +5,15 @@ import { getAllCoursePhaseTypes } from '../network/queries/coursePhaseTypes'
 import { useQuery } from '@tanstack/react-query'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { useEffect } from 'react'
+import { ErrorPage } from '@/components/ErrorPage'
 
 export default function CourseConfiguratorPage() {
   const { setCoursePhaseTypes, appendCoursePhaseType } = useCourseConfigurationState()
   const {
     data: fetchedCoursePhaseTypes,
     error,
-    isPending,
     isError,
+    refetch,
   } = useQuery<CoursePhaseType[]>({
     queryKey: ['course_phase_types'],
     queryFn: () => getAllCoursePhaseTypes(),
@@ -51,7 +52,16 @@ export default function CourseConfiguratorPage() {
         </CardContent>
       </Card>
       <Card className='m-8'>
-        <Canvas />
+        {isError ? (
+          <ErrorPage
+            title='Error'
+            description='Failed to fetch course phase types'
+            message={error?.message}
+            onRetry={() => refetch()}
+          />
+        ) : (
+          <Canvas />
+        )}
       </Card>
     </>
   )
