@@ -3,16 +3,18 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { coursePhases, phaseTypes } from '../data' // replace this with DB request
+import { coursePhases } from '../data' // replace this with DB request
 import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { Save, Pen, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
+import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   const coursePhase = coursePhases.find((phase) => phase.id === id)
   const [phaseData, setPhaseData] = useState<CreateCoursePhase | undefined>(coursePhase)
   const [isEditing, setIsEditing] = useState(false)
+  const { coursePhaseTypes } = useCourseConfigurationState()
 
   const { setNodes } = useReactFlow()
 
@@ -24,12 +26,12 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
   const incomingMetaData = connections
     .map((conn) => coursePhases.find((phase) => phase.id === conn.source)?.course_phase_type_id)
-    .map((typeId) => phaseTypes.find((type) => type.id === typeId)?.output_meta_data)
+    .map((typeId) => coursePhaseTypes.find((type) => type.id === typeId)?.provided_output_meta_data)
     .filter((meta) => meta !== undefined)
     .flat()
 
   // type of the selected phase:
-  const phaseType = phaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
+  const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
 
   const handleNameChange = (value: string) => {
     setPhaseData((prev) => (prev ? { ...prev, name: value } : undefined))
@@ -89,22 +91,23 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           {/** TODO DELETE Button */}
         </CardHeader>
         <CardContent className='p-4 pt-2'>
-          {phaseType?.input_meta_data && phaseType.input_meta_data.length > 0 && (
+          {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
             <MetaDataBadges
-              metaData={phaseType.input_meta_data}
+              metaData={phaseType.required_input_meta_data}
               icon={<ArrowDownToLine className='w-4 h-4 text-green-500' />}
               label='Required Input Metadata'
               providedMetaData={incomingMetaData}
             />
           )}
 
-          {phaseType?.output_meta_data && phaseType.output_meta_data.length > 0 && (
-            <MetaDataBadges
-              metaData={phaseType.output_meta_data}
-              icon={<ArrowUpFromLine className='w-4 h-4 text-green-500' />}
-              label='Provided Output Metadata'
-            />
-          )}
+          {phaseType?.provided_output_meta_data &&
+            phaseType.provided_output_meta_data.length > 0 && (
+              <MetaDataBadges
+                metaData={phaseType.provided_output_meta_data}
+                icon={<ArrowUpFromLine className='w-4 h-4 text-green-500' />}
+                label='Provided Output Metadata'
+              />
+            )}
         </CardContent>
       </Card>
       {!phaseData?.is_initial_phase && (
@@ -116,7 +119,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           className='!w-3 !h-3 !bg-blue-500 rounded-full'
         />
       )}
-      {phaseType?.input_meta_data && phaseType.input_meta_data.length > 0 && (
+      {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
         <Handle
           type='target'
           position={Position.Top}
@@ -132,7 +135,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         style={{ left: 50, bottom: -10 }}
         className='!w-3 !h-3 !bg-blue-500 rounded-full'
       />
-      {phaseType?.output_meta_data && phaseType.output_meta_data.length > 0 && (
+      {phaseType?.provided_output_meta_data && phaseType.provided_output_meta_data.length > 0 && (
         <Handle
           type='source'
           position={Position.Bottom}

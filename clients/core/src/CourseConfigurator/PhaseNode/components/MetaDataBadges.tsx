@@ -2,12 +2,13 @@ import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react'
+import { MetaDataItem } from '@/interfaces/course_phase_type'
 
 interface MetaDataBadgesProps {
-  metaData: string[]
+  metaData: MetaDataItem[]
   icon: React.ReactNode
   label: string
-  providedMetaData?: string[]
+  providedMetaData?: MetaDataItem[]
 }
 
 export const MetaDataBadges = ({
@@ -17,19 +18,31 @@ export const MetaDataBadges = ({
   providedMetaData,
 }: MetaDataBadgesProps): JSX.Element => {
   const getMetaDataStatus = (
-    item: string,
+    name: string,
+    type: string,
   ): { color: string; icon: React.ReactNode; tooltip?: string } => {
     if (!providedMetaData) return { color: 'bg-secondary', icon: null }
 
-    const count = providedMetaData.filter((meta) => meta === item).length
+    const matchingItems = providedMetaData.filter(
+      (meta) => meta.name === name && meta.type === type,
+    )
 
-    if (count === 0)
+    const wrongType = providedMetaData.filter((meta) => meta.name === name && meta.type !== type)
+
+    if (wrongType.length > 0) {
+      return {
+        color: 'bg-yellow-200 text-yellow-800',
+        icon: <AlertCircle className='w-3 h-3' />,
+        tooltip: 'Conflict: metadata provided with wrong type',
+      }
+    }
+    if (matchingItems.length === 0)
       return {
         color: 'bg-red-200 text-red-800',
         icon: <AlertCircle className='w-3 h-3' />,
         tooltip: 'Missing metadata',
       }
-    if (count === 1)
+    if (matchingItems.length === 1)
       return { color: 'bg-green-200 text-green-800', icon: <CheckCircle className='w-3 h-3' /> }
     return {
       color: 'bg-yellow-200 text-yellow-800',
@@ -37,7 +50,6 @@ export const MetaDataBadges = ({
       tooltip: 'Conflict: metadata provided multiple times',
     }
   }
-
   return (
     <div className='flex items-start space-x-2 mb-2'>
       <div className='mt-1'>{icon}</div>
@@ -45,7 +57,7 @@ export const MetaDataBadges = ({
         <div className='text-xs font-semibold text-secondary-foreground mb-1'>{label}</div>
         <div className='flex flex-wrap gap-1'>
           {metaData.map((item, index) => {
-            const { color, icon: statusIcon, tooltip } = getMetaDataStatus(item)
+            const { color, icon: statusIcon, tooltip } = getMetaDataStatus(item.name, item.type)
             const BadgeContent = (
               <Badge
                 key={index}
@@ -53,10 +65,13 @@ export const MetaDataBadges = ({
                 className={`text-xs font-normal ${color} flex items-center gap-1`}
               >
                 {statusIcon}
-                {item}
+                {item.name}
               </Badge>
             )
 
+            {
+              /** fix this issue forward res */
+            }
             return tooltip ? (
               <TooltipProvider key={index}>
                 <Tooltip>

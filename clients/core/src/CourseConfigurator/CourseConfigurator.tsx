@@ -1,7 +1,39 @@
+import { CoursePhaseType } from '@/interfaces/course_phase_type'
 import { Canvas } from './Canvas'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { getAllCoursePhaseTypes } from '../network/queries/coursePhaseTypes'
+import { useQuery } from '@tanstack/react-query'
+import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { useEffect } from 'react'
 
 export default function CourseConfiguratorPage() {
+  const { setCoursePhaseTypes, appendCoursePhaseType } = useCourseConfigurationState()
+  const {
+    data: fetchedCoursePhaseTypes,
+    error,
+    isPending,
+    isError,
+  } = useQuery<CoursePhaseType[]>({
+    queryKey: ['course_phase_types'],
+    queryFn: () => getAllCoursePhaseTypes(),
+  })
+
+  useEffect(() => {
+    if (fetchedCoursePhaseTypes) {
+      setCoursePhaseTypes([])
+      // deep copy of course phase data
+      fetchedCoursePhaseTypes.forEach((coursePhaseType) => {
+        appendCoursePhaseType({
+          id: coursePhaseType.id,
+          name: coursePhaseType.name,
+          initial_phase: coursePhaseType.initial_phase,
+          required_input_meta_data: [...coursePhaseType.required_input_meta_data],
+          provided_output_meta_data: [...coursePhaseType.provided_output_meta_data],
+        })
+      })
+    }
+  }, [appendCoursePhaseType, fetchedCoursePhaseTypes, setCoursePhaseTypes])
+
   return (
     <>
       <Card className='m-8'>

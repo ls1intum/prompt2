@@ -1,10 +1,20 @@
 import { GripVertical } from 'lucide-react'
-import { coursePhases, phaseTypes } from '../data' // TODO replace this with a DB request
+import { coursePhases } from '../data' // TODO replace this with a DB request
+import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 
 export function Sidebar() {
   // TODO get this from the database
-  // TODO maybe replace later if multiple are allowed!
+  const { coursePhaseTypes } = useCourseConfigurationState()
   const courseHasInitialPhase = coursePhases.map((phase) => phase.is_initial_phase).includes(true)
+  const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
+    if (a.initial_phase && !b.initial_phase) {
+      return -1
+    }
+    if (!a.initial_phase && b.initial_phase) {
+      return 1
+    }
+    return 0
+  })
 
   const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeType: string) => {
     event.dataTransfer.setData('application/@xyflow/react', nodeType)
@@ -18,7 +28,7 @@ export function Sidebar() {
       </div>
       <div className='flex-1 overflow-auto p-4'>
         <div className='space-y-2'>
-          {phaseTypes.map((phase) =>
+          {coursePhaseTypesOrdered.map((phase) =>
             courseHasInitialPhase && phase.initial_phase ? null : (
               <div
                 key={phase.id}

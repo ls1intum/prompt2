@@ -1,10 +1,12 @@
 import { useCallback } from 'react'
-import { coursePhases, phaseTypes } from '../data' // TODO: replace with real data
+import { coursePhases } from '../data' // TODO: replace with real data
 import { Node, useReactFlow } from '@xyflow/react'
 import { CreateCoursePhase } from '@/interfaces/course_phase'
+import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 
 export const useDrop = (reactFlowWrapper, setNodes) => {
   const { screenToFlowPosition } = useReactFlow()
+  const { coursePhaseTypes } = useCourseConfigurationState()
 
   return useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -17,7 +19,9 @@ export const useDrop = (reactFlowWrapper, setNodes) => {
           return
         }
 
-        const coursePhaseType = phaseTypes.find((phaseType) => phaseType.id === coursePhaseTypeID)
+        const coursePhaseType = coursePhaseTypes.find(
+          (phaseType) => phaseType.id === coursePhaseTypeID,
+        )
         if (!coursePhaseType) {
           console.error(`Unknown course phase type: ${coursePhaseTypeID}`)
           return
@@ -51,6 +55,6 @@ export const useDrop = (reactFlowWrapper, setNodes) => {
         setNodes((nds) => nds.concat(newNode))
       }
     },
-    [reactFlowWrapper, screenToFlowPosition, setNodes],
+    [coursePhaseTypes, reactFlowWrapper, screenToFlowPosition, setNodes],
   )
 }
