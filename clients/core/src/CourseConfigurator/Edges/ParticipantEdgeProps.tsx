@@ -3,7 +3,7 @@ import { UserRound } from 'lucide-react'
 
 export const ParticipantEdgeProps = (params: Edge | Connection) => ({
   ...params,
-  animated: true,
+  animated: false,
   style: { stroke: '#3b82f6', strokeWidth: 3 },
   type: 'iconEdge',
   markerEnd: { type: MarkerType.ArrowClosed },

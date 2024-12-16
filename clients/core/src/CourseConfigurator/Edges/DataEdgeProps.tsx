@@ -3,7 +3,7 @@ import { Database } from 'lucide-react'
 
 export const DataEdgeProps = (params: Edge | Connection) => ({
   ...params,
-  animated: true,
+  animated: false,
   style: { stroke: '#22c55e', strokeWidth: 2, strokeDasharray: '5,5' },
   type: 'iconEdge',
   markerEnd: { type: MarkerType.ArrowClosed },
