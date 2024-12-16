@@ -20,6 +20,7 @@ import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { ParticipantEdgeProps } from './Edges/ParticipantEdgeProps'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -54,9 +55,19 @@ export function CourseConfigurator() {
     edges: initialEdges,
   })
 
+  const designedEdges = layoutedEdges.map((edge) => {
+    const participantEdge = ParticipantEdgeProps(edge)
+    return {
+      ...participantEdge,
+      id: edge.id,
+      sourceHandle: `participants-out-${edge.source}`,
+      targetHandle: `participants-in-${edge.target}`,
+    }
+  })
+
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(designedEdges)
   const { theme } = useDarkMode()
 
   // For deletion confirmation dialog

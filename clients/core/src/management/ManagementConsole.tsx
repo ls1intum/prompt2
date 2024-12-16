@@ -66,7 +66,6 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   // check authorization
   // if course non existent or unauthorized, show error page
   const courseExists = fetchedCourses.some((course) => course.id === courseId.courseId)
-  console.log(fetchedCourses)
 
   return (
     <DarkModeProvider>

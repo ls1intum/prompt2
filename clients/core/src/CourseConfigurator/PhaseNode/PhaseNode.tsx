@@ -11,9 +11,7 @@ import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   const { coursePhases } = useCourseConfigurationState()
-  console.log('available coursePhases', coursePhases)
   const coursePhase = coursePhases.find((phase) => phase.id === id)
-  console.log('im coursePhase', coursePhase)
 
   const [phaseData, setPhaseData] = useState<CoursePhasePosition | undefined>(coursePhase)
   const [isEditing, setIsEditing] = useState(false)

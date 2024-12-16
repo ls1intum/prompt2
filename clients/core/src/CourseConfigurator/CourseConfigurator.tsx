@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getAllCoursePhaseTypes } from '../network/queries/coursePhaseTypes'
 import { useQuery } from '@tanstack/react-query'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseGraph } from '../network/queries/coursePhaseGraph'
@@ -19,11 +19,14 @@ export default function CourseConfiguratorPage() {
   const { setCoursePhaseTypes, appendCoursePhaseType, setCoursePhaseGraph, setCoursePhases } =
     useCourseConfigurationState()
 
+  const [finishedGraphSetup, setFinishedGraphSetup] = useState(false)
+  const [finishedCoursePhaseSetup, setFinishedCoursePhaseSetup] = useState(false)
+
   const {
     data: fetchedCoursePhaseTypes,
     isPending: isCoursePhaseTypesPending,
     error,
-    isError,
+    isError: isCoursePhaseTypesError,
     refetch: refetchCoursePhaseTypes,
   } = useQuery<CoursePhaseType[]>({
     queryKey: ['course_phase_types'],
@@ -61,6 +64,7 @@ export default function CourseConfiguratorPage() {
     if (fetchedCourseGraph) {
       console.log(fetchedCourseGraph)
       setCoursePhaseGraph([...fetchedCourseGraph])
+      setFinishedGraphSetup(true)
     }
   }, [fetchedCourseGraph, setCoursePhaseGraph])
 
@@ -77,6 +81,7 @@ export default function CourseConfiguratorPage() {
         })),
       ])
     }
+    setFinishedCoursePhaseSetup(true)
   }, [course, setCoursePhases])
 
   return (
@@ -95,10 +100,9 @@ export default function CourseConfiguratorPage() {
           </ol>
         </CardContent>
       </Card>
+
       <Card className='m-8'>
-        {isCoursePhaseTypesPending || isGraphPending ? (
-          <Loader2 className='w-12 h-12 m-8' />
-        ) : isError || isGraphError ? (
+        {isCoursePhaseTypesError || isGraphError ? (
           <ErrorPage
             title='Error'
             description='Failed to fetch course phase types'
@@ -108,6 +112,11 @@ export default function CourseConfiguratorPage() {
               refetchGraph()
             }}
           />
+        ) : isCoursePhaseTypesPending ||
+          isGraphPending ||
+          !finishedCoursePhaseSetup ||
+          !finishedGraphSetup ? (
+          <Loader2 className='w-12 h-12 m-8' />
         ) : (
           <Canvas />
         )}
