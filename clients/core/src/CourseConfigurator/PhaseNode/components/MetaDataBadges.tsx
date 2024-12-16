@@ -33,14 +33,14 @@ export const MetaDataBadges = ({
       return {
         color: 'bg-yellow-200 text-yellow-800',
         icon: <AlertCircle className='w-3 h-3' />,
-        tooltip: 'Conflict: metadata provided with wrong type',
+        tooltip: 'Conflict (Wrong type): expecting type: ' + type,
       }
     }
     if (matchingItems.length === 0)
       return {
         color: 'bg-red-200 text-red-800',
         icon: <AlertCircle className='w-3 h-3' />,
-        tooltip: 'Missing metadata',
+        tooltip: 'Missing meta data with name: ' + name + ' and type: ' + type,
       }
     if (matchingItems.length === 1)
       return { color: 'bg-green-200 text-green-800', icon: <CheckCircle className='w-3 h-3' /> }
@@ -58,31 +58,24 @@ export const MetaDataBadges = ({
         <div className='flex flex-wrap gap-1'>
           {metaData.map((item, index) => {
             const { color, icon: statusIcon, tooltip } = getMetaDataStatus(item.name, item.type)
-            const BadgeContent = (
-              <Badge
-                key={index}
-                variant='secondary'
-                className={`text-xs font-normal ${color} flex items-center gap-1`}
-              >
-                {statusIcon}
-                {item.name}
-              </Badge>
-            )
-
-            {
-              /** fix this issue forward res */
-            }
-            return tooltip ? (
+            return (
               <TooltipProvider key={index}>
                 <Tooltip>
-                  <TooltipTrigger asChild>{BadgeContent}</TooltipTrigger>
+                  <TooltipTrigger>
+                    <Badge
+                      key={index}
+                      variant='secondary'
+                      className={`text-xs font-normal ${color} flex items-center gap-1`}
+                    >
+                      {statusIcon}
+                      {item.name}
+                    </Badge>
+                  </TooltipTrigger>
                   <TooltipContent>
-                    <p>{tooltip}</p>
+                    <p>{tooltip || `Name: ${item.name}, Type: ${item.type}`}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            ) : (
-              BadgeContent
             )
           })}
         </div>
