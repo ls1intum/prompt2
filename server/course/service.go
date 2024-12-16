@@ -136,3 +136,19 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 	}
 	return nil
 }
+
+func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.CoursePhaseGraph, error) {
+	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, courseID)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoGraph := make([]courseDTO.CoursePhaseGraph, 0, len(graph))
+	for _, g := range graph {
+		dtoGraph = append(dtoGraph, courseDTO.CoursePhaseGraph{
+			FromCoursePhaseID: g.FromCoursePhaseID,
+			ToCoursePhaseID:   g.ToCoursePhaseID,
+		})
+	}
+	return dtoGraph, nil
+}

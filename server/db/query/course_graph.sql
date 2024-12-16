@@ -16,6 +16,16 @@ FROM phase_sequence ps
 INNER JOIN course_phase_type cpt ON ps.course_phase_type_id = cpt.id
 ORDER BY ps.sequence_order;
 
+
+-- name: GetCoursePhaseGraph :many
+SELECT cpg.*
+FROM course_phase_graph cpg
+JOIN course_phase cp
+  ON cpg.from_course_phase_id = cp.id
+WHERE cp.course_id = $1;
+
+
+
 -- name: GetNotOrderedCoursePhases :many
 SELECT cp.*, cpt.name AS course_phase_type_name
 FROM course_phase cp

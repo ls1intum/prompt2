@@ -6,17 +6,39 @@ import { useQuery } from '@tanstack/react-query'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { useEffect } from 'react'
 import { ErrorPage } from '@/components/ErrorPage'
+import { useParams } from 'react-router-dom'
+import { getCoursePhaseGraph } from '../network/queries/coursePhaseGraph'
+import { CoursePhaseGraphItem } from '@/interfaces/course_phase_graph'
+import { useCourseStore } from '@/zustand/useCourseStore'
+import { Loader2 } from 'lucide-react'
 
 export default function CourseConfiguratorPage() {
-  const { setCoursePhaseTypes, appendCoursePhaseType } = useCourseConfigurationState()
+  const { courses } = useCourseStore()
+  const courseId = useParams<{ courseId: string }>().courseId
+  const course = courses.find((c) => c.id === courseId)
+  const { setCoursePhaseTypes, appendCoursePhaseType, setCoursePhaseGraph, setCoursePhases } =
+    useCourseConfigurationState()
+
   const {
     data: fetchedCoursePhaseTypes,
+    isPending: isCoursePhaseTypesPending,
     error,
     isError,
-    refetch,
+    refetch: refetchCoursePhaseTypes,
   } = useQuery<CoursePhaseType[]>({
     queryKey: ['course_phase_types'],
     queryFn: () => getAllCoursePhaseTypes(),
+  })
+
+  const {
+    data: fetchedCourseGraph,
+    isPending: isGraphPending,
+    error: graphError,
+    isError: isGraphError,
+    refetch: refetchGraph,
+  } = useQuery<CoursePhaseGraphItem[]>({
+    queryKey: ['course_phases', 'course_phase_graph'],
+    queryFn: () => getCoursePhaseGraph(courseId ?? ''),
   })
 
   useEffect(() => {
@@ -35,6 +57,28 @@ export default function CourseConfiguratorPage() {
     }
   }, [appendCoursePhaseType, fetchedCoursePhaseTypes, setCoursePhaseTypes])
 
+  useEffect(() => {
+    if (fetchedCourseGraph) {
+      console.log(fetchedCourseGraph)
+      setCoursePhaseGraph([...fetchedCourseGraph])
+    }
+  }, [fetchedCourseGraph, setCoursePhaseGraph])
+
+  useEffect(() => {
+    if (!course) {
+      // TODO replace by error page
+      console.log('Course not found')
+    } else {
+      setCoursePhases([
+        ...course.course_phases.map((phase) => ({
+          ...phase,
+          position: { x: 0, y: 0 },
+          meta_data: [],
+        })),
+      ])
+    }
+  }, [course, setCoursePhases])
+
   return (
     <>
       <Card className='m-8'>
@@ -52,12 +96,17 @@ export default function CourseConfiguratorPage() {
         </CardContent>
       </Card>
       <Card className='m-8'>
-        {isError ? (
+        {isCoursePhaseTypesPending || isGraphPending ? (
+          <Loader2 className='w-12 h-12 m-8' />
+        ) : isError || isGraphError ? (
           <ErrorPage
             title='Error'
             description='Failed to fetch course phase types'
-            message={error?.message}
-            onRetry={() => refetch()}
+            message={error?.message || graphError?.message}
+            onRetry={() => {
+              refetchCoursePhaseTypes()
+              refetchGraph()
+            }}
           />
         ) : (
           <Canvas />

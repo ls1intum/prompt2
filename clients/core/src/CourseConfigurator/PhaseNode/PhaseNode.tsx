@@ -3,16 +3,19 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { coursePhases } from '../data' // replace this with DB request
-import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { Save, Pen, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
+  const { coursePhases } = useCourseConfigurationState()
+  console.log('available coursePhases', coursePhases)
   const coursePhase = coursePhases.find((phase) => phase.id === id)
-  const [phaseData, setPhaseData] = useState<CreateCoursePhase | undefined>(coursePhase)
+  console.log('im coursePhase', coursePhase)
+
+  const [phaseData, setPhaseData] = useState<CoursePhasePosition | undefined>(coursePhase)
   const [isEditing, setIsEditing] = useState(false)
   const { coursePhaseTypes } = useCourseConfigurationState()
 

@@ -12,7 +12,6 @@ import {
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './PhaseNode/PhaseNode'
 import { Sidebar } from './components/Sidebar'
-import { coursePhases, initialEdges } from './data'
 import { IconEdge } from './Edges/IconEdge'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { getLayoutedElements } from './utils/getLayoutedElements'
@@ -20,22 +19,35 @@ import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
+import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
 }
 
+// TODO rewrite icon edge to instead have two types: one for participant and one for metadata
 const edgeTypes: EdgeTypes = {
   iconEdge: IconEdge,
 }
 
 export function CourseConfigurator() {
+  // getting the data
+  const { coursePhases, coursePhaseGraph } = useCourseConfigurationState()
   const initialNodes = coursePhases.map((phase) => ({
     id: phase.id || `no-valid-id-${Date.now()}`,
     type: 'phaseNode',
     position: phase.position,
     data: {},
   }))
+
+  const initialEdges = coursePhaseGraph.map((item) => {
+    return {
+      id: 'edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
+      source: item.from_course_phase_id,
+      target: item.to_course_phase_id,
+      type: 'iconEdge',
+    }
+  })
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements({
     nodes: initialNodes,

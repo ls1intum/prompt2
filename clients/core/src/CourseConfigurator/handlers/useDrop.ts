@@ -1,12 +1,11 @@
 import { useCallback } from 'react'
-import { coursePhases } from '../data' // TODO: replace with real data
 import { Node, useReactFlow } from '@xyflow/react'
-import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 
 export const useDrop = (reactFlowWrapper, setNodes) => {
   const { screenToFlowPosition } = useReactFlow()
-  const { coursePhaseTypes } = useCourseConfigurationState()
+  const { coursePhaseTypes, appendCoursePhase } = useCourseConfigurationState()
 
   return useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -34,16 +33,17 @@ export const useDrop = (reactFlowWrapper, setNodes) => {
 
         const id = `no-valid-id-${Date.now()}`
 
-        const coursePhase: CreateCoursePhase = {
+        const coursePhase: CoursePhasePosition = {
           id: id,
-          course_id: 'some_id',
+          course_id: 'some_id', // TODO replace with real course id
           name: `New ${coursePhaseType.name}`,
           position: position,
           is_initial_phase: coursePhaseType.initial_phase,
           course_phase_type_id: coursePhaseType.id,
+          meta_data: [], // TODO: maybe fix this to be {} instead of []
         }
 
-        Object.assign(coursePhases, coursePhases.concat(coursePhase))
+        appendCoursePhase(coursePhase)
 
         const newNode: Node = {
           id: id,

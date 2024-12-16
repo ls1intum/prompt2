@@ -38,6 +38,34 @@ func (q *Queries) DeleteCourseGraph(ctx context.Context, courseID uuid.UUID) err
 	return err
 }
 
+const getCoursePhaseGraph = `-- name: GetCoursePhaseGraph :many
+SELECT cpg.from_course_phase_id, cpg.to_course_phase_id
+FROM course_phase_graph cpg
+JOIN course_phase cp
+  ON cpg.from_course_phase_id = cp.id
+WHERE cp.course_id = $1
+`
+
+func (q *Queries) GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]CoursePhaseGraph, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseGraph, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseGraph
+	for rows.Next() {
+		var i CoursePhaseGraph
+		if err := rows.Scan(&i.FromCoursePhaseID, &i.ToCoursePhaseID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCoursePhaseSequence = `-- name: GetCoursePhaseSequence :many
 WITH RECURSIVE phase_sequence AS (
     SELECT cp.id, cp.course_id, cp.name, cp.is_initial_phase, cp.course_phase_type_id, 1 AS sequence_order
