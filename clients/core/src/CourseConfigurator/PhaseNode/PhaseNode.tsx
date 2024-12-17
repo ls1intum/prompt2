@@ -35,15 +35,11 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
   const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
 
   const handleNameChange = (value: string) => {
+    if (coursePhase) {
+      coursePhase.is_modified = true
+      coursePhase.name = value
+    }
     setPhaseData((prev) => (prev ? { ...prev, name: value } : undefined))
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          node.data = { ...node.data, name: value }
-        }
-        return node
-      }),
-    )
   }
 
   const onNodeClick = useCallback(() => {

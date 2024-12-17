@@ -1,14 +1,16 @@
 import { Node, Edge } from '@xyflow/react'
-import { CreateCoursePhase } from '@/interfaces/course_phase'
+import { CreateCoursePhase, UpdateCoursePhase } from '@/interfaces/course_phase'
 import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
 import { UseMutateFunction } from '@tanstack/react-query'
+import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 
 interface HandleSaveProps {
   nodes: Node[]
   edges: Edge[]
-  coursePhases: any[]
+  coursePhases: CoursePhasePosition[]
   mutateDeletePhase: UseMutateFunction<string | undefined, Error, string, unknown>
   mutateAsyncPhases: (coursePhase: CreateCoursePhase) => Promise<string | undefined>
+  mutateRenamePhase: UseMutateFunction<string | undefined, Error, UpdateCoursePhase, unknown>
   mutateGraph: UseMutateFunction<string | undefined, Error, CoursePhaseGraphUpdate, unknown>
   queryClient: any
   setIsModified: (val: boolean) => void
@@ -20,6 +22,7 @@ export async function handleSave({
   coursePhases,
   mutateDeletePhase,
   mutateAsyncPhases,
+  mutateRenamePhase,
   mutateGraph,
   queryClient,
   setIsModified,
@@ -60,7 +63,21 @@ export async function handleSave({
     }
   }
 
-  // 2.) Update edges with replaced IDs if necessary
+  // 2.) Update the names of the phases if any
+  const updatedPhases = coursePhases.filter((phase) => phase.is_modified)
+  for (const updatedPhase of updatedPhases) {
+    try {
+      await mutateRenamePhase({
+        id: updatedPhase.id as string,
+        name: updatedPhase.name,
+      })
+    } catch (err) {
+      console.error('Error saving course phase', err)
+      return
+    }
+  }
+
+  // 3.) Update edges with replaced IDs if necessary
   const updatedEdges = edges.map((edge) => {
     const newSource = idReplacementMap[edge.source] || edge.source
     const newTarget = idReplacementMap[edge.target] || edge.target
@@ -71,7 +88,7 @@ export async function handleSave({
     from_course_phase_id: edge.source,
     to_course_phase_id: edge.target,
   }))
-
+  console.log(coursePhases.find((phase) => phase.is_initial_phase))
   const initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
 
   const graphUpdate: CoursePhaseGraphUpdate = {

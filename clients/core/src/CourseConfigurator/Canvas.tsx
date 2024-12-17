@@ -25,7 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { postNewCoursePhase } from '../network/mutations/postNewCoursePhase'
-import { CreateCoursePhase } from '@/interfaces/course_phase'
+import { CreateCoursePhase, UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorPage } from '@/components/ErrorPage'
 import { CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
@@ -33,6 +33,7 @@ import { updatePhaseGraph } from '../network/mutations/updatePhaseGraph'
 import { useParams } from 'react-router-dom'
 import { deleteCoursePhase } from '../network/mutations/deleteCoursePhase'
 import { handleSave } from './handlers/handleSave'
+import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -83,6 +84,7 @@ export function CourseConfigurator() {
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(designedEdges)
   const [isModified, setIsModified] = useState(false)
+  const phaseNameModified = coursePhases.some((phase) => phase.is_modified)
 
   const { theme } = useDarkMode()
 
@@ -99,6 +101,15 @@ export function CourseConfigurator() {
 
   const onBeforeDelete = useCallback(
     async ({ nodes: toBeDeletedNodes, edges: toBeDeletedEdges }) => {
+      if (
+        toBeDeletedNodes.filter(
+          (node) =>
+            node.id && coursePhases.some((phase) => phase.id === node.id && phase.is_initial_phase),
+        ).length > 0
+      ) {
+        console.log('Cannot delete initial phase')
+        return false
+      }
       setDeleteDialogOpen(true)
 
       if (toBeDeletedNodes.length > 0) {
@@ -141,9 +152,16 @@ export function CourseConfigurator() {
     },
   })
 
-  const { mutate: mutateDeletePhase } = useMutation({
+  const { mutate: mutateDeletePhase, isError: isDeleteError } = useMutation({
     mutationFn: (coursePhaseId: string) => {
       return deleteCoursePhase(coursePhaseId)
+    },
+    onSuccess: () => {},
+  })
+
+  const { mutate: mutateRenamePhase, isError: isRenameError } = useMutation({
+    mutationFn: (coursePhase: UpdateCoursePhase) => {
+      return updateCoursePhase(coursePhase)
     },
     onSuccess: () => {},
   })
@@ -155,6 +173,7 @@ export function CourseConfigurator() {
       coursePhases,
       mutateDeletePhase,
       mutateAsyncPhases,
+      mutateRenamePhase,
       mutateGraph,
       queryClient,
       setIsModified,
@@ -175,14 +194,18 @@ export function CourseConfigurator() {
     setIsModified(false)
   }
 
+  const handleRetry = () => {
+    window.location.reload()
+  }
+
   return (
     <>
       <Sidebar />
       <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
-        {(isPhaseError || isGraphError) && (
-          <ErrorPage message='Failed to save the changes' onRetry={handleRevert} />
+        {(isPhaseError || isGraphError || isDeleteError || isRenameError) && (
+          <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />
         )}
-        {isModified && (
+        {(isModified || phaseNameModified) && (
           <Alert variant='destructive' className='mb-4'>
             <AlertCircle className='h-4 w-4' />
             <AlertTitle>Unsaved Changes</AlertTitle>

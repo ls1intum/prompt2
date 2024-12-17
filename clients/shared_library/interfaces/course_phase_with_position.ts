@@ -6,4 +6,5 @@ export interface CoursePhasePosition {
   is_initial_phase: boolean
   course_phase_type_id: string
   position: { x: number; y: number }
+  is_modified?: boolean
 }
