@@ -13,6 +13,7 @@ func setupCoursePhaseRouter(router *gin.RouterGroup) {
 	coursePhase.GET("/:uuid", getCoursePhaseByID)
 	coursePhase.POST("", createCoursePhase)
 	coursePhase.PUT("/:uuid", updateCoursePhase)
+	coursePhase.DELETE("/:uuid", deleteCoursePhase)
 }
 
 func createCoursePhase(c *gin.Context) {
@@ -65,6 +66,22 @@ func updateCoursePhase(c *gin.Context) {
 	}
 
 	err := UpdateCoursePhase(c, updatedCoursePhase)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func deleteCoursePhase(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = DeleteCoursePhase(c, id)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

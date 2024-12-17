@@ -31,6 +31,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
 import { updatePhaseGraph } from '../network/mutations/updatePhaseGraph'
 import { useParams } from 'react-router-dom'
+import { deleteCoursePhase } from '../network/mutations/deleteCoursePhase'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -148,15 +149,33 @@ export function CourseConfigurator() {
       return updatePhaseGraph(courseId ?? '', coursePhaseGraphUpdate)
     },
     onSuccess: () => {
-      // reload window to get the updated UI
+      // reload window to get the updated UI and Sidebar
       window.location.reload()
     },
+  })
+
+  const { mutate: mutateDeletePhase } = useMutation({
+    mutationFn: (coursePhaseId: string) => {
+      return deleteCoursePhase(coursePhaseId)
+    },
+    onSuccess: () => {},
   })
 
   const handleSave = async () => {
     const idReplacementMap: { [key: string]: string } = {}
 
     // 0.) Remove edges and nodes if need to be removed
+    const nodesToRemove = coursePhases.filter(
+      (phase) => phase.id && !nodes.find((node) => node.id === phase.id),
+    )
+    for (const node of nodesToRemove) {
+      try {
+        await mutateDeletePhase(node.id as string)
+      } catch (err) {
+        console.error('Error deleting course phase', err)
+        return
+      }
+    }
 
     // 1.) Add additional nodes
     const newPhases = coursePhases.filter(

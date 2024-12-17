@@ -48,6 +48,16 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 	return i, err
 }
 
+const deleteCoursePhase = `-- name: DeleteCoursePhase :exec
+DELETE FROM course_phase
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCoursePhase(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCoursePhase, id)
+	return err
+}
+
 const getAllCoursePhaseForCourse = `-- name: GetAllCoursePhaseForCourse :many
 SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
 FROM course_phase cp
