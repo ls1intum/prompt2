@@ -40,7 +40,7 @@ export default function CourseConfiguratorPage() {
     isError: isGraphError,
     refetch: refetchGraph,
   } = useQuery<CoursePhaseGraphItem[]>({
-    queryKey: ['course_phases', 'course_phase_graph'],
+    queryKey: ['course_phases', 'course_phase_graph', courseId],
     queryFn: () => getCoursePhaseGraph(courseId ?? ''),
   })
 
