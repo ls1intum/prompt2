@@ -1,6 +1,5 @@
 import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 import { CoursePhaseType } from '@/interfaces/course_phase_type'
 
 export function Sidebar() {
