@@ -28,10 +28,11 @@ import { postNewCoursePhase } from '../network/mutations/postNewCoursePhase'
 import { CreateCoursePhase } from '@/interfaces/course_phase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorPage } from '@/components/ErrorPage'
-import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
+import { CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
 import { updatePhaseGraph } from '../network/mutations/updatePhaseGraph'
 import { useParams } from 'react-router-dom'
 import { deleteCoursePhase } from '../network/mutations/deleteCoursePhase'
+import { handleSave } from './handlers/handleSave'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -120,20 +121,6 @@ export function CourseConfigurator() {
     [],
   )
 
-  const handleRevert = () => {
-    const filteredLayoutedNodes = layoutedNodes.filter(
-      (node) => node.id && !node.id.startsWith('no-valid-id'),
-    )
-
-    const filteredEdges = designedEdges.filter(
-      (edge) => edge.id && !edge.id.includes('no-valid-id'),
-    )
-    setNodes(filteredLayoutedNodes)
-    setEdges(filteredEdges)
-    removeUnsavedCoursePhases()
-    setIsModified(false)
-  }
-
   const { mutateAsync: mutateAsyncPhases, isError: isPhaseError } = useMutation({
     mutationFn: (coursePhase: CreateCoursePhase) => {
       return postNewCoursePhase(coursePhase)
@@ -161,80 +148,33 @@ export function CourseConfigurator() {
     onSuccess: () => {},
   })
 
-  const handleSave = async () => {
-    const idReplacementMap: { [key: string]: string } = {}
-
-    // 0.) Remove edges and nodes if need to be removed
-    const nodesToRemove = coursePhases.filter(
-      (phase) => phase.id && !nodes.find((node) => node.id === phase.id),
-    )
-    for (const node of nodesToRemove) {
-      try {
-        await mutateDeletePhase(node.id as string)
-      } catch (err) {
-        console.error('Error deleting course phase', err)
-        return
-      }
-    }
-
-    // 1.) Add additional nodes
-    const newPhases = coursePhases.filter(
-      (phase) => !phase.id || phase.id.startsWith('no-valid-id'),
-    )
-    // send array of phases to backend
-    for (const phase of newPhases) {
-      console.log(phase)
-      const createPhase: CreateCoursePhase = {
-        course_id: phase.course_id,
-        name: phase.name,
-        course_phase_type_id: phase.course_phase_type_id,
-        is_initial_phase: phase.is_initial_phase,
-      }
-
-      try {
-        const newId = await mutateAsyncPhases(createPhase)
-        if (phase.id) {
-          idReplacementMap[phase.id] = newId as string
-        }
-      } catch (err) {
-        console.error('Error saving course phase', err)
-        return
-      }
-    }
-
-    // 2.) Update course phase order
-    const updatedEdges = edges.map((edge) => {
-      const newSource = idReplacementMap[edge.source] || edge.source
-      const newTarget = idReplacementMap[edge.target] || edge.target
-      return { ...edge, source: newSource, target: newTarget }
+  const saveChanges = async () => {
+    await handleSave({
+      nodes,
+      edges,
+      coursePhases,
+      mutateDeletePhase,
+      mutateAsyncPhases,
+      mutateGraph,
+      queryClient,
+      setIsModified,
     })
-
-    const orderArray: CoursePhaseGraphItem[] = updatedEdges.map((edge) => {
-      return {
-        from_course_phase_id: edge.source,
-        to_course_phase_id: edge.target,
-      }
-    })
-
-    const graphUpdate: CoursePhaseGraphUpdate = {
-      initial_phase: coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined',
-      course_phase_graph: orderArray,
-    }
-    console.log(graphUpdate)
-    try {
-      await mutateGraph(graphUpdate)
-      queryClient.invalidateQueries({
-        queryKey: ['courses', 'course_phase_types', 'course_phase_graph'],
-      })
-      setIsModified(false)
-      // TODO reload
-    } catch (err) {
-      console.error('Error saving course phase', err)
-      return err
-    }
   }
 
-  // TODO: replace handle revert in error message to sth which reloads this whole component
+  const handleRevert = () => {
+    const filteredLayoutedNodes = layoutedNodes.filter(
+      (node) => node.id && !node.id.startsWith('no-valid-id'),
+    )
+
+    const filteredEdges = designedEdges.filter(
+      (edge) => edge.id && !edge.id.includes('no-valid-id'),
+    )
+    setNodes(filteredLayoutedNodes)
+    setEdges(filteredEdges)
+    removeUnsavedCoursePhases()
+    setIsModified(false)
+  }
+
   return (
     <>
       <Sidebar />
@@ -252,7 +192,7 @@ export function CourseConfigurator() {
                 <Button variant='outline' size='sm' onClick={handleRevert}>
                   Revert
                 </Button>
-                <Button variant='default' size='sm' onClick={handleSave}>
+                <Button variant='default' size='sm' onClick={saveChanges}>
                   Save
                 </Button>
               </div>
