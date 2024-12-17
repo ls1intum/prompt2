@@ -22,6 +22,15 @@ export default function CourseConfiguratorPage() {
   const [finishedGraphSetup, setFinishedGraphSetup] = useState(false)
   const [finishedCoursePhaseSetup, setFinishedCoursePhaseSetup] = useState(false)
 
+  useEffect(() => {
+    // If courseId changes, reset graph setup states
+    setFinishedGraphSetup(false)
+    setFinishedCoursePhaseSetup(false)
+    setCoursePhases([])
+    // Optionally refetch queries if needed
+    refetchGraph()
+  }, [courseId])
+
   const {
     data: fetchedCoursePhaseTypes,
     isPending: isCoursePhaseTypesPending,
@@ -82,11 +91,11 @@ export default function CourseConfiguratorPage() {
       ])
     }
     setFinishedCoursePhaseSetup(true)
-  }, [course, setCoursePhases])
+  }, [course, setCoursePhases, courseId])
 
   return (
     <>
-      <Card className='m-8'>
+      <Card className='m-8' key={courseId}>
         <CardHeader>
           <CardTitle>Instructions</CardTitle>
           <CardDescription>Follow these steps to create your course flow:</CardDescription>
