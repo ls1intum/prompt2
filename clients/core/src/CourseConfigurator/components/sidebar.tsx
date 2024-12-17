@@ -1,5 +1,7 @@
 import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { CoursePhaseType } from '@/interfaces/course_phase_type'
 
 export function Sidebar() {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
@@ -19,6 +21,16 @@ export function Sidebar() {
     event.dataTransfer.effectAllowed = 'move'
   }
 
+  const isDraggable = (phase: CoursePhaseType) => {
+    if (phase.initial_phase && courseHasInitialPhase) {
+      return false
+    }
+    if (!courseHasInitialPhase && !phase.initial_phase) {
+      return false
+    }
+    return true
+  }
+
   return (
     <aside className='flex h-screen w-64 flex-col border-r bg-background'>
       <div className='flex h-14 items-center border-b px-4'>
@@ -26,19 +38,19 @@ export function Sidebar() {
       </div>
       <div className='flex-1 overflow-auto p-4'>
         <div className='space-y-2'>
-          {coursePhaseTypesOrdered.map((phase) =>
-            courseHasInitialPhase && phase.initial_phase ? null : (
-              <div
-                key={phase.id}
-                draggable
-                onDragStart={(event) => onDragStart(event, phase.id)}
-                className='group flex cursor-move items-center rounded-md border bg-card p-2 hover:bg-accent'
-              >
-                <GripVertical className='mr-2 h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>{phase.name}</span>
-              </div>
-            ),
-          )}
+          {coursePhaseTypesOrdered.map((phase) => (
+            <div
+              key={phase.id}
+              draggable={isDraggable(phase)}
+              onDragStart={(event) => isDraggable(phase) && onDragStart(event, phase.id)}
+              className={`group flex items-center rounded-md border bg-card p-2 ${
+                isDraggable(phase) ? 'cursor-move hover:bg-accent' : 'cursor-not-allowed opacity-50'
+              }`}
+            >
+              <GripVertical className='mr-2 h-4 w-4 text-muted-foreground' />
+              <span className='text-sm font-medium'>{phase.name}</span>
+            </div>
+          ))}
         </div>
       </div>
     </aside>
