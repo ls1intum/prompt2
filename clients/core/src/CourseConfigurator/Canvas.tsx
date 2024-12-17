@@ -68,6 +68,8 @@ export function CourseConfigurator() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(designedEdges)
+  const [isModified, setIsModified] = useState(false)
+
   const { theme } = useDarkMode()
 
   // For deletion confirmation dialog
@@ -96,6 +98,7 @@ export function CourseConfigurator() {
       })
 
       if (userDecision) {
+        setIsModified(true)
         return { nodes: toBeDeletedNodes, edges: toBeDeletedEdges }
       } else {
         return false
@@ -108,14 +111,15 @@ export function CourseConfigurator() {
     <>
       <Sidebar />
       <div className='flex-grow h-full' ref={reactFlowWrapper}>
+        <div>{isModified && 'This board has been modified'}</div>
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onBeforeDelete={onBeforeDelete}
-          onConnect={useConnect(edges, nodes, setEdges)}
-          onDrop={useDrop(reactFlowWrapper, setNodes)}
+          onConnect={useConnect(edges, nodes, setEdges, setIsModified)}
+          onDrop={useDrop(reactFlowWrapper, setNodes, setIsModified)}
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}

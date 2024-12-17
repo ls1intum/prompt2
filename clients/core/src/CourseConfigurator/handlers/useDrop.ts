@@ -3,7 +3,7 @@ import { Node, useReactFlow } from '@xyflow/react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
 
-export const useDrop = (reactFlowWrapper, setNodes) => {
+export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
   const { screenToFlowPosition } = useReactFlow()
   const { coursePhaseTypes, appendCoursePhase } = useCourseConfigurationState()
 
@@ -44,6 +44,7 @@ export const useDrop = (reactFlowWrapper, setNodes) => {
         }
 
         appendCoursePhase(coursePhase)
+        setIsModified(true)
 
         const newNode: Node = {
           id: id,

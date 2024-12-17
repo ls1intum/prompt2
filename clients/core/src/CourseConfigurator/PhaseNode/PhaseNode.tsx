@@ -89,7 +89,6 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
             {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}
           </Button>
-          {/** TODO DELETE Button */}
         </CardHeader>
         <CardContent className='p-4 pt-2'>
           {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
