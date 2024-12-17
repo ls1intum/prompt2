@@ -20,10 +20,7 @@ type CourseService struct {
 var CourseServiceSingleton *CourseService
 
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
-	defer cancel()
-
-	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctxWithTimeout)
+	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,23 +38,20 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 }
 
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
-	defer cancel()
-
 	// TODO: replace with query to get the course incl phases
-	course, err := CourseServiceSingleton.queries.GetCourse(ctxWithTimeout, id)
+	course, err := CourseServiceSingleton.queries.GetCourse(ctx, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
 
 	// Get all course phases in order
-	coursePhasesOrder, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctxWithTimeout, id)
+	coursePhasesOrder, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
 
 	// get all coursePhases out of order
-	coursePhasesNoOrder, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctxWithTimeout, id)
+	coursePhasesNoOrder, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
@@ -141,10 +135,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 }
 
 func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.CoursePhaseGraph, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
-	defer cancel()
-
-	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctxWithTimeout, courseID)
+	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, courseID)
 	if err != nil {
 		return nil, err
 	}
