@@ -8,6 +8,7 @@ interface CourseConfigurationState {
   coursePhaseGraph: CoursePhaseGraphItem[]
   coursePhases: CoursePhasePosition[]
   setCoursePhaseTypes: (coursePhaseTypes: CoursePhaseType[]) => void
+  removeUnsavedCoursePhases: () => void
   appendCoursePhaseType
   setCoursePhaseGraph: (coursePhaseGraph: CoursePhaseGraphItem[]) => void
   setCoursePhases: (coursePhases: CoursePhasePosition[]) => void
@@ -19,6 +20,12 @@ export const useCourseConfigurationState = create<CourseConfigurationState>((set
   coursePhaseGraph: [],
   coursePhases: [],
   setCoursePhaseTypes: (coursePhaseTypes) => set({ coursePhaseTypes }),
+  removeUnsavedCoursePhases: () =>
+    set((state) => ({
+      coursePhases: state.coursePhases.filter(
+        (phase) => phase.id && !phase.id.startsWith('no-valid-id'),
+      ),
+    })),
   appendCoursePhaseType: (coursePhaseType: CoursePhaseType) =>
     set((state) => ({
       coursePhaseTypes: state.coursePhaseTypes.concat(coursePhaseType),

@@ -21,19 +21,22 @@ import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { ParticipantEdgeProps } from './Edges/ParticipantEdgeProps'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
 }
 
-// TODO rewrite icon edge to instead have two types: one for participant and one for metadata
 const edgeTypes: EdgeTypes = {
   iconEdge: IconEdge,
 }
 
 export function CourseConfigurator() {
   // getting the data
-  const { coursePhases, coursePhaseGraph } = useCourseConfigurationState()
+  const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
+    useCourseConfigurationState()
   const initialNodes = coursePhases.map((phase) => ({
     id: phase.id || `no-valid-id-${Date.now()}`,
     type: 'phaseNode',
@@ -107,11 +110,45 @@ export function CourseConfigurator() {
     [],
   )
 
+  const handleRevert = () => {
+    const filteredLayoutedNodes = layoutedNodes.filter(
+      (node) => node.id && !node.id.startsWith('no-valid-id'),
+    )
+
+    const filteredEdges = designedEdges.filter(
+      (edge) => edge.id && !edge.id.includes('no-valid-id'),
+    )
+    setNodes(filteredLayoutedNodes)
+    setEdges(filteredEdges)
+    removeUnsavedCoursePhases()
+    setIsModified(false)
+  }
+
+  const handleSave = () => {
+    setIsModified(false)
+  }
+
   return (
     <>
       <Sidebar />
-      <div className='flex-grow h-full' ref={reactFlowWrapper}>
-        <div>{isModified && 'This board has been modified'}</div>
+      <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
+        {isModified && (
+          <Alert variant='destructive' className='mb-4'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertTitle>Unsaved Changes</AlertTitle>
+            <AlertDescription className='flex items-center justify-between'>
+              <span>This board has been modified. Would you like to save your changes?</span>
+              <div className='space-x-2'>
+                <Button variant='outline' size='sm' onClick={handleRevert}>
+                  Revert
+                </Button>
+                <Button variant='default' size='sm' onClick={handleSave}>
+                  Save
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
         <ReactFlow
           nodes={nodes}
           edges={edges}
