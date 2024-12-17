@@ -26,7 +26,7 @@ import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { postNewCoursePhase } from '../network/mutations/postNewCoursePhase'
 import { CreateCoursePhase } from '@/interfaces/course_phase'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorPage } from '@/components/ErrorPage'
 import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
 import { updatePhaseGraph } from '../network/mutations/updatePhaseGraph'
@@ -42,6 +42,7 @@ const edgeTypes: EdgeTypes = {
 
 export function CourseConfigurator() {
   // getting the data
+  const queryClient = useQueryClient()
   const { courseId } = useParams<{ courseId: string }>()
   const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
     useCourseConfigurationState()
@@ -146,7 +147,10 @@ export function CourseConfigurator() {
     mutationFn: (coursePhaseGraphUpdate: CoursePhaseGraphUpdate) => {
       return updatePhaseGraph(courseId ?? '', coursePhaseGraphUpdate)
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      // reload window to get the updated UI
+      window.location.reload()
+    },
   })
 
   const handleSave = async () => {
@@ -197,17 +201,18 @@ export function CourseConfigurator() {
       initial_phase: coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined',
       course_phase_graph: orderArray,
     }
+    console.log(graphUpdate)
     try {
       await mutateGraph(graphUpdate)
+      queryClient.invalidateQueries({
+        queryKey: ['courses', 'course_phase_types', 'course_phase_graph'],
+      })
+      setIsModified(false)
       // TODO reload
     } catch (err) {
       console.error('Error saving course phase', err)
-      return
+      return err
     }
-
-    // 3.) reload components
-
-    setIsModified(false)
   }
 
   // TODO: replace handle revert in error message to sth which reloads this whole component
