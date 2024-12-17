@@ -1,10 +1,8 @@
 import { GripVertical } from 'lucide-react'
-import { coursePhases } from '../data' // TODO replace this with a DB request
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 
 export function Sidebar() {
-  // TODO get this from the database
-  const { coursePhaseTypes } = useCourseConfigurationState()
+  const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
   const courseHasInitialPhase = coursePhases.map((phase) => phase.is_initial_phase).includes(true)
   const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
     if (a.initial_phase && !b.initial_phase) {

@@ -2,9 +2,11 @@ import { useCallback } from 'react'
 import { Node, useReactFlow } from '@xyflow/react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { useParams } from 'react-router-dom'
 
 export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
   const { screenToFlowPosition } = useReactFlow()
+  const { courseId } = useParams<{ courseId: string }>()
   const { coursePhaseTypes, appendCoursePhase } = useCourseConfigurationState()
 
   return useCallback(
@@ -35,7 +37,7 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
 
         const coursePhase: CoursePhasePosition = {
           id: id,
-          course_id: 'some_id', // TODO replace with real course id
+          course_id: courseId ?? 'no-valid-id',
           name: `New ${coursePhaseType.name}`,
           position: position,
           is_initial_phase: coursePhaseType.initial_phase,

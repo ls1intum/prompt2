@@ -16,7 +16,7 @@ type CoursePhaseTypeService struct {
 var CoursePhaseTypeServiceSingleton *CoursePhaseTypeService
 
 func GetAllCoursePhaseTypes(ctx context.Context) ([]coursePhaseTypeDTO.CoursePhaseType, error) {
-	coursePhaseTypes, err := CoursePhaseTypeServiceSingleton.queries.GetAllCoursePhaseTypes(ctx)
+	coursePhaseTypes, err := CoursePhaseTypeServiceSingleton.queries.GetAllCoursePhaseTypes(context.Background())
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	log "github.com/sirupsen/logrus"
 )
 
 type CourseService struct {
@@ -19,7 +20,10 @@ type CourseService struct {
 var CourseServiceSingleton *CourseService
 
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
-	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctx)
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctxWithTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +31,7 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 	// TODO rewrite this cleaner!!!
 	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
 	for _, course := range courses {
-		dtoCourse, err := GetCourseByID(ctx, course.ID)
+		dtoCourse, err := GetCourseByID(context.Background(), course.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -37,20 +41,23 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 }
 
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
 	// TODO: replace with query to get the course incl phases
-	course, err := CourseServiceSingleton.queries.GetCourse(ctx, id)
+	course, err := CourseServiceSingleton.queries.GetCourse(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
 
 	// Get all course phases in order
-	coursePhasesOrder, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, id)
+	coursePhasesOrder, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
 
 	// get all coursePhases out of order
-	coursePhasesNoOrder, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, id)
+	coursePhasesNoOrder, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
@@ -86,7 +93,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
 }
 
-func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhaseOrder courseDTO.CoursePhaseOrderRequest) error {
+func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate courseDTO.UpdateCoursePhaseGraph) error {
 	tx, err := CourseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -100,15 +107,14 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 	}
 
 	// create new connections
-	for i := range updatedPhaseOrder.OrderedPhases {
-		if i < len(updatedPhaseOrder.OrderedPhases)-1 {
-			err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
-				FromCoursePhaseID: updatedPhaseOrder.OrderedPhases[i],
-				ToCoursePhaseID:   updatedPhaseOrder.OrderedPhases[i+1],
-			})
-			if err != nil {
-				return err
-			}
+	for _, graphItem := range graphUpdate.PhaseGraph {
+		err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
+			FromCoursePhaseID: graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:   graphItem.ToCoursePhaseID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
 		}
 	}
 
@@ -120,15 +126,12 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 		return err
 	}
 
-	if len(updatedPhaseOrder.OrderedPhases) > 0 {
-		err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
-			CourseID: courseID,
-			ID:       updatedPhaseOrder.OrderedPhases[0],
-		})
-		if err != nil {
-			return err
-		}
-
+	err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
+		CourseID: courseID,
+		ID:       graphUpdate.InitialPhase,
+	})
+	if err != nil {
+		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -138,7 +141,10 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 }
 
 func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.CoursePhaseGraph, error) {
-	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, courseID)
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctxWithTimeout, courseID)
 	if err != nil {
 		return nil, err
 	}

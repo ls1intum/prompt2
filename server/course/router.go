@@ -87,18 +87,18 @@ func updateCoursePhaseOrder(c *gin.Context) {
 		return
 	}
 
-	var updatedPhaseOrder courseDTO.CoursePhaseOrderRequest
-	if err := c.BindJSON(&updatedPhaseOrder); err != nil {
+	var graphUpdate courseDTO.UpdateCoursePhaseGraph
+	if err := c.BindJSON(&graphUpdate); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := validateUpdateCourseOrder(c, courseID, updatedPhaseOrder); err != nil {
+	if err := validateUpdateCourseOrder(c, courseID, graphUpdate.PhaseGraph); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = UpdateCoursePhaseOrder(c, courseID, updatedPhaseOrder)
+	err = UpdateCoursePhaseOrder(c, courseID, graphUpdate)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

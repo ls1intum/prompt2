@@ -24,6 +24,13 @@ import { ParticipantEdgeProps } from './Edges/ParticipantEdgeProps'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { postNewCoursePhase } from '../network/mutations/postNewCoursePhase'
+import { CreateCoursePhase } from '@/interfaces/course_phase'
+import { useMutation } from '@tanstack/react-query'
+import { ErrorPage } from '@/components/ErrorPage'
+import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
+import { updatePhaseGraph } from '../network/mutations/updatePhaseGraph'
+import { useParams } from 'react-router-dom'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -35,6 +42,7 @@ const edgeTypes: EdgeTypes = {
 
 export function CourseConfigurator() {
   // getting the data
+  const { courseId } = useParams<{ courseId: string }>()
   const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
     useCourseConfigurationState()
   const initialNodes = coursePhases.map((phase) => ({
@@ -124,14 +132,92 @@ export function CourseConfigurator() {
     setIsModified(false)
   }
 
-  const handleSave = () => {
+  const { mutateAsync: mutateAsyncPhases, isError: isPhaseError } = useMutation({
+    mutationFn: (coursePhase: CreateCoursePhase) => {
+      return postNewCoursePhase(coursePhase)
+    },
+    onSuccess: (data: string | undefined) => {
+      console.log('Received ID' + data)
+      return data
+    },
+  })
+
+  const { mutate: mutateGraph, isError: isGraphError } = useMutation({
+    mutationFn: (coursePhaseGraphUpdate: CoursePhaseGraphUpdate) => {
+      return updatePhaseGraph(courseId ?? '', coursePhaseGraphUpdate)
+    },
+    onSuccess: () => {},
+  })
+
+  const handleSave = async () => {
+    const idReplacementMap: { [key: string]: string } = {}
+
+    // 0.) Remove edges and nodes if need to be removed
+
+    // 1.) Add additional nodes
+    const newPhases = coursePhases.filter(
+      (phase) => !phase.id || phase.id.startsWith('no-valid-id'),
+    )
+    // send array of phases to backend
+    for (const phase of newPhases) {
+      console.log(phase)
+      const createPhase: CreateCoursePhase = {
+        course_id: phase.course_id,
+        name: phase.name,
+        course_phase_type_id: phase.course_phase_type_id,
+        is_initial_phase: phase.is_initial_phase,
+      }
+
+      try {
+        const newId = await mutateAsyncPhases(createPhase)
+        if (phase.id) {
+          idReplacementMap[phase.id] = newId as string
+        }
+      } catch (err) {
+        console.error('Error saving course phase', err)
+        return
+      }
+    }
+
+    // 2.) Update course phase order
+    const updatedEdges = edges.map((edge) => {
+      const newSource = idReplacementMap[edge.source] || edge.source
+      const newTarget = idReplacementMap[edge.target] || edge.target
+      return { ...edge, source: newSource, target: newTarget }
+    })
+
+    const orderArray: CoursePhaseGraphItem[] = updatedEdges.map((edge) => {
+      return {
+        from_course_phase_id: edge.source,
+        to_course_phase_id: edge.target,
+      }
+    })
+
+    const graphUpdate: CoursePhaseGraphUpdate = {
+      initial_phase: coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined',
+      course_phase_graph: orderArray,
+    }
+    try {
+      await mutateGraph(graphUpdate)
+      // TODO reload
+    } catch (err) {
+      console.error('Error saving course phase', err)
+      return
+    }
+
+    // 3.) reload components
+
     setIsModified(false)
   }
 
+  // TODO: replace handle revert in error message to sth which reloads this whole component
   return (
     <>
       <Sidebar />
       <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
+        {(isPhaseError || isGraphError) && (
+          <ErrorPage message='Failed to save the changes' onRetry={handleRevert} />
+        )}
         {isModified && (
           <Alert variant='destructive' className='mb-4'>
             <AlertCircle className='h-4 w-4' />
