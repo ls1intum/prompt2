@@ -2,7 +2,7 @@ import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { CoursePhaseType } from '@/interfaces/course_phase_type'
 
-export function Sidebar() {
+export const CourseConfigSidebar = (): JSX.Element => {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
   const courseHasInitialPhase = coursePhases.map((phase) => phase.is_initial_phase).includes(true)
   const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {

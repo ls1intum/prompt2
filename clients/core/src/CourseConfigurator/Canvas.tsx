@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './PhaseNode/PhaseNode'
-import { Sidebar } from './components/Sidebar'
+import { CourseConfigSidebar } from './components/CourseConfigSidebar'
 import { IconEdge } from './Edges/IconEdge'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
 import { getLayoutedElements } from './utils/getLayoutedElements'
@@ -200,7 +200,7 @@ export function CourseConfigurator() {
 
   return (
     <>
-      <Sidebar />
+      <CourseConfigSidebar />
       <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
         {(isPhaseError || isGraphError || isDeleteError || isRenameError) && (
           <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />

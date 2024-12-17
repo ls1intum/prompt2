@@ -118,32 +118,41 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	firstUUID := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
 	secondUUID := uuid.MustParse("500db7ed-2eb2-42d0-82b3-8750e12afa8a")
 	thirdUUID := uuid.MustParse("92bb0532-39e5-453d-bc50-fa61ea0128b2")
-	newPhaseOrder := courseDTO.CoursePhaseOrderRequest{
-		OrderedPhases: []uuid.UUID{
-			firstUUID,
-			secondUUID,
-			thirdUUID,
+
+	// Construct the updated phase graph: first -> second -> third
+	updateGraphRequest := courseDTO.UpdateCoursePhaseGraph{
+		InitialPhase: firstUUID,
+		PhaseGraph: []courseDTO.CoursePhaseGraph{
+			{
+				FromCoursePhaseID: firstUUID,
+				ToCoursePhaseID:   secondUUID,
+			},
+			{
+				FromCoursePhaseID: secondUUID,
+				ToCoursePhaseID:   thirdUUID,
+			},
 		},
 	}
-	body, _ := json.Marshal(newPhaseOrder)
+
+	body, _ := json.Marshal(updateGraphRequest)
 	req, _ := http.NewRequest("PUT", "/api/courses/"+courseID+"/phase_graph", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code, "Expected 200 OK when updating course phase graph")
 
-	// Verify the updated order
+	// Verify the updated order by fetching the course again
 	req, _ = http.NewRequest("GET", "/api/courses/"+courseID, nil)
 	resp = httptest.NewRecorder()
 	suite.router.ServeHTTP(resp, req)
 
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code, "Expected 200 OK when fetching the updated course")
 
 	var updatedCourse courseDTO.CourseWithPhases
 	err := json.Unmarshal(resp.Body.Bytes(), &updatedCourse)
-	assert.NoError(suite.T(), err)
+	assert.NoError(suite.T(), err, "Unmarshalling the response should not produce an error")
 
 	// Validate the phases in the updated course
 	var firstCoursePhase *coursePhaseDTO.CoursePhaseSequence
@@ -151,13 +160,12 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	var thirdCoursePhase *coursePhaseDTO.CoursePhaseSequence
 
 	for _, phase := range updatedCourse.CoursePhases {
-		if phase.SequenceOrder == 1 {
+		switch phase.SequenceOrder {
+		case 1:
 			firstCoursePhase = &phase
-		}
-		if phase.SequenceOrder == 2 {
+		case 2:
 			secondCoursePhase = &phase
-		}
-		if phase.SequenceOrder == 3 {
+		case 3:
 			thirdCoursePhase = &phase
 		}
 	}
@@ -166,13 +174,13 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	assert.NotNil(suite.T(), secondCoursePhase, "Second phase should be present")
 	assert.NotNil(suite.T(), thirdCoursePhase, "Third phase should be present")
 
-	assert.Equal(suite.T(), firstUUID, firstCoursePhase.ID, "First phase ID should match")
+	assert.Equal(suite.T(), firstUUID, firstCoursePhase.ID, "First phase ID should match initial phase")
 	assert.Equal(suite.T(), secondUUID, secondCoursePhase.ID, "Second phase ID should match")
 	assert.Equal(suite.T(), thirdUUID, thirdCoursePhase.ID, "Third phase ID should match")
 
-	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be initial phase")
-	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be initial phase")
-	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be initial phase")
+	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be the initial phase")
+	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be the initial phase")
+	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
 }
 
 func TestCourseRouterTestSuite(t *testing.T) {
