@@ -11,6 +11,8 @@ import PrivacyPage from './LegalPages/Privacy'
 import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
 import CourseConfiguratorPage from './CourseConfigurator/CourseConfigurator'
+import { PermissionRestriction } from './management/PermissionRestriction'
+import { Role } from '@/interfaces/permission_roles'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,7 +57,15 @@ export const App = (): JSX.Element => {
               path='/management/course/:courseId/application/*'
               element={
                 <ManagementRoot>
-                  <Application />
+                  <PermissionRestriction
+                    requiredPermissions={[
+                      Role.PROMPT_ADMIN,
+                      Role.COURSE_LECTURER,
+                      Role.COURSE_EDITOR,
+                    ]}
+                  >
+                    <Application />
+                  </PermissionRestriction>
                 </ManagementRoot>
               }
             />

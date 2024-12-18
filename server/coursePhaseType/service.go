@@ -3,14 +3,14 @@ package coursePhaseType
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhaseType/coursePhaseTypeDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 )
 
 type CoursePhaseTypeService struct {
 	queries db.Queries
-	conn    *pgx.Conn
+	conn    *pgxpool.Pool
 }
 
 var CoursePhaseTypeServiceSingleton *CoursePhaseTypeService

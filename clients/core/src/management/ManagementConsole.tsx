@@ -54,7 +54,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     return <ErrorPage onRetry={() => refetch()} onLogout={logout} />
   }
 
-  // TODO update with what was passed to this page
+  // Check if the user has at least some Prompt rights
   if (permissions.length === 0) {
     return <UnauthorizedPage />
   }
@@ -63,8 +63,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   // TODO do course id management here
   // store latest selected course in local storage
-  // check authorization
-  // if course non existent or unauthorized, show error page
+
   const courseExists = fetchedCourses.some((course) => course.id === courseId.courseId)
 
   return (

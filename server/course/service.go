@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -14,13 +14,19 @@ import (
 
 type CourseService struct {
 	queries db.Queries
-	conn    *pgx.Conn
+	conn    *pgxpool.Pool
+	// use dependency injection for keycloak to allow mocking
+	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName string) error
+	addUserToGroup             func(ctx context.Context, userID, groupName string) error
 }
 
 var CourseServiceSingleton *CourseService
 
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
-	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctx)
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctxWithTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +34,7 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 	// TODO rewrite this cleaner!!!
 	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
 	for _, course := range courses {
-		dtoCourse, err := GetCourseByID(context.Background(), course.ID)
+		dtoCourse, err := GetCourseByID(ctxWithTimeout, course.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -38,8 +44,10 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 }
 
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
 	// TODO: replace with query to get the course incl phases
-	course, err := CourseServiceSingleton.queries.GetCourse(ctx, id)
+	course, err := CourseServiceSingleton.queries.GetCourse(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}
@@ -72,7 +80,14 @@ func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhase
 	return CourseWithPhases, nil
 }
 
-func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO.Course, error) {
+func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterID string) (courseDTO.Course, error) {
+	// start transaction to roll back if keycloak failed
+	tx, err := CourseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+	defer tx.Rollback(ctx)
+
 	createCourseParams, err := course.GetDBModel()
 	if err != nil {
 		return courseDTO.Course{}, err
@@ -84,6 +99,23 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse) (courseDTO
 		return courseDTO.Course{}, err
 	}
 
+	// create keycloak roles
+	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
+	if err != nil {
+		log.Error("Failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	roleString := fmt.Sprintf("%s-%s-Lecturer", createdCourse.Name, createdCourse.SemesterTag.String)
+	err = CourseServiceSingleton.addUserToGroup(ctx, requesterID, roleString)
+	if err != nil {
+		log.Error("Failed to assign requestor to lecturer roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to commit transaction: %w", err)
+	}
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
 }
 

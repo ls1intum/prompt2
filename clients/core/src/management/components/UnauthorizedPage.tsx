@@ -1,25 +1,43 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useKeycloak } from '@/keycloak/useKeycloak'
-import { AlertTriangle, ArrowLeft } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export default function UnauthorizedPage() {
   const { logout } = useKeycloak()
+  const navigate = useNavigate()
+
   return (
-    <div className='min-h-screen flex items-center justify-center bg-background p-4'>
-      <div className='max-w-md w-full space-y-8'>
-        <Alert variant='destructive'>
-          <AlertTriangle className='h-4 w-4' />
-          <AlertTitle>Access Denied</AlertTitle>
-          <AlertDescription>You do not have permission to access this page.</AlertDescription>
-        </Alert>
-        <div className='text-center'>
-          <Button variant='outline' onClick={logout}>
+    <div className='fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
+      <Card className='max-w-md w-full shadow-lg'>
+        <CardHeader>
+          <CardTitle className='text-2xl font-bold text-center text-primary'>
+            Access Denied
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <Alert
+            variant='destructive'
+            className='border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive'
+          >
+            <AlertTriangle className='h-4 w-4' />
+            <AlertTitle>Unauthorized</AlertTitle>
+            <AlertDescription>You do not have permission to access this page.</AlertDescription>
+          </Alert>
+        </CardContent>
+        <CardFooter className='flex justify-center space-x-4'>
+          <Button variant='outline' onClick={() => navigate(-1)} className='w-full sm:w-auto'>
             <ArrowLeft className='mr-2 h-4 w-4' />
             Go Back
           </Button>
-        </div>
-      </div>
+          <Button variant='destructive' onClick={logout} className='w-full sm:w-auto'>
+            <LogOut className='mr-2 h-4 w-4' />
+            Logout
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

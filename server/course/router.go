@@ -1,21 +1,26 @@
 package course
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
+	log "github.com/sirupsen/logrus"
 )
 
-func setupCourseRouter(router *gin.RouterGroup) {
-	course := router.Group("/courses")
-	course.GET("/", getAllCourses)
-	course.GET("/:uuid", getCourseByID)
-	course.POST("/", createCourse)
-	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
-	course.GET("/:uuid/phase_graph", getCoursePhaseGraph)
-	// TODO: course.PUT("/", updateCourse)
+// Id Middleware for all routes with a course id
+// Role middleware for all without id -> possible additional filtering in subroutes required
+func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+	course := router.Group("/courses", authMiddleware())
+	course.GET("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent), getAllCourses)
+	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
+	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
+	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
+	course.GET("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), getCoursePhaseGraph)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -25,7 +30,32 @@ func getAllCourses(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, courses)
+	rolesVal, exists := c.Get("userRoles")
+	if !exists {
+		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
+		return
+	}
+	userRoles := rolesVal.(map[string]bool)
+	if userRoles[keycloak.PromptAdmin] {
+		c.IndentedJSON(http.StatusOK, courses)
+		return
+	}
+
+	// TODO: move this to DB request
+	// Filtern Sie die Kurse basierend auf den Berechtigungen
+	filteredCourses := []courseDTO.CourseWithPhases{}
+	allowedUsers := []string{keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent}
+	for _, course := range courses {
+		for _, role := range allowedUsers {
+			desiredRole := fmt.Sprintf("%s-%s-%s", course.Name, course.SemesterTag, role)
+			if userRoles[desiredRole] {
+				filteredCourses = append(filteredCourses, course)
+				break
+			}
+		}
+	}
+
+	c.IndentedJSON(http.StatusOK, filteredCourses)
 }
 
 func getCourseByID(c *gin.Context) {
@@ -37,7 +67,8 @@ func getCourseByID(c *gin.Context) {
 
 	course, err := GetCourseByID(c, id)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to get course"))
 		return
 	}
 
@@ -45,6 +76,8 @@ func getCourseByID(c *gin.Context) {
 }
 
 func createCourse(c *gin.Context) {
+	userID := c.GetString("userID")
+
 	var newCourse courseDTO.CreateCourse
 	if err := c.BindJSON(&newCourse); err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -56,9 +89,10 @@ func createCourse(c *gin.Context) {
 		return
 	}
 
-	course, err := CreateCourse(c, newCourse)
+	course, err := CreateCourse(c, newCourse, userID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to create course"))
 		return
 	}
 	c.IndentedJSON(http.StatusCreated, course)
@@ -100,7 +134,8 @@ func updateCoursePhaseOrder(c *gin.Context) {
 
 	err = UpdateCoursePhaseOrder(c, courseID, graphUpdate)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update course phase order"))
 		return
 	}
 

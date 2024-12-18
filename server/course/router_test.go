@@ -15,6 +15,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -37,19 +38,35 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
+	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
+		// No-op or add assertions for test
+		return nil
+	}
+
+	mockAddUserToGroup := func(ctx context.Context, userID, groupName string) error {
+		// No-op or add assertions for test
+		return nil
+	}
+
 	suite.cleanup = cleanup
 	suite.courseService = CourseService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries:                    *testDB.Queries,
+		conn:                       testDB.Conn,
+		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
+		addUserToGroup:             mockAddUserToGroup,
 	}
 
 	CourseServiceSingleton = &suite.courseService
 
+	// Init the permissionValidation service
+	permissionValidation.InitValidationService(*testDB.Queries, testDB.Conn)
+
 	// Initialize router
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
-	setupCourseRouter(api)
-
+	setupCourseRouter(api, func() gin.HandlerFunc {
+		return testutils.MockAuthMiddleware([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"})
+	}, testutils.MockPermissionMiddleware, testutils.MockPermissionMiddleware)
 	coursePhase.InitCoursePhaseModule(api, *testDB.Queries, testDB.Conn)
 }
 
