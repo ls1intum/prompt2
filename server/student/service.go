@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 )
 
 type StudentService struct {
 	queries db.Queries
-	conn    *pgx.Conn
+	conn    *pgxpool.Pool
 }
 
 var StudentServiceSingleton *StudentService
