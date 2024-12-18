@@ -16,11 +16,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 	}
 
 	baseGroupName := fmt.Sprintf("%s-%s", courseName, iterationName)
-	subGroupNames := []string{
-		fmt.Sprintf("%s-%s", baseGroupName, CourseLecturer),
-		fmt.Sprintf("%s-%s", baseGroupName, CourseEditor),
-		fmt.Sprintf("%s-%s", baseGroupName, CourseStudent),
-	}
+	subGroupNames := getGroupNames(baseGroupName)
 
 	baseGroupID, err := CreateGroup(ctx, token.AccessToken, baseGroupName)
 	if err != nil {
@@ -49,4 +45,12 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 		}
 	}
 	return nil
+}
+
+func getGroupNames(baseGroupName string) []string {
+	return []string{
+		fmt.Sprintf("%s-%s", baseGroupName, CourseLecturer),
+		fmt.Sprintf("%s-%s", baseGroupName, CourseEditor),
+		fmt.Sprintf("%s-%s", baseGroupName, CourseStudent),
+	}
 }

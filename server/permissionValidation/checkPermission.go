@@ -8,7 +8,7 @@ import (
 	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []string) (bool, error) {
+func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers ...string) (bool, error) {
 	// Extract user roles from context
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
@@ -27,11 +27,15 @@ func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers []strin
 	// Generate the desired role keys based on input
 	for _, role := range allowedUsers {
 		var desiredRole string = ""
-		if role == keycloak.PromptAdmin || role == keycloak.PromptLecturer {
-			desiredRole = role
-		} else {
+		switch role {
+		case keycloak.PromptAdmin:
+			desiredRole = keycloak.PromptAdmin
+		case keycloak.PromptLecturer:
+			desiredRole = keycloak.PromptLecturer
+		default:
 			desiredRole = fmt.Sprintf("%s-%s", courseIdentifier, role)
 		}
+
 		if userRoles[desiredRole] {
 			return true, nil // Found at least one matching role
 		}

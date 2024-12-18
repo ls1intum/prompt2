@@ -62,7 +62,7 @@ func getCourseByID(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, []string{keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent})
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent)
 	if err != nil || !hasAccess {
 		return
 	}
@@ -117,7 +117,7 @@ func updateCoursePhaseOrder(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, []string{keycloak.CourseLecturer, keycloak.PromptAdmin})
+	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, keycloak.CourseLecturer, keycloak.PromptAdmin)
 	if err != nil || !hasAccess {
 		return
 	}
