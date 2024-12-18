@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -14,7 +14,7 @@ import (
 
 type CourseService struct {
 	queries db.Queries
-	conn    *pgx.Conn
+	conn    *pgxpool.Pool
 	// use dependency injection for keycloak to allow mocking
 	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName string) error
 	addUserToGroup             func(ctx context.Context, userID, groupName string) error
