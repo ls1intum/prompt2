@@ -20,6 +20,7 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
 	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
 	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
+	course.GET("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseGraph)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -97,6 +98,22 @@ func createCourse(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, course)
 }
 
+func getCoursePhaseGraph(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	graph, err := GetCoursePhaseGraph(c, courseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, graph)
+}
+
 func updateCoursePhaseOrder(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -104,18 +121,18 @@ func updateCoursePhaseOrder(c *gin.Context) {
 		return
 	}
 
-	var updatedPhaseOrder courseDTO.CoursePhaseOrderRequest
-	if err := c.BindJSON(&updatedPhaseOrder); err != nil {
+	var graphUpdate courseDTO.UpdateCoursePhaseGraph
+	if err := c.BindJSON(&graphUpdate); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := validateUpdateCourseOrder(c, courseID, updatedPhaseOrder); err != nil {
+	if err := validateUpdateCourseOrder(c, courseID, graphUpdate.PhaseGraph); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = UpdateCoursePhaseOrder(c, courseID, updatedPhaseOrder)
+	err = UpdateCoursePhaseOrder(c, courseID, graphUpdate)
 	if err != nil {
 		log.Debug(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to update course phase order"))

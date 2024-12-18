@@ -20,6 +20,9 @@ RETURNING *;
 UPDATE course_phase
 SET 
     name = COALESCE($2, name), 
-    is_initial_phase = COALESCE($3, is_initial_phase), 
-    meta_data = meta_data || $4
+    meta_data = meta_data || $3
+WHERE id = $1;
+
+-- name: DeleteCoursePhase :exec
+DELETE FROM course_phase
 WHERE id = $1;

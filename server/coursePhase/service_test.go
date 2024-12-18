@@ -60,10 +60,9 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhase() {
 	assert.NoError(suite.T(), err)
 
 	update := coursePhaseDTO.UpdateCoursePhase{
-		ID:             id,
-		Name:           "Updated Phase",
-		IsInitialPhase: false,
-		MetaData:       metaData,
+		ID:       id,
+		Name:     "Updated Phase",
+		MetaData: metaData,
 	}
 
 	err = UpdateCoursePhase(suite.ctx, update)
@@ -85,10 +84,9 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
 	assert.NoError(suite.T(), err)
 
 	update := coursePhaseDTO.UpdateCoursePhase{
-		ID:             id,
-		Name:           "Updated Phase",
-		IsInitialPhase: false,
-		MetaData:       metaData,
+		ID:       id,
+		Name:     "Updated Phase",
+		MetaData: metaData,
 	}
 
 	err = UpdateCoursePhase(suite.ctx, update)
@@ -98,7 +96,6 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
 	updatedCoursePhase, err := GetCoursePhaseByID(suite.ctx, id)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated Phase", updatedCoursePhase.Name, "Expected updated course phase name to match")
-	assert.False(suite.T(), updatedCoursePhase.IsInitialPhase, "Expected updated course phase to be an initial phase")
 	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value-new", "updated_key": "updated_value"}, updatedCoursePhase.MetaData, "Expected metadata to match updated data including the old data")
 }
 

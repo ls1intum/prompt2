@@ -8,10 +8,9 @@ import (
 )
 
 type UpdateCoursePhase struct {
-	ID             uuid.UUID     `json:"id"`
-	Name           string        `json:"name"`
-	IsInitialPhase bool          `json:"is_initial_phase"`
-	MetaData       meta.MetaData `json:"meta_data"`
+	ID       uuid.UUID     `json:"id"`
+	Name     string        `json:"name"`
+	MetaData meta.MetaData `json:"meta_data"`
 }
 
 func (cp UpdateCoursePhase) GetDBModel() (db.UpdateCoursePhaseParams, error) {
@@ -20,9 +19,8 @@ func (cp UpdateCoursePhase) GetDBModel() (db.UpdateCoursePhaseParams, error) {
 		return db.UpdateCoursePhaseParams{}, err
 	}
 	return db.UpdateCoursePhaseParams{
-		ID:             cp.ID,
-		Name:           pgtype.Text{String: cp.Name, Valid: true},
-		IsInitialPhase: cp.IsInitialPhase,
-		MetaData:       metaData,
+		ID:       cp.ID,
+		Name:     pgtype.Text{String: cp.Name, Valid: true},
+		MetaData: metaData,
 	}, nil
 }

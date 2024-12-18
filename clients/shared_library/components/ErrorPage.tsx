@@ -6,8 +6,8 @@ interface ErrorPageProps {
   title?: string
   description?: string
   message?: string
-  onRetry: () => void
-  onLogout: () => void
+  onRetry?: () => void
+  onLogout?: () => void
 }
 
 export const ErrorPage = ({
@@ -30,12 +30,18 @@ export const ErrorPage = ({
           </CardHeader>
           <CardContent>
             <p className='text-sm text-muted-foreground mb-4'>{message}</p>
-            <Button onClick={onRetry} className='w-full mb-2'>
-              <RefreshCw className='mr-2 h-4 w-4' /> Retry
-            </Button>
-            <Button onClick={onLogout} variant='outline' className='w-full'>
-              <LogOut className='mr-2 h-4 w-4' /> Logout
-            </Button>
+            {onRetry && (
+              <>
+                <Button onClick={onRetry} className='w-full mb-2'>
+                  <RefreshCw className='mr-2 h-4 w-4' /> Retry
+                </Button>
+              </>
+            )}
+            {onLogout && (
+              <Button onClick={onLogout} variant='outline' className='w-full'>
+                <LogOut className='mr-2 h-4 w-4' /> Logout
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>

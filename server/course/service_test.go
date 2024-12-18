@@ -105,42 +105,56 @@ func (suite *CourseServiceTestSuite) TestUpdateCoursePhaseOrder() {
 	firstUUID := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
 	secondUUID := uuid.MustParse("500db7ed-2eb2-42d0-82b3-8750e12afa8a")
 	thirdUUID := uuid.MustParse("92bb0532-39e5-453d-bc50-fa61ea0128b2")
-	newPhaseOrder := courseDTO.CoursePhaseOrderRequest{
-		OrderedPhases: []uuid.UUID{
-			firstUUID,
-			secondUUID,
-			thirdUUID,
+
+	// Construct the graph to represent the new phase order:
+	// firstUUID -> secondUUID -> thirdUUID
+	graphUpdate := courseDTO.UpdateCoursePhaseGraph{
+		InitialPhase: firstUUID,
+		PhaseGraph: []courseDTO.CoursePhaseGraph{
+			{
+				FromCoursePhaseID: firstUUID,
+				ToCoursePhaseID:   secondUUID,
+			},
+			{
+				FromCoursePhaseID: secondUUID,
+				ToCoursePhaseID:   thirdUUID,
+			},
 		},
 	}
 
-	err := UpdateCoursePhaseOrder(suite.ctx, courseID, newPhaseOrder)
-	assert.NoError(suite.T(), err)
+	err := UpdateCoursePhaseOrder(suite.ctx, courseID, graphUpdate)
+	assert.NoError(suite.T(), err, "Updating course phase order should not produce an error")
 
 	// Verify phase order has been updated
 	course, err := GetCourseByID(suite.ctx, courseID)
-	assert.NoError(suite.T(), err)
-	var firstCoursePhase *coursePhaseDTO.CoursePhaseSequence
-	var secondCoursePhase *coursePhaseDTO.CoursePhaseSequence
-	var thirdCoursePhase *coursePhaseDTO.CoursePhaseSequence
+	assert.NoError(suite.T(), err, "Fetching updated course should not produce an error")
+
+	var firstCoursePhase, secondCoursePhase, thirdCoursePhase *coursePhaseDTO.CoursePhaseSequence
 
 	for _, phase := range course.CoursePhases {
-		if phase.SequenceOrder == 1 {
+		switch phase.SequenceOrder {
+		case 1:
 			firstCoursePhase = &phase
-		}
-		if phase.SequenceOrder == 2 {
+		case 2:
 			secondCoursePhase = &phase
-		}
-		if phase.SequenceOrder == 3 {
+		case 3:
 			thirdCoursePhase = &phase
 		}
 	}
-	assert.Equal(suite.T(), firstUUID, firstCoursePhase.ID, "Phase order should match")
-	assert.Equal(suite.T(), secondUUID, secondCoursePhase.ID, "Phase order should match")
-	assert.Equal(suite.T(), thirdUUID, thirdCoursePhase.ID, "Phase order should match")
 
-	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be initial phase")
-	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be initial phase")
-	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be initial phase")
+	// Ensure that each found phase matches the expected UUID
+	assert.NotNil(suite.T(), firstCoursePhase, "First course phase should be found")
+	assert.NotNil(suite.T(), secondCoursePhase, "Second course phase should be found")
+	assert.NotNil(suite.T(), thirdCoursePhase, "Third course phase should be found")
+
+	assert.Equal(suite.T(), firstUUID, firstCoursePhase.ID, "First phase UUID should match")
+	assert.Equal(suite.T(), secondUUID, secondCoursePhase.ID, "Second phase UUID should match")
+	assert.Equal(suite.T(), thirdUUID, thirdCoursePhase.ID, "Third phase UUID should match")
+
+	// Validate initial phase flags
+	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be the initial phase")
+	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be the initial phase")
+	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
 }
 
 func TestCourseServiceTestSuite(t *testing.T) {

@@ -16,8 +16,6 @@ const SidebarHeaderComponent = () => {
   const navigate = useNavigate()
 
   const isActive = location.pathname.startsWith('/management/general')
-  console.log('isActive', isActive)
-  console.log('location.pathname', location.pathname)
 
   return (
     <SidebarHeader>

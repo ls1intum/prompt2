@@ -38,6 +38,34 @@ func (q *Queries) DeleteCourseGraph(ctx context.Context, courseID uuid.UUID) err
 	return err
 }
 
+const getCoursePhaseGraph = `-- name: GetCoursePhaseGraph :many
+SELECT cpg.from_course_phase_id, cpg.to_course_phase_id
+FROM course_phase_graph cpg
+JOIN course_phase cp
+  ON cpg.from_course_phase_id = cp.id
+WHERE cp.course_id = $1
+`
+
+func (q *Queries) GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]CoursePhaseGraph, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseGraph, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseGraph
+	for rows.Next() {
+		var i CoursePhaseGraph
+		if err := rows.Scan(&i.FromCoursePhaseID, &i.ToCoursePhaseID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCoursePhaseSequence = `-- name: GetCoursePhaseSequence :many
 WITH RECURSIVE phase_sequence AS (
     SELECT cp.id, cp.course_id, cp.name, cp.is_initial_phase, cp.course_phase_type_id, 1 AS sequence_order
@@ -96,17 +124,26 @@ func (q *Queries) GetCoursePhaseSequence(ctx context.Context, courseID uuid.UUID
 }
 
 const getNotOrderedCoursePhases = `-- name: GetNotOrderedCoursePhases :many
+WITH RECURSIVE phase_sequence AS (
+    -- Select the initial phase
+    SELECT cp.id
+    FROM course_phase cp
+    WHERE cp.course_id = $1 AND cp.is_initial_phase = true
+
+    UNION ALL
+
+    -- Select all subsequent phases that are reachable from the initial phase
+    SELECT cp.id
+    FROM course_phase cp
+    INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
+    INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
+)
 SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
 FROM course_phase cp
 INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
-  AND cp.is_initial_phase = FALSE
-  AND NOT EXISTS (
-      SELECT from_course_phase_id, to_course_phase_id
-      FROM course_phase_graph g
-      WHERE g.from_course_phase_id = cp.id
-         OR g.to_course_phase_id = cp.id
-  )
+  AND cp.is_initial_phase = false
+  AND cp.id NOT IN (SELECT id FROM phase_sequence)
 `
 
 type GetNotOrderedCoursePhasesRow struct {

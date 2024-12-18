@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
-import { CourseOverview } from './Course/CourseOverview'
 import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
 import { Application } from './Application/Application'
 import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
@@ -13,6 +12,7 @@ import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
 import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
+import { CourseOverview } from './Course/CourseOverview'
 
 const queryClient = new QueryClient({
   defaultOptions: {

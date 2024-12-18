@@ -153,26 +153,34 @@ func (suite *CourseTestSuite) TestValidateUpdateCourseOrder() {
 			},
 			expectedError: "",
 		},
+		// Example of a failing test:
 		// {
 		// 	name:     "invalid course ID in phase",
 		// 	courseID: uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e"),
 		// 	orderedPhases: []uuid.UUID{
 		// 		uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411c"),
 		// 	},
-		// 	expectedError: "course phase not found",
+		// 	expectedError: "course id must be the same for all course phases",
 		// },
 	}
 
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
-			err := validateUpdateCourseOrder(context.Background(), tt.courseID, courseDTO.CoursePhaseOrderRequest{
-				OrderedPhases: tt.orderedPhases,
-			})
+			// Convert orderedPhases to a slice of CoursePhaseGraph entries
+			var phaseGraph []courseDTO.CoursePhaseGraph
+			for _, phaseID := range tt.orderedPhases {
+				phaseGraph = append(phaseGraph, courseDTO.CoursePhaseGraph{
+					FromCoursePhaseID: uuid.Nil, // or another valid UUID if needed
+					ToCoursePhaseID:   phaseID,
+				})
+			}
+
+			err := validateUpdateCourseOrder(context.Background(), tt.courseID, phaseGraph)
 			if tt.expectedError == "" {
-				assert.NoError(t, err)
+				assert.NoError(t, err, "Expected no error, got %v", err)
 			} else {
-				assert.Error(t, err)
-				assert.EqualError(t, err, tt.expectedError)
+				assert.Error(t, err, "Expected an error but got none")
+				assert.EqualError(t, err, tt.expectedError, "Error message did not match")
 			}
 		})
 	}

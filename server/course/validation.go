@@ -45,11 +45,10 @@ func validateCreateCourse(c courseDTO.CreateCourse) error {
 	return nil
 }
 
-// TODO: add validation that initial phase is of type application phase
-func validateUpdateCourseOrder(ctx context.Context, courseID uuid.UUID, c courseDTO.CoursePhaseOrderRequest) error {
+func validateUpdateCourseOrder(ctx context.Context, courseID uuid.UUID, c []courseDTO.CoursePhaseGraph) error {
 	// for each course phase check if the course id is the same
-	for _, id := range c.OrderedPhases {
-		coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, id)
+	for _, graphItem := range c {
+		coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, graphItem.ToCoursePhaseID)
 		if err != nil {
 			return err
 		}

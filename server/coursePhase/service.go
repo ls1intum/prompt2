@@ -49,3 +49,7 @@ func CreateCoursePhase(ctx context.Context, coursePhase coursePhaseDTO.CreateCou
 
 	return GetCoursePhaseByID(ctx, createdCoursePhase.ID)
 }
+
+func DeleteCoursePhase(ctx context.Context, id uuid.UUID) error {
+	return CoursePhaseServiceSingleton.queries.DeleteCoursePhase(ctx, id)
+}

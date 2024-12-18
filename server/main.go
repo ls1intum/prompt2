@@ -12,6 +12,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
@@ -89,6 +90,7 @@ func main() {
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
+	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 	router.Run(serverAddress)
