@@ -2,8 +2,9 @@
 SELECT * FROM course
 WHERE id = $1 LIMIT 1;
 
--- name: GetAllCourses :many
-SELECT * FROM course;
+-- name: GetAllActiveCourses :many
+SELECT * FROM course
+WHERE end_date >= NOW() - INTERVAL '1 month';;
 
 -- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)

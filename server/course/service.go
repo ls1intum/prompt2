@@ -25,7 +25,8 @@ var CourseServiceSingleton *CourseService
 func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
-	courses, err := CourseServiceSingleton.queries.GetAllCourses(ctxWithTimeout)
+
+	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctxWithTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 	// TODO rewrite this cleaner!!!
 	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
 	for _, course := range courses {
-		dtoCourse, err := GetCourseByID(ctx, course.ID)
+		dtoCourse, err := GetCourseByID(ctxWithTimeout, course.ID)
 		if err != nil {
 			return nil, err
 		}
