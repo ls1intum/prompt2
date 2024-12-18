@@ -9,15 +9,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
-func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc) {
+// Id Middleware for all routes with a course id
+// Role middleware for all without id -> possible additional filtering in subroutes required
+func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
-	course.GET("/", getAllCourses)
-	course.GET("/:uuid", getCourseByID)
-	course.POST("/", createCourse)
-	course.PUT("/:uuid/phase_graph", updateCoursePhaseOrder)
+	course.GET("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent), getAllCourses)
+	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
+	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
+	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
 	// TODO: course.PUT("/", updateCourse)
 }
 
@@ -39,6 +40,7 @@ func getAllCourses(c *gin.Context) {
 		return
 	}
 
+	// TODO: move this to DB request
 	// Filtern Sie die Kurse basierend auf den Berechtigungen
 	filteredCourses := []courseDTO.CourseWithPhases{}
 	allowedUsers := []string{keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent}
@@ -62,11 +64,6 @@ func getCourseByID(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, id, keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent)
-	if err != nil || !hasAccess {
-		return
-	}
-
 	course, err := GetCourseByID(c, id)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
@@ -77,19 +74,7 @@ func getCourseByID(c *gin.Context) {
 }
 
 func createCourse(c *gin.Context) {
-	rolesVal, exists := c.Get("userRoles")
-	if !exists {
-		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
-		return
-	}
-	userRoles := rolesVal.(map[string]bool)
-
 	userID := c.GetString("userID")
-
-	if !userRoles[keycloak.PromptAdmin] && !userRoles[keycloak.PromptLecturer] {
-		handleError(c, http.StatusForbidden, errors.New("missing permission to create course"))
-		return
-	}
 
 	var newCourse courseDTO.CreateCourse
 	if err := c.BindJSON(&newCourse); err != nil {
@@ -114,11 +99,6 @@ func updateCoursePhaseOrder(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	hasAccess, err := permissionValidation.CheckCoursePermission(c, courseID, keycloak.CourseLecturer, keycloak.PromptAdmin)
-	if err != nil || !hasAccess {
 		return
 	}
 

@@ -2,7 +2,7 @@ package testutils
 
 import "github.com/gin-gonic/gin"
 
-func MockMiddleware(mockRoles []string) gin.HandlerFunc {
+func MockAuthMiddleware(mockRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Optionally set mock data, such as roles, for downstream handlers
 		// Create a map for user roles
