@@ -2,7 +2,11 @@ import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { CoursePhaseType } from '@/interfaces/course_phase_type'
 
-export const CourseConfigSidebar = (): JSX.Element => {
+interface CourseConfigSidebarProps {
+  canEdit: boolean
+}
+
+export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.Element => {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
   const courseHasInitialPhase = coursePhases.map((phase) => phase.is_initial_phase).includes(true)
   const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
@@ -21,6 +25,9 @@ export const CourseConfigSidebar = (): JSX.Element => {
   }
 
   const isDraggable = (phase: CoursePhaseType) => {
+    if (!canEdit) {
+      return false
+    }
     if (phase.initial_phase && courseHasInitialPhase) {
       return false
     }

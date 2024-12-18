@@ -10,9 +10,9 @@ import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
 import PrivacyPage from './LegalPages/Privacy'
 import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
-import CourseConfiguratorPage from './CourseConfigurator/CourseConfigurator'
 import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
+import { CourseOverview } from './Course/CourseOverview'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +41,7 @@ export const App = (): JSX.Element => {
               path='/management/course/:courseId'
               element={
                 <ManagementRoot>
-                  <CourseConfiguratorPage />
+                  <CourseOverview />
                 </ManagementRoot>
               }
             />

@@ -8,8 +8,20 @@ import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
 import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { useParams } from 'react-router-dom'
+import { useCourseStore } from '@/zustand/useCourseStore'
+import { useAuthStore } from '@/zustand/useAuthStore'
+import { getPermissionString, Role } from '@/interfaces/permission_roles'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
+  const { courseId } = useParams<{ courseId: string }>()
+  const { courses } = useCourseStore()
+  const course = courses.find((c) => c.id === courseId)
+  const { permissions } = useAuthStore()
+  const canEdit = permissions.includes(
+    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
+  )
+
   const { coursePhases } = useCourseConfigurationState()
   const coursePhase = coursePhases.find((phase) => phase.id === id)
 
@@ -82,9 +94,11 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
               {phaseType?.name}
             </Badge>
           </div>
-          <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
-            {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}
-          </Button>
+          {canEdit && (
+            <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
+              {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}
+            </Button>
+          )}
         </CardHeader>
         <CardContent className='p-4 pt-2'>
           {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (

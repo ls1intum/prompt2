@@ -34,6 +34,9 @@ import { useParams } from 'react-router-dom'
 import { deleteCoursePhase } from '../network/mutations/deleteCoursePhase'
 import { handleSave } from './handlers/handleSave'
 import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
+import { useAuthStore } from '@/zustand/useAuthStore'
+import { getPermissionString, Role } from '@/interfaces/permission_roles'
+import { useCourseStore } from '@/zustand/useCourseStore'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -45,8 +48,15 @@ const edgeTypes: EdgeTypes = {
 
 export function CourseConfigurator() {
   // getting the data
-  const queryClient = useQueryClient()
   const { courseId } = useParams<{ courseId: string }>()
+  const { courses } = useCourseStore()
+  const course = courses.find((c) => c.id === courseId)
+  const { permissions } = useAuthStore()
+  const canEdit = permissions.includes(
+    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
+  )
+
+  const queryClient = useQueryClient()
   const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
     useCourseConfigurationState()
   const initialNodes = coursePhases.map((phase) => ({
@@ -200,7 +210,7 @@ export function CourseConfigurator() {
 
   return (
     <>
-      <CourseConfigSidebar />
+      <CourseConfigSidebar canEdit={canEdit} />
       <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
         {(isPhaseError || isGraphError || isDeleteError || isRenameError) && (
           <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />
@@ -235,6 +245,9 @@ export function CourseConfigurator() {
           edgeTypes={edgeTypes}
           isValidConnection={useValidation()}
           colorMode={theme}
+          nodesDraggable={canEdit}
+          nodesConnectable={canEdit}
+          connectOnClick={canEdit}
           fitView
         >
           <DeleteConfirmation
