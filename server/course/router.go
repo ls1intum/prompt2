@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
+	log "github.com/sirupsen/logrus"
 )
 
 // Id Middleware for all routes with a course id
@@ -19,7 +20,6 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
 	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
 	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
-	// TODO: course.PUT("/", updateCourse)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -66,7 +66,8 @@ func getCourseByID(c *gin.Context) {
 
 	course, err := GetCourseByID(c, id)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to get course"))
 		return
 	}
 
@@ -89,7 +90,8 @@ func createCourse(c *gin.Context) {
 
 	course, err := CreateCourse(c, newCourse, userID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to create course"))
 		return
 	}
 	c.IndentedJSON(http.StatusCreated, course)
@@ -115,7 +117,8 @@ func updateCoursePhaseOrder(c *gin.Context) {
 
 	err = UpdateCoursePhaseOrder(c, courseID, updatedPhaseOrder)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Debug(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update course phase order"))
 		return
 	}
 
