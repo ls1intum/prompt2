@@ -11,6 +11,8 @@ import { useCourseStore } from '@/zustand/useCourseStore'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
 import { AddCourseButton } from './components/AddCourseSidebarItem'
+import { useAuthStore } from '@/zustand/useAuthStore'
+import { Role } from '@/interfaces/permission_roles'
 
 interface CourseSwitchSidebarProps {
   onLogout: () => void
@@ -18,6 +20,11 @@ interface CourseSwitchSidebarProps {
 
 export const CourseSwitchSidebar = ({ onLogout }: CourseSwitchSidebarProps): JSX.Element => {
   const { courses } = useCourseStore()
+  const { permissions } = useAuthStore()
+
+  const canAddCourse = permissions.some(
+    (permission) => permission === Role.PROMPT_ADMIN || permission === Role.PROMPT_LECTURER,
+  )
 
   return (
     <Sidebar
@@ -32,7 +39,7 @@ export const CourseSwitchSidebar = ({ onLogout }: CourseSwitchSidebarProps): JSX
               {courses.map((course) => {
                 return <CourseSidebarItem key={course.id} course={course} />
               })}
-              <AddCourseButton />
+              {canAddCourse && <AddCourseButton />}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

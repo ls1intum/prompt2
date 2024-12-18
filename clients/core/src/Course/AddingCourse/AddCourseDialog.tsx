@@ -15,6 +15,7 @@ import { PostCourse } from '@/interfaces/post_course'
 import { postNewCourse } from '../../network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, Loader2 } from 'lucide-react'
+import { useKeycloak } from '@/keycloak/useKeycloak'
 
 interface AddCourseDialogProps {
   children: React.ReactNode
@@ -28,18 +29,31 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
 
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { forceTokenRefresh } = useKeycloak()
 
   const { mutate, isPending, error, isError, reset } = useMutation({
     mutationFn: (course: PostCourse) => {
       return postNewCourse(course)
     },
     onSuccess: (data: string | undefined) => {
-      console.log('Received ID' + data)
-      queryClient.invalidateQueries({ queryKey: ['courses'] })
-
-      setIsOpen(false)
-      setIsOpen(false)
-      navigate(`/management/course/${data}`)
+      forceTokenRefresh() // refresh token to get permission for new course
+        .then(() => {
+          // Invalidate course queries
+          return queryClient.invalidateQueries({ queryKey: ['courses'] })
+        })
+        .then(() => {
+          // Wait for courses to be refetched
+          return queryClient.refetchQueries({ queryKey: ['courses'] })
+        })
+        .then(() => {
+          // Close the window and navigate
+          setIsOpen(false)
+          navigate(`/management/course/${data}`)
+        })
+        .catch((err) => {
+          console.error('Error during token refresh or query invalidation:', err)
+          return err
+        })
     },
   })
 
