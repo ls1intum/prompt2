@@ -9,3 +9,15 @@ export interface CoursePhase {
   course_phase_type_id: string
   course_phase_type: string
 }
+
+export interface CreateCoursePhase {
+  course_id: string
+  name: string
+  is_initial_phase: boolean
+  course_phase_type_id: string
+}
+
+export interface UpdateCoursePhase {
+  id: string
+  name: string
+}

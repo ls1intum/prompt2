@@ -119,7 +119,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
 }
 
-func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhaseOrder courseDTO.CoursePhaseOrderRequest) error {
+func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate courseDTO.UpdateCoursePhaseGraph) error {
 	tx, err := CourseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -133,15 +133,14 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 	}
 
 	// create new connections
-	for i := range updatedPhaseOrder.OrderedPhases {
-		if i < len(updatedPhaseOrder.OrderedPhases)-1 {
-			err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
-				FromCoursePhaseID: updatedPhaseOrder.OrderedPhases[i],
-				ToCoursePhaseID:   updatedPhaseOrder.OrderedPhases[i+1],
-			})
-			if err != nil {
-				return err
-			}
+	for _, graphItem := range graphUpdate.PhaseGraph {
+		err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
+			FromCoursePhaseID: graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:   graphItem.ToCoursePhaseID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
 		}
 	}
 
@@ -153,19 +152,32 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, updatedPhas
 		return err
 	}
 
-	if len(updatedPhaseOrder.OrderedPhases) > 0 {
-		err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
-			CourseID: courseID,
-			ID:       updatedPhaseOrder.OrderedPhases[0],
-		})
-		if err != nil {
-			return err
-		}
-
+	err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
+		CourseID: courseID,
+		ID:       graphUpdate.InitialPhase,
+	})
+	if err != nil {
+		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return nil
+}
+
+func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.CoursePhaseGraph, error) {
+	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, courseID)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoGraph := make([]courseDTO.CoursePhaseGraph, 0, len(graph))
+	for _, g := range graph {
+		dtoGraph = append(dtoGraph, courseDTO.CoursePhaseGraph{
+			FromCoursePhaseID: g.FromCoursePhaseID,
+			ToCoursePhaseID:   g.ToCoursePhaseID,
+		})
+	}
+	return dtoGraph, nil
 }

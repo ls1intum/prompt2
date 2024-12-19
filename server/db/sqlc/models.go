@@ -186,8 +186,11 @@ type CoursePhaseParticipation struct {
 }
 
 type CoursePhaseType struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID                     uuid.UUID `json:"id"`
+	Name                   string    `json:"name"`
+	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
+	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
+	InitialPhase           bool      `json:"initial_phase"`
 }
 
 type Student struct {

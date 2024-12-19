@@ -114,10 +114,9 @@ func (suite *RouterTestSuite) TestUpdateCoursePhase() {
 	assert.NoError(suite.T(), err)
 
 	updatedCoursePhase := coursePhaseDTO.UpdateCoursePhase{
-		ID:             uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b"),
-		Name:           "Updated Phase",
-		IsInitialPhase: false,
-		MetaData:       metaData,
+		ID:       uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b"),
+		Name:     "Updated Phase",
+		MetaData: metaData,
 	}
 
 	body, _ := json.Marshal(updatedCoursePhase)
@@ -140,7 +139,6 @@ func (suite *RouterTestSuite) TestUpdateCoursePhase() {
 	err = json.Unmarshal(fetchRes.Body.Bytes(), &fetchedCoursePhase)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated Phase", fetchedCoursePhase.Name, "Expected updated course phase name to match")
-	assert.False(suite.T(), fetchedCoursePhase.IsInitialPhase, "Expected course phase not to be an initial phase")
 	assert.Equal(suite.T(), updatedCoursePhase.MetaData["updated_key"], fetchedCoursePhase.MetaData["updated_key"], "Expected updated metadata to match")
 	assert.Equal(suite.T(), "test-value", fetchedCoursePhase.MetaData["test-key"], "Expected existing metadata to match")
 }

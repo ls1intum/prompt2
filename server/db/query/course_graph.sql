@@ -16,18 +16,38 @@ FROM phase_sequence ps
 INNER JOIN course_phase_type cpt ON ps.course_phase_type_id = cpt.id
 ORDER BY ps.sequence_order;
 
+
+-- name: GetCoursePhaseGraph :many
+SELECT cpg.*
+FROM course_phase_graph cpg
+JOIN course_phase cp
+  ON cpg.from_course_phase_id = cp.id
+WHERE cp.course_id = $1;
+
+
+
 -- name: GetNotOrderedCoursePhases :many
+WITH RECURSIVE phase_sequence AS (
+    -- Select the initial phase
+    SELECT cp.id
+    FROM course_phase cp
+    WHERE cp.course_id = $1 AND cp.is_initial_phase = true
+
+    UNION ALL
+
+    -- Select all subsequent phases that are reachable from the initial phase
+    SELECT cp.id
+    FROM course_phase cp
+    INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
+    INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
+)
 SELECT cp.*, cpt.name AS course_phase_type_name
 FROM course_phase cp
 INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
-  AND cp.is_initial_phase = FALSE
-  AND NOT EXISTS (
-      SELECT *
-      FROM course_phase_graph g
-      WHERE g.from_course_phase_id = cp.id
-         OR g.to_course_phase_id = cp.id
-  );
+  AND cp.is_initial_phase = false
+  AND cp.id NOT IN (SELECT id FROM phase_sequence);
+
 
 
 -- name: DeleteCourseGraph :exec

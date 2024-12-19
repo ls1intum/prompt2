@@ -48,6 +48,16 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 	return i, err
 }
 
+const deleteCoursePhase = `-- name: DeleteCoursePhase :exec
+DELETE FROM course_phase
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCoursePhase(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCoursePhase, id)
+	return err
+}
+
 const getAllCoursePhaseForCourse = `-- name: GetAllCoursePhaseForCourse :many
 SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
 FROM course_phase cp
@@ -130,24 +140,17 @@ const updateCoursePhase = `-- name: UpdateCoursePhase :exec
 UPDATE course_phase
 SET 
     name = COALESCE($2, name), 
-    is_initial_phase = COALESCE($3, is_initial_phase), 
-    meta_data = meta_data || $4
+    meta_data = meta_data || $3
 WHERE id = $1
 `
 
 type UpdateCoursePhaseParams struct {
-	ID             uuid.UUID   `json:"id"`
-	Name           pgtype.Text `json:"name"`
-	IsInitialPhase bool        `json:"is_initial_phase"`
-	MetaData       []byte      `json:"meta_data"`
+	ID       uuid.UUID   `json:"id"`
+	Name     pgtype.Text `json:"name"`
+	MetaData []byte      `json:"meta_data"`
 }
 
 func (q *Queries) UpdateCoursePhase(ctx context.Context, arg UpdateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhase,
-		arg.ID,
-		arg.Name,
-		arg.IsInitialPhase,
-		arg.MetaData,
-	)
+	_, err := q.db.Exec(ctx, updateCoursePhase, arg.ID, arg.Name, arg.MetaData)
 	return err
 }
