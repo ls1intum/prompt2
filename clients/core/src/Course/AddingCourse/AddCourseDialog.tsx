@@ -14,8 +14,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PostCourse } from '@/interfaces/post_course'
 import { postNewCourse } from '../../network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Loader2 } from 'lucide-react'
 import { useKeycloak } from '@/keycloak/useKeycloak'
+import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
+import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 
 interface AddCourseDialogProps {
   children: React.ReactNode
@@ -112,18 +113,9 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className='sm:max-w-[550px]'>
         {isPending ? (
-          <div className='flex flex-col items-center justify-center h-48'>
-            <Loader2 className='h-10 w-10 text-primary animate-spin' />
-            <p className='mt-4 text-lg font-medium text-muted-foreground'>Loading course data...</p>
-          </div>
+          <DialogLoadingDisplay customMessage='Updating course data...' />
         ) : isError ? (
-          <div className='flex flex-col items-center justify-center h-48'>
-            <AlertCircle className='h-10 w-10 text-destructive' />
-            <p className='mt-4 text-lg font-medium text-destructive'>Error: {error.message}</p>
-            <p className='mt-2 text-sm text-muted-foreground'>
-              Please try again or contact support if the problem persists.
-            </p>
-          </div>
+          <DialogErrorDisplay error={error} />
         ) : (
           <>
             <DialogHeader>
