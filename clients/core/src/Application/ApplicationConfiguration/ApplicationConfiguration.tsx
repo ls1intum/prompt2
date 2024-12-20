@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, GripVertical, Loader2, Plus, Settings } from 'lucide-react'
+import { Loader2, Plus, Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,7 +16,7 @@ import { getApplicationStatus } from './utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionCard } from './components/ApplicationQuestionCard'
+import { ApplicationQuestionCard } from './ApplicationQuestionConfig/ApplicationQuestionCard'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,23 +96,37 @@ export const ApplicationConfiguration = (): JSX.Element => {
     )
   }
 
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return
+  // const onDragEnd = (result: any) => {
+  //   if (!result.destination) return
 
-    // const newQuestions = Array.from(questions)
-    // const [reorderedItem] = newQuestions.splice(result.source.index, 1)
-    // newQuestions.splice(result.destination.index, 0, reorderedItem)
+  //   // const newQuestions = Array.from(questions)
+  //   // const [reorderedItem] = newQuestions.splice(result.source.index, 1)
+  //   // newQuestions.splice(result.destination.index, 0, reorderedItem)
 
-    // setQuestions(newQuestions)
-  }
+  //   // setQuestions(newQuestions)
+  // }
 
-  const handleAddNewQuestion = () => {
+  const handleAddNewQuestionText = () => {
     const newQuestion: ApplicationQuestionText = {
-      id: `question-${applicationQuestions.length + 1}`,
-      title: 'New Question',
+      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
+      title: ``,
       course_phase_id: phaseId!,
       is_required: false,
-      order_num: 1,
+      order_num: applicationQuestions.length + 1,
+    }
+    setApplicationQuestions([...applicationQuestions, newQuestion])
+  }
+
+  const handleAddNewQuestionMultiSelect = () => {
+    const newQuestion: ApplicationQuestionMultiSelect = {
+      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
+      title: ``,
+      course_phase_id: phaseId!,
+      is_required: false,
+      order_num: applicationQuestions.length + 1,
+      min_select: 0,
+      max_select: 0,
+      options: [],
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
@@ -177,10 +191,10 @@ export const ApplicationConfiguration = (): JSX.Element => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-              <DropdownMenuItem onSelect={() => handleAddNewQuestion()}>
+              <DropdownMenuItem onSelect={() => handleAddNewQuestionText()}>
                 Text Question
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => handleAddNewQuestion()}>
+              <DropdownMenuItem onSelect={() => handleAddNewQuestionMultiSelect()}>
                 Multi-Select Question
               </DropdownMenuItem>
             </DropdownMenuContent>
