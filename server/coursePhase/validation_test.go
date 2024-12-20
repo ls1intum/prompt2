@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/stretchr/testify/assert"
@@ -84,7 +85,7 @@ func TestValidateUpdateCoursePhase(t *testing.T) {
 			name: "valid update",
 			input: coursePhaseDTO.UpdateCoursePhase{
 				ID:       uuid.New(),
-				Name:     "Updated Phase Name",
+				Name:     pgtype.Text{Valid: true, String: "Updated Phase Name"},
 				MetaData: meta.MetaData{"key": "value"},
 			},
 			expectedError: "",
@@ -93,7 +94,7 @@ func TestValidateUpdateCoursePhase(t *testing.T) {
 			name: "missing name",
 			input: coursePhaseDTO.UpdateCoursePhase{
 				ID:       uuid.New(),
-				Name:     "",
+				Name:     pgtype.Text{Valid: true, String: ""},
 				MetaData: meta.MetaData{"key": "value"},
 			},
 			expectedError: "course phase name is required",
@@ -102,7 +103,7 @@ func TestValidateUpdateCoursePhase(t *testing.T) {
 			name: "empty metadata",
 			input: coursePhaseDTO.UpdateCoursePhase{
 				ID:       uuid.New(),
-				Name:     "Phase with Empty Metadata",
+				Name:     pgtype.Text{Valid: true, String: "Phase with empty meta data"},
 				MetaData: meta.MetaData{},
 			},
 			expectedError: "",
@@ -111,7 +112,7 @@ func TestValidateUpdateCoursePhase(t *testing.T) {
 			name: "missing ID",
 			input: coursePhaseDTO.UpdateCoursePhase{
 				ID:       uuid.Nil,
-				Name:     "Valid Name",
+				Name:     pgtype.Text{Valid: true, String: "Valid Name"},
 				MetaData: meta.MetaData{"key": "value"},
 			},
 			expectedError: "",

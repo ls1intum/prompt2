@@ -23,7 +23,7 @@ func validateCreateCoursePhase(coursePhase coursePhaseDTO.CreateCoursePhase) err
 }
 
 func validateUpdateCoursePhase(coursePhase coursePhaseDTO.UpdateCoursePhase) error {
-	if coursePhase.Name == "" {
+	if coursePhase.Name.Valid && coursePhase.Name.String == "" {
 		errorMessage := "course phase name is required"
 		log.Error(errorMessage)
 		return errors.New(errorMessage)

@@ -5,13 +5,10 @@ import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
 import { TemplateRoutes } from './PhaseMapping/ExternalRouters/TemplateRoutes'
-import { Application } from './Application/Application'
 import { PhaseRouterMapping } from './PhaseMapping/PhaseRouterMapping'
 import PrivacyPage from './LegalPages/Privacy'
 import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
-import { PermissionRestriction } from './management/PermissionRestriction'
-import { Role } from '@/interfaces/permission_roles'
 import { CourseOverview } from './Course/CourseOverview'
 
 const queryClient = new QueryClient({
@@ -50,22 +47,6 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <PhaseRouterMapping />
-                </ManagementRoot>
-              }
-            />
-            <Route
-              path='/management/course/:courseId/application/*'
-              element={
-                <ManagementRoot>
-                  <PermissionRestriction
-                    requiredPermissions={[
-                      Role.PROMPT_ADMIN,
-                      Role.COURSE_LECTURER,
-                      Role.COURSE_EDITOR,
-                    ]}
-                  >
-                    <Application />
-                  </PermissionRestriction>
                 </ManagementRoot>
               }
             />

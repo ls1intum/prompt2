@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -115,7 +116,7 @@ func (suite *RouterTestSuite) TestUpdateCoursePhase() {
 
 	updatedCoursePhase := coursePhaseDTO.UpdateCoursePhase{
 		ID:       uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b"),
-		Name:     "Updated Phase",
+		Name:     pgtype.Text{Valid: true, String: "Updated Phase"},
 		MetaData: metaData,
 	}
 

@@ -2,11 +2,11 @@ import { useCourseStore } from '@/zustand/useCourseStore'
 import { Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { TemplateRoutes } from './ExternalRouters/TemplateRoutes'
-import { Application } from '../Application/Application'
+import { ApplicationRoutes } from './ExternalRouters/ApplicationRoutes'
 
 const PhaseRouter: { [key: string]: React.FC } = {
-  application: Application,
   template_component: TemplateRoutes,
+  Application: ApplicationRoutes,
 }
 
 export const PhaseRouterMapping = (): JSX.Element => {
