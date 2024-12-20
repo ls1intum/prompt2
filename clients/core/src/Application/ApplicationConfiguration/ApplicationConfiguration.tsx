@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { ChevronDown, GripVertical, Loader2, Plus, Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,12 +14,25 @@ import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
 import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
 import { getApplicationStatus } from './utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
+import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionCard } from './components/ApplicationQuestionCard'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export const ApplicationConfiguration = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
+
+  const [applicationQuestions, setApplicationQuestions] = useState<
+    (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
+  >([])
 
   const {
     data: fetchedCoursePhase,
@@ -83,6 +96,27 @@ export const ApplicationConfiguration = (): JSX.Element => {
     )
   }
 
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return
+
+    // const newQuestions = Array.from(questions)
+    // const [reorderedItem] = newQuestions.splice(result.source.index, 1)
+    // newQuestions.splice(result.destination.index, 0, reorderedItem)
+
+    // setQuestions(newQuestions)
+  }
+
+  const handleAddNewQuestion = () => {
+    const newQuestion: ApplicationQuestionText = {
+      id: `question-${applicationQuestions.length + 1}`,
+      title: 'New Question',
+      course_phase_id: phaseId!,
+      is_required: false,
+      order_num: 1,
+    }
+    setApplicationQuestions([...applicationQuestions, newQuestion])
+  }
+
   const handleModifyConfiguration = () => {
     setIsConfigDialogOpen(true)
   }
@@ -96,35 +130,80 @@ export const ApplicationConfiguration = (): JSX.Element => {
   // }
 
   return (
-    <Card className='w-full max-w-3xl mx-auto'>
-      <ApplicationConfigurationHeader
-        applicationPhaseIsConfigured={applicationPhaseIsConfigured ?? false}
-        applicationStatus={applicationStatus}
-      />
-      <CardContent>
-        {applicationPhaseIsConfigured && (
-          <div>
-            <ApplicationTimeline
-              startDate={applicationMetaData?.applicationStartDate}
-              endDate={applicationMetaData?.applicationEndDate}
-            />
-            <div className='py-2'>
+    <div className='container mx-auto space-y-8'>
+      <h1 className='text-4xl font-bold text-center mb-8'>Application Configuration</h1>
+      <Card className='w-full max-w-4xl mx-auto shadow-lg'>
+        <ApplicationConfigurationHeader
+          applicationPhaseIsConfigured={applicationPhaseIsConfigured ?? false}
+          applicationStatus={applicationStatus}
+        />
+        <CardContent className='space-y-6'>
+          {applicationPhaseIsConfigured ? (
+            <>
+              <ApplicationTimeline
+                startDate={applicationMetaData?.applicationStartDate}
+                endDate={applicationMetaData?.applicationEndDate}
+              />
               <ExternalStudentsStatus
                 externalStudentsAllowed={applicationMetaData?.externalStudentsAllowed ?? false}
               />
+              <div className='flex justify-end'>
+                <Button onClick={handleModifyConfiguration} variant='outline'>
+                  <Settings className='mr-2 h-4 w-4' />
+                  Modify Configuration
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className='text-center py-8'>
+              <p className='text-xl mb-4'>The application phase is not yet configured.</p>
+              <Button onClick={handleModifyConfiguration} size='lg'>
+                <Settings className='mr-2 h-5 w-5' />
+                Configure Application Phase
+              </Button>
             </div>
-            <div className='flex justify-end'>
-              <Button onClick={handleModifyConfiguration}>Modify Configuration</Button>
-            </div>
-          </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className='space-y-6 max-w-4xl mx-auto'>
+        <div className='flex justify-between items-center'>
+          <h2 className='text-2xl font-semibold'>Application Questions</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size='sm'>
+                <Plus className='mr-2 h-4 w-4' />
+                Add Question
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onSelect={() => handleAddNewQuestion()}>
+                Text Question
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleAddNewQuestion()}>
+                Multi-Select Question
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {applicationQuestions.length > 0 ? (
+          applicationQuestions.map((question, index) => (
+            <ApplicationQuestionCard
+              key={question.id}
+              question={question}
+              index={index}
+              onUpdate={() => console.log('Question updated')}
+            />
+          ))
+        ) : (
+          <Card>
+            <CardContent className='text-center py-8'>
+              <p className='text-lg mb-4'>No questions added yet.</p>
+            </CardContent>
+          </Card>
         )}
-        {!applicationPhaseIsConfigured && (
-          <div className='text-center'>
-            <p className='text-lg mb-4'>The application phase is not yet configured.</p>
-            <Button onClick={handleModifyConfiguration}>Configure Application Phase</Button>
-          </div>
-        )}
-      </CardContent>
+      </div>
+
       {applicationMetaData && (
         <ApplicationConfigDialog
           isOpen={isConfigDialogOpen}
@@ -132,6 +211,6 @@ export const ApplicationConfiguration = (): JSX.Element => {
           initialData={applicationMetaData}
         />
       )}
-    </Card>
+    </div>
   )
 }

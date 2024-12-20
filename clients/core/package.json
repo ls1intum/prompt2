@@ -14,6 +14,7 @@
         "@dagrejs/dagre": "^1.1.4",
         "@xyflow/react": "^12.3.6",
         "external-remotes-plugin": "^1.0.0",
+        "react-beautiful-dnd": "^13.1.1",
         "sha256": "^0.2.0"
     },
     "devDependencies": {
