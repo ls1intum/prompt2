@@ -16,7 +16,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { updateCoursePhase } from '../../../network/mutations/updateCoursePhase'
 import { useParams } from 'react-router-dom'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
+import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 
 interface ApplicationConfigDialogProps {
   isOpen: boolean
@@ -71,20 +72,9 @@ export function ApplicationConfigDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         {isPending ? (
-          <div className='flex flex-col items-center justify-center h-48'>
-            <Loader2 className='h-10 w-10 text-primary animate-spin' />
-            <p className='mt-4 text-lg font-medium text-muted-foreground'>
-              Saving application config...
-            </p>
-          </div>
+          <DialogLoadingDisplay customMessage='Saving application config...' />
         ) : isMutateError ? (
-          <div className='flex flex-col items-center justify-center h-48'>
-            <AlertCircle className='h-10 w-10 text-destructive' />
-            <p className='mt-4 text-lg font-medium text-destructive'>Error: {error.message}</p>
-            <p className='mt-2 text-sm text-muted-foreground'>
-              Please try again or contact support if the problem persists.
-            </p>
-          </div>
+          <DialogErrorDisplay error={error} />
         ) : (
           <>
             <DialogHeader>
