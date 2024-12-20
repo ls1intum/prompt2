@@ -19,7 +19,8 @@ export interface CreateCoursePhase {
 
 export interface UpdateCoursePhase {
   id: string
-  name: string
+  name?: string
+  meta_data?: { [key: string]: any }
 }
 
 export interface CoursePhaseWithMetaData {
