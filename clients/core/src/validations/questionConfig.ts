@@ -9,7 +9,23 @@ export const questionConfigSchema = z.object({
   min_select: z.number().min(0).optional(),
   max_select: z.number().min(1).optional(),
   options: z.array(z.string()).default([]),
-  validation_regex: z.string().optional(),
+  validation_regex: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true // If empty, we consider it optional and thus valid
+        try {
+          new RegExp(val)
+          return true
+        } catch {
+          return false
+        }
+      },
+      {
+        message: 'Invalid regex pattern',
+      },
+    ),
   allowed_length: z.number().min(1).optional(),
 })
 
