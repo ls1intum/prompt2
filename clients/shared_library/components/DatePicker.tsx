@@ -7,11 +7,21 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-export function DatePicker() {
-  const [date, setDate] = React.useState<Date>()
+interface DatePickerProps {
+  date: Date | undefined
+  onSelect: (date: Date | undefined) => void
+}
+
+export const DatePicker = ({ date, onSelect }: DatePickerProps): JSX.Element => {
+  const [open, setOpen] = React.useState(false)
+
+  const handleSelect = (newDate: Date | undefined) => {
+    onSelect(newDate)
+    setOpen(false)
+  }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={'outline'}
@@ -20,12 +30,12 @@ export function DatePicker() {
             !date && 'text-muted-foreground',
           )}
         >
-          <CalendarIcon />
+          <CalendarIcon className='mr-2 h-4 w-4' />
           {date ? format(date, 'PPP') : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0'>
-        <Calendar mode='single' selected={date} onSelect={setDate} initialFocus />
+        <Calendar mode='single' selected={date} onSelect={handleSelect} initialFocus />
       </PopoverContent>
     </Popover>
   )

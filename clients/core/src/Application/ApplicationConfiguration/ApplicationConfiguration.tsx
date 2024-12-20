@@ -13,11 +13,13 @@ import { ApplicationConfigurationHeader } from './components/ConfigurationHeader
 import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
 import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
 import { getApplicationStatus } from './utils/getApplicationStatus'
+import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 
 export const ApplicationConfiguration = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
 
   const {
     data: fetchedCoursePhase,
@@ -82,9 +84,11 @@ export const ApplicationConfiguration = (): JSX.Element => {
   }
 
   const handleModifyConfiguration = () => {
-    // TODO: DB modification
-    console.log('Modify configuration')
-    // Implement the logic to open a modal or navigate to a configuration page
+    setIsConfigDialogOpen(true)
+  }
+
+  const handleDialogClose = () => {
+    setIsConfigDialogOpen(false)
   }
 
   // const onSubmit = (data: ApplicationMetaData) => {
@@ -117,12 +121,17 @@ export const ApplicationConfiguration = (): JSX.Element => {
         {!applicationPhaseIsConfigured && (
           <div className='text-center'>
             <p className='text-lg mb-4'>The application phase is not yet configured.</p>
-            <Button onClick={() => console.log('Configure application phase')}>
-              Configure Application Phase
-            </Button>
+            <Button onClick={handleModifyConfiguration}>Configure Application Phase</Button>
           </div>
         )}
       </CardContent>
+      {applicationMetaData && (
+        <ApplicationConfigDialog
+          isOpen={isConfigDialogOpen}
+          onClose={handleDialogClose}
+          initialData={applicationMetaData}
+        />
+      )}
     </Card>
   )
 }
