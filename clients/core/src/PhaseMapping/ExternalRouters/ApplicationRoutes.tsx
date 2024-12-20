@@ -1,7 +1,7 @@
 import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
 import { Role } from '@/interfaces/permission_roles'
 import { Application } from '../../Application/Application'
-import { ApplicationConfiguration } from '../../Application/ApplicationConfiguration'
+import { ApplicationConfiguration } from '../../Application/ApplicationConfiguration/ApplicationConfiguration'
 import { ExternalRoutes } from './ExternalRoutes'
 
 const applicationRoutesObjects: ExtendedRouteObject[] = [
