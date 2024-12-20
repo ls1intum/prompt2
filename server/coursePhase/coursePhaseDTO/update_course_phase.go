@@ -9,7 +9,7 @@ import (
 
 type UpdateCoursePhase struct {
 	ID       uuid.UUID     `json:"id"`
-	Name     string        `json:"name"`
+	Name     pgtype.Text   `json:"name"` // use pgtype to handle null values
 	MetaData meta.MetaData `json:"meta_data"`
 }
 
@@ -20,7 +20,7 @@ func (cp UpdateCoursePhase) GetDBModel() (db.UpdateCoursePhaseParams, error) {
 	}
 	return db.UpdateCoursePhaseParams{
 		ID:       cp.ID,
-		Name:     pgtype.Text{String: cp.Name, Valid: true},
+		Name:     cp.Name,
 		MetaData: metaData,
 	}, nil
 }

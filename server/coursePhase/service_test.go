@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -61,7 +62,7 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhase() {
 
 	update := coursePhaseDTO.UpdateCoursePhase{
 		ID:       id,
-		Name:     "Updated Phase",
+		Name:     pgtype.Text{Valid: true, String: "Updated Phase"},
 		MetaData: metaData,
 	}
 
@@ -85,7 +86,7 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
 
 	update := coursePhaseDTO.UpdateCoursePhase{
 		ID:       id,
-		Name:     "Updated Phase",
+		Name:     pgtype.Text{Valid: true, String: "Updated Phase"},
 		MetaData: metaData,
 	}
 
