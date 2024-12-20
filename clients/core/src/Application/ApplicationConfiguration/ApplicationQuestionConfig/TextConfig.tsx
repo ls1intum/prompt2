@@ -26,7 +26,15 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
           <FormItem>
             <FormLabel>Allowed Length</FormLabel>
             <FormControl>
-              <Input type='number' {...field} min={1} />
+              <Input
+                type='number'
+                {...field}
+                min={1}
+                onChange={(e) => {
+                  const value = e.target.value
+                  field.onChange(value === '' ? '' : Number(value))
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
