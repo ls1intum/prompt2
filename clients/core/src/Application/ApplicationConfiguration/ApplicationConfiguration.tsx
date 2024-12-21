@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, Plus, Settings } from 'lucide-react'
@@ -16,7 +16,7 @@ import { getApplicationStatus } from './utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionCard } from './ApplicationQuestionConfig/ApplicationQuestionCard'
+import { ApplicationQuestionCard, ApplicationQuestionCardRef } from './ApplicationQuestionConfig/ApplicationQuestionCard'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +33,8 @@ export const ApplicationConfiguration = (): JSX.Element => {
   const [applicationQuestions, setApplicationQuestions] = useState<
     (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
   >([])
+  const [questionsModified, setQuestionsModified] = useState(false)
+  const questionRefs = useRef<Array<ApplicationQuestionCardRef | null | undefined>>([])
 
   const {
     data: fetchedCoursePhase,
@@ -115,6 +117,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
       order_num: applicationQuestions.length + 1,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
+    setQuestionsModified(true)
   }
 
   const handleAddNewQuestionMultiSelect = () => {
@@ -129,6 +132,16 @@ export const ApplicationConfiguration = (): JSX.Element => {
       options: [],
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
+    setQuestionsModified(true)
+  }
+
+  const handleQuestionUpdate = (
+    updatedQuestion: ApplicationQuestionText | ApplicationQuestionMultiSelect,
+  ) => {
+    setApplicationQuestions((prev) => {
+      return prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
+    })
+    setQuestionsModified(true)
   }
 
   const handleModifyConfiguration = () => {
@@ -137,6 +150,25 @@ export const ApplicationConfiguration = (): JSX.Element => {
 
   const handleDialogClose = () => {
     setIsConfigDialogOpen(false)
+  }
+  const handleSubmitAllQuestions = async () => {
+    let allValid = true
+
+    // Loop over each child's ref, call validate()
+    for (const ref of questionRefs.current) {
+      if (!ref) continue
+      const isValid = await ref.validate()
+      if (!isValid) {
+        allValid = false
+        // optionally break early
+      }
+    }
+
+    // If everything is valid, log true
+    if (allValid) {
+      console.log(true)
+      // ... your save logic here ...
+    }
   }
 
   // const onSubmit = (data: ApplicationMetaData) => {
@@ -180,6 +212,10 @@ export const ApplicationConfiguration = (): JSX.Element => {
         </CardContent>
       </Card>
 
+      <div className='max-w-4xl mx-auto'>
+        <Button onClick={handleSubmitAllQuestions}>Submit All Questions</Button>
+      </div>
+
       <div className='space-y-6 max-w-4xl mx-auto'>
         <div className='flex justify-between items-center'>
           <h2 className='text-2xl font-semibold'>Application Questions</h2>
@@ -206,7 +242,8 @@ export const ApplicationConfiguration = (): JSX.Element => {
               key={question.id}
               question={question}
               index={index}
-              onUpdate={() => console.log('Question updated')}
+              onUpdate={handleQuestionUpdate}
+              ref={(el) => (questionRefs.current[index] = el)}
             />
           ))
         ) : (

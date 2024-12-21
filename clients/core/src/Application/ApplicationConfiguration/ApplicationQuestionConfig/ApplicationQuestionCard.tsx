@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
@@ -20,26 +19,50 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-export function ApplicationQuestionCard({
-  question,
-  index,
-  onUpdate,
-}: {
+// If you plan to expose methods via this ref, define them here:
+export interface ApplicationQuestionCardRef {
+  validate: () => Promise<boolean>
+  getValues: () => QuestionConfigFormData
+}
+
+interface ApplicationQuestionCardProps {
   question: ApplicationQuestionMultiSelect | ApplicationQuestionText
   index: number
   onUpdate: (updatedQuestion: ApplicationQuestionMultiSelect | ApplicationQuestionText) => void
-}) {
-  const [isExpanded, setIsExpanded] = useState(false)
+}
+
+export const ApplicationQuestionCard = forwardRef<
+  ApplicationQuestionCardRef | undefined, // or null if you prefer
+  ApplicationQuestionCardProps
+>(function ApplicationQuestionCard({ question, index, onUpdate }, ref) {
+  const isNewQuestion = question.title === '' ? true : false
+  const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelect = 'options' in question
 
   const form = useForm<QuestionConfigFormData>({
     resolver: zodResolver(questionConfigSchema),
     defaultValues: question,
+    mode: 'onTouched',
   })
 
-  const onSubmit = (data: QuestionConfigFormData) => {
-    onUpdate({ ...question, ...data })
-  }
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      onUpdate({ ...question, ...value })
+    })
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe()
+  }, [form.watch, question, onUpdate, form])
+
+  // allow to call validate from the parent component
+  useImperativeHandle(ref, () => ({
+    async validate() {
+      const valid = await form.trigger()
+      return valid
+    },
+    getValues() {
+      return form.getValues()
+    },
+  }))
 
   return (
     <Card className='mb-4'>
@@ -52,7 +75,7 @@ export function ApplicationQuestionCard({
       {isExpanded && (
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+            <form className='space-y-4'>
               <FormField
                 control={form.control}
                 name='title'
@@ -123,12 +146,10 @@ export function ApplicationQuestionCard({
               />
 
               {isMultiSelect ? <MultiSelectConfig form={form} /> : <TextConfig form={form} />}
-
-              <Button type='submit'>Update Question</Button>
             </form>
           </Form>
         </CardContent>
       )}
     </Card>
   )
-}
+})
