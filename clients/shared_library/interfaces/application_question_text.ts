@@ -1,5 +1,5 @@
 export interface ApplicationQuestionText {
-  id?: string
+  id: string
   course_phase_id: string
   title: string
   description?: string

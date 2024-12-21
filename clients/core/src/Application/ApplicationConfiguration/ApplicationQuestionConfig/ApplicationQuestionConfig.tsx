@@ -15,6 +15,7 @@ import { useRef, useState } from 'react'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { useParams } from 'react-router-dom'
+import { SaveChangesAlert } from '@/components/SaveChangesAlert'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -77,19 +78,28 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     if (allValid) {
       // TODO: call mutate call to the server
       console.log(true)
+    } else {
+      throw new Error('Not all questions are valid')
     }
+  }
+
+  const handleRevertAllQuestions = () => {
+    // TODO revert all questions
+    console.log('revert all questions')
+    setQuestionsModified(false)
+    setApplicationQuestions([])
+  }
+
+  const handleDeleteQuestion = (id: string) => {
+    // TODO: sync with server
+    setApplicationQuestions((prev) => prev.filter((q) => q.id !== id))
+    setQuestionsModified(true)
   }
 
   return (
     <div className='space-y-6 max-w-4xl mx-auto'>
       <div className='flex justify-between items-center'>
         <h2 className='text-2xl font-semibold'>Application Questions</h2>
-        {questionsModified && (
-          <div className='max-w-4xl mx-auto'>
-            <Button onClick={handleSubmitAllQuestions}>Submit All Questions</Button>
-          </div>
-        )}
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size='sm'>
@@ -107,6 +117,13 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {questionsModified && (
+        <SaveChangesAlert
+          message='You have unsaved changes'
+          handleRevert={handleRevertAllQuestions}
+          saveChanges={handleSubmitAllQuestions}
+        />
+      )}
       {applicationQuestions.length > 0 ? (
         applicationQuestions.map((question, index) => (
           <ApplicationQuestionCard
@@ -116,6 +133,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
             onUpdate={handleQuestionUpdate}
             ref={(el) => (questionRefs.current[index] = el)}
             submitAttempted={submitAttempted}
+            onDelete={handleDeleteQuestion}
           />
         ))
       ) : (
