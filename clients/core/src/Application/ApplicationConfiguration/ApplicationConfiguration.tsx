@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, Plus, Settings } from 'lucide-react'
+import { Loader2, Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,27 +14,13 @@ import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
 import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
 import { getApplicationStatus } from './utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionCard, ApplicationQuestionCardRef } from './ApplicationQuestionConfig/ApplicationQuestionCard'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
 
 export const ApplicationConfiguration = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
-
-  const [applicationQuestions, setApplicationQuestions] = useState<
-    (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
-  >([])
-  const [questionsModified, setQuestionsModified] = useState(false)
-  const questionRefs = useRef<Array<ApplicationQuestionCardRef | null | undefined>>([])
 
   const {
     data: fetchedCoursePhase,
@@ -98,52 +84,6 @@ export const ApplicationConfiguration = (): JSX.Element => {
     )
   }
 
-  // const onDragEnd = (result: any) => {
-  //   if (!result.destination) return
-
-  //   // const newQuestions = Array.from(questions)
-  //   // const [reorderedItem] = newQuestions.splice(result.source.index, 1)
-  //   // newQuestions.splice(result.destination.index, 0, reorderedItem)
-
-  //   // setQuestions(newQuestions)
-  // }
-
-  const handleAddNewQuestionText = () => {
-    const newQuestion: ApplicationQuestionText = {
-      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
-      title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-    }
-    setApplicationQuestions([...applicationQuestions, newQuestion])
-    setQuestionsModified(true)
-  }
-
-  const handleAddNewQuestionMultiSelect = () => {
-    const newQuestion: ApplicationQuestionMultiSelect = {
-      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
-      title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-      min_select: 0,
-      max_select: 0,
-      options: [],
-    }
-    setApplicationQuestions([...applicationQuestions, newQuestion])
-    setQuestionsModified(true)
-  }
-
-  const handleQuestionUpdate = (
-    updatedQuestion: ApplicationQuestionText | ApplicationQuestionMultiSelect,
-  ) => {
-    setApplicationQuestions((prev) => {
-      return prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    })
-    setQuestionsModified(true)
-  }
-
   const handleModifyConfiguration = () => {
     setIsConfigDialogOpen(true)
   }
@@ -151,29 +91,6 @@ export const ApplicationConfiguration = (): JSX.Element => {
   const handleDialogClose = () => {
     setIsConfigDialogOpen(false)
   }
-  const handleSubmitAllQuestions = async () => {
-    let allValid = true
-
-    // Loop over each child's ref, call validate()
-    for (const ref of questionRefs.current) {
-      if (!ref) continue
-      const isValid = await ref.validate()
-      if (!isValid) {
-        allValid = false
-        // optionally break early
-      }
-    }
-
-    // If everything is valid, log true
-    if (allValid) {
-      console.log(true)
-      // ... your save logic here ...
-    }
-  }
-
-  // const onSubmit = (data: ApplicationMetaData) => {
-  //   console.log('submitting: ', data)
-  // }
 
   return (
     <div className='container mx-auto space-y-8'>
@@ -212,48 +129,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
         </CardContent>
       </Card>
 
-      <div className='max-w-4xl mx-auto'>
-        <Button onClick={handleSubmitAllQuestions}>Submit All Questions</Button>
-      </div>
-
-      <div className='space-y-6 max-w-4xl mx-auto'>
-        <div className='flex justify-between items-center'>
-          <h2 className='text-2xl font-semibold'>Application Questions</h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size='sm'>
-                <Plus className='mr-2 h-4 w-4' />
-                Add Question
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem onSelect={() => handleAddNewQuestionText()}>
-                Text Question
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => handleAddNewQuestionMultiSelect()}>
-                Multi-Select Question
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        {applicationQuestions.length > 0 ? (
-          applicationQuestions.map((question, index) => (
-            <ApplicationQuestionCard
-              key={question.id}
-              question={question}
-              index={index}
-              onUpdate={handleQuestionUpdate}
-              ref={(el) => (questionRefs.current[index] = el)}
-            />
-          ))
-        ) : (
-          <Card>
-            <CardContent className='text-center py-8'>
-              <p className='text-lg mb-4'>No questions added yet.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {applicationPhaseIsConfigured && <ApplicationQuestionConfig />}
 
       {applicationMetaData && (
         <ApplicationConfigDialog

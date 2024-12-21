@@ -7,7 +7,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { QuestionConfigFormData, questionConfigSchema } from '../../../validations/questionConfig'
+import {
+  QuestionConfigFormData,
+  questionConfigSchema,
+} from '../../../../validations/questionConfig'
 import { MultiSelectConfig } from './MultiSelectConfig'
 import { TextConfig } from './TextConfig'
 import {
@@ -29,12 +32,13 @@ interface ApplicationQuestionCardProps {
   question: ApplicationQuestionMultiSelect | ApplicationQuestionText
   index: number
   onUpdate: (updatedQuestion: ApplicationQuestionMultiSelect | ApplicationQuestionText) => void
+  submitAttempted: boolean
 }
 
 export const ApplicationQuestionCard = forwardRef<
   ApplicationQuestionCardRef | undefined, // or null if you prefer
   ApplicationQuestionCardProps
->(function ApplicationQuestionCard({ question, index, onUpdate }, ref) {
+>(function ApplicationQuestionCard({ question, index, onUpdate, submitAttempted }, ref) {
   const isNewQuestion = question.title === '' ? true : false
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelect = 'options' in question
@@ -65,7 +69,7 @@ export const ApplicationQuestionCard = forwardRef<
   }))
 
   return (
-    <Card className='mb-4'>
+    <Card className={`mb-4 ${submitAttempted && !form.formState.isValid ? 'border-red-500' : ''}`}>
       <CardHeader className='cursor-pointer' onClick={() => setIsExpanded(!isExpanded)}>
         <CardTitle className='flex justify-between items-center'>
           <span>{question.title || `Question ${index + 1}`}</span>
