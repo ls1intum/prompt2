@@ -35,7 +35,9 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
         name='allowed_length'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Allowed Length</FormLabel>
+            <FormLabel>
+              Allowed Length <span className='text-destructive'> *</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type='number'

@@ -42,7 +42,9 @@ export function MultiSelectConfig({
     <div className='space-y-4'>
       <div>
         <FormItem>
-          <FormLabel>Options</FormLabel>
+          <FormLabel>
+            Options <span className='text-destructive'> *</span>
+          </FormLabel>
           <FormControl>
             {/* Wrap multiple children in a single parent */}
             <>
@@ -92,7 +94,9 @@ export function MultiSelectConfig({
           name='min_select'
           render={({ field }) => (
             <FormItem className='flex-1'>
-              <FormLabel>Min Required</FormLabel>
+              <FormLabel>
+                Min Required <span className='text-destructive'> *</span>
+              </FormLabel>
               <FormControl>
                 <Input
                   type='number'
@@ -116,7 +120,9 @@ export function MultiSelectConfig({
           name='max_select'
           render={({ field }) => (
             <FormItem className='flex-1'>
-              <FormLabel>Max Allowed</FormLabel>
+              <FormLabel>
+                Max Allowed <span className='text-destructive'> *</span>
+              </FormLabel>
               <FormControl>
                 <Input
                   type='number'
