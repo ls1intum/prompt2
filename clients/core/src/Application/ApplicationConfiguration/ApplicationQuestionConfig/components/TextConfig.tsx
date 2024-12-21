@@ -1,9 +1,16 @@
 import { Input } from '@/components/ui/input'
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+} from '@/components/ui/form'
 import { UseFormReturn } from 'react-hook-form'
-import { QuestionConfigFormData } from 'src/validations/questionConfig'
+import { QuestionConfigFormDataText } from 'src/validations/questionConfig'
 
-export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormData> }) {
+export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDataText> }) {
   return (
     <div className='space-y-4'>
       <FormField
@@ -15,6 +22,10 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
             <FormControl>
               <Input {...field} placeholder='Enter validation regex' />
             </FormControl>
+            <FormDescription>
+              The regex will be used as a validation rule for the input. Leave empty for no
+              validation.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -36,6 +47,9 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
                 }}
               />
             </FormControl>
+            <FormDescription>
+              The allowed number of chars to be entered. Recommended default is 500 chars.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

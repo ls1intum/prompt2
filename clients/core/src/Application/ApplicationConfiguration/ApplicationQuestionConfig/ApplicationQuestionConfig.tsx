@@ -34,6 +34,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
       course_phase_id: phaseId!,
       is_required: false,
       order_num: applicationQuestions.length + 1,
+      allowed_length: 500,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
     setQuestionsModified(true)

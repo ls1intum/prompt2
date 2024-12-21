@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,8 @@ import { ApplicationQuestionMultiSelect } from '@/interfaces/application_questio
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import {
   QuestionConfigFormData,
+  QuestionConfigFormDataMultiSelect,
+  QuestionConfigFormDataText,
   questionConfigSchema,
 } from '../../../../validations/questionConfig'
 import { MultiSelectConfig } from './MultiSelectConfig'
@@ -20,6 +22,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { DeleteConfirmation } from './DeleteConfirmation'
@@ -49,7 +52,7 @@ export const ApplicationQuestionCard = forwardRef<
 
   const form = useForm<QuestionConfigFormData>({
     resolver: zodResolver(questionConfigSchema),
-    defaultValues: question,
+    defaultValues: { type: isMultiSelect ? 'multi-select' : 'text', ...question },
     mode: 'onTouched',
   })
 
@@ -71,6 +74,10 @@ export const ApplicationQuestionCard = forwardRef<
       return form.getValues()
     },
   }))
+
+  useEffect(() => {
+    console.log(form.formState.errors)
+  }, [form.formState.errors])
 
   return (
     <>
@@ -105,6 +112,20 @@ export const ApplicationQuestionCard = forwardRef<
           <CardContent>
             <Form {...form}>
               <form className='space-y-4'>
+                <FormField
+                  control={form.control}
+                  name='is_required'
+                  render={({ field }) => (
+                    <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <div className='space-y-1 leading-none'>
+                        <FormLabel>Question is required to be answered</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name='title'
@@ -155,26 +176,22 @@ export const ApplicationQuestionCard = forwardRef<
                       <FormControl>
                         <Input {...field} placeholder='Enter error message' />
                       </FormControl>
+                      <FormDescription>
+                        The custom error message that will be displayed if the question is not
+                        answered or validation fails.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name='is_required'
-                  render={({ field }) => (
-                    <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <div className='space-y-1 leading-none'>
-                        <FormLabel>Required</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
 
-                {isMultiSelect ? <MultiSelectConfig form={form} /> : <TextConfig form={form} />}
+                {isMultiSelect ? (
+                  <MultiSelectConfig
+                    form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
+                  />
+                ) : (
+                  <TextConfig form={form as UseFormReturn<QuestionConfigFormDataText>} />
+                )}
               </form>
             </Form>
           </CardContent>

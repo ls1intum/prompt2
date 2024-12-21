@@ -1,11 +1,23 @@
 import { Button } from '@/components/ui/button'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { MinusIcon, PlusIcon } from 'lucide-react'
+import { useEffect } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
-import { QuestionConfigFormData } from 'src/validations/questionConfig'
+import { QuestionConfigFormDataMultiSelect } from 'src/validations/questionConfig'
 
-export function MultiSelectConfig({ form }: { form: UseFormReturn<QuestionConfigFormData> }) {
+export function MultiSelectConfig({
+  form,
+}: {
+  form: UseFormReturn<QuestionConfigFormDataMultiSelect>
+}) {
   const {
     fields: options,
     append,
@@ -18,35 +30,57 @@ export function MultiSelectConfig({ form }: { form: UseFormReturn<QuestionConfig
   const minSelect = form.watch('min_select') || 0
   const maxSelect = form.watch('max_select') || options.length
 
+  useEffect(() => {
+    console.log(form.formState.errors)
+    console.log('Options: ', form.formState.errors.options)
+    console.log('isArray: ', Array.isArray(form.formState.errors.options))
+    console.log('length: ', form.formState.errors.options?.length)
+    console.log('object: ', form.formState.errors.options?.[0])
+  }, [form.formState.errors])
+
   return (
     <div className='space-y-4'>
       <div>
-        <FormLabel>Options</FormLabel>
-        {options.map((option, index) => (
-          <FormField
-            key={option.id}
-            control={form.control}
-            name={`options.${index}`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className='flex items-center space-x-2 mt-2'>
-                    <Input {...field} placeholder={`Option ${index + 1}`} />
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='icon'
-                      onClick={() => remove(index)}
-                    >
-                      <MinusIcon className='h-4 w-4' />
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+        <FormItem>
+          <FormLabel>Options</FormLabel>
+          <FormControl>
+            {/* Wrap multiple children in a single parent */}
+            <>
+              {options.map((option, index) => (
+                <div key={option.id} className='flex items-center space-x-2 mt-2'>
+                  <FormField
+                    control={form.control}
+                    name={`options.${index}`}
+                    render={({ field }) => <Input {...field} placeholder={`Option ${index + 1}`} />}
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='icon'
+                    onClick={() => remove(index)}
+                    disabled={options.length === 1} // Prevent removing the last option
+                  >
+                    <MinusIcon className='h-4 w-4' />
+                  </Button>
+                </div>
+              ))}
+            </>
+          </FormControl>
+          {/* Array-Level Error Message */}
+          {form.formState.errors.options &&
+            typeof form.formState.errors.options.message === 'string' && (
+              <FormMessage className='text-red-500'>
+                {form.formState.errors.options.message}
+              </FormMessage>
             )}
-          />
-        ))}
+          {form.formState.errors.options &&
+            Array.isArray(form.formState.errors.options) &&
+            form.formState.errors.options.length > 0 && (
+              <FormMessage className='text-red-500'>
+                {form.formState.errors.options[0].message}
+              </FormMessage>
+            )}
+        </FormItem>
         <Button type='button' variant='outline' className='mt-2' onClick={() => append('')}>
           <PlusIcon className='h-4 w-4 mr-2' />
           Add Option
@@ -72,6 +106,7 @@ export function MultiSelectConfig({ form }: { form: UseFormReturn<QuestionConfig
                   }}
                 />
               </FormControl>
+              <FormDescription>The min amount of options required to be selected.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -95,6 +130,7 @@ export function MultiSelectConfig({ form }: { form: UseFormReturn<QuestionConfig
                   }}
                 />
               </FormControl>
+              <FormDescription>The max amount of options allowed to be selected.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
