@@ -5,17 +5,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Plus } from 'lucide-react'
+import { AlertCircle, Loader2, Plus } from 'lucide-react'
 import {
   ApplicationQuestionCard,
   ApplicationQuestionCardRef,
 } from './components/ApplicationQuestionCard'
 import { Card, CardContent } from '@/components/ui/card'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { useParams } from 'react-router-dom'
 import { SaveChangesAlert } from '@/components/SaveChangesAlert'
+import { useQuery } from '@tanstack/react-query'
+import { ApplicationForm } from '@/interfaces/application_form'
+import { getApplicationForm } from '../../../network/queries/applicationForm'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -26,6 +30,31 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
   const questionRefs = useRef<Array<ApplicationQuestionCardRef | null | undefined>>([])
   // required to highlight questions red if submit is attempted and not valid
   const [submitAttempted, setSubmitAttempted] = useState(false)
+
+  const {
+    data: fetchedForm,
+    isPending: isApplicationFormPending,
+    isError: isApplicationFormError,
+    error: applicationFormError,
+  } = useQuery<ApplicationForm>({
+    queryKey: ['application_form', phaseId],
+    queryFn: () => getApplicationForm(phaseId ?? 'undefined'),
+  })
+
+  useEffect(() => {
+    if (fetchedForm) {
+      console.log(fetchedForm)
+      const combinedQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
+        ...fetchedForm.questions_multi_select,
+        ...fetchedForm.questions_text,
+      ]
+
+      // Sort the combined questions by ordernum
+      combinedQuestions.sort((a, b) => (a.order_num ?? 0) - (b.order_num ?? 0))
+
+      setApplicationQuestions(combinedQuestions)
+    }
+  }, [fetchedForm])
 
   const handleAddNewQuestionText = () => {
     const newQuestion: ApplicationQuestionText = {
@@ -95,6 +124,32 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     // TODO: sync with server
     setApplicationQuestions((prev) => prev.filter((q) => q.id !== id))
     setQuestionsModified(true)
+  }
+
+  if (isApplicationFormPending || isApplicationFormError) {
+    return (
+      <div className='space-y-6 max-w-4xl mx-auto'>
+        <div className='flex justify-between items-center'>
+          <h2 className='text-2xl font-semibold'>Application Questions</h2>
+        </div>
+        {isApplicationFormPending && (
+          <div className='flex justify-center items-center h-32'>
+            <Loader2 className='h-8 w-8 animate-spin' />
+          </div>
+        )}
+        {isApplicationFormError && (
+          <Alert variant='destructive'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {applicationFormError instanceof Error
+                ? applicationFormError.message
+                : 'An error occurred while fetching the application form.'}
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    )
   }
 
   return (
