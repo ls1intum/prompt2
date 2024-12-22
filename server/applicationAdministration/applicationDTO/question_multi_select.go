@@ -20,19 +20,18 @@ type QuestionMultiSelect struct {
 	OrderNum      int       `json:"order_num"`
 }
 
-func (a QuestionMultiSelect) GetDBModel() db.ApplicationQuestionMultiSelect {
-	return db.ApplicationQuestionMultiSelect{
-		ID:            a.ID,
-		CoursePhaseID: a.CoursePhaseID,
-		Title:         pgtype.Text{String: a.Title, Valid: true},
-		Description:   pgtype.Text{String: a.Description, Valid: true},
-		Placeholder:   pgtype.Text{String: a.Placeholder, Valid: true},
-		ErrorMessage:  pgtype.Text{String: a.ErrorMessage, Valid: true},
-		IsRequired:    pgtype.Bool{Bool: a.IsRequired, Valid: true},
-		MinSelect:     pgtype.Int4{Int32: int32(a.MinSelect), Valid: true},
-		MaxSelect:     pgtype.Int4{Int32: int32(a.MaxSelect), Valid: true},
-		Options:       a.Options,
-		OrderNum:      pgtype.Int4{Int32: int32(a.OrderNum), Valid: true},
+func (a QuestionMultiSelect) GetDBModel() db.UpdateApplicationQuestionMultiSelectParams {
+	return db.UpdateApplicationQuestionMultiSelectParams{
+		ID:           a.ID,
+		Title:        pgtype.Text{String: a.Title, Valid: true},
+		Description:  pgtype.Text{String: a.Description, Valid: true},
+		Placeholder:  pgtype.Text{String: a.Placeholder, Valid: true},
+		ErrorMessage: pgtype.Text{String: a.ErrorMessage, Valid: true},
+		IsRequired:   pgtype.Bool{Bool: a.IsRequired, Valid: true},
+		MinSelect:    pgtype.Int4{Int32: int32(a.MinSelect), Valid: true},
+		MaxSelect:    pgtype.Int4{Int32: int32(a.MaxSelect), Valid: true},
+		Options:      a.Options,
+		OrderNum:     pgtype.Int4{Int32: int32(a.OrderNum), Valid: true},
 	}
 
 }

@@ -10,7 +10,7 @@ import (
 
 func InitApplicationAdministrationModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
 	setupApplicationRouter(routerGroup, keycloak.KeycloakMiddleware, checkAccessControlByIDWrapper)
-	ApplicationService = &ApplicationServiceSingleton{
+	ApplicationServiceSingleton = &ApplicationService{
 		queries: queries,
 		conn:    conn,
 	}

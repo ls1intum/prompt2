@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
@@ -44,7 +45,34 @@ func getApplicationForm(c *gin.Context) {
 }
 
 func updateApplicationForm(c *gin.Context) {
-	// TODO
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var updatedApplicationForm applicationDTO.UpdateForm
+	if err := c.BindJSON(&updatedApplicationForm); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// TODO Validation of application form
+	err = validateUpdateForm(c, coursePhaseId, updatedApplicationForm)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdateApplicationForm(c, coursePhaseId, updatedApplicationForm)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not update application form"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "application form updated"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
