@@ -2,6 +2,7 @@ package applicationAdministration
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,6 +21,15 @@ var ApplicationService *ApplicationServiceSingleton
 func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
+
+	isApplicationPhase, err := ApplicationService.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return applicationDTO.Form{}, err
+	}
+
+	if !isApplicationPhase {
+		return applicationDTO.Form{}, errors.New("course phase is not an application phase")
+	}
 
 	applicationQuestionsText, err := ApplicationService.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {

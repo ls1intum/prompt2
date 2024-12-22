@@ -25,3 +25,15 @@ RETURNING *;
 INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING *;
+
+-- name: CheckIfCoursePhaseIsApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1;
