@@ -163,7 +163,7 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 }
 
 const deleteApplicationQuestionMultiSelect = `-- name: DeleteApplicationQuestionMultiSelect :exec
-DELETE FROM application_question_text
+DELETE FROM application_question_multi_select
 WHERE id = $1
 `
 

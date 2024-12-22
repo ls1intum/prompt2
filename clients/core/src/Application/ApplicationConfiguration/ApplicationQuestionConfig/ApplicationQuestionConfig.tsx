@@ -16,10 +16,11 @@ import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { useParams } from 'react-router-dom'
 import { SaveChangesAlert } from '@/components/SaveChangesAlert'
-import { useQuery } from '@tanstack/react-query'
-import { ApplicationForm } from '@/interfaces/application_form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ApplicationForm, UpdateApplicationForm } from '@/interfaces/application_form'
 import { getApplicationForm } from '../../../network/queries/applicationForm'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { updateApplicationForm } from '../../../network/mutations/updateApplicationForm'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -30,6 +31,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
   const questionRefs = useRef<Array<ApplicationQuestionCardRef | null | undefined>>([])
   // required to highlight questions red if submit is attempted and not valid
   const [submitAttempted, setSubmitAttempted] = useState(false)
+  const queryClient = useQueryClient()
 
   const {
     data: fetchedForm,
@@ -41,18 +43,39 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     queryFn: () => getApplicationForm(phaseId ?? 'undefined'),
   })
 
+  const {
+    mutate: mutateApplicationForm,
+    isError: isMutateError,
+    error: mutateError,
+    isPending: isMutatePending,
+  } = useMutation({
+    mutationFn: (updateForm: UpdateApplicationForm) => {
+      return updateApplicationForm(phaseId ?? 'undefined', updateForm)
+    },
+    onSuccess: () => {
+      // invalidate query
+      queryClient.invalidateQueries({ queryKey: ['application_form', phaseId] })
+      setQuestionsModified(false)
+      // close this window
+    },
+  })
+
+  const setQuestionsFromForm = (form: ApplicationForm) => {
+    const combinedQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
+      ...form.questions_multi_select,
+      ...form.questions_text,
+    ]
+
+    // Sort the combined questions by ordernum
+    combinedQuestions.sort((a, b) => (a.order_num ?? 0) - (b.order_num ?? 0))
+
+    setApplicationQuestions(combinedQuestions)
+  }
+
   useEffect(() => {
     if (fetchedForm) {
       console.log(fetchedForm)
-      const combinedQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
-        ...fetchedForm.questions_multi_select,
-        ...fetchedForm.questions_text,
-      ]
-
-      // Sort the combined questions by ordernum
-      combinedQuestions.sort((a, b) => (a.order_num ?? 0) - (b.order_num ?? 0))
-
-      setApplicationQuestions(combinedQuestions)
+      setQuestionsFromForm(fetchedForm)
     }
   }, [fetchedForm])
 
@@ -106,7 +129,39 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     }
     setSubmitAttempted(true)
     if (allValid) {
-      // TODO: call mutate call to the server
+      const deletedTextQuestion = fetchedForm?.questions_text
+        .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
+        .map((q) => q.id)
+
+      const deletedMultiSelectQuestion = fetchedForm?.questions_multi_select
+        .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
+        .map((q) => q.id)
+
+      const questions_multi_select = applicationQuestions
+        .filter((q) => 'options' in q)
+        .map((q) => q as ApplicationQuestionMultiSelect)
+
+      const questions_text = applicationQuestions
+        .filter((q) => !('options' in q))
+        .map((q) => q as ApplicationQuestionText)
+
+      const updateForm: UpdateApplicationForm = {
+        delete_questions_text: deletedTextQuestion ?? [],
+        delete_questions_multi_select: deletedMultiSelectQuestion ?? [],
+        create_questions_text: questions_text.filter((q) =>
+          q.id.startsWith('not-valid-id-question-'),
+        ),
+        create_questions_multi_select: questions_multi_select.filter((q) =>
+          q.id.startsWith('not-valid-id-question-'),
+        ),
+        update_questions_text: questions_text.filter(
+          (q) => !q.id.startsWith('not-valid-id-question-'),
+        ),
+        update_questions_multi_select: questions_multi_select.filter(
+          (q) => !q.id.startsWith('not-valid-id-question-'),
+        ),
+      }
+      mutateApplicationForm(updateForm)
       console.log(true)
     } else {
       throw new Error('Not all questions are valid')
@@ -117,7 +172,9 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     // TODO revert all questions
     console.log('revert all questions')
     setQuestionsModified(false)
-    setApplicationQuestions([])
+    if (fetchedForm) {
+      setQuestionsFromForm(fetchedForm)
+    }
   }
 
   const handleDeleteQuestion = (id: string) => {
@@ -126,18 +183,18 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     setQuestionsModified(true)
   }
 
-  if (isApplicationFormPending || isApplicationFormError) {
+  if (isApplicationFormPending || isApplicationFormError || isMutatePending || isMutateError) {
     return (
       <div className='space-y-6 max-w-4xl mx-auto'>
         <div className='flex justify-between items-center'>
           <h2 className='text-2xl font-semibold'>Application Questions</h2>
         </div>
-        {isApplicationFormPending && (
+        {(isApplicationFormPending || isMutatePending) && (
           <div className='flex justify-center items-center h-32'>
             <Loader2 className='h-8 w-8 animate-spin' />
           </div>
         )}
-        {isApplicationFormError && (
+        {(isApplicationFormError || isMutateError) && (
           <Alert variant='destructive'>
             <AlertCircle className='h-4 w-4' />
             <AlertTitle>Error</AlertTitle>
@@ -145,6 +202,9 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
               {applicationFormError instanceof Error
                 ? applicationFormError.message
                 : 'An error occurred while fetching the application form.'}
+              {mutateError instanceof Error
+                ? mutateError.message
+                : 'An error occurred while updating the application form.'}
             </AlertDescription>
           </Alert>
         )}

@@ -70,6 +70,6 @@ DELETE FROM application_question_text
 WHERE id = $1;
 
 -- name: DeleteApplicationQuestionMultiSelect :exec
-DELETE FROM application_question_text
+DELETE FROM application_question_multi_select
 WHERE id = $1;
 
