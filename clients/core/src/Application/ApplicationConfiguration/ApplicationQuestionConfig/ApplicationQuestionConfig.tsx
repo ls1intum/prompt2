@@ -1,11 +1,4 @@
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { AlertCircle, Loader2, Plus } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import {
   ApplicationQuestionCard,
   ApplicationQuestionCardRef,
@@ -24,6 +17,7 @@ import { updateApplicationForm } from '../../../network/mutations/updateApplicat
 import { handleSubmitAllQuestions } from './handlers/handleSubmitAllQuestions'
 import { computeQuestionsModified } from './handlers/computeQuestionsModified'
 import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
+import { AddQuestionMenu } from './components/AddQuestionMenu'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -85,32 +79,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     }
   }, [fetchedForm])
 
-  const handleAddNewQuestionText = () => {
-    const newQuestion: ApplicationQuestionText = {
-      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
-      title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-      allowed_length: 500,
-    }
-    setApplicationQuestions([...applicationQuestions, newQuestion])
-  }
-
-  const handleAddNewQuestionMultiSelect = () => {
-    const newQuestion: ApplicationQuestionMultiSelect = {
-      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
-      title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-      min_select: 0,
-      max_select: 0,
-      options: [],
-    }
-    setApplicationQuestions([...applicationQuestions, newQuestion])
-  }
-
   const handleRevertAllQuestions = () => {
     if (fetchedForm) {
       setQuestionsFromForm(fetchedForm)
@@ -154,22 +122,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     <div className='space-y-6 max-w-4xl mx-auto'>
       <div className='flex justify-between items-center'>
         <h2 className='text-2xl font-semibold'>Application Questions</h2>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size='sm'>
-              <Plus className='mr-2 h-4 w-4' />
-              Add Question
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onSelect={() => handleAddNewQuestionText()}>
-              Text Question
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddNewQuestionMultiSelect()}>
-              Multi-Select Question
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <AddQuestionMenu
+          setApplicationQuestions={setApplicationQuestions}
+          applicationQuestions={applicationQuestions}
+        />
       </div>
       {questionsModified && (
         <SaveChangesAlert
