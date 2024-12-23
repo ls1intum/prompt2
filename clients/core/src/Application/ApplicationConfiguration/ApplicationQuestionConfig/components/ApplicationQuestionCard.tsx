@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { DeleteConfirmation } from './DeleteConfirmation'
+import { questionsEqual } from '../handlers/computeQuestionsModified'
+import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -35,6 +37,7 @@ export interface ApplicationQuestionCardRef {
 
 interface ApplicationQuestionCardProps {
   question: ApplicationQuestionMultiSelect | ApplicationQuestionText
+  originalQuestion: ApplicationQuestionMultiSelect | ApplicationQuestionText | undefined
   index: number
   onUpdate: (updatedQuestion: ApplicationQuestionMultiSelect | ApplicationQuestionText) => void
   submitAttempted: boolean
@@ -44,11 +47,20 @@ interface ApplicationQuestionCardProps {
 export const ApplicationQuestionCard = forwardRef<
   ApplicationQuestionCardRef | undefined, // or null if you prefer
   ApplicationQuestionCardProps
->(function ApplicationQuestionCard({ question, index, onUpdate, submitAttempted, onDelete }, ref) {
+>(function ApplicationQuestionCard(
+  { question, index, originalQuestion, onUpdate, submitAttempted, onDelete },
+  ref,
+) {
   const isNewQuestion = question.title === '' ? true : false
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelect = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  const status: QuestionStatus = originalQuestion
+    ? questionsEqual(question, originalQuestion)
+      ? 'saved'
+      : 'modified'
+    : 'new'
 
   const form = useForm<QuestionConfigFormData>({
     resolver: zodResolver(questionConfigSchema),
@@ -88,6 +100,7 @@ export const ApplicationQuestionCard = forwardRef<
           <CardTitle className='flex justify-between items-center'>
             <span>{question.title || `Question ${index + 1}`}</span>
             <div className='flex items-center space-x-2'>
+              <QuestionStatusBadge status={status} />
               <Button
                 variant='ghost'
                 size='sm'
@@ -107,6 +120,9 @@ export const ApplicationQuestionCard = forwardRef<
               {isExpanded ? <ChevronUp className='h-6 w-6' /> : <ChevronDown className='h-6 w-6' />}
             </div>
           </CardTitle>
+          <p className='text-sm text-muted-foreground mt-1'>
+            {isMultiSelect ? 'Multi-select question' : 'Text question'}
+          </p>
         </CardHeader>
         {isExpanded && (
           <CardContent>

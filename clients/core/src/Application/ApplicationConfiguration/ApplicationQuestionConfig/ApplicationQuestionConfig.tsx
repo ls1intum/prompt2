@@ -44,7 +44,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     queryKey: ['application_form', phaseId],
     queryFn: () => getApplicationForm(phaseId ?? 'undefined'),
   })
-
+  const originalQuestions = [
+    ...(fetchedForm?.questions_multi_select ?? []),
+    ...(fetchedForm?.questions_text ?? []),
+  ]
   const questionsModified = computeQuestionsModified(fetchedForm, applicationQuestions)
 
   const {
@@ -188,6 +191,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
           <ApplicationQuestionCard
             key={question.id}
             question={question}
+            originalQuestion={originalQuestions.find((q) => q.id === question.id)}
             index={index}
             onUpdate={(updatedQuestion) => {
               handleQuestionUpdate(updatedQuestion, setApplicationQuestions)
