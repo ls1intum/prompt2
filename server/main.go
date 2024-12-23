@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/niclasheun/prompt2.0/applicationAdministration"
 	"github.com/niclasheun/prompt2.0/course"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase"
@@ -91,6 +92,7 @@ func main() {
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
+	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 	router.Run(serverAddress)

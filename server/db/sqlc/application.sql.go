@@ -12,6 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkIfCoursePhaseIsApplicationPhase = `-- name: CheckIfCoursePhaseIsApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1
+`
+
+func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, checkIfCoursePhaseIsApplicationPhase, id)
+	var is_application bool
+	err := row.Scan(&is_application)
+	return is_application, err
+}
+
 const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :one
 INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)
@@ -72,10 +92,9 @@ func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApp
 	return i, err
 }
 
-const createApplicationQuestionMultiSelect = `-- name: CreateApplicationQuestionMultiSelect :one
+const createApplicationQuestionMultiSelect = `-- name: CreateApplicationQuestionMultiSelect :exec
 INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num
 `
 
 type CreateApplicationQuestionMultiSelectParams struct {
@@ -92,8 +111,8 @@ type CreateApplicationQuestionMultiSelectParams struct {
 	OrderNum      pgtype.Int4 `json:"order_num"`
 }
 
-func (q *Queries) CreateApplicationQuestionMultiSelect(ctx context.Context, arg CreateApplicationQuestionMultiSelectParams) (ApplicationQuestionMultiSelect, error) {
-	row := q.db.QueryRow(ctx, createApplicationQuestionMultiSelect,
+func (q *Queries) CreateApplicationQuestionMultiSelect(ctx context.Context, arg CreateApplicationQuestionMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, createApplicationQuestionMultiSelect,
 		arg.ID,
 		arg.CoursePhaseID,
 		arg.Title,
@@ -106,27 +125,12 @@ func (q *Queries) CreateApplicationQuestionMultiSelect(ctx context.Context, arg 
 		arg.Options,
 		arg.OrderNum,
 	)
-	var i ApplicationQuestionMultiSelect
-	err := row.Scan(
-		&i.ID,
-		&i.CoursePhaseID,
-		&i.Title,
-		&i.Description,
-		&i.Placeholder,
-		&i.ErrorMessage,
-		&i.IsRequired,
-		&i.MinSelect,
-		&i.MaxSelect,
-		&i.Options,
-		&i.OrderNum,
-	)
-	return i, err
+	return err
 }
 
-const createApplicationQuestionText = `-- name: CreateApplicationQuestionText :one
+const createApplicationQuestionText = `-- name: CreateApplicationQuestionText :exec
 INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num
 `
 
 type CreateApplicationQuestionTextParams struct {
@@ -142,8 +146,8 @@ type CreateApplicationQuestionTextParams struct {
 	OrderNum        pgtype.Int4 `json:"order_num"`
 }
 
-func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateApplicationQuestionTextParams) (ApplicationQuestionText, error) {
-	row := q.db.QueryRow(ctx, createApplicationQuestionText,
+func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateApplicationQuestionTextParams) error {
+	_, err := q.db.Exec(ctx, createApplicationQuestionText,
 		arg.ID,
 		arg.CoursePhaseID,
 		arg.Title,
@@ -155,20 +159,27 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 		arg.AllowedLength,
 		arg.OrderNum,
 	)
-	var i ApplicationQuestionText
-	err := row.Scan(
-		&i.ID,
-		&i.CoursePhaseID,
-		&i.Title,
-		&i.Description,
-		&i.Placeholder,
-		&i.ValidationRegex,
-		&i.ErrorMessage,
-		&i.IsRequired,
-		&i.AllowedLength,
-		&i.OrderNum,
-	)
-	return i, err
+	return err
+}
+
+const deleteApplicationQuestionMultiSelect = `-- name: DeleteApplicationQuestionMultiSelect :exec
+DELETE FROM application_question_multi_select
+WHERE id = $1
+`
+
+func (q *Queries) DeleteApplicationQuestionMultiSelect(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteApplicationQuestionMultiSelect, id)
+	return err
+}
+
+const deleteApplicationQuestionText = `-- name: DeleteApplicationQuestionText :exec
+DELETE FROM application_question_text
+WHERE id = $1
+`
+
+func (q *Queries) DeleteApplicationQuestionText(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteApplicationQuestionText, id)
+	return err
 }
 
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many
@@ -242,4 +253,89 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateApplicationQuestionMultiSelect = `-- name: UpdateApplicationQuestionMultiSelect :exec
+UPDATE application_question_multi_select
+SET
+    title = COALESCE($2, title),
+    description = COALESCE($3, description),
+    placeholder = COALESCE($4, placeholder),
+    error_message = COALESCE($5, error_message),
+    is_required = COALESCE($6, is_required),
+    min_select = COALESCE($7, min_select),
+    max_select = COALESCE($8, max_select),
+    options = COALESCE($9, options),
+    order_num = COALESCE($10, order_num)
+WHERE id = $1
+`
+
+type UpdateApplicationQuestionMultiSelectParams struct {
+	ID           uuid.UUID   `json:"id"`
+	Title        pgtype.Text `json:"title"`
+	Description  pgtype.Text `json:"description"`
+	Placeholder  pgtype.Text `json:"placeholder"`
+	ErrorMessage pgtype.Text `json:"error_message"`
+	IsRequired   pgtype.Bool `json:"is_required"`
+	MinSelect    pgtype.Int4 `json:"min_select"`
+	MaxSelect    pgtype.Int4 `json:"max_select"`
+	Options      []string    `json:"options"`
+	OrderNum     pgtype.Int4 `json:"order_num"`
+}
+
+func (q *Queries) UpdateApplicationQuestionMultiSelect(ctx context.Context, arg UpdateApplicationQuestionMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, updateApplicationQuestionMultiSelect,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.Placeholder,
+		arg.ErrorMessage,
+		arg.IsRequired,
+		arg.MinSelect,
+		arg.MaxSelect,
+		arg.Options,
+		arg.OrderNum,
+	)
+	return err
+}
+
+const updateApplicationQuestionText = `-- name: UpdateApplicationQuestionText :exec
+UPDATE application_question_text
+SET
+    title = COALESCE($2, title),
+    description = COALESCE($3, description),
+    placeholder = COALESCE($4, placeholder),
+    validation_regex = COALESCE($5, validation_regex),
+    error_message = COALESCE($6, error_message),
+    is_required = COALESCE($7, is_required),
+    allowed_length = COALESCE($8, allowed_length),
+    order_num = COALESCE($9, order_num)
+WHERE id = $1
+`
+
+type UpdateApplicationQuestionTextParams struct {
+	ID              uuid.UUID   `json:"id"`
+	Title           pgtype.Text `json:"title"`
+	Description     pgtype.Text `json:"description"`
+	Placeholder     pgtype.Text `json:"placeholder"`
+	ValidationRegex pgtype.Text `json:"validation_regex"`
+	ErrorMessage    pgtype.Text `json:"error_message"`
+	IsRequired      pgtype.Bool `json:"is_required"`
+	AllowedLength   pgtype.Int4 `json:"allowed_length"`
+	OrderNum        pgtype.Int4 `json:"order_num"`
+}
+
+func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateApplicationQuestionTextParams) error {
+	_, err := q.db.Exec(ctx, updateApplicationQuestionText,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.Placeholder,
+		arg.ValidationRegex,
+		arg.ErrorMessage,
+		arg.IsRequired,
+		arg.AllowedLength,
+		arg.OrderNum,
+	)
+	return err
 }

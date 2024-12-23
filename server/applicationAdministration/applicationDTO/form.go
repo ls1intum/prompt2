@@ -8,21 +8,6 @@ type Form struct {
 	QuestionsMultiSelect []QuestionMultiSelect `json:"questions_multi_select"`
 }
 
-func (a Form) GetDBModel() ([]db.ApplicationQuestionText, []db.ApplicationQuestionMultiSelect) {
-	questionsText := make([]db.ApplicationQuestionText, 0, len(a.QuestionsText))
-	applicationQuestionsMultiSelect := make([]db.ApplicationQuestionMultiSelect, 0, len(a.QuestionsMultiSelect))
-
-	for _, question := range a.QuestionsText {
-		questionsText = append(questionsText, question.GetDBModel())
-	}
-
-	for _, question := range a.QuestionsMultiSelect {
-		applicationQuestionsMultiSelect = append(applicationQuestionsMultiSelect, question.GetDBModel())
-	}
-
-	return questionsText, applicationQuestionsMultiSelect
-}
-
 func GetFormDTOFromDBModel(questionsText []db.ApplicationQuestionText, questionsMultiSelect []db.ApplicationQuestionMultiSelect) Form {
 	applicationFormDTO := Form{
 		QuestionsText:        make([]QuestionText, 0, len(questionsText)),

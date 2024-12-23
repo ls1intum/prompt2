@@ -23,5 +23,5 @@ func InitCourseModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pg
 
 // initializes the handler func with CheckCoursePermissions
 func checkAccessControlByIDWrapper(allowedRoles ...string) gin.HandlerFunc {
-	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, allowedRoles...)
+	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, "uuid", allowedRoles...)
 }

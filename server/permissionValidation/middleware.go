@@ -18,17 +18,17 @@ func handleAuthError(c *gin.Context) {
 }
 
 // Reads an id from the URL and checks based on the URL the permission of the user
-func CheckAccessControlByID(checkPermission func(ctx *gin.Context, id uuid.UUID, allowedRoles ...string) (bool, error), allowedRoles ...string) gin.HandlerFunc {
+func CheckAccessControlByID(checkPermission func(ctx *gin.Context, id uuid.UUID, allowedRoles ...string) (bool, error), idParamName string, allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and parse the course UUID from route parameters.
-		courseID, err := uuid.Parse(c.Param("uuid"))
+		id, err := uuid.Parse(c.Param(idParamName))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		// Check the user's permission for the given course with the provided roles.
-		hasAccess, err := checkPermission(c, courseID, allowedRoles...)
+		hasAccess, err := checkPermission(c, id, allowedRoles...)
 		if err != nil {
 			log.Error("Permission validation failed: ", err)
 			handleAuthError(c)
