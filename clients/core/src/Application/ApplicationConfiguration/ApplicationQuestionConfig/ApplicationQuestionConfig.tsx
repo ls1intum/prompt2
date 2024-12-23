@@ -22,13 +22,14 @@ import { getApplicationForm } from '../../../network/queries/applicationForm'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { updateApplicationForm } from '../../../network/mutations/updateApplicationForm'
 import { handleSubmitAllQuestions } from './handlers/handleSubmitAllQuestions'
+import { computeQuestionsModified } from './handlers/computeQuestionsModified'
+import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [applicationQuestions, setApplicationQuestions] = useState<
     (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
   >([])
-  const [questionsModified, setQuestionsModified] = useState(false)
   const questionRefs = useRef<Array<ApplicationQuestionCardRef | null | undefined>>([])
   // required to highlight questions red if submit is attempted and not valid
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -44,6 +45,8 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     queryFn: () => getApplicationForm(phaseId ?? 'undefined'),
   })
 
+  const questionsModified = computeQuestionsModified(fetchedForm, applicationQuestions)
+
   const {
     mutate: mutateApplicationForm,
     isError: isMutateError,
@@ -56,7 +59,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     onSuccess: () => {
       // invalidate query
       queryClient.invalidateQueries({ queryKey: ['application_form', phaseId] })
-      setQuestionsModified(false)
       // close this window
     },
   })
@@ -90,7 +92,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
       allowed_length: 500,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
-    setQuestionsModified(true)
   }
 
   const handleAddNewQuestionMultiSelect = () => {
@@ -105,29 +106,16 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
       options: [],
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
-    setQuestionsModified(true)
-  }
-
-  const handleQuestionUpdate = (
-    updatedQuestion: ApplicationQuestionText | ApplicationQuestionMultiSelect,
-  ) => {
-    setApplicationQuestions((prev) => {
-      return prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    })
-    setQuestionsModified(true)
   }
 
   const handleRevertAllQuestions = () => {
-    setQuestionsModified(false)
     if (fetchedForm) {
       setQuestionsFromForm(fetchedForm)
     }
   }
 
   const handleDeleteQuestion = (id: string) => {
-    // TODO: sync with server
     setApplicationQuestions((prev) => prev.filter((q) => q.id !== id))
-    setQuestionsModified(true)
   }
 
   if (isApplicationFormPending || isApplicationFormError || isMutatePending || isMutateError) {
@@ -201,7 +189,9 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
             key={question.id}
             question={question}
             index={index}
-            onUpdate={handleQuestionUpdate}
+            onUpdate={(updatedQuestion) => {
+              handleQuestionUpdate(updatedQuestion, setApplicationQuestions)
+            }}
             ref={(el) => (questionRefs.current[index] = el)}
             submitAttempted={submitAttempted}
             onDelete={handleDeleteQuestion}
