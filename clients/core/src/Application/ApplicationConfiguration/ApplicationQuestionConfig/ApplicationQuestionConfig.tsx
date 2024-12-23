@@ -21,6 +21,7 @@ import { ApplicationForm, UpdateApplicationForm } from '@/interfaces/application
 import { getApplicationForm } from '../../../network/queries/applicationForm'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { updateApplicationForm } from '../../../network/mutations/updateApplicationForm'
+import { handleSubmitAllQuestions } from './handlers/handleSubmitAllQuestions'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -116,61 +117,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     setQuestionsModified(true)
   }
 
-  const handleSubmitAllQuestions = async () => {
-    let allValid = true
-
-    // Loop over each child's ref, call validate()
-    for (const ref of questionRefs.current) {
-      if (!ref) continue
-      const isValid = await ref.validate()
-      if (!isValid) {
-        allValid = false
-      }
-    }
-    setSubmitAttempted(true)
-    if (allValid) {
-      const deletedTextQuestion = fetchedForm?.questions_text
-        .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
-        .map((q) => q.id)
-
-      const deletedMultiSelectQuestion = fetchedForm?.questions_multi_select
-        .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
-        .map((q) => q.id)
-
-      const questions_multi_select = applicationQuestions
-        .filter((q) => 'options' in q)
-        .map((q) => q as ApplicationQuestionMultiSelect)
-
-      const questions_text = applicationQuestions
-        .filter((q) => !('options' in q))
-        .map((q) => q as ApplicationQuestionText)
-
-      const updateForm: UpdateApplicationForm = {
-        delete_questions_text: deletedTextQuestion ?? [],
-        delete_questions_multi_select: deletedMultiSelectQuestion ?? [],
-        create_questions_text: questions_text.filter((q) =>
-          q.id.startsWith('not-valid-id-question-'),
-        ),
-        create_questions_multi_select: questions_multi_select.filter((q) =>
-          q.id.startsWith('not-valid-id-question-'),
-        ),
-        update_questions_text: questions_text.filter(
-          (q) => !q.id.startsWith('not-valid-id-question-'),
-        ),
-        update_questions_multi_select: questions_multi_select.filter(
-          (q) => !q.id.startsWith('not-valid-id-question-'),
-        ),
-      }
-      mutateApplicationForm(updateForm)
-      console.log(true)
-    } else {
-      throw new Error('Not all questions are valid')
-    }
-  }
-
   const handleRevertAllQuestions = () => {
-    // TODO revert all questions
-    console.log('revert all questions')
     setQuestionsModified(false)
     if (fetchedForm) {
       setQuestionsFromForm(fetchedForm)
@@ -237,7 +184,15 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
         <SaveChangesAlert
           message='You have unsaved changes'
           handleRevert={handleRevertAllQuestions}
-          saveChanges={handleSubmitAllQuestions}
+          saveChanges={() =>
+            handleSubmitAllQuestions({
+              questionRefs,
+              fetchedForm,
+              applicationQuestions,
+              setSubmitAttempted,
+              mutateApplicationForm,
+            })
+          }
         />
       )}
       {applicationQuestions.length > 0 ? (
