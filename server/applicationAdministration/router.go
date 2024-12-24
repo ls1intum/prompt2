@@ -20,9 +20,6 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
 	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer), updateApplicationForm)
 
-	// Application Endpoints
-	// application.GET("/:coursePhaseID/applications", permissionIDMiddleware("CourseLecturer", "CourseEditor"), getApplications)
-
 }
 
 func getApplicationForm(c *gin.Context) {

@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/sirupsen/logrus"
 )
 
 type ApplicationService struct {
@@ -64,7 +63,6 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 
 	// Delete all questions to be deleted
 	for _, questionID := range form.DeleteQuestionsMultiSelect {
-		logrus.Info("questionID", questionID)
 		err := ApplicationServiceSingleton.queries.DeleteApplicationQuestionMultiSelect(ctx, questionID)
 		if err != nil {
 			return errors.New("could not delete question")
