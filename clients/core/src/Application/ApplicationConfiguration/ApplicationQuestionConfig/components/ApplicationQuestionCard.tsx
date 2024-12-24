@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, GripVertical, Trash2 } from 'lucide-react'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import {
@@ -97,8 +97,16 @@ export const ApplicationQuestionCard = forwardRef<
         className={`mb-4 ${submitAttempted && !form.formState.isValid ? 'border-red-500' : ''}`}
       >
         <CardHeader className='cursor-pointer' onClick={() => setIsExpanded(!isExpanded)}>
-          <CardTitle className='flex justify-between items-center'>
-            <span>{question.title || `Question ${index + 1}`}</span>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center space-x-2'>
+              <GripVertical className='cursor-move h-6 w-6 text-muted-foreground' />
+              <div>
+                <CardTitle>{question.title || `Untitled Question`}</CardTitle>
+                <p className='text-sm text-muted-foreground mt-1'>
+                  Question {index + 1}: {isMultiSelect ? 'Multi-select question' : 'Text question'}
+                </p>
+              </div>
+            </div>
             <div className='flex items-center space-x-2'>
               <QuestionStatusBadge status={status} />
               <Button
@@ -106,7 +114,6 @@ export const ApplicationQuestionCard = forwardRef<
                 size='sm'
                 onClick={(e) => {
                   e.stopPropagation()
-                  // confirmation if question is new as this might result in data loss
                   if (question.id.startsWith('no-valid-id')) {
                     onDelete(question.id)
                   } else {
@@ -119,10 +126,7 @@ export const ApplicationQuestionCard = forwardRef<
               </Button>
               {isExpanded ? <ChevronUp className='h-6 w-6' /> : <ChevronDown className='h-6 w-6' />}
             </div>
-          </CardTitle>
-          <p className='text-sm text-muted-foreground mt-1'>
-            {isMultiSelect ? 'Multi-select question' : 'Text question'}
-          </p>
+          </div>
         </CardHeader>
         {isExpanded && (
           <CardContent>

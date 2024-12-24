@@ -18,6 +18,7 @@ import { handleSubmitAllQuestions } from './handlers/handleSubmitAllQuestions'
 import { computeQuestionsModified } from './handlers/computeQuestionsModified'
 import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
 import { AddQuestionMenu } from './components/AddQuestionMenu'
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -89,6 +90,24 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     setApplicationQuestions((prev) => prev.filter((q) => q.id !== id))
   }
 
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) {
+      return
+    }
+
+    const newQuestions = Array.from(applicationQuestions)
+    const [reorderedItem] = newQuestions.splice(result.source.index, 1)
+    newQuestions.splice(result.destination.index, 0, reorderedItem)
+
+    // Update order_num for all questions
+    const updatedQuestions = newQuestions.map((question, index) => ({
+      ...question,
+      order_num: index + 1,
+    }))
+
+    setApplicationQuestions(updatedQuestions)
+  }
+
   if (isApplicationFormPending || isApplicationFormError || isMutatePending || isMutateError) {
     return (
       <div className='space-y-6 max-w-4xl mx-auto'>
@@ -143,20 +162,38 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
         />
       )}
       {applicationQuestions.length > 0 ? (
-        applicationQuestions.map((question, index) => (
-          <ApplicationQuestionCard
-            key={question.id}
-            question={question}
-            originalQuestion={originalQuestions.find((q) => q.id === question.id)}
-            index={index}
-            onUpdate={(updatedQuestion) => {
-              handleQuestionUpdate(updatedQuestion, setApplicationQuestions)
-            }}
-            ref={(el) => (questionRefs.current[index] = el)}
-            submitAttempted={submitAttempted}
-            onDelete={handleDeleteQuestion}
-          />
-        ))
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId='questions'>
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {applicationQuestions.map((question, index) => (
+                  <Draggable key={question.id} draggableId={question.id} index={index}>
+                    {(providedQuestionItem) => (
+                      <div
+                        ref={providedQuestionItem.innerRef}
+                        {...providedQuestionItem.draggableProps}
+                        {...providedQuestionItem.dragHandleProps}
+                      >
+                        <ApplicationQuestionCard
+                          question={question}
+                          originalQuestion={originalQuestions.find((q) => q.id === question.id)}
+                          index={index}
+                          onUpdate={(updatedQuestion) => {
+                            handleQuestionUpdate(updatedQuestion, setApplicationQuestions)
+                          }}
+                          ref={(el) => (questionRefs.current[index] = el)}
+                          submitAttempted={submitAttempted}
+                          onDelete={handleDeleteQuestion}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       ) : (
         <Card>
           <CardContent className='text-center py-8'>
