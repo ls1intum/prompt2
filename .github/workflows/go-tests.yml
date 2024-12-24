@@ -20,14 +20,8 @@ jobs:
           cache-dependency-path: "**/*.sum"
       - name: Install dependencies
         run: cd ${{ matrix.directory }} && go mod download
-      - name: Find and Test Go Files
-        run: |
-          find ${{ matrix.directory }} -type d | while read -r dir; do
-            if ls "$dir"/*.go > /dev/null 2>&1; then
-              echo "Running tests in $dir"
-              go test "$dir" -json >> TestResults-${{ matrix.directory }}.json
-            fi
-          done
+      - name: Test with Go
+        run:  cd ${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
       - name: Upload Go test results
         if: always()
         uses: actions/upload-artifact@v4
