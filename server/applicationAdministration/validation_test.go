@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type ApplicationAdministrationTestSuite struct {
+type ApplicationAdminValidationTestSuite struct {
 	suite.Suite
 	router                  *gin.Engine
 	ctx                     context.Context
@@ -21,7 +21,7 @@ type ApplicationAdministrationTestSuite struct {
 	applicationAdminService ApplicationService
 }
 
-func (suite *ApplicationAdministrationTestSuite) SetupSuite() {
+func (suite *ApplicationAdminValidationTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
@@ -40,11 +40,11 @@ func (suite *ApplicationAdministrationTestSuite) SetupSuite() {
 	suite.router = gin.Default()
 }
 
-func (suite *ApplicationAdministrationTestSuite) TearDownSuite() {
+func (suite *ApplicationAdminValidationTestSuite) TearDownSuite() {
 	suite.cleanup()
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_Success() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	updateForm := applicationDTO.UpdateForm{
 		DeleteQuestionsText:        []uuid.UUID{uuid.MustParse("a6a04042-95d1-4765-8592-caf9560c8c3c")},
@@ -70,7 +70,7 @@ func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_Success(
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidDeleteQuestion() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_InvalidDeleteQuestion() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	updateForm := applicationDTO.UpdateForm{
 		DeleteQuestionsText: []uuid.UUID{uuid.New()}, // Non-existent question
@@ -80,7 +80,7 @@ func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidD
 	assert.Equal(suite.T(), "question does not belong to this course", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidCreateTextQuestion() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_InvalidCreateTextQuestion() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	updateForm := applicationDTO.UpdateForm{
 		CreateQuestionsText: []applicationDTO.CreateQuestionText{
@@ -96,7 +96,7 @@ func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidC
 	assert.Equal(suite.T(), "course phase id is not correct", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidCreateMultiSelect() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_InvalidCreateMultiSelect() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	updateForm := applicationDTO.UpdateForm{
 		CreateQuestionsMultiSelect: []applicationDTO.CreateQuestionMultiSelect{
@@ -114,42 +114,42 @@ func (suite *ApplicationAdministrationTestSuite) TestValidateUpdateForm_InvalidC
 	assert.Equal(suite.T(), "minimum selection must be at least 0", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionText_EmptyTitle() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionText_EmptyTitle() {
 	err := validateQuestionText("", "", 100)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "title is required", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionText_InvalidRegex() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionText_InvalidRegex() {
 	err := validateQuestionText("Valid Title", "[", 100)
 	assert.Error(suite.T(), err)
 	assert.Contains(suite.T(), err.Error(), "invalid regex pattern")
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionMultiSelect_EmptyTitle() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_EmptyTitle() {
 	err := validateQuestionMultiSelect("", 1, 3, []string{"Option1", "Option2"})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "title is required", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionMultiSelect_EmptyOptions() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_EmptyOptions() {
 	err := validateQuestionMultiSelect("Valid Title", 1, 3, []string{})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "options cannot be empty", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionMultiSelect_MinSelectNegative() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_MinSelectNegative() {
 	err := validateQuestionMultiSelect("Valid Title", -1, 3, []string{"Option1", "Option2"})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "minimum selection must be at least 0", err.Error())
 }
 
-func (suite *ApplicationAdministrationTestSuite) TestValidateQuestionMultiSelect_MaxSelectLessThanOne() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_MaxSelectLessThanOne() {
 	err := validateQuestionMultiSelect("Valid Title", 0, 0, []string{"Option1", "Option2"})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "maximum selection must be at least 1", err.Error())
 }
 
 func TestValidateUpdateFormSuite(t *testing.T) {
-	suite.Run(t, new(ApplicationAdministrationTestSuite))
+	suite.Run(t, new(ApplicationAdminValidationTestSuite))
 }

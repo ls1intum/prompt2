@@ -127,8 +127,3 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	return nil
 
 }
-
-// TODO
-func GetApplication() {
-
-}
