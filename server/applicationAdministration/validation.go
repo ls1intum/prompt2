@@ -9,15 +9,27 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/sirupsen/logrus"
 )
 
 func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm applicationDTO.UpdateForm) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
+	// Check if course phase is application phase
+	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		logrus.Error("could not validate application form: ", err)
+		return errors.New("could not validate the application form")
+	}
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
 	// Get all questions for the course phase
 	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
+		logrus.Error("could not validate application form: ", err)
 		return errors.New("could not validate the application form")
 	}
 
@@ -38,14 +50,14 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 	}
 
 	// 1. DELETE: Check that all deleted questions are from this course
-	for _, question := range updateForm.DeleteQuestionsText {
-		if !textQuestionsMap[question] {
+	for _, questionID := range updateForm.DeleteQuestionsText {
+		if !textQuestionsMap[questionID] {
 			return errors.New("question does not belong to this course")
 		}
 	}
 
-	for _, question := range updateForm.DeleteQuestionsMultiSelect {
-		if !multiSelectQuestionsMap[question] {
+	for _, questionID := range updateForm.DeleteQuestionsMultiSelect {
+		if !multiSelectQuestionsMap[questionID] {
 			return errors.New("question does not belong to this course")
 		}
 	}
@@ -133,6 +145,10 @@ func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options
 	// Validate max_select
 	if maxSelect < 1 {
 		return errors.New("maximum selection must be at least 1")
+	}
+
+	if maxSelect < minSelect {
+		return errors.New("maximum selection must be greater than or equal to minimum selection")
 	}
 
 	// Ensure options are not empty
