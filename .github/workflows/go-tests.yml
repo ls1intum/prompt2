@@ -7,41 +7,30 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: [ 'server' ]
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.22
           cache-dependency-path: "**/*.sum"
-
-      - name: Find Testable Folders
-        id: find_folders
+      - name: Install dependencies
+        run: cd ${{ matrix.directory }} && go mod download
+      - name: Find and Test Go Files
         run: |
-          testable_folders=$(find . -type f -name '*_test.go' -exec dirname {} \; | sort -u | jq -R -s -c 'split("\n")[:-1]')
-          echo "Testable folders: $testable_folders"
-          echo "::set-output name=folders::$testable_folders"
-
-      - name: Run Tests in Each Folder
-        run: |
-          folders=$(echo "${{ steps.find_folders.outputs.folders }}" | jq -r '.[]')
-          for folder in $folders; do
-            echo "Running tests in $folder"
-            if ls $folder/*_test.go > /dev/null 2>&1; then
-              cd $folder
-              go mod download
-              go test ./... -json > TestResults.json || true
-              mv TestResults.json ../TestResults-${folder//\//_}.json
-              cd -
+          find ${{ matrix.directory }} -type d | while read -r dir; do
+            if ls "$dir"/*.go > /dev/null 2>&1; then
+              echo "Running tests in $dir"
+              go test "$dir" -json >> TestResults-${{ matrix.directory }}.json
             fi
           done
-
-      - name: Upload Test Results
+      - name: Upload Go test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Test-Results
-          path: TestResults-*.json
+          name: Go-results-${{ matrix.directory }}
+          path: ./${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
