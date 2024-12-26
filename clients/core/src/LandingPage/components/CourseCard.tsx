@@ -5,6 +5,7 @@ import { DeadlineInfo } from './DeadlineInfo'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { OpenApplication } from '@/interfaces/open_application'
+import { CourseTypeDetails } from '@/interfaces/course_type'
 
 // todo fix this in the data model and import an actual course here!!
 interface CourseCardProps {
@@ -19,7 +20,7 @@ export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => (
     <CardContent>
       <div className='flex flex-col space-y-2 mb-4'>
         <div className='flex justify-between items-center'>
-          <Badge variant={'secondary'}>{courseDetails.courseType}</Badge>
+          <Badge variant={'secondary'}>{CourseTypeDetails[courseDetails.courseType].name}</Badge>
           <span className='text-sm font-medium'>{courseDetails.ects} ECTS</span>
         </div>
         <div className='text-sm text-gray-600 space-y-1'>
