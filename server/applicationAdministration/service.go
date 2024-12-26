@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	log "github.com/sirupsen/logrus"
 )
 
 type ApplicationService struct {
@@ -18,7 +19,8 @@ type ApplicationService struct {
 
 var ApplicationServiceSingleton *ApplicationService
 
-// TODO
+var ErrNotFound = errors.New("Application was not found")
+
 func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
@@ -54,6 +56,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	// Check if course phase is application phase
 	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseId)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -65,6 +68,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	for _, questionID := range form.DeleteQuestionsMultiSelect {
 		err := ApplicationServiceSingleton.queries.DeleteApplicationQuestionMultiSelect(ctx, questionID)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not delete question")
 		}
 	}
@@ -72,6 +76,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	for _, questionID := range form.DeleteQuestionsText {
 		err := ApplicationServiceSingleton.queries.DeleteApplicationQuestionText(ctx, questionID)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not delete question")
 		}
 	}
@@ -85,6 +90,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 
 		err = ApplicationServiceSingleton.queries.CreateApplicationQuestionText(ctx, questionDBModel)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not create question")
 		}
 	}
@@ -97,6 +103,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 
 		err = ApplicationServiceSingleton.queries.CreateApplicationQuestionMultiSelect(ctx, questionDBModel)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not create question")
 		}
 	}
@@ -106,6 +113,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		questionDBModel := question.GetDBModel()
 		err = ApplicationServiceSingleton.queries.UpdateApplicationQuestionMultiSelect(ctx, questionDBModel)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not update question")
 		}
 	}
@@ -114,14 +122,56 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		questionDBModel := question.GetDBModel()
 		err = ApplicationServiceSingleton.queries.UpdateApplicationQuestionText(ctx, questionDBModel)
 		if err != nil {
+			log.Error(err)
 			return errors.New("could not update question")
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
 
+}
+
+func GetOpenApplicationPhases(ctx context.Context) ([]applicationDTO.OpenApplication, error) {
+	applicationCoursePhases, err := ApplicationServiceSingleton.queries.GetAllOpenApplicationPhases(ctx)
+	if err != nil {
+		log.Error(err)
+		return nil, errors.New("could not get open application phases")
+	}
+
+	openApplications := make([]applicationDTO.OpenApplication, 0, len(applicationCoursePhases))
+	for _, openApplication := range applicationCoursePhases {
+		applicationPhase := applicationDTO.GetOpenApplicationPhaseDTO(openApplication)
+		openApplications = append(openApplications, applicationPhase)
+	}
+
+	return openApplications, nil
+}
+
+func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.FormWithDetails, error) {
+	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, ErrNotFound
+	}
+
+	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
+	}
+
+	applicationFormMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
+	}
+
+	openApplicationDTO := applicationDTO.GetFormWithDetailsDTOFromDBModel(applicationCoursePhase, applicationFormText, applicationFormMultiSelect)
+
+	return openApplicationDTO, nil
 }

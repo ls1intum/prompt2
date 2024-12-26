@@ -28,8 +28,9 @@ func InitApplicationAdministrationModule(routerGroup *gin.RouterGroup, queries d
 	if !exists {
 		// create the application module
 		newApplicationPhaseType := db.CreateCoursePhaseTypeParams{
-			ID:   uuid.New(),
-			Name: "Application",
+			ID:           uuid.New(),
+			Name:         "Application",
+			InitialPhase: true,
 		}
 		err := ApplicationServiceSingleton.queries.CreateCoursePhaseType(ctx, newApplicationPhaseType)
 		if err != nil {

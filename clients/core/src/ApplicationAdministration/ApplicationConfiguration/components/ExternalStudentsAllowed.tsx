@@ -17,7 +17,7 @@ export const ExternalStudentsStatus: React.FC<ExternalStudentsStatusProps> = ({
         ) : (
           <UserX className='h-4 w-4 text-red-500' />
         )}
-        <span className='text-sm text-gray-600'>
+        <span className='text-sm text-secondary-foreground'>
           {externalStudentsAllowed ? 'External Students Allowed' : 'External Students Not Allowed'}
         </span>
       </div>

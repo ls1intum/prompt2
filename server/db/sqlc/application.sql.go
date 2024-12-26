@@ -182,6 +182,71 @@ func (q *Queries) DeleteApplicationQuestionText(ctx context.Context, id uuid.UUI
 	return err
 }
 
+const getAllOpenApplicationPhases = `-- name: GetAllOpenApplicationPhases :many
+SELECT 
+    cp.id AS course_phase_id,
+    c.name AS course_name,
+    c.start_date, 
+    c.end_date,
+    c.course_type, 
+    c.ects,
+    (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+    ON cp.course_phase_type_id = cpt.id
+JOIN 
+    course c
+    ON cp.course_id = c.id
+WHERE 
+    cp.is_initial_phase = true
+    AND cpt.name = 'Application'
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW()
+`
+
+type GetAllOpenApplicationPhasesRow struct {
+	CoursePhaseID           uuid.UUID   `json:"course_phase_id"`
+	CourseName              string      `json:"course_name"`
+	StartDate               pgtype.Date `json:"start_date"`
+	EndDate                 pgtype.Date `json:"end_date"`
+	CourseType              CourseType  `json:"course_type"`
+	Ects                    pgtype.Int4 `json:"ects"`
+	ApplicationEndDate      string      `json:"application_end_date"`
+	ExternalStudentsAllowed bool        `json:"external_students_allowed"`
+}
+
+func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpenApplicationPhasesRow, error) {
+	rows, err := q.db.Query(ctx, getAllOpenApplicationPhases)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllOpenApplicationPhasesRow
+	for rows.Next() {
+		var i GetAllOpenApplicationPhasesRow
+		if err := rows.Scan(
+			&i.CoursePhaseID,
+			&i.CourseName,
+			&i.StartDate,
+			&i.EndDate,
+			&i.CourseType,
+			&i.Ects,
+			&i.ApplicationEndDate,
+			&i.ExternalStudentsAllowed,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many
 SELECT id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num FROM application_question_multi_select
 WHERE course_phase_id = $1
@@ -253,6 +318,59 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 		return nil, err
 	}
 	return items, nil
+}
+
+const getOpenApplicationPhase = `-- name: GetOpenApplicationPhase :one
+SELECT 
+    cp.id AS course_phase_id,
+    c.name AS course_name,
+    c.start_date, 
+    c.end_date,
+    c.course_type, 
+    c.ects,
+    (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+    ON cp.course_phase_type_id = cpt.id
+JOIN 
+    course c
+    ON cp.course_id = c.id
+WHERE 
+    cp.id = $1
+    AND cp.is_initial_phase = true
+    AND cpt.name = 'Application'
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW()
+`
+
+type GetOpenApplicationPhaseRow struct {
+	CoursePhaseID           uuid.UUID   `json:"course_phase_id"`
+	CourseName              string      `json:"course_name"`
+	StartDate               pgtype.Date `json:"start_date"`
+	EndDate                 pgtype.Date `json:"end_date"`
+	CourseType              CourseType  `json:"course_type"`
+	Ects                    pgtype.Int4 `json:"ects"`
+	ApplicationEndDate      string      `json:"application_end_date"`
+	ExternalStudentsAllowed bool        `json:"external_students_allowed"`
+}
+
+func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (GetOpenApplicationPhaseRow, error) {
+	row := q.db.QueryRow(ctx, getOpenApplicationPhase, id)
+	var i GetOpenApplicationPhaseRow
+	err := row.Scan(
+		&i.CoursePhaseID,
+		&i.CourseName,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CourseType,
+		&i.Ects,
+		&i.ApplicationEndDate,
+		&i.ExternalStudentsAllowed,
+	)
+	return i, err
 }
 
 const updateApplicationQuestionMultiSelect = `-- name: UpdateApplicationQuestionMultiSelect :exec
