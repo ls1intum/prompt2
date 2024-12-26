@@ -52,9 +52,11 @@ export function CourseConfigurator() {
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)
   const { permissions } = useAuthStore()
-  const canEdit = permissions.includes(
-    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
-  )
+  // TODO: revise if admin should have access to edit in long run
+  const canEdit =
+    permissions.includes(
+      getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
+    ) || permissions.includes(Role.PROMPT_ADMIN)
 
   const queryClient = useQueryClient()
   const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
