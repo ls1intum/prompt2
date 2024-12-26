@@ -16,5 +16,5 @@ export const useAuthStore = create<AuthStoreState>((set) => ({
   setUser: (user) => set({ user }),
   clearUser: () => set({ user: undefined }),
   setPermissions: (permissions) => set({ permissions }),
-  clearPermissions: () => set({ permissions: [] })
+  clearPermissions: () => set({ permissions: [] }),
 }))
