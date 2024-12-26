@@ -7,7 +7,24 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
+
+const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
+INSERT INTO course_phase_type (id, name)
+VALUES ($1, $2)
+`
+
+type CreateCoursePhaseTypeParams struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
+	_, err := q.db.Exec(ctx, createCoursePhaseType, arg.ID, arg.Name)
+	return err
+}
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
 SELECT id, name, required_input_meta_data, provided_output_meta_data, initial_phase FROM course_phase_type
@@ -37,4 +54,19 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 		return nil, err
 	}
 	return items, nil
+}
+
+const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Application'
+) AS does_exist
+`
+
+func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testApplicationPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
 }
