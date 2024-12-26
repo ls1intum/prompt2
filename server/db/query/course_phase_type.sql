@@ -9,5 +9,5 @@ SELECT EXISTS (
 ) AS does_exist;
 
 -- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name)
-VALUES ($1, $2);
+INSERT INTO course_phase_type (id, name, initial_phase)
+VALUES ($1, $2, $3);

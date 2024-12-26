@@ -2,35 +2,36 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DeadlineInfo } from './DeadlineInfo'
-import { Course } from '@/interfaces/course'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
+import { OpenApplication } from '@/interfaces/open_application'
 
 // todo fix this in the data model and import an actual course here!!
 interface CourseCardProps {
-  course: Course
+  courseDetails: OpenApplication
 }
 
-export const CourseCard = ({ course }: CourseCardProps): JSX.Element => (
-  <Card key={course.id}>
+export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => (
+  <Card key={courseDetails.id}>
     <CardHeader>
-      <CardTitle>{course.name}</CardTitle>
+      <CardTitle>{courseDetails.courseName}</CardTitle>
     </CardHeader>
     <CardContent>
       <div className='flex flex-col space-y-2 mb-4'>
         <div className='flex justify-between items-center'>
-          <Badge variant={'secondary'}>Practical Course</Badge>
-          <span className='text-sm font-medium'>10 ECTS</span>
+          <Badge variant={'secondary'}>{courseDetails.courseType}</Badge>
+          <span className='text-sm font-medium'>{courseDetails.ects} ECTS</span>
         </div>
         <div className='text-sm text-gray-600 space-y-1'>
           <div className='flex items-center space-x-2'>
             <Calendar className='h-4 w-4 flex-shrink-0' />
             <p>
-              {format(course.start_date, 'MMM d, yyyy')} - {format(course.end_date, 'MMM d, yyyy')}
+              {format(courseDetails.startDate, 'MMM d, yyyy')} -{' '}
+              {format(courseDetails.endDate, 'MMM d, yyyy')}
             </p>
           </div>
         </div>
-        <DeadlineInfo deadline={course.start_date} />
+        <DeadlineInfo deadline={courseDetails.applicationDeadline} />
       </div>
       <Button variant='secondary' className='w-full'>
         Apply Now

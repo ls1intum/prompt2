@@ -11,18 +11,24 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
 import { DatePicker } from '@/components/DatePicker'
-import { format } from 'date-fns'
+import { format, set, parse, formatISO } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { updateCoursePhase } from '../../../network/mutations/updateCoursePhase'
 import { useParams } from 'react-router-dom'
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
+import { Input } from '@/components/ui/input'
 
 interface ApplicationConfigDialogProps {
   isOpen: boolean
   onClose: () => void
   initialData: ApplicationMetaData
+}
+
+const getTimeString = (date: Date) => {
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
 export function ApplicationConfigDialog({
@@ -32,8 +38,29 @@ export function ApplicationConfigDialog({
 }: ApplicationConfigDialogProps) {
   const queryClient = useQueryClient()
   const { phaseId } = useParams<{ phaseId: string }>()
-  const [startDate, setStartDate] = useState(initialData.applicationStartDate ?? undefined)
-  const [endDate, setEndDate] = useState(initialData.applicationEndDate ?? undefined)
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    initialData.applicationStartDate ? new Date(initialData.applicationStartDate) : undefined,
+  )
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    initialData.applicationEndDate ? new Date(initialData.applicationEndDate) : undefined,
+  )
+  const [startTime, setStartTime] = useState(() => {
+    if (initialData.applicationStartDate) {
+      const date = new Date(initialData.applicationStartDate)
+      return getTimeString(date)
+    }
+    return '00:00'
+  })
+
+  const timeZone = 'Europe/Berlin'
+
+  const [endTime, setEndTime] = useState(() => {
+    if (initialData.applicationEndDate) {
+      const date = new Date(initialData.applicationEndDate)
+      return getTimeString(date)
+    }
+    return '23:59'
+  })
   const [externalStudentsAllowed, setExternalStudentsAllowed] = useState(
     initialData.externalStudentsAllowed,
   )
@@ -48,9 +75,7 @@ export function ApplicationConfigDialog({
       return updateCoursePhase(coursePhase)
     },
     onSuccess: () => {
-      // invalidate query
       queryClient.invalidateQueries({ queryKey: ['course_phase', phaseId] })
-      // close this window
       onClose()
     },
   })
@@ -60,8 +85,28 @@ export function ApplicationConfigDialog({
     const updatedPhase: UpdateCoursePhase = {
       id: phaseId ?? '',
       meta_data: {
-        applicationStartDate: startDate,
-        applicationEndDate: endDate,
+        applicationStartDate: startDate
+          ? formatISO(
+              toZonedTime(
+                set(startDate, {
+                  hours: parse(startTime, 'HH:mm', new Date()).getHours(),
+                  minutes: parse(startTime, 'HH:mm', new Date()).getMinutes(),
+                }),
+                timeZone,
+              ),
+            )
+          : undefined,
+        applicationEndDate: endDate
+          ? formatISO(
+              toZonedTime(
+                set(endDate, {
+                  hours: parse(endTime, 'HH:mm', new Date()).getHours(),
+                  minutes: parse(endTime, 'HH:mm', new Date()).getMinutes(),
+                }),
+                timeZone,
+              ),
+            )
+          : undefined,
         externalStudentsAllowed,
       },
     }
@@ -86,25 +131,46 @@ export function ApplicationConfigDialog({
                   <Label htmlFor='startDate' className='text-right'>
                     Start Date
                   </Label>
-                  <DatePicker
-                    date={startDate ? new Date(startDate) : undefined}
-                    //Force format of date to be yyyy-MM-dd to avoid timezone issues
-                    onSelect={(date) =>
-                      setStartDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-                    }
-                  />
+                  <div className='col-span-3 flex items-center gap-2'>
+                    <DatePicker
+                      date={startDate}
+                      onSelect={(date) =>
+                        setStartDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
+                      }
+                    />
+                    <Input
+                      id='startTime'
+                      type='time'
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className='w-24'
+                    />
+                  </div>
                 </div>
                 <div className='grid grid-cols-4 items-center gap-4'>
                   <Label htmlFor='endDate' className='text-right'>
                     End Date
                   </Label>
-                  <DatePicker
-                    date={endDate ? new Date(endDate) : undefined}
-                    //Force format of date to be yyyy-MM-dd to avoid timezone issues
-                    onSelect={(date) =>
-                      setEndDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-                    }
-                  />
+                  <div className='col-span-3 flex flex-col gap-2'>
+                    <div className='flex items-center gap-2'>
+                      <DatePicker
+                        date={endDate}
+                        onSelect={(date) =>
+                          setEndDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
+                        }
+                      />
+                      <Input
+                        id='endTime'
+                        type='time'
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        className='w-24'
+                      />
+                    </div>
+                    <p className='text-sm text-secondary-foreground'>
+                      Note: All times are in German time (Europe/Berlin).
+                    </p>
+                  </div>
                 </div>
                 <div className='grid grid-cols-4 items-center gap-4'>
                   <Label htmlFor='externalStudents' className='text-right'>

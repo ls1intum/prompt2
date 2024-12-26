@@ -12,17 +12,18 @@ import (
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name)
-VALUES ($1, $2)
+INSERT INTO course_phase_type (id, name, initial_phase)
+VALUES ($1, $2, $3)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	InitialPhase bool      `json:"initial_phase"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
-	_, err := q.db.Exec(ctx, createCoursePhaseType, arg.ID, arg.Name)
+	_, err := q.db.Exec(ctx, createCoursePhaseType, arg.ID, arg.Name, arg.InitialPhase)
 	return err
 }
 

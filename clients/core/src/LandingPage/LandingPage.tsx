@@ -4,17 +4,17 @@ import { CourseCard } from './components/CourseCard'
 import { Footer } from './components/Footer'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
-import { getAllCourses } from '../network/queries/course'
-import { Course } from '@/interfaces/course'
+import { OpenApplication } from '@/interfaces/open_application'
+import { getAllOpenApplications } from '../network/queries/openApplications'
 
 export function LandingPage(): JSX.Element {
   const {
-    data: courses,
+    data: openApplications,
     isPending,
     isError,
-  } = useQuery<Course[]>({
-    queryKey: ['courses'],
-    queryFn: () => getAllCourses(),
+  } = useQuery<OpenApplication[]>({
+    queryKey: ['open_applications'],
+    queryFn: () => getAllOpenApplications(),
   })
 
   return (
@@ -47,10 +47,10 @@ export function LandingPage(): JSX.Element {
                   An error occurred while fetching courses. Please try again later.
                 </AlertDescription>
               </Alert>
-            ) : courses && courses.length > 0 ? (
+            ) : openApplications && openApplications.length > 0 ? (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-                {courses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
+                {openApplications.map((courseDetails) => (
+                  <CourseCard key={courseDetails.id} courseDetails={courseDetails} />
                 ))}
               </div>
             ) : (
