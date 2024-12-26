@@ -1,6 +1,6 @@
 import { CourseType } from './course_type'
 
-export interface OpenApplication {
+export interface OpenApplicationDetails {
   id: string
   courseName: string
   courseType: CourseType

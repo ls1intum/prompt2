@@ -2,7 +2,7 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 import { CourseCard } from './components/CourseCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
-import { OpenApplication } from '@/interfaces/open_application'
+import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { getAllOpenApplications } from '../network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
 
@@ -11,7 +11,7 @@ export function LandingPage(): JSX.Element {
     data: openApplications,
     isPending,
     isError,
-  } = useQuery<OpenApplication[]>({
+  } = useQuery<OpenApplicationDetails[]>({
     queryKey: ['open_applications'],
     queryFn: () => getAllOpenApplications(),
   })

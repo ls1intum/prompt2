@@ -1,11 +1,11 @@
-import { OpenApplication } from '@/interfaces/open_application'
+import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 
 interface ApplicationHeaderProps {
-  applicationPhase: OpenApplication
+  applicationPhase: OpenApplicationDetails
 }
 
 export const ApplicationHeader = ({ applicationPhase }: ApplicationHeaderProps) => {

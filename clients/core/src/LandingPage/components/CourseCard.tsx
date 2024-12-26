@@ -4,13 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DeadlineInfo } from './DeadlineInfo'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
-import { OpenApplication } from '@/interfaces/open_application'
+import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { CourseTypeDetails } from '@/interfaces/course_type'
 import { useNavigate } from 'react-router-dom'
 
 // todo fix this in the data model and import an actual course here!!
 interface CourseCardProps {
-  courseDetails: OpenApplication
+  courseDetails: OpenApplicationDetails
 }
 
 export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
