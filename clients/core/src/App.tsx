@@ -11,6 +11,8 @@ import ImprintPage from './LegalPages/Imprint'
 import AboutPage from './LegalPages/AboutPage'
 import { CourseOverview } from './Course/CourseOverview'
 import { ApplicationLoginPage } from './Application/ApplicationLoginPage'
+import { ApplicationExternal } from './Application/ApplicationExternal'
+import { ApplicationAuthenticated } from './Application/ApplicationAuthenticated'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +35,9 @@ export const App = (): JSX.Element => {
             <Route path='/privacy' element={<PrivacyPage />} />
             <Route path='/imprint' element={<ImprintPage />} />
             <Route path='/' element={<LandingPage />} />
-            <Route path='/apply/:phaseId/*' element={<ApplicationLoginPage />} />
+            <Route path='/apply/:phaseId' element={<ApplicationLoginPage />} />
+            <Route path='/apply/:phaseId/extern' element={<ApplicationExternal />} />
+            <Route path='/apply/:phaseId/authenticated' element={<ApplicationAuthenticated />} />
             <Route path='/management' element={<ManagementRoot />} />
             <Route path='/management/general' element={<ManagementRoot />} />
             <Route

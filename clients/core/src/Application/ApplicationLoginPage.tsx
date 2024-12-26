@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { ArrowLeft, GraduationCap } from 'lucide-react'
+import { GraduationCap } from 'lucide-react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
@@ -13,6 +13,7 @@ import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
 
 export const ApplicationLoginPage = (): JSX.Element => {
+  const path = window.location.pathname
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
 
@@ -48,9 +49,6 @@ export const ApplicationLoginPage = (): JSX.Element => {
   return (
     <NonAuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <Button onClick={() => navigate('/')} variant='ghost' className='mb-4'>
-          <ArrowLeft className='mr-2 h-4 w-4' /> Back to Overview
-        </Button>
         <ApplicationHeader applicationPhase={application_phase} />
         <Card>
           <CardHeader>
@@ -68,7 +66,11 @@ export const ApplicationLoginPage = (): JSX.Element => {
                 Are you a {translations.university.name} student? Then please log in using your{' '}
                 {translations.university['login-name']}.
               </p>
-              <Button className='w-full bg-[#0065BD] hover:bg-[#005299] text-white' size='lg'>
+              <Button
+                className='w-full bg-[#0065BD] hover:bg-[#005299] text-white'
+                size='lg'
+                onClick={() => navigate(path + '/authenticated')}
+              >
                 <GraduationCap className='mr-2 h-5 w-5' />
                 Log in with {translations.university['login-name']}
               </Button>
@@ -78,7 +80,11 @@ export const ApplicationLoginPage = (): JSX.Element => {
                 <Separator className='my-4' />
                 <div className='space-y-4'>
                   <p>Are you an external student?</p>
-                  <Button variant='outline' className='w-full'>
+                  <Button
+                    variant='outline'
+                    className='w-full'
+                    onClick={() => navigate(path + '/extern')}
+                  >
                     Continue without a {translations.university.name}-Account
                   </Button>
                 </div>
