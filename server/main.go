@@ -19,7 +19,6 @@ import (
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/utils"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -50,7 +49,7 @@ func initKeycloak() {
 	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
 	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
 
-	logrus.Error("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " idOfClient: ", idOfClient)
+	log.Debug("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " idOfClient: ", idOfClient)
 
 	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient)
 	if err != nil {
