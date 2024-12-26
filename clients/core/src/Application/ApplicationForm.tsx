@@ -1,15 +1,20 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Loader2 } from 'lucide-react'
-import { useParams } from 'react-router-dom'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { ArrowLeft, GraduationCap } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import translations from '@/lib/translations.json'
+import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
+import { ApplicationHeader } from './components/ApplicationHeader'
+import { LoadingState } from './components/LoadingState'
+import { ErrorState } from './components/ErrorState'
 
 export const ApplicationForm = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const navigate = useNavigate()
 
   const {
     data: applicationForm,
@@ -23,33 +28,17 @@ export const ApplicationForm = (): JSX.Element => {
 
   if (isPending) {
     return (
-      <div>
-        <Loader2 />
-      </div>
+      <NonAuthenticatedPageWrapper withLoginButton={false}>
+        <LoadingState />
+      </NonAuthenticatedPageWrapper>
     )
   }
 
   if (isError || !applicationForm) {
-    let errorMessage = 'An error occurred while fetching the application form.'
-
-    // Check for specific error types
-    if (error.message.includes('404')) {
-      errorMessage = 'The requested application phase cannot be found or may have already passed.'
-    }
-    console.error(error)
-
     return (
-      <Card className='w-full max-w-md mx-auto'>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <AlertCircle className='h-5 w-5 text-destructive' />
-            Error{error.message.includes('404') ? ': Not Found' : ''}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>{errorMessage}</p>
-        </CardContent>
-      </Card>
+      <NonAuthenticatedPageWrapper withLoginButton={false}>
+        <ErrorState error={error} onBack={() => navigate('/')} />
+      </NonAuthenticatedPageWrapper>
     )
   }
 
@@ -57,37 +46,47 @@ export const ApplicationForm = (): JSX.Element => {
   const externalStudentsAllowed = application_phase.externalStudentsAllowed
 
   return (
-    <Card className='w-full max-w-2xl mx-auto'>
-      <CardHeader>
-        <div className='flex justify-between items-start'>
-          <div>
-            <CardTitle>{application_phase.courseName}</CardTitle>
-            <CardDescription>Application Form</CardDescription>
-          </div>
-          <Badge variant='outline'>{application_phase.courseType}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className='space-y-4'>
-        <div className='grid grid-cols-2 gap-4 text-sm'>
-          <div>
-            <strong>ECTS:</strong> {application_phase.ects}
-          </div>
-        </div>
-
-        <div className='space-y-4'>
-          <Button className='w-full'>
-            Log-In with your {translations.university['login-name']}
-          </Button>
-
-          {externalStudentsAllowed && (
-            <div className='text-center'>
-              <a href='/external-application' className='text-primary hover:underline'>
-                Not a {translations.university.name} Student? Continue as an external student.
-              </a>
+    <NonAuthenticatedPageWrapper withLoginButton={false}>
+      <div className='max-w-4xl mx-auto space-y-6'>
+        <Button onClick={() => navigate('/')} variant='ghost' className='mb-4'>
+          <ArrowLeft className='mr-2 h-4 w-4' /> Back to Overview
+        </Button>
+        <ApplicationHeader applicationPhase={application_phase} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Please log in to continue:</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-6'>
+            {!externalStudentsAllowed && (
+              <p className='text-yellow-600 bg-yellow-50 p-3 rounded-md'>
+                This course is only open for {translations.university.name} students. If you cannot
+                log in, please reach out to the instructor of the course.
+              </p>
+            )}
+            <div className='space-y-4'>
+              <p>
+                Are you a {translations.university.name} student? Then please log in using your{' '}
+                {translations.university['login-name']}.
+              </p>
+              <Button className='w-full bg-[#0065BD] hover:bg-[#005299] text-white' size='lg'>
+                <GraduationCap className='mr-2 h-5 w-5' />
+                Log in with {translations.university['login-name']}
+              </Button>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {externalStudentsAllowed && (
+              <>
+                <Separator className='my-4' />
+                <div className='space-y-4'>
+                  <p>Are you an external student?</p>
+                  <Button variant='outline' className='w-full'>
+                    Continue without a {translations.university.name}-Account
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </NonAuthenticatedPageWrapper>
   )
 }
