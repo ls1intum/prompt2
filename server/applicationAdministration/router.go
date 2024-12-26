@@ -20,6 +20,11 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
 	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer), updateApplicationForm)
 
+	// Apply Endpoints - No Authentication needed
+	apply := router.Group("/apply")
+	apply.GET("", getAllOpenApplications)
+	// apply.GET("/:coursePhaseID", getApplicationForm)
+	// apply.POST("/:coursePhaseID", postApplication)
 }
 
 func getApplicationForm(c *gin.Context) {
@@ -70,6 +75,17 @@ func updateApplicationForm(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "application form updated"})
+}
+
+func getAllOpenApplications(c *gin.Context) {
+	openApplications, err := GetOpenApplicationPhases(c)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get open applications"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, openApplications)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

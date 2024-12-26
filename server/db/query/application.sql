@@ -73,3 +73,26 @@ WHERE id = $1;
 DELETE FROM application_question_multi_select
 WHERE id = $1;
 
+-- name: GetAllOpenApplicationPhases :many
+SELECT 
+    cp.id AS course_phase_id,
+    c.name AS course_name,
+    c.start_date, 
+    c.end_date,
+    c.course_type, 
+    c.ects,
+    (cp.meta_data->>'applicationEndDate')::text AS application_end_date
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+    ON cp.course_phase_type_id = cpt.id
+JOIN 
+    course c
+    ON cp.course_id = c.id
+WHERE 
+    cp.is_initial_phase = true
+    AND cpt.name = 'Application'
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW();
+
