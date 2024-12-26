@@ -12,7 +12,7 @@ import { ApplicationHeader } from './components/ApplicationHeader'
 import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
 
-export const ApplicationForm = (): JSX.Element => {
+export const ApplicationLoginPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
 
