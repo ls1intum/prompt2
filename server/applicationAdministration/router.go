@@ -98,6 +98,10 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 	applicationForm, err := GetApplicationFormWithDetails(c, coursePhaseId)
 	if err != nil {
 		log.Error(err)
+		if errors.Is(err, ErrNotFound) {
+			handleError(c, http.StatusNotFound, errors.New("application not found"))
+			return
+		}
 		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
 		return
 	}

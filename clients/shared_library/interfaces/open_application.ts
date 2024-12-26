@@ -8,4 +8,5 @@ export interface OpenApplication {
   startDate: Date
   endDate: Date
   applicationDeadline: Date
+  externalStudentsAllowed: boolean
 }

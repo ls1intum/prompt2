@@ -19,6 +19,8 @@ type ApplicationService struct {
 
 var ApplicationServiceSingleton *ApplicationService
 
+var ErrNotFound = errors.New("Application was not found")
+
 func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
@@ -154,7 +156,7 @@ func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID)
 	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return applicationDTO.FormWithDetails{}, errors.New("could not get open application phase")
+		return applicationDTO.FormWithDetails{}, ErrNotFound
 	}
 
 	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
