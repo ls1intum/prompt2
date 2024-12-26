@@ -23,7 +23,7 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	// Apply Endpoints - No Authentication needed
 	apply := router.Group("/apply")
 	apply.GET("", getAllOpenApplications)
-	// apply.GET("/:coursePhaseID", getApplicationForm)
+	apply.GET("/:coursePhaseID", getApplicationFormWithCourseDetails)
 	// apply.POST("/:coursePhaseID", postApplication)
 }
 
@@ -86,6 +86,23 @@ func getAllOpenApplications(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, openApplications)
+}
+
+func getApplicationFormWithCourseDetails(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	applicationForm, err := GetApplicationFormWithDetails(c, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, applicationForm)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

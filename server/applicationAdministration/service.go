@@ -19,7 +19,6 @@ type ApplicationService struct {
 
 var ApplicationServiceSingleton *ApplicationService
 
-// TODO
 func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
@@ -149,4 +148,28 @@ func GetOpenApplicationPhases(ctx context.Context) ([]applicationDTO.OpenApplica
 	}
 
 	return openApplications, nil
+}
+
+func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.FormWithDetails, error) {
+	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get open application phase")
+	}
+
+	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
+	}
+
+	applicationFormMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
+	}
+
+	openApplicationDTO := applicationDTO.GetFormWithDetailsDTOFromDBModel(applicationCoursePhase, applicationFormText, applicationFormMultiSelect)
+
+	return openApplicationDTO, nil
 }
