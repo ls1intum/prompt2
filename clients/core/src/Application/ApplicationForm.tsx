@@ -11,7 +11,7 @@ import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
-import { ApplicationQuestionMultiSelectForm } from './components/ApplicationQuestionMultiSelectForm'
+import { ApplicationQuestionMultiSelectForm } from './MultiSelectForm/ApplicationQuestionMultiSelectForm'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -66,6 +66,8 @@ export const ApplicationForm = ({
       const isValid = await ref.validate()
       if (!isValid) {
         allValid = false
+      } else {
+        console.log(ref.getValues())
       }
     }
 
