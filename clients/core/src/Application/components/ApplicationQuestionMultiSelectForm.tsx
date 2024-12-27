@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/form'
 import { QuestionMultiSelectFormRef } from '../utils/QuestionMultiSelectFormRef'
 import { MultiSelect } from '@/components/MultiSelect'
+import { Checkbox } from '@/components/ui/checkbox'
+import { isCheckboxQuestion } from '../utils/CheckBoxRequirements'
 
 export interface ApplicationQuestionMultiSelect {
   id: string
@@ -75,6 +77,8 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       },
     }))
 
+    const checkboxQuestion = isCheckboxQuestion(question)
+
     const multiSelectOptions = question.options.map((option) => ({
       label: option,
       value: option,
@@ -84,31 +88,61 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       <Form {...form}>
         <form>
           <FormItem>
-            <FormLabel>
-              {question.title}
-              {question.is_required ? <span className='text-destructive'> *</span> : ''}
-            </FormLabel>
-            {question.description && <FormDescription>{question.description}</FormDescription>}
+            {!checkboxQuestion && (
+              <>
+                <FormLabel>
+                  {question.title}
+                  {question.is_required ? <span className='text-destructive'> *</span> : ''}
+                </FormLabel>
+                {question.description && <FormDescription>{question.description}</FormDescription>}
+              </>
+            )}
             <FormField
               control={form.control}
               name='answers'
               render={({ fieldState }) => (
                 <>
                   <FormControl>
-                    <MultiSelect
-                      options={multiSelectOptions}
-                      placeholder={
-                        question.placeholder && question.placeholder !== ''
-                          ? question.placeholder
-                          : 'Please select...'
-                      }
-                      defaultValue={initialAnswers}
-                      onValueChange={(values) => {
-                        form.setValue('answers', values, { shouldValidate: true })
-                      }}
-                      maxCount={question.max_select}
-                      variant='inverted'
-                    />
+                    {checkboxQuestion ? (
+                      <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                        <Checkbox
+                          checked={form.getValues().answers.length > 0}
+                          onCheckedChange={(checked) => {
+                            form.setValue('answers', checked ? ['Yes'] : [], {
+                              shouldValidate: true,
+                            })
+                          }}
+                        />
+                        <div className='space-y-1 leading-none'>
+                          <FormLabel>
+                            {question.title}
+                            {question.is_required ? (
+                              <span className='text-destructive'> *</span>
+                            ) : (
+                              ''
+                            )}
+                          </FormLabel>
+                          {question.description && (
+                            <FormDescription>{question.description}</FormDescription>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <MultiSelect
+                        options={multiSelectOptions}
+                        placeholder={
+                          question.placeholder && question.placeholder !== ''
+                            ? question.placeholder
+                            : 'Please select...'
+                        }
+                        defaultValue={initialAnswers}
+                        onValueChange={(values) => {
+                          form.setValue('answers', values, { shouldValidate: true })
+                        }}
+                        maxCount={question.max_select}
+                        variant='inverted'
+                      />
+                    )}
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
                 </>
