@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { DeleteConfirmation } from './DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
+import { isCheckboxQuestion } from '../../../../Application/utils/CheckBoxRequirements'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -91,6 +92,9 @@ export const ApplicationQuestionCard = forwardRef<
     console.log(form.formState.errors)
   }, [form.formState.errors])
 
+  const checkBoxQuestion =
+    isMultiSelect && isCheckboxQuestion(question as ApplicationQuestionMultiSelect)
+
   return (
     <>
       <Card
@@ -103,7 +107,12 @@ export const ApplicationQuestionCard = forwardRef<
               <div>
                 <CardTitle>{question.title || `Untitled Question`}</CardTitle>
                 <p className='text-sm text-muted-foreground mt-1'>
-                  Question {index + 1}: {isMultiSelect ? 'Multi-select question' : 'Text question'}
+                  Question {index + 1}:{' '}
+                  {isMultiSelect
+                    ? checkBoxQuestion
+                      ? 'Checkbox'
+                      : 'Multi-select question'
+                    : 'Text question'}
                 </p>
               </div>
             </div>
@@ -174,19 +183,21 @@ export const ApplicationQuestionCard = forwardRef<
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name='placeholder'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Placeholder</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder='Enter placeholder text' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!checkBoxQuestion && (
+                  <FormField
+                    control={form.control}
+                    name='placeholder'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Placeholder</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder='Enter placeholder text' />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <FormField
                   control={form.control}
                   name='error_message'
@@ -206,9 +217,11 @@ export const ApplicationQuestionCard = forwardRef<
                 />
 
                 {isMultiSelect ? (
-                  <MultiSelectConfig
-                    form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
-                  />
+                  !checkBoxQuestion && (
+                    <MultiSelectConfig
+                      form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
+                    />
+                  )
                 ) : (
                   <TextConfig form={form as UseFormReturn<QuestionConfigFormDataText>} />
                 )}

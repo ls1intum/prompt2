@@ -79,9 +79,7 @@ export const AddQuestionMenu = ({
         <DropdownMenuItem onSelect={() => handleAddNewQuestionMultiSelect()}>
           Multi-Select Question
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => handleAddNewCheckbox()}>
-          Multi-Select Question
-        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => handleAddNewCheckbox()}>Checkbox</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
