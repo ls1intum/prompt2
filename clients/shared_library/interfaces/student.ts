@@ -5,8 +5,8 @@ export interface Student {
   firstName: string
   lastName: string
   email: string
-  matriculationNumber: string
-  universityLogin: string
+  matriculationNumber?: string
+  universityLogin?: string
   hasUniversityAccount: boolean
-  gender: Gender
+  gender?: Gender
 }

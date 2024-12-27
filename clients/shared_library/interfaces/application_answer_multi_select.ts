@@ -7,5 +7,5 @@ export interface ApplicationAnswerMultiSelect {
 
 export interface CreateApplicationAnswerMultiSelect {
   applicationQuestionId: string
-  answer: string
+  answer: string[]
 }
