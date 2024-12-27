@@ -1,5 +1,9 @@
 import * as z from 'zod'
 import { Gender } from '@/interfaces/gender'
+import translations from '@/lib/translations.json'
+
+const universityLoginRegex = new RegExp(translations.university.universityLoginRegex)
+const matriculationNumberRegex = new RegExp(translations.university.matriculationNumberRegex)
 
 // Define the schema for a student form
 export const studentBaseSchema = z.object({
@@ -17,8 +21,18 @@ export const studentUniversitySchema = z.object({
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
   hasUniversityAccount: z.literal(true), // Explicit literal for university case
-  matriculationNumber: z.string().min(1, 'Matriculation number is required'),
-  universityLogin: z.string().min(1, 'University login is required'),
+  matriculationNumber: z
+    .string()
+    .regex(
+      matriculationNumberRegex,
+      `Matriculation number must follow the pattern ${translations.university.matriculationExample}`,
+    ),
+  universityLogin: z
+    .string()
+    .regex(
+      universityLoginRegex,
+      `${translations.university.name} login should be of the format ${translations.university.universityLoginExample}`,
+    ),
 })
 
 // Define the discriminated union based on `hasUniversityAccount`

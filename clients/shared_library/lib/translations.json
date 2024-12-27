@@ -1,6 +1,10 @@
 {
     "university": {
       "name": "TUM",
-      "login-name": "TUM-ID"
+      "login-name": "TUM-ID",
+      "matriculationNumberRegex": "^0\\d{7}$",
+      "matriculationExample": "0xxxxxxx",
+      "universityLoginRegex": "^[a-zA-Z]{2}\\d{2}[a-zA-Z]{3}$",
+      "universityLoginExample": "ab12cde"
     }
 }
