@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { MinusIcon, PlusIcon } from 'lucide-react'
-import { useEffect } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 import { QuestionConfigFormDataMultiSelect } from 'src/validations/questionConfig'
 
@@ -29,14 +28,6 @@ export function MultiSelectConfig({
 
   const minSelect = form.watch('min_select') || 0
   const maxSelect = form.watch('max_select') || options.length
-
-  useEffect(() => {
-    console.log(form.formState.errors)
-    console.log('Options: ', form.formState.errors.options)
-    console.log('isArray: ', Array.isArray(form.formState.errors.options))
-    console.log('length: ', form.formState.errors.options?.length)
-    console.log('object: ', form.formState.errors.options?.[0])
-  }, [form.formState.errors])
 
   return (
     <div className='space-y-4'>

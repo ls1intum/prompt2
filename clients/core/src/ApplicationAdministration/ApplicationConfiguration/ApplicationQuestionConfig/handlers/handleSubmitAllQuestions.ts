@@ -1,5 +1,5 @@
 import { ApplicationForm, UpdateApplicationForm } from '@/interfaces/application_form'
-import { ApplicationQuestionCardRef } from '../components/ApplicationQuestionCard'
+import { ApplicationQuestionCardRef } from '../FormPages/ApplicationQuestionCard'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 

@@ -6,12 +6,12 @@ import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_mu
 import { Student } from '@/interfaces/student'
 import { useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
-import { ApplicationQuestionTextForm } from './components/ApplicationQuestionTextForm'
+import { ApplicationQuestionTextForm } from './TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
-import { ApplicationQuestionMultiSelectForm } from './components/ApplicationQuestionMultiSelectForm'
+import { ApplicationQuestionMultiSelectForm } from './MultiSelectForm/ApplicationQuestionMultiSelectForm'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -66,6 +66,8 @@ export const ApplicationForm = ({
       const isValid = await ref.validate()
       if (!isValid) {
         allValid = false
+      } else {
+        console.log(ref.getValues())
       }
     }
 
