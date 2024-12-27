@@ -35,10 +35,11 @@ export interface CreateApplicationAnswerText {
 
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText
+  initialAnswer?: string
 }
 
 export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuestionTextForm(
-  { question }: ApplicationQuestionTextFormProps,
+  { question, initialAnswer }: ApplicationQuestionTextFormProps,
   ref: React.Ref<QuestionTextFormRef>,
 ) {
   const [charCount, setCharCount] = useState(0)
@@ -60,7 +61,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
 
   const form = useForm<{ answer: string }>({
     resolver: zodResolver(validationSchema),
-    defaultValues: { answer: '' },
+    defaultValues: { answer: initialAnswer ?? '' },
     mode: 'onTouched',
   })
 

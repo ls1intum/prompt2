@@ -16,6 +16,7 @@ import { ApplicationQuestionTextForm } from './components/ApplicationQuestionTex
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectRef'
 import { Button } from '@/components/ui/button'
+import { StudentComponentRef } from './utils/StudentComponentRef'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -40,24 +41,27 @@ export const ApplicationForm = ({
   student,
   onSubmit,
 }: ApplicationFormProps): JSX.Element => {
-  const [answersMultiSelect, setAnswersMultiSelect] = useState<
-    (CreateApplicationAnswerMultiSelect | ApplicationAnswerMultiSelect)[]
-  >(initialAnswersMultiSelect ?? [])
-  const [answersText, setAnswersText] = useState<
-    (CreateApplicationAnswerText | ApplicationAnswerText)[]
-  >(initialAnswersText ?? [])
-
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
     ...questionsText,
     ...questionsMultiSelect,
   ].sort((a, b) => a.order_num - b.order_num)
 
   const [studentData, setStudentData] = useState<Student>(student ?? ({} as Student))
+  const studentRef = useRef<StudentComponentRef>(null)
   const questionTextRefs = useRef<Array<QuestionTextFormRef | null | undefined>>([])
   const questionMultiSelectRefs = useRef<Array<QuestionMultiSelectFormRef | null | undefined>>([])
 
   const handleSubmit = async () => {
     let allValid = true
+
+    if (!studentRef.current) {
+      console.log('Student ref is not set')
+      return
+    }
+    const studentValid = await studentRef.current.validate()
+    if (!studentValid) {
+      allValid = false
+    }
 
     // Loop over each child's ref, call validate()
     for (const ref of questionTextRefs.current) {
@@ -84,7 +88,7 @@ export const ApplicationForm = ({
           <CardTitle>Application Form</CardTitle>
         </CardHeader>
         <CardContent>
-          <StudentForm student={studentData} onUpdate={setStudentData} />
+          <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
           {questions.map((question, index) => {
             return (
               <div key={index}>
@@ -94,6 +98,10 @@ export const ApplicationForm = ({
                   <div>
                     <ApplicationQuestionTextForm
                       question={question}
+                      initialAnswer={
+                        initialAnswersText?.find((a) => a.applicationQuestionId === question.id)
+                          ?.answer ?? ''
+                      }
                       ref={(el) => (questionTextRefs.current[index] = el)}
                     />
                   </div>

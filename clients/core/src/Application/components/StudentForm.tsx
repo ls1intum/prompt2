@@ -1,6 +1,6 @@
 import { Student } from '@/interfaces/student'
 import { forwardRef, useEffect, useImperativeHandle } from 'react'
-import { FormComponentRef } from '../utils/FormComponentRef'
+import { StudentComponentRef } from '../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,7 @@ interface StudentFormProps {
   onUpdate: (updatedStudent: Student) => void
 }
 
-export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(function StudentForm(
+export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(function StudentForm(
   { student, onUpdate },
   ref,
 ) {
