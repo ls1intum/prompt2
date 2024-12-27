@@ -79,17 +79,19 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
     <Form {...form}>
       <form>
         <FormItem>
-          <FormLabel>
-            {question.title}
-            {question.is_required ? <span className='text-destructive'> *</span> : ''}
-          </FormLabel>
-          {question.description && <FormDescription>{question.description}</FormDescription>}
-          <FormField
-            control={form.control}
-            name='answer'
-            render={({ field, fieldState }) => (
-              <>
-                <FormControl>
+          <FormControl>
+            <FormField
+              control={form.control}
+              name='answer'
+              render={({ field, fieldState }) => (
+                <>
+                  <FormLabel>
+                    {question.title}
+                    {question.is_required ? <span className='text-destructive'> *</span> : ''}
+                  </FormLabel>
+                  {question.description && (
+                    <FormDescription>{question.description}</FormDescription>
+                  )}
                   <div className='relative'>
                     {isTextArea ? (
                       <Textarea
@@ -111,11 +113,11 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                       {charCount}/{question.allowed_length || 255}
                     </div>
                   </div>
-                </FormControl>
-                <FormMessage>{fieldState.error?.message}</FormMessage>
-              </>
-            )}
-          />
+                  <FormMessage>{fieldState.error?.message}</FormMessage>
+                </>
+              )}
+            />
+          </FormControl>
         </FormItem>
       </form>
     </Form>
