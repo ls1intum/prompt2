@@ -73,32 +73,39 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       <Form {...form}>
         <form>
           <FormItem>
-            {!isCheckboxQuestion && (
+            <FormControl>
               <>
-                <FormLabel>
-                  {question.title}
-                  {question.is_required ? <span className='text-destructive'> *</span> : ''}
-                </FormLabel>
-                {question.description && <FormDescription>{question.description}</FormDescription>}
-              </>
-            )}
-            <FormField
-              control={form.control}
-              name='answers'
-              render={({ fieldState }) => (
-                <>
-                  <FormControl>
-                    {isCheckboxQuestion ? (
-                      <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
-                        <Checkbox
-                          checked={form.getValues().answers.length > 0}
-                          onCheckedChange={(checked) => {
-                            form.setValue('answers', checked ? ['Yes'] : [], {
-                              shouldValidate: true,
-                            })
-                          }}
-                        />
-                        <div className='space-y-1 leading-none'>
+                <FormField
+                  control={form.control}
+                  name='answers'
+                  render={({ fieldState }) => (
+                    <>
+                      {isCheckboxQuestion ? (
+                        <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                          <Checkbox
+                            checked={form.getValues().answers.length > 0}
+                            onCheckedChange={(checked) => {
+                              form.setValue('answers', checked ? ['Yes'] : [], {
+                                shouldValidate: true,
+                              })
+                            }}
+                          />
+                          <div className='space-y-1 leading-none'>
+                            <FormLabel>
+                              {question.title}
+                              {question.is_required ? (
+                                <span className='text-destructive'> *</span>
+                              ) : (
+                                ''
+                              )}
+                            </FormLabel>
+                            {question.description && (
+                              <FormDescription>{question.description}</FormDescription>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
                           <FormLabel>
                             {question.title}
                             {question.is_required ? (
@@ -110,29 +117,28 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
                           {question.description && (
                             <FormDescription>{question.description}</FormDescription>
                           )}
-                        </div>
-                      </div>
-                    ) : (
-                      <MultiSelect
-                        options={multiSelectOptions}
-                        placeholder={
-                          question.placeholder && question.placeholder !== ''
-                            ? question.placeholder
-                            : 'Please select...'
-                        }
-                        defaultValue={initialAnswers}
-                        onValueChange={(values) => {
-                          form.setValue('answers', values, { shouldValidate: true })
-                        }}
-                        maxCount={question.max_select}
-                        variant='inverted'
-                      />
-                    )}
-                  </FormControl>
-                  <FormMessage>{fieldState.error?.message}</FormMessage>
-                </>
-              )}
-            />
+                          <MultiSelect
+                            options={multiSelectOptions}
+                            placeholder={
+                              question.placeholder && question.placeholder !== ''
+                                ? question.placeholder
+                                : 'Please select...'
+                            }
+                            defaultValue={initialAnswers}
+                            onValueChange={(values) => {
+                              form.setValue('answers', values, { shouldValidate: true })
+                            }}
+                            maxCount={question.max_select}
+                            variant='inverted'
+                          />
+                        </>
+                      )}
+                      <FormMessage>{fieldState.error?.message}</FormMessage>
+                    </>
+                  )}
+                />
+              </>
+            </FormControl>
           </FormItem>
         </form>
       </Form>
