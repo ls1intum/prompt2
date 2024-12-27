@@ -49,18 +49,18 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
         .array(z.string())
         .min(
           question.is_required ? question.min_select : 0,
-          `Select at least ${question.min_select} option${question.min_select > 1 && 's'}.`,
+          `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
         )
         .max(
           question.max_select,
-          `Select no more than ${question.max_select} option${question.max_select > 1 && 's'}.`,
+          `Select no more than ${question.max_select} option${question.max_select > 1 ? 's' : ''}.`,
         ),
     })
 
     const form = useForm<{ answers: string[] }>({
       resolver: zodResolver(validationSchema),
       defaultValues: { answers: initialAnswers || [] },
-      mode: 'onTouched',
+      mode: 'onChange',
     })
 
     // Expose validation method

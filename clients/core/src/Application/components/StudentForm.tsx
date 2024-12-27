@@ -51,7 +51,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           gender: student.gender ?? undefined,
           hasUniversityAccount: false,
         },
-    mode: 'onTouched',
+    mode: 'onChange',
   })
 
   useImperativeHandle(ref, () => ({

@@ -62,7 +62,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
   const form = useForm<{ answer: string }>({
     resolver: zodResolver(validationSchema),
     defaultValues: { answer: initialAnswer ?? '' },
-    mode: 'onTouched',
+    mode: 'onChange',
   })
 
   // Expose validation method

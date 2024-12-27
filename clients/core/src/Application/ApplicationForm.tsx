@@ -58,8 +58,6 @@ export const ApplicationForm = ({
       const isValid = await ref.validate()
       if (!isValid) {
         allValid = false
-      } else {
-        console.log(ref.getValues())
       }
     }
 
@@ -68,8 +66,6 @@ export const ApplicationForm = ({
       const isValid = await ref.validate()
       if (!isValid) {
         allValid = false
-      } else {
-        console.log(ref.getValues())
       }
     }
 
