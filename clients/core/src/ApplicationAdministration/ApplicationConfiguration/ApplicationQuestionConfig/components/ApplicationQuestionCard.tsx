@@ -54,7 +54,7 @@ export const ApplicationQuestionCard = forwardRef<
 ) {
   const isNewQuestion = question.title === '' ? true : false
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
-  const isMultiSelect = 'options' in question
+  const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const status: QuestionStatus = originalQuestion
@@ -65,7 +65,7 @@ export const ApplicationQuestionCard = forwardRef<
 
   const form = useForm<QuestionConfigFormData>({
     resolver: zodResolver(questionConfigSchema),
-    defaultValues: { type: isMultiSelect ? 'multi-select' : 'text', ...question },
+    defaultValues: { type: isMultiSelectType ? 'multi-select' : 'text', ...question },
     mode: 'onTouched',
   })
 
@@ -93,7 +93,8 @@ export const ApplicationQuestionCard = forwardRef<
   }, [form.formState.errors])
 
   const isCheckboxQuestion =
-    isMultiSelect && checkCheckBoxQuestion(question as ApplicationQuestionMultiSelect)
+    isMultiSelectType && checkCheckBoxQuestion(question as ApplicationQuestionMultiSelect)
+  const isActualMultiSelect = isMultiSelectType && !isCheckboxQuestion
 
   return (
     <>
@@ -108,7 +109,7 @@ export const ApplicationQuestionCard = forwardRef<
                 <CardTitle>{question.title || `Untitled Question`}</CardTitle>
                 <p className='text-sm text-muted-foreground mt-1'>
                   Question {index + 1}:{' '}
-                  {isMultiSelect
+                  {isMultiSelectType
                     ? isCheckboxQuestion
                       ? 'Checkbox'
                       : 'Multi-select question'
@@ -141,20 +142,23 @@ export const ApplicationQuestionCard = forwardRef<
           <CardContent>
             <Form {...form}>
               <form className='space-y-4'>
-                <FormField
-                  control={form.control}
-                  name='is_required'
-                  render={({ field }) => (
-                    <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <div className='space-y-1 leading-none'>
-                        <FormLabel>Question is required to be answered</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                {/** For multi-select question the is_required is controlled by min-select */}
+                {!isActualMultiSelect && (
+                  <FormField
+                    control={form.control}
+                    name='is_required'
+                    render={({ field }) => (
+                      <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                        <FormControl>
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <div className='space-y-1 leading-none'>
+                          <FormLabel>Question is required to be answered</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <FormField
                   control={form.control}
                   name='title'
@@ -183,6 +187,7 @@ export const ApplicationQuestionCard = forwardRef<
                     </FormItem>
                   )}
                 />
+                {/** Checkbox Questions do not have a placeholder */}
                 {!isCheckboxQuestion && (
                   <FormField
                     control={form.control}
@@ -198,7 +203,8 @@ export const ApplicationQuestionCard = forwardRef<
                     )}
                   />
                 )}
-                {(!isMultiSelect || isCheckboxQuestion) && (
+                {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
+                {!isActualMultiSelect && (
                   <FormField
                     control={form.control}
                     name='error_message'
@@ -211,7 +217,7 @@ export const ApplicationQuestionCard = forwardRef<
                         <FormDescription>
                           {isCheckboxQuestion &&
                             'This message will be shown if the checkbox is not checked'}
-                          {!isMultiSelect &&
+                          {!isMultiSelectType &&
                             'This error message will be shown if the question does not match the validation regex. If regex is empty, this has no effect.'}
                         </FormDescription>
                         <FormMessage />
@@ -220,7 +226,7 @@ export const ApplicationQuestionCard = forwardRef<
                   />
                 )}
 
-                {isMultiSelect ? (
+                {isMultiSelectType ? (
                   !isCheckboxQuestion && (
                     <MultiSelectConfig
                       form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}

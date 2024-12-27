@@ -15,25 +15,7 @@ import { QuestionMultiSelectFormRef } from '../utils/QuestionMultiSelectFormRef'
 import { MultiSelect } from '@/components/MultiSelect'
 import { Checkbox } from '@/components/ui/checkbox'
 import { checkCheckBoxQuestion } from '../utils/CheckBoxRequirements'
-
-export interface ApplicationQuestionMultiSelect {
-  id: string
-  course_phase_id: string
-  title: string
-  description?: string
-  placeholder?: string
-  error_message?: string
-  is_required: boolean
-  min_select: number
-  max_select: number
-  options: string[]
-  order_num: number
-}
-
-export interface CreateApplicationAnswerMultiSelect {
-  applicationQuestionId: string
-  answers: string[]
-}
+import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 
 interface ApplicationQuestionMultiSelectFormProps {
   question: ApplicationQuestionMultiSelect
@@ -45,13 +27,18 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
     { question, initialAnswers }: ApplicationQuestionMultiSelectFormProps,
     ref: React.Ref<QuestionMultiSelectFormRef>,
   ) {
+    const isCheckboxQuestion = checkCheckBoxQuestion(question)
     // Create validation schema dynamically based on question properties
     const validationSchema = z.object({
       answers: z
         .array(z.string())
         .min(
-          question.is_required ? question.min_select : 0,
-          `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
+          isCheckboxQuestion ? (question.is_required ? 1 : 0) : question.min_select,
+          isCheckboxQuestion
+            ? question.error_message && question.error_message !== ''
+              ? question.error_message
+              : 'This checkbox is required'
+            : `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
         )
         .max(
           question.max_select,
@@ -76,8 +63,6 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
         return { applicationQuestionId: question.id, answer: form.getValues().answers }
       },
     }))
-
-    const isCheckboxQuestion = checkCheckBoxQuestion(question)
 
     const multiSelectOptions = question.options.map((option) => ({
       label: option,
