@@ -1,22 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import {
-  ApplicationAnswerText,
-  CreateApplicationAnswerText,
-} from '@/interfaces/application_answer_text'
-import {
-  ApplicationAnswerMultiSelect,
-  CreateApplicationAnswerMultiSelect,
-} from '@/interfaces/application_answer_multi_select'
+import { ApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
 import { useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
 import { ApplicationQuestionTextForm } from './components/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
-import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectRef'
+import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
+import { ApplicationQuestionMultiSelectForm } from './components/ApplicationQuestionMultiSelectForm'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -25,12 +20,6 @@ interface ApplicationFormProps {
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
   onSubmit: () => void
-}
-
-const isMultiSelectQuestion = (
-  question: ApplicationQuestionMultiSelect | ApplicationQuestionText,
-): boolean => {
-  return 'options' in question
 }
 
 export const ApplicationForm = ({
@@ -79,6 +68,7 @@ export const ApplicationForm = ({
       return
     }
     // call onSubmit
+    onSubmit()
   }
 
   return (
@@ -93,8 +83,18 @@ export const ApplicationForm = ({
             {questions.map((question, index) => {
               return (
                 <div key={index}>
-                  {isMultiSelectQuestion(question) ? (
-                    <div>MultiSelect</div>
+                  {'options' in question ? (
+                    <div>
+                      <ApplicationQuestionMultiSelectForm
+                        question={question}
+                        initialAnswers={
+                          initialAnswersMultiSelect?.find(
+                            (a) => a.applicationQuestionId === question.id,
+                          )?.answer ?? []
+                        }
+                        ref={(el) => (questionMultiSelectRefs.current[index] = el)}
+                      />
+                    </div>
                   ) : (
                     <div>
                       <ApplicationQuestionTextForm

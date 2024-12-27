@@ -2,5 +2,5 @@ import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_ans
 
 export interface QuestionMultiSelectFormRef {
   validate: () => Promise<boolean>
-  getValue: () => CreateApplicationAnswerMultiSelect
+  getValues: () => CreateApplicationAnswerMultiSelect
 }
