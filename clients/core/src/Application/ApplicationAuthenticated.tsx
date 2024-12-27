@@ -8,9 +8,12 @@ import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageW
 import { ErrorState } from './components/ErrorState'
 import { ApplicationHeader } from './components/ApplicationHeader'
 import { ApplicationForm } from './ApplicationForm'
+import { useAuthStore } from '@/zustand/useAuthStore'
+import { Student } from '@/interfaces/student'
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
 
   // This data should already be fetched in the Login Page, but this page could also be loaded from a direct link
@@ -44,6 +47,14 @@ export const ApplicationAuthenticated = (): JSX.Element => {
 
   const { application_phase } = applicationForm
 
+  // TODO -> try to get student with email from server. Else use the user from the auth store
+  const student: Student = {
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    email: user?.email ?? '',
+    hasUniversityAccount: true,
+  }
+
   return (
     <AuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
@@ -51,6 +62,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
         <ApplicationForm
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}
+          student={student}
           onSubmit={() => console.log('Submit')}
         />
       </div>

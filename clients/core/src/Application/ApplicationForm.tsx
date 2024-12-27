@@ -1,4 +1,4 @@
-import { Card, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
 import { useState } from 'react'
+import { StudentForm } from './components/StudentForm'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -36,12 +37,17 @@ export const ApplicationForm = ({
     (CreateApplicationAnswerText | ApplicationAnswerText)[]
   >(initialAnswersText ?? [])
 
-  const [studentData, setStudentData] = useState<Student | undefined>(student)
+  const [studentData, setStudentData] = useState<Student>(student ?? ({} as Student))
 
   return (
     <div>
       <Card>
-        <CardTitle>Application Form</CardTitle>
+        <CardHeader>
+          <CardTitle>Application Form</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StudentForm student={studentData} onUpdate={setStudentData} />
+        </CardContent>
       </Card>
     </div>
   )
