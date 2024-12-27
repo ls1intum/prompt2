@@ -91,7 +91,10 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
     <Form {...form}>
       <form>
         <FormItem>
-          <FormLabel>{question.title}</FormLabel>
+          <FormLabel>
+            {question.title}
+            {question.is_required ? <span className='text-destructive'> *</span> : ''}
+          </FormLabel>
           {question.description && <FormDescription>{question.description}</FormDescription>}
           <FormField
             control={form.control}

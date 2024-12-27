@@ -69,6 +69,8 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
     return () => subscription.unsubscribe()
   }, [form.watch, student, onUpdate, form])
 
+  const requiredStar = <span className='text-destructive'> *</span>
+
   return (
     <Form {...form}>
       <form
@@ -82,7 +84,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               name='matriculationNumber'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Matriculation Number</FormLabel>
+                  <FormLabel>
+                    Matriculation Number
+                    {requiredStar}
+                  </FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -95,7 +100,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               name='universityLogin'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>University Login</FormLabel>
+                  <FormLabel>University Login{requiredStar}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -111,7 +116,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             name='firstName'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel>First Name{requiredStar}</FormLabel>
                 <FormControl>
                   <Input {...field} disabled={hasUniversityAccount} />
                 </FormControl>
@@ -124,7 +129,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             name='lastName'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel>Last Name{requiredStar}</FormLabel>
                 <FormControl>
                   <Input {...field} disabled={hasUniversityAccount} />
                 </FormControl>
@@ -138,7 +143,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email{requiredStar}</FormLabel>
               <FormControl>
                 <Input {...field} type='email' disabled={hasUniversityAccount} />
               </FormControl>
@@ -151,7 +156,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           name='gender'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Gender</FormLabel>
+              <FormLabel>Gender{requiredStar}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
