@@ -73,7 +73,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => onUpdate({ ...student, ...data }))}
-        className='space-y-8'
+        className='space-y-6'
       >
         {hasUniversityAccount && (
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

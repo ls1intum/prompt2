@@ -88,8 +88,8 @@ export const ApplicationForm = ({
           <CardTitle>Application Form</CardTitle>
         </CardHeader>
         <CardContent>
-          <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
           <div className='space-y-8'>
+            <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
             {questions.map((question, index) => {
               return (
                 <div key={index}>
@@ -120,8 +120,10 @@ export const ApplicationForm = ({
                 </div>
               )
             })}
+            <div className='flex justify-end mt-4'>
+              <Button onClick={handleSubmit}>Submit</Button>
+            </div>
           </div>
-          <Button onClick={handleSubmit}>Submit</Button>
         </CardContent>
       </Card>
     </div>
