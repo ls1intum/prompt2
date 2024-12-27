@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Gender } from '@/interfaces/gender'
-import { StudentFormValues, studentSchema } from '../../validations/student'
+import { studentSchema, StudentFormValues } from '../../validations/student'
 
 interface StudentFormProps {
   student: Student
@@ -35,7 +35,24 @@ export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(functi
   const hasUniversityAccount = student.hasUniversityAccount
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
-    defaultValues: student,
+    defaultValues: hasUniversityAccount
+      ? {
+          matriculationNumber: student.matriculationNumber || '',
+          universityLogin: student.universityLogin || '',
+          firstName: student.firstName || '',
+          lastName: student.lastName || '',
+          email: student.email || '',
+          gender: student.gender ?? undefined,
+          hasUniversityAccount: true,
+        }
+      : {
+          firstName: student.firstName || '',
+          lastName: student.lastName || '',
+          email: student.email || '',
+          gender: student.gender ?? undefined,
+          hasUniversityAccount: false,
+        },
+    mode: 'onTouched',
   })
 
   useImperativeHandle(ref, () => ({
@@ -93,12 +110,11 @@ export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(functi
           <FormField
             control={form.control}
             name='firstName'
-            disabled={hasUniversityAccount}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={hasUniversityAccount} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,12 +123,11 @@ export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(functi
           <FormField
             control={form.control}
             name='lastName'
-            disabled={hasUniversityAccount}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={hasUniversityAccount} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -122,12 +137,11 @@ export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(functi
         <FormField
           control={form.control}
           name='email'
-          disabled={hasUniversityAccount}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} type='email' />
+                <Input {...field} type='email' disabled={hasUniversityAccount} />
               </FormControl>
               <FormMessage />
             </FormItem>
