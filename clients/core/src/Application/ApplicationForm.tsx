@@ -89,26 +89,28 @@ export const ApplicationForm = ({
         </CardHeader>
         <CardContent>
           <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
-          {questions.map((question, index) => {
-            return (
-              <div key={index}>
-                {isMultiSelectQuestion(question) ? (
-                  <div>MultiSelect</div>
-                ) : (
-                  <div>
-                    <ApplicationQuestionTextForm
-                      question={question}
-                      initialAnswer={
-                        initialAnswersText?.find((a) => a.applicationQuestionId === question.id)
-                          ?.answer ?? ''
-                      }
-                      ref={(el) => (questionTextRefs.current[index] = el)}
-                    />
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          <div className='space-y-8'>
+            {questions.map((question, index) => {
+              return (
+                <div key={index}>
+                  {isMultiSelectQuestion(question) ? (
+                    <div>MultiSelect</div>
+                  ) : (
+                    <div>
+                      <ApplicationQuestionTextForm
+                        question={question}
+                        initialAnswer={
+                          initialAnswersText?.find((a) => a.applicationQuestionId === question.id)
+                            ?.answer ?? ''
+                        }
+                        ref={(el) => (questionTextRefs.current[index] = el)}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
           <Button onClick={handleSubmit}>Submit</Button>
         </CardContent>
       </Card>

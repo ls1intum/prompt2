@@ -3,7 +3,6 @@ import { forwardRef, useEffect, useImperativeHandle } from 'react'
 import { StudentComponentRef } from '../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -171,7 +170,6 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             </FormItem>
           )}
         />
-        <Button type='submit'>Update Student</Button>
       </form>
     </Form>
   )

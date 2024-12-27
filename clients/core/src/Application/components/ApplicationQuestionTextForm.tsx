@@ -89,7 +89,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
 
   return (
     <Form {...form}>
-      <form className='space-y-2'>
+      <form>
         <FormItem>
           <FormLabel>{question.title}</FormLabel>
           {question.description && <FormDescription>{question.description}</FormDescription>}
