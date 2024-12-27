@@ -12,7 +12,9 @@ export const createValidationSchema = (
         isCheckboxQuestion ? (question.is_required ? 1 : 0) : question.min_select,
         isCheckboxQuestion
           ? question.error_message || 'This checkbox is required'
-          : `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
+          : question.max_select === 1
+            ? 'Select an option'
+            : `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
       )
       .max(
         question.max_select,
