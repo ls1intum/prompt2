@@ -2,7 +2,7 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 import {
   ApplicationQuestionCard,
   ApplicationQuestionCardRef,
-} from './components/ApplicationQuestionCard'
+} from './FormPages/ApplicationQuestionCard'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useRef, useState } from 'react'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'

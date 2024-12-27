@@ -25,7 +25,7 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { DeleteConfirmation } from './DeleteConfirmation'
+import { DeleteConfirmation } from '../components/DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 import { checkCheckBoxQuestion } from '../../../../Application/utils/CheckBoxRequirements'

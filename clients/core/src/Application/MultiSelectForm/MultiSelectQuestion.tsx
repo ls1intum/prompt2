@@ -24,7 +24,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
     <>
       <FormLabel>
         {question.title}
-        {question.is_required && <span className='text-destructive'> *</span>}
+        {question.min_select > 0 && <span className='text-destructive'> *</span>}
       </FormLabel>
       {question.description && <FormDescription>{question.description}</FormDescription>}
       <MultiSelect
