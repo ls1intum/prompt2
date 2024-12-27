@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
+import React, { forwardRef, useImperativeHandle } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -11,8 +11,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Checkbox } from '@/components/ui/checkbox'
 import { QuestionMultiSelectFormRef } from '../utils/QuestionMultiSelectFormRef'
+import { MultiSelect } from '@/components/MultiSelect'
 
 export interface ApplicationQuestionMultiSelect {
   id: string
@@ -43,19 +43,17 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
     { question, initialAnswers }: ApplicationQuestionMultiSelectFormProps,
     ref: React.Ref<QuestionMultiSelectFormRef>,
   ) {
-    const [selectedCount, setSelectedCount] = useState(initialAnswers?.length || 0)
-
     // Create validation schema dynamically based on question properties
     const validationSchema = z.object({
       answers: z
         .array(z.string())
         .min(
           question.is_required ? question.min_select : 0,
-          question.error_message || `Select at least ${question.min_select} options.`,
+          `Select at least ${question.min_select} option${question.min_select > 1 && 's'}.`,
         )
         .max(
           question.max_select,
-          question.error_message || `Select no more than ${question.max_select} options.`,
+          `Select no more than ${question.max_select} option${question.max_select > 1 && 's'}.`,
         ),
     })
 
@@ -68,8 +66,8 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
     // Expose validation method
     useImperativeHandle(ref, () => ({
       async validate() {
-        console.log('Validating question', question.title)
         const isValid = await form.trigger()
+        console.log('Validating question', question.title, ' isValid: ', isValid)
         return isValid
       },
       getValues() {
@@ -77,13 +75,10 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       },
     }))
 
-    // Watch for changes in the "answers" field to update selected count
-    useEffect(() => {
-      const subscription = form.watch((value) => {
-        setSelectedCount(value.answers?.length || 0)
-      })
-      return () => subscription.unsubscribe()
-    }, [form, form.watch])
+    const multiSelectOptions = question.options.map((option) => ({
+      label: option,
+      value: option,
+    }))
 
     return (
       <Form {...form}>
@@ -94,32 +89,24 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
             <FormField
               control={form.control}
               name='answers'
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <>
                   <FormControl>
-                    <div className='space-y-2'>
-                      {question.options.map((option, index) => (
-                        <div key={index} className='flex items-center space-x-2'>
-                          <Checkbox
-                            value={option}
-                            onChange={(e) => {
-                              const checked = e.target
-                              const currentValues = form.getValues().answers
-                              const newValues = checked
-                                ? [...currentValues, option]
-                                : currentValues.filter((val) => val !== option)
-                              field.onChange(newValues)
-                            }}
-                            checked={field.value.includes(option)}
-                          />
-                          <span>{option}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <MultiSelect
+                      options={multiSelectOptions}
+                      placeholder={
+                        question.placeholder && question.placeholder !== ''
+                          ? question.placeholder
+                          : 'Please select...'
+                      }
+                      defaultValue={initialAnswers}
+                      onValueChange={(values) => {
+                        form.setValue('answers', values, { shouldValidate: true })
+                      }}
+                      maxCount={question.max_select}
+                      variant='inverted'
+                    />
                   </FormControl>
-                  <div className='text-sm text-gray-500'>
-                    {selectedCount}/{question.max_select} selected
-                  </div>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
                 </>
               )}

@@ -63,6 +63,16 @@ export const ApplicationForm = ({
       }
     }
 
+    for (const ref of questionMultiSelectRefs.current) {
+      if (!ref) continue
+      const isValid = await ref.validate()
+      if (!isValid) {
+        allValid = false
+      } else {
+        console.log(ref.getValues())
+      }
+    }
+
     if (!allValid) {
       console.log('Not all questions are valid')
       return
