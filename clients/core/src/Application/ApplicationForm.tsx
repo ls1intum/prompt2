@@ -6,7 +6,7 @@ import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_mu
 import { Student } from '@/interfaces/student'
 import { useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
-import { ApplicationQuestionTextForm } from './components/ApplicationQuestionTextForm'
+import { ApplicationQuestionTextForm } from './TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'

@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import {
   Form,
   FormControl,
@@ -14,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { QuestionTextFormRef } from '../utils/QuestionTextFormRef'
+import { createValidationSchema } from './validationSchema'
 
 export interface ApplicationQuestionText {
   id: string
@@ -45,19 +45,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
   const [charCount, setCharCount] = useState(0)
 
   // Create validation schema dynamically based on question properties
-  const validationSchema = z.object({
-    answer: z
-      .string()
-      .min(question.is_required ? 1 : 0, 'This field is required')
-      .max(
-        question.allowed_length || 255,
-        `Answer must be less than ${question.allowed_length} characters`,
-      )
-      .regex(
-        new RegExp(question.validation_regex || '.*'),
-        question.error_message || 'Invalid format',
-      ),
-  })
+  const validationSchema = createValidationSchema(question)
 
   const form = useForm<{ answer: string }>({
     resolver: zodResolver(validationSchema),
