@@ -162,7 +162,7 @@ export const StudentForm = forwardRef<FormComponentRef, StudentFormProps>(functi
                 <SelectContent>
                   {Object.values(Gender).map((gender) => (
                     <SelectItem key={gender} value={gender}>
-                      {gender}
+                      {gender.replace(/_/g, ' ')}
                     </SelectItem>
                   ))}
                 </SelectContent>
