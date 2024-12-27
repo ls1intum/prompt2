@@ -14,7 +14,7 @@ import {
 import { QuestionMultiSelectFormRef } from '../utils/QuestionMultiSelectFormRef'
 import { MultiSelect } from '@/components/MultiSelect'
 import { Checkbox } from '@/components/ui/checkbox'
-import { isCheckboxQuestion } from '../utils/CheckBoxRequirements'
+import { checkCheckBoxQuestion } from '../utils/CheckBoxRequirements'
 
 export interface ApplicationQuestionMultiSelect {
   id: string
@@ -77,7 +77,7 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       },
     }))
 
-    const checkboxQuestion = isCheckboxQuestion(question)
+    const isCheckboxQuestion = checkCheckBoxQuestion(question)
 
     const multiSelectOptions = question.options.map((option) => ({
       label: option,
@@ -88,7 +88,7 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
       <Form {...form}>
         <form>
           <FormItem>
-            {!checkboxQuestion && (
+            {!isCheckboxQuestion && (
               <>
                 <FormLabel>
                   {question.title}
@@ -103,7 +103,7 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
               render={({ fieldState }) => (
                 <>
                   <FormControl>
-                    {checkboxQuestion ? (
+                    {isCheckboxQuestion ? (
                       <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
                         <Checkbox
                           checked={form.getValues().answers.length > 0}

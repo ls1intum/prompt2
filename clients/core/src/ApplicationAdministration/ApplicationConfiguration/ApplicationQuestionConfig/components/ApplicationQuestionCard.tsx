@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button'
 import { DeleteConfirmation } from './DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
-import { isCheckboxQuestion } from '../../../../Application/utils/CheckBoxRequirements'
+import { checkCheckBoxQuestion } from '../../../../Application/utils/CheckBoxRequirements'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -92,8 +92,8 @@ export const ApplicationQuestionCard = forwardRef<
     console.log(form.formState.errors)
   }, [form.formState.errors])
 
-  const checkBoxQuestion =
-    isMultiSelect && isCheckboxQuestion(question as ApplicationQuestionMultiSelect)
+  const isCheckboxQuestion =
+    isMultiSelect && checkCheckBoxQuestion(question as ApplicationQuestionMultiSelect)
 
   return (
     <>
@@ -109,7 +109,7 @@ export const ApplicationQuestionCard = forwardRef<
                 <p className='text-sm text-muted-foreground mt-1'>
                   Question {index + 1}:{' '}
                   {isMultiSelect
-                    ? checkBoxQuestion
+                    ? isCheckboxQuestion
                       ? 'Checkbox'
                       : 'Multi-select question'
                     : 'Text question'}
@@ -183,7 +183,7 @@ export const ApplicationQuestionCard = forwardRef<
                     </FormItem>
                   )}
                 />
-                {!checkBoxQuestion && (
+                {!isCheckboxQuestion && (
                   <FormField
                     control={form.control}
                     name='placeholder'
@@ -198,26 +198,30 @@ export const ApplicationQuestionCard = forwardRef<
                     )}
                   />
                 )}
-                <FormField
-                  control={form.control}
-                  name='error_message'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Error Message</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder='Enter error message' />
-                      </FormControl>
-                      <FormDescription>
-                        The custom error message that will be displayed if the question is not
-                        answered or validation fails.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {(!isMultiSelect || isCheckboxQuestion) && (
+                  <FormField
+                    control={form.control}
+                    name='error_message'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Custom Error Message</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder='Enter error message' />
+                        </FormControl>
+                        <FormDescription>
+                          {isCheckboxQuestion &&
+                            'This message will be shown if the checkbox is not checked'}
+                          {!isMultiSelect &&
+                            'This error message will be shown if the question does not match the validation regex. If regex is empty, this has no effect.'}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {isMultiSelect ? (
-                  !checkBoxQuestion && (
+                  !isCheckboxQuestion && (
                     <MultiSelectConfig
                       form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
                     />
