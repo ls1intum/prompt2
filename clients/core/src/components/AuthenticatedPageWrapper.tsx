@@ -1,4 +1,3 @@
-import { useKeycloak } from '@/keycloak/useKeycloak'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { LoadingPage } from '@/components/LoadingPage'
@@ -13,6 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { useKeycloak } from '@/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
   children: React.ReactNode

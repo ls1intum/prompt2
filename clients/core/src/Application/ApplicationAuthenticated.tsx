@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthenticatedPageWrapper } from '../components/AuthenticatedPageWrapper'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
 import { LoadingState } from './components/LoadingState'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
@@ -24,6 +24,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   const { user } = useAuthStore()
   const navigate = useNavigate()
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
+  const queryClient = useQueryClient()
 
   // This data should already be fetched in the Login Page, but this page could also be loaded from a direct link
   const {
@@ -52,6 +53,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
       return postNewApplicationAuthenticated(phaseId ?? 'undefined', modifiedApplication)
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['application', phaseId, user?.email] })
       setShowDialog('success')
     },
     onError: () => {
@@ -122,7 +124,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   return (
     <AuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} />
+        <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
         <ApplicationForm
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}

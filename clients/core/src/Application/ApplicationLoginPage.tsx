@@ -84,7 +84,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
   return (
     <NonAuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} />
+        <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
         {!selectedContinueAsExternal && (
           <ApplicationLoginCard
             externalStudentsAllowed={externalStudentsAllowed}
