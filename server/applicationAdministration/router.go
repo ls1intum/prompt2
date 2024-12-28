@@ -135,6 +135,14 @@ func postApplicationExtern(c *gin.Context) {
 	err = PostApplicationExtern(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
+		if errors.Is(err, ErrAlreadyApplied) {
+			handleError(c, http.StatusConflict, errors.New("already applied"))
+			return
+		} else if errors.Is(err, ErrStudentDetailsDoNotMatch) {
+			handleError(c, http.StatusConflict, errors.New("student exists but details do not match"))
+			return
+		}
+
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
 		return
 	}
