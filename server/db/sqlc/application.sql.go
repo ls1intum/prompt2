@@ -32,6 +32,27 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 	return is_application, err
 }
 
+const checkIfCoursePhaseIsOpenApplicationPhase = `-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+`
+
+func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, checkIfCoursePhaseIsOpenApplicationPhase, id)
+	var is_application bool
+	err := row.Scan(&is_application)
+	return is_application, err
+}
+
 const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
 INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)

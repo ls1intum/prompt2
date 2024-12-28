@@ -127,3 +127,16 @@ SELECT EXISTS (
     INNER JOIN course_phase ph ON cp.course_id = ph.course_id
     WHERE cp.student_id = $1 AND ph.id = $2
 );
+
+-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW();

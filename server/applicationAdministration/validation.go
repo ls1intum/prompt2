@@ -173,14 +173,16 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 	defer cancel()
 
 	// Check if course phase is application phase
-	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
 		log.Error("could not validate application: ", err)
-		return errors.New("could not validate the application")
+		return errors.New("could not validate the application. the application deadline might have passed")
 	}
 	if !isApplicationPhase {
 		return errors.New("course phase is not an application phase")
 	}
+
+	// TODO: check if application phase is open!!!
 
 	// 1. Check that the student is valid
 	err = student.Validate(application.Student)
