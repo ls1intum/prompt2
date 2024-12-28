@@ -178,6 +178,43 @@ func postApplicationExtern(c *gin.Context) {
 
 func postApplicationAuthenticated(c *gin.Context) {
 	// TODO: extra check that student credentials did not change and match the token!
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userEmail := c.GetString("userEmail")
+	if userEmail == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
+		return
+	}
+
+	var application applicationDTO.PostApplication
+	if err := c.BindJSON(&application); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateApplication(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if application.Student.Email != userEmail {
+		handleError(c, http.StatusUnauthorized, errors.New("email does not match - is not allowed to be changed"))
+		return
+	}
+
+	err = PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

@@ -154,3 +154,17 @@ FROM application_answer_multi_select aams
 INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
 INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
 WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+
+-- name: CreateOrOverwriteApplicationAnswerText :exec 
+INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer;
+
+-- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec 
+INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer;

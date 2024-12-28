@@ -329,3 +329,70 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 	}
 
 }
+
+func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// 1. Update student details
+	studentObj, err := student.CreateOrUpdateStudent(ctx, application.Student)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not save the application")
+	}
+
+	// 2. Possibly Create Course and Course Phase Participation
+	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not save the application")
+	}
+
+	cParticipation, err := courseParticipation.CreateIfNotExistingCourseParticipation(ctx, studentObj.ID, courseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not save the application")
+	}
+
+	cPhaseParticipation, err := coursePhaseParticipation.CreateIfNotExistingPhaseParticipation(ctx, cParticipation.ID, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not save the application")
+	}
+
+	// 3. Save answers
+	for _, answer := range application.AnswersText {
+		answerDBModel := answer.GetDBModel()
+		answerDBModel.ID = uuid.New()
+		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not save the application")
+		}
+
+	}
+
+	for _, answer := range application.AnswersMultiSelect {
+		answerDBModel := answer.GetDBModel()
+		answerDBModel.ID = uuid.New()
+		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not save the application")
+		}
+
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+
+}

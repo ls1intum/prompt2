@@ -167,6 +167,56 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 	return err
 }
 
+const createOrOverwriteApplicationAnswerMultiSelect = `-- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec
+INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer
+`
+
+type CreateOrOverwriteApplicationAnswerMultiSelectParams struct {
+	ID                         uuid.UUID `json:"id"`
+	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
+	CoursePhaseParticipationID uuid.UUID `json:"course_phase_participation_id"`
+	Answer                     []string  `json:"answer"`
+}
+
+func (q *Queries) CreateOrOverwriteApplicationAnswerMultiSelect(ctx context.Context, arg CreateOrOverwriteApplicationAnswerMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerMultiSelect,
+		arg.ID,
+		arg.ApplicationQuestionID,
+		arg.CoursePhaseParticipationID,
+		arg.Answer,
+	)
+	return err
+}
+
+const createOrOverwriteApplicationAnswerText = `-- name: CreateOrOverwriteApplicationAnswerText :exec
+INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer
+`
+
+type CreateOrOverwriteApplicationAnswerTextParams struct {
+	ID                         uuid.UUID   `json:"id"`
+	ApplicationQuestionID      uuid.UUID   `json:"application_question_id"`
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	Answer                     pgtype.Text `json:"answer"`
+}
+
+func (q *Queries) CreateOrOverwriteApplicationAnswerText(ctx context.Context, arg CreateOrOverwriteApplicationAnswerTextParams) error {
+	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerText,
+		arg.ID,
+		arg.ApplicationQuestionID,
+		arg.CoursePhaseParticipationID,
+		arg.Answer,
+	)
+	return err
+}
+
 const deleteApplicationQuestionMultiSelect = `-- name: DeleteApplicationQuestionMultiSelect :exec
 DELETE FROM application_question_multi_select
 WHERE id = $1

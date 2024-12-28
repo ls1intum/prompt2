@@ -14,3 +14,7 @@ WHERE student_id = $1;
 INSERT INTO course_participation (id, course_id, student_id)
 VALUES ($1, $2, $3)
 RETURNING *;
+
+-- name: GetCourseParticipationByStudentAndCourseID :one
+SELECT * FROM course_participation
+WHERE student_id = $1 AND course_id = $2 LIMIT 1;

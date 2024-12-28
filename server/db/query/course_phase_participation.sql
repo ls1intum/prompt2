@@ -22,3 +22,7 @@ SET
     meta_data = meta_data || $3
 WHERE id = $1
 RETURNING *;
+
+-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
+SELECT * FROM course_phase_participation
+WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1;

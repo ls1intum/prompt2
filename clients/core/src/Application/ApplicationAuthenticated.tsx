@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthenticatedPageWrapper } from '../components/AuthenticatedPageWrapper'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
 import { LoadingState } from './components/LoadingState'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
@@ -12,11 +12,18 @@ import { useAuthStore } from '@/zustand/useAuthStore'
 import { Student } from '@/interfaces/student'
 import { getApplication } from '../network/queries/application'
 import { GetApplication } from '@/interfaces/get_application'
+import { PostApplication } from '@/interfaces/post_application'
+import { postNewApplicationAuthenticated } from '../network/mutations/postApplicationAuthenticated'
+import { useState } from 'react'
+import { ApplicationSavingDialog } from './components/ApplicationSavingDialog'
+import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
 
   // This data should already be fetched in the Login Page, but this page could also be loaded from a direct link
   const {
@@ -39,6 +46,36 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     queryKey: ['application', phaseId, user?.email],
     queryFn: () => getApplication(phaseId ?? ''),
   })
+
+  const { mutate: mutateSendApplication, error: mutateError } = useMutation({
+    mutationFn: (modifiedApplication: PostApplication) => {
+      return postNewApplicationAuthenticated(phaseId ?? 'undefined', modifiedApplication)
+    },
+    onSuccess: () => {
+      setShowDialog('success')
+    },
+    onError: () => {
+      setShowDialog('error')
+    },
+  })
+
+  const handleSubmit = (
+    student: Student,
+    answersText: CreateApplicationAnswerText[],
+    answersMultiSelect: CreateApplicationAnswerMultiSelect[],
+  ) => {
+    const modifiedApplication: PostApplication = {
+      student,
+      answers_text: answersText,
+      answers_multi_select: answersMultiSelect,
+    }
+    setShowDialog('saving')
+    mutateSendApplication(modifiedApplication)
+  }
+
+  const handleCloseDialog = () => {
+    setShowDialog(null)
+  }
 
   if (isPending || isApplicationPending) {
     return (
@@ -78,6 +115,8 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     application.student
   ) {
     student = application.student
+    // enforcing that student has university account
+    student.has_university_account = true
   }
 
   return (
@@ -90,9 +129,15 @@ export const ApplicationAuthenticated = (): JSX.Element => {
           initialAnswersMultiSelect={application.answers_multi_select}
           initialAnswersText={application.answers_text}
           student={student}
-          onSubmit={() => console.log('Submit')}
+          onSubmit={handleSubmit}
         />
       </div>
+      <ApplicationSavingDialog
+        showDialog={showDialog}
+        onClose={handleCloseDialog}
+        onNavigateBack={() => navigate('/')}
+        errorMessage={mutateError?.message}
+      />
     </AuthenticatedPageWrapper>
   )
 }

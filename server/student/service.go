@@ -2,6 +2,8 @@ package student
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -58,4 +60,41 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	}
 
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
+}
+
+func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.Student) (studentDTO.Student, error) {
+	updateStudentParams := student.GetDBModel()
+
+	updatedStudent, err := StudentServiceSingleton.queries.UpdateStudent(ctx, db.UpdateStudentParams(updateStudentParams))
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+
+	return studentDTO.GetStudentDTOFromDBModel(updatedStudent), nil
+}
+
+func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
+	studentByEmail, err := GetStudentByEmail(ctx, studentObj.Email)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return CreateStudent(ctx, studentObj)
+	}
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+
+	// student exists
+	if studentObj.ID != uuid.Nil && studentByEmail.ID != studentObj.ID {
+		return studentDTO.Student{}, errors.New("student has wrong ID")
+	} else {
+		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.Student{
+			ID:                   studentByEmail.ID, // make sure the id is not overwritten
+			FirstName:            studentObj.FirstName,
+			LastName:             studentObj.LastName,
+			Email:                studentByEmail.Email,
+			MatriculationNumber:  studentObj.MatriculationNumber,
+			UniversityLogin:      studentObj.UniversityLogin,
+			HasUniversityAccount: studentObj.HasUniversityAccount,
+			Gender:               studentObj.Gender,
+		})
+	}
 }

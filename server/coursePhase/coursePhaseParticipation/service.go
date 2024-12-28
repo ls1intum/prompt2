@@ -2,6 +2,8 @@ package coursePhaseParticipation
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -62,4 +64,23 @@ func UpdateCoursePhaseParticipation(ctx context.Context, updatedCoursePhaseParti
 	}
 
 	return coursePhaseParticipationDTO.UpdateCoursePhaseParticipationDTOFromDBModel(updatedParticipation)
+}
+
+func CreateIfNotExistingPhaseParticipation(ctx context.Context, CourseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
+	participation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipationByCourseParticipationAndCoursePhase(ctx, db.GetCoursePhaseParticipationByCourseParticipationAndCoursePhaseParams{
+		CourseParticipationID: CourseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err == nil {
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(participation)
+	} else if errors.Is(err, sql.ErrNoRows) {
+		// has to be created
+		return CreateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
+			CourseParticipationID: CourseParticipationID,
+			CoursePhaseID:         coursePhaseID,
+		})
+
+	} else {
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
+	}
 }
