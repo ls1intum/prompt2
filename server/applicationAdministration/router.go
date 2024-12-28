@@ -17,8 +17,8 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application := router.Group("/applications", authMiddleware())
 
 	// Application Form Endpoints
-	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
-	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer), updateApplicationForm)
+	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
+	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
 
 	// Apply Endpoints - No Authentication needed
 	apply := router.Group("/apply")
