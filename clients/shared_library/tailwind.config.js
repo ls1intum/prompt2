@@ -1,15 +1,8 @@
 // Default values that shall be reused in every component
 
-const { Sidebar } = require('lucide-react')
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  content: [
-    './src/**/*.{js,ts,jsx,tsx}', // Adjust for your project structure
-    './components/minimal-tiptap/**/*.{ts,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}', // General components folder
-  ],
   safelist: ['dark', 'ProseMirror'],
   theme: {
     extend: {

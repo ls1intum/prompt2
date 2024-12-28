@@ -40,7 +40,6 @@
   --hljs-attr: #3a92bc;
   --hljs-literal: #c82b0f;
   --hljs-name: #259792;
-  --hljs-link: #259792;
   --hljs-selector-tag: #c8500f;
   --hljs-number: #3da067;
 }
@@ -217,11 +216,11 @@
   @apply mb-2 mt-4 text-sm;
 }
 
-.minimal-tiptap-editor .ProseMirror link {
-  @apply cursor-pointer text-primary;
+.minimal-tiptap-editor .ProseMirror a.link {
+  @apply cursor-pointer text-blue-700;
 }
 
-.minimal-tiptap-editor .ProseMirror link:hover {
+.minimal-tiptap-editor .ProseMirror a.link:hover {
   @apply underline;
 }
 

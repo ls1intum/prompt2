@@ -29,7 +29,7 @@ export const Link = TiptapLink.extend({
       ...this.parent?.(),
       openOnClick: false,
       HTMLAttributes: {
-        class: 'link text-blue-500', // TODO fix tis later!!!
+        class: 'link',
       },
     }
   },
