@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { ApplicationSavingDialog } from './components/ApplicationSavingDialog'
 import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
 import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
+import { InfoBanner } from './components/InfoBanner'
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -127,6 +128,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     <AuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
         <ApplicationHeader applicationPhase={application_phase} onBackClick={handleBack} />
+        <InfoBanner status={application.status} />
         <ApplicationForm
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}
