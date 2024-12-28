@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
@@ -48,4 +49,13 @@ func CreateStudent(ctx context.Context, student studentDTO.CreateStudent) (stude
 	}
 
 	return studentDTO.GetStudentDTOFromDBModel(createdStudent), nil
+}
+
+func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, error) {
+	student, err := StudentServiceSingleton.queries.GetStudentByEmail(ctx, pgtype.Text{String: email, Valid: true})
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+
+	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }

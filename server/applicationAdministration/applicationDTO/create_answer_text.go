@@ -11,8 +11,8 @@ type CreateAnswerText struct {
 	Answer                string    `json:"answer"`
 }
 
-func (a CreateAnswerText) GetDBModel() db.ApplicationAnswerText {
-	return db.ApplicationAnswerText{
+func (a CreateAnswerText) GetDBModel() db.CreateApplicationAnswerTextParams {
+	return db.CreateApplicationAnswerTextParams{
 		ApplicationQuestionID: a.ApplicationQuestionID,
 		Answer:                pgtype.Text{String: a.Answer, Valid: true},
 	}

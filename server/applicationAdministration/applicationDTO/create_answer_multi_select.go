@@ -10,8 +10,8 @@ type CreateAnswerMultiSelect struct {
 	Answer                []string  `json:"answer"`
 }
 
-func (a CreateAnswerMultiSelect) GetDBModel() db.ApplicationAnswerMultiSelect {
-	return db.ApplicationAnswerMultiSelect{
+func (a CreateAnswerMultiSelect) GetDBModel() db.CreateApplicationAnswerMultiSelectParams {
+	return db.CreateApplicationAnswerMultiSelectParams{
 		ApplicationQuestionID: a.ApplicationQuestionID,
 		Answer:                a.Answer,
 	}

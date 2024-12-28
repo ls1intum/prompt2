@@ -108,6 +108,27 @@ func (q *Queries) GetStudent(ctx context.Context, id uuid.UUID) (Student, error)
 	return i, err
 }
 
+const getStudentByEmail = `-- name: GetStudentByEmail :one
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender FROM student
+WHERE email = $1 LIMIT 1
+`
+
+func (q *Queries) GetStudentByEmail(ctx context.Context, email pgtype.Text) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByEmail, email)
+	var i Student
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.MatriculationNumber,
+		&i.UniversityLogin,
+		&i.HasUniversityAccount,
+		&i.Gender,
+	)
+	return i, err
+}
+
 const updateStudent = `-- name: UpdateStudent :one
 UPDATE student
 SET first_name = $2,

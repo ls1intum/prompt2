@@ -32,10 +32,9 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 	return is_application, err
 }
 
-const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :one
+const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
 INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-RETURNING id, application_question_id, course_phase_participation_id, answer
 `
 
 type CreateApplicationAnswerMultiSelectParams struct {
@@ -45,27 +44,19 @@ type CreateApplicationAnswerMultiSelectParams struct {
 	Answer                     []string  `json:"answer"`
 }
 
-func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg CreateApplicationAnswerMultiSelectParams) (ApplicationAnswerMultiSelect, error) {
-	row := q.db.QueryRow(ctx, createApplicationAnswerMultiSelect,
+func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg CreateApplicationAnswerMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, createApplicationAnswerMultiSelect,
 		arg.ID,
 		arg.ApplicationQuestionID,
 		arg.CoursePhaseParticipationID,
 		arg.Answer,
 	)
-	var i ApplicationAnswerMultiSelect
-	err := row.Scan(
-		&i.ID,
-		&i.ApplicationQuestionID,
-		&i.CoursePhaseParticipationID,
-		&i.Answer,
-	)
-	return i, err
+	return err
 }
 
-const createApplicationAnswerText = `-- name: CreateApplicationAnswerText :one
+const createApplicationAnswerText = `-- name: CreateApplicationAnswerText :exec
 INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-RETURNING id, application_question_id, course_phase_participation_id, answer
 `
 
 type CreateApplicationAnswerTextParams struct {
@@ -75,21 +66,14 @@ type CreateApplicationAnswerTextParams struct {
 	Answer                     pgtype.Text `json:"answer"`
 }
 
-func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApplicationAnswerTextParams) (ApplicationAnswerText, error) {
-	row := q.db.QueryRow(ctx, createApplicationAnswerText,
+func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApplicationAnswerTextParams) error {
+	_, err := q.db.Exec(ctx, createApplicationAnswerText,
 		arg.ID,
 		arg.ApplicationQuestionID,
 		arg.CoursePhaseParticipationID,
 		arg.Answer,
 	)
-	var i ApplicationAnswerText
-	err := row.Scan(
-		&i.ID,
-		&i.ApplicationQuestionID,
-		&i.CoursePhaseParticipationID,
-		&i.Answer,
-	)
-	return i, err
+	return err
 }
 
 const createApplicationQuestionMultiSelect = `-- name: CreateApplicationQuestionMultiSelect :exec
@@ -245,6 +229,27 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 		return nil, err
 	}
 	return items, nil
+}
+
+const getApplicationExistsForStudent = `-- name: GetApplicationExistsForStudent :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_participation cp
+    INNER JOIN course_phase ph ON cp.course_id = ph.course_id
+    WHERE cp.student_id = $1 AND ph.id = $2
+)
+`
+
+type GetApplicationExistsForStudentParams struct {
+	StudentID uuid.UUID `json:"student_id"`
+	ID        uuid.UUID `json:"id"`
+}
+
+func (q *Queries) GetApplicationExistsForStudent(ctx context.Context, arg GetApplicationExistsForStudentParams) (bool, error) {
+	row := q.db.QueryRow(ctx, getApplicationExistsForStudent, arg.StudentID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many
