@@ -1,10 +1,9 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { AuthenticatedPageWrapper } from '../components/AuthenticatedPageWrapper'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
 import { LoadingState } from './components/LoadingState'
-import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
 import { ErrorState } from './components/ErrorState'
 import { ApplicationHeader } from './components/ApplicationHeader'
 import { ApplicationForm } from './ApplicationForm'
@@ -21,8 +20,7 @@ import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_ans
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const { user } = useAuthStore()
-  const navigate = useNavigate()
+  const { user, logout } = useAuthStore()
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
   const queryClient = useQueryClient()
 
@@ -79,6 +77,10 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     setShowDialog(null)
   }
 
+  const handleBack = () => {
+    logout()
+  }
+
   if (isPending || isApplicationPending) {
     return (
       <AuthenticatedPageWrapper withLoginButton={false}>
@@ -89,17 +91,17 @@ export const ApplicationAuthenticated = (): JSX.Element => {
 
   if (isError || !applicationForm) {
     return (
-      <NonAuthenticatedPageWrapper withLoginButton={false}>
-        <ErrorState error={error} onBack={() => navigate('/')} />
-      </NonAuthenticatedPageWrapper>
+      <AuthenticatedPageWrapper withLoginButton={false}>
+        <ErrorState error={error} onBack={handleBack} />
+      </AuthenticatedPageWrapper>
     )
   }
 
   if (isApplicationError || !application) {
     return (
-      <NonAuthenticatedPageWrapper withLoginButton={false}>
-        <ErrorState error={applicationError} onBack={() => navigate('/')} />
-      </NonAuthenticatedPageWrapper>
+      <AuthenticatedPageWrapper withLoginButton={false}>
+        <ErrorState error={applicationError} onBack={handleBack} />
+      </AuthenticatedPageWrapper>
     )
   }
 
@@ -124,7 +126,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   return (
     <AuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
+        <ApplicationHeader applicationPhase={application_phase} onBackClick={handleBack} />
         <ApplicationForm
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}
@@ -137,7 +139,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
       <ApplicationSavingDialog
         showDialog={showDialog}
         onClose={handleCloseDialog}
-        onNavigateBack={() => navigate('/')}
+        onNavigateBack={handleBack}
         errorMessage={mutateError?.message}
       />
     </AuthenticatedPageWrapper>

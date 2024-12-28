@@ -32,7 +32,7 @@ export default function UnauthorizedPage() {
             <ArrowLeft className='mr-2 h-4 w-4' />
             Go Back
           </Button>
-          <Button variant='destructive' onClick={logout} className='w-full sm:w-auto'>
+          <Button variant='destructive' onClick={() => logout()} className='w-full sm:w-auto'>
             <LogOut className='mr-2 h-4 w-4' />
             Logout
           </Button>

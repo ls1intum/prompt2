@@ -51,7 +51,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   if (isError) {
     console.error(error)
-    return <ErrorPage onRetry={() => refetch()} onLogout={logout} />
+    return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 
   // Check if the user has at least some Prompt rights
@@ -69,7 +69,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   return (
     <DarkModeProvider>
       <SidebarProvider>
-        <AppSidebar onLogout={logout} />
+        <AppSidebar onLogout={() => logout()} />
         <SidebarInset>
           {courseId.courseId && !courseExists && (
             <CourseNotFound courseId={courseId.courseId || ''} />
