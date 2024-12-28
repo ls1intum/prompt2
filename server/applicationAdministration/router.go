@@ -27,6 +27,7 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	apply.POST("/:coursePhaseID", postApplicationExtern)
 
 	applyAuthenticated := router.Group("/apply/authenticated", authMiddleware())
+	applyAuthenticated.GET("/:coursePhaseID", getApplicationAuthenticated)
 	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
 }
 
@@ -110,6 +111,30 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, applicationForm)
+}
+
+func getApplicationAuthenticated(c *gin.Context) {
+	// TODO
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	userEmail := c.GetString("userEmail")
+
+	if userEmail == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
+		return
+	}
+
+	applicationForm, err := GetApplicationAuthenticatedByEmail(c, userEmail, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
+		return
+	}
+	c.IndentedJSON(http.StatusOK, applicationForm)
+
 }
 
 func postApplicationExtern(c *gin.Context) {

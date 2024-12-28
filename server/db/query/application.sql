@@ -140,3 +140,17 @@ ON
 WHERE 
     cp.id = $1
     AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW();
+
+-- name: GetApplicationAnswersTextForStudent :many
+SELECT aat.*
+FROM application_answer_text aat
+INNER JOIN course_phase_participation cpp ON aat.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+
+-- name: GetApplicationAnswersMultiSelectForStudent :many
+SELECT aams.*
+FROM application_answer_multi_select aams
+INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;

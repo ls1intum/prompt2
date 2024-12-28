@@ -30,3 +30,12 @@ func GetAnswerTextDTOFromDBModel(answer db.ApplicationAnswerText) AnswerText {
 		Answer:                     answer.Answer.String,
 	}
 }
+
+func GetAnswersTextDTOFromDBModels(answers []db.ApplicationAnswerText) []AnswerText {
+	answerTextDTO := make([]AnswerText, 0, len(answers))
+	for _, answer := range answers {
+		answerTextDTO = append(answerTextDTO, GetAnswerTextDTOFromDBModel(answer))
+	}
+
+	return answerTextDTO
+}

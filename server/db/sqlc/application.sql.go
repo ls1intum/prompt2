@@ -252,6 +252,82 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 	return items, nil
 }
 
+const getApplicationAnswersMultiSelectForStudent = `-- name: GetApplicationAnswersMultiSelectForStudent :many
+SELECT aams.id, aams.application_question_id, aams.course_phase_participation_id, aams.answer
+FROM application_answer_multi_select aams
+INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2
+`
+
+type GetApplicationAnswersMultiSelectForStudentParams struct {
+	StudentID     uuid.UUID `json:"student_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetApplicationAnswersMultiSelectForStudent(ctx context.Context, arg GetApplicationAnswersMultiSelectForStudentParams) ([]ApplicationAnswerMultiSelect, error) {
+	rows, err := q.db.Query(ctx, getApplicationAnswersMultiSelectForStudent, arg.StudentID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ApplicationAnswerMultiSelect
+	for rows.Next() {
+		var i ApplicationAnswerMultiSelect
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationQuestionID,
+			&i.CoursePhaseParticipationID,
+			&i.Answer,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getApplicationAnswersTextForStudent = `-- name: GetApplicationAnswersTextForStudent :many
+SELECT aat.id, aat.application_question_id, aat.course_phase_participation_id, aat.answer
+FROM application_answer_text aat
+INNER JOIN course_phase_participation cpp ON aat.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2
+`
+
+type GetApplicationAnswersTextForStudentParams struct {
+	StudentID     uuid.UUID `json:"student_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetApplicationAnswersTextForStudent(ctx context.Context, arg GetApplicationAnswersTextForStudentParams) ([]ApplicationAnswerText, error) {
+	rows, err := q.db.Query(ctx, getApplicationAnswersTextForStudent, arg.StudentID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ApplicationAnswerText
+	for rows.Next() {
+		var i ApplicationAnswerText
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationQuestionID,
+			&i.CoursePhaseParticipationID,
+			&i.Answer,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getApplicationExistsForStudent = `-- name: GetApplicationExistsForStudent :one
 SELECT EXISTS (
     SELECT 1

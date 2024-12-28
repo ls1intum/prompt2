@@ -275,3 +275,57 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 
 	return nil
 }
+
+func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, coursePhaseID uuid.UUID) (applicationDTO.Application, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	studentObj, err := student.GetStudentByEmail(ctxWithTimeout, email)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return applicationDTO.Application{
+			Status:             applicationDTO.StatusNewUser,
+			Student:            nil,
+			AnswersText:        make([]applicationDTO.AnswerText, 0),
+			AnswersMultiSelect: make([]applicationDTO.AnswerMultiSelect, 0),
+		}, nil
+	}
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get application")
+	}
+
+	exists, err := ApplicationServiceSingleton.queries.GetApplicationExistsForStudent(ctxWithTimeout, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get application")
+	}
+
+	if exists {
+		answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForStudent(ctxWithTimeout, db.GetApplicationAnswersTextForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+		if err != nil {
+			log.Error(err)
+			return applicationDTO.Application{}, errors.New("could not get application")
+		}
+
+		answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForStudent(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+		if err != nil {
+			log.Error(err)
+			return applicationDTO.Application{}, errors.New("could not get application")
+		}
+		return applicationDTO.Application{
+			Status:             applicationDTO.StatusApplied,
+			Student:            &studentObj,
+			AnswersText:        applicationDTO.GetAnswersTextDTOFromDBModels(answersText),
+			AnswersMultiSelect: applicationDTO.GetAnswersMultiSelectDTOFromDBModels(answersMultiSelect),
+		}, nil
+
+	} else {
+		return applicationDTO.Application{
+			Status:             applicationDTO.StatusNotApplied,
+			Student:            &studentObj,
+			AnswersText:        make([]applicationDTO.AnswerText, 0),
+			AnswersMultiSelect: make([]applicationDTO.AnswerMultiSelect, 0),
+		}, nil
+	}
+
+}
