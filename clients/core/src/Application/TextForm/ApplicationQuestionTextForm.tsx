@@ -14,24 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { QuestionTextFormRef } from '../utils/QuestionTextFormRef'
 import { createValidationSchema } from './validationSchema'
-
-export interface ApplicationQuestionText {
-  id: string
-  course_phase_id: string
-  title: string
-  description?: string
-  placeholder?: string
-  validation_regex?: string
-  error_message?: string
-  is_required: boolean
-  allowed_length?: number
-  order_num: number
-}
-
-export interface CreateApplicationAnswerText {
-  applicationQuestionId: string
-  answer: string
-}
+import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText
@@ -61,7 +44,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
       return isValid
     },
     getValues() {
-      return { applicationQuestionId: question.id, answer: form.getValues().answer }
+      return { application_question_id: question.id, answer: form.getValues().answer }
     },
   }))
 

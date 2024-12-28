@@ -147,6 +147,7 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
+	// TODO: send mail confirmation to student!
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 

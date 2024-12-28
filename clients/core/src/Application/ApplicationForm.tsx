@@ -111,7 +111,7 @@ export const ApplicationForm = ({
                         question={question}
                         initialAnswers={
                           initialAnswersMultiSelect?.find(
-                            (a) => a.applicationQuestionId === question.id,
+                            (a) => a.application_question_id === question.id,
                           )?.answer ?? []
                         }
                         ref={(el) => (questionMultiSelectRefs.current[index] = el)}
@@ -122,7 +122,7 @@ export const ApplicationForm = ({
                       <ApplicationQuestionTextForm
                         question={question}
                         initialAnswer={
-                          initialAnswersText?.find((a) => a.applicationQuestionId === question.id)
+                          initialAnswersText?.find((a) => a.application_question_id === question.id)
                             ?.answer ?? ''
                         }
                         ref={(el) => (questionTextRefs.current[index] = el)}
