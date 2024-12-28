@@ -18,6 +18,7 @@ import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
 import { ApplicationQuestionMultiSelectForm } from './MultiSelectForm/ApplicationQuestionMultiSelectForm'
+import { Separator } from '@/components/ui/separator'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]
@@ -94,50 +95,53 @@ export const ApplicationForm = ({
   }
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Application Form</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='space-y-8'>
+    <Card>
+      <CardHeader>
+        <CardTitle>Application Form</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className='space-y-8'>
+          <div>
+            <h2 className='text-lg font-semibold mb-2'>Personal Information</h2>
+            <p className='text-sm text-muted-foreground mb-4'>
+              This information will be applied for all applications at this chair.
+            </p>
             <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
-            {questions.map((question, index) => {
-              return (
-                <div key={index}>
-                  {'options' in question ? (
-                    <div>
-                      <ApplicationQuestionMultiSelectForm
-                        question={question}
-                        initialAnswers={
-                          initialAnswersMultiSelect?.find(
-                            (a) => a.application_question_id === question.id,
-                          )?.answer ?? []
-                        }
-                        ref={(el) => (questionMultiSelectRefs.current[index] = el)}
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <ApplicationQuestionTextForm
-                        question={question}
-                        initialAnswer={
-                          initialAnswersText?.find((a) => a.application_question_id === question.id)
-                            ?.answer ?? ''
-                        }
-                        ref={(el) => (questionTextRefs.current[index] = el)}
-                      />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-            <div className='flex justify-end mt-4'>
-              <Button onClick={handleSubmit}>Submit</Button>
-            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <Separator />
+          <div>
+            <h2 className='text-lg font-semibold mb-4'>Course Specific Questions</h2>
+            {questions.map((question, index) => (
+              <div key={question.id} className='mb-6'>
+                {'options' in question ? (
+                  <ApplicationQuestionMultiSelectForm
+                    question={question}
+                    initialAnswers={
+                      initialAnswersMultiSelect?.find(
+                        (a) => a.application_question_id === question.id,
+                      )?.answer ?? []
+                    }
+                    ref={(el) => (questionMultiSelectRefs.current[index] = el)}
+                  />
+                ) : (
+                  <ApplicationQuestionTextForm
+                    question={question}
+                    initialAnswer={
+                      initialAnswersText?.find((a) => a.application_question_id === question.id)
+                        ?.answer ?? ''
+                    }
+                    ref={(el) => (questionTextRefs.current[index] = el)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className='flex justify-end'>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
