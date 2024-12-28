@@ -29,8 +29,9 @@ func getDatabaseURL() string {
 	dbPort := utils.GetEnv("DB_PORT", "5432")
 	dbName := utils.GetEnv("DB_NAME", "prompt")
 	sslMode := utils.GetEnv("SSL_MODE", "disable")
+	timeZone := utils.GetEnv("DB_TIMEZONE", "Europe/Berlin") // Add a timezone parameter
 
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode)
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode, timeZone)
 }
 
 func runMigrations(databaseURL string) {
