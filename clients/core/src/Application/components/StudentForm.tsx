@@ -31,25 +31,25 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
   { student, onUpdate },
   ref,
 ) {
-  const hasUniversityAccount = student.hasUniversityAccount
+  const hasUniversityAccount = student.has_university_account
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: hasUniversityAccount
       ? {
-          matriculationNumber: student.matriculationNumber || '',
-          universityLogin: student.universityLogin || '',
-          firstName: student.firstName || '',
-          lastName: student.lastName || '',
+          matriculation_number: student.matriculation_number || '',
+          university_login: student.university_login || '',
+          first_name: student.first_name || '',
+          last_name: student.last_name || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
-          hasUniversityAccount: true,
+          has_university_account: true,
         }
       : {
-          firstName: student.firstName || '',
-          lastName: student.lastName || '',
+          first_name: student.first_name || '',
+          last_name: student.last_name || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
-          hasUniversityAccount: false,
+          has_university_account: false,
         },
     mode: 'onChange',
   })
@@ -81,7 +81,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <FormField
               control={form.control}
-              name='matriculationNumber'
+              name='matriculation_number'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -97,7 +97,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             />
             <FormField
               control={form.control}
-              name='universityLogin'
+              name='university_login'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>University Login{requiredStar}</FormLabel>
@@ -113,7 +113,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <FormField
             control={form.control}
-            name='firstName'
+            name='first_name'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First Name{requiredStar}</FormLabel>
@@ -126,7 +126,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           />
           <FormField
             control={form.control}
-            name='lastName'
+            name='last_name'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Last Name{requiredStar}</FormLabel>

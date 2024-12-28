@@ -7,27 +7,27 @@ const matriculationNumberRegex = new RegExp(translations.university.matriculatio
 
 // Define the schema for a student form
 export const studentBaseSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
-  hasUniversityAccount: z.literal(false), // Explicit literal for base case
+  has_university_account: z.literal(false), // Explicit literal for base case
 })
 
 // Define the schema for a university student form (extended)
 export const studentUniversitySchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
-  hasUniversityAccount: z.literal(true), // Explicit literal for university case
-  matriculationNumber: z
+  has_university_account: z.literal(true), // Explicit literal for university case
+  matriculation_number: z
     .string()
     .regex(
       matriculationNumberRegex,
       `Matriculation number must follow the pattern ${translations.university.matriculationExample}`,
     ),
-  universityLogin: z
+  university_login: z
     .string()
     .regex(
       universityLoginRegex,
@@ -36,12 +36,12 @@ export const studentUniversitySchema = z.object({
 })
 
 // Define the discriminated union based on `hasUniversityAccount`
-export const studentSchema = z.discriminatedUnion('hasUniversityAccount', [
+export const studentSchema = z.discriminatedUnion('has_university_account', [
   studentBaseSchema,
   studentUniversitySchema,
 ])
 
-export const questionConfigSchema = z.discriminatedUnion('hasUniversityAccount', [
+export const questionConfigSchema = z.discriminatedUnion('has_university_account', [
   studentBaseSchema,
   studentUniversitySchema,
 ])

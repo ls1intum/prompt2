@@ -49,10 +49,10 @@ export const ApplicationAuthenticated = (): JSX.Element => {
 
   // TODO -> try to get student with email from server. Else use the user from the auth store
   const student: Student = {
-    firstName: user?.firstName ?? '',
-    lastName: user?.lastName ?? '',
+    first_name: user?.firstName ?? '',
+    last_name: user?.lastName ?? '',
     email: user?.email ?? '',
-    hasUniversityAccount: true,
+    has_university_account: true,
   }
 
   return (
