@@ -10,6 +10,8 @@ import { ApplicationHeader } from './components/ApplicationHeader'
 import { ApplicationForm } from './ApplicationForm'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { Student } from '@/interfaces/student'
+import { getApplication } from '../network/queries/application'
+import { GetApplication } from '@/interfaces/get_application'
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -28,8 +30,17 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   })
 
   // TODO: mutate function with authenticated Instance!!
+  const {
+    data: application,
+    isPending: isApplicationPending,
+    isError: isApplicationError,
+    error: applicationError,
+  } = useQuery<GetApplication>({
+    queryKey: ['application', phaseId, user?.email],
+    queryFn: () => getApplication(phaseId ?? ''),
+  })
 
-  if (isPending) {
+  if (isPending || isApplicationPending) {
     return (
       <AuthenticatedPageWrapper withLoginButton={false}>
         <LoadingState />
@@ -45,14 +56,28 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     )
   }
 
+  if (isApplicationError || !application) {
+    return (
+      <NonAuthenticatedPageWrapper withLoginButton={false}>
+        <ErrorState error={applicationError} onBack={() => navigate('/')} />
+      </NonAuthenticatedPageWrapper>
+    )
+  }
+
   const { application_phase } = applicationForm
 
   // TODO -> try to get student with email from server. Else use the user from the auth store
-  const student: Student = {
+  let student: Student = {
     first_name: user?.firstName ?? '',
     last_name: user?.lastName ?? '',
     email: user?.email ?? '',
     has_university_account: true,
+  }
+  if (
+    (application.status === 'applied' || application.status === 'not_applied') &&
+    application.student
+  ) {
+    student = application.student
   }
 
   return (
@@ -62,6 +87,8 @@ export const ApplicationAuthenticated = (): JSX.Element => {
         <ApplicationForm
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}
+          initialAnswersMultiSelect={application.answers_multi_select}
+          initialAnswersText={application.answers_text}
           student={student}
           onSubmit={() => console.log('Submit')}
         />
