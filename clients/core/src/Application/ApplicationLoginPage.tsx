@@ -9,6 +9,9 @@ import { ErrorState } from './components/ErrorState'
 import { useState } from 'react'
 import { ApplicationLoginCard } from './components/ApplicationLoginCard'
 import { ApplicationForm } from './ApplicationForm'
+import { Student } from '@/interfaces/student'
+import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
 
 export const ApplicationLoginPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -24,6 +27,14 @@ export const ApplicationLoginPage = (): JSX.Element => {
     queryKey: ['applicationForm', phaseId],
     queryFn: () => getApplicationFormWithDetails(phaseId ?? ''),
   })
+
+  const handleSubmit = (
+    student: Student,
+    answersText: CreateApplicationAnswerText[],
+    answersMultiSelect: CreateApplicationAnswerMultiSelect[],
+  ) => {
+    console.log('Submit', student, answersText, answersMultiSelect)
+  }
 
   if (isPending) {
     return (
@@ -59,7 +70,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
           <ApplicationForm
             questionsText={applicationForm.questions_text}
             questionsMultiSelect={applicationForm.questions_multi_select}
-            onSubmit={() => console.log('Submit')}
+            onSubmit={handleSubmit}
           />
         )}
       </div>

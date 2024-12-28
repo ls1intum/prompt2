@@ -1,8 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { ApplicationAnswerText } from '@/interfaces/application_answer_text'
-import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
+import {
+  ApplicationAnswerText,
+  CreateApplicationAnswerText,
+} from '@/interfaces/application_answer_text'
+import {
+  ApplicationAnswerMultiSelect,
+  CreateApplicationAnswerMultiSelect,
+} from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
 import { useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
@@ -19,7 +25,11 @@ interface ApplicationFormProps {
   initialAnswersText?: ApplicationAnswerText[]
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
-  onSubmit: () => void
+  onSubmit: (
+    student: Student,
+    answersText: CreateApplicationAnswerText[],
+    answersMultiSelect: CreateApplicationAnswerMultiSelect[],
+  ) => void
 }
 
 export const ApplicationForm = ({
@@ -48,26 +58,30 @@ export const ApplicationForm = ({
       return
     }
     const studentValid = await studentRef.current.validate()
-    if (!studentValid) {
+    if (studentData && !studentValid) {
       allValid = false
     }
 
     // Loop over each child's ref, call validate()
+    const answersText: CreateApplicationAnswerText[] = []
     for (const ref of questionTextRefs.current) {
       if (!ref) continue
       const isValid = await ref.validate()
-      if (!isValid) {
+      if (isValid) {
+        answersText.push(ref.getValues())
+      } else {
         allValid = false
       }
     }
 
+    const answersMultiSelect: CreateApplicationAnswerMultiSelect[] = []
     for (const ref of questionMultiSelectRefs.current) {
       if (!ref) continue
       const isValid = await ref.validate()
-      if (!isValid) {
-        allValid = false
+      if (isValid) {
+        answersMultiSelect.push(ref.getValues())
       } else {
-        console.log(ref.getValues())
+        allValid = false
       }
     }
 
@@ -76,7 +90,7 @@ export const ApplicationForm = ({
       return
     }
     // call onSubmit
-    onSubmit()
+    onSubmit(studentData, answersText, answersMultiSelect)
   }
 
   return (
