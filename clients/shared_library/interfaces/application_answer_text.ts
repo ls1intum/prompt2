@@ -1,11 +1,11 @@
 export interface ApplicationAnswerText {
   id: string
-  applicationQuestionId: string
-  coursePhaseParticipationId: string
+  application_question_id: string
+  course_phase_participation_id: string
   answer: string
 }
 
 export interface CreateApplicationAnswerText {
-  applicationQuestionId: string
+  application_question_id: string
   answer: string
 }

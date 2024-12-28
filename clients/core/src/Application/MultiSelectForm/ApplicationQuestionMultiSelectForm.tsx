@@ -35,7 +35,7 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
         return isValid
       },
       getValues() {
-        return { applicationQuestionId: question.id, answer: form.getValues().answers }
+        return { application_question_id: question.id, answer: form.getValues().answers }
       },
     }))
 

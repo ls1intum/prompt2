@@ -1,4 +1,3 @@
-import { useKeycloak } from '@/keycloak/useKeycloak'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { LoadingPage } from '@/components/LoadingPage'
@@ -13,6 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { useKeycloak } from '@/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
   children: React.ReactNode
@@ -25,18 +25,11 @@ export const AuthenticatedPageWrapper = ({
   withLoginButton = true,
 }: NonAuthenticatedPageWrapper): JSX.Element => {
   const { keycloak } = useKeycloak()
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
 
   const openLogoutDialog = () => setIsLogoutDialogOpen(true)
   const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
-
-  const handleLogout = async () => {
-    if (keycloak) {
-      const redirectUri = window.location.origin
-      await keycloak.logout({ redirectUri })
-    }
-  }
 
   if (!keycloak) {
     return <LoadingPage />
@@ -68,7 +61,7 @@ export const AuthenticatedPageWrapper = ({
             <Button variant='outline' onClick={closeLogoutDialog}>
               Cancel
             </Button>
-            <Button variant='destructive' onClick={handleLogout}>
+            <Button variant='destructive' onClick={() => logout()}>
               Logout
             </Button>
           </DialogFooter>

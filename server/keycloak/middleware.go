@@ -84,9 +84,15 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		userEmail, ok := claims["email"].(string)
+		if !ok {
+			log.Error("Failed to extract user ID (sub) from token claims")
+		}
+
 		// Store the extracted roles in the context
 		c.Set("userRoles", userRoles)
 		c.Set("userID", userID)
+		c.Set("userEmail", userEmail)
 		c.Next()
 	}
 }

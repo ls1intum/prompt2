@@ -29,3 +29,12 @@ func GetAnswerMultiSelectDTOFromDBModel(answer db.ApplicationAnswerMultiSelect) 
 		Answer:                     answer.Answer,
 	}
 }
+
+func GetAnswersMultiSelectDTOFromDBModels(answers []db.ApplicationAnswerMultiSelect) []AnswerMultiSelect {
+	answerTextDTO := make([]AnswerMultiSelect, 0, len(answers))
+	for _, answer := range answers {
+		answerTextDTO = append(answerTextDTO, GetAnswerMultiSelectDTOFromDBModel(answer))
+	}
+
+	return answerTextDTO
+}

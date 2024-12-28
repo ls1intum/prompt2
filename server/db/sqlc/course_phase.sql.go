@@ -103,6 +103,20 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 	return items, nil
 }
 
+const getCourseIDByCoursePhaseID = `-- name: GetCourseIDByCoursePhaseID :one
+SELECT course_id
+FROM course_phase
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetCourseIDByCoursePhaseID(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getCourseIDByCoursePhaseID, id)
+	var course_id uuid.UUID
+	err := row.Scan(&course_id)
+	return course_id, err
+}
+
 const getCoursePhase = `-- name: GetCoursePhase :one
 SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
 FROM course_phase cp

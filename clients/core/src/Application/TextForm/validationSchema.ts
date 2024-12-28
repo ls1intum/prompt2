@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { ApplicationQuestionText } from './ApplicationQuestionTextForm'
+import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 
 export const createValidationSchema = (question: ApplicationQuestionText) =>
   z.object({

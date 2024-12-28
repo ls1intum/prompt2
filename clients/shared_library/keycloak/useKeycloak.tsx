@@ -20,11 +20,11 @@ const parseJwt = (token: string) => {
 
 export const useKeycloak = (): {
   keycloak: Keycloak | undefined
-  logout: () => void
+  logout: (redirectUri?: string) => void
   forceTokenRefresh: () => Promise<void>
 } => {
   const context = useContext(KeycloakContext)
-  const { setUser, setPermissions, clearUser, clearPermissions } = useAuthStore()
+  const { setUser, setPermissions, clearUser, clearPermissions, setLogoutFunction } = useAuthStore()
 
   if (!context) {
     throw new Error('useKeycloak must be used within a KeycloakProvider')
@@ -100,15 +100,22 @@ export const useKeycloak = (): {
     }
   }, [keycloakValue, initializeKeycloak])
 
-  const logout = () => {
-    if (keycloakValue) {
-      keycloakValue.logout({ redirectUri: window.location.origin }) // Keycloak logout
-    }
-    clearUser()
-    clearPermissions()
-    localStorage.removeItem('jwt_token')
-    localStorage.removeItem('refreshToken')
-  }
+  const logout = useCallback(
+    async (redirectUri?: string) => {
+      if (keycloakValue) {
+        await keycloakValue.logout({ redirectUri: redirectUri || window.location.origin }) // Use provided URI or fallback
+      }
+      clearUser()
+      clearPermissions()
+      localStorage.removeItem('jwt_token')
+      localStorage.removeItem('refreshToken')
+    },
+    [clearPermissions, clearUser, keycloakValue],
+  )
+
+  useEffect(() => {
+    setLogoutFunction(logout) // Inject the logout function into the store
+  }, [logout, setLogoutFunction])
 
   const forceTokenRefresh = (): Promise<void> => {
     return new Promise((resolve, reject) => {

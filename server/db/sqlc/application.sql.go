@@ -32,10 +32,30 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 	return is_application, err
 }
 
-const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :one
+const checkIfCoursePhaseIsOpenApplicationPhase = `-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+`
+
+func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, checkIfCoursePhaseIsOpenApplicationPhase, id)
+	var is_application bool
+	err := row.Scan(&is_application)
+	return is_application, err
+}
+
+const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
 INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-RETURNING id, application_question_id, course_phase_participation_id, answer
 `
 
 type CreateApplicationAnswerMultiSelectParams struct {
@@ -45,27 +65,19 @@ type CreateApplicationAnswerMultiSelectParams struct {
 	Answer                     []string  `json:"answer"`
 }
 
-func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg CreateApplicationAnswerMultiSelectParams) (ApplicationAnswerMultiSelect, error) {
-	row := q.db.QueryRow(ctx, createApplicationAnswerMultiSelect,
+func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg CreateApplicationAnswerMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, createApplicationAnswerMultiSelect,
 		arg.ID,
 		arg.ApplicationQuestionID,
 		arg.CoursePhaseParticipationID,
 		arg.Answer,
 	)
-	var i ApplicationAnswerMultiSelect
-	err := row.Scan(
-		&i.ID,
-		&i.ApplicationQuestionID,
-		&i.CoursePhaseParticipationID,
-		&i.Answer,
-	)
-	return i, err
+	return err
 }
 
-const createApplicationAnswerText = `-- name: CreateApplicationAnswerText :one
+const createApplicationAnswerText = `-- name: CreateApplicationAnswerText :exec
 INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-RETURNING id, application_question_id, course_phase_participation_id, answer
 `
 
 type CreateApplicationAnswerTextParams struct {
@@ -75,21 +87,14 @@ type CreateApplicationAnswerTextParams struct {
 	Answer                     pgtype.Text `json:"answer"`
 }
 
-func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApplicationAnswerTextParams) (ApplicationAnswerText, error) {
-	row := q.db.QueryRow(ctx, createApplicationAnswerText,
+func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApplicationAnswerTextParams) error {
+	_, err := q.db.Exec(ctx, createApplicationAnswerText,
 		arg.ID,
 		arg.ApplicationQuestionID,
 		arg.CoursePhaseParticipationID,
 		arg.Answer,
 	)
-	var i ApplicationAnswerText
-	err := row.Scan(
-		&i.ID,
-		&i.ApplicationQuestionID,
-		&i.CoursePhaseParticipationID,
-		&i.Answer,
-	)
-	return i, err
+	return err
 }
 
 const createApplicationQuestionMultiSelect = `-- name: CreateApplicationQuestionMultiSelect :exec
@@ -158,6 +163,56 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 		arg.IsRequired,
 		arg.AllowedLength,
 		arg.OrderNum,
+	)
+	return err
+}
+
+const createOrOverwriteApplicationAnswerMultiSelect = `-- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec
+INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer
+`
+
+type CreateOrOverwriteApplicationAnswerMultiSelectParams struct {
+	ID                         uuid.UUID `json:"id"`
+	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
+	CoursePhaseParticipationID uuid.UUID `json:"course_phase_participation_id"`
+	Answer                     []string  `json:"answer"`
+}
+
+func (q *Queries) CreateOrOverwriteApplicationAnswerMultiSelect(ctx context.Context, arg CreateOrOverwriteApplicationAnswerMultiSelectParams) error {
+	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerMultiSelect,
+		arg.ID,
+		arg.ApplicationQuestionID,
+		arg.CoursePhaseParticipationID,
+		arg.Answer,
+	)
+	return err
+}
+
+const createOrOverwriteApplicationAnswerText = `-- name: CreateOrOverwriteApplicationAnswerText :exec
+INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer
+`
+
+type CreateOrOverwriteApplicationAnswerTextParams struct {
+	ID                         uuid.UUID   `json:"id"`
+	ApplicationQuestionID      uuid.UUID   `json:"application_question_id"`
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	Answer                     pgtype.Text `json:"answer"`
+}
+
+func (q *Queries) CreateOrOverwriteApplicationAnswerText(ctx context.Context, arg CreateOrOverwriteApplicationAnswerTextParams) error {
+	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerText,
+		arg.ID,
+		arg.ApplicationQuestionID,
+		arg.CoursePhaseParticipationID,
+		arg.Answer,
 	)
 	return err
 }
@@ -245,6 +300,103 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 		return nil, err
 	}
 	return items, nil
+}
+
+const getApplicationAnswersMultiSelectForStudent = `-- name: GetApplicationAnswersMultiSelectForStudent :many
+SELECT aams.id, aams.application_question_id, aams.course_phase_participation_id, aams.answer
+FROM application_answer_multi_select aams
+INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2
+`
+
+type GetApplicationAnswersMultiSelectForStudentParams struct {
+	StudentID     uuid.UUID `json:"student_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetApplicationAnswersMultiSelectForStudent(ctx context.Context, arg GetApplicationAnswersMultiSelectForStudentParams) ([]ApplicationAnswerMultiSelect, error) {
+	rows, err := q.db.Query(ctx, getApplicationAnswersMultiSelectForStudent, arg.StudentID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ApplicationAnswerMultiSelect
+	for rows.Next() {
+		var i ApplicationAnswerMultiSelect
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationQuestionID,
+			&i.CoursePhaseParticipationID,
+			&i.Answer,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getApplicationAnswersTextForStudent = `-- name: GetApplicationAnswersTextForStudent :many
+SELECT aat.id, aat.application_question_id, aat.course_phase_participation_id, aat.answer
+FROM application_answer_text aat
+INNER JOIN course_phase_participation cpp ON aat.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2
+`
+
+type GetApplicationAnswersTextForStudentParams struct {
+	StudentID     uuid.UUID `json:"student_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetApplicationAnswersTextForStudent(ctx context.Context, arg GetApplicationAnswersTextForStudentParams) ([]ApplicationAnswerText, error) {
+	rows, err := q.db.Query(ctx, getApplicationAnswersTextForStudent, arg.StudentID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ApplicationAnswerText
+	for rows.Next() {
+		var i ApplicationAnswerText
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationQuestionID,
+			&i.CoursePhaseParticipationID,
+			&i.Answer,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getApplicationExistsForStudent = `-- name: GetApplicationExistsForStudent :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_participation cp
+    INNER JOIN course_phase ph ON cp.course_id = ph.course_id
+    WHERE cp.student_id = $1 AND ph.id = $2
+)
+`
+
+type GetApplicationExistsForStudentParams struct {
+	StudentID uuid.UUID `json:"student_id"`
+	ID        uuid.UUID `json:"id"`
+}
+
+func (q *Queries) GetApplicationExistsForStudent(ctx context.Context, arg GetApplicationExistsForStudentParams) (bool, error) {
+	row := q.db.QueryRow(ctx, getApplicationExistsForStudent, arg.StudentID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many

@@ -2,17 +2,16 @@ import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import { useNavigate } from 'react-router-dom'
 
 interface ApplicationHeaderProps {
   applicationPhase: OpenApplicationDetails
+  onBackClick: () => void
 }
 
-export const ApplicationHeader = ({ applicationPhase }: ApplicationHeaderProps) => {
-  const navigate = useNavigate()
+export const ApplicationHeader = ({ applicationPhase, onBackClick }: ApplicationHeaderProps) => {
   return (
     <div>
-      <Button onClick={() => navigate('/')} variant='ghost' className='mb-4'>
+      <Button onClick={onBackClick} variant='ghost' className='mb-4'>
         <ArrowLeft className='mr-2 h-4 w-4' /> Back to Overview
       </Button>
 
