@@ -7,7 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -148,6 +151,124 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelec
 	err := validateQuestionMultiSelect("Valid Title", 0, 0, []string{"Option1", "Option2"})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "maximum selection must be at least 1", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_InvalidStudent() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	application := applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			ID: uuid.New(),
+		},
+		AnswersText:        []applicationDTO.CreateAnswerText{},
+		AnswersMultiSelect: []applicationDTO.CreateAnswerMultiSelect{},
+	}
+
+	err := validateApplication(suite.ctx, coursePhaseID, application)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "invalid student", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_InvalidTextAnswers() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	application := applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			ID: uuid.New(),
+			// Valid student details
+			FirstName:            "John",
+			LastName:             "Doe",
+			Email:                "test@test.de",
+			HasUniversityAccount: false,
+		},
+		AnswersText: []applicationDTO.CreateAnswerText{
+			{
+				ApplicationQuestionID: uuid.New(), // Non-existent question ID
+				Answer:                "Invalid Answer",
+			},
+		},
+	}
+
+	err := validateApplication(suite.ctx, coursePhaseID, application)
+	assert.Error(suite.T(), err)
+	assert.Contains(suite.T(), err.Error(), "required question")
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateTextAnswers_ExceedsAllowedLength() {
+	textQuestions := []db.ApplicationQuestionText{
+		{
+			ID:            uuid.New(),
+			AllowedLength: pgtype.Int4{Int32: 10, Valid: true},
+			IsRequired:    pgtype.Bool{Bool: true, Valid: true},
+		},
+	}
+	textAnswers := []applicationDTO.CreateAnswerText{
+		{
+			ApplicationQuestionID: textQuestions[0].ID,
+			Answer:                "This answer is way too long",
+		},
+	}
+
+	err := validateTextAnswers(textQuestions, textAnswers)
+	assert.Error(suite.T(), err)
+	assert.Contains(suite.T(), err.Error(), "exceeds allowed length")
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateMultiSelectAnswers_InvalidSelection() {
+	multiSelectQuestions := []db.ApplicationQuestionMultiSelect{
+		{
+			ID:         uuid.New(),
+			MinSelect:  pgtype.Int4{Int32: 1, Valid: true},
+			MaxSelect:  pgtype.Int4{Int32: 3, Valid: true},
+			IsRequired: pgtype.Bool{Bool: true, Valid: true},
+			Options:    []string{"Option1", "Option2", "Option3"},
+		},
+	}
+	multiSelectAnswers := []applicationDTO.CreateAnswerMultiSelect{
+		{
+			ApplicationQuestionID: multiSelectQuestions[0].ID,
+			Answer:                []string{"InvalidOption"},
+		},
+	}
+
+	err := validateMultiSelectAnswers(multiSelectQuestions, multiSelectAnswers)
+	assert.Error(suite.T(), err)
+	assert.Contains(suite.T(), err.Error(), "invalid selection")
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateMultiSelectAnswers_MissingRequiredAnswer() {
+	multiSelectQuestions := []db.ApplicationQuestionMultiSelect{
+		{
+			ID:         uuid.New(),
+			MinSelect:  pgtype.Int4{Int32: 1, Valid: true},
+			IsRequired: pgtype.Bool{Bool: true, Valid: true},
+			Options:    []string{"Option1", "Option2", "Option3"},
+		},
+	}
+	multiSelectAnswers := []applicationDTO.CreateAnswerMultiSelect{}
+
+	err := validateMultiSelectAnswers(multiSelectQuestions, multiSelectAnswers)
+	assert.Error(suite.T(), err)
+	assert.Contains(suite.T(), err.Error(), "required question")
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateMultiSelectAnswers_SelectionOutOfRange() {
+	multiSelectQuestions := []db.ApplicationQuestionMultiSelect{
+		{
+			ID:        uuid.New(),
+			MinSelect: pgtype.Int4{Int32: 1, Valid: true},
+			MaxSelect: pgtype.Int4{Int32: 3, Valid: true},
+			Options:   []string{"Option1", "Option2", "Option3"},
+		},
+	}
+	multiSelectAnswers := []applicationDTO.CreateAnswerMultiSelect{
+		{
+			ApplicationQuestionID: multiSelectQuestions[0].ID,
+			Answer:                []string{"Option1", "Option2", "Option3", "Option4"}, // Exceeds MaxSelect
+		},
+	}
+
+	err := validateMultiSelectAnswers(multiSelectQuestions, multiSelectAnswers)
+	assert.Error(suite.T(), err)
+	assert.Contains(suite.T(), err.Error(), "does not meet selection requirements")
 }
 
 func TestValidateUpdateFormSuite(t *testing.T) {
