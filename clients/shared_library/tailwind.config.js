@@ -5,6 +5,12 @@ const { Sidebar } = require('lucide-react')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}', // Adjust for your project structure
+    './components/minimal-tiptap/**/*.{ts,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}', // General components folder
+  ],
+  safelist: ['dark', 'ProseMirror'],
   theme: {
     extend: {
       colors: {
@@ -59,5 +65,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 }

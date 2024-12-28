@@ -5,6 +5,10 @@ import { useQuery } from '@tanstack/react-query'
 import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { getAllOpenApplications } from '../network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
+import { useState } from 'react'
+import { MinimalTiptapEditor } from '@/components/minimal-tiptap'
+import { Content } from '@tiptap/react'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 export function LandingPage(): JSX.Element {
   const {
@@ -15,6 +19,7 @@ export function LandingPage(): JSX.Element {
     queryKey: ['open_applications'],
     queryFn: () => getAllOpenApplications(),
   })
+  const [value, setValue] = useState<Content>('')
 
   return (
     <NonAuthenticatedPageWrapper>
@@ -27,6 +32,19 @@ export function LandingPage(): JSX.Element {
           platform for course and seminar applications.
         </p>
       </section>
+      <TooltipProvider>
+        <MinimalTiptapEditor
+          value={value}
+          onChange={(answer) => setValue(answer)}
+          className='w-full'
+          editorContentClassName='minimal-tiptap-editor'
+          output='html'
+          placeholder='Type your description here...'
+          autofocus={true}
+          editable={true}
+          editorClassName='focus:outline-none'
+        />
+      </TooltipProvider>
 
       <section className='mb-16'>
         <h3 className='text-2xl font-semibold text-gray-800 mb-6'>Available Courses</h3>
