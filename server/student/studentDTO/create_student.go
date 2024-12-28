@@ -6,6 +6,7 @@ import (
 )
 
 type CreateStudent struct {
+	ID                   *string   `json:"id,omitempty"` // ID is optional -> i.e. used for updating applications
 	FirstName            string    `json:"first_name"`
 	LastName             string    `json:"last_name"`
 	Email                string    `json:"email"`

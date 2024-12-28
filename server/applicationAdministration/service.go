@@ -175,3 +175,7 @@ func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID)
 
 	return openApplicationDTO, nil
 }
+
+func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+	return nil
+}

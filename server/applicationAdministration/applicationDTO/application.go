@@ -5,7 +5,6 @@ import (
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 )
 
-// TODO: Course phase id should be in the URI
 type Application struct {
 	Student            studentDTO.Student  `json:"student"` // should be able to handle either a new student or an existing dependent on ID
 	AnswersText        []AnswerText        `json:"answers_text"`

@@ -24,7 +24,10 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	apply := router.Group("/apply")
 	apply.GET("", getAllOpenApplications)
 	apply.GET("/:coursePhaseID", getApplicationFormWithCourseDetails)
-	// apply.POST("/:coursePhaseID", postApplication)
+	apply.POST("/:coursePhaseID", postApplicationExtern)
+
+	applyAuthenticated := router.Group("/apply/authenticated", authMiddleware())
+	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
 }
 
 func getApplicationForm(c *gin.Context) {
@@ -107,6 +110,40 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, applicationForm)
+}
+
+func postApplicationExtern(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var application applicationDTO.PostApplication
+	if err := c.BindJSON(&application); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateApplication(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = PostApplicationExtern(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+}
+
+func postApplicationAuthenticated(c *gin.Context) {
+	// TODO: extra check that student credentials did not change and match the token!
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
