@@ -3,7 +3,13 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseParticipations } from '../../network/queries/getCoursePhaseParticipations'
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import {
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table'
 
 import {
   Table,
@@ -14,9 +20,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
+import { useState } from 'react'
 
 export const ApplicationTable = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const {
     data: fetchedParticipations,
     isPending: isParticipationsPending,
@@ -31,10 +40,21 @@ export const ApplicationTable = (): JSX.Element => {
     data: fetchedParticipations ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
   })
 
   if (isParticipationsPending) {
+    // TODO make this nicer
     return <div>Loading...</div>
+  }
+
+  if (isParticipantsError) {
+    // TODO make this nicer
+    return <div>An error occurred: {participantsError.message}</div>
   }
 
   return (
