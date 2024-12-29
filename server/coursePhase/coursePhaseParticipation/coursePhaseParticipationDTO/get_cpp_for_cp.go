@@ -9,10 +9,10 @@ import (
 )
 
 type GetAllCPPsForCoursePhase struct {
-	ID       uuid.UUID          `json:"id"`
-	Passed   bool               `json:"passed"`
-	MetaData meta.MetaData      `json:"meta_data"`
-	Student  studentDTO.Student `json:"student"`
+	ID         uuid.UUID          `json:"id"`
+	PassStatus string             `json:"passed_status"`
+	MetaData   meta.MetaData      `json:"meta_data"`
+	Student    studentDTO.Student `json:"student"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipationsForCoursePhaseRow) (GetAllCPPsForCoursePhase, error) {
@@ -23,9 +23,9 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 	}
 
 	return GetAllCPPsForCoursePhase{
-		ID:       model.CoursePhaseParticipationID,
-		Passed:   model.Passed.Bool,
-		MetaData: metaData,
+		ID:         model.CoursePhaseParticipationID,
+		PassStatus: getPassStatusString(model.PassStatus),
+		MetaData:   metaData,
 		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{
 			ID:                   model.StudentID,
 			FirstName:            model.FirstName,

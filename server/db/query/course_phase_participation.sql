@@ -5,7 +5,7 @@ WHERE id = $1 LIMIT 1;
 -- name: GetAllCoursePhaseParticipationsForCoursePhase :many
 SELECT
     cpp.id AS course_phase_participation_id,
-    cpp.passed,
+    cpp.pass_status,
     cpp.meta_data,
     s.id AS student_id,
     s.first_name,
@@ -29,17 +29,16 @@ SELECT * FROM course_phase_participation
 WHERE course_participation_id = $1;
 
 -- name: CreateCoursePhaseParticipation :one
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, passed, meta_data)
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, pass_status, meta_data)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
--- name: UpdateCoursePhaseParticipation :one
+-- name: UpdateCoursePhaseParticipation :exec
 UPDATE course_phase_participation
 SET 
-    passed = COALESCE($2, passed),
+    pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
-WHERE id = $1
-RETURNING *;
+WHERE id = $1;
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 SELECT * FROM course_phase_participation

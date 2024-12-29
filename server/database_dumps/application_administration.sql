@@ -68,11 +68,13 @@ CREATE TABLE course_participation (
     student_id uuid NOT NULL
 );
 
+CREATE TYPE pass_status AS ENUM ('passed', 'failed', 'not_assessed');
+
 CREATE TABLE course_phase_participation (
     id uuid NOT NULL,
     course_participation_id uuid NOT NULL,
     course_phase_id uuid NOT NULL,
-    passed boolean,
+    pass_status pass_status,
     meta_data jsonb
 );
 
