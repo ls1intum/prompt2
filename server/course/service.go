@@ -46,7 +46,6 @@ func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
-	// TODO: replace with query to get the course incl phases
 	course, err := CourseServiceSingleton.queries.GetCourse(ctxWithTimeout, id)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err

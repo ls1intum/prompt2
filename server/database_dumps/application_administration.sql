@@ -24,6 +24,85 @@ SET default_table_access_method = heap;
 -- Name: course_phase_type; Type: TABLE; Schema: public; Owner: prompt-postgres
 --
 
+CREATE type gender as enum ('male', 'female', 'diverse', 'prefer_not_to_say');
+
+
+CREATE TABLE student (
+    id uuid NOT NULL,
+    first_name character varying(50),
+    last_name character varying(50),
+    email character varying(255),
+    matriculation_number character varying(30),
+    university_login character varying(20),
+    has_university_account boolean,
+    gender gender NOT NULL
+);
+
+
+--
+-- Data for Name: student; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
+VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'John', 'Doe', 'existingstudent@example.com', '03711126', 'ge25hok', true, 'male');
+
+
+
+create type course_type as enum ('lecture', 'seminar', 'practical course');
+
+
+CREATE TABLE course (
+    id uuid NOT NULL,
+    name text NOT NULL,
+    start_date date,
+    end_date date,
+    semester_tag text,
+    course_type course_type NOT NULL,
+    ects integer,
+    meta_data jsonb
+);
+
+CREATE TABLE course_participation (
+    id uuid NOT NULL,
+    course_id uuid NOT NULL,
+    student_id uuid NOT NULL
+);
+
+CREATE TABLE course_phase_participation (
+    id uuid NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    passed boolean,
+    meta_data jsonb
+);
+
+CREATE TABLE application_answer_multi_select (
+    id uuid NOT NULL,
+    application_question_id uuid NOT NULL,
+    course_phase_participation_id uuid NOT NULL,
+    answer text[]
+);
+
+--
+-- Name: application_answer_text; Type: TABLE; Schema: public; Owner: prompt-postgres
+--
+
+CREATE TABLE application_answer_text (
+    id uuid NOT NULL,
+    application_question_id uuid NOT NULL,
+    course_phase_participation_id uuid NOT NULL,
+    answer text
+);
+
+
+--
+-- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('be780b32-a678-4b79-ae1c-80071771d254', 'iPraktikum', '2024-10-01', '2025-01-01', 'ios24245', 'practical course', 10, '{"icon": "apple", "bg-color": "bg-orange-100"}');
+
+
+
 CREATE TABLE course_phase_type (
     id uuid NOT NULL,
     name text NOT NULL,
@@ -70,7 +149,7 @@ CREATE TABLE course_phase (
 -- Data for Name: course_phase; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'be780b32-a678-4b79-ae1c-80071771d254', 'Dev Application', '{"applicationEndDate": "2025-01-18T00:00:00.000Z", "applicationStartDate": "2024-12-24T00:00:00.000Z", "externalStudentsAllowed": false}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
+INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'be780b32-a678-4b79-ae1c-80071771d254', 'Dev Application', '{"applicationEndDate": "2030-01-18T00:00:00.000Z", "applicationStartDate": "2024-12-24T00:00:00.000Z", "externalStudentsAllowed": false}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
 INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('7062236a-e290-487c-be41-29b24e0afc64', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382');
 INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d3', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030');
 
@@ -178,3 +257,13 @@ ALTER TABLE ONLY application_question_text
 -- PostgreSQL database dump complete
 --
 
+ALTER TABLE ONLY application_answer_multi_select
+    ADD CONSTRAINT unique_application_answer_multi_select UNIQUE (course_phase_participation_id, application_question_id);
+
+
+--
+-- Name: application_answer_text unique_application_answer_text; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY application_answer_text
+    ADD CONSTRAINT unique_application_answer_text UNIQUE (course_phase_participation_id, application_question_id);

@@ -26,8 +26,6 @@ func GetCourseByIDFromDBModel(course db.Course) (CourseWithPhases, error) {
 		return CourseWithPhases{}, err
 	}
 
-	// todo also pass the course phases here
-
 	return CourseWithPhases{
 		ID:           course.ID,
 		Name:         course.Name,

@@ -104,8 +104,6 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		}
 	}
 
-	// 4. TODO:  Validate the correct order of the questions
-
 	return nil
 }
 
@@ -182,8 +180,6 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 		return errors.New("course phase is not an application phase")
 	}
 
-	// TODO: check if application phase is open!!!
-
 	// 1. Check that the student is valid
 	err = student.Validate(application.Student)
 	if err != nil {
@@ -223,11 +219,25 @@ func validateTextAnswers(textQuestions []db.ApplicationQuestionText, textAnswers
 
 	for _, question := range textQuestions {
 		answer, exists := answerMap[question.ID]
-		if question.IsRequired.Bool && !exists {
+		if question.IsRequired.Bool && (!exists || len(answer) == 0) {
 			return fmt.Errorf("required question %s is not answered", question.ID)
+		}
+		if question.ValidationRegex.String != "" && exists && !regexp.MustCompile(question.ValidationRegex.String).MatchString(answer) {
+			return fmt.Errorf("answer to question %s does not match validation regex", question.ID)
 		}
 		if exists && len(answer) > int(question.AllowedLength.Int32) {
 			return fmt.Errorf("answer to question %s exceeds allowed length of %d", question.ID, question.AllowedLength.Int32)
+		}
+	}
+
+	questionMap := make(map[uuid.UUID]db.ApplicationQuestionText, len(textQuestions))
+	for _, question := range textQuestions {
+		questionMap[question.ID] = question
+	}
+	for _, answer := range textAnswers {
+		_, exists := questionMap[answer.ApplicationQuestionID]
+		if !exists {
+			return fmt.Errorf("answer to question %s does not belong to this course", answer.ApplicationQuestionID)
 		}
 	}
 	return nil
@@ -258,6 +268,16 @@ func validateMultiSelectAnswers(multiSelectQuestions []db.ApplicationQuestionMul
 		}
 	}
 
+	questionMap := make(map[uuid.UUID]db.ApplicationQuestionMultiSelect, len(multiSelectQuestions))
+	for _, question := range multiSelectQuestions {
+		questionMap[question.ID] = question
+	}
+	for _, answer := range multiSelectAnswers {
+		_, exists := questionMap[answer.ApplicationQuestionID]
+		if !exists {
+			return fmt.Errorf("answer to question %s does not belong to this course", answer.ApplicationQuestionID)
+		}
+	}
 	return nil
 }
 
