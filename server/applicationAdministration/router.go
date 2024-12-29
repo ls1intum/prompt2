@@ -116,7 +116,6 @@ func getApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 	userEmail := c.GetString("userEmail")
-	log.Info("User email: ", userEmail)
 
 	if userEmail == "" {
 		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))

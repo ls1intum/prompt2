@@ -36,7 +36,6 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     queryFn: () => getApplicationFormWithDetails(phaseId ?? ''),
   })
 
-  // TODO: mutate function with authenticated Instance!!
   const {
     data: application,
     isPending: isApplicationPending,
@@ -108,7 +107,6 @@ export const ApplicationAuthenticated = (): JSX.Element => {
 
   const { application_phase } = applicationForm
 
-  // TODO -> try to get student with email from server. Else use the user from the auth store
   let student: Student = {
     first_name: user?.firstName ?? '',
     last_name: user?.lastName ?? '',

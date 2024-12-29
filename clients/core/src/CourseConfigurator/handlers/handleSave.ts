@@ -88,7 +88,6 @@ export async function handleSave({
     from_course_phase_id: edge.source,
     to_course_phase_id: edge.target,
   }))
-  console.log(coursePhases.find((phase) => phase.is_initial_phase))
   const initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
 
   const graphUpdate: CoursePhaseGraphUpdate = {

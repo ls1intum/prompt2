@@ -15,7 +15,6 @@ type CreateCourse struct {
 	MetaData    meta.MetaData `json:"meta_data"`
 	CourseType  db.CourseType `json:"course_type"`
 	Ects        pgtype.Int4   `json:"ects"`
-	//TODO: CoursePhases []coursePhaseDTO.CoursePhase `json:"course_phases"`
 }
 
 func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {

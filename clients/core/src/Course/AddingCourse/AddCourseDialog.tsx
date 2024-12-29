@@ -70,7 +70,6 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       meta_data: { icon: data.icon, 'bg-color': data.color },
     }
 
-    console.log(course)
     // todo API call
     mutate(course)
 

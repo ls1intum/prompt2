@@ -88,10 +88,6 @@ export const ApplicationQuestionCard = forwardRef<
     },
   }))
 
-  useEffect(() => {
-    console.log(form.formState.errors)
-  }, [form.formState.errors])
-
   const isCheckboxQuestion =
     isMultiSelectType && checkCheckBoxQuestion(question as ApplicationQuestionMultiSelect)
   const isActualMultiSelect = isMultiSelectType && !isCheckboxQuestion

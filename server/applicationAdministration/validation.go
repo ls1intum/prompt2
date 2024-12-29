@@ -104,8 +104,6 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		}
 	}
 
-	// 4. TODO:  Validate the correct order of the questions
-
 	return nil
 }
 
@@ -181,8 +179,6 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 	if !isApplicationPhase {
 		return errors.New("course phase is not an application phase")
 	}
-
-	// TODO: check if application phase is open!!!
 
 	// 1. Check that the student is valid
 	err = student.Validate(application.Student)
