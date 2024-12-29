@@ -10,7 +10,7 @@ import (
 
 type GetAllCPPsForCoursePhase struct {
 	ID         uuid.UUID          `json:"id"`
-	PassStatus string             `json:"passed_status"`
+	PassStatus string             `json:"pass_status"`
 	MetaData   meta.MetaData      `json:"meta_data"`
 	Student    studentDTO.Student `json:"student"`
 }

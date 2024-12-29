@@ -14,4 +14,8 @@ export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
     accessorKey: 'student.email',
     header: 'Email',
   },
+  {
+    accessorKey: 'pass_status',
+    header: 'Status',
+  },
 ]
