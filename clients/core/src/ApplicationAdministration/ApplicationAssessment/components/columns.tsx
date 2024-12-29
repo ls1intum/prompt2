@@ -22,14 +22,33 @@ const SortableHeader = ({ column, title }: { column: any; title: string }) => {
 
 export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
   {
+    id: 'First Name', // required for filter bar
     accessorKey: 'student.first_name',
     header: ({ column }) => <SortableHeader column={column} title='First Name' />,
+    filterFn: (row, columnId, filterValue) => {
+      const { condition, value } = filterValue
+      const cellValue = row.original.student.first_name
+      switch (condition) {
+        case 'equals':
+          return cellValue === value
+        case 'contains':
+          return cellValue.toLowerCase().includes(value.toLowerCase())
+        case 'startsWith':
+          return cellValue.toLowerCase().startsWith(value.toLowerCase())
+        case 'endsWith':
+          return cellValue.toLowerCase().endsWith(value.toLowerCase())
+        default:
+          return true
+      }
+    },
   },
   {
+    id: 'Last Name',
     accessorKey: 'student.last_name',
     header: ({ column }) => <SortableHeader column={column} title='Last Name' />,
   },
   {
+    id: 'Status',
     accessorKey: 'pass_status',
     header: ({ column }) => <SortableHeader column={column} title='Status' />,
     cell: ({ row }) => {
@@ -53,14 +72,17 @@ export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
     },
   },
   {
+    id: 'Email',
     accessorKey: 'student.email',
     header: ({ column }) => <SortableHeader column={column} title='Email' />,
   },
   {
+    id: 'Matriculation Number',
     accessorKey: 'student.matriculation_number',
     header: ({ column }) => <SortableHeader column={column} title='Matriculation Number' />,
   },
   {
+    id: `${translations.university['login-name']}`,
     accessorKey: 'student.university_login',
     header: ({ column }) => (
       <SortableHeader column={column} title={translations.university['login-name']} />
