@@ -1,10 +1,9 @@
 // Default values that shall be reused in every component
 
-const { Sidebar } = require('lucide-react')
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
+  safelist: ['dark', 'ProseMirror'],
   theme: {
     extend: {
       colors: {
@@ -59,5 +58,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 }
