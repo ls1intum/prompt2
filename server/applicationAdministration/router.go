@@ -11,8 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TBD: I will postpone this till I write the client side.
-// currently it is too much guess work which endpoints I will need.
 func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	application := router.Group("/applications", authMiddleware())
 
@@ -32,7 +30,6 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 }
 
 func getApplicationForm(c *gin.Context) {
-	// TODO
 	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -63,7 +60,6 @@ func updateApplicationForm(c *gin.Context) {
 		return
 	}
 
-	// TODO Validation of application form
 	err = validateUpdateForm(c, coursePhaseId, updatedApplicationForm)
 	if err != nil {
 		log.Error(err)
@@ -114,13 +110,13 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 }
 
 func getApplicationAuthenticated(c *gin.Context) {
-	// TODO
 	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 	userEmail := c.GetString("userEmail")
+	log.Info("User email: ", userEmail)
 
 	if userEmail == "" {
 		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
@@ -177,7 +173,6 @@ func postApplicationExtern(c *gin.Context) {
 }
 
 func postApplicationAuthenticated(c *gin.Context) {
-	// TODO: extra check that student credentials did not change and match the token!
 	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -214,6 +209,8 @@ func postApplicationAuthenticated(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
 		return
 	}
+
+	// TODO: send mail confirmation to student!
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 

@@ -271,6 +271,108 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateMultiSelectAnswers
 	assert.Contains(suite.T(), err.Error(), "does not meet selection requirements")
 }
 
+func TestValidateTextAnswers_InvalidQuestionID(t *testing.T) {
+	textQuestions := []db.ApplicationQuestionText{
+		{
+			ID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"),
+			ValidationRegex: pgtype.Text{
+				String: `^[a-zA-Z\s]+$`,
+				Valid:  true,
+			},
+			AllowedLength: pgtype.Int4{
+				Int32: 100,
+				Valid: true,
+			},
+			IsRequired: pgtype.Bool{
+				Bool:  true,
+				Valid: true,
+			},
+		},
+	}
+
+	textAnswers := []applicationDTO.CreateAnswerText{
+		{
+			ApplicationQuestionID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"),
+			Answer:                "This is a valid answer",
+		},
+		{
+			ApplicationQuestionID: uuid.MustParse("d1e74f8b-9f7f-4b87-94a5-1234567890ab"), // Invalid ID
+			Answer:                "This is a invalid answer",
+		},
+	}
+
+	err := validateTextAnswers(textQuestions, textAnswers)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "answer to question d1e74f8b-9f7f-4b87-94a5-1234567890ab does not belong to this course")
+}
+
+func TestValidateTextAnswers_RegexMismatch(t *testing.T) {
+	textQuestions := []db.ApplicationQuestionText{
+		{
+			ID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"),
+			ValidationRegex: pgtype.Text{
+				String: `^[a-zA-Z\s]+$`,
+				Valid:  true,
+			},
+			AllowedLength: pgtype.Int4{
+				Int32: 100,
+				Valid: true,
+			},
+			IsRequired: pgtype.Bool{
+				Bool:  true,
+				Valid: true,
+			},
+		},
+	}
+
+	textAnswers := []applicationDTO.CreateAnswerText{
+		{
+			ApplicationQuestionID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"), // Valid ID
+			Answer:                "123InvalidRegexAnswer!",                               // Regex mismatch
+		},
+	}
+
+	err := validateTextAnswers(textQuestions, textAnswers)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "answer to question 4179d58a-d00d-4fa7-94a5-397bc69fab02 does not match validation regex")
+}
+
+func TestValidateMultiSelectAnswers_InvalidQuestionID(t *testing.T) {
+	multiSelectQuestions := []db.ApplicationQuestionMultiSelect{
+		{
+			ID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"),
+			MinSelect: pgtype.Int4{
+				Int32: 1,
+				Valid: true,
+			},
+			MaxSelect: pgtype.Int4{
+				Int32: 3,
+				Valid: true,
+			},
+			Options: []string{"Option1", "Option2", "Option3"},
+			IsRequired: pgtype.Bool{
+				Bool:  true,
+				Valid: true,
+			},
+		},
+	}
+
+	multiSelectAnswers := []applicationDTO.CreateAnswerMultiSelect{
+		{
+			ApplicationQuestionID: uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02"),
+			Answer:                []string{"Option1", "Option2"},
+		},
+		{
+			ApplicationQuestionID: uuid.MustParse("d1e74f8b-9f7f-4b87-94a5-1234567890ab"), // Invalid ID
+			Answer:                []string{"Option1", "Option2"},
+		},
+	}
+
+	err := validateMultiSelectAnswers(multiSelectQuestions, multiSelectAnswers)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "answer to question d1e74f8b-9f7f-4b87-94a5-1234567890ab does not belong to this course")
+}
+
 func TestValidateUpdateFormSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationAdminValidationTestSuite))
 }
