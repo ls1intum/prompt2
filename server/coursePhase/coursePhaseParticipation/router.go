@@ -6,14 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/sirupsen/logrus"
 )
 
-func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup) {
-	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations")
-	courseParticipation.GET("", getParticipationsForCoursePhase)
-	courseParticipation.POST("", createCoursePhaseParticipation)
-	courseParticipation.PUT("/:participation_uuid", updateCoursePhaseParticipation)
+func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
+	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipationsForCoursePhase)
+	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), createCoursePhaseParticipation)
+	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), updateCoursePhaseParticipation)
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {

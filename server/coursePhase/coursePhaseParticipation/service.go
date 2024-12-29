@@ -18,15 +18,15 @@ type CoursePhaseParticipationService struct {
 
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
 
-func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
+func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, error) {
 	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
 
-	participationDTOs := make([]coursePhaseParticipationDTO.GetCoursePhaseParticipation, 0, len(coursePhaseParticipations))
+	participationDTOs := make([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, 0, len(coursePhaseParticipations))
 	for _, coursePhaseParticipation := range coursePhaseParticipations {
-		dto, err := coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(coursePhaseParticipation)
+		dto, err := coursePhaseParticipationDTO.GetAllCPPsForCoursePhaseDTOFromDBModel(coursePhaseParticipation)
 		if err != nil {
 			return nil, err
 		}

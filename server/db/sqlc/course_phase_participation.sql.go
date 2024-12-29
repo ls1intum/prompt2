@@ -77,25 +77,63 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 }
 
 const getAllCoursePhaseParticipationsForCoursePhase = `-- name: GetAllCoursePhaseParticipationsForCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
-WHERE course_phase_id = $1
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.passed,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+WHERE
+    cpp.course_phase_id = $1
 `
 
-func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]CoursePhaseParticipation, error) {
+type GetAllCoursePhaseParticipationsForCoursePhaseRow struct {
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	Passed                     pgtype.Bool `json:"passed"`
+	MetaData                   []byte      `json:"meta_data"`
+	StudentID                  uuid.UUID   `json:"student_id"`
+	FirstName                  pgtype.Text `json:"first_name"`
+	LastName                   pgtype.Text `json:"last_name"`
+	Email                      pgtype.Text `json:"email"`
+	MatriculationNumber        pgtype.Text `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool `json:"has_university_account"`
+	Gender                     Gender      `json:"gender"`
+}
+
+func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseRow, error) {
 	rows, err := q.db.Query(ctx, getAllCoursePhaseParticipationsForCoursePhase, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhaseParticipation
+	var items []GetAllCoursePhaseParticipationsForCoursePhaseRow
 	for rows.Next() {
-		var i CoursePhaseParticipation
+		var i GetAllCoursePhaseParticipationsForCoursePhaseRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
+			&i.CoursePhaseParticipationID,
 			&i.Passed,
 			&i.MetaData,
+			&i.StudentID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
 		); err != nil {
 			return nil, err
 		}

@@ -48,6 +48,49 @@ VALUES
 
 
 
+CREATE TABLE course_participation (
+    id uuid NOT NULL,
+    course_id uuid NOT NULL,
+    student_id uuid NOT NULL
+);
+
+
+--
+-- Data for Name: course_participation; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('6e19bab2-53d0-4b6a-ac02-33b23988401a', '3f42d322-e5bf-4faa-b576-51f2cab14c2e', '3a774200-39a7-4656-bafb-92b7210a93c1');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('8713d7bc-1542-4366-88a9-1fa50945b052', '3f42d322-e5bf-4faa-b576-51f2cab14c2e', '7dc1c4e8-4255-4874-80a0-0c12b958744b');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('0e762fdd-c4fa-49f4-9c38-c90160cc6caa', '3f42d322-e5bf-4faa-b576-51f2cab14c2e', '500db7ed-2eb2-42d0-82b3-8750e12afa8b');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('65dcc535-a9ab-4421-a2bc-0f09780ca59e', '918977e1-2d27-4b55-9064-8504ff027a1a', '500db7ed-2eb2-42d0-82b3-8750e12afa8b');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('ec679792-f9e1-423c-80fa-a9f3324fefa8', '918977e1-2d27-4b55-9064-8504ff027a1a', '7dc1c4e8-4255-4874-80a0-0c12b958744b');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('9f061396-e208-4b00-bc8c-f3a04bc0a212', '918977e1-2d27-4b55-9064-8504ff027a1a', '7dc1c4e8-4255-4874-80a0-0c12b958744a');
+
+
+CREATE type gender as enum ('male', 'female', 'diverse', 'prefer_not_to_say');
+
+CREATE TABLE student (
+    id uuid NOT NULL,
+    first_name character varying(50),
+    last_name character varying(50),
+    email character varying(255),
+    matriculation_number character varying(30),
+    university_login character varying(20),
+    has_university_account boolean,
+    gender gender NOT NULL
+);
+
+
+--
+-- Data for Name: student; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
+VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'Niclas', 'Heun', 'niclas.heun@tum.de', '03711126', 'ge25hok', true, 'male');
+
+
+--
+
 -- PostgreSQL database dump complete
 --
 
