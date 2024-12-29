@@ -61,16 +61,18 @@ export function MultiSelectConfig({
           </FormControl>
           {/* Array-Level Error Message */}
           {form.formState.errors.options &&
-            typeof form.formState.errors.options.message === 'string' && (
+            Array.isArray(form.formState.errors.options) &&
+            form.formState.errors.options.length > 0 &&
+            form.formState.errors.options[0]?.message && (
               <FormMessage className='text-red-500'>
-                {form.formState.errors.options.message}
+                {form.formState.errors.options[0].message}
               </FormMessage>
             )}
           {form.formState.errors.options &&
-            Array.isArray(form.formState.errors.options) &&
-            form.formState.errors.options.length > 0 && (
+            typeof form.formState.errors.options === 'object' &&
+            typeof form.formState.errors.options.message === 'string' && (
               <FormMessage className='text-red-500'>
-                {form.formState.errors.options[0].message}
+                {form.formState.errors.options.message}
               </FormMessage>
             )}
         </FormItem>
