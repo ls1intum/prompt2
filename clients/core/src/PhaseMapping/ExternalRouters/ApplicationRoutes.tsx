@@ -3,6 +3,7 @@ import { Role } from '@/interfaces/permission_roles'
 import { Application } from '../../ApplicationAdministration/Application'
 import { ApplicationConfiguration } from '../../ApplicationAdministration/ApplicationConfiguration/ApplicationConfiguration'
 import { ExternalRoutes } from './ExternalRoutes'
+import { ApplicationTable } from '../../ApplicationAdministration/ApplicationAssessment/ApplicationTable'
 
 const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
@@ -13,6 +14,11 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
     path: '/configuration',
     element: <ApplicationConfiguration />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/applications',
+    element: <ApplicationTable />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]
