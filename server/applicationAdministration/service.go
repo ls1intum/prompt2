@@ -212,7 +212,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		exists, err := ApplicationServiceSingleton.queries.GetApplicationExistsForStudent(ctx, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application")
+			return errors.New("could not get existing student")
 		}
 		if exists {
 			return ErrAlreadyApplied
@@ -222,7 +222,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		studentObj, err = student.CreateStudent(ctx, application.Student)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application")
+			return errors.New("could not save student")
 		}
 	}
 
@@ -230,19 +230,19 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could save the application")
+		return errors.New("could not find the application")
 	}
 
 	cParticipation, err := courseParticipation.CreateCourseParticipation(ctx, courseParticipationDTO.CreateCourseParticipation{StudentID: studentObj.ID, CourseID: courseID})
 	if err != nil {
 		log.Error(err)
-		return errors.New("could save the application")
+		return errors.New("could not create course participation")
 	}
 
 	cPhaseParticipation, err := coursePhaseParticipation.CreateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
 	if err != nil {
 		log.Error(err)
-		return errors.New("could save the application")
+		return errors.New("could not create course phase participation")
 	}
 
 	// 3. Save answers
@@ -253,7 +253,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerText(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application")
+			return errors.New("could save the application answers")
 		}
 	}
 
@@ -264,7 +264,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application")
+			return errors.New("could save the application answers")
 		}
 	}
 
@@ -291,26 +291,26 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 	}
 	if err != nil {
 		log.Error(err)
-		return applicationDTO.Application{}, errors.New("could not get application")
+		return applicationDTO.Application{}, errors.New("could not get the student")
 	}
 
 	exists, err := ApplicationServiceSingleton.queries.GetApplicationExistsForStudent(ctxWithTimeout, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
 	if err != nil {
 		log.Error(err)
-		return applicationDTO.Application{}, errors.New("could not get application")
+		return applicationDTO.Application{}, errors.New("could not get application details")
 	}
 
 	if exists {
 		answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForStudent(ctxWithTimeout, db.GetApplicationAnswersTextForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
 		if err != nil {
 			log.Error(err)
-			return applicationDTO.Application{}, errors.New("could not get application")
+			return applicationDTO.Application{}, errors.New("could not get application answers")
 		}
 
 		answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForStudent(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
 		if err != nil {
 			log.Error(err)
-			return applicationDTO.Application{}, errors.New("could not get application")
+			return applicationDTO.Application{}, errors.New("could not get application answers")
 		}
 		return applicationDTO.Application{
 			Status:             applicationDTO.StatusApplied,
@@ -341,26 +341,26 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	studentObj, err := student.CreateOrUpdateStudent(ctx, application.Student)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the application")
+		return errors.New("could not save the student")
 	}
 
 	// 2. Possibly Create Course and Course Phase Participation
 	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the application")
+		return errors.New("could not get the application phase")
 	}
 
 	cParticipation, err := courseParticipation.CreateIfNotExistingCourseParticipation(ctx, studentObj.ID, courseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the application")
+		return errors.New("could not save the course participation")
 	}
 
 	cPhaseParticipation, err := coursePhaseParticipation.CreateIfNotExistingPhaseParticipation(ctx, cParticipation.ID, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the application")
+		return errors.New("could not save the course phase participation")
 	}
 
 	// 3. Save answers
@@ -371,7 +371,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not save the application")
+			return errors.New("could not save the application answers")
 		}
 
 	}
@@ -383,7 +383,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not save the application")
+			return errors.New("could not save the application answers")
 		}
 
 	}

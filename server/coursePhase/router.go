@@ -52,7 +52,6 @@ func getCoursePhaseByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, coursePhase)
 }
 
-// TODO: maybe at some point required to have a return value
 func updateCoursePhase(c *gin.Context) {
 	var updatedCoursePhase coursePhaseDTO.UpdateCoursePhase
 	if err := c.BindJSON(&updatedCoursePhase); err != nil {

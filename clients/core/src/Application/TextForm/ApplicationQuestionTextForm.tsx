@@ -39,7 +39,6 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
   // Expose validation method
   useImperativeHandle(ref, () => ({
     async validate() {
-      console.log('Validating question', question.title)
       const isValid = await form.trigger()
       return isValid
     },

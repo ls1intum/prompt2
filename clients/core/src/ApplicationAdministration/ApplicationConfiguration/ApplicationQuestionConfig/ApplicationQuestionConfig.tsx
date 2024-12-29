@@ -75,7 +75,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
 
   useEffect(() => {
     if (fetchedForm) {
-      console.log(fetchedForm)
       setQuestionsFromForm(fetchedForm)
     }
   }, [fetchedForm])

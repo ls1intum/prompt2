@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TODO: add requester to newly created groups
 func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName string) error {
 	token, err := LoginClient(ctx)
 	if err != nil {
@@ -24,8 +23,6 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 	}
 
 	for _, roleName := range subGroupNames {
-		// TODO: Welche rollen sollten wir hier anlegen?
-		// Lecturer, Editor, Student oder "courses:create", "courseName-semsterTag:view"??
 		role, err := CreateRealmRole(ctx, token.AccessToken, roleName)
 		if err != nil {
 			return err

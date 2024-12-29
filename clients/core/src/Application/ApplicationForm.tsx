@@ -87,7 +87,6 @@ export const ApplicationForm = ({
     }
 
     if (!allValid) {
-      console.log('Not all questions are valid')
       return
     }
     // call onSubmit
