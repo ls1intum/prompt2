@@ -88,7 +88,15 @@ export async function handleSave({
     from_course_phase_id: edge.source,
     to_course_phase_id: edge.target,
   }))
-  const initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
+
+  let initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
+  if (initialPhase.startsWith('no-valid-id')) {
+    if (idReplacementMap[initialPhase]) {
+      initialPhase = idReplacementMap[initialPhase]
+    } else {
+      console.error('Initial phase has invalid ID')
+    }
+  }
 
   const graphUpdate: CoursePhaseGraphUpdate = {
     initial_phase: initialPhase,
