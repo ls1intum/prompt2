@@ -61,6 +61,13 @@ func CreateCoursePhaseParticipation(ctx context.Context, newCoursePhaseParticipa
 
 	participation.ID = uuid.New()
 
+	if !participation.PassStatus.Valid {
+		participation.PassStatus = db.NullPassStatus{
+			Valid:      true,
+			PassStatus: "not_assessed",
+		}
+	}
+
 	createdParticipation, err := CoursePhaseParticipationServiceSingleton.queries.CreateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
 		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
