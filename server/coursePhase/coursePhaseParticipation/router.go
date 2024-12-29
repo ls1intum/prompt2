@@ -77,12 +77,12 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 
 	updatedCourseParticipation.ID = id
 
-	courseParticipation, err := UpdateCoursePhaseParticipation(c, updatedCourseParticipation)
+	err = UpdateCoursePhaseParticipation(c, updatedCourseParticipation)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.IndentedJSON(http.StatusOK, courseParticipation)
+	c.JSON(http.StatusOK, gin.H{"message": "updated course phase participation"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

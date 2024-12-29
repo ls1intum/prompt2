@@ -15,16 +15,12 @@ INSERT INTO course_phase_participation (id, course_participation_id, course_phas
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
--- name: UpdateCoursePhaseParticipation :one
+-- name: UpdateCoursePhaseParticipation :exec
 UPDATE course_phase_participation
 SET 
-    pass_status = CASE
-                    WHEN $2 IS NOT NULL THEN $2::pass_status
-                    ELSE pass_status
-                 END,
+    pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
-WHERE id = $1
-RETURNING *;
+WHERE id = $1;
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 SELECT * FROM course_phase_participation

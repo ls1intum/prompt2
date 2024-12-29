@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	log "github.com/sirupsen/logrus"
 )
 
 type CoursePhaseParticipationService struct {
@@ -36,6 +37,22 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 	return participationDTOs, nil
 }
 
+func GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
+	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipation(ctx, id)
+	if err != nil {
+		log.Error(err)
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to get course phase participation")
+	}
+
+	participationDTO, err := coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(coursePhaseParticipation)
+	if err != nil {
+		log.Error(err)
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create DTO from DB model")
+	}
+
+	return participationDTO, nil
+}
+
 func CreateCoursePhaseParticipation(ctx context.Context, newCoursePhaseParticipation coursePhaseParticipationDTO.CreateCoursePhaseParticipation) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
 	participation, err := newCoursePhaseParticipation.GetDBModel()
 	if err != nil {
@@ -52,18 +69,20 @@ func CreateCoursePhaseParticipation(ctx context.Context, newCoursePhaseParticipa
 	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(createdParticipation)
 }
 
-func UpdateCoursePhaseParticipation(ctx context.Context, updatedCoursePhaseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) (coursePhaseParticipationDTO.UpdateCoursePhaseParticipation, error) {
+func UpdateCoursePhaseParticipation(ctx context.Context, updatedCoursePhaseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) error {
 	participation, err := updatedCoursePhaseParticipation.GetDBModel()
 	if err != nil {
-		return coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{}, err
+		log.Error(err)
+		return errors.New("failed to create DB model from DTO")
 	}
 
-	updatedParticipation, err := CoursePhaseParticipationServiceSingleton.queries.UpdateCoursePhaseParticipation(ctx, participation)
+	err = CoursePhaseParticipationServiceSingleton.queries.UpdateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
-		return coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{}, err
+		log.Error(err)
+		return errors.New("failed to update course phase participation")
 	}
 
-	return coursePhaseParticipationDTO.UpdateCoursePhaseParticipationDTOFromDBModel(updatedParticipation)
+	return nil
 }
 
 func CreateIfNotExistingPhaseParticipation(ctx context.Context, CourseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
