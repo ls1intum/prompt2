@@ -2,11 +2,11 @@ import { Gender } from './gender'
 
 export interface Student {
   id?: string
-  firstName: string
-  lastName: string
+  first_name: string
+  last_name: string
   email: string
-  matriculationNumber: string
-  universityLogin: string
-  hasUniversityAccount: boolean
-  gender: Gender
+  matriculation_number?: string
+  university_login?: string
+  has_university_account: boolean
+  gender?: Gender
 }

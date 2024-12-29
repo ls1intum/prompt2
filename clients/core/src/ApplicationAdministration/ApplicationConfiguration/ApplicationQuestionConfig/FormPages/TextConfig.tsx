@@ -50,7 +50,9 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
               />
             </FormControl>
             <FormDescription>
-              The allowed number of chars to be entered. Recommended default is 500 chars.
+              The allowed number of chars to be entered. Recommended default is 500 chars. For {'<'}
+              100 chars, the input will be a single line. For {'>'}100 chars, the input will be a
+              textarea.
             </FormDescription>
             <FormMessage />
           </FormItem>

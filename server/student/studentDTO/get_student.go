@@ -39,5 +39,6 @@ func (s Student) GetDBModel() db.Student {
 		MatriculationNumber:  pgtype.Text{String: s.MatriculationNumber, Valid: true},
 		UniversityLogin:      pgtype.Text{String: s.UniversityLogin, Valid: true},
 		HasUniversityAccount: pgtype.Bool{Bool: s.HasUniversityAccount, Valid: true},
+		Gender:               s.Gender,
 	}
 }

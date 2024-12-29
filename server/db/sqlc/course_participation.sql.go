@@ -91,3 +91,20 @@ func (q *Queries) GetCourseParticipation(ctx context.Context, id uuid.UUID) (Cou
 	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
 	return i, err
 }
+
+const getCourseParticipationByStudentAndCourseID = `-- name: GetCourseParticipationByStudentAndCourseID :one
+SELECT id, course_id, student_id FROM course_participation
+WHERE student_id = $1 AND course_id = $2 LIMIT 1
+`
+
+type GetCourseParticipationByStudentAndCourseIDParams struct {
+	StudentID uuid.UUID `json:"student_id"`
+	CourseID  uuid.UUID `json:"course_id"`
+}
+
+func (q *Queries) GetCourseParticipationByStudentAndCourseID(ctx context.Context, arg GetCourseParticipationByStudentAndCourseIDParams) (CourseParticipation, error) {
+	row := q.db.QueryRow(ctx, getCourseParticipationByStudentAndCourseID, arg.StudentID, arg.CourseID)
+	var i CourseParticipation
+	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
+	return i, err
+}

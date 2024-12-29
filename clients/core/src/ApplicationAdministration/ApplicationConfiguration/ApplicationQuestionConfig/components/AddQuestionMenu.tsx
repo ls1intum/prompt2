@@ -49,6 +49,21 @@ export const AddQuestionMenu = ({
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
 
+  const handleAddNewCheckbox = () => {
+    const newQuestion: ApplicationQuestionMultiSelect = {
+      id: `not-valid-id-question-${applicationQuestions.length + 1}`,
+      title: ``,
+      course_phase_id: phaseId!,
+      is_required: false,
+      order_num: applicationQuestions.length + 1,
+      placeholder: 'CheckBoxQuestion',
+      min_select: 0,
+      max_select: 1,
+      options: ['Yes'],
+    }
+    setApplicationQuestions([...applicationQuestions, newQuestion])
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -64,6 +79,7 @@ export const AddQuestionMenu = ({
         <DropdownMenuItem onSelect={() => handleAddNewQuestionMultiSelect()}>
           Multi-Select Question
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => handleAddNewCheckbox()}>Checkbox</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

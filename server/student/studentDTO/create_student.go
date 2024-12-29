@@ -1,11 +1,13 @@
 package studentDTO
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 )
 
 type CreateStudent struct {
+	ID                   uuid.UUID `json:"id"`
 	FirstName            string    `json:"first_name"`
 	LastName             string    `json:"last_name"`
 	Email                string    `json:"email"`

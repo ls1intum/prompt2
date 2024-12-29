@@ -125,6 +125,29 @@ func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID)
 	return i, err
 }
 
+const getCoursePhaseParticipationByCourseParticipationAndCoursePhase = `-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
+SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
+WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1
+`
+
+type GetCoursePhaseParticipationByCourseParticipationAndCoursePhaseParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase(ctx context.Context, arg GetCoursePhaseParticipationByCourseParticipationAndCoursePhaseParams) (CoursePhaseParticipation, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseParticipationByCourseParticipationAndCoursePhase, arg.CourseParticipationID, arg.CoursePhaseID)
+	var i CoursePhaseParticipation
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.CoursePhaseID,
+		&i.Passed,
+		&i.MetaData,
+	)
+	return i, err
+}
+
 const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 

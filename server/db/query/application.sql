@@ -6,15 +6,13 @@ WHERE course_phase_id = $1;
 SELECT * FROM application_question_multi_select
 WHERE course_phase_id = $1;
 
--- name: CreateApplicationAnswerText :one
+-- name: CreateApplicationAnswerText :exec
 INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
-VALUES ($1, $2, $3, $4)
-RETURNING *;
+VALUES ($1, $2, $3, $4);
 
--- name: CreateApplicationAnswerMultiSelect :one
+-- name: CreateApplicationAnswerMultiSelect :exec
 INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
-VALUES ($1, $2, $3, $4)
-RETURNING *;
+VALUES ($1, $2, $3, $4);
 
 -- name: CreateApplicationQuestionText :exec
 INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num)
@@ -121,3 +119,52 @@ WHERE
     AND cpt.name = 'Application'
     AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
     AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW();
+
+-- name: GetApplicationExistsForStudent :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_participation cp
+    INNER JOIN course_phase ph ON cp.course_id = ph.course_id
+    WHERE cp.student_id = $1 AND ph.id = $2
+);
+
+-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
+SELECT 
+    cpt.name = 'Application' AS is_application
+FROM 
+    course_phase cp
+JOIN 
+    course_phase_type cpt
+ON 
+    cp.course_phase_type_id = cpt.id
+WHERE 
+    cp.id = $1
+    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW();
+
+-- name: GetApplicationAnswersTextForStudent :many
+SELECT aat.*
+FROM application_answer_text aat
+INNER JOIN course_phase_participation cpp ON aat.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+
+-- name: GetApplicationAnswersMultiSelectForStudent :many
+SELECT aams.*
+FROM application_answer_multi_select aams
+INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
+INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
+WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+
+-- name: CreateOrOverwriteApplicationAnswerText :exec 
+INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer;
+
+-- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec 
+INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_phase_participation_id, application_question_id)
+DO UPDATE
+SET answer = EXCLUDED.answer;

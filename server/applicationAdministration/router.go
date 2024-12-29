@@ -17,14 +17,18 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application := router.Group("/applications", authMiddleware())
 
 	// Application Form Endpoints
-	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
-	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.CourseLecturer), updateApplicationForm)
+	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
+	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
 
 	// Apply Endpoints - No Authentication needed
 	apply := router.Group("/apply")
 	apply.GET("", getAllOpenApplications)
 	apply.GET("/:coursePhaseID", getApplicationFormWithCourseDetails)
-	// apply.POST("/:coursePhaseID", postApplication)
+	apply.POST("/:coursePhaseID", postApplicationExtern)
+
+	applyAuthenticated := router.Group("/apply/authenticated", authMiddleware())
+	applyAuthenticated.GET("/:coursePhaseID", getApplicationAuthenticated)
+	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
 }
 
 func getApplicationForm(c *gin.Context) {
@@ -107,6 +111,110 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, applicationForm)
+}
+
+func getApplicationAuthenticated(c *gin.Context) {
+	// TODO
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	userEmail := c.GetString("userEmail")
+
+	if userEmail == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
+		return
+	}
+
+	applicationForm, err := GetApplicationAuthenticatedByEmail(c, userEmail, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
+		return
+	}
+	c.IndentedJSON(http.StatusOK, applicationForm)
+
+}
+
+func postApplicationExtern(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var application applicationDTO.PostApplication
+	if err := c.BindJSON(&application); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateApplication(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = PostApplicationExtern(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, ErrAlreadyApplied) {
+			handleError(c, http.StatusMethodNotAllowed, errors.New("already applied"))
+			return
+		} else if errors.Is(err, ErrStudentDetailsDoNotMatch) {
+			handleError(c, http.StatusConflict, errors.New("student exists but details do not match"))
+			return
+		}
+
+		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
+		return
+	}
+
+	// TODO: send mail confirmation to student!
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+}
+
+func postApplicationAuthenticated(c *gin.Context) {
+	// TODO: extra check that student credentials did not change and match the token!
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userEmail := c.GetString("userEmail")
+	if userEmail == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
+		return
+	}
+
+	var application applicationDTO.PostApplication
+	if err := c.BindJSON(&application); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateApplication(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if application.Student.Email != userEmail {
+		handleError(c, http.StatusUnauthorized, errors.New("email does not match - is not allowed to be changed"))
+		return
+	}
+
+	err = PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

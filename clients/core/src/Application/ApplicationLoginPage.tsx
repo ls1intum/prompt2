@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
 import { ApplicationHeader } from './components/ApplicationHeader'
 import { LoadingState } from './components/LoadingState'
@@ -9,11 +9,18 @@ import { ErrorState } from './components/ErrorState'
 import { useState } from 'react'
 import { ApplicationLoginCard } from './components/ApplicationLoginCard'
 import { ApplicationForm } from './ApplicationForm'
+import { Student } from '@/interfaces/student'
+import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
+import { PostApplication } from '@/interfaces/post_application'
+import { postNewApplicationExtern } from '../network/mutations/postApplicationExtern'
+import { ApplicationSavingDialog } from './components/ApplicationSavingDialog'
 
 export const ApplicationLoginPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const [selectedContinueAsExternal, setSelectedContinueAsExternal] = useState(false)
+  const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
 
   const {
     data: applicationForm,
@@ -24,6 +31,36 @@ export const ApplicationLoginPage = (): JSX.Element => {
     queryKey: ['applicationForm', phaseId],
     queryFn: () => getApplicationFormWithDetails(phaseId ?? ''),
   })
+
+  const { mutate: mutateSendApplication, error: mutateError } = useMutation({
+    mutationFn: (application: PostApplication) => {
+      return postNewApplicationExtern(phaseId ?? 'undefined', application)
+    },
+    onSuccess: () => {
+      setShowDialog('success')
+    },
+    onError: () => {
+      setShowDialog('error')
+    },
+  })
+
+  const handleSubmit = (
+    student: Student,
+    answersText: CreateApplicationAnswerText[],
+    answersMultiSelect: CreateApplicationAnswerMultiSelect[],
+  ) => {
+    const application: PostApplication = {
+      student,
+      answers_text: answersText,
+      answers_multi_select: answersMultiSelect,
+    }
+    setShowDialog('saving')
+    mutateSendApplication(application)
+  }
+
+  const handleCloseDialog = () => {
+    setShowDialog(null)
+  }
 
   if (isPending) {
     return (
@@ -47,7 +84,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
   return (
     <NonAuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} />
+        <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
         {!selectedContinueAsExternal && (
           <ApplicationLoginCard
             externalStudentsAllowed={externalStudentsAllowed}
@@ -59,10 +96,16 @@ export const ApplicationLoginPage = (): JSX.Element => {
           <ApplicationForm
             questionsText={applicationForm.questions_text}
             questionsMultiSelect={applicationForm.questions_multi_select}
-            onSubmit={() => console.log('Submit')}
+            onSubmit={handleSubmit}
           />
         )}
       </div>
+      <ApplicationSavingDialog
+        showDialog={showDialog}
+        onClose={handleCloseDialog}
+        onNavigateBack={() => navigate('/')}
+        errorMessage={mutateError?.message}
+      />
     </NonAuthenticatedPageWrapper>
   )
 }

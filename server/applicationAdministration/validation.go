@@ -9,7 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/sirupsen/logrus"
+	"github.com/niclasheun/prompt2.0/student"
+	log "github.com/sirupsen/logrus"
 )
 
 func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm applicationDTO.UpdateForm) error {
@@ -19,7 +20,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 	// Check if course phase is application phase
 	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		logrus.Error("could not validate application form: ", err)
+		log.Error("could not validate application form: ", err)
 		return errors.New("could not validate the application form")
 	}
 	if !isApplicationPhase {
@@ -29,7 +30,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 	// Get all questions for the course phase
 	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		logrus.Error("could not validate application form: ", err)
+		log.Error("could not validate application form: ", err)
 		return errors.New("could not validate the application form")
 	}
 
@@ -165,4 +166,106 @@ func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options
 
 	// No issues, return nil
 	return nil
+}
+
+func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Check if course phase is application phase
+	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate application: ", err)
+		return errors.New("could not validate the application. the application deadline might have passed")
+	}
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
+	// TODO: check if application phase is open!!!
+
+	// 1. Check that the student is valid
+	err = student.Validate(application.Student)
+	if err != nil {
+		return errors.New("invalid student")
+	}
+
+	// 2. Get all questions for the course phase
+	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate application: ", err)
+		return errors.New("could not validate the application")
+	}
+
+	applicationQuestionsMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return errors.New("could not validate the application")
+	}
+
+	// 3. Validate all the answers
+	err = validateTextAnswers(applicationQuestionsText, application.AnswersText)
+	if err != nil {
+		return err
+	}
+
+	err = validateMultiSelectAnswers(applicationQuestionsMultiSelect, application.AnswersMultiSelect)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateTextAnswers(textQuestions []db.ApplicationQuestionText, textAnswers []applicationDTO.CreateAnswerText) error {
+	answerMap := make(map[uuid.UUID]string, len(textAnswers))
+	for _, answer := range textAnswers {
+		answerMap[answer.ApplicationQuestionID] = answer.Answer
+	}
+
+	for _, question := range textQuestions {
+		answer, exists := answerMap[question.ID]
+		if question.IsRequired.Bool && !exists {
+			return fmt.Errorf("required question %s is not answered", question.ID)
+		}
+		if exists && len(answer) > int(question.AllowedLength.Int32) {
+			return fmt.Errorf("answer to question %s exceeds allowed length of %d", question.ID, question.AllowedLength.Int32)
+		}
+	}
+	return nil
+}
+
+func validateMultiSelectAnswers(multiSelectQuestions []db.ApplicationQuestionMultiSelect, multiSelectAnswers []applicationDTO.CreateAnswerMultiSelect) error {
+	// Create a map of answers for quick lookup
+	answerMap := make(map[uuid.UUID]applicationDTO.CreateAnswerMultiSelect, len(multiSelectAnswers))
+	for _, answer := range multiSelectAnswers {
+		answerMap[answer.ApplicationQuestionID] = answer
+	}
+
+	// Validate multi select questions
+	for _, question := range multiSelectQuestions {
+		answer, exists := answerMap[question.ID]
+		if (question.IsRequired.Bool || question.MinSelect.Int32 > 0) && !exists {
+			return fmt.Errorf("required question %s is not answered", question.ID)
+		}
+		if exists {
+			if len(answer.Answer) < int(question.MinSelect.Int32) || len(answer.Answer) > int(question.MaxSelect.Int32) {
+				return fmt.Errorf("answer to question %s does not meet selection requirements", question.ID)
+			}
+			for _, selection := range answer.Answer {
+				if !contains(question.Options, selection) {
+					return fmt.Errorf("invalid selection %s for question %s", selection, question.ID)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func contains(options []string, selection string) bool {
+	for _, option := range options {
+		if option == selection {
+			return true
+		}
+	}
+	return false
 }

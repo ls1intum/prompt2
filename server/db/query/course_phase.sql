@@ -26,3 +26,9 @@ WHERE id = $1;
 -- name: DeleteCoursePhase :exec
 DELETE FROM course_phase
 WHERE id = $1;
+
+-- name: GetCourseIDByCoursePhaseID :one
+SELECT course_id
+FROM course_phase
+WHERE id = $1
+LIMIT 1;

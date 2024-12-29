@@ -21,3 +21,7 @@ SET first_name = $2,
     gender = $8
 WHERE id = $1
 RETURNING *;
+
+-- name: GetStudentByEmail :one
+SELECT * FROM student
+WHERE email = $1 LIMIT 1;
