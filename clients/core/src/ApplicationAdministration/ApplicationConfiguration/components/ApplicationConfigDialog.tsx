@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -125,6 +126,9 @@ export function ApplicationConfigDialog({
             <DialogHeader>
               <DialogTitle>Configure Application Phase</DialogTitle>
             </DialogHeader>
+            <DialogDescription>
+              Note: All times are in German time (Europe/Berlin).
+            </DialogDescription>
             <form onSubmit={handleSubmit}>
               <div className='grid gap-4 py-4'>
                 <div className='grid grid-cols-4 items-center gap-4'>
@@ -167,9 +171,6 @@ export function ApplicationConfigDialog({
                         className='w-24'
                       />
                     </div>
-                    <p className='text-sm text-secondary-foreground'>
-                      Note: All times are in German time (Europe/Berlin).
-                    </p>
                   </div>
                 </div>
                 <div className='grid grid-cols-4 items-center gap-4'>
