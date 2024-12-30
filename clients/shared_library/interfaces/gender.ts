@@ -5,7 +5,7 @@ export enum Gender {
   PREFER_NOT_TO_SAY = 'prefer_not_to_say',
 }
 
-export function getGenderString(gender: Gender): string {
+export function getGenderString(gender: Gender | undefined): string {
   switch (gender) {
     case Gender.MALE:
       return 'Male'

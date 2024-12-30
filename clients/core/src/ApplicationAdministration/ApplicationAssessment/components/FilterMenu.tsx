@@ -8,10 +8,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { useState } from 'react'
 import { getStatusBadge } from '../utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { Gender, getGenderString } from '@/interfaces/gender'
+import { Filter, X } from 'lucide-react'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState
@@ -70,13 +70,20 @@ export const FilterMenu = ({
     })
   }
 
+  const resetFilters = () => {
+    setColumnFilters([])
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline'>Open</Button>
+        <Button variant='outline' className='justify-start'>
+          <Filter className='mr-2 h-4 w-4' />
+          Filter
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56'>
-        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+        <DropdownMenuLabel>Assessment</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {renderFilterItems('pass_status', PassStatus, getStatusBadge)}
 
@@ -85,6 +92,20 @@ export const FilterMenu = ({
         {renderFilterItems('gender', Gender, getGenderString)}
 
         <DropdownMenuSeparator />
+        <div className='p-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            className='w-full justify-center'
+            onClick={(e) => {
+              e.preventDefault()
+              resetFilters()
+            }}
+            disabled={!(columnFilters.length > 0)}
+          >
+            Clear Filters
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )

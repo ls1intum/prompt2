@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from './SortableHeader'
 import { getStatusBadge } from '../utils/getStatusBadge'
+import { getGenderString } from '@/interfaces/gender'
 
 export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
   {
@@ -56,6 +57,10 @@ export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
     header: ({ column }) => <SortableHeader column={column} title='Gender' />,
     filterFn: (row, columnId, filterValue) => {
       return filterValue.includes(row.original.student.gender)
+    },
+    cell: ({ row }) => {
+      const gender = row.original.student.gender
+      return getGenderString(gender)
     },
   },
 ]
