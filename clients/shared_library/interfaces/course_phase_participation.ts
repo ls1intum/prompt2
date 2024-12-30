@@ -1,6 +1,6 @@
 import { Student } from './student'
 
-export enum pass_status {
+export enum PassStatus {
   PASSED = 'passed',
   FAILED = 'failed',
   NOT_ASSESSED = 'not_assessed',
@@ -8,7 +8,7 @@ export enum pass_status {
 
 export interface CoursePhaseParticipationWithStudent {
   id: string
-  pass_status: pass_status
+  pass_status: PassStatus
   meta_data: { [key: string]: any }
   student: Student
 }

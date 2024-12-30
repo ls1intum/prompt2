@@ -1,8 +1,8 @@
 import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
 import { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from './SortableHeader'
+import { getStatusBadge } from '../utils/getStatusBadge'
 
 export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
   {
@@ -21,22 +21,16 @@ export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
     header: ({ column }) => <SortableHeader column={column} title='Status' />,
     cell: ({ row }) => {
       const passStatus = row.original.pass_status
-      switch (passStatus) {
-        case 'passed':
-          return <Badge className='bg-green-500 hover:bg-green-500'>Accepted</Badge>
-        case 'failed':
-          return <Badge className='bg-red-500 hover:bg-red-500'>Rejected</Badge>
-        case 'not_assessed':
-          return <Badge className='bg-gray-500 hover:bg-gray-500'>Not Assessed</Badge>
-        default:
-          return <Badge className='bg-gray-500 hover:bg-gray-500'>Unknown</Badge>
-      }
+      return getStatusBadge(passStatus)
     },
     sortingFn: (rowA, rowB) => {
       const statusOrder = ['passed', 'not_assessed', 'failed']
       const statusA = rowA.original.pass_status
       const statusB = rowB.original.pass_status
       return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB)
+    },
+    filterFn: (row, columnId, filterValue) => {
+      return filterValue.includes(row.original.pass_status)
     },
   },
   {
@@ -55,5 +49,13 @@ export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
     header: ({ column }) => (
       <SortableHeader column={column} title={translations.university['login-name']} />
     ),
+  },
+  {
+    id: `gender`,
+    accessorKey: 'student.gender',
+    header: ({ column }) => <SortableHeader column={column} title='Gender' />,
+    filterFn: (row, columnId, filterValue) => {
+      return filterValue.includes(row.original.student.gender)
+    },
   },
 ]

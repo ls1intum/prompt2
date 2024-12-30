@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { getCoursePhaseParticipations } from '../../network/queries/getCoursePhaseParticipations'
 
 import {
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -21,14 +22,16 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { SearchIcon } from 'lucide-react'
+import { FilterMenu } from './components/FilterMenu'
 
-export const ApplicationTable = (): JSX.Element => {
+export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const {
     data: fetchedParticipations,
@@ -47,6 +50,7 @@ export const ApplicationTable = (): JSX.Element => {
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, columnId, filterValue) => {
       const { student } = row.original
       const searchableValues = [
@@ -60,8 +64,13 @@ export const ApplicationTable = (): JSX.Element => {
     state: {
       sorting,
       globalFilter,
+      columnFilters,
     },
   })
+
+  useEffect(() => {
+    console.log('filters', columnFilters)
+  }, [columnFilters])
 
   if (isParticipationsPending) {
     // TODO make this nicer
@@ -88,6 +97,7 @@ export const ApplicationTable = (): JSX.Element => {
             <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
           </div>
         </div>
+        <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
       </div>
       <div className='rounded-md border'>
         <Table>
