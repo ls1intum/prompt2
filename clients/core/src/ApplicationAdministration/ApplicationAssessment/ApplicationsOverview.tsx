@@ -25,9 +25,10 @@ import {
 import { columns } from './components/columns'
 import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { SearchIcon } from 'lucide-react'
+import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
 import { VisibilityMenu } from './components/VisibilityMenu'
+import { ErrorPage } from '@/components/ErrorPage'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -39,8 +40,8 @@ export const ApplicationsOverview = (): JSX.Element => {
   const {
     data: fetchedParticipations,
     isPending: isParticipationsPending,
-    error: participantsError,
     isError: isParticipantsError,
+    refetch,
   } = useQuery<CoursePhaseParticipationWithStudent[]>({
     queryKey: ['course_phase_participations', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
@@ -77,72 +78,68 @@ export const ApplicationsOverview = (): JSX.Element => {
     console.log('filters', columnVisibility)
   }, [columnVisibility])
 
-  if (isParticipationsPending) {
-    // TODO make this nicer
-    return <div>Loading...</div>
-  }
-
   if (isParticipantsError) {
-    // TODO make this nicer
-    return <div>An error occurred: {participantsError.message}</div>
+    return <ErrorPage onRetry={refetch} />
   }
 
   return (
-    <div>
-      <h1>Application Table</h1>
-      <div className='flex items-center py-4'>
-        <div className='grid w-full max-w-sm items-center gap-1.5'>
-          <div className='relative'>
-            <Input
-              placeholder='Search applications...'
-              value={globalFilter}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className='pl-10'
-            />
-            <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
-          </div>
+    <div className='flex flex-col min-h-screen'>
+      <h1 className='text-4xl font-bold text-center mb-8'>Applications Overview</h1>
+      <div className='flex items-center py-4 space-x-4'>
+        <div className='relative flex-grow max-w-md'>
+          <Input
+            placeholder='Search applications...'
+            value={globalFilter}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className='pl-10'
+          />
+          <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
         </div>
         <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
         <VisibilityMenu columns={table.getAllColumns()} />
       </div>
-      <div className='rounded-md border'>
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
+      {isParticipationsPending ? (
+        <div className='flex justify-center items-center flex-grow'>
+          <Loader2 className='h-12 w-12 animate-spin text-primary' />
+        </div>
+      ) : (
+        <div className='rounded-md border'>
+          <Table>
+            <TableHeader className='bg-muted/100'>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className='h-24 text-center'>
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   )
 }
