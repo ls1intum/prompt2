@@ -93,10 +93,10 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='university_login'
+                name='matriculation_number'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{translations.university['login-name']}</FormLabel>
+                    <FormLabel>Matriculation Number</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -106,10 +106,10 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
               />
               <FormField
                 control={form.control}
-                name='matriculation_number'
+                name='university_login'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Matriculation Number</FormLabel>
+                    <FormLabel>{translations.university['login-name']}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
