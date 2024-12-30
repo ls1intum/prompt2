@@ -168,3 +168,11 @@ VALUES ($1, $2, $3, $4)
 ON CONFLICT (course_phase_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer;
+
+-- name: GetApplicationExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.course_phase_id = $1
+    AND cpp.id = $2
+);

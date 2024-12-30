@@ -41,6 +41,15 @@ func GetStudentByID(ctx context.Context, id uuid.UUID) (studentDTO.Student, erro
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
+func GetStudentByCoursePhaseParticipationID(ctx context.Context, coursePhaseParticipationID uuid.UUID) (studentDTO.Student, error) {
+	student, err := StudentServiceSingleton.queries.GetStudentByCoursePhaseParticipationID(ctx, coursePhaseParticipationID)
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+
+	return studentDTO.GetStudentDTOFromDBModel(student), nil
+}
+
 func CreateStudent(ctx context.Context, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	createStudentParams := student.GetDBModel()
 

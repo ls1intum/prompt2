@@ -378,6 +378,27 @@ func (q *Queries) GetApplicationAnswersTextForStudent(ctx context.Context, arg G
 	return items, nil
 }
 
+const getApplicationExists = `-- name: GetApplicationExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.course_phase_id = $1
+    AND cpp.id = $2
+)
+`
+
+type GetApplicationExistsParams struct {
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+	ID            uuid.UUID `json:"id"`
+}
+
+func (q *Queries) GetApplicationExists(ctx context.Context, arg GetApplicationExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, getApplicationExists, arg.CoursePhaseID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getApplicationExistsForStudent = `-- name: GetApplicationExistsForStudent :one
 SELECT EXISTS (
     SELECT 1
