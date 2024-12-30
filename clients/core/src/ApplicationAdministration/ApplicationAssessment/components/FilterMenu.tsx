@@ -53,11 +53,10 @@ export const FilterMenu = ({
     items: Record<string, T>,
     getDisplay: (value: T) => React.ReactNode,
   ) => {
-    return Object.keys(items).map((key) => {
-      const value = items[key]
+    return Object.values(items).map((value) => {
       return (
         <DropdownMenuCheckboxItem
-          key={key}
+          key={value}
           checked={isSelected(id, value)}
           onClick={(e) => {
             e.preventDefault()

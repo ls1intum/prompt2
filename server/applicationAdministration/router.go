@@ -27,6 +27,8 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	applyAuthenticated := router.Group("/apply/authenticated", authMiddleware())
 	applyAuthenticated.GET("/:coursePhaseID", getApplicationAuthenticated)
 	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
+
+	applyAuthenticated.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
 }
 
 func getApplicationForm(c *gin.Context) {
@@ -211,6 +213,33 @@ func postApplicationAuthenticated(c *gin.Context) {
 
 	// TODO: send mail confirmation to student!
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+}
+
+func getApplicationByCPPID(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	coursePhaseParticipationId, err := uuid.Parse(c.Param("coursePhaseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	application, err := GetApplicationByCPPID(c, coursePhaseId, coursePhaseParticipationId)
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, ErrNotFound) {
+			handleError(c, http.StatusNotFound, errors.New("application not found"))
+			return
+		}
+		handleError(c, http.StatusInternalServerError, errors.New("could not get application"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, application)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
