@@ -1,6 +1,5 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,13 +11,15 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, XCircle } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   UniversityDataFormValues,
   formSchemaUniversityData,
 } from '../../../validations/universityData'
 import { Student } from '@/interfaces/student'
+import { updateStudent } from '../../../network/mutations/updateStudent'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface MissingUniversityDataProps {
   student: Student
@@ -26,8 +27,21 @@ interface MissingUniversityDataProps {
 
 export const MissingUniversityData = ({ student }: MissingUniversityDataProps): JSX.Element => {
   const [isAddingData, setIsAddingData] = React.useState(false)
+  const queryClient = useQueryClient()
 
-  // mutatation to update the student data!
+  const {
+    mutate: mutateStudent,
+    isError: isMutateError,
+    reset: resetMutation,
+  } = useMutation({
+    mutationFn: (modifiedStudent: Student) => {
+      return updateStudent(modifiedStudent)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['application', 'students'] })
+      setIsAddingData(false)
+    },
+  })
 
   const form = useForm<UniversityDataFormValues>({
     resolver: zodResolver(formSchemaUniversityData),
@@ -40,24 +54,39 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
 
   function onSubmit(values: UniversityDataFormValues) {
     console.log('Submitted data:', values)
-    // You can add a function here to handle saving the data to the backend.
-    setIsAddingData(false) // Reset the form visibility
+    mutateStudent({ ...student, ...values, has_university_account: true })
+  }
+
+  const handleRetry = () => {
+    resetMutation()
+    form.reset()
   }
 
   return (
-    <Alert>
+    <Alert variant={isMutateError ? 'destructive' : undefined}>
       <div className='flex items-center justify-between mb-2'>
         <AlertDescription className='flex items-center'>
-          <AlertCircle className='h-4 w-4 mr-2' />
-          The student has no university login.
+          {isMutateError ? (
+            <XCircle className='h-4 w-4 mr-2' />
+          ) : (
+            <AlertCircle className='h-4 w-4 mr-2' />
+          )}
+          {isMutateError
+            ? 'Failed to update university data.'
+            : 'The student has no university login.'}
         </AlertDescription>
-        {!isAddingData && (
+        {!isAddingData && !isMutateError && (
           <Button onClick={() => setIsAddingData(true)} variant='outline' size='sm'>
             Add University Data
           </Button>
         )}
+        {isMutateError && (
+          <Button onClick={handleRetry} variant='outline' size='sm'>
+            Retry
+          </Button>
+        )}
       </div>
-      {isAddingData && (
+      {isAddingData && !isMutateError && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>

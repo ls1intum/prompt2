@@ -56,7 +56,7 @@ export const ApplicationsOverview = (): JSX.Element => {
     isError: isParticipantsError,
     refetch,
   } = useQuery<CoursePhaseParticipationWithStudent[]>({
-    queryKey: ['course_phase_participations', phaseId],
+    queryKey: ['course_phase_participations', 'students', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
 

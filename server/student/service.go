@@ -71,8 +71,9 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.Student) (studentDTO.Student, error) {
+func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	updateStudentParams := student.GetDBModel()
+	updateStudentParams.ID = id
 
 	updatedStudent, err := StudentServiceSingleton.queries.UpdateStudent(ctx, db.UpdateStudentParams(updateStudentParams))
 	if err != nil {
@@ -95,7 +96,7 @@ func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStud
 	if studentObj.ID != uuid.Nil && studentByEmail.ID != studentObj.ID {
 		return studentDTO.Student{}, errors.New("student has wrong ID")
 	} else {
-		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.Student{
+		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.CreateStudent{
 			ID:                   studentByEmail.ID, // make sure the id is not overwritten
 			FirstName:            studentObj.FirstName,
 			LastName:             studentObj.LastName,
