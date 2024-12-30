@@ -60,6 +60,27 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
       const valid = await form.trigger()
       return valid
     },
+    rerender(updatedStudent: Student) {
+      form.reset(
+        updatedStudent.has_university_account
+          ? {
+              matriculation_number: updatedStudent.matriculation_number || '',
+              university_login: updatedStudent.university_login || '',
+              first_name: updatedStudent.first_name || '',
+              last_name: updatedStudent.last_name || '',
+              email: updatedStudent.email || '',
+              gender: updatedStudent.gender ?? undefined,
+              has_university_account: true,
+            }
+          : {
+              first_name: updatedStudent.first_name || '',
+              last_name: updatedStudent.last_name || '',
+              email: updatedStudent.email || '',
+              gender: updatedStudent.gender ?? undefined,
+              has_university_account: false,
+            },
+      )
+    },
   }))
 
   useEffect(() => {

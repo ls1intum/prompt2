@@ -57,6 +57,9 @@ export const ApplicationFormView = ({
   useEffect(() => {
     if (student) {
       setStudentData(student)
+      if (studentRef.current) {
+        studentRef.current.rerender(student)
+      }
     }
   }, [student])
 
