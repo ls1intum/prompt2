@@ -33,7 +33,7 @@ interface ApplicationFormProps {
   ) => void
 }
 
-export const ApplicationForm = ({
+export const ApplicationFormView = ({
   questionsText,
   questionsMultiSelect,
   initialAnswersMultiSelect,

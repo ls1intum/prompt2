@@ -6,7 +6,7 @@ import { getApplicationFormWithDetails } from '../network/queries/applicationFor
 import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
 import { ApplicationHeader } from './components/ApplicationHeader'
-import { ApplicationForm } from './ApplicationForm'
+import { ApplicationFormView } from './ApplicationFormView'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { Student } from '@/interfaces/student'
 import { getApplication } from '../network/queries/application'
@@ -127,7 +127,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
       <div className='max-w-4xl mx-auto space-y-6'>
         <ApplicationHeader applicationPhase={application_phase} onBackClick={handleBack} />
         <InfoBanner status={application.status} />
-        <ApplicationForm
+        <ApplicationFormView
           questionsText={applicationForm.questions_text}
           questionsMultiSelect={applicationForm.questions_multi_select}
           initialAnswersMultiSelect={application.answers_multi_select}

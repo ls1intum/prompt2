@@ -1,10 +1,18 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { GetApplication } from '@/interfaces/get_application'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../network/queries/applicationAssessment'
 import { ApplicationForm } from '@/interfaces/application_form'
+import { getApplicationForm } from '../../network/queries/applicationForm'
+import { ApplicationFormView } from '../../Application/ApplicationFormView'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
@@ -22,10 +30,18 @@ export const ApplicationDetailsView = ({
     data: fetchedApplication,
     isPending: isFetchingApplication,
     isError: isApplicationError,
-    refetch,
   } = useQuery<GetApplication>({
     queryKey: ['application', coursePhaseParticipationID],
     queryFn: () => getApplicationAssessment(phaseId ?? '', coursePhaseParticipationID),
+  })
+
+  const {
+    data: fetchedApplicationForm,
+    isPending: isFetchingApplicationForm,
+    isError: isApplicationFormError,
+  } = useQuery<ApplicationForm>({
+    queryKey: ['application_form', phaseId],
+    queryFn: () => getApplicationForm(phaseId ?? ''),
   })
 
   useEffect(() => {
@@ -34,11 +50,39 @@ export const ApplicationDetailsView = ({
     }
   }, [fetchedApplication])
 
+  if (isFetchingApplication || isFetchingApplicationForm) {
+    return <div>Loading...</div>
+  }
+
+  if (isApplicationError || isApplicationFormError) {
+    return <div>Error...</div>
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[425px]'>
-        <div>Some fancy detail view here</div>
-        {coursePhaseParticipationID}
+      <DialogContent className='max-w-4xl w-full max-h-[90vh] flex flex-col'>
+        <DialogHeader>
+          <DialogTitle>Application Details</DialogTitle>
+          <DialogDescription>View and assess the application</DialogDescription>
+        </DialogHeader>
+        <div className='flex-1 overflow-y-auto p-4'>
+          <div className='space-y-4'>
+            <div className='p-4 bg-gray-100 rounded-lg'>
+              <h3 className='font-semibold mb-2'>Application ID</h3>
+              <p>{coursePhaseParticipationID}</p>
+            </div>
+            {fetchedApplication && fetchedApplicationForm && (
+              <ApplicationFormView
+                questionsText={fetchedApplicationForm.questions_text}
+                questionsMultiSelect={fetchedApplicationForm.questions_multi_select}
+                initialAnswersText={fetchedApplication.answers_text}
+                initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
+                student={fetchedApplication.student}
+                onSubmit={() => console.log('submit')}
+              />
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
