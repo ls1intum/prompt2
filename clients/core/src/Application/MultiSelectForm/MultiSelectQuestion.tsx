@@ -15,12 +15,14 @@ interface MultiSelectQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
   question: ApplicationQuestionMultiSelect
   initialAnswers: string[]
+  disabled?: boolean
 }
 
 export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
   form,
   question,
   initialAnswers,
+  disabled = false,
 }) => {
   const multiSelectOptions = question.options.map((option) => ({
     label: option,
@@ -44,6 +46,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
           }}
           maxCount={question.max_select}
           variant='inverted'
+          disabled={disabled}
         />
       ) : (
         <Select
@@ -51,6 +54,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
             form.setValue('answers', [value], { shouldValidate: true })
           }}
           defaultValue={initialAnswers.length === 1 ? initialAnswers[0] : ''}
+          disabled={disabled}
         >
           <SelectTrigger>
             <SelectValue placeholder={question.placeholder || 'Please select...'} />

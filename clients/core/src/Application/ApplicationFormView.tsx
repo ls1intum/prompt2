@@ -26,6 +26,7 @@ interface ApplicationFormProps {
   initialAnswersText?: ApplicationAnswerText[]
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
+  disabled?: boolean
   onSubmit: (
     student: Student,
     answersText: CreateApplicationAnswerText[],
@@ -39,6 +40,7 @@ export const ApplicationFormView = ({
   initialAnswersMultiSelect,
   initialAnswersText,
   student,
+  disabled = false,
   onSubmit,
 }: ApplicationFormProps): JSX.Element => {
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
@@ -105,7 +107,12 @@ export const ApplicationFormView = ({
             <p className='text-sm text-muted-foreground mb-4'>
               This information will be applied for all applications at this chair.
             </p>
-            <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
+            <StudentForm
+              student={studentData}
+              onUpdate={setStudentData}
+              ref={studentRef}
+              disabled={disabled}
+            />
           </div>
           <Separator />
           <div>
@@ -121,6 +128,7 @@ export const ApplicationFormView = ({
                       )?.answer ?? []
                     }
                     ref={(el) => (questionMultiSelectRefs.current[index] = el)}
+                    disabled={disabled}
                   />
                 ) : (
                   <ApplicationQuestionTextForm
@@ -130,15 +138,20 @@ export const ApplicationFormView = ({
                         ?.answer ?? ''
                     }
                     ref={(el) => (questionTextRefs.current[index] = el)}
+                    disabled={disabled}
                   />
                 )}
               </div>
             ))}
           </div>
 
-          <div className='flex justify-end'>
-            <Button onClick={handleSubmit}>Submit</Button>
-          </div>
+          {!disabled && (
+            <div className='flex justify-end'>
+              <Button onClick={handleSubmit} disabled={disabled}>
+                Submit
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

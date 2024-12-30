@@ -24,11 +24,12 @@ import { studentSchema, StudentFormValues } from '../../validations/student'
 
 interface StudentFormProps {
   student: Student
+  disabled?: boolean
   onUpdate: (updatedStudent: Student) => void
 }
 
 export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(function StudentForm(
-  { student, onUpdate },
+  { student, disabled = false, onUpdate },
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
@@ -89,7 +90,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {requiredStar}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,7 +103,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormItem>
                   <FormLabel>University Login{requiredStar}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +119,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>First Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount} />
+                  <Input {...field} disabled={hasUniversityAccount || disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -131,7 +132,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>Last Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount} />
+                  <Input {...field} disabled={hasUniversityAccount || disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -145,7 +146,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             <FormItem>
               <FormLabel>Email{requiredStar}</FormLabel>
               <FormControl>
-                <Input {...field} type='email' disabled={hasUniversityAccount} />
+                <Input {...field} type='email' disabled={hasUniversityAccount || disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -157,7 +158,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           render={({ field }) => (
             <FormItem>
               <FormLabel>Gender{requiredStar}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a gender' />

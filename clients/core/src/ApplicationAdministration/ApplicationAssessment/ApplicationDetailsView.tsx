@@ -78,6 +78,7 @@ export const ApplicationDetailsView = ({
                 initialAnswersText={fetchedApplication.answers_text}
                 initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
                 student={fetchedApplication.student}
+                disabled={true}
                 onSubmit={() => console.log('submit')}
               />
             )}
