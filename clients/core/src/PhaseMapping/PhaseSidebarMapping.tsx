@@ -15,6 +15,11 @@ const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; title: stri
         goToPath: '/configuration',
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
       },
+      {
+        title: 'Applications',
+        goToPath: '/applications',
+        requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+      },
     ],
   }
   return (

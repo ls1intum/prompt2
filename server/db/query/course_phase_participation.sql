@@ -3,8 +3,26 @@ SELECT * FROM course_phase_participation
 WHERE id = $1 LIMIT 1;
 
 -- name: GetAllCoursePhaseParticipationsForCoursePhase :many
-SELECT * FROM course_phase_participation
-WHERE course_phase_id = $1;
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+WHERE
+    cpp.course_phase_id = $1;
 
 -- name: GetAllCoursePhaseParticipationsForCourseParticipation :many
 SELECT * FROM course_phase_participation
