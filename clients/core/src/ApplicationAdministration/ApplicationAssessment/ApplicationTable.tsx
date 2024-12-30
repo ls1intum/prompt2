@@ -22,10 +22,13 @@ import {
 } from '@/components/ui/table'
 import { columns } from './components/columns'
 import { useState } from 'react'
+import { Input } from '@/components/ui/input'
+import { SearchIcon } from 'lucide-react'
 
 export const ApplicationTable = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState<string>('')
 
   const {
     data: fetchedParticipations,
@@ -44,8 +47,19 @@ export const ApplicationTable = (): JSX.Element => {
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, columnId, filterValue) => {
+      const { student } = row.original
+      const searchableValues = [
+        `${student.first_name} ${student.last_name}`.toLowerCase(),
+        student.email?.toLowerCase(),
+        student.matriculation_number?.toString(),
+        student.university_login?.toLowerCase(),
+      ]
+      return searchableValues.some((value) => value?.includes(filterValue.toLowerCase()))
+    },
     state: {
       sorting,
+      globalFilter,
     },
   })
 
@@ -62,6 +76,19 @@ export const ApplicationTable = (): JSX.Element => {
   return (
     <div>
       <h1>Application Table</h1>
+      <div className='flex items-center py-4'>
+        <div className='grid w-full max-w-sm items-center gap-1.5'>
+          <div className='relative'>
+            <Input
+              placeholder='Search applications...'
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className='pl-10'
+            />
+            <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
+          </div>
+        </div>
+      </div>
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
