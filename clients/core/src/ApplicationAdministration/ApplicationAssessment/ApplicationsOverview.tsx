@@ -86,20 +86,26 @@ export const ApplicationsOverview = (): JSX.Element => {
   return (
     <div className='flex flex-col min-h-screen'>
       <h1 className='text-4xl font-bold text-center mb-8'>Applications Overview</h1>
-      <div className='flex items-center py-4 space-x-4'>
-        <div className='relative flex-grow max-w-md'>
-          <Input
-            placeholder='Search applications...'
-            value={globalFilter}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            className='pl-10'
-          />
-          <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
+      <div className='space-y-4 mb-6'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
+          <div className='relative flex-grow max-w-md w-full'>
+            <Input
+              placeholder='Search applications...'
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className='pl-10 w-full'
+            />
+            <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
+          </div>
+          <div className='flex space-x-2 w-full sm:w-auto'>
+            <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+            <VisibilityMenu columns={table.getAllColumns()} />
+          </div>
         </div>
-        <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-        <VisibilityMenu columns={table.getAllColumns()} />
+        <div className='flex flex-wrap gap-2'>
+          <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
+        </div>
       </div>
-      <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
       {isParticipationsPending ? (
         <div className='flex justify-center items-center flex-grow'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />

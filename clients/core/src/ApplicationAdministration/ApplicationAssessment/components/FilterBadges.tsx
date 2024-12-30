@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { PassStatus } from '@/interfaces/course_phase_participation'
 import { getStatusString } from '../utils/getStatusBadge'
 import { Gender, getGenderString } from '@/interfaces/gender'
+import { X } from 'lucide-react'
 
 interface FilterBadgesProps {
   filters: ColumnFiltersState
@@ -42,9 +43,10 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
             <Badge
               variant='secondary'
               key={`${filter.id}-${value}`}
-              className='cursor-pointer'
+              className='cursor-pointer flex items-center gap-1'
               onClick={() => handleRemoveFilter(filter.id, value)}
             >
+              <X className='h-3 w-3' />
               {getDisplayString(filter.id, value)}
             </Badge>
           ))
@@ -52,9 +54,10 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
           <Badge
             variant='secondary'
             key={filter.id}
-            className='cursor-pointer'
+            className='cursor-pointer flex items-center gap-1'
             onClick={() => handleRemoveFilter(filter.id, filter.value as string)}
           >
+            <X className='h-3 w-3' />
             {getDisplayString(filter.id, filter.value as string)}
           </Badge>
         ),
