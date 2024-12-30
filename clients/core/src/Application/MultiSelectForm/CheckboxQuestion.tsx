@@ -7,15 +7,21 @@ import { ApplicationQuestionMultiSelect } from '@/interfaces/application_questio
 interface CheckboxQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
   question: ApplicationQuestionMultiSelect
+  disabled?: boolean
 }
 
-export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({ form, question }) => (
+export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
+  form,
+  question,
+  disabled = false,
+}) => (
   <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
     <Checkbox
       checked={form.getValues().answers.length > 0}
       onCheckedChange={(checked) => {
         form.setValue('answers', checked ? ['Yes'] : [], { shouldValidate: true })
       }}
+      disabled={disabled}
     />
     <div className='space-y-1 leading-none'>
       <FormLabel>

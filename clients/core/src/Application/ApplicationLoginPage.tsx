@@ -8,7 +8,7 @@ import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
 import { useState } from 'react'
 import { ApplicationLoginCard } from './components/ApplicationLoginCard'
-import { ApplicationForm } from './ApplicationForm'
+import { ApplicationFormView } from './ApplicationFormView'
 import { Student } from '@/interfaces/student'
 import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
 import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
@@ -93,7 +93,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
         )}
         {/** display non authenticated applicationForm here */}
         {externalStudentsAllowed && selectedContinueAsExternal && (
-          <ApplicationForm
+          <ApplicationFormView
             questionsText={applicationForm.questions_text}
             questionsMultiSelect={applicationForm.questions_multi_select}
             onSubmit={handleSubmit}

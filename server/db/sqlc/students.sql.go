@@ -108,6 +108,30 @@ func (q *Queries) GetStudent(ctx context.Context, id uuid.UUID) (Student, error)
 	return i, err
 }
 
+const getStudentByCoursePhaseParticipationID = `-- name: GetStudentByCoursePhaseParticipationID :one
+SELECT s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender
+FROM student s
+INNER JOIN course_participation cp ON s.id = cp.student_id
+INNER JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
+WHERE cpp.id = $1
+`
+
+func (q *Queries) GetStudentByCoursePhaseParticipationID(ctx context.Context, id uuid.UUID) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByCoursePhaseParticipationID, id)
+	var i Student
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.MatriculationNumber,
+		&i.UniversityLogin,
+		&i.HasUniversityAccount,
+		&i.Gender,
+	)
+	return i, err
+}
+
 const getStudentByEmail = `-- name: GetStudentByEmail :one
 SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender FROM student
 WHERE email = $1 LIMIT 1

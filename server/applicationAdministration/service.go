@@ -396,3 +396,43 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	return nil
 
 }
+
+func GetApplicationByCPPID(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationID uuid.UUID) (applicationDTO.Application, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	applicationExists, err := ApplicationServiceSingleton.queries.GetApplicationExists(ctxWithTimeout, db.GetApplicationExistsParams{CoursePhaseID: coursePhaseID, ID: coursePhaseParticipationID})
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get application")
+	}
+
+	if !applicationExists {
+		return applicationDTO.Application{}, ErrNotFound
+	}
+
+	studentObj, err := student.GetStudentByCoursePhaseParticipationID(ctxWithTimeout, coursePhaseParticipationID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get student")
+	}
+
+	answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForStudent(ctxWithTimeout, db.GetApplicationAnswersTextForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get application answers")
+	}
+
+	answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForStudent(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.Application{}, errors.New("could not get application answers")
+	}
+
+	return applicationDTO.Application{
+		Status:             applicationDTO.StatusApplied,
+		Student:            &studentObj,
+		AnswersText:        applicationDTO.GetAnswersTextDTOFromDBModels(answersText),
+		AnswersMultiSelect: applicationDTO.GetAnswersMultiSelectDTOFromDBModels(answersMultiSelect),
+	}, nil
+}

@@ -1,6 +1,7 @@
 package student
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ func setupStudentRouter(router *gin.RouterGroup) {
 	student.GET("/", getAllStudents)
 	student.GET("/:uuid", getStudentByID)
 	student.POST("/", createStudent)
+	student.PUT("/:uuid", updateStudent)
 }
 
 func getAllStudents(c *gin.Context) {
@@ -60,6 +62,40 @@ func createStudent(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, student)
+}
+
+func updateStudent(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var updateStudent studentDTO.CreateStudent
+	if err := c.BindJSON(&updateStudent); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// make sure that the UUID matches
+	if id != updateStudent.ID {
+		handleError(c, http.StatusBadRequest, errors.New("UUID in URL does not match UUID in body"))
+		return
+	}
+
+	// validate student
+	if err := Validate(updateStudent); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	student, err := UpdateStudent(c, id, updateStudent)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, student)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

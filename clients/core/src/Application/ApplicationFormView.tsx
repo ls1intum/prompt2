@@ -10,7 +10,7 @@ import {
   CreateApplicationAnswerMultiSelect,
 } from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
 import { ApplicationQuestionTextForm } from './TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
@@ -26,6 +26,7 @@ interface ApplicationFormProps {
   initialAnswersText?: ApplicationAnswerText[]
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
+  disabled?: boolean
   onSubmit: (
     student: Student,
     answersText: CreateApplicationAnswerText[],
@@ -33,12 +34,13 @@ interface ApplicationFormProps {
   ) => void
 }
 
-export const ApplicationForm = ({
+export const ApplicationFormView = ({
   questionsText,
   questionsMultiSelect,
   initialAnswersMultiSelect,
   initialAnswersText,
   student,
+  disabled = false,
   onSubmit,
 }: ApplicationFormProps): JSX.Element => {
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
@@ -50,6 +52,16 @@ export const ApplicationForm = ({
   const studentRef = useRef<StudentComponentRef>(null)
   const questionTextRefs = useRef<Array<QuestionTextFormRef | null | undefined>>([])
   const questionMultiSelectRefs = useRef<Array<QuestionMultiSelectFormRef | null | undefined>>([])
+
+  // correctly propagate student data changes
+  useEffect(() => {
+    if (student) {
+      setStudentData(student)
+      if (studentRef.current) {
+        studentRef.current.rerender(student)
+      }
+    }
+  }, [student])
 
   const handleSubmit = async () => {
     let allValid = true
@@ -105,7 +117,12 @@ export const ApplicationForm = ({
             <p className='text-sm text-muted-foreground mb-4'>
               This information will be applied for all applications at this chair.
             </p>
-            <StudentForm student={studentData} onUpdate={setStudentData} ref={studentRef} />
+            <StudentForm
+              student={studentData}
+              onUpdate={setStudentData}
+              ref={studentRef}
+              disabled={disabled}
+            />
           </div>
           <Separator />
           <div>
@@ -121,6 +138,7 @@ export const ApplicationForm = ({
                       )?.answer ?? []
                     }
                     ref={(el) => (questionMultiSelectRefs.current[index] = el)}
+                    disabled={disabled}
                   />
                 ) : (
                   <ApplicationQuestionTextForm
@@ -130,15 +148,20 @@ export const ApplicationForm = ({
                         ?.answer ?? ''
                     }
                     ref={(el) => (questionTextRefs.current[index] = el)}
+                    disabled={disabled}
                   />
                 )}
               </div>
             ))}
           </div>
 
-          <div className='flex justify-end'>
-            <Button onClick={handleSubmit}>Submit</Button>
-          </div>
+          {!disabled && (
+            <div className='flex justify-end'>
+              <Button onClick={handleSubmit} disabled={disabled}>
+                Submit
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
