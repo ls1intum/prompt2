@@ -7,7 +7,7 @@ import { getGenderString } from '@/interfaces/gender'
 
 export const columns: ColumnDef<CoursePhaseParticipationWithStudent>[] = [
   {
-    id: 'first_NAme', // required for filter bar
+    id: 'first_name', // required for filter bar
     accessorKey: 'student.first_name',
     header: ({ column }) => <SortableHeader column={column} title='First Name' />,
   },

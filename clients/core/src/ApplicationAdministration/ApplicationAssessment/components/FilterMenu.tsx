@@ -11,7 +11,7 @@ import { PassStatus } from '@/interfaces/course_phase_participation'
 import { getStatusBadge } from '../utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { Gender, getGenderString } from '@/interfaces/gender'
-import { Filter, X } from 'lucide-react'
+import { Filter } from 'lucide-react'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState

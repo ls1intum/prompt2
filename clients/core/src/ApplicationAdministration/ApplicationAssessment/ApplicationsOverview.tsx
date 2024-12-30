@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from '@tanstack/react-table'
 
 import {
@@ -26,12 +27,14 @@ import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
+import { VisibilityMenu } from './components/VisibilityMenu'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
 
   const {
     data: fetchedParticipations,
@@ -49,6 +52,7 @@ export const ApplicationsOverview = (): JSX.Element => {
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, columnId, filterValue) => {
@@ -65,12 +69,13 @@ export const ApplicationsOverview = (): JSX.Element => {
       sorting,
       globalFilter,
       columnFilters,
+      columnVisibility,
     },
   })
 
   useEffect(() => {
-    console.log('filters', columnFilters)
-  }, [columnFilters])
+    console.log('filters', columnVisibility)
+  }, [columnVisibility])
 
   if (isParticipationsPending) {
     // TODO make this nicer
@@ -98,6 +103,7 @@ export const ApplicationsOverview = (): JSX.Element => {
           </div>
         </div>
         <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+        <VisibilityMenu columns={table.getAllColumns()} />
       </div>
       <div className='rounded-md border'>
         <Table>
