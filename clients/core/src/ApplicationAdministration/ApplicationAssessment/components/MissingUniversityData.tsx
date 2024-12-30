@@ -20,6 +20,7 @@ import {
 import { Student } from '@/interfaces/student'
 import { updateStudent } from '../../../network/mutations/updateStudent'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import translations from '@/lib/translations.json'
 
 interface MissingUniversityDataProps {
   student: Student
@@ -95,7 +96,7 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
                 name='university_login'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>University Login</FormLabel>
+                    <FormLabel>{translations.university['login-name']}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

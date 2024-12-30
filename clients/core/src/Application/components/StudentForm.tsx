@@ -19,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Gender } from '@/interfaces/gender'
+import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../validations/student'
+import translations from '@/lib/translations.json'
 
 interface StudentFormProps {
   student: Student
@@ -122,7 +123,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               name='university_login'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>University Login{requiredStar}</FormLabel>
+                  <FormLabel>
+                    {translations.university['login-name']}
+                    {requiredStar}
+                  </FormLabel>
                   <FormControl>
                     <Input {...field} disabled={disabled} />
                   </FormControl>
@@ -188,7 +192,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <SelectContent>
                   {Object.values(Gender).map((gender) => (
                     <SelectItem key={gender} value={gender}>
-                      {gender.replace(/_/g, ' ')}
+                      {getGenderString(gender)}
                     </SelectItem>
                   ))}
                 </SelectContent>
