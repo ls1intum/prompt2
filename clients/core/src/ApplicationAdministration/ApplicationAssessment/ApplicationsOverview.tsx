@@ -29,6 +29,7 @@ import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
 import { VisibilityMenu } from './components/VisibilityMenu'
 import { ErrorPage } from '@/components/ErrorPage'
+import { FilterBadges } from './components/FilterBadges'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -98,6 +99,7 @@ export const ApplicationsOverview = (): JSX.Element => {
         <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
         <VisibilityMenu columns={table.getAllColumns()} />
       </div>
+      <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
       {isParticipationsPending ? (
         <div className='flex justify-center items-center flex-grow'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
