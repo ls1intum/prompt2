@@ -29,6 +29,7 @@ import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
 import { VisibilityMenu } from './components/VisibilityMenu'
 import { ErrorPage } from '@/components/ErrorPage'
+import { ApplicationDetailsView } from './ApplicationDetailsView'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -36,6 +37,18 @@ export const ApplicationsOverview = (): JSX.Element => {
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(null)
+
+  const viewApplication = (id: string) => {
+    setSelectedApplication(id)
+    setDialogOpen(true)
+  }
+
+  const deleteApplication = (coursePhaseParticipationID: string) => {
+    console.log('delete', coursePhaseParticipationID)
+  }
 
   const {
     data: fetchedParticipations,
@@ -49,7 +62,7 @@ export const ApplicationsOverview = (): JSX.Element => {
 
   const table = useReactTable({
     data: fetchedParticipations ?? [],
-    columns,
+    columns: columns(viewApplication, deleteApplication),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -123,7 +136,11 @@ export const ApplicationsOverview = (): JSX.Element => {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell
+                        key={cell.id}
+                        onClick={() => viewApplication(cell.row.original.id)}
+                        className='cursor-pointer'
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -140,6 +157,12 @@ export const ApplicationsOverview = (): JSX.Element => {
           </Table>
         </div>
       )}
+
+      <ApplicationDetailsView
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        coursePhaseParticipationID={selectedApplication ?? ''}
+      />
     </div>
   )
 }
