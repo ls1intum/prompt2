@@ -10,7 +10,7 @@ import {
   CreateApplicationAnswerMultiSelect,
 } from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm'
 import { ApplicationQuestionTextForm } from './TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
@@ -52,6 +52,13 @@ export const ApplicationFormView = ({
   const studentRef = useRef<StudentComponentRef>(null)
   const questionTextRefs = useRef<Array<QuestionTextFormRef | null | undefined>>([])
   const questionMultiSelectRefs = useRef<Array<QuestionMultiSelectFormRef | null | undefined>>([])
+
+  // correctly propagate student data changes
+  useEffect(() => {
+    if (student) {
+      setStudentData(student)
+    }
+  }, [student])
 
   const handleSubmit = async () => {
     let allValid = true

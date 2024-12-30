@@ -38,7 +38,8 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
       return updateStudent(modifiedStudent)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['application', 'students'] })
+      queryClient.invalidateQueries({ queryKey: ['application'] })
+      queryClient.invalidateQueries({ queryKey: ['course_phase_participations'] })
       setIsAddingData(false)
     },
   })
@@ -53,7 +54,6 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
   })
 
   function onSubmit(values: UniversityDataFormValues) {
-    console.log('Submitted data:', values)
     mutateStudent({ ...student, ...values, has_university_account: true })
   }
 

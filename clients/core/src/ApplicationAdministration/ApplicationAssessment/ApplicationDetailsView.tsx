@@ -7,7 +7,6 @@ import {
 } from '@/components/ui/dialog'
 import { GetApplication } from '@/interfaces/get_application'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../network/queries/applicationAssessment'
 import { ApplicationForm } from '@/interfaces/application_form'
@@ -29,6 +28,7 @@ export const ApplicationDetailsView = ({
   onClose,
 }: ApplicationDetailsViewProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+
   const {
     data: fetchedApplication,
     isPending: isFetchingApplication,
@@ -48,16 +48,6 @@ export const ApplicationDetailsView = ({
     queryKey: ['application_form', phaseId],
     queryFn: () => getApplicationForm(phaseId ?? ''),
   })
-
-  useEffect(() => {
-    if (fetchedApplication) {
-      console.log(fetchedApplication)
-    }
-  }, [fetchedApplication])
-
-  if (isFetchingApplication || isFetchingApplicationForm) {
-    return <div>Loading...</div>
-  }
 
   if (isApplicationError || isApplicationFormError) {
     return (
@@ -84,20 +74,25 @@ export const ApplicationDetailsView = ({
                 <Loader2 className='h-12 w-12 animate-spin text-primary' />
               </div>
             )}
-            {fetchedApplication.student && !fetchedApplication.student.has_university_account && (
-              <MissingUniversityData student={fetchedApplication.student} />
-            )}
-            {fetchedApplication && fetchedApplicationForm && (
-              <ApplicationFormView
-                questionsText={fetchedApplicationForm.questions_text}
-                questionsMultiSelect={fetchedApplicationForm.questions_multi_select}
-                initialAnswersText={fetchedApplication.answers_text}
-                initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
-                student={fetchedApplication.student}
-                disabled={true}
-                onSubmit={() => console.log('submit')}
-              />
-            )}
+            {!isFetchingApplication &&
+              fetchedApplication.student &&
+              !fetchedApplication.student.has_university_account && (
+                <MissingUniversityData student={fetchedApplication.student} />
+              )}
+            {!isFetchingApplication &&
+              fetchedApplication &&
+              fetchedApplicationForm &&
+              fetchedApplication.student && (
+                <ApplicationFormView
+                  questionsText={fetchedApplicationForm.questions_text}
+                  questionsMultiSelect={fetchedApplicationForm.questions_multi_select}
+                  initialAnswersText={fetchedApplication.answers_text}
+                  initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
+                  student={fetchedApplication.student}
+                  disabled={true}
+                  onSubmit={() => console.log('submit')}
+                />
+              )}
           </div>
         </div>
       </DialogContent>
