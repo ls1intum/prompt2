@@ -64,7 +64,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 		MetaData:              metaData,
 	}
 
-	createdParticipation, err := CreateCoursePhaseParticipation(suite.ctx, newParticipation)
+	createdParticipation, err := CreateCoursePhaseParticipation(suite.ctx, nil, newParticipation)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newParticipation.CoursePhaseID, createdParticipation.CoursePhaseID, "CoursePhaseID should match")
 	assert.Equal(suite.T(), newParticipation.MetaData, createdParticipation.MetaData, "Meta data should match")

@@ -83,7 +83,7 @@ func (suite *CourseParticipationTestSuite) TestCreateCourseParticipation() {
 		StudentID: uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411a"),
 	}
 
-	createdParticipation, err := CreateCourseParticipation(suite.ctx, newParticipation)
+	createdParticipation, err := CreateCourseParticipation(suite.ctx, nil, newParticipation)
 	assert.NoError(suite.T(), err)
 
 	// Verify the created participation
