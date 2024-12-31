@@ -24,7 +24,7 @@ func InitKeycloakVerifier() error {
 
 	// Configure the verifier with the expected client ID (audience)
 	config := &oidc.Config{
-		ClientID: KeycloakSingleton.ClientID,
+		SkipClientIDCheck: true, // otherwise students cannot apply to courses
 	}
 
 	verifier = provider.Verifier(config)

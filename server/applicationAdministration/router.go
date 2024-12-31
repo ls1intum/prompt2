@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, applicationMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	application := router.Group("/applications", authMiddleware())
 
 	// Application Form Endpoints
@@ -24,11 +24,10 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	apply.GET("/:coursePhaseID", getApplicationFormWithCourseDetails)
 	apply.POST("/:coursePhaseID", postApplicationExtern)
 
-	applyAuthenticated := router.Group("/apply/authenticated", authMiddleware())
+	applyAuthenticated := router.Group("/apply/authenticated", applicationMiddleware())
 	applyAuthenticated.GET("/:coursePhaseID", getApplicationAuthenticated)
 	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
 
-	applyAuthenticated.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
 }
 
 func getApplicationForm(c *gin.Context) {
