@@ -1,4 +1,4 @@
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
+import { CoursePhaseParticipationWithStudent, PassStatus } from '@/interfaces/course_phase_participation'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseParticipations } from '../../network/queries/getCoursePhaseParticipations'
@@ -170,6 +170,10 @@ export const ApplicationsOverview = (): JSX.Element => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         coursePhaseParticipationID={selectedApplication ?? ''}
+        status={
+          fetchedParticipations?.find((participation) => participation.id === selectedApplication)
+            ?.pass_status ?? PassStatus.NOT_ASSESSED
+        }
       />
     </div>
   )
