@@ -49,17 +49,6 @@ export const ApplicationDetailsView = ({
     queryFn: () => getApplicationForm(phaseId ?? ''),
   })
 
-  if (isApplicationError || isApplicationFormError) {
-    return (
-      <ErrorPage
-        onRetry={() => {
-          refetchApplication()
-          refetchApplicationForm()
-        }}
-      />
-    )
-  }
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className='max-w-4xl w-full max-h-[90vh] flex flex-col'>
@@ -69,12 +58,20 @@ export const ApplicationDetailsView = ({
         </DialogHeader>
         <div className='flex-1 overflow-y-auto p-4'>
           <div className='space-y-4'>
+            {(isApplicationError || isApplicationFormError) && (
+              <ErrorPage
+                onRetry={() => {
+                  refetchApplication()
+                  refetchApplicationForm()
+                }}
+              />
+            )}
             {(isFetchingApplication || isFetchingApplicationForm) && (
               <div className='flex justify-center items-center flex-grow'>
                 <Loader2 className='h-12 w-12 animate-spin text-primary' />
               </div>
             )}
-            {!isFetchingApplication &&
+            {fetchedApplication &&
               fetchedApplication.student &&
               !fetchedApplication.student.has_university_account && (
                 <MissingUniversityData student={fetchedApplication.student} />

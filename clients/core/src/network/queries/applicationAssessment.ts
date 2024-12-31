@@ -7,9 +7,7 @@ export const getApplicationAssessment = async (
 ): Promise<GetApplication> => {
   try {
     return (
-      await axiosInstance.get(
-        `/api/apply/authenticated/${coursePhaseId}/${coursePhaseParticipationID}`,
-      )
+      await axiosInstance.get(`/api/applications/${coursePhaseId}/${coursePhaseParticipationID}`)
     ).data
   } catch (err) {
     console.error(err)
