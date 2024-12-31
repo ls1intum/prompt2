@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
@@ -87,10 +87,6 @@ export const ApplicationsOverview = (): JSX.Element => {
       columnVisibility,
     },
   })
-
-  useEffect(() => {
-    console.log('filters', columnVisibility)
-  }, [columnVisibility])
 
   if (isParticipantsError) {
     return <ErrorPage onRetry={refetch} />
@@ -166,15 +162,17 @@ export const ApplicationsOverview = (): JSX.Element => {
         </div>
       )}
 
-      <ApplicationDetailsView
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        coursePhaseParticipationID={selectedApplication ?? ''}
-        status={
-          fetchedParticipations?.find((participation) => participation.id === selectedApplication)
-            ?.pass_status ?? PassStatus.NOT_ASSESSED
-        }
-      />
+      {dialogOpen && (
+        <ApplicationDetailsView
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          coursePhaseParticipationID={selectedApplication ?? ''}
+          status={
+            fetchedParticipations?.find((participation) => participation.id === selectedApplication)
+              ?.pass_status ?? PassStatus.NOT_ASSESSED
+          }
+        />
+      )}
     </div>
   )
 }

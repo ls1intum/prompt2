@@ -41,6 +41,13 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if !checkAuthorizedParty(claims, KeycloakSingleton.expectedAuthorizedParty) {
+			log.Error("Token authorized party mismatch")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token authorized party mismatch"})
+			return
+		}
+
+		// manually check the audience, as the it is disabled in the verifier config (for allowing students to apply)
 		if !checkAudience(claims, KeycloakSingleton.ClientID) {
 			log.Error("Token audience mismatch")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token audience mismatch"})
@@ -115,7 +122,6 @@ func extractClaims(idToken *oidc.IDToken) (map[string]interface{}, error) {
 	return claims, nil
 }
 
-// checkAudience ensures that the "aud" claim matches the expected client ID.
 func checkAudience(claims map[string]interface{}, expectedClientID string) bool {
 	aud, ok := claims["aud"]
 	if !ok {
@@ -142,4 +148,12 @@ func extractResourceAccess(claims map[string]interface{}) (map[string]interface{
 		return nil, fmt.Errorf("resource access missing in token")
 	}
 	return resourceAccess, nil
+}
+
+func checkAuthorizedParty(claims map[string]interface{}, expectedAuthorizedParty string) bool {
+	azp, ok := claims["azp"]
+	if !ok {
+		return false
+	}
+	return azp == expectedAuthorizedParty
 }
