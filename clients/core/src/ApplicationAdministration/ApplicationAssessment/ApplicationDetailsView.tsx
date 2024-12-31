@@ -15,16 +15,20 @@ import { ApplicationFormView } from '../../Application/ApplicationFormView'
 import { MissingUniversityData } from './components/MissingUniversityData'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
+import { getStatusBadge } from './utils/getStatusBadge'
+import { PassStatus } from '@/interfaces/course_phase_participation'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
   open: boolean
+  status: PassStatus
   onClose: () => void
 }
 
 export const ApplicationDetailsView = ({
   coursePhaseParticipationID,
   open,
+  status,
   onClose,
 }: ApplicationDetailsViewProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -52,9 +56,16 @@ export const ApplicationDetailsView = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className='max-w-4xl w-full max-h-[90vh] flex flex-col'>
+        {(isFetchingApplication || isFetchingApplicationForm) && (
+          <div className='flex justify-center items-center flex-grow'>
+            <Loader2 className='h-12 w-12 animate-spin text-primary' />
+          </div>
+        )}
         <DialogHeader>
-          <DialogTitle>Application Details</DialogTitle>
-          <DialogDescription>View and assess the application</DialogDescription>
+          <DialogTitle>
+            {fetchedApplication?.student?.first_name} {fetchedApplication?.student?.last_name}{' '}
+          </DialogTitle>
+          <DialogDescription>{getStatusBadge(status)}</DialogDescription>
         </DialogHeader>
         <div className='flex-1 overflow-y-auto p-4'>
           <div className='space-y-4'>
