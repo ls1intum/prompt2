@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Nerzal/gocloak/v13"
 	log "github.com/sirupsen/logrus"
@@ -27,6 +28,7 @@ func CreateGroup(ctx context.Context, accessToken, groupName string) (string, er
 	baseGroupID, err := KeycloakSingleton.client.CreateGroup(ctx, accessToken, KeycloakSingleton.Realm, group)
 	if err != nil {
 		log.Error("failed to create base group: ", err)
+		return "", errors.New("failed to create keycloak roles")
 	}
 	return baseGroupID, err
 }
@@ -39,6 +41,7 @@ func CreateChildGroup(ctx context.Context, accessToken, groupName, parentGroupID
 	childGroupID, err := KeycloakSingleton.client.CreateChildGroup(ctx, accessToken, KeycloakSingleton.Realm, parentGroupID, group)
 	if err != nil {
 		log.Error("failed to create child group: ", err)
+		return "", errors.New("failed to create keycloak roles")
 	}
 
 	return childGroupID, err
