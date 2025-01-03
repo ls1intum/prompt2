@@ -7,8 +7,8 @@ export const postApplicationAssessment = async (
   assessment: ApplicationAssessment,
 ): Promise<void> => {
   try {
-    return await axiosInstance.post(
-      `/api/applications/${phaseId}/${coursePhaseParticipationID}`,
+    return await axiosInstance.put(
+      `/api/applications/${phaseId}/${coursePhaseParticipationID}/assessment`,
       assessment,
       {
         headers: {

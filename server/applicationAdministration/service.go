@@ -459,3 +459,53 @@ func GetAllApplicationParticipations(ctx context.Context, coursePhaseID uuid.UUI
 
 	return applicationParticipationsDTO, nil
 }
+
+func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
+	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
+
+	if assessment.PassStatus != nil || assessment.MetaData.Length() > 0 {
+		var passStatus db.NullPassStatus
+		if assessment.PassStatus != nil {
+			passStatus = db.NullPassStatus{
+				Valid:      true,
+				PassStatus: *assessment.PassStatus,
+			}
+		} else {
+			passStatus = db.NullPassStatus{
+				Valid:      false,
+				PassStatus: "",
+			}
+		}
+
+		// TODO: implement transaction control here
+		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
+			ID:         coursePhaseParticipationID,
+			PassStatus: passStatus,
+			MetaData:   assessment.MetaData,
+		})
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update application assessment")
+		}
+	}
+
+	if assessment.Score.Valid {
+		err := qtx.UpdateApplicationAssessment(ctx, db.UpdateApplicationAssessmentParams{CoursePhaseParticipationID: coursePhaseParticipationID, Score: assessment.Score})
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update application assessment")
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}

@@ -12,6 +12,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCoursePhaseParticipationPair = `-- name: CheckCoursePhaseParticipationPair :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.id = $1
+      AND cpp.course_phase_id = $2
+)
+`
+
+type CheckCoursePhaseParticipationPairParams struct {
+	ID            uuid.UUID `json:"id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) CheckCoursePhaseParticipationPair(ctx context.Context, arg CheckCoursePhaseParticipationPairParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCoursePhaseParticipationPair, arg.ID, arg.CoursePhaseID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkIfCoursePhaseIsApplicationPhase = `-- name: CheckIfCoursePhaseIsApplicationPhase :one
 SELECT 
     cpt.name = 'Application' AS is_application
@@ -618,6 +639,28 @@ func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (Ge
 		&i.ExternalStudentsAllowed,
 	)
 	return i, err
+}
+
+const updateApplicationAssessment = `-- name: UpdateApplicationAssessment :exec
+INSERT INTO application_assessment (id, course_phase_participation_id, score)
+VALUES (
+    gen_random_uuid(),    
+    $1,                   
+    $2             
+)
+ON CONFLICT (course_phase_participation_id) 
+DO UPDATE 
+SET score = EXCLUDED.score
+`
+
+type UpdateApplicationAssessmentParams struct {
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	Score                      pgtype.Int4 `json:"score"`
+}
+
+func (q *Queries) UpdateApplicationAssessment(ctx context.Context, arg UpdateApplicationAssessmentParams) error {
+	_, err := q.db.Exec(ctx, updateApplicationAssessment, arg.CoursePhaseParticipationID, arg.Score)
+	return err
 }
 
 const updateApplicationQuestionMultiSelect = `-- name: UpdateApplicationQuestionMultiSelect :exec
