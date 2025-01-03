@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/utils"
 )
 
 type CourseParticipationService struct {
@@ -48,11 +49,12 @@ func GetAllCourseParticipationsForStudent(ctx context.Context, id uuid.UUID) ([]
 	return dtoCourseParticipations, nil
 }
 
-func CreateCourseParticipation(ctx context.Context, c courseParticipationDTO.CreateCourseParticipation) (courseParticipationDTO.GetCourseParticipation, error) {
+func CreateCourseParticipation(ctx context.Context, transactionQueries *db.Queries, c courseParticipationDTO.CreateCourseParticipation) (courseParticipationDTO.GetCourseParticipation, error) {
+	queries := utils.GetQueries(transactionQueries, &CourseParticipationServiceSingleton.queries)
 	courseParticipation := c.GetDBModel()
 	courseParticipation.ID = uuid.New()
 
-	createdParticipation, err := CourseParticipationServiceSingleton.queries.CreateCourseParticipation(ctx, courseParticipation)
+	createdParticipation, err := queries.CreateCourseParticipation(ctx, courseParticipation)
 	if err != nil {
 		return courseParticipationDTO.GetCourseParticipation{}, err
 	}
@@ -60,8 +62,9 @@ func CreateCourseParticipation(ctx context.Context, c courseParticipationDTO.Cre
 	return courseParticipationDTO.GetCourseParticipationDTOFromDBModel(createdParticipation), nil
 }
 
-func CreateIfNotExistingCourseParticipation(ctx context.Context, studentID uuid.UUID, courseID uuid.UUID) (courseParticipationDTO.GetCourseParticipation, error) {
-	participation, err := CourseParticipationServiceSingleton.queries.GetCourseParticipationByStudentAndCourseID(ctx, db.GetCourseParticipationByStudentAndCourseIDParams{
+func CreateIfNotExistingCourseParticipation(ctx context.Context, transactionQueries *db.Queries, studentID uuid.UUID, courseID uuid.UUID) (courseParticipationDTO.GetCourseParticipation, error) {
+	queries := utils.GetQueries(transactionQueries, &CourseParticipationServiceSingleton.queries)
+	participation, err := queries.GetCourseParticipationByStudentAndCourseID(ctx, db.GetCourseParticipationByStudentAndCourseIDParams{
 		StudentID: studentID,
 		CourseID:  courseID,
 	})
@@ -69,7 +72,7 @@ func CreateIfNotExistingCourseParticipation(ctx context.Context, studentID uuid.
 		return courseParticipationDTO.GetCourseParticipationDTOFromDBModel(participation), nil
 	} else if errors.Is(err, sql.ErrNoRows) {
 		// has to be created
-		return CreateCourseParticipation(ctx, courseParticipationDTO.CreateCourseParticipation{
+		return CreateCourseParticipation(ctx, &queries, courseParticipationDTO.CreateCourseParticipation{
 			StudentID: studentID,
 			CourseID:  courseID,
 		})

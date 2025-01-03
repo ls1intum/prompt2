@@ -85,7 +85,7 @@ func (suite *RouterTestSuite) TestRouterGetStudentByID() {
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
 	}
-	createdStudent, err := CreateStudent(suite.ctx, newStudent)
+	createdStudent, err := CreateStudent(suite.ctx, nil, newStudent)
 	assert.NoError(suite.T(), err)
 	expectedID = createdStudent.ID
 

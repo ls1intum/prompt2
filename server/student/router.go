@@ -56,7 +56,7 @@ func createStudent(c *gin.Context) {
 		return
 	}
 
-	student, err := CreateStudent(c, newStudent)
+	student, err := CreateStudent(c, nil, newStudent)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -90,7 +90,7 @@ func updateStudent(c *gin.Context) {
 		return
 	}
 
-	student, err := UpdateStudent(c, id, updateStudent)
+	student, err := UpdateStudent(c, nil, id, updateStudent)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

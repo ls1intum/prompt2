@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
+	"github.com/niclasheun/prompt2.0/utils"
 )
 
 type StudentService struct {
@@ -50,11 +51,12 @@ func GetStudentByCoursePhaseParticipationID(ctx context.Context, coursePhasePart
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func CreateStudent(ctx context.Context, student studentDTO.CreateStudent) (studentDTO.Student, error) {
+func CreateStudent(ctx context.Context, transactionQueries *db.Queries, student studentDTO.CreateStudent) (studentDTO.Student, error) {
+	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 	createStudentParams := student.GetDBModel()
 
 	createStudentParams.ID = uuid.New()
-	createdStudent, err := StudentServiceSingleton.queries.CreateStudent(ctx, createStudentParams)
+	createdStudent, err := queries.CreateStudent(ctx, createStudentParams)
 	if err != nil {
 		return studentDTO.Student{}, err
 	}
@@ -71,11 +73,12 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
+func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
+	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 	updateStudentParams := student.GetDBModel()
 	updateStudentParams.ID = id
 
-	updatedStudent, err := StudentServiceSingleton.queries.UpdateStudent(ctx, db.UpdateStudentParams(updateStudentParams))
+	updatedStudent, err := queries.UpdateStudent(ctx, db.UpdateStudentParams(updateStudentParams))
 	if err != nil {
 		return studentDTO.Student{}, err
 	}
@@ -83,10 +86,11 @@ func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.CreateS
 	return studentDTO.GetStudentDTOFromDBModel(updatedStudent), nil
 }
 
-func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
+func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
+	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 	studentByEmail, err := GetStudentByEmail(ctx, studentObj.Email)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return CreateStudent(ctx, studentObj)
+		return CreateStudent(ctx, &queries, studentObj)
 	}
 	if err != nil {
 		return studentDTO.Student{}, err
@@ -96,7 +100,7 @@ func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStud
 	if studentObj.ID != uuid.Nil && studentByEmail.ID != studentObj.ID {
 		return studentDTO.Student{}, errors.New("student has wrong ID")
 	} else {
-		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.CreateStudent{
+		return UpdateStudent(ctx, &queries, studentByEmail.ID, studentDTO.CreateStudent{
 			ID:                   studentByEmail.ID, // make sure the id is not overwritten
 			FirstName:            studentObj.FirstName,
 			LastName:             studentObj.LastName,
