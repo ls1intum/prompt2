@@ -2542,6 +2542,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-scroll-area@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@radix-ui/react-scroll-area@npm:1.2.2"
+  dependencies:
+    "@radix-ui/number": "npm:1.1.0"
+    "@radix-ui/primitive": "npm:1.1.1"
+    "@radix-ui/react-compose-refs": "npm:1.1.1"
+    "@radix-ui/react-context": "npm:1.1.1"
+    "@radix-ui/react-direction": "npm:1.1.0"
+    "@radix-ui/react-presence": "npm:1.1.2"
+    "@radix-ui/react-primitive": "npm:2.0.1"
+    "@radix-ui/react-use-callback-ref": "npm:1.1.0"
+    "@radix-ui/react-use-layout-effect": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/a959c199780d5ef931a4bc9323a009dff8207ccb21ea42131e259cd32fdea035ccddca7f161e3ac1eb93691644b39a6a274329637234d525c2543ceb299493fb
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-select@npm:^2.1.2":
   version: 2.1.2
   resolution: "@radix-ui/react-select@npm:2.1.2"
@@ -13027,6 +13054,7 @@ __metadata:
     "@radix-ui/react-popover": "npm:^1.1.2"
     "@radix-ui/react-progress": "npm:^1.1.1"
     "@radix-ui/react-radio-group": "npm:^1.2.2"
+    "@radix-ui/react-scroll-area": "npm:^1.2.2"
     "@radix-ui/react-select": "npm:^2.1.2"
     "@radix-ui/react-separator": "npm:^1.1.0"
     "@radix-ui/react-slot": "npm:^1.1.0"

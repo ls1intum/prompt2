@@ -33,6 +33,7 @@ import { ApplicationDetailsView } from './ApplicationDetailsView'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
 import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -99,9 +100,9 @@ export const ApplicationsOverview = (): JSX.Element => {
   }
 
   return (
-    <div className='flex flex-col min-h-screen'>
-      <h1 className='text-4xl font-bold text-center mb-8'>Applications Overview</h1>
-      <div className='space-y-4 mb-6'>
+    <div className='flex flex-col space-y-6 p-4 md:p-6 max-w-full'>
+      <h1 className='text-3xl md:text-4xl font-bold text-center'>Applications Overview</h1>
+      <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
           <div className='relative flex-grow max-w-md w-full'>
             <Input
@@ -125,49 +126,52 @@ export const ApplicationsOverview = (): JSX.Element => {
         </div>
       </div>
       {isParticipationsPending ? (
-        <div className='flex justify-center items-center flex-grow'>
+        <div className='flex justify-center items-center h-64'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
         <div className='rounded-md border'>
-          <Table>
-            <TableHeader className='bg-muted/100'>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={() => viewApplication(cell.row.original.id)}
-                        className='cursor-pointer'
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+          <ScrollArea className='h-[calc(100vh-300px)]'>
+            <Table>
+              <TableHeader className='bg-muted/100 sticky top-0 z-10'>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} className='whitespace-nowrap'>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24 text-center'>
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          onClick={() => viewApplication(cell.row.original.id)}
+                          className='cursor-pointer whitespace-nowrap'
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className='h-24 text-center'>
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation='horizontal' />
+          </ScrollArea>
         </div>
       )}
 

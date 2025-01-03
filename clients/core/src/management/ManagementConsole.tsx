@@ -74,14 +74,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
           {courseId.courseId && !courseExists && (
             <CourseNotFound courseId={courseId.courseId || ''} />
           )}
-          <header className='flex h-16 shrink-0 items-center gap-2'>
+          <header className='sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2'>
             <div className='flex items-center gap-2 px-4'>
               <SidebarTrigger className='-ml-1' />
               <Separator orientation='vertical' className='mr-2 h-4' />
               <Breadcrumbs />
             </div>
           </header>
-          <div className='flex flex-1 flex-col gap-4 p-4'>
+          <div className='flex flex-1 flex-col gap-4 p-4 overflow-auto'>
             {hasChildren ? children : <WelcomePage />}
           </div>
         </SidebarInset>
