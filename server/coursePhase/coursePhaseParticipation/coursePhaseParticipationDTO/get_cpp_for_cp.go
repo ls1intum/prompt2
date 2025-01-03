@@ -24,7 +24,7 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 
 	return GetAllCPPsForCoursePhase{
 		ID:         model.CoursePhaseParticipationID,
-		PassStatus: getPassStatusString(model.PassStatus),
+		PassStatus: GetPassStatusString(model.PassStatus),
 		MetaData:   metaData,
 		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{
 			ID:                   model.StudentID,
