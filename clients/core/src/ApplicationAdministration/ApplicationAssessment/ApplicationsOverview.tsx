@@ -32,7 +32,7 @@ import { FilterBadges } from './components/FilterBadges'
 import { ApplicationDetailsView } from './ApplicationDetailsView'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
-import AssessmentScoreUpload from './components/ScoreUpload'
+import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

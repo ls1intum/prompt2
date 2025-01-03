@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { AlertCircle, Upload } from 'lucide-react'
+import { AlertCircle, Equal, Upload } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   Table,
@@ -30,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import translations from '@/lib/translations.json'
 
 export default function AssessmentScoreUpload() {
   const [page, setPage] = useState(1)
@@ -50,7 +49,9 @@ export default function AssessmentScoreUpload() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const text = e.target?.result as string
-        const rows = text.split('\n').map((row) => row.split(','))
+        const rows = text
+          .split('\n')
+          .map((row) => row.split(',').map((value) => value.replace(/"/g, '')))
         setCsvData(rows)
       }
       reader.readAsText(uploadFile)
@@ -128,38 +129,47 @@ export default function AssessmentScoreUpload() {
       {csvData.length > 0 && (
         <>
           <div className='space-y-4'>
-            <Label htmlFor='matchBy'>Match students by</Label>
-            <Select
-              value={matchBy}
-              onValueChange={(value: 'email' | 'tumId' | 'matrNr') => setMatchBy(value)}
-            >
-              <SelectTrigger id='matchBy'>
-                <SelectValue placeholder='Select matching criteria' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='email'>Email</SelectItem>
-                <SelectItem value='tumId'>TUM ID</SelectItem>
-                <SelectItem value='matrNr'>Matriculation Number</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className='flex items-end space-x-4'>
+              <div className='flex-1 space-y-2'>
+                <Label htmlFor='matchBy'>Match students by</Label>
+                <Select
+                  value={matchBy}
+                  onValueChange={(value: 'email' | 'tumId' | 'matrNr') => setMatchBy(value)}
+                >
+                  <SelectTrigger id='matchBy'>
+                    <SelectValue placeholder='Select matching criteria' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='email'>Email</SelectItem>
+                    <SelectItem value='university_login'>
+                      {translations.university['login-name']}
+                    </SelectItem>
+                    <SelectItem value='matriculation_number'>Matriculation Number</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className='space-y-4'>
-            <Label htmlFor='matchColumn'>Select column to match by</Label>
-            <Select value={matchColumn} onValueChange={setMatchColumn}>
-              <SelectTrigger id='matchColumn'>
-                <SelectValue placeholder='Select a column' />
-              </SelectTrigger>
-              <SelectContent>
-                {csvData[0]?.map((header, index) => (
-                  <SelectItem key={index} value={header}>
-                    {header}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className='flex items-center pb-2'>
+                <Equal className='h-6 w-6 text-muted-foreground' />
+              </div>
 
+              <div className='flex-1 space-y-2'>
+                <Label htmlFor='matchColumn'>Select column to match by</Label>
+                <Select value={matchColumn} onValueChange={setMatchColumn}>
+                  <SelectTrigger id='matchColumn'>
+                    <SelectValue placeholder='Select a column' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {csvData?.[0]?.map((header, index) => (
+                      <SelectItem key={index} value={header}>
+                        {header}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
           <div className='space-y-4'>
             <Label htmlFor='scoreColumn'>Select column for scores</Label>
             <Select value={scoreColumn} onValueChange={setScoreColumn}>
