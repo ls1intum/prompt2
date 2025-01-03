@@ -176,3 +176,28 @@ SELECT EXISTS (
     WHERE cpp.course_phase_id = $1
     AND cpp.id = $2
 );
+
+-- name: GetAllApplicationParticipations :many
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender, 
+    a.score
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+LEFT JOIN
+    application_assessment a on cpp.id = a.course_phase_participation_id
+WHERE
+    cpp.course_phase_id = $1;

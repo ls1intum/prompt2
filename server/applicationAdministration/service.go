@@ -436,3 +436,26 @@ func GetApplicationByCPPID(ctx context.Context, coursePhaseID uuid.UUID, courseP
 		AnswersMultiSelect: applicationDTO.GetAnswersMultiSelectDTOFromDBModels(answersMultiSelect),
 	}, nil
 }
+
+func GetAllApplicationParticipations(ctx context.Context, coursePhaseID uuid.UUID) ([]applicationDTO.ApplicationParticipation, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	applicationParticipations, err := ApplicationServiceSingleton.queries.GetAllApplicationParticipations(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return nil, errors.New("could not get application participations")
+	}
+
+	applicationParticipationsDTO := make([]applicationDTO.ApplicationParticipation, 0, len(applicationParticipations))
+	for _, applicationParticipation := range applicationParticipations {
+		application, err := applicationDTO.GetAllCPPsForCoursePhaseDTOFromDBModel(applicationParticipation)
+		if err != nil {
+			log.Error(err)
+			return nil, errors.New("could not get application participations")
+		}
+		applicationParticipationsDTO = append(applicationParticipationsDTO, application)
+	}
+
+	return applicationParticipationsDTO, nil
+}

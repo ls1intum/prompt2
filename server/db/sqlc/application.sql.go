@@ -237,6 +237,80 @@ func (q *Queries) DeleteApplicationQuestionText(ctx context.Context, id uuid.UUI
 	return err
 }
 
+const getAllApplicationParticipations = `-- name: GetAllApplicationParticipations :many
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender, 
+    a.score
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+LEFT JOIN
+    application_assessment a on cpp.id = a.course_phase_participation_id
+WHERE
+    cpp.course_phase_id = $1
+`
+
+type GetAllApplicationParticipationsRow struct {
+	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
+	PassStatus                 NullPassStatus `json:"pass_status"`
+	MetaData                   []byte         `json:"meta_data"`
+	StudentID                  uuid.UUID      `json:"student_id"`
+	FirstName                  pgtype.Text    `json:"first_name"`
+	LastName                   pgtype.Text    `json:"last_name"`
+	Email                      pgtype.Text    `json:"email"`
+	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text    `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
+	Gender                     Gender         `json:"gender"`
+	Score                      pgtype.Int4    `json:"score"`
+}
+
+func (q *Queries) GetAllApplicationParticipations(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllApplicationParticipationsRow, error) {
+	rows, err := q.db.Query(ctx, getAllApplicationParticipations, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllApplicationParticipationsRow
+	for rows.Next() {
+		var i GetAllApplicationParticipationsRow
+		if err := rows.Scan(
+			&i.CoursePhaseParticipationID,
+			&i.PassStatus,
+			&i.MetaData,
+			&i.StudentID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+			&i.Score,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllOpenApplicationPhases = `-- name: GetAllOpenApplicationPhases :many
 SELECT 
     cp.id AS course_phase_id,
