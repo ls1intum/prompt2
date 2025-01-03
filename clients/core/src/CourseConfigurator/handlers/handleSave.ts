@@ -16,6 +16,7 @@ interface HandleSaveProps {
   setIsModified: (val: boolean) => void
 }
 
+// TODO: move this to the server side to enable transaction control!
 export async function handleSave({
   nodes,
   edges,
