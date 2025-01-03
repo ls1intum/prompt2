@@ -110,18 +110,29 @@ export const ApplicationDetailsView = ({
                 />
               )}
 
-            <AssessmentCard score={score} metaData={metaData} />
+            <AssessmentCard
+              score={score}
+              metaData={metaData}
+              onScoreSubmission={console.log}
+              onCommentSubmission={console.log}
+            />
           </div>
         </div>
         <DialogFooter className='space-x-2'>
           <Button
             variant='outline'
             size='sm'
+            disabled={status === PassStatus.FAILED}
             className='border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-red-50'
           >
             Decline
           </Button>
-          <Button variant='default' size='sm' className='bg-green-500 hover:bg-green-600'>
+          <Button
+            variant='default'
+            size='sm'
+            disabled={status === PassStatus.PASSED}
+            className='bg-green-500 hover:bg-green-600'
+          >
             Accept
           </Button>
         </DialogFooter>

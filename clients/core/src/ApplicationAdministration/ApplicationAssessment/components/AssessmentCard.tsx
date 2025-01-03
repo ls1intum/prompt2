@@ -6,14 +6,25 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { InstructorComment } from '@/interfaces/instructor_comment'
 import { Send } from 'lucide-react'
+import { useState } from 'react'
 
 interface AssessmentCardProps {
   score: number | null
   metaData: { [key: string]: any }
+  onScoreSubmission: (score: number) => void
+  onCommentSubmission: (comment: string) => void
 }
 
-export const AssessmentCard = ({ score, metaData }: AssessmentCardProps): JSX.Element => {
+export const AssessmentCard = ({
+  score,
+  metaData,
+  onScoreSubmission,
+  onCommentSubmission,
+}: AssessmentCardProps): JSX.Element => {
+  const [currentScore, setCurrentScore] = useState<number | null>(score)
+  const [newComment, setNewComment] = useState<string>('')
   const comments = metaData.comments as InstructorComment[]
+
   return (
     <Card>
       <CardContent className='pt-6'>
@@ -28,12 +39,15 @@ export const AssessmentCard = ({ score, metaData }: AssessmentCardProps): JSX.El
                 id='new-score'
                 title='Assessment Score'
                 type='number'
-                defaultValue={score ?? 0}
+                value={currentScore ?? ''}
                 placeholder='New score'
-                // onChange={(e) => setNewScore(e.target.value)}
+                onChange={(e) =>
+                  setCurrentScore(e.target.value === '' ? null : Number(e.target.value))
+                }
               />
               <Button
-                // onClick={handleSubmitScore}
+                disabled={!currentScore || currentScore === score}
+                onClick={() => onScoreSubmission(currentScore ?? 0)}
                 size='sm'
               >
                 Submit
@@ -49,12 +63,19 @@ export const AssessmentCard = ({ score, metaData }: AssessmentCardProps): JSX.El
             <div className='flex items-start space-x-2'>
               <Textarea
                 id='new-comment'
-                // value={newComment}
-                // onChange={(e) => setNewComment(e.target.value)}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
                 placeholder='Type your comment here...'
                 className='flex-grow'
               />
-              <Button size='sm'>
+              <Button
+                size='sm'
+                disabled={!newComment}
+                onClick={() => {
+                  onCommentSubmission(newComment)
+                  setNewComment('')
+                }}
+              >
                 <Send className='h-4 w-4 mr-2' />
                 Send
               </Button>
