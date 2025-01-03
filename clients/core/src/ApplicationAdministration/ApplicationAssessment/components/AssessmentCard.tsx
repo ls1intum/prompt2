@@ -85,12 +85,19 @@ export const AssessmentCard = ({
             <div className='space-y-2 mt-4'>
               <Label className='mb-2 block font-medium'>Previous Comments</Label>
               {comments.map((comment, index) => (
-                <div key={index} className='border p-3 rounded-md bg-gray-50'>
-                  <p className='text-sm text-gray-600 mb-1'>
-                    <strong>{comment.author}</strong>{' '}
-                    {comment.timestamp && `- ${new Date(comment.timestamp).toLocaleString()}`}
+                <div
+                  key={index}
+                  className='border border-border p-3 rounded-md bg-secondary text-card-foreground'
+                >
+                  <p className='text-sm text-muted-foreground mb-1'>
+                    <strong className='font-medium text-foreground'>{comment.author}</strong>{' '}
+                    {comment.timestamp && (
+                      <span className='text-muted-foreground'>
+                        - {new Date(comment.timestamp).toLocaleString()}
+                      </span>
+                    )}
                   </p>
-                  <p className='text-gray-800'>{comment.text}</p>
+                  <p className='text-foreground'>{comment.text}</p>
                 </div>
               ))}
             </div>
