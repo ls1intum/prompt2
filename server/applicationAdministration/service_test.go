@@ -2,15 +2,18 @@ package applicationAdministration
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -315,6 +318,34 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 	// Apply with existing email but updated details
 	err := PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
 	assert.NoError(suite.T(), err)
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_Success() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+	jsonData := `{"comments": "Test-Comment"}`
+	var metaData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &metaData)
+	assert.NoError(suite.T(), err)
+
+	assessment := applicationDTO.PutAssessment{
+		MetaData: metaData,
+		Score:    pgtype.Int4{Int32: 90, Valid: true},
+	}
+
+	err = UpdateApplicationAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	assert.NoError(suite.T(), err)
+
+	// Verify that the assessment was updated
+	participations, err := GetAllApplicationParticipations(suite.ctx, coursePhaseParticipationID)
+	assert.NoError(suite.T(), err)
+	for _, participation := range participations {
+		if participation.ID == coursePhaseParticipationID {
+			assert.Equal(suite.T(), 90, participation.Score.Int32)
+			assert.Equal(suite.T(), "Test-Comment", participation.MetaData["comments"])
+			assert.Equal(suite.T(), db.PassStatusFailed, participation.PassStatus)
+		}
+	}
 }
 
 func TestApplicationAdminServiceTestSuite(t *testing.T) {

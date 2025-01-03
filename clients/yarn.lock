@@ -2642,6 +2642,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-toast@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@radix-ui/react-toast@npm:1.2.4"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.1"
+    "@radix-ui/react-collection": "npm:1.1.1"
+    "@radix-ui/react-compose-refs": "npm:1.1.1"
+    "@radix-ui/react-context": "npm:1.1.1"
+    "@radix-ui/react-dismissable-layer": "npm:1.1.3"
+    "@radix-ui/react-portal": "npm:1.1.3"
+    "@radix-ui/react-presence": "npm:1.1.2"
+    "@radix-ui/react-primitive": "npm:2.0.1"
+    "@radix-ui/react-use-callback-ref": "npm:1.1.0"
+    "@radix-ui/react-use-controllable-state": "npm:1.1.0"
+    "@radix-ui/react-use-layout-effect": "npm:1.1.0"
+    "@radix-ui/react-visually-hidden": "npm:1.1.1"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/0b9629f1a486cfca38994cc913baa01c2428e0eede6a6a06810c51497849b923cf758f49ed37805e57295daafbeabc8e8fe06e8bed20522b952e97e2e1bbb190
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-toggle-group@npm:^1.1.0":
   version: 1.1.0
   resolution: "@radix-ui/react-toggle-group@npm:1.1.0"
@@ -2895,6 +2925,25 @@ __metadata:
     "@types/react-dom":
       optional: true
   checksum: 10c0/db138dd5f3c94958a9f836740d4408c89c4a73e770eaba5ead921e69b3c0d196c5cd58323d82829a9bc05a74873c299195dfd8366b9808e53a9a3dbca5a1e5fe
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-visually-hidden@npm:1.1.1":
+  version: 1.1.1
+  resolution: "@radix-ui/react-visually-hidden@npm:1.1.1"
+  dependencies:
+    "@radix-ui/react-primitive": "npm:2.0.1"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/9a34b8e09dc79983626194fdfb4bd24c79060034a226153a2bd9f726f056139316e7a6360583567c6ccd5d9589e6d230fe2c436abea455f73e2d27b73412c412
   languageName: node
   linkType: hard
 
@@ -12927,6 +12976,7 @@ __metadata:
     "@radix-ui/react-slot": "npm:^1.1.0"
     "@radix-ui/react-switch": "npm:^1.1.1"
     "@radix-ui/react-tabs": "npm:^1.1.1"
+    "@radix-ui/react-toast": "npm:^1.2.4"
     "@radix-ui/react-toggle": "npm:^1.1.0"
     "@radix-ui/react-toggle-group": "npm:^1.1.0"
     "@radix-ui/react-tooltip": "npm:^1.1.4"

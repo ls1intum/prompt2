@@ -18,6 +18,9 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
 	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
 	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
+	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationAssessment)
+
+	application.GET("/:coursePhaseID/participations", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getAllApplicationParticipations)
 
 	// Apply Endpoints - No Authentication needed
 	apply := router.Group("/apply")
@@ -240,6 +243,59 @@ func getApplicationByCPPID(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, application)
+}
+
+func getAllApplicationParticipations(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	applications, err := GetAllApplicationParticipations(c, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get applications"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, applications)
+}
+
+func updateApplicationAssessment(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	coursePhaseParticipationId, err := uuid.Parse(c.Param("coursePhaseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var assessment applicationDTO.PutAssessment
+	if err := c.BindJSON(&assessment); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateUpdateAssessment(c, coursePhaseId, coursePhaseParticipationId, assessment)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdateApplicationAssessment(c, coursePhaseId, coursePhaseParticipationId, assessment)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not update application assessment"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "application assessment updated"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

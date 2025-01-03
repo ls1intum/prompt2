@@ -2,11 +2,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { GetApplication } from '@/interfaces/get_application'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../network/queries/applicationAssessment'
 import { ApplicationForm } from '@/interfaces/application_form'
@@ -17,11 +18,21 @@ import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from './utils/getStatusBadge'
 import { PassStatus } from '@/interfaces/course_phase_participation'
+import { Button } from '@/components/ui/button'
+
+import { AssessmentCard } from './components/AssessmentCard'
+import { ApplicationAssessment } from '@/interfaces/application_assessment'
+import { postApplicationAssessment } from '../../network/mutations/postApplicationAssessment'
+import { InstructorComment } from '@/interfaces/instructor_comment'
+import { useAuthStore } from '@/zustand/useAuthStore'
+import { useToast } from '@/hooks/use-toast'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
   open: boolean
   status: PassStatus
+  score: number | null
+  metaData: { [key: string]: any }
   onClose: () => void
 }
 
@@ -29,9 +40,14 @@ export const ApplicationDetailsView = ({
   coursePhaseParticipationID,
   open,
   status,
+  score,
+  metaData,
   onClose,
 }: ApplicationDetailsViewProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const {
     data: fetchedApplication,
@@ -52,6 +68,55 @@ export const ApplicationDetailsView = ({
     queryKey: ['application_form', phaseId],
     queryFn: () => getApplicationForm(phaseId ?? ''),
   })
+
+  const { mutate: mutateAssessment } = useMutation({
+    mutationFn: (applicationAssessment: ApplicationAssessment) => {
+      return postApplicationAssessment(
+        phaseId ?? 'undefined',
+        coursePhaseParticipationID,
+        applicationAssessment,
+      )
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['application_participations'] })
+    },
+    onError: () => {
+      toast({
+        title: 'Failed to Store Assessment',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const handleScoreSubmit = (newScore: number) => {
+    const assessment: ApplicationAssessment = {
+      Score: newScore,
+    }
+    mutateAssessment(assessment)
+  }
+
+  const handleCommentSubmit = (comment: string) => {
+    const comments = (metaData.comments || []) as InstructorComment[]
+    comments.push({
+      text: comment,
+      timestamp: new Date().toISOString(),
+      author: `${user?.firstName} ${user?.lastName}`,
+    })
+    const assessment: ApplicationAssessment = {
+      meta_data: {
+        comments,
+      },
+    }
+    mutateAssessment(assessment)
+  }
+
+  const handleAcceptanceStatusChange = (newStatus: PassStatus) => {
+    const assessment: ApplicationAssessment = {
+      pass_status: newStatus,
+    }
+    mutateAssessment(assessment)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -101,8 +166,35 @@ export const ApplicationDetailsView = ({
                   onSubmit={() => console.log('submit')}
                 />
               )}
+
+            <AssessmentCard
+              score={score}
+              metaData={metaData}
+              onScoreSubmission={handleScoreSubmit}
+              onCommentSubmission={handleCommentSubmit}
+            />
           </div>
         </div>
+        <DialogFooter className='space-x-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            disabled={status === PassStatus.FAILED}
+            className='border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-red-50'
+            onClick={() => handleAcceptanceStatusChange(PassStatus.FAILED)}
+          >
+            Reject
+          </Button>
+          <Button
+            variant='default'
+            size='sm'
+            disabled={status === PassStatus.PASSED}
+            className='bg-green-500 hover:bg-green-600'
+            onClick={() => handleAcceptanceStatusChange(PassStatus.PASSED)}
+          >
+            Accept
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

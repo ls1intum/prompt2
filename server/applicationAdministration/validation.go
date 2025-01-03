@@ -289,3 +289,40 @@ func contains(options []string, selection string) bool {
 	}
 	return false
 }
+
+func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhaseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Check if course phase is assessment phase
+	isAssessmentPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate assessment: ", err)
+		return errors.New("could not validate the assessment")
+	}
+	if !isAssessmentPhase {
+		return errors.New("course phase is not an assessment phase")
+	}
+
+	isCorrectParticipation, err := ApplicationServiceSingleton.queries.CheckCoursePhaseParticipationPair(ctxWithTimeout, db.CheckCoursePhaseParticipationPairParams{
+		ID:            coursePhaseParticipationID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not validate assessment: ", err)
+		return errors.New("could not validate the assessment")
+	}
+	if !isCorrectParticipation {
+		return errors.New("course phase participation does not belong to this course phase")
+	}
+
+	// Check if the score is valid
+	if assessment.MetaData != nil {
+		for key := range assessment.MetaData {
+			if key != "comments" {
+				return errors.New("invalid meta data key - not allowed to update other meta data")
+			}
+		}
+	}
+	return nil
+}
