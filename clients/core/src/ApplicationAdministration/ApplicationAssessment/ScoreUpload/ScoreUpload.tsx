@@ -12,6 +12,7 @@ import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentSco
 import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPage3'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { AdditionalScore } from '@/interfaces/additional_score'
+import { Upload } from 'lucide-react'
 
 interface AssessmentScoreUploadProps {
   applications: ApplicationParticipation[]
@@ -21,7 +22,7 @@ export default function AssessmentScoreUpload({
   applications,
 }: AssessmentScoreUploadProps): JSX.Element {
   const [page, setPage] = useState(1)
-  const [matchedCount, setMatchedCount] = useState(0)
+  const [additionalScores, setAdditionalScores] = useState<AdditionalScore[]>([])
   const [unmatchedApplications, setUnmatchedApplications] = useState<ApplicationParticipation[]>([])
   const [numberOfBelowThreshold, setNumberOfBelowThreshold] = useState<number | null>(null)
   const [rowsWithError, setRowsWithError] = useState<string[][]>([])
@@ -74,7 +75,7 @@ export default function AssessmentScoreUpload({
       }
     })
 
-    setMatchedCount(matchedApplications.length)
+    setAdditionalScores(matchedApplications)
     setUnmatchedApplications(unmatched)
     setRowsWithError(errorRows)
 
@@ -108,16 +109,10 @@ export default function AssessmentScoreUpload({
         }
       }
     } else {
-      // Handle form submission
-      const page1Values = page1Ref.current?.getValues()
-      const page2Values = page2Ref.current?.getValues()
       console.log({
-        ...page1Values,
-        ...page2Values,
-        matchedCount,
-        unmatchedApplications,
+        additionalScores,
       })
-      // Close the dialog or show a success message
+      // TODO: sync with server + toast error / success message
     }
   }
 
@@ -132,7 +127,10 @@ export default function AssessmentScoreUpload({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Upload Assessment Scores</Button>
+        <Button>
+          <Upload className='h-4 w-4 mr-2' />
+          Upload Scores
+        </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[900px] w-[90vw]'>
         <DialogHeader>
@@ -147,7 +145,7 @@ export default function AssessmentScoreUpload({
           </div>
           <div style={{ display: page === 3 ? 'block' : 'none' }}>
             <AssessmentScoreUploadPage3
-              matchedCount={matchedCount}
+              matchedCount={additionalScores.length}
               unmatchedApplications={unmatchedApplications}
               belowThreshold={numberOfBelowThreshold}
               rowsWithError={rowsWithError}
