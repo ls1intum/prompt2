@@ -1,7 +1,6 @@
-import { CoursePhaseParticipationWithStudent, PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@/interfaces/course_phase_participation'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { getCoursePhaseParticipations } from '../../network/queries/getCoursePhaseParticipations'
 
 import {
   ColumnFiltersState,
@@ -31,6 +30,8 @@ import { VisibilityMenu } from './components/VisibilityMenu'
 import { ErrorPage } from '@/components/ErrorPage'
 import { FilterBadges } from './components/FilterBadges'
 import { ApplicationDetailsView } from './ApplicationDetailsView'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -56,9 +57,9 @@ export const ApplicationsOverview = (): JSX.Element => {
     isPending: isParticipationsPending,
     isError: isParticipantsError,
     refetch,
-  } = useQuery<CoursePhaseParticipationWithStudent[]>({
-    queryKey: ['course_phase_participations', 'students', phaseId],
-    queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
+  } = useQuery<ApplicationParticipation[]>({
+    queryKey: ['application_participations', 'students', phaseId],
+    queryFn: () => getApplicationParticipations(phaseId ?? ''),
   })
 
   const table = useReactTable({

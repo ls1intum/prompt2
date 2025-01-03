@@ -49,6 +49,11 @@ export const columns = (
       },
     },
     {
+      id: 'score',
+      accessorKey: 'score',
+      header: ({ column }) => <SortableHeader column={column} title='Score' />,
+    },
+    {
       id: 'email',
       accessorKey: 'student.email',
       header: ({ column }) => <SortableHeader column={column} title='Email' />,
@@ -56,7 +61,7 @@ export const columns = (
     {
       id: 'matriculation_number',
       accessorKey: 'student.matriculation_number',
-      header: ({ column }) => <SortableHeader column={column} title='Matriculation Number' />,
+      header: ({ column }) => <SortableHeader column={column} title='Mat Number' />,
     },
     {
       id: `university_login`,
