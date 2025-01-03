@@ -25,6 +25,7 @@ import { ApplicationAssessment } from '@/interfaces/application_assessment'
 import { postApplicationAssessment } from '../../network/mutations/postApplicationAssessment'
 import { InstructorComment } from '@/interfaces/instructor_comment'
 import { useAuthStore } from '@/zustand/useAuthStore'
+import { useToast } from '@/hooks/use-toast'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
@@ -46,6 +47,7 @@ export const ApplicationDetailsView = ({
   const { phaseId } = useParams<{ phaseId: string }>()
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const {
     data: fetchedApplication,
@@ -79,9 +81,11 @@ export const ApplicationDetailsView = ({
       queryClient.invalidateQueries({ queryKey: ['application_participations'] })
     },
     onError: () => {
-      // Handle error
-      // TODO: add info banner
-      console.log('Error')
+      toast({
+        title: 'Failed to Store Assessment',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
     },
   })
 
