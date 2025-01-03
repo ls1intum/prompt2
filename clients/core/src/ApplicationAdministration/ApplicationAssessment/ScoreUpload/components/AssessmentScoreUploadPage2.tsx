@@ -1,5 +1,4 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -9,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Equal, Upload } from 'lucide-react'
+import { Equal } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -36,7 +35,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
     const [file, setFile] = useState<File | null>(null)
     const [csvData, setCsvData] = useState<string[][]>([])
     const [matchBy, setMatchBy] = useState<'email' | 'university_login' | 'matriculation_number'>(
-      'email',
+      'university_login',
     )
     const [matchColumn, setMatchColumn] = useState('')
     const [scoreColumn, setScoreColumn] = useState('')
@@ -50,8 +49,9 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
         reader.onload = (e) => {
           const text = e.target?.result as string
           const rows = text
+            .replace(/\r/g, '') // Remove all \r characters
             .split('\n')
-            .map((row) => row.split(',').map((value) => value.replace(/"/g, '')))
+            .map((row) => row.split(';').map((value) => value.replace(/"/g, '')))
           setCsvData(rows)
         }
         reader.readAsText(uploadFile)
@@ -88,9 +88,6 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
           <Label htmlFor='csvUpload'>Upload CSV file</Label>
           <div className='flex items-center space-x-2'>
             <Input id='csvUpload' type='file' accept='.csv' onChange={handleFileUpload} />
-            <Button type='button' size='icon'>
-              <Upload className='h-4 w-4' />
-            </Button>
           </div>
           {file && <p className='text-sm text-muted-foreground'>File uploaded: {file.name}</p>}
           {errors.file && <p className='text-sm text-red-500'>{errors.file}</p>}
@@ -112,10 +109,10 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
                       <SelectValue placeholder='Select matching criteria' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='email'>Email</SelectItem>
                       <SelectItem value='university_login'>
                         {translations.university['login-name']}
                       </SelectItem>
+                      <SelectItem value='email'>Email</SelectItem>
                       <SelectItem value='matriculation_number'>Matriculation Number</SelectItem>
                     </SelectContent>
                   </Select>
@@ -162,7 +159,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
               {errors.scoreColumn && <p className='text-sm text-red-500'>{errors.scoreColumn}</p>}
             </div>
 
-            <div className='mt-4 h-[300px] sm:max-w-[650px] w-[85vw] overflow-hidden flex flex-col'>
+            <div className='mt-4 h-[300px] sm:max-w-[850px] w-[85vw] overflow-hidden flex flex-col'>
               <h4 className='text-sm font-medium mb-2'>CSV Preview</h4>
               <div className='overflow-x-auto overflow-y-auto flex-grow'>
                 <Table>
@@ -176,7 +173,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {csvData.slice(1, 6).map((row, rowIndex) => (
+                    {csvData.slice(1).map((row, rowIndex) => (
                       <TableRow key={rowIndex}>
                         {row.map((cell, cellIndex) => (
                           <TableCell key={cellIndex} className='break-words'>

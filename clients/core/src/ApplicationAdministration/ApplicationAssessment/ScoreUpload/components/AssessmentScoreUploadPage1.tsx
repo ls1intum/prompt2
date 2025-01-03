@@ -63,13 +63,13 @@ export const AssessmentScoreUploadPage1 = forwardRef<Page1Ref>(
             id='scoreName'
             value={scoreName}
             onChange={(e) => setScoreName(e.target.value)}
-            placeholder='e.g., Midterm Exam'
+            placeholder='e.g., Technical Challenge'
           />
           {errors.scoreName && <p className='text-sm text-red-500'>{errors.scoreName}</p>}
         </div>
 
         <div className='space-y-4'>
-          <Label>Select input type</Label>
+          <Label>Select score data type</Label>
           <RadioGroup
             value={inputType}
             onValueChange={(value: 'number' | 'percentage') => setInputType(value)}
@@ -96,7 +96,7 @@ export const AssessmentScoreUploadPage1 = forwardRef<Page1Ref>(
                 type='number'
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                placeholder={inputType === 'percentage' ? 'e.g., 60' : 'e.g., 70'}
+                placeholder={inputType === 'percentage' ? 'e.g., 0,7' : 'e.g., 60'}
               />
               {errors.threshold && <p className='text-sm text-red-500'>{errors.threshold}</p>}
               <Alert>

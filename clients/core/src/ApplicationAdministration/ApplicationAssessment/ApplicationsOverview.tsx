@@ -114,7 +114,9 @@ export const ApplicationsOverview = (): JSX.Element => {
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-            <AssessmentScoreUpload />
+            {fetchedParticipations && (
+              <AssessmentScoreUpload applications={fetchedParticipations} />
+            )}
             <VisibilityMenu columns={table.getAllColumns()} />
           </div>
         </div>
