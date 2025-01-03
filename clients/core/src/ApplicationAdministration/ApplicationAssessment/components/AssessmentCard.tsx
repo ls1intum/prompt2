@@ -1,0 +1,81 @@
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { InstructorComment } from '@/interfaces/instructor_comment'
+import { Send } from 'lucide-react'
+
+interface AssessmentCardProps {
+  score: number | null
+  metaData: { [key: string]: any }
+}
+
+export const AssessmentCard = ({ score, metaData }: AssessmentCardProps): JSX.Element => {
+  const comments = metaData.comments as InstructorComment[]
+  return (
+    <Card>
+      <CardContent className='pt-6'>
+        <CardTitle className='text-xl font-semibold mb-4'>Assessment</CardTitle>
+        <div className='space-y-4'>
+          <div>
+            <Label htmlFor='new-score' className='mb-2 block font-medium'>
+              Assessment Score
+            </Label>
+            <div className='flex items-start space-x-2'>
+              <Input
+                id='new-score'
+                title='Assessment Score'
+                type='number'
+                defaultValue={score ?? 0}
+                placeholder='New score'
+                // onChange={(e) => setNewScore(e.target.value)}
+              />
+              <Button
+                // onClick={handleSubmitScore}
+                size='sm'
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+
+          <Separator className='my-4' />
+          <div>
+            <Label htmlFor='new-comment' className='mb-2 block font-medium'>
+              Add Comment
+            </Label>
+            <div className='flex items-start space-x-2'>
+              <Textarea
+                id='new-comment'
+                // value={newComment}
+                // onChange={(e) => setNewComment(e.target.value)}
+                placeholder='Type your comment here...'
+                className='flex-grow'
+              />
+              <Button size='sm'>
+                <Send className='h-4 w-4 mr-2' />
+                Send
+              </Button>
+            </div>
+          </div>
+          {comments !== undefined && comments.length > 0 && (
+            <div className='space-y-2 mt-4'>
+              <Label className='mb-2 block font-medium'>Previous Comments</Label>
+              {comments.map((comment, index) => (
+                <div key={index} className='border p-3 rounded-md bg-gray-50'>
+                  <p className='text-sm text-gray-600 mb-1'>
+                    <strong>{comment.author}</strong>{' '}
+                    {comment.timestamp && `- ${new Date(comment.timestamp).toLocaleString()}`}
+                  </p>
+                  <p className='text-gray-800'>{comment.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
