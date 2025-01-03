@@ -6,14 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func setupCoursePhaseRouter(router *gin.RouterGroup) {
-	coursePhase := router.Group("/course_phases")
-	coursePhase.GET("/:uuid", getCoursePhaseByID)
-	coursePhase.POST("", createCoursePhase)
-	coursePhase.PUT("/:uuid", updateCoursePhase)
-	coursePhase.DELETE("/:uuid", deleteCoursePhase)
+func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+	coursePhase := router.Group("/course_phases", authMiddleware())
+	coursePhase.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseByID)
+	coursePhase.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhase)
+	coursePhase.PUT("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhase)
+	coursePhase.DELETE("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteCoursePhase)
 }
 
 func createCoursePhase(c *gin.Context) {
