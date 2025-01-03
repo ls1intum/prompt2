@@ -2,6 +2,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -17,11 +18,19 @@ import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from './utils/getStatusBadge'
 import { PassStatus } from '@/interfaces/course_phase_participation'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { InstructorComment } from '@/interfaces/instructor_comment'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
   open: boolean
   status: PassStatus
+  score: number | null
+  metaData: { [key: string]: any }
   onClose: () => void
 }
 
@@ -29,6 +38,8 @@ export const ApplicationDetailsView = ({
   coursePhaseParticipationID,
   open,
   status,
+  score,
+  metaData,
   onClose,
 }: ApplicationDetailsViewProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -52,6 +63,8 @@ export const ApplicationDetailsView = ({
     queryKey: ['application_form', phaseId],
     queryFn: () => getApplicationForm(phaseId ?? ''),
   })
+
+  const comments = metaData.comments as InstructorComment[]
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -101,8 +114,58 @@ export const ApplicationDetailsView = ({
                   onSubmit={() => console.log('submit')}
                 />
               )}
+
+            <Card className='mt-6'>
+              <CardContent className='pt-6'>
+                <CardTitle className='mb-4'>Assessment</CardTitle>
+                <div className='space-y-4'>
+                  <div>
+                    <Label htmlFor='new-score' className='mb-2 block'>
+                      Assessment Score
+                    </Label>
+                    <div className='flex items-center space-x-2'>
+                      <Input
+                        id='new-score'
+                        title='Assessment Score'
+                        type='number'
+                        defaultValue={score ?? 0}
+                        className='w-24'
+                        placeholder='New score'
+                      />
+                    </div>
+                    <Button>Submit</Button>
+                  </div>
+                  <Separator className='my-4' />
+                  <div className='flex space-x-2'></div>
+                  <Label htmlFor='new-score' className='mb-2 block'>
+                    Additional Comments
+                  </Label>
+                  {comments !== undefined && comments.length > 0 && (
+                    <div className='space-y-2'>
+                      {comments.map((comment, index) => (
+                        <div key={index} className='border p-2 rounded-md'>
+                          <p className='text-sm text-gray-600'>
+                            <strong>{comment.author}</strong>{' '}
+                            {comment.timestamp && `- ${comment.timestamp}`}
+                          </p>
+                          <p>{comment.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
+        <DialogFooter>
+          <Button variant='destructive' className='flex-1'>
+            Reject
+          </Button>
+          <Button variant='default' className='flex-1'>
+            Accept
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

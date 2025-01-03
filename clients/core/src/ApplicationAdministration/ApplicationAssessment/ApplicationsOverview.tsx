@@ -41,10 +41,10 @@ export const ApplicationsOverview = (): JSX.Element => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedApplication, setSelectedApplication] = useState<string | null>(null)
+  const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
 
   const viewApplication = (id: string) => {
-    setSelectedApplication(id)
+    setSelectedApplicationID(id)
     setDialogOpen(true)
   }
 
@@ -61,6 +61,10 @@ export const ApplicationsOverview = (): JSX.Element => {
     queryKey: ['application_participations', 'students', phaseId],
     queryFn: () => getApplicationParticipations(phaseId ?? ''),
   })
+
+  const selectedApplication = fetchedParticipations?.find(
+    (participation) => participation.id === selectedApplicationID,
+  )
 
   const table = useReactTable({
     data: fetchedParticipations ?? [],
@@ -167,11 +171,10 @@ export const ApplicationsOverview = (): JSX.Element => {
         <ApplicationDetailsView
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
-          coursePhaseParticipationID={selectedApplication ?? ''}
-          status={
-            fetchedParticipations?.find((participation) => participation.id === selectedApplication)
-              ?.pass_status ?? PassStatus.NOT_ASSESSED
-          }
+          coursePhaseParticipationID={selectedApplicationID ?? ''}
+          status={selectedApplication?.pass_status ?? PassStatus.NOT_ASSESSED}
+          score={selectedApplication?.score ?? null}
+          metaData={selectedApplication?.meta_data ?? {}}
         />
       )}
     </div>
