@@ -220,3 +220,24 @@ SELECT EXISTS (
     WHERE cpp.id = $1
       AND cpp.course_phase_id = $2
 );
+
+
+-- name: BatchUpdateAdditionalScores :exec
+WITH updates AS (
+  SELECT 
+    UNNEST($1::uuid[]) AS id,
+    UNNEST($2::float8[]) AS score -- Use float8 (double precision) for the score
+)
+UPDATE course_phase_participation
+SET    
+    meta_data = jsonb_set(
+        COALESCE(meta_data, '{}'),
+        ARRAY[$3]::text[], -- Use $3 for the scoreName parameter
+        to_jsonb(updates.score) -- Convert the float score to JSONB
+    )
+FROM updates
+WHERE 
+    course_phase_participation.id = updates.id
+    AND course_phase_participation.course_phase_id = $4; -- Use $4 for the single course_phase_id
+
+

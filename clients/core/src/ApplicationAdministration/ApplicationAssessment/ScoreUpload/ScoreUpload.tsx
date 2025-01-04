@@ -11,8 +11,11 @@ import { AssessmentScoreUploadPage1, Page1Ref } from './components/AssessmentSco
 import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentScoreUploadPage2'
 import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPage3'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { AdditionalScore, IndividualScore } from '@/interfaces/additional_score'
 import { Upload } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { postAdditionalScore } from '../../../network/mutations/postAdditionalScore'
+import { useParams } from 'react-router-dom'
 
 interface AssessmentScoreUploadProps {
   applications: ApplicationParticipation[]
@@ -21,13 +24,27 @@ interface AssessmentScoreUploadProps {
 export default function AssessmentScoreUpload({
   applications,
 }: AssessmentScoreUploadProps): JSX.Element {
+  const { phaseId } = useParams<{ phaseId: string }>()
   const [page, setPage] = useState(1)
-  const [additionalScores, setAdditionalScores] = useState<AdditionalScore[]>([])
+  const [additionalScores, setAdditionalScores] = useState<IndividualScore[]>([])
   const [unmatchedApplications, setUnmatchedApplications] = useState<ApplicationParticipation[]>([])
   const [numberOfBelowThreshold, setNumberOfBelowThreshold] = useState<number | null>(null)
   const [rowsWithError, setRowsWithError] = useState<string[][]>([])
   const page1Ref = useRef<Page1Ref>(null)
   const page2Ref = useRef<Page2Ref>(null)
+
+  const { mutate: mutateSendScore, error: mutateError } = useMutation({
+    mutationFn: (additionalScore: AdditionalScore) => {
+      return postAdditionalScore(phaseId ?? 'undefined', additionalScore)
+    },
+    onSuccess: () => {
+      // queryClient.invalidateQueries({ queryKey: ['application', phaseId, user?.email] })
+      console.log('success')
+    },
+    onError: () => {
+      console.log('error')
+    },
+  })
 
   const matchStudents = (
     csvData: string[][],
@@ -45,7 +62,7 @@ export default function AssessmentScoreUpload({
       console.log('Match column or score column not found in CSV data')
     }
 
-    const matchedApplications: AdditionalScore[] = []
+    const matchedApplications: IndividualScore[] = []
     let belowThreshold: number = 0
     const unmatched: ApplicationParticipation[] = []
     const errorRows: string[][] = []
@@ -60,7 +77,7 @@ export default function AssessmentScoreUpload({
         const score = parseFloat(matchedRow[scoreColumnIndex])
         if (!isNaN(score)) {
           matchedApplications.push({
-            coursePhaseParticipationId: app.id,
+            course_phase_participation_id: app.id,
             score,
           })
           if (threshold !== null && score < threshold) {
@@ -95,7 +112,7 @@ export default function AssessmentScoreUpload({
       if (page2Ref.current?.validate()) {
         const page1Values = page1Ref.current?.getValues()
         const page2Values = page2Ref.current?.getValues()
-        console.log(page1Values, page2Values)
+
         if (page1Values && page2Values) {
           console.log('trying to match students')
           matchStudents(
@@ -109,6 +126,21 @@ export default function AssessmentScoreUpload({
         }
       }
     } else {
+      const page1Values = page1Ref.current?.getValues()
+      const page2Values = page2Ref.current?.getValues()
+
+      if (page1Values && page2Values) {
+        const newScore: AdditionalScore = {
+          name: page1Values.scoreName,
+          threshold_active: page1Values.hasThreshold,
+          threshold: page1Values.hasThreshold ? parseFloat(page1Values.threshold) : 0,
+          scores: additionalScores,
+        }
+        mutateSendScore(newScore)
+      } else {
+        // TODO replace this with a toast message
+        console.log('Error: could not get values from page 1 or page')
+      }
       console.log({
         additionalScores,
       })

@@ -12,6 +12,42 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
+WITH updates AS (
+  SELECT 
+    UNNEST($1::uuid[]) AS id,
+    UNNEST($2::float8[]) AS score -- Use float8 (double precision) for the score
+)
+UPDATE course_phase_participation
+SET    
+    meta_data = jsonb_set(
+        COALESCE(meta_data, '{}'),
+        ARRAY[$3]::text[], -- Use $3 for the scoreName parameter
+        to_jsonb(updates.score) -- Convert the float score to JSONB
+    )
+FROM updates
+WHERE 
+    course_phase_participation.id = updates.id
+    AND course_phase_participation.course_phase_id = $4
+`
+
+type BatchUpdateAdditionalScoresParams struct {
+	Column1       []uuid.UUID `json:"column_1"`
+	Column2       []float64   `json:"column_2"`
+	Column3       []string    `json:"column_3"`
+	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
+}
+
+func (q *Queries) BatchUpdateAdditionalScores(ctx context.Context, arg BatchUpdateAdditionalScoresParams) error {
+	_, err := q.db.Exec(ctx, batchUpdateAdditionalScores,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.CoursePhaseID,
+	)
+	return err
+}
+
 const checkCoursePhaseParticipationPair = `-- name: CheckCoursePhaseParticipationPair :one
 SELECT EXISTS (
     SELECT 1

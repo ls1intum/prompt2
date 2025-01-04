@@ -509,3 +509,41 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 
 	return nil
 }
+
+func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additionalScore applicationDTO.AdditionalScore) error {
+	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback(ctx)
+	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
+
+	// generate batch of scores
+	batchScores := make([]float64, 0, len(additionalScore.Scores))
+	coursePhaseIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
+	scoreNameArray := make([]string, 0, len(additionalScore.Scores))
+	for _, score := range additionalScore.Scores {
+		batchScores = append(batchScores, float64(score.Score))
+		coursePhaseIDs = append(coursePhaseIDs, uuid.MustParse(score.CoursePhaseParticipationID))
+		scoreNameArray = append(scoreNameArray, additionalScore.Name)
+	}
+
+	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
+		Column1:       coursePhaseIDs,
+		Column2:       batchScores,
+		Column3:       scoreNameArray,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not update additional scores")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
