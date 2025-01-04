@@ -14,12 +14,38 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
 ): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
   return [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label='Select all'
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onClick={(event) => {
+            event.stopPropagation()
+            row.toggleSelected()
+          }}
+          aria-label='Select row'
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       id: 'first_name', // required for filter bar
       accessorKey: 'student.first_name',
