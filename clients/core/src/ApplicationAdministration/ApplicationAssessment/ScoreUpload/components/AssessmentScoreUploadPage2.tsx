@@ -28,6 +28,7 @@ export interface Page2Ref {
     matchColumn: string
     scoreColumn: string
   }
+  reset: () => void
 }
 
 export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
@@ -40,6 +41,15 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
     const [matchColumn, setMatchColumn] = useState('')
     const [scoreColumn, setScoreColumn] = useState('')
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
+
+    const reset = () => {
+      setFile(null)
+      setCsvData([])
+      setMatchBy('university_login')
+      setMatchColumn('')
+      setScoreColumn('')
+      setErrors({})
+    }
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
       const uploadFile = event.target.files?.[0]
@@ -80,6 +90,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
     useImperativeHandle(ref, () => ({
       validate,
       getValues: () => ({ file, csvData, matchBy, matchColumn, scoreColumn }),
+      reset,
     }))
 
     return (

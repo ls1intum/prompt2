@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,9 +13,10 @@ import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPa
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { AdditionalScore, IndividualScore } from '@/interfaces/additional_score'
 import { Upload } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postAdditionalScore } from '../../../network/mutations/postAdditionalScore'
 import { useParams } from 'react-router-dom'
+import { useToast } from '@/hooks/use-toast'
 
 interface AssessmentScoreUploadProps {
   applications: ApplicationParticipation[]
@@ -25,6 +26,7 @@ export default function AssessmentScoreUpload({
   applications,
 }: AssessmentScoreUploadProps): JSX.Element {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [additionalScores, setAdditionalScores] = useState<IndividualScore[]>([])
   const [unmatchedApplications, setUnmatchedApplications] = useState<ApplicationParticipation[]>([])
@@ -32,17 +34,46 @@ export default function AssessmentScoreUpload({
   const [rowsWithError, setRowsWithError] = useState<string[][]>([])
   const page1Ref = useRef<Page1Ref>(null)
   const page2Ref = useRef<Page2Ref>(null)
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
-  const { mutate: mutateSendScore, error: mutateError } = useMutation({
+  const resetStates = useCallback(() => {
+    setPage(1)
+    setAdditionalScores([])
+    setUnmatchedApplications([])
+    setNumberOfBelowThreshold(null)
+    setRowsWithError([])
+    if (page1Ref.current) {
+      page1Ref.current.reset()
+    }
+    if (page2Ref.current) {
+      page2Ref.current.reset()
+    }
+  }, [])
+
+  const { mutate: mutateSendScore } = useMutation({
     mutationFn: (additionalScore: AdditionalScore) => {
       return postAdditionalScore(phaseId ?? 'undefined', additionalScore)
     },
     onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ['application', phaseId, user?.email] })
-      console.log('success')
+      queryClient.invalidateQueries({
+        queryKey: ['application_participations', 'students', phaseId],
+      })
+      toast({
+        title: 'Successfully added the scores!',
+        variant: 'default',
+      })
+      setOpen(false)
+      resetStates()
     },
     onError: () => {
-      console.log('error')
+      toast({
+        title: 'Failed to upload the scores',
+        description: 'An error occurred. Please try again later.',
+        variant: 'destructive',
+      })
+      setOpen(false)
+      resetStates()
     },
   })
 
@@ -157,7 +188,15 @@ export default function AssessmentScoreUpload({
   }
 
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          resetStates()
+        }
+        setOpen(newOpen)
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Upload className='h-4 w-4 mr-2' />

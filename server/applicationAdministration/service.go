@@ -524,12 +524,14 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	// generate batch of scores
 	batchScores := make([]float64, 0, len(additionalScore.Scores))
 	coursePhaseIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
-	scoreNameArray := make([]string, 0, len(additionalScore.Scores))
+
 	for _, score := range additionalScore.Scores {
+		log.Info(score)
 		batchScores = append(batchScores, float64(score.Score))
 		coursePhaseIDs = append(coursePhaseIDs, uuid.MustParse(score.CoursePhaseParticipationID))
-		scoreNameArray = append(scoreNameArray, additionalScore.Name)
 	}
+	scoreNameArray := make([]string, 0, 1)
+	scoreNameArray = append(scoreNameArray, additionalScore.Name)
 
 	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
 		Column1:       coursePhaseIDs,

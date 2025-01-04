@@ -12,6 +12,7 @@ export interface Page1Ref {
     hasThreshold: boolean
     threshold: string
   }
+  reset: () => void
 }
 
 export const AssessmentScoreUploadPage1 = forwardRef<Page1Ref>(
@@ -20,6 +21,13 @@ export const AssessmentScoreUploadPage1 = forwardRef<Page1Ref>(
     const [hasThreshold, setHasThreshold] = useState(false)
     const [threshold, setThreshold] = useState('')
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
+
+    const reset = () => {
+      setScoreName('')
+      setHasThreshold(false)
+      setThreshold('')
+      setErrors({})
+    }
 
     const validate = () => {
       const newErrors: { [key: string]: string } = {}
@@ -48,6 +56,7 @@ export const AssessmentScoreUploadPage1 = forwardRef<Page1Ref>(
     useImperativeHandle(ref, () => ({
       validate,
       getValues: () => ({ scoreName, hasThreshold, threshold }),
+      reset,
     }))
 
     return (

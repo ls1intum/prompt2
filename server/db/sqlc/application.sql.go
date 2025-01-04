@@ -16,13 +16,14 @@ const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 
     UNNEST($1::uuid[]) AS id,
-    UNNEST($2::float8[]) AS score -- Use float8 (double precision) for the score
+    UNNEST($2::float8[]) AS score,
+    $3::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
 SET    
     meta_data = jsonb_set(
         COALESCE(meta_data, '{}'),
-        $3::text[], -- Use $3 for the scoreName parameter
+        updates.path, -- Use dynamic path
         to_jsonb(updates.score) -- Convert the float score to JSONB
     )
 FROM updates
@@ -625,8 +626,6 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 }
 
 const getExistingAdditionalScores = `-- name: GetExistingAdditionalScores :one
-
-
 SELECT 
     meta_data->>'additional_scores' AS additional_scores
 FROM
@@ -635,7 +634,6 @@ WHERE
     id = $1
 `
 
-// Use $4 for the single course_phase_id
 func (q *Queries) GetExistingAdditionalScores(ctx context.Context, id uuid.UUID) (interface{}, error) {
 	row := q.db.QueryRow(ctx, getExistingAdditionalScores, id)
 	var additional_scores interface{}
