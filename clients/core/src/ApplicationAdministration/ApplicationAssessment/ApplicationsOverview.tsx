@@ -162,10 +162,10 @@ export const ApplicationsOverview = (): JSX.Element => {
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+            <VisibilityMenu columns={table.getAllColumns()} />
             {fetchedParticipations && (
               <AssessmentScoreUpload applications={fetchedParticipations} />
             )}
-            <VisibilityMenu columns={table.getAllColumns()} />
           </div>
         </div>
         <div className='flex flex-wrap gap-2'>

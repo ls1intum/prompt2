@@ -170,7 +170,7 @@ export default function AssessmentScoreUpload({
               Previous
             </Button>
           )}
-          <Button onClick={() => handlePageNavigation(true)}>
+          <Button className='ml-auto' onClick={() => handlePageNavigation(true)}>
             {state.page === 3 ? 'Submit' : 'Next'}
           </Button>
         </div>
