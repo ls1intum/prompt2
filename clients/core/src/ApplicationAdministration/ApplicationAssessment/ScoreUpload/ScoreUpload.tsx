@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postAdditionalScore } from '../../../network/mutations/postAdditionalScore'
 import { useParams } from 'react-router-dom'
 import { useToast } from '@/hooks/use-toast'
+import { matchStudents } from './utils/matchStudents'
 
 interface AssessmentScoreUploadProps {
   applications: ApplicationParticipation[]
@@ -27,22 +28,36 @@ export default function AssessmentScoreUpload({
 }: AssessmentScoreUploadProps): JSX.Element {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
-  const [page, setPage] = useState(1)
-  const [additionalScores, setAdditionalScores] = useState<IndividualScore[]>([])
-  const [unmatchedApplications, setUnmatchedApplications] = useState<ApplicationParticipation[]>([])
-  const [numberOfBelowThreshold, setNumberOfBelowThreshold] = useState<number | null>(null)
-  const [rowsWithError, setRowsWithError] = useState<string[][]>([])
+  const [state, setState] = useState({
+    page: 1,
+    additionalScores: [] as IndividualScore[],
+    unmatchedApplications: [] as ApplicationParticipation[],
+    rowsWithError: [] as string[][],
+    numberOfBelowThreshold: null as number | null,
+    open: false,
+  })
+
   const page1Ref = useRef<Page1Ref>(null)
   const page2Ref = useRef<Page2Ref>(null)
-  const [open, setOpen] = useState(false)
   const { toast } = useToast()
 
+  const onError = (message: string) => {
+    toast({
+      title: 'Error',
+      description: message,
+      variant: 'destructive',
+    })
+  }
+
   const resetStates = useCallback(() => {
-    setPage(1)
-    setAdditionalScores([])
-    setUnmatchedApplications([])
-    setNumberOfBelowThreshold(null)
-    setRowsWithError([])
+    setState({
+      page: 1,
+      additionalScores: [],
+      unmatchedApplications: [],
+      rowsWithError: [],
+      numberOfBelowThreshold: null,
+      open: false,
+    })
     if (page1Ref.current) {
       page1Ref.current.reset()
     }
@@ -57,13 +72,15 @@ export default function AssessmentScoreUpload({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
+        queryKey: ['application_participations', phaseId],
+      })
+      queryClient.invalidateQueries({
         queryKey: ['application_participations', 'students', phaseId],
       })
       toast({
         title: 'Successfully added the scores!',
         variant: 'default',
       })
-      setOpen(false)
       resetStates()
     },
     onError: () => {
@@ -72,130 +89,53 @@ export default function AssessmentScoreUpload({
         description: 'An error occurred. Please try again later.',
         variant: 'destructive',
       })
-      setOpen(false)
       resetStates()
     },
   })
 
-  const matchStudents = (
-    csvData: string[][],
-    matchBy: string,
-    matchColumn: string,
-    scoreColumn: string,
-    threshold: number | null,
-  ) => {
-    const headerRow = csvData[0]
-    const matchColumnIndex = headerRow.indexOf(matchColumn)
-    const scoreColumnIndex = headerRow.indexOf(scoreColumn)
-
-    if (matchColumnIndex === -1 || scoreColumnIndex === -1) {
-      // TODO replace this with a toast message
-      console.log('Match column or score column not found in CSV data')
-    }
-
-    const matchedApplications: IndividualScore[] = []
-    let belowThreshold: number = 0
-    const unmatched: ApplicationParticipation[] = []
-    const errorRows: string[][] = []
-
-    errorRows.push(csvData[0]) // Add the header row to the error rows
-
-    applications.forEach((app) => {
-      const matchValue = app.student[matchBy as keyof typeof app.student]
-      const matchedRow = csvData.find((row) => row[matchColumnIndex] === matchValue)
-
-      if (matchedRow) {
-        const commaSeparatedScores = matchedRow[scoreColumnIndex].replace(',', '.')
-        const score = parseFloat(commaSeparatedScores)
-        if (!isNaN(score)) {
-          matchedApplications.push({
-            course_phase_participation_id: app.id,
-            score,
-          })
-          if (threshold !== null && score < threshold) {
-            belowThreshold += 1
-          }
-        } else {
-          errorRows.push(matchedRow)
-          unmatched.push(app)
-        }
-      } else {
-        unmatched.push(app)
-      }
-    })
-
-    setAdditionalScores(matchedApplications)
-    setUnmatchedApplications(unmatched)
-    setRowsWithError(errorRows)
-
-    if (threshold !== null) {
-      setNumberOfBelowThreshold(belowThreshold)
-    } else {
-      setNumberOfBelowThreshold(null)
-    }
-  }
-
-  const handleNext = () => {
-    if (page === 1) {
-      if (page1Ref.current?.validate()) {
-        setPage(2)
-      }
-    } else if (page === 2) {
-      if (page2Ref.current?.validate()) {
+  const handlePageNavigation = (next: boolean) => {
+    if (next) {
+      if (state.page === 1 && page1Ref.current?.validate()) {
+        setState((prev) => ({ ...prev, page: 2 }))
+      } else if (state.page === 2 && page2Ref.current?.validate()) {
         const page1Values = page1Ref.current?.getValues()
         const page2Values = page2Ref.current?.getValues()
-
         if (page1Values && page2Values) {
-          console.log('trying to match students')
           matchStudents(
             page2Values.csvData,
             page2Values.matchBy,
             page2Values.matchColumn,
             page2Values.scoreColumn,
             page1Values.hasThreshold ? parseFloat(page1Values.threshold) : null,
+            onError,
+            applications,
+            setState,
           )
-          setPage(3)
+          setState((prev) => ({ ...prev, page: 3 }))
         }
-      }
-    } else {
-      const page1Values = page1Ref.current?.getValues()
-      const page2Values = page2Ref.current?.getValues()
-
-      if (page1Values && page2Values) {
+      } else if (state.page === 3) {
+        const page1Values = page1Ref.current?.getValues()
         const newScore: AdditionalScore = {
-          name: page1Values.scoreName,
-          threshold_active: page1Values.hasThreshold,
-          threshold: page1Values.hasThreshold ? parseFloat(page1Values.threshold) : 0,
-          scores: additionalScores,
+          name: page1Values?.scoreName ?? '',
+          threshold_active: !!page1Values?.hasThreshold,
+          threshold: page1Values?.hasThreshold ? parseFloat(page1Values.threshold) : 0,
+          scores: state.additionalScores,
         }
         mutateSendScore(newScore)
-      } else {
-        // TODO replace this with a toast message
-        console.log('Error: could not get values from page 1 or page')
       }
-      console.log({
-        additionalScores,
-      })
-      // TODO: sync with server + toast error / success message
-    }
-  }
-
-  const handlePrevious = () => {
-    if (page === 2) {
-      setPage(1)
-    } else if (page === 3) {
-      setPage(2)
+    } else {
+      setState((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))
     }
   }
 
   return (
     <Dialog
-      open={open}
+      open={state.open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
           resetStates()
         }
-        setOpen(newOpen)
+        setState((prev) => ({ ...prev, open: newOpen }))
       }}
     >
       <DialogTrigger asChild>
@@ -209,26 +149,30 @@ export default function AssessmentScoreUpload({
           <DialogTitle>Upload Assessment Scores</DialogTitle>
         </DialogHeader>
         <div className='mt-4'>
-          <div style={{ display: page === 1 ? 'block' : 'none' }}>
+          <div style={{ display: state.page === 1 ? 'block' : 'none' }}>
             <AssessmentScoreUploadPage1 ref={page1Ref} />
           </div>
-          <div style={{ display: page === 2 ? 'block' : 'none' }}>
+          <div style={{ display: state.page === 2 ? 'block' : 'none' }}>
             <AssessmentScoreUploadPage2 ref={page2Ref} />
           </div>
-          <div style={{ display: page === 3 ? 'block' : 'none' }}>
+          <div style={{ display: state.page === 3 ? 'block' : 'none' }}>
             <AssessmentScoreUploadPage3
-              matchedCount={additionalScores.length}
-              unmatchedApplications={unmatchedApplications}
-              belowThreshold={numberOfBelowThreshold}
-              rowsWithError={rowsWithError}
+              matchedCount={state.additionalScores.length}
+              unmatchedApplications={state.unmatchedApplications}
+              belowThreshold={state.numberOfBelowThreshold}
+              rowsWithError={state.rowsWithError}
             />
           </div>
         </div>
         <div className='mt-4 flex justify-between'>
-          <Button onClick={handlePrevious} disabled={page === 1}>
-            Previous
+          {state.page !== 1 && (
+            <Button onClick={() => handlePageNavigation(false)} disabled={state.page === 1}>
+              Previous
+            </Button>
+          )}
+          <Button onClick={() => handlePageNavigation(true)}>
+            {state.page === 3 ? 'Submit' : 'Next'}
           </Button>
-          <Button onClick={handleNext}>{page === 3 ? 'Submit' : 'Next'}</Button>
         </div>
       </DialogContent>
     </Dialog>
