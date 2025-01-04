@@ -18,7 +18,19 @@ import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
+  additionalScores: string[],
 ): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
+  let additionalScoreColumns: ColumnDef<CoursePhaseParticipationWithStudent>[] = []
+  if (additionalScores.length > 0) {
+    additionalScoreColumns = additionalScores.map((scoreName) => {
+      return {
+        id: scoreName,
+        accessorFn: (row) => row.meta_data?.[scoreName] ?? null,
+        header: ({ column }) => <SortableHeader column={column} title={scoreName} />,
+      }
+    })
+  }
+
   return [
     {
       id: 'first_name', // required for filter bar
@@ -53,6 +65,7 @@ export const columns = (
       accessorKey: 'score',
       header: ({ column }) => <SortableHeader column={column} title='Score' />,
     },
+    ...additionalScoreColumns,
     {
       id: 'email',
       accessorKey: 'student.email',

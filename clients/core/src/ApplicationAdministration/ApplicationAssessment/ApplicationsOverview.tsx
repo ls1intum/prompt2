@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
@@ -94,12 +94,6 @@ export const ApplicationsOverview = (): JSX.Element => {
     queryFn: () => getAdditionalScoreNames(phaseId ?? ''),
   })
 
-  useEffect(() => {
-    if (fetchedAdditionalScores) {
-      console.log(fetchedAdditionalScores)
-    }
-  }, [fetchedAdditionalScores])
-
   const {
     data: fetchedParticipations,
     isPending: isParticipationsPending,
@@ -123,7 +117,7 @@ export const ApplicationsOverview = (): JSX.Element => {
 
   const table = useReactTable({
     data: fetchedParticipations ?? [],
-    columns: columns(viewApplication, deleteApplication),
+    columns: columns(viewApplication, deleteApplication, fetchedAdditionalScores ?? []),
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
