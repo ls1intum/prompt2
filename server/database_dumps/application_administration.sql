@@ -48,6 +48,9 @@ VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'John', 'Doe', 'existingstudent@
 
 INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
 VALUES ('b1f97ee7-fd11-4556-8c75-d0c2714e7082', 'Test', 'Student', 'test@example.com', '03788888', 'ab12cde', true, 'male');
+INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
+VALUES ('15ae3969-bcb7-4d5b-8245-c305d13d671b', 'Another', 'Student', 'test@example.com', '03788888', 'ab12cde', true, 'male');
+
 
 
 create type course_type as enum ('lecture', 'seminar', 'practical course');
@@ -275,10 +278,13 @@ ALTER TABLE ONLY application_answer_text
     ADD CONSTRAINT unique_application_answer_text UNIQUE (course_phase_participation_id, application_question_id);
 
 
+
 INSERT INTO course_participation (id, course_id, student_id) VALUES ('82d7efae-d545-4cc5-9b94-5d0ee1e50d25', 'be780b32-a678-4b79-ae1c-80071771d254', 'b1f97ee7-fd11-4556-8c75-d0c2714e7082');
+INSERT INTO course_participation (id, course_id, student_id) VALUES ('32aa070e-67c3-4a69-852a-ba3b5e849a4d', 'be780b32-a678-4b79-ae1c-80071771d254', '15ae3969-bcb7-4d5b-8245-c305d13d671b');
 
 
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status) VALUES ('0c58232d-1a67-44e6-b4dc-69e95373b976', '82d7efae-d545-4cc5-9b94-5d0ee1e50d25', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'failed');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status) VALUES ('0c58232d-1a67-44e6-b4dc-69e95373b976', '82d7efae-d545-4cc5-9b94-5d0ee1e50d25', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'passed');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status) VALUES ('f5e61de3-6b6a-494e-a0ac-a18f1f9262e1', '32aa070e-67c3-4a69-852a-ba3b5e849a4d', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed');
 
 CREATE TABLE application_assessment (
     id uuid NOT NULL,

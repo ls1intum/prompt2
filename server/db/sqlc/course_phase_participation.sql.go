@@ -204,3 +204,21 @@ func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg Update
 	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation, arg.ID, arg.PassStatus, arg.MetaData)
 	return err
 }
+
+const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :exec
+UPDATE course_phase_participation
+SET pass_status = $3::pass_status
+WHERE id = ANY($1::uuid[])
+  AND course_phase_id = $2::uuid
+`
+
+type UpdateCoursePhasePassStatusParams struct {
+	Column1 []uuid.UUID `json:"column_1"`
+	Column2 uuid.UUID   `json:"column_2"`
+	Column3 PassStatus  `json:"column_3"`
+}
+
+func (q *Queries) UpdateCoursePhasePassStatus(ctx context.Context, arg UpdateCoursePhasePassStatusParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhasePassStatus, arg.Column1, arg.Column2, arg.Column3)
+	return err
+}
