@@ -15,7 +15,6 @@ import (
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -504,7 +503,6 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_In
 	}
 
 	err := validateAdditionalScore(invalidScore)
-	logrus.Info(err)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "failed to parse score for entry", err.Error())
 }
