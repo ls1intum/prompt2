@@ -326,3 +326,23 @@ func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhasePar
 	}
 	return nil
 }
+
+func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
+	// Check if the name is empty
+	if score.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+
+	// Check if all scores are greater than 0
+	for _, individualScore := range score.Scores {
+		scoreValue, err := individualScore.Score.Float64Value()
+		if err != nil {
+			return errors.New("failed to parse score for entry")
+		}
+		if scoreValue.Float64 <= 0 {
+			return errors.New("scores must be greater than 0")
+		}
+	}
+
+	return nil
+}

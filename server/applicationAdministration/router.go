@@ -314,13 +314,12 @@ func uploadAdditionalScore(c *gin.Context) {
 		return
 	}
 
-	// TODO: validate additional score
-	// err = validateAdditionalScore(c, coursePhaseId, additionalScore)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	handleError(c, http.StatusBadRequest, err)
-	// 	return
-	// }
+	err = validateAdditionalScore(additionalScore)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
 
 	err = UploadAdditionalScore(c, coursePhaseId, additionalScore)
 	if err != nil {
