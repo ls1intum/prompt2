@@ -335,6 +335,10 @@ func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
 
 	// Check if all scores are greater than 0
 	for _, individualScore := range score.Scores {
+		if !individualScore.Score.Valid {
+			return errors.New("failed to parse score for entry")
+		}
+
 		scoreValue, err := individualScore.Score.Float64Value()
 		if err != nil {
 			return errors.New("failed to parse score for entry")

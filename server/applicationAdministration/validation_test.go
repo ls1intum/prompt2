@@ -15,6 +15,7 @@ import (
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -426,7 +427,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 	assert.Equal(suite.T(), "invalid meta data key - not allowed to update other meta data", err.Error())
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Success() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Success() {
 	validScore := applicationDTO.AdditionalScore{
 		Name: "ValidScore",
 		Scores: []applicationDTO.IndividualScore{
@@ -451,7 +452,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Succe
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_EmptyName() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_EmptyName() {
 	invalidScore := applicationDTO.AdditionalScore{
 		Name: "",
 		Scores: []applicationDTO.IndividualScore{
@@ -470,7 +471,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Empty
 	assert.Equal(suite.T(), "name cannot be empty", err.Error())
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_NegativeScore() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_NegativeScore() {
 	invalidScore := applicationDTO.AdditionalScore{
 		Name: "NegativeScore",
 		Scores: []applicationDTO.IndividualScore{
@@ -489,7 +490,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Negat
 	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
 	invalidScore := applicationDTO.AdditionalScore{
 		Name: "InvalidScoreValue",
 		Scores: []applicationDTO.IndividualScore{
@@ -503,11 +504,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Inval
 	}
 
 	err := validateAdditionalScore(invalidScore)
+	logrus.Info(err)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "failed to parse score for entry", err.Error())
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
 	invalidScore := applicationDTO.AdditionalScore{
 		Name: "MixedScores",
 		Scores: []applicationDTO.IndividualScore{
