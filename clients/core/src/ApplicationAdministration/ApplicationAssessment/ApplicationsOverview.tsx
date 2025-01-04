@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
@@ -34,6 +34,7 @@ import { ApplicationParticipation } from '@/interfaces/application_participation
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
 import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -84,14 +85,37 @@ export const ApplicationsOverview = (): JSX.Element => {
   }
 
   const {
+    data: fetchedAdditionalScores,
+    isPending: isAdditionalScoresPending,
+    isError: isAdditionalScoresError,
+    refetch: refetchScores,
+  } = useQuery<string[]>({
+    queryKey: ['application_participations', phaseId],
+    queryFn: () => getAdditionalScoreNames(phaseId ?? ''),
+  })
+
+  useEffect(() => {
+    if (fetchedAdditionalScores) {
+      console.log(fetchedAdditionalScores)
+    }
+  }, [fetchedAdditionalScores])
+
+  const {
     data: fetchedParticipations,
     isPending: isParticipationsPending,
     isError: isParticipantsError,
-    refetch,
+    refetch: refetchParticipations,
   } = useQuery<ApplicationParticipation[]>({
     queryKey: ['application_participations', 'students', phaseId],
     queryFn: () => getApplicationParticipations(phaseId ?? ''),
   })
+
+  const isError = isParticipantsError || isAdditionalScoresError
+  const isPending = isParticipationsPending || isAdditionalScoresPending
+  const refetch = () => {
+    refetchParticipations()
+    refetchScores()
+  }
 
   const selectedApplication = fetchedParticipations?.find(
     (participation) => participation.id === selectedApplicationID,
@@ -124,7 +148,7 @@ export const ApplicationsOverview = (): JSX.Element => {
     },
   })
 
-  if (isParticipantsError) {
+  if (isError) {
     return <ErrorPage onRetry={refetch} />
   }
 
@@ -154,7 +178,7 @@ export const ApplicationsOverview = (): JSX.Element => {
           <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
         </div>
       </div>
-      {isParticipationsPending ? (
+      {isPending ? (
         <div className='flex justify-center items-center flex-grow'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>

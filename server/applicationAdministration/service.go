@@ -579,10 +579,23 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	return nil
 }
 
-func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
-	var newScoreNamesArray []string
+func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]string, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
 
-	oldNames, ok := oldMetaData["additionalScores"]
+	coursePhaseDTO, err := coursePhase.GetCoursePhaseByID(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return nil, errors.New("could not update additional scores")
+	}
+
+	return metaToScoresArray(coursePhaseDTO.MetaData)
+}
+
+func metaToScoresArray(metaData meta.MetaData) ([]string, error) {
+	var scoreNamesArray []string
+
+	oldNames, ok := metaData["additionalScores"]
 	if ok && oldNames != nil {
 		// Assert that oldNames is a slice of interface{}
 		oldNamesArray, ok := oldNames.([]interface{})
@@ -598,8 +611,19 @@ func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
 				log.Error("expected string, got: ", name)
 				return nil, errors.New("could not update additional scores")
 			}
-			newScoreNamesArray = append(newScoreNamesArray, nameStr)
+			scoreNamesArray = append(scoreNamesArray, nameStr)
 		}
+	}
+
+	return scoreNamesArray, nil
+}
+
+func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
+	var newScoreNamesArray []string
+
+	newScoreNamesArray, err := metaToScoresArray(oldMetaData)
+	if err != nil {
+		return nil, err
 	}
 
 	nameExists := false
