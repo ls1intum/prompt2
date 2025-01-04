@@ -1,4 +1,3 @@
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
 import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from './SortableHeader'
@@ -15,11 +14,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
 
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
-): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
+): ColumnDef<ApplicationParticipation>[] => {
   return [
     {
       id: 'select',
