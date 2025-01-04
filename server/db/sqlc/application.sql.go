@@ -22,7 +22,7 @@ UPDATE course_phase_participation
 SET    
     meta_data = jsonb_set(
         COALESCE(meta_data, '{}'),
-        ARRAY[$3]::text[], -- Use $3 for the scoreName parameter
+        $3::text[], -- Use $3 for the scoreName parameter
         to_jsonb(updates.score) -- Convert the float score to JSONB
     )
 FROM updates
@@ -624,6 +624,25 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 	return items, nil
 }
 
+const getExistingAdditionalScores = `-- name: GetExistingAdditionalScores :one
+
+
+SELECT 
+    meta_data->>'additional_scores' AS additional_scores
+FROM
+    course_phase
+WHERE
+    id = $1
+`
+
+// Use $4 for the single course_phase_id
+func (q *Queries) GetExistingAdditionalScores(ctx context.Context, id uuid.UUID) (interface{}, error) {
+	row := q.db.QueryRow(ctx, getExistingAdditionalScores, id)
+	var additional_scores interface{}
+	err := row.Scan(&additional_scores)
+	return additional_scores, err
+}
+
 const getOpenApplicationPhase = `-- name: GetOpenApplicationPhase :one
 SELECT 
     cp.id AS course_phase_id,
@@ -781,5 +800,21 @@ func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateA
 		arg.AllowedLength,
 		arg.OrderNum,
 	)
+	return err
+}
+
+const updateExistingAdditionalScores = `-- name: UpdateExistingAdditionalScores :exec
+UPDATE course_phase
+SET meta_data = meta_data || $2
+WHERE id = $1
+`
+
+type UpdateExistingAdditionalScoresParams struct {
+	ID       uuid.UUID `json:"id"`
+	MetaData []byte    `json:"meta_data"`
+}
+
+func (q *Queries) UpdateExistingAdditionalScores(ctx context.Context, arg UpdateExistingAdditionalScoresParams) error {
+	_, err := q.db.Exec(ctx, updateExistingAdditionalScores, arg.ID, arg.MetaData)
 	return err
 }

@@ -232,7 +232,7 @@ UPDATE course_phase_participation
 SET    
     meta_data = jsonb_set(
         COALESCE(meta_data, '{}'),
-        ARRAY[$3]::text[], -- Use $3 for the scoreName parameter
+        $3::text[], -- Use $3 for the scoreName parameter
         to_jsonb(updates.score) -- Convert the float score to JSONB
     )
 FROM updates
@@ -241,3 +241,15 @@ WHERE
     AND course_phase_participation.course_phase_id = $4; -- Use $4 for the single course_phase_id
 
 
+-- name: GetExistingAdditionalScores :one
+SELECT 
+    meta_data->>'additional_scores' AS additional_scores
+FROM
+    course_phase
+WHERE
+    id = $1;
+
+-- name: UpdateExistingAdditionalScores :exec
+UPDATE course_phase
+SET meta_data = meta_data || $2
+WHERE id = $1;

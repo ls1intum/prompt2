@@ -328,6 +328,8 @@ func uploadAdditionalScore(c *gin.Context) {
 		return
 	}
 
+	// TODO: possibly send rejection mails to students
+
 	c.JSON(http.StatusOK, gin.H{"message": "additional score uploaded"})
 }
 

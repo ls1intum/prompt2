@@ -11,9 +11,11 @@ import (
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student"
 	log "github.com/sirupsen/logrus"
 )
@@ -540,10 +542,87 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		return errors.New("could not update additional scores")
 	}
 
+	// set under threshold to failed
+
+	// add score to the course phase meta data
+	_, err = qtx.GetExistingAdditionalScores(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not update additional scores")
+	}
+
+	coursePhaseDTO, err := coursePhase.GetCoursePhaseByID(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not update additional scores")
+	}
+
+	metaDataUpdate, err := addScoreName(coursePhaseDTO.MetaData, additionalScore.Name)
+	if err != nil {
+		return err
+	}
+
+	err = qtx.UpdateExistingAdditionalScores(ctx, db.UpdateExistingAdditionalScoresParams{
+		ID:       coursePhaseID,
+		MetaData: metaDataUpdate,
+	})
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not update additional scores")
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
+}
+
+func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
+	var newScoreNamesArray []string
+
+	oldNames, ok := oldMetaData["additionalScores"]
+	if ok && oldNames != nil {
+		// Assert that oldNames is a slice of interface{}
+		oldNamesArray, ok := oldNames.([]interface{})
+		if !ok {
+			log.Error("expected []interface{}, got: ", oldNames)
+			return nil, errors.New("could not update additional scores")
+		}
+
+		// Convert each element to string
+		for _, name := range oldNamesArray {
+			nameStr, ok := name.(string)
+			if !ok {
+				log.Error("expected string, got: ", name)
+				return nil, errors.New("could not update additional scores")
+			}
+			newScoreNamesArray = append(newScoreNamesArray, nameStr)
+		}
+	}
+
+	nameExists := false
+	for _, name := range newScoreNamesArray {
+		if name == newName {
+			nameExists = true
+			break
+		}
+	}
+
+	if !nameExists {
+		newScoreNamesArray = append(newScoreNamesArray, newName)
+	}
+
+	metaDataUpdate := meta.MetaData{
+		"additionalScores": newScoreNamesArray,
+	}
+
+	byteArray, err := metaDataUpdate.GetDBModel()
+	if err != nil {
+		log.Error(err)
+		return nil, errors.New("could not update additional scores")
+	}
+
+	return byteArray, nil
 }
