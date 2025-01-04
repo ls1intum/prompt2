@@ -1,6 +1,9 @@
 package applicationDTO
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type AdditionalScore struct {
 	Name            string            `json:"name"`
@@ -10,6 +13,6 @@ type AdditionalScore struct {
 }
 
 type IndividualScore struct {
-	CoursePhaseParticipationID string         `json:"course_phase_participation_id"`
+	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
 	Score                      pgtype.Numeric `json:"score"`
 }

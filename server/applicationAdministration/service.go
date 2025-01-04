@@ -528,7 +528,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 
 	for _, score := range additionalScore.Scores {
 		batchScores = append(batchScores, score.Score)
-		coursePhaseIDs = append(coursePhaseIDs, uuid.MustParse(score.CoursePhaseParticipationID))
+		coursePhaseIDs = append(coursePhaseIDs, score.CoursePhaseParticipationID)
 	}
 	scoreNameArray := make([]string, 0, 1)
 	scoreNameArray = append(scoreNameArray, additionalScore.Name)
@@ -561,7 +561,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 				return errors.New("could not update additional scores")
 			}
 			if scoreValue.Float64 < thresholdValue.Float64 {
-				batchSetFailed = append(batchSetFailed, uuid.MustParse(score.CoursePhaseParticipationID))
+				batchSetFailed = append(batchSetFailed, score.CoursePhaseParticipationID)
 			}
 		}
 

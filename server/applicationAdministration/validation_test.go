@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"math/big"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -423,6 +424,113 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 	err = validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "invalid meta data key - not allowed to update other meta data", err.Error())
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_Success() {
+	validScore := applicationDTO.AdditionalScore{
+		Name: "ValidScore",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(validScore)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_EmptyName() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "name cannot be empty", err.Error())
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_NegativeScore() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "NegativeScore",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(-10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "InvalidScoreValue",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Valid: false, // Invalid value
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "failed to parse score for entry", err.Error())
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "MixedScores",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(-10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
 }
 
 func TestValidateUpdateFormSuite(t *testing.T) {
