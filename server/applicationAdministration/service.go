@@ -533,6 +533,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	scoreNameArray := make([]string, 0, 1)
 	scoreNameArray = append(scoreNameArray, additionalScore.Name)
 
+	// 1.) Store the new score for each participation
 	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
 		Column1:       coursePhaseIDs,
 		Column2:       batchScores,
@@ -544,9 +545,38 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		return errors.New("could not update additional scores")
 	}
 
-	// set under threshold to failed
+	// 2.) Set students to failed, if under threshold
+	if additionalScore.ThresholdActive && additionalScore.Threshold.Valid {
+		batchSetFailed := []uuid.UUID{}
+		thresholdValue, err := additionalScore.Threshold.Float64Value()
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update additional scores")
+		}
 
-	// add score to the course phase meta data
+		for _, score := range additionalScore.Scores {
+			scoreValue, err := score.Score.Float64Value()
+			if err != nil {
+				log.Error(err)
+				return errors.New("could not update additional scores")
+			}
+			if scoreValue.Float64 < thresholdValue.Float64 {
+				batchSetFailed = append(batchSetFailed, uuid.MustParse(score.CoursePhaseParticipationID))
+			}
+		}
+
+		err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
+			Column1: batchSetFailed,
+			Column2: coursePhaseID,
+			Column3: db.PassStatusFailed,
+		})
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update additional scores")
+		}
+	}
+
+	// 3.) score the score name in the course phase
 	_, err = qtx.GetExistingAdditionalScores(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
