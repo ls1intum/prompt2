@@ -177,7 +177,10 @@ export const ApplicationsOverview = (): JSX.Element => {
                 }}
                 onExport={() => {
                   console.log('exporting...')
-                  downloadApplications(table.getSelectedRowModel().rows.map((row) => row.original))
+                  downloadApplications(
+                    table.getSelectedRowModel().rows.map((row) => row.original),
+                    fetchedAdditionalScores ?? [],
+                  )
                   table.resetRowSelection()
                 }}
                 onSetFailed={() => {
