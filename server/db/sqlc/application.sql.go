@@ -16,7 +16,7 @@ const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 
     UNNEST($1::uuid[]) AS id,
-    UNNEST($2::float8[]) AS score,
+    UNNEST($2::numeric[]) AS score,
     $3::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
@@ -24,7 +24,7 @@ SET
     meta_data = jsonb_set(
         COALESCE(meta_data, '{}'),
         updates.path, -- Use dynamic path
-        to_jsonb(updates.score) -- Convert the float score to JSONB
+        to_jsonb(ROUND(updates.score, 2)) -- Convert the float score to JSONB
     )
 FROM updates
 WHERE 
@@ -33,10 +33,10 @@ WHERE
 `
 
 type BatchUpdateAdditionalScoresParams struct {
-	Column1       []uuid.UUID `json:"column_1"`
-	Column2       []float64   `json:"column_2"`
-	Column3       []string    `json:"column_3"`
-	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
+	Column1       []uuid.UUID      `json:"column_1"`
+	Column2       []pgtype.Numeric `json:"column_2"`
+	Column3       []string         `json:"column_3"`
+	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
 }
 
 func (q *Queries) BatchUpdateAdditionalScores(ctx context.Context, arg BatchUpdateAdditionalScoresParams) error {

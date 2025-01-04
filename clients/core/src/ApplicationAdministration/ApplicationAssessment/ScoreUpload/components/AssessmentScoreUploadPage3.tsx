@@ -34,6 +34,9 @@ export const AssessmentScoreUploadPage3 = ({
             Students below threshold: {belowThreshold}
           </p>
         )}
+        <p className='text-sm text-muted-foreground mt-2'>
+          Note: All numeric values, including the threshold, are rounded to two decimal places.
+        </p>
       </div>
 
       {unmatchedApplications.length > 1 && (

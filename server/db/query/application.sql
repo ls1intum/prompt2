@@ -226,7 +226,7 @@ SELECT EXISTS (
 WITH updates AS (
   SELECT 
     UNNEST($1::uuid[]) AS id,
-    UNNEST($2::float8[]) AS score,
+    UNNEST($2::numeric[]) AS score,
     $3::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
@@ -234,7 +234,7 @@ SET
     meta_data = jsonb_set(
         COALESCE(meta_data, '{}'),
         updates.path, -- Use dynamic path
-        to_jsonb(updates.score) -- Convert the float score to JSONB
+        to_jsonb(ROUND(updates.score, 2)) -- Convert the float score to JSONB
     )
 FROM updates
 WHERE 

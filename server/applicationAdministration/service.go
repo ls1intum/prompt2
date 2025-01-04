@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
@@ -522,12 +523,11 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// generate batch of scores
-	batchScores := make([]float64, 0, len(additionalScore.Scores))
+	batchScores := make([]pgtype.Numeric, 0, len(additionalScore.Scores))
 	coursePhaseIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
 
 	for _, score := range additionalScore.Scores {
-		log.Info(score)
-		batchScores = append(batchScores, float64(score.Score))
+		batchScores = append(batchScores, score.Score)
 		coursePhaseIDs = append(coursePhaseIDs, uuid.MustParse(score.CoursePhaseParticipationID))
 	}
 	scoreNameArray := make([]string, 0, 1)

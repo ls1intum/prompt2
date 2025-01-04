@@ -105,7 +105,8 @@ export default function AssessmentScoreUpload({
       const matchedRow = csvData.find((row) => row[matchColumnIndex] === matchValue)
 
       if (matchedRow) {
-        const score = parseFloat(matchedRow[scoreColumnIndex])
+        const commaSeparatedScores = matchedRow[scoreColumnIndex].replace(',', '.')
+        const score = parseFloat(commaSeparatedScores)
         if (!isNaN(score)) {
           matchedApplications.push({
             course_phase_participation_id: app.id,
