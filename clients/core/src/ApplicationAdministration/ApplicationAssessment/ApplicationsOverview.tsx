@@ -32,6 +32,7 @@ import { FilterBadges } from './components/FilterBadges'
 import { ApplicationDetailsView } from './ApplicationDetailsView'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
+import { GroupActionsMenu } from './components/GroupActionsMenu'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -114,6 +115,27 @@ export const ApplicationsOverview = (): JSX.Element => {
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
             <VisibilityMenu columns={table.getAllColumns()} />
+            {table.getSelectedRowModel().rows.length > 0 && (
+              <GroupActionsMenu
+                numberOfRowsSelected={table.getSelectedRowModel().rows.length}
+                onDelete={() => {
+                  console.log('delete')
+                  table.resetRowSelection()
+                }}
+                onExport={() => {
+                  console.log('exporting...')
+                  table.resetRowSelection()
+                }}
+                onSetFailed={() => {
+                  console.log('set failed')
+                  table.resetRowSelection()
+                }}
+                onSetPassed={() => {
+                  console.log('set passed')
+                  table.resetRowSelection()
+                }}
+              />
+            )}
           </div>
         </div>
         <div className='flex flex-wrap gap-2'>
