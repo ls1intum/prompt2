@@ -17,6 +17,9 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	// Application Form Endpoints
 	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
 	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
+	application.GET("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), getAdditionalScores)
+	application.POST("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), uploadAdditionalScore)
+
 	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
 	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationAssessment)
 
@@ -296,6 +299,55 @@ func updateApplicationAssessment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "application assessment updated"})
+}
+
+func uploadAdditionalScore(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var additionalScore applicationDTO.AdditionalScore
+	if err := c.BindJSON(&additionalScore); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateAdditionalScore(additionalScore)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UploadAdditionalScore(c, coursePhaseId, additionalScore)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not upload additional score"))
+		return
+	}
+
+	// TODO: possibly send rejection mails to students
+
+	c.JSON(http.StatusOK, gin.H{"message": "additional score uploaded"})
+}
+
+func getAdditionalScores(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	additionalScore, err := GetAdditionalScores(c, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not get additional score"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, additionalScore)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

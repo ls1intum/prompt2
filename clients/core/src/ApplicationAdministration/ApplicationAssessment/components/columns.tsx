@@ -19,7 +19,19 @@ import { ApplicationParticipation } from '@/interfaces/application_participation
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
+  additionalScores: string[],
 ): ColumnDef<ApplicationParticipation>[] => {
+  let additionalScoreColumns: ColumnDef<ApplicationParticipation>[] = []
+  if (additionalScores.length > 0) {
+    additionalScoreColumns = additionalScores.map((scoreName) => {
+      return {
+        id: scoreName,
+        accessorFn: (row) => row.meta_data?.[scoreName] ?? null,
+        header: ({ column }) => <SortableHeader column={column} title={scoreName} />,
+      }
+    })
+  }
+
   return [
     {
       id: 'select',
@@ -79,6 +91,7 @@ export const columns = (
       accessorKey: 'score',
       header: ({ column }) => <SortableHeader column={column} title='Score' />,
     },
+    ...additionalScoreColumns,
     {
       id: 'email',
       accessorKey: 'student.email',
