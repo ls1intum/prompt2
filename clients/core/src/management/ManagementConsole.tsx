@@ -81,7 +81,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
               <Breadcrumbs />
             </div>
           </header>
-          <div className='flex flex-1 flex-col gap-4 p-4 overflow-auto'>
+          <div id='management-children' className='flex flex-1 flex-col gap-4 p-4 overflow-auto'>
             {hasChildren ? children : <WelcomePage />}
           </div>
         </SidebarInset>

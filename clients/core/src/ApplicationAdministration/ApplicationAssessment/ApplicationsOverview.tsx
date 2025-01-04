@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
@@ -44,6 +44,35 @@ export const ApplicationsOverview = (): JSX.Element => {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
+  // for the weird horizontal scrolling bug
+  const [elementWidth, setElementWidth] = useState(0)
+
+  useLayoutEffect(() => {
+    const updateWidth = () => {
+      const element = document.getElementById('table-view')
+      if (element) {
+        setElementWidth(element.clientWidth - 100)
+      }
+    }
+
+    // Create a ResizeObserver instance to observe changes to the div's size
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth()
+    })
+
+    const element = document.getElementById('table-view')
+    if (element) {
+      resizeObserver.observe(element)
+    }
+
+    updateWidth()
+
+    return () => {
+      if (element) {
+        resizeObserver.unobserve(element)
+      }
+    }
+  }, [])
 
   const viewApplication = (id: string) => {
     setSelectedApplicationID(id)
@@ -100,7 +129,7 @@ export const ApplicationsOverview = (): JSX.Element => {
   }
 
   return (
-    <div className='flex flex-col space-y-6 p-4 md:p-6 max-w-full'>
+    <div id='table-view' className='relative flex flex-col space-y-6 p-4'>
       <h1 className='text-3xl md:text-4xl font-bold text-center'>Applications Overview</h1>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
@@ -126,13 +155,13 @@ export const ApplicationsOverview = (): JSX.Element => {
         </div>
       </div>
       {isParticipationsPending ? (
-        <div className='flex justify-center items-center h-64'>
+        <div className='flex justify-center items-center flex-grow'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
-        <div className='rounded-md border'>
-          <ScrollArea className='h-[calc(100vh-300px)]'>
-            <Table>
+        <div className='rounded-md border' style={{ width: `${elementWidth + 50}px` }}>
+          <ScrollArea className='h-[calc(100vh-300px)] overflow-x-scroll'>
+            <Table className='table-auto min-w-full w-full relative'>
               <TableHeader className='bg-muted/100 sticky top-0 z-10'>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
