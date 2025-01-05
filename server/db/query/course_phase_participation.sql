@@ -44,8 +44,10 @@ WHERE id = $1;
 SELECT * FROM course_phase_participation
 WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1;
 
--- name: UpdateCoursePhasePassStatus :exec
+-- name: UpdateCoursePhasePassStatus :many
 UPDATE course_phase_participation
 SET pass_status = $3::pass_status
 WHERE id = ANY($1::uuid[])
-  AND course_phase_id = $2::uuid;
+  AND course_phase_id = $2::uuid
+  AND pass_status != $3::pass_status
+RETURNING course_participation_id;

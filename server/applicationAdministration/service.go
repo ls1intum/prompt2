@@ -565,7 +565,8 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 			}
 		}
 
-		err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
+		// TODO MAIL: use the changed participations for mailing!
+		_, err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
 			Column1: batchSetFailed,
 			Column2: coursePhaseID,
 			Column3: db.PassStatusFailed,
