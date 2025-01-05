@@ -37,7 +37,6 @@ import { downloadApplications } from './utils/downloadApplications'
 import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
-import { useApplicationStatusUpdate } from './handlers/useApplicationStatusUpdate'
 import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 
 export const ApplicationsOverview = (): JSX.Element => {
@@ -90,8 +89,6 @@ export const ApplicationsOverview = (): JSX.Element => {
   const selectedApplication = fetchedParticipations?.find(
     (participation) => participation.id === selectedApplicationID,
   )
-
-  const { mutate: mutateUpdateApplicationStatus } = useApplicationStatusUpdate()
 
   const table = useReactTable({
     data: fetchedParticipations ?? [],
@@ -146,34 +143,13 @@ export const ApplicationsOverview = (): JSX.Element => {
             )}
             {table.getSelectedRowModel().rows.length > 0 && (
               <GroupActionsMenu
-                numberOfRowsSelected={table.getSelectedRowModel().rows.length}
-                onDelete={() => {
-                  console.log('delete')
-                  table.resetRowSelection()
-                }}
+                selectedRows={table.getSelectedRowModel()}
+                onClose={() => table.resetRowSelection()}
                 onExport={() => {
                   downloadApplications(
                     table.getSelectedRowModel().rows.map((row) => row.original),
                     fetchedAdditionalScores ?? [],
                   )
-                  table.resetRowSelection()
-                }}
-                onSetFailed={() => {
-                  mutateUpdateApplicationStatus({
-                    pass_status: PassStatus.FAILED,
-                    course_phase_participation_ids: table
-                      .getSelectedRowModel()
-                      .rows.map((row) => row.original.id),
-                  })
-                  table.resetRowSelection()
-                }}
-                onSetPassed={() => {
-                  mutateUpdateApplicationStatus({
-                    pass_status: PassStatus.PASSED,
-                    course_phase_participation_ids: table
-                      .getSelectedRowModel()
-                      .rows.map((row) => row.original.id),
-                  })
                   table.resetRowSelection()
                 }}
               />

@@ -10,21 +10,22 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import { ActionDialog } from './GroupActionDialog'
+import { RowModel } from '@tanstack/react-table'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { useApplicationStatusUpdate } from '../handlers/useApplicationStatusUpdate'
+import { useDeleteApplications } from '../handlers/useDeleteApplications'
+import { PassStatus } from '@/interfaces/course_phase_participation'
 
 interface GroupActionsMenuProps {
-  numberOfRowsSelected: number
-  onDelete: () => void
+  selectedRows: RowModel<ApplicationParticipation>
+  onClose: () => void
   onExport: () => void
-  onSetPassed: () => void
-  onSetFailed: () => void
 }
 
 export const GroupActionsMenu = ({
-  numberOfRowsSelected,
-  onDelete,
+  selectedRows,
+  onClose,
   onExport,
-  onSetPassed,
-  onSetFailed,
 }: GroupActionsMenuProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false)
   const [dialogState, setDialogState] = useState<{
@@ -38,6 +39,11 @@ export const GroupActionsMenu = ({
   }
 
   const closeDialog = () => setDialogState({ type: null, isOpen: false })
+
+  // modifiers
+  const { mutate: mutateUpdateApplicationStatus } = useApplicationStatusUpdate()
+  const { mutate: mutateDeleteApplications } = useDeleteApplications()
+  const numberOfRowsSelected = selectedRows.rows.length
 
   return (
     <>
@@ -74,12 +80,16 @@ export const GroupActionsMenu = ({
       {dialogState.isOpen && dialogState.type === 'delete' && (
         <ActionDialog
           title='Confirm Deletion'
-          description={`Are you sure you want to delete ${numberOfRowsSelected} applications? This action cannot be undone.`}
+          description={`Are you sure you want to delete ${numberOfRowsSelected} applications? This action cannot be undone. 
+          The course application will be deleted for the selected students.`}
           confirmLabel='Delete'
           confirmVariant='destructive'
           isOpen={dialogState.type === 'delete' && dialogState.isOpen}
           onClose={closeDialog}
-          onConfirm={onDelete}
+          onConfirm={() => {
+            mutateDeleteApplications(selectedRows.rows.map((row) => row.original.id))
+            onClose()
+          }}
         />
       )}
 
@@ -90,7 +100,13 @@ export const GroupActionsMenu = ({
           confirmLabel='Set Accepted'
           isOpen={dialogState.type === 'setPassed' && dialogState.isOpen}
           onClose={closeDialog}
-          onConfirm={onSetPassed}
+          onConfirm={() => {
+            mutateUpdateApplicationStatus({
+              pass_status: PassStatus.PASSED,
+              course_phase_participation_ids: selectedRows.rows.map((row) => row.original.id),
+            })
+            onClose()
+          }}
         />
       )}
 
@@ -101,7 +117,13 @@ export const GroupActionsMenu = ({
           confirmLabel='Set Rejected'
           isOpen={dialogState.type === 'setFailed' && dialogState.isOpen}
           onClose={closeDialog}
-          onConfirm={onSetFailed}
+          onConfirm={() => {
+            mutateUpdateApplicationStatus({
+              pass_status: PassStatus.FAILED,
+              course_phase_participation_ids: selectedRows.rows.map((row) => row.original.id),
+            })
+            onClose()
+          }}
         />
       )}
     </>
