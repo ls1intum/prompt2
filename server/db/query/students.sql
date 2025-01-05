@@ -32,3 +32,13 @@ RETURNING *;
 -- name: GetStudentByEmail :one
 SELECT * FROM student
 WHERE email = $1 LIMIT 1;
+
+-- name: SearchStudents :many
+SELECT *
+FROM student
+WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
+   OR first_name ILIKE '%' || $1 || '%'
+   OR last_name ILIKE '%' || $1 || '%'
+   OR email ILIKE '%' || $1 || '%'
+   OR matriculation_number ILIKE '%' || $1 || '%'
+   OR university_login ILIKE '%' || $1 || '%';

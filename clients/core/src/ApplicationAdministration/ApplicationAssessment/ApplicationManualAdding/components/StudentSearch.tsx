@@ -17,19 +17,7 @@ import translations from '@/lib/translations.json'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Student } from '@/interfaces/student'
-
-// This is a mock function. Replace it with your actual API call.
-const searchUniversityUsers = async (query: string, phaseId: string) => {
-  // Simulating API call
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-  return [
-    { id: '1', name: 'John Doe', email: 'john@university.edu' },
-    { id: '2', name: 'Jane Smith', email: 'jane@university.edu' },
-    { id: '3', name: 'Jane Smith', email: 'jane@university.edu' },
-    { id: '4', name: 'Jane Smith', email: 'jane@university.edu' },
-    { id: '5', name: 'Jane Smith', email: 'jane@university.edu' },
-  ]
-}
+import { searchStudents } from '../../../../network/queries/searchStudents'
 
 interface StudentSearchProps {
   onSelect: (selectedStudent: Student | null) => void
@@ -38,7 +26,7 @@ interface StudentSearchProps {
 export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [searchQuery, setSearchQuery] = useState('')
-  const [hasSearched, setHasSearched] = useState(false)
+  const [enteredSearchString, setEnteredSearchString] = useState('')
 
   const {
     data: users,
@@ -47,22 +35,22 @@ export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => 
     error,
     refetch,
   } = useQuery({
-    queryKey: ['university_users', searchQuery, phaseId],
-    queryFn: () => searchUniversityUsers(searchQuery, phaseId ?? ''),
+    queryKey: ['university_users', enteredSearchString, phaseId],
+    queryFn: () => searchStudents(enteredSearchString),
     enabled: searchQuery.length > 2,
   })
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.length > 2) {
-      setHasSearched(true)
+      setEnteredSearchString(searchQuery)
       refetch()
     }
   }
 
   const onClose = () => {
     setSearchQuery('')
-    setHasSearched(false)
+    setEnteredSearchString('')
   }
 
   return (
@@ -80,32 +68,44 @@ export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => 
           Search
         </Button>
       </form>
-      {hasSearched && isPending ? (
+      {enteredSearchString.length > 0 && isPending ? (
         <div className='flex justify-center items-center h-32'>
           <Loader2 className='h-8 w-8 animate-spin text-primary' />
         </div>
-      ) : hasSearched && isError ? (
+      ) : enteredSearchString.length > 0 && isError ? (
         <Alert variant='destructive'>
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>Failed to search university users. {error?.message}</AlertDescription>
         </Alert>
-      ) : hasSearched && users && users.length > 0 ? (
-        <ScrollArea className='max-h-[calc(40vh)]'>
+      ) : enteredSearchString.length > 0 && users && users.length > 0 ? (
+        <ScrollArea className='max-h-[calc(40vh)-150px]'>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>First Name</TableHead>
+                <TableHead>Last Name</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>{translations.university['login-name']}</TableHead>
+                <TableHead>Matriculation Number</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.first_name}</TableCell>
+                  <TableCell>{user.last_name}</TableCell>
                   <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.university_login}</TableCell>
+                  <TableCell>{user.matriculation_number}</TableCell>
                   <TableCell>
-                    <Button size='sm' onClick={() => console.log('Add user', user.id)}>
+                    <Button
+                      size='sm'
+                      onClick={() => {
+                        onClose()
+                        onSelect(user)
+                      }}
+                    >
                       Select
                     </Button>
                   </TableCell>
@@ -114,8 +114,13 @@ export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => 
             </TableBody>
           </Table>
         </ScrollArea>
-      ) : hasSearched ? (
-        <p>No users found</p>
+      ) : enteredSearchString.length > 0 ? (
+        <Alert>
+          <AlertTitle>No user found.</AlertTitle>
+          <AlertDescription>
+            There is no user registered with prompt matching the search string.
+          </AlertDescription>
+        </Alert>
       ) : null}
       <Separator />
       <div className='space-y-2'>
