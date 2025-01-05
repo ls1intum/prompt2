@@ -205,11 +205,13 @@ func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg Update
 	return err
 }
 
-const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :exec
+const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many
 UPDATE course_phase_participation
 SET pass_status = $3::pass_status
 WHERE id = ANY($1::uuid[])
   AND course_phase_id = $2::uuid
+  AND pass_status != $3::pass_status
+RETURNING course_participation_id
 `
 
 type UpdateCoursePhasePassStatusParams struct {
@@ -218,7 +220,22 @@ type UpdateCoursePhasePassStatusParams struct {
 	Column3 PassStatus  `json:"column_3"`
 }
 
-func (q *Queries) UpdateCoursePhasePassStatus(ctx context.Context, arg UpdateCoursePhasePassStatusParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhasePassStatus, arg.Column1, arg.Column2, arg.Column3)
-	return err
+func (q *Queries) UpdateCoursePhasePassStatus(ctx context.Context, arg UpdateCoursePhasePassStatusParams) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, updateCoursePhasePassStatus, arg.Column1, arg.Column2, arg.Column3)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var course_participation_id uuid.UUID
+		if err := rows.Scan(&course_participation_id); err != nil {
+			return nil, err
+		}
+		items = append(items, course_participation_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

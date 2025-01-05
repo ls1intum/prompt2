@@ -565,7 +565,8 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 			}
 		}
 
-		err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
+		// TODO MAIL: use the changed participations for mailing!
+		_, err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
 			Column1: batchSetFailed,
 			Column2: coursePhaseID,
 			Column3: db.PassStatusFailed,
@@ -681,4 +682,16 @@ func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
 	}
 
 	return byteArray, nil
+}
+
+func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	err := ApplicationServiceSingleton.queries.DeleteApplications(ctxWithTimeout, db.DeleteApplicationsParams{CoursePhaseID: coursePhaseID, Column2: coursePhaseParticipationIDs})
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not delete applications")
+	}
+	return nil
 }

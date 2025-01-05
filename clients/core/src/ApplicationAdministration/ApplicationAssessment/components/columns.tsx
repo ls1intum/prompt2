@@ -1,4 +1,3 @@
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
 import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from './SortableHeader'
@@ -14,13 +13,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
 
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
   additionalScores: string[],
-): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
-  let additionalScoreColumns: ColumnDef<CoursePhaseParticipationWithStudent>[] = []
+): ColumnDef<ApplicationParticipation>[] => {
+  let additionalScoreColumns: ColumnDef<ApplicationParticipation>[] = []
   if (additionalScores.length > 0) {
     additionalScoreColumns = additionalScores.map((scoreName) => {
       return {
@@ -33,14 +34,49 @@ export const columns = (
 
   return [
     {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label='Select all'
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onClick={(event) => {
+            event.stopPropagation()
+            row.toggleSelected()
+          }}
+          aria-label='Select row'
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
       id: 'first_name', // required for filter bar
       accessorKey: 'student.first_name',
       header: ({ column }) => <SortableHeader column={column} title='First Name' />,
+      sortingFn: (rowA, rowB) => {
+        const valueA = rowA.original.student.first_name.toLowerCase() || ''
+        const valueB = rowB.original.student.first_name.toLowerCase() || ''
+        return valueA.localeCompare(valueB)
+      },
     },
     {
       id: 'last_name',
       accessorKey: 'student.last_name',
       header: ({ column }) => <SortableHeader column={column} title='Last Name' />,
+      sortingFn: (rowA, rowB) => {
+        const valueA = rowA.original.student.last_name.toLowerCase() || ''
+        const valueB = rowB.original.student.last_name.toLowerCase() || ''
+        return valueA.localeCompare(valueB)
+      },
     },
     {
       id: 'pass_status',

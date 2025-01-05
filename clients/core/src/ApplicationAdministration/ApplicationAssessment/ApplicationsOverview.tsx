@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/columns'
-import { useLayoutEffect, useState } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/FilterMenu'
@@ -32,48 +32,23 @@ import { FilterBadges } from './components/FilterBadges'
 import { ApplicationDetailsView } from './ApplicationDetailsView'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
+import { GroupActionsMenu } from './components/GroupActionsMenu'
+import { downloadApplications } from './utils/downloadApplications'
 import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
+import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'last_name', desc: false }])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
-  // for the weird horizontal scrolling bug
-  const [elementWidth, setElementWidth] = useState(0)
-
-  useLayoutEffect(() => {
-    const updateWidth = () => {
-      const element = document.getElementById('table-view')
-      if (element) {
-        setElementWidth(element.clientWidth - 100)
-      }
-    }
-
-    // Create a ResizeObserver instance to observe changes to the div's size
-    const resizeObserver = new ResizeObserver(() => {
-      updateWidth()
-    })
-
-    const element = document.getElementById('table-view')
-    if (element) {
-      resizeObserver.observe(element)
-    }
-
-    updateWidth()
-
-    return () => {
-      if (element) {
-        resizeObserver.unobserve(element)
-      }
-    }
-  }, [])
+  const tableWidth = useCustomElementWidth('table-view')
 
   const viewApplication = (id: string) => {
     setSelectedApplicationID(id)
@@ -166,6 +141,19 @@ export const ApplicationsOverview = (): JSX.Element => {
             {fetchedParticipations && (
               <AssessmentScoreUpload applications={fetchedParticipations} />
             )}
+            {table.getSelectedRowModel().rows.length > 0 && (
+              <GroupActionsMenu
+                selectedRows={table.getSelectedRowModel()}
+                onClose={() => table.resetRowSelection()}
+                onExport={() => {
+                  downloadApplications(
+                    table.getSelectedRowModel().rows.map((row) => row.original),
+                    fetchedAdditionalScores ?? [],
+                  )
+                  table.resetRowSelection()
+                }}
+              />
+            )}
           </div>
         </div>
         <div className='flex flex-wrap gap-2'>
@@ -177,7 +165,7 @@ export const ApplicationsOverview = (): JSX.Element => {
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
-        <div className='rounded-md border' style={{ width: `${elementWidth + 50}px` }}>
+        <div className='rounded-md border' style={{ width: `${tableWidth + 50}px` }}>
           <ScrollArea className='h-[calc(100vh-300px)] overflow-x-scroll'>
             <Table className='table-auto min-w-full w-full relative'>
               <TableHeader className='bg-muted/100 sticky top-0 z-10'>

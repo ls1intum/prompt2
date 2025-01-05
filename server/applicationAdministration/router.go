@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,6 +21,8 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
 	application.GET("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), getAdditionalScores)
 	application.POST("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), uploadAdditionalScore)
+	application.PUT("/:coursePhaseID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationsStatus)
+	application.DELETE("/:coursePhaseID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteApplications)
 
 	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
 	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationAssessment)
@@ -298,6 +302,8 @@ func updateApplicationAssessment(c *gin.Context) {
 		return
 	}
 
+	// TODO MAIL: send mail to student that assessment was updated
+
 	c.JSON(http.StatusOK, gin.H{"message": "application assessment updated"})
 }
 
@@ -328,7 +334,7 @@ func uploadAdditionalScore(c *gin.Context) {
 		return
 	}
 
-	// TODO: possibly send rejection mails to students
+	// TODO MAIL: send mail to student that additional score was uploaded
 
 	c.JSON(http.StatusOK, gin.H{"message": "additional score uploaded"})
 }
@@ -348,6 +354,55 @@ func getAdditionalScores(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, additionalScore)
+}
+
+func updateApplicationsStatus(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var status coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus
+	if err := c.BindJSON(&status); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	participationIDs, err := coursePhaseParticipation.BatchUpdatePassStatus(c, coursePhaseId, status.CoursePhaseParticipationIDs, status.PassStatus)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not update application status"))
+		return
+	}
+	log.Info("Updated ", len(participationIDs), " participations")
+
+	// TODO MAIL: send mail to student that status was updated
+
+	c.JSON(http.StatusOK, gin.H{"message": "application status updated"})
+}
+
+func deleteApplications(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var coursePhaseParticipationIDs []uuid.UUID
+	if err := c.BindJSON(&coursePhaseParticipationIDs); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = DeleteApplications(c, coursePhaseId, coursePhaseParticipationIDs)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not delete applications"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "applications deleted"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

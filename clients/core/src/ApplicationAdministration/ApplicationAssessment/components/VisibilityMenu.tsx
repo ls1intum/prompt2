@@ -5,12 +5,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { Column } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'
 
 interface VisibilityMenuProps {
-  columns: Column<CoursePhaseParticipationWithStudent, unknown>[]
+  columns: Column<ApplicationParticipation, unknown>[]
 }
 
 export const VisibilityMenu = ({ columns }: VisibilityMenuProps): JSX.Element => {
