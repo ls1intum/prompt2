@@ -1,9 +1,9 @@
 import { axiosInstance } from '../configService'
-import { UpdateApplicationStatus } from '@/interfaces/update_application_status'
+import { UpdateCoursePhaseParticipationStatus } from '@/interfaces/update_course_phase_participation_status'
 
 export const updateApplicationStatus = async (
   coursePhaseID: string,
-  updateApplications: UpdateApplicationStatus,
+  updateApplications: UpdateCoursePhaseParticipationStatus,
 ): Promise<void> => {
   try {
     await axiosInstance.put(`/api/applications/${coursePhaseID}/assessment`, updateApplications, {
