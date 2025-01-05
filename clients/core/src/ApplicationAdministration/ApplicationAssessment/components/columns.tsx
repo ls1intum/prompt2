@@ -62,11 +62,21 @@ export const columns = (
       id: 'first_name', // required for filter bar
       accessorKey: 'student.first_name',
       header: ({ column }) => <SortableHeader column={column} title='First Name' />,
+      sortingFn: (rowA, rowB) => {
+        const valueA = rowA.original.student.first_name.toLowerCase() || ''
+        const valueB = rowB.original.student.first_name.toLowerCase() || ''
+        return valueA.localeCompare(valueB)
+      },
     },
     {
       id: 'last_name',
       accessorKey: 'student.last_name',
       header: ({ column }) => <SortableHeader column={column} title='Last Name' />,
+      sortingFn: (rowA, rowB) => {
+        const valueA = rowA.original.student.last_name.toLowerCase() || ''
+        const valueB = rowB.original.student.last_name.toLowerCase() || ''
+        return valueA.localeCompare(valueB)
+      },
     },
     {
       id: 'pass_status',
