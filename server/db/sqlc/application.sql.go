@@ -295,6 +295,26 @@ func (q *Queries) DeleteApplicationQuestionText(ctx context.Context, id uuid.UUI
 	return err
 }
 
+const deleteApplications = `-- name: DeleteApplications :exec
+DELETE FROM course_participation
+WHERE id IN (
+      SELECT cpp.course_participation_id
+      FROM course_phase_participation cpp
+      WHERE cpp.id = ANY($2::uuid[])
+        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+  )
+`
+
+type DeleteApplicationsParams struct {
+	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
+	Column2       []uuid.UUID `json:"column_2"`
+}
+
+func (q *Queries) DeleteApplications(ctx context.Context, arg DeleteApplicationsParams) error {
+	_, err := q.db.Exec(ctx, deleteApplications, arg.CoursePhaseID, arg.Column2)
+	return err
+}
+
 const getAllApplicationParticipations = `-- name: GetAllApplicationParticipations :many
 SELECT
     cpp.id AS course_phase_participation_id,
