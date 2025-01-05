@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, Plus, AlertCircle } from 'lucide-react'
+import { Loader2, Plus, AlertCircle, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,6 +17,9 @@ import { ApplicationForm } from '@/interfaces/application_form'
 import { getApplicationForm } from '../../../network/queries/applicationForm'
 import { UniversitySelection } from './components/UniversitySelection'
 import { ApplicationFormView } from '../../../Application/ApplicationFormView'
+import { StudentSearch } from './components/StudentSearch'
+import { Student } from '@/interfaces/student'
+import { set } from 'date-fns'
 
 export const ApplicationManualAdd = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -25,6 +28,7 @@ export const ApplicationManualAdd = () => {
     page: 1,
     universityAccount: false,
   })
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
 
   const resetStates = useCallback(() => {
     setState({
@@ -57,7 +61,12 @@ export const ApplicationManualAdd = () => {
         )
       case 2:
         return state.universityAccount ? (
-          <div>Not implemented</div>
+          <StudentSearch
+            onSelect={(student) => {
+              setSelectedStudent(student)
+              setState((prev) => ({ ...prev, page: 3 }))
+            }}
+          />
         ) : (
           <ScrollArea className='max-h-[calc(90vh-150px)]'>
             <ApplicationFormView
@@ -116,7 +125,7 @@ export const ApplicationManualAdd = () => {
               className='mr-auto'
               onClick={() => setState((prev) => ({ ...prev, page: prev.page - 1 }))}
             >
-              Previous
+              <ArrowLeft className='mr-2 h-4 w-4' /> Back
             </Button>
           )}
         </DialogFooter>
