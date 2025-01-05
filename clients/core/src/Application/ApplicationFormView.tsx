@@ -27,6 +27,7 @@ interface ApplicationFormProps {
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
   disabled?: boolean
+  allowEditUniversityData?: boolean
   onSubmit: (
     student: Student,
     answersText: CreateApplicationAnswerText[],
@@ -41,6 +42,7 @@ export const ApplicationFormView = ({
   initialAnswersText,
   student,
   disabled = false,
+  allowEditUniversityData = false,
   onSubmit,
 }: ApplicationFormProps): JSX.Element => {
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
@@ -122,6 +124,7 @@ export const ApplicationFormView = ({
               onUpdate={setStudentData}
               ref={studentRef}
               disabled={disabled}
+              allowEditUniversityData={allowEditUniversityData}
             />
           </div>
           <Separator />

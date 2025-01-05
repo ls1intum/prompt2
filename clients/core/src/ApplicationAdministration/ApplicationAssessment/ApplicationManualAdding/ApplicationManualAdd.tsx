@@ -19,7 +19,6 @@ import { UniversitySelection } from './components/UniversitySelection'
 import { ApplicationFormView } from '../../../Application/ApplicationFormView'
 import { StudentSearch } from './components/StudentSearch'
 import { Student } from '@/interfaces/student'
-import { set } from 'date-fns'
 
 export const ApplicationManualAdd = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -35,6 +34,7 @@ export const ApplicationManualAdd = () => {
       page: 1,
       universityAccount: false,
     })
+    setSelectedStudent(null)
   }, [])
 
   const {
@@ -72,6 +72,27 @@ export const ApplicationManualAdd = () => {
             <ApplicationFormView
               questionsText={fetchedApplicationForm?.questions_text ?? []}
               questionsMultiSelect={fetchedApplicationForm?.questions_multi_select ?? []}
+              onSubmit={() => console.log('Submit')}
+            />
+          </ScrollArea>
+        )
+      case 3:
+        return (
+          <ScrollArea className='max-h-[calc(90vh-150px)]'>
+            <ApplicationFormView
+              questionsText={fetchedApplicationForm?.questions_text ?? []}
+              questionsMultiSelect={fetchedApplicationForm?.questions_multi_select ?? []}
+              student={
+                selectedStudent !== null
+                  ? selectedStudent
+                  : {
+                      first_name: '',
+                      last_name: '',
+                      email: '',
+                      has_university_account: true,
+                    }
+              }
+              allowEditUniversityData={selectedStudent === null}
               onSubmit={() => console.log('Submit')}
             />
           </ScrollArea>
