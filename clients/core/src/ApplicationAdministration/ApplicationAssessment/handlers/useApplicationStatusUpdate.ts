@@ -1,13 +1,13 @@
 import { useToast } from '@/hooks/use-toast'
-import { UpdateApplicationStatus } from '@/interfaces/update_application_status'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { updateApplicationStatus } from '../../../network/mutations/updateApplicationStatus'
 import { useParams } from 'react-router-dom'
+import { UpdateCoursePhaseParticipationStatus } from '@/interfaces/update_course_phase_participation_status'
 
 export const useApplicationStatusUpdate = (): UseMutationResult<
   void,
   Error,
-  UpdateApplicationStatus,
+  UpdateCoursePhaseParticipationStatus,
   unknown
 > => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -15,7 +15,7 @@ export const useApplicationStatusUpdate = (): UseMutationResult<
   const { toast } = useToast()
 
   const mutation = useMutation({
-    mutationFn: (updateApplication: UpdateApplicationStatus) => {
+    mutationFn: (updateApplication: UpdateCoursePhaseParticipationStatus) => {
       return updateApplicationStatus(phaseId ?? 'undefined', updateApplication)
     },
     onSuccess: () => {

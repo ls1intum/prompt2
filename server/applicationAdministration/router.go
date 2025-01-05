@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
@@ -361,7 +362,7 @@ func updateApplicationsStatus(c *gin.Context) {
 		return
 	}
 
-	var status applicationDTO.PutApplicationStatus
+	var status coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus
 	if err := c.BindJSON(&status); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
