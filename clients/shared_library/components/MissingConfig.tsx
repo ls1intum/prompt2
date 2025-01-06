@@ -5,7 +5,7 @@ import { AlertTriangle } from 'lucide-react'
 import { ElementType } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-interface MissingConfigItem {
+export interface MissingConfigItem {
   title: string
   icon: ElementType
   description?: string

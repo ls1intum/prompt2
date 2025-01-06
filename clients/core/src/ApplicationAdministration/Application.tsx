@@ -1,15 +1,56 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { CalendarX, Mail, FileCheck, FileX, FileClock, Users } from 'lucide-react'
-import { MissingConfig } from '@/components/MissingConfig'
+import { CalendarX, FileCheck, FileX, FileClock, Users, Mail } from 'lucide-react'
+import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { useGetCoursePhase } from './handlers/useGetCoursePhase'
+import { getIsApplicationConfigured } from './utils/getApplicationIsConfigured'
+import { useEffect, useMemo, useState } from 'react'
+import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
+import { useLocation } from 'react-router-dom'
 
 export const Application = (): JSX.Element => {
-  // Mock data - replace with actual data fetching logic
-  const missingConfigs = [
-    { id: 1, title: 'Application Start Date', icon: CalendarX, link: '/configuration' },
-    { id: 2, title: 'Application End Date', icon: CalendarX, link: '/configuration' },
-    { id: 3, title: 'Mailing Configuration', icon: Mail, link: '/configuration' },
-  ]
+  const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
+  const path = useLocation().pathname
+  const {
+    data: fetchedCoursePhase,
+    isPending: isCoursePhasePending,
+    error: coursePhaseError,
+    isError: isCoursePhaseError,
+  } = useGetCoursePhase()
+
+  useEffect(() => {
+    if (fetchedCoursePhase) {
+      const externalStudentsAllowed = fetchedCoursePhase?.meta_data?.['externalStudentsAllowed']
+      const applicationStartDate = fetchedCoursePhase?.meta_data?.['applicationStartDate']
+      const applicationEndDate = fetchedCoursePhase?.meta_data?.['applicationEndDate']
+
+      const parsedMetaData: ApplicationMetaData = {
+        applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,
+        applicationEndDate: applicationEndDate ? new Date(applicationEndDate) : undefined,
+        externalStudentsAllowed: externalStudentsAllowed ? externalStudentsAllowed : false,
+      }
+      setApplicationMetaData(parsedMetaData)
+    }
+  }, [fetchedCoursePhase])
+
+  const missingConfigs: MissingConfigItem[] = useMemo(() => {
+    const missingConfigItems: MissingConfigItem[] = []
+    if (getIsApplicationConfigured(applicationMetaData)) {
+      missingConfigItems.push({
+        title: 'Application Phase Deadlines',
+        icon: CalendarX,
+        link: `${path}/configuration`,
+      })
+    }
+
+    // TODO fix when mail is configured
+    missingConfigItems.push({
+      title: 'Mail Configuration',
+      icon: Mail,
+      link: `${path}`,
+    })
+    return missingConfigItems
+  }, [applicationMetaData, path])
 
   const applicationStats = {
     total: 150,

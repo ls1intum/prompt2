@@ -8,11 +8,12 @@ import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
 import { ApplicationTimeline } from './components/ApplicationTimeline'
 import { ApplicationConfigurationHeader } from './components/ConfigurationHeader'
 import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
-import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
-import { getApplicationStatus } from './utils/getApplicationStatus'
+import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
+import { getApplicationStatus } from '../utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
 import { useGetCoursePhase } from '../handlers/useGetCoursePhase'
+import { getIsApplicationConfigured } from '../utils/getApplicationIsConfigured'
 
 export const ApplicationConfiguration = (): JSX.Element => {
   const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
@@ -47,12 +48,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
     }
   }, [coursePhase, fetchedCoursePhase])
 
-  const applicationPhaseIsConfigured =
-    applicationMetaData?.applicationStartDate &&
-    applicationMetaData.applicationEndDate &&
-    applicationMetaData.externalStudentsAllowed !== undefined
-      ? true
-      : false
+  const applicationPhaseIsConfigured = getIsApplicationConfigured(applicationMetaData)
 
   const applicationStatus = getApplicationStatus(applicationMetaData, applicationPhaseIsConfigured)
 

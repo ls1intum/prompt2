@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
+import { ApplicationMetaData } from '../../interfaces/ApplicationMetaData'
 import { DatePicker } from '@/components/DatePicker'
 import { format, set, parse, formatISO } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'

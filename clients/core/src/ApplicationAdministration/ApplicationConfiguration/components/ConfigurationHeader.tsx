@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react'
-import { ApplicationStatus } from '../interfaces/ApplicationStatus'
+import { ApplicationStatus } from '../../interfaces/ApplicationStatus'
 
 interface ApplicationConfigurationHeaderProps {
   applicationPhaseIsConfigured: boolean
