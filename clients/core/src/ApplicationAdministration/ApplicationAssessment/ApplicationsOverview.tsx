@@ -30,8 +30,6 @@ import { VisibilityMenu } from './components/VisibilityMenu'
 import { ErrorPage } from '@/components/ErrorPage'
 import { FilterBadges } from './components/FilterBadges'
 import { ApplicationDetailsView } from './ApplicationDetailsView'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { getApplicationParticipations } from '../../network/queries/applicationParticipations'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadApplications } from './utils/downloadApplications'
 import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
@@ -39,6 +37,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
 import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 import { ApplicationManualAdd } from './ApplicationManualAdding/ApplicationManualAdd'
+import { useGetApplicationParticipations } from '../handlers/useGetApplicationParticipations'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -75,10 +74,7 @@ export const ApplicationsOverview = (): JSX.Element => {
     isPending: isParticipationsPending,
     isError: isParticipantsError,
     refetch: refetchParticipations,
-  } = useQuery<ApplicationParticipation[]>({
-    queryKey: ['application_participations', 'students', phaseId],
-    queryFn: () => getApplicationParticipations(phaseId ?? ''),
-  })
+  } = useGetApplicationParticipations()
 
   const isError = isParticipantsError || isAdditionalScoresError
   const isPending = isParticipationsPending || isAdditionalScoresPending

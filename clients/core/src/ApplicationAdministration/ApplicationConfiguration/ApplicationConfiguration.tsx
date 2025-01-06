@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { Loader2, Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
-import { getCoursePhaseByID } from '../../network/queries/coursePhase'
 import { ApplicationTimeline } from './components/ApplicationTimeline'
 import { ApplicationConfigurationHeader } from './components/ConfigurationHeader'
 import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
-import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
-import { getApplicationStatus } from './utils/getApplicationStatus'
+import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
+import { getApplicationStatus } from '../utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
-import { ApplicationPreview } from '../../Application/ApplicationPreview'
+import { useGetCoursePhase } from '../handlers/useGetCoursePhase'
+import { getIsApplicationConfigured } from '../utils/getApplicationIsConfigured'
 
 export const ApplicationConfiguration = (): JSX.Element => {
-  const { phaseId } = useParams<{ phaseId: string }>()
   const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
@@ -28,10 +25,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
     isPending: isCoursePhasePending,
     error: coursePhaseError,
     isError: isCoursePhaseError,
-  } = useQuery<CoursePhaseWithMetaData>({
-    queryKey: ['course_phase', phaseId],
-    queryFn: () => getCoursePhaseByID(phaseId ?? ''),
-  })
+  } = useGetCoursePhase()
 
   useEffect(() => {
     if (fetchedCoursePhase) {
@@ -54,12 +48,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
     }
   }, [coursePhase, fetchedCoursePhase])
 
-  const applicationPhaseIsConfigured =
-    applicationMetaData?.applicationStartDate &&
-    applicationMetaData.applicationEndDate &&
-    applicationMetaData.externalStudentsAllowed !== undefined
-      ? true
-      : false
+  const applicationPhaseIsConfigured = getIsApplicationConfigured(applicationMetaData)
 
   const applicationStatus = getApplicationStatus(applicationMetaData, applicationPhaseIsConfigured)
 
