@@ -57,7 +57,7 @@ func setupRouter() *gin.Engine {
 		return testutils.MockAuthMiddleware([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"})
 	}
 	permissionIDMiddleware := testutils.MockPermissionMiddleware
-	setupCoursePhaseRouter(api, authMiddleware, permissionIDMiddleware)
+	setupCoursePhaseRouter(api, authMiddleware, permissionIDMiddleware, permissionIDMiddleware)
 	return router
 }
 
@@ -94,7 +94,7 @@ func (suite *RouterTestSuite) TestCreateCoursePhase() {
 	}
 
 	body, _ := json.Marshal(newCoursePhase)
-	req := httptest.NewRequest(http.MethodPost, "/api/course_phases", bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/course_phases/course/3f42d322-e5bf-4faa-b576-51f2cab14c2e", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 

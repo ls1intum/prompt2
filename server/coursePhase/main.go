@@ -10,7 +10,7 @@ import (
 
 func InitCoursePhaseModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
 
-	setupCoursePhaseRouter(routerGroup, keycloak.KeycloakMiddleware, checkAccessControlByIDWrapper)
+	setupCoursePhaseRouter(routerGroup, keycloak.KeycloakMiddleware, checkAccessControlByIDWrapper, checkAccessControlByCourseIDWrapper)
 	CoursePhaseServiceSingleton = &CoursePhaseService{
 		queries: queries,
 		conn:    conn,
@@ -21,4 +21,8 @@ func InitCoursePhaseModule(routerGroup *gin.RouterGroup, queries db.Queries, con
 
 func checkAccessControlByIDWrapper(allowedRoles ...string) gin.HandlerFunc {
 	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePhasePermission, "uuid", allowedRoles...)
+}
+
+func checkAccessControlByCourseIDWrapper(allowedRoles ...string) gin.HandlerFunc {
+	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, "courseID", allowedRoles...)
 }
