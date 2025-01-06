@@ -32,22 +32,24 @@ export const MissingConfig = ({ elements }: MissingConfigProps): JSX.Element => 
           <CardContent>
             <div className='space-y-2'>
               {elements.map((config) => (
-                <Alert key={config.title} className='flex items-center justify-between'>
+                <Alert key={config.title} className='flex items-start'>
                   <div className='flex-grow'>
                     <div className='flex items-center'>
-                      <config.icon className='h-4 w-4 text-yellow-500 mr-2' />
-                      <AlertTitle>Missing: {config.title}</AlertTitle>
+                      <config.icon className='h-4 w-4 text-yellow-500 mr-2 mt-1' />
+                      <div>
+                        <AlertTitle className='mb-1'>Missing: {config.title}</AlertTitle>
+                        <AlertDescription>
+                          {config.description ||
+                            `Please configure the ${config.title.toLowerCase()} to ensure proper functionality.`}
+                        </AlertDescription>
+                      </div>
                     </div>
-                    <AlertDescription>
-                      {config.description ||
-                        `Please configure the ${config.title.toLowerCase()} to ensure proper functionality.`}
-                    </AlertDescription>
                   </div>
                   <Button
                     variant='outline'
                     size='sm'
                     onClick={() => navigate(config.link)}
-                    className='ml-4'
+                    className='ml-4 mt-1 whitespace-nowrap'
                   >
                     Configure
                   </Button>
