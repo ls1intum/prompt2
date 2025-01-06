@@ -12,6 +12,7 @@ import {
 } from '@radix-ui/react-icons'
 import { LinkEditPopover } from '../link/link-edit-popover'
 import { ToolbarSection } from '../toolbar-section'
+import { ImageEditDialog } from '../image/image-edit-dialog'
 
 type InsertElementAction = 'codeBlock' | 'blockquote' | 'horizontalRule'
 interface InsertElement extends FormatAction {
@@ -64,6 +65,7 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   return (
     <>
       <LinkEditPopover editor={editor} size={size} variant={variant} />
+      <ImageEditDialog editor={editor} size={size} variant={variant} />
       <ToolbarSection
         editor={editor}
         actions={formatActions}
