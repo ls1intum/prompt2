@@ -166,6 +166,24 @@ func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options
 	return nil
 }
 
+func validateApplicationManualAdd(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Check if course phase is application phase
+	// But we don't check if it's open, since we're manually adding an application
+	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate application: ", err)
+		return errors.New("could not validate the application")
+	}
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
+	return validateAnswers(ctx, coursePhaseID, application)
+}
+
 func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
@@ -180,20 +198,24 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 		return errors.New("course phase is not an application phase")
 	}
 
+	return validateAnswers(ctx, coursePhaseID, application)
+}
+
+func validateAnswers(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
 	// 1. Check that the student is valid
-	err = student.Validate(application.Student)
+	err := student.Validate(application.Student)
 	if err != nil {
 		return errors.New("invalid student")
 	}
 
 	// 2. Get all questions for the course phase
-	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
+	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not validate application: ", err)
 		return errors.New("could not validate the application")
 	}
 
-	applicationQuestionsMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
+	applicationQuestionsMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		return errors.New("could not validate the application")
 	}
@@ -208,6 +230,7 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

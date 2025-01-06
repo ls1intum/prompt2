@@ -22,6 +22,8 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.GET("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), getAdditionalScores)
 	application.POST("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), uploadAdditionalScore)
 	application.PUT("/:coursePhaseID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationsStatus)
+
+	application.POST("/:coursePhaseID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), postApplicationManual)
 	application.DELETE("/:coursePhaseID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteApplications)
 
 	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
@@ -142,6 +144,41 @@ func getApplicationAuthenticated(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, applicationForm)
 
+}
+
+func postApplicationManual(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	var application applicationDTO.PostApplication
+	if err := c.BindJSON(&application); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateApplicationManualAdd(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = PostApplicationExtern(c, coursePhaseId, application)
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, ErrAlreadyApplied) {
+			handleError(c, http.StatusMethodNotAllowed, errors.New("already applied"))
+			return
+		}
+
+		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
+		return
+	}
+
+	// TODO: send mail confirmation to student!
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
 func postApplicationExtern(c *gin.Context) {
