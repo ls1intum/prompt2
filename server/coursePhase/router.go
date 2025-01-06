@@ -9,17 +9,30 @@ import (
 	"github.com/niclasheun/prompt2.0/keycloak"
 )
 
-func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware, permissionCourseIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhase := router.Group("/course_phases", authMiddleware())
 	coursePhase.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseByID)
-	coursePhase.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhase)
+	// getting the course ID here to do correct rights management
+	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhase)
 	coursePhase.PUT("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhase)
 	coursePhase.DELETE("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteCoursePhase)
 }
 
 func createCoursePhase(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("courseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var newCoursePhase coursePhaseDTO.CreateCoursePhase
 	if err := c.BindJSON(&newCoursePhase); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate that the courseIDs are identical
+	if newCoursePhase.CourseID != courseID {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
