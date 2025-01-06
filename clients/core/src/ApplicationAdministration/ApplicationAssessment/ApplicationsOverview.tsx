@@ -142,7 +142,7 @@ export const ApplicationsOverview = (): JSX.Element => {
             {fetchedParticipations && (
               <AssessmentScoreUpload applications={fetchedParticipations} />
             )}
-            <ApplicationManualAdd />
+            <ApplicationManualAdd existingApplications={fetchedParticipations ?? []} />
             {table.getSelectedRowModel().rows.length > 0 && (
               <GroupActionsMenu
                 selectedRows={table.getSelectedRowModel()}

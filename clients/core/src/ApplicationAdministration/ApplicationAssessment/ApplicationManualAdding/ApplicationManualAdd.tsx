@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, Plus, AlertCircle, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,9 +19,21 @@ import { UniversitySelection } from './components/UniversitySelection'
 import { ApplicationFormView } from '../../../Application/ApplicationFormView'
 import { StudentSearch } from './components/StudentSearch'
 import { Student } from '@/interfaces/student'
+import { postNewApplicationManual } from '../../../network/mutations/postApplicationManual'
+import { PostApplication } from '@/interfaces/post_application'
+import { useToast } from '@/hooks/use-toast'
+import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
 
-export const ApplicationManualAdd = () => {
+interface ApplicationManualAddProps {
+  existingApplications: ApplicationParticipation[]
+}
+
+export const ApplicationManualAdd = ({ existingApplications }: ApplicationManualAddProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [state, setState] = useState({
     page: 1,
@@ -49,6 +61,43 @@ export const ApplicationManualAdd = () => {
     enabled: !!phaseId,
   })
 
+  const { mutate: mutateSendApplication, error: mutateError } = useMutation({
+    mutationFn: (manualApplication: PostApplication) => {
+      return postNewApplicationManual(phaseId ?? 'undefined', manualApplication)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['application_participations', 'students', phaseId],
+      })
+      toast({
+        title: 'Application added',
+        description: 'The application has been successfully added',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: `The application could not be addded. ${mutateError?.message}`,
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const submitManualApplication = (
+    student: Student,
+    answersText: CreateApplicationAnswerText[],
+    answersMultiSelect: CreateApplicationAnswerMultiSelect[],
+  ) => {
+    const manualApplication: PostApplication = {
+      student: student,
+      answers_text: answersText,
+      answers_multi_select: answersMultiSelect,
+    }
+    mutateSendApplication(manualApplication)
+    resetStates()
+    setDialogOpen(false)
+  }
+
   const renderContent = () => {
     switch (state.page) {
       case 1:
@@ -66,13 +115,14 @@ export const ApplicationManualAdd = () => {
               setSelectedStudent(student)
               setState((prev) => ({ ...prev, page: 3 }))
             }}
+            existingApplications={existingApplications}
           />
         ) : (
           <ScrollArea className='max-h-[calc(90vh-150px)]'>
             <ApplicationFormView
               questionsText={fetchedApplicationForm?.questions_text ?? []}
               questionsMultiSelect={fetchedApplicationForm?.questions_multi_select ?? []}
-              onSubmit={() => console.log('Submit')}
+              onSubmit={submitManualApplication}
             />
           </ScrollArea>
         )
@@ -93,7 +143,7 @@ export const ApplicationManualAdd = () => {
                     }
               }
               allowEditUniversityData={selectedStudent === null}
-              onSubmit={() => console.log('Submit')}
+              onSubmit={submitManualApplication}
             />
           </ScrollArea>
         )

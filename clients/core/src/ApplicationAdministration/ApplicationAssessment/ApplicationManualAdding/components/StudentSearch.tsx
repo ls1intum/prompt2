@@ -18,12 +18,17 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Student } from '@/interfaces/student'
 import { searchStudents } from '../../../../network/queries/searchStudents'
+import { ApplicationParticipation } from '@/interfaces/application_participations'
 
 interface StudentSearchProps {
   onSelect: (selectedStudent: Student | null) => void
+  existingApplications: ApplicationParticipation[]
 }
 
-export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => {
+export const StudentSearch = ({
+  onSelect,
+  existingApplications,
+}: StudentSearchProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [searchQuery, setSearchQuery] = useState('')
   const [enteredSearchString, setEnteredSearchString] = useState('')
@@ -99,15 +104,21 @@ export const StudentSearch = ({ onSelect }: StudentSearchProps): JSX.Element => 
                   <TableCell>{user.university_login}</TableCell>
                   <TableCell>{user.matriculation_number}</TableCell>
                   <TableCell>
-                    <Button
-                      size='sm'
-                      onClick={() => {
-                        onClose()
-                        onSelect(user)
-                      }}
-                    >
-                      Select
-                    </Button>
+                    {existingApplications.some(
+                      (application) => application.student.id === user.id,
+                    ) ? (
+                      <>Has Already Applied</>
+                    ) : (
+                      <Button
+                        size='sm'
+                        onClick={() => {
+                          onClose()
+                          onSelect(user)
+                        }}
+                      >
+                        Select
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
