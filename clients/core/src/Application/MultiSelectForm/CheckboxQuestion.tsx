@@ -1,8 +1,9 @@
 import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
-import { FormDescription, FormLabel } from '@/components/ui/form'
+import { FormLabel } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
 
 interface CheckboxQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
@@ -28,7 +29,7 @@ export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
         {question.title}
         {question.is_required && <span className='text-destructive'> *</span>}
       </FormLabel>
-      {question.description && <FormDescription>{question.description}</FormDescription>}
+      {question.description && <FormDescriptionHTML htmlCode={question.description} />}
     </div>
   </div>
 )

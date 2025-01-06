@@ -1,6 +1,6 @@
 import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
-import { FormDescription, FormLabel } from '@/components/ui/form'
+import { FormLabel } from '@/components/ui/form'
 import { MultiSelect } from '@/components/MultiSelect'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import {
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
 
 interface MultiSelectQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
@@ -35,7 +36,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
         {question.title}
         {question.min_select > 0 && <span className='text-destructive'> *</span>}
       </FormLabel>
-      {question.description && <FormDescription>{question.description}</FormDescription>}
+      {question.description && <FormDescriptionHTML htmlCode={question.description} />}
       {question.max_select > 1 ? (
         <MultiSelect
           options={multiSelectOptions}

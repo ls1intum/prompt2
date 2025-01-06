@@ -29,6 +29,8 @@ import { DeleteConfirmation } from '../components/DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 import { checkCheckBoxQuestion } from '../../../../Application/utils/CheckBoxRequirements'
+import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -177,12 +179,26 @@ export const ApplicationQuestionCard = forwardRef<
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder='Enter question description' />
+                        <TooltipProvider>
+                          <DescriptionMinimalTiptapEditor
+                            {...field}
+                            // value={richEditorValue}
+                            // onChange={(answer) => setRichEditorValue(answer)}
+                            className='w-full'
+                            editorContentClassName='minimal-tiptap-editor'
+                            output='html'
+                            placeholder='Type your description here...'
+                            autofocus={false}
+                            editable={true}
+                            editorClassName='focus:outline-none'
+                          />
+                        </TooltipProvider>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 {/** Checkbox Questions do not have a placeholder */}
                 {!isCheckboxQuestion && (
                   <FormField
