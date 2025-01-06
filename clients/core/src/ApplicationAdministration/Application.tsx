@@ -1,6 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { CalendarX, FileCheck, FileX, FileClock, Users, Mail } from 'lucide-react'
+import { CalendarX, Mail } from 'lucide-react'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { useGetCoursePhase } from './handlers/useGetCoursePhase'
 import { getIsApplicationConfigured } from './utils/getApplicationIsConfigured'
@@ -10,6 +8,7 @@ import { useLocation } from 'react-router-dom'
 import { useGetApplicationParticipations } from './handlers/useGetApplicationParticipations'
 import { AssessmentDiagram } from './components/AssessmentDiagram'
 import { ApplicationStatusCard } from './components/ApplicationStatusCard'
+import { ApplicationGenderDiagram } from './components/ApplicationGenderDiagram'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -62,18 +61,6 @@ export const Application = (): JSX.Element => {
     return missingConfigItems
   }, [applicationMetaData, path])
 
-  const applicationStats = {
-    total: 150,
-    notAssessed: 50,
-    accepted: 70,
-    rejected: 30,
-  }
-
-  const applicationPhase = {
-    isLive: true,
-    daysLeft: 15,
-  }
-
   return (
     <div className='container mx-auto p-6'>
       <h1 className='text-4xl font-bold mb-6'>Application Administration</h1>
@@ -86,6 +73,7 @@ export const Application = (): JSX.Element => {
           applicationPhaseIsConfigured={getIsApplicationConfigured(applicationMetaData)}
         />
         <AssessmentDiagram applications={fetchedParticipations ?? []} />
+        <ApplicationGenderDiagram applications={fetchedParticipations ?? []} />
       </div>
     </div>
   )
