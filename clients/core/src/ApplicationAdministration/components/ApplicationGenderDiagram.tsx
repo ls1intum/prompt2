@@ -13,19 +13,19 @@ import { useMemo } from 'react'
 const chartConfig = {
   female: {
     label: 'Female',
-    color: 'hsl(var(--chart-blue))',
+    color: 'hsl(var(--primary))',
   },
   male: {
     label: 'Male',
-    color: 'hsl(var(--chart-blue))',
+    color: 'hsl(var(--primary))',
   },
   diverse: {
     label: 'Diverse',
-    color: 'hsl(var(--chart-blue))',
+    color: 'hsl(var(--primary))',
   },
   prefer_not_to_say: {
     label: 'Unknown',
-    color: 'hsl(var(--chart-blue))',
+    color: 'hsl(var(--primary))',
   },
 } satisfies ChartConfig
 
