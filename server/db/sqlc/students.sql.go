@@ -153,6 +153,46 @@ func (q *Queries) GetStudentByEmail(ctx context.Context, email pgtype.Text) (Stu
 	return i, err
 }
 
+const searchStudents = `-- name: SearchStudents :many
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender
+FROM student
+WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
+   OR first_name ILIKE '%' || $1 || '%'
+   OR last_name ILIKE '%' || $1 || '%'
+   OR email ILIKE '%' || $1 || '%'
+   OR matriculation_number ILIKE '%' || $1 || '%'
+   OR university_login ILIKE '%' || $1 || '%'
+`
+
+func (q *Queries) SearchStudents(ctx context.Context, dollar_1 pgtype.Text) ([]Student, error) {
+	rows, err := q.db.Query(ctx, searchStudents, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Student
+	for rows.Next() {
+		var i Student
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateStudent = `-- name: UpdateStudent :one
 UPDATE student
 SET first_name = $2,

@@ -26,11 +26,12 @@ import translations from '@/lib/translations.json'
 interface StudentFormProps {
   student: Student
   disabled?: boolean
+  allowEditUniversityData: boolean
   onUpdate: (updatedStudent: Student) => void
 }
 
 export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(function StudentForm(
-  { student, disabled = false, onUpdate },
+  { student, disabled = false, allowEditUniversityData, onUpdate },
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
@@ -144,7 +145,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>First Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount || disabled} />
+                  <Input
+                    {...field}
+                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -157,7 +161,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>Last Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount || disabled} />
+                  <Input
+                    {...field}
+                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -171,7 +178,11 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             <FormItem>
               <FormLabel>Email{requiredStar}</FormLabel>
               <FormControl>
-                <Input {...field} type='email' disabled={hasUniversityAccount || disabled} />
+                <Input
+                  {...field}
+                  type='email'
+                  disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

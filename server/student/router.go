@@ -16,6 +16,7 @@ func setupStudentRouter(router *gin.RouterGroup, authMiddleware func() gin.Handl
 	student.GET("/:uuid", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), getStudentByID)
 	student.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createStudent)
 	student.PUT("/:uuid", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), updateStudent)
+	student.GET("/search/:searchString", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), searchStudents)
 }
 
 func getAllStudents(c *gin.Context) {
@@ -97,6 +98,17 @@ func updateStudent(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, student)
+}
+
+func searchStudents(c *gin.Context) {
+	searchString := c.Param("searchString")
+
+	students, err := SearchStudents(c, searchString)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, students)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

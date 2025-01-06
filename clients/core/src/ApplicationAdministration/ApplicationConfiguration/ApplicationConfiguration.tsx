@@ -15,6 +15,7 @@ import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
 import { getApplicationStatus } from './utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
+import { ApplicationPreview } from '../../Application/ApplicationPreview'
 
 export const ApplicationConfiguration = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

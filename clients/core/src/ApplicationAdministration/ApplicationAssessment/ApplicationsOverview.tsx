@@ -38,6 +38,7 @@ import AssessmentScoreUpload from './ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
 import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
+import { ApplicationManualAdd } from './ApplicationManualAdding/ApplicationManualAdd'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -141,6 +142,7 @@ export const ApplicationsOverview = (): JSX.Element => {
             {fetchedParticipations && (
               <AssessmentScoreUpload applications={fetchedParticipations} />
             )}
+            <ApplicationManualAdd existingApplications={fetchedParticipations ?? []} />
             {table.getSelectedRowModel().rows.length > 0 && (
               <GroupActionsMenu
                 selectedRows={table.getSelectedRowModel()}
