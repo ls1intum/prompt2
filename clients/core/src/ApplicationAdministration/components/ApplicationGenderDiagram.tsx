@@ -48,7 +48,7 @@ export const ApplicationGenderDiagram = ({
 
     const data = Object.entries(chartConfig).map(([gender, config]) => ({
       gender: config.label,
-      students: genderCounts[gender as Gender] || 0,
+      Students: genderCounts[gender as Gender] || 0,
       fill: config.color,
     }))
 
@@ -74,10 +74,10 @@ export const ApplicationGenderDiagram = ({
               tickFormatter={(value) => value.split(' ').join('\n')}
             />
             <YAxis hide />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey='students' radius={[4, 4, 0, 0]}>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Bar dataKey='Students' radius={[4, 4, 0, 0]}>
               {genderData.map((entry, index) => (
-                <Bar key={`bar-${index}`} dataKey='students' fill={entry.fill} />
+                <Bar key={`bar-${index}`} dataKey='Students' fill={entry.fill} />
               ))}
               <LabelList position='top' offset={10} className='fill-foreground' fontSize={12} />
             </Bar>
