@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Student } from '@/interfaces/student'
 import { searchStudents } from '../../../../network/queries/searchStudents'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { Badge } from '@/components/ui/badge'
 
 interface StudentSearchProps {
   onSelect: (selectedStudent: Student | null) => void
@@ -107,7 +108,7 @@ export const StudentSearch = ({
                     {existingApplications.some(
                       (application) => application.student.id === user.id,
                     ) ? (
-                      <>Has Already Applied</>
+                      <Badge variant='secondary'>Already Applied</Badge>
                     ) : (
                       <Button
                         size='sm'
