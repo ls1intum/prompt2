@@ -31,6 +31,7 @@ import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatu
 import { checkCheckBoxQuestion } from '../../../../Application/utils/CheckBoxRequirements'
 import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -58,6 +59,7 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [useRichInput, setUseRichInput] = useState(false)
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -177,22 +179,34 @@ export const ApplicationQuestionCard = forwardRef<
                   name='description'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <TooltipProvider>
-                          <DescriptionMinimalTiptapEditor
-                            {...field}
-                            // value={richEditorValue}
-                            // onChange={(answer) => setRichEditorValue(answer)}
-                            className='w-full'
-                            editorContentClassName='minimal-tiptap-editor'
-                            output='html'
-                            placeholder='Type your description here...'
-                            autofocus={false}
-                            editable={true}
-                            editorClassName='focus:outline-none'
+                      <div className='flex items-center justify-between'>
+                        <FormLabel>Description</FormLabel>
+                        <div className='flex items-center space-x-2'>
+                          <Switch
+                            checked={useRichInput}
+                            onCheckedChange={setUseRichInput}
+                            aria-label='Toggle between standard and rich input'
                           />
-                        </TooltipProvider>
+                          <span className='text-sm text-muted-foreground'>Rich Text Editor</span>
+                        </div>
+                      </div>
+                      <FormControl>
+                        {useRichInput ? (
+                          <TooltipProvider>
+                            <DescriptionMinimalTiptapEditor
+                              {...field}
+                              className='w-full'
+                              editorContentClassName='minimal-tiptap-editor'
+                              output='html'
+                              placeholder='Type your description here...'
+                              autofocus={false}
+                              editable={true}
+                              editorClassName='focus:outline-none'
+                            />
+                          </TooltipProvider>
+                        ) : (
+                          <Input {...field} placeholder='Enter description text' />
+                        )}
                       </FormControl>
                       <FormMessage />
                     </FormItem>

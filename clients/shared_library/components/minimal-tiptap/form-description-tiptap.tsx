@@ -55,7 +55,7 @@ export const DescriptionMinimalTiptapEditor = React.forwardRef<HTMLDivElement, M
         name='editor'
         ref={ref}
         className={cn(
-          'flex h-auto min-h-72 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary',
+          'flex h-auto min-h-70 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary',
           className,
         )}
       >
