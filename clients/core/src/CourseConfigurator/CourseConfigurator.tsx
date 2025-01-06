@@ -71,7 +71,6 @@ export default function CourseConfiguratorPage() {
 
   useEffect(() => {
     if (fetchedCourseGraph) {
-      console.log(fetchedCourseGraph)
       setCoursePhaseGraph([...fetchedCourseGraph])
       setFinishedGraphSetup(true)
     }

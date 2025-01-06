@@ -11,7 +11,7 @@ type GetCoursePhaseParticipation struct {
 	ID                    uuid.UUID     `json:"id"`
 	CourseParticipationID uuid.UUID     `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID     `json:"course_phase_id"`
-	Passed                bool          `json:"passed"`
+	PassStatus            string        `json:"passed_status"`
 	MetaData              meta.MetaData `json:"meta_data"`
 }
 
@@ -26,7 +26,7 @@ func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation
 		ID:                    model.ID,
 		CourseParticipationID: model.CourseParticipationID,
 		CoursePhaseID:         model.CoursePhaseID,
-		Passed:                model.Passed.Bool,
+		PassStatus:            GetPassStatusString(model.PassStatus),
 		MetaData:              metaData,
 	}, nil
 }

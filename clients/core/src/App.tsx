@@ -12,6 +12,7 @@ import AboutPage from './LegalPages/AboutPage'
 import { CourseOverview } from './Course/CourseOverview'
 import { ApplicationLoginPage } from './Application/ApplicationLoginPage'
 import { ApplicationAuthenticated } from './Application/ApplicationAuthenticated'
+import { Toaster } from '@/components/ui/toaster'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ export const App = (): JSX.Element => {
               }
             />
           </Routes>
+          <Toaster />
         </BrowserRouter>
       </QueryClientProvider>
     </KeycloakProvider>

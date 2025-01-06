@@ -63,7 +63,6 @@ export const handleSubmitAllQuestions = async ({
       ),
     }
     mutateApplicationForm(updateForm)
-    console.log(true)
   } else {
     throw new Error('Not all questions are valid')
   }

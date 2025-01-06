@@ -19,10 +19,11 @@ import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText
   initialAnswer?: string
+  disabled?: boolean
 }
 
 export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuestionTextForm(
-  { question, initialAnswer }: ApplicationQuestionTextFormProps,
+  { question, initialAnswer, disabled = false }: ApplicationQuestionTextFormProps,
   ref: React.Ref<QuestionTextFormRef>,
 ) {
   const [charCount, setCharCount] = useState(0)
@@ -39,7 +40,6 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
   // Expose validation method
   useImperativeHandle(ref, () => ({
     async validate() {
-      console.log('Validating question', question.title)
       const isValid = await form.trigger()
       return isValid
     },
@@ -83,6 +83,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                         maxLength={question.allowed_length}
                         className='pr-12'
                         rows={4}
+                        disabled={disabled}
                       />
                     ) : (
                       <Input
@@ -90,6 +91,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                         placeholder={question.placeholder || ''}
                         maxLength={question.allowed_length}
                         className='pr-12'
+                        disabled={disabled}
                       />
                     )}
                     <div className='absolute right-2 bottom-2 text-sm text-gray-500'>

@@ -53,7 +53,11 @@ func (suite *RouterTestSuite) TearDownSuite() {
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/api")
-	setupCoursePhaseRouter(api)
+	authMiddleware := func() gin.HandlerFunc {
+		return testutils.MockAuthMiddleware([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"})
+	}
+	permissionIDMiddleware := testutils.MockPermissionMiddleware
+	setupCoursePhaseRouter(api, authMiddleware, permissionIDMiddleware)
 	return router
 }
 

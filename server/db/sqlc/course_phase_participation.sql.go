@@ -13,17 +13,17 @@ import (
 )
 
 const createCoursePhaseParticipation = `-- name: CreateCoursePhaseParticipation :one
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, passed, meta_data)
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, pass_status, meta_data)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, course_participation_id, course_phase_id, passed, meta_data
+RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status
 `
 
 type CreateCoursePhaseParticipationParams struct {
-	ID                    uuid.UUID   `json:"id"`
-	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
-	Passed                pgtype.Bool `json:"passed"`
-	MetaData              []byte      `json:"meta_data"`
+	ID                    uuid.UUID      `json:"id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	PassStatus            NullPassStatus `json:"pass_status"`
+	MetaData              []byte         `json:"meta_data"`
 }
 
 func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg CreateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
@@ -31,7 +31,7 @@ func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg Create
 		arg.ID,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
-		arg.Passed,
+		arg.PassStatus,
 		arg.MetaData,
 	)
 	var i CoursePhaseParticipation
@@ -39,14 +39,14 @@ func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg Create
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.Passed,
 		&i.MetaData,
+		&i.PassStatus,
 	)
 	return i, err
 }
 
 const getAllCoursePhaseParticipationsForCourseParticipation = `-- name: GetAllCoursePhaseParticipationsForCourseParticipation :many
-SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, meta_data, pass_status FROM course_phase_participation
 WHERE course_participation_id = $1
 `
 
@@ -63,8 +63,8 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 			&i.ID,
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
-			&i.Passed,
 			&i.MetaData,
+			&i.PassStatus,
 		); err != nil {
 			return nil, err
 		}
@@ -77,25 +77,63 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 }
 
 const getAllCoursePhaseParticipationsForCoursePhase = `-- name: GetAllCoursePhaseParticipationsForCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
-WHERE course_phase_id = $1
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+WHERE
+    cpp.course_phase_id = $1
 `
 
-func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]CoursePhaseParticipation, error) {
+type GetAllCoursePhaseParticipationsForCoursePhaseRow struct {
+	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
+	PassStatus                 NullPassStatus `json:"pass_status"`
+	MetaData                   []byte         `json:"meta_data"`
+	StudentID                  uuid.UUID      `json:"student_id"`
+	FirstName                  pgtype.Text    `json:"first_name"`
+	LastName                   pgtype.Text    `json:"last_name"`
+	Email                      pgtype.Text    `json:"email"`
+	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text    `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
+	Gender                     Gender         `json:"gender"`
+}
+
+func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseRow, error) {
 	rows, err := q.db.Query(ctx, getAllCoursePhaseParticipationsForCoursePhase, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhaseParticipation
+	var items []GetAllCoursePhaseParticipationsForCoursePhaseRow
 	for rows.Next() {
-		var i CoursePhaseParticipation
+		var i GetAllCoursePhaseParticipationsForCoursePhaseRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
-			&i.Passed,
+			&i.CoursePhaseParticipationID,
+			&i.PassStatus,
 			&i.MetaData,
+			&i.StudentID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
 		); err != nil {
 			return nil, err
 		}
@@ -108,7 +146,7 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Cont
 }
 
 const getCoursePhaseParticipation = `-- name: GetCoursePhaseParticipation :one
-SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, meta_data, pass_status FROM course_phase_participation
 WHERE id = $1 LIMIT 1
 `
 
@@ -119,14 +157,14 @@ func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID)
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.Passed,
 		&i.MetaData,
+		&i.PassStatus,
 	)
 	return i, err
 }
 
 const getCoursePhaseParticipationByCourseParticipationAndCoursePhase = `-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
-SELECT id, course_participation_id, course_phase_id, passed, meta_data FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, meta_data, pass_status FROM course_phase_participation
 WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1
 `
 
@@ -142,36 +180,62 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.Passed,
 		&i.MetaData,
+		&i.PassStatus,
 	)
 	return i, err
 }
 
-const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
+const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :exec
 UPDATE course_phase_participation
 SET 
-    passed = COALESCE($2, passed),
+    pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
 WHERE id = $1
-RETURNING id, course_participation_id, course_phase_id, passed, meta_data
 `
 
 type UpdateCoursePhaseParticipationParams struct {
-	ID       uuid.UUID   `json:"id"`
-	Passed   pgtype.Bool `json:"passed"`
-	MetaData []byte      `json:"meta_data"`
+	ID         uuid.UUID      `json:"id"`
+	PassStatus NullPassStatus `json:"pass_status"`
+	MetaData   []byte         `json:"meta_data"`
 }
 
-func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
-	row := q.db.QueryRow(ctx, updateCoursePhaseParticipation, arg.ID, arg.Passed, arg.MetaData)
-	var i CoursePhaseParticipation
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.CoursePhaseID,
-		&i.Passed,
-		&i.MetaData,
-	)
-	return i, err
+func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation, arg.ID, arg.PassStatus, arg.MetaData)
+	return err
+}
+
+const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many
+UPDATE course_phase_participation
+SET pass_status = $3::pass_status
+WHERE id = ANY($1::uuid[])
+  AND course_phase_id = $2::uuid
+  AND pass_status != $3::pass_status
+RETURNING course_participation_id
+`
+
+type UpdateCoursePhasePassStatusParams struct {
+	Column1 []uuid.UUID `json:"column_1"`
+	Column2 uuid.UUID   `json:"column_2"`
+	Column3 PassStatus  `json:"column_3"`
+}
+
+func (q *Queries) UpdateCoursePhasePassStatus(ctx context.Context, arg UpdateCoursePhasePassStatusParams) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, updateCoursePhasePassStatus, arg.Column1, arg.Column2, arg.Column3)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var course_participation_id uuid.UUID
+		if err := rows.Scan(&course_participation_id); err != nil {
+			return nil, err
+		}
+		items = append(items, course_participation_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

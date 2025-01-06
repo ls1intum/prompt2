@@ -16,6 +16,7 @@ interface HandleSaveProps {
   setIsModified: (val: boolean) => void
 }
 
+// TODO: move this to the server side to enable transaction control!
 export async function handleSave({
   nodes,
   edges,
@@ -88,8 +89,15 @@ export async function handleSave({
     from_course_phase_id: edge.source,
     to_course_phase_id: edge.target,
   }))
-  console.log(coursePhases.find((phase) => phase.is_initial_phase))
-  const initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
+
+  let initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
+  if (initialPhase.startsWith('no-valid-id')) {
+    if (idReplacementMap[initialPhase]) {
+      initialPhase = idReplacementMap[initialPhase]
+    } else {
+      console.error('Initial phase has invalid ID')
+    }
+  }
 
   const graphUpdate: CoursePhaseGraphUpdate = {
     initial_phase: initialPhase,

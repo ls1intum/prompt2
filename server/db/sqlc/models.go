@@ -99,6 +99,49 @@ func (ns NullGender) Value() (driver.Value, error) {
 	return string(ns.Gender), nil
 }
 
+type PassStatus string
+
+const (
+	PassStatusPassed      PassStatus = "passed"
+	PassStatusFailed      PassStatus = "failed"
+	PassStatusNotAssessed PassStatus = "not_assessed"
+)
+
+func (e *PassStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PassStatus(s)
+	case string:
+		*e = PassStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PassStatus: %T", src)
+	}
+	return nil
+}
+
+type NullPassStatus struct {
+	PassStatus PassStatus `json:"pass_status"`
+	Valid      bool       `json:"valid"` // Valid is true if PassStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPassStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.PassStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PassStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPassStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PassStatus), nil
+}
+
 type ApplicationAnswerMultiSelect struct {
 	ID                         uuid.UUID `json:"id"`
 	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
@@ -178,11 +221,11 @@ type CoursePhaseGraph struct {
 }
 
 type CoursePhaseParticipation struct {
-	ID                    uuid.UUID   `json:"id"`
-	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
-	Passed                pgtype.Bool `json:"passed"`
-	MetaData              []byte      `json:"meta_data"`
+	ID                    uuid.UUID      `json:"id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	MetaData              []byte         `json:"meta_data"`
+	PassStatus            NullPassStatus `json:"pass_status"`
 }
 
 type CoursePhaseType struct {

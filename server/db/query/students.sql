@@ -2,6 +2,13 @@
 SELECT * FROM student
 WHERE id = $1 LIMIT 1;
 
+-- name: GetStudentByCoursePhaseParticipationID :one
+SELECT s.*
+FROM student s
+INNER JOIN course_participation cp ON s.id = cp.student_id
+INNER JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
+WHERE cpp.id = $1;
+
 -- name: GetAllStudents :many
 SELECT * FROM student;
 
@@ -25,3 +32,13 @@ RETURNING *;
 -- name: GetStudentByEmail :one
 SELECT * FROM student
 WHERE email = $1 LIMIT 1;
+
+-- name: SearchStudents :many
+SELECT *
+FROM student
+WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
+   OR first_name ILIKE '%' || $1 || '%'
+   OR last_name ILIKE '%' || $1 || '%'
+   OR email ILIKE '%' || $1 || '%'
+   OR matriculation_number ILIKE '%' || $1 || '%'
+   OR university_login ILIKE '%' || $1 || '%';

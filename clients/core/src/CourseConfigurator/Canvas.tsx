@@ -149,7 +149,6 @@ export function CourseConfigurator() {
       return postNewCoursePhase(coursePhase)
     },
     onSuccess: (data: string | undefined) => {
-      console.log('Received ID' + data)
       return data
     },
   })

@@ -19,16 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Gender } from '@/interfaces/gender'
+import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../validations/student'
+import translations from '@/lib/translations.json'
 
 interface StudentFormProps {
   student: Student
+  disabled?: boolean
+  allowEditUniversityData: boolean
   onUpdate: (updatedStudent: Student) => void
 }
 
 export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(function StudentForm(
-  { student, onUpdate },
+  { student, disabled = false, allowEditUniversityData, onUpdate },
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
@@ -58,6 +61,27 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
     async validate() {
       const valid = await form.trigger()
       return valid
+    },
+    rerender(updatedStudent: Student) {
+      form.reset(
+        updatedStudent.has_university_account
+          ? {
+              matriculation_number: updatedStudent.matriculation_number || '',
+              university_login: updatedStudent.university_login || '',
+              first_name: updatedStudent.first_name || '',
+              last_name: updatedStudent.last_name || '',
+              email: updatedStudent.email || '',
+              gender: updatedStudent.gender ?? undefined,
+              has_university_account: true,
+            }
+          : {
+              first_name: updatedStudent.first_name || '',
+              last_name: updatedStudent.last_name || '',
+              email: updatedStudent.email || '',
+              gender: updatedStudent.gender ?? undefined,
+              has_university_account: false,
+            },
+      )
     },
   }))
 
@@ -89,7 +113,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {requiredStar}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,9 +124,12 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               name='university_login'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>University Login{requiredStar}</FormLabel>
+                  <FormLabel>
+                    {translations.university['login-name']}
+                    {requiredStar}
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +145,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>First Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount} />
+                  <Input
+                    {...field}
+                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -131,7 +161,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               <FormItem>
                 <FormLabel>Last Name{requiredStar}</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={hasUniversityAccount} />
+                  <Input
+                    {...field}
+                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -145,7 +178,11 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             <FormItem>
               <FormLabel>Email{requiredStar}</FormLabel>
               <FormControl>
-                <Input {...field} type='email' disabled={hasUniversityAccount} />
+                <Input
+                  {...field}
+                  type='email'
+                  disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -157,7 +194,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           render={({ field }) => (
             <FormItem>
               <FormLabel>Gender{requiredStar}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a gender' />
@@ -166,7 +203,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <SelectContent>
                   {Object.values(Gender).map((gender) => (
                     <SelectItem key={gender} value={gender}>
-                      {gender.replace(/_/g, ' ')}
+                      {getGenderString(gender)}
                     </SelectItem>
                   ))}
                 </SelectContent>

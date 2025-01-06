@@ -41,6 +41,15 @@ func GetStudentByID(ctx context.Context, id uuid.UUID) (studentDTO.Student, erro
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
+func GetStudentByCoursePhaseParticipationID(ctx context.Context, coursePhaseParticipationID uuid.UUID) (studentDTO.Student, error) {
+	student, err := StudentServiceSingleton.queries.GetStudentByCoursePhaseParticipationID(ctx, coursePhaseParticipationID)
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+
+	return studentDTO.GetStudentDTOFromDBModel(student), nil
+}
+
 func CreateStudent(ctx context.Context, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	createStudentParams := student.GetDBModel()
 
@@ -62,8 +71,9 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.Student) (studentDTO.Student, error) {
+func UpdateStudent(ctx context.Context, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	updateStudentParams := student.GetDBModel()
+	updateStudentParams.ID = id
 
 	updatedStudent, err := StudentServiceSingleton.queries.UpdateStudent(ctx, db.UpdateStudentParams(updateStudentParams))
 	if err != nil {
@@ -86,7 +96,7 @@ func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStud
 	if studentObj.ID != uuid.Nil && studentByEmail.ID != studentObj.ID {
 		return studentDTO.Student{}, errors.New("student has wrong ID")
 	} else {
-		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.Student{
+		return UpdateStudent(ctx, studentByEmail.ID, studentDTO.CreateStudent{
 			ID:                   studentByEmail.ID, // make sure the id is not overwritten
 			FirstName:            studentObj.FirstName,
 			LastName:             studentObj.LastName,
@@ -97,4 +107,17 @@ func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStud
 			Gender:               studentObj.Gender,
 		})
 	}
+}
+
+func SearchStudents(ctx context.Context, searchString string) ([]studentDTO.Student, error) {
+	students, err := StudentServiceSingleton.queries.SearchStudents(ctx, pgtype.Text{String: searchString, Valid: true})
+	if err != nil {
+		return nil, err
+	}
+
+	dtoStudents := make([]studentDTO.Student, 0, len(students))
+	for _, student := range students {
+		dtoStudents = append(dtoStudents, studentDTO.GetStudentDTOFromDBModel(student))
+	}
+	return dtoStudents, nil
 }

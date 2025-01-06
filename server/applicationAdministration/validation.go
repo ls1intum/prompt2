@@ -104,8 +104,6 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		}
 	}
 
-	// 4. TODO:  Validate the correct order of the questions
-
 	return nil
 }
 
@@ -168,6 +166,24 @@ func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options
 	return nil
 }
 
+func validateApplicationManualAdd(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Check if course phase is application phase
+	// But we don't check if it's open, since we're manually adding an application
+	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate application: ", err)
+		return errors.New("could not validate the application")
+	}
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
+	return validateAnswers(ctx, coursePhaseID, application)
+}
+
 func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
@@ -182,22 +198,24 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 		return errors.New("course phase is not an application phase")
 	}
 
-	// TODO: check if application phase is open!!!
+	return validateAnswers(ctx, coursePhaseID, application)
+}
 
+func validateAnswers(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
 	// 1. Check that the student is valid
-	err = student.Validate(application.Student)
+	err := student.Validate(application.Student)
 	if err != nil {
 		return errors.New("invalid student")
 	}
 
 	// 2. Get all questions for the course phase
-	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
+	applicationQuestionsText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not validate application: ", err)
 		return errors.New("could not validate the application")
 	}
 
-	applicationQuestionsMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
+	applicationQuestionsMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		return errors.New("could not validate the application")
 	}
@@ -212,6 +230,7 @@ func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, applicati
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -223,11 +242,25 @@ func validateTextAnswers(textQuestions []db.ApplicationQuestionText, textAnswers
 
 	for _, question := range textQuestions {
 		answer, exists := answerMap[question.ID]
-		if question.IsRequired.Bool && !exists {
+		if question.IsRequired.Bool && (!exists || len(answer) == 0) {
 			return fmt.Errorf("required question %s is not answered", question.ID)
+		}
+		if question.ValidationRegex.String != "" && exists && !regexp.MustCompile(question.ValidationRegex.String).MatchString(answer) {
+			return fmt.Errorf("answer to question %s does not match validation regex", question.ID)
 		}
 		if exists && len(answer) > int(question.AllowedLength.Int32) {
 			return fmt.Errorf("answer to question %s exceeds allowed length of %d", question.ID, question.AllowedLength.Int32)
+		}
+	}
+
+	questionMap := make(map[uuid.UUID]db.ApplicationQuestionText, len(textQuestions))
+	for _, question := range textQuestions {
+		questionMap[question.ID] = question
+	}
+	for _, answer := range textAnswers {
+		_, exists := questionMap[answer.ApplicationQuestionID]
+		if !exists {
+			return fmt.Errorf("answer to question %s does not belong to this course", answer.ApplicationQuestionID)
 		}
 	}
 	return nil
@@ -258,6 +291,16 @@ func validateMultiSelectAnswers(multiSelectQuestions []db.ApplicationQuestionMul
 		}
 	}
 
+	questionMap := make(map[uuid.UUID]db.ApplicationQuestionMultiSelect, len(multiSelectQuestions))
+	for _, question := range multiSelectQuestions {
+		questionMap[question.ID] = question
+	}
+	for _, answer := range multiSelectAnswers {
+		_, exists := questionMap[answer.ApplicationQuestionID]
+		if !exists {
+			return fmt.Errorf("answer to question %s does not belong to this course", answer.ApplicationQuestionID)
+		}
+	}
 	return nil
 }
 
@@ -268,4 +311,65 @@ func contains(options []string, selection string) bool {
 		}
 	}
 	return false
+}
+
+func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhaseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Check if course phase is assessment phase
+	isAssessmentPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("could not validate assessment: ", err)
+		return errors.New("could not validate the assessment")
+	}
+	if !isAssessmentPhase {
+		return errors.New("course phase is not an assessment phase")
+	}
+
+	isCorrectParticipation, err := ApplicationServiceSingleton.queries.CheckCoursePhaseParticipationPair(ctxWithTimeout, db.CheckCoursePhaseParticipationPairParams{
+		ID:            coursePhaseParticipationID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not validate assessment: ", err)
+		return errors.New("could not validate the assessment")
+	}
+	if !isCorrectParticipation {
+		return errors.New("course phase participation does not belong to this course phase")
+	}
+
+	// Check if the score is valid
+	if assessment.MetaData != nil {
+		for key := range assessment.MetaData {
+			if key != "comments" {
+				return errors.New("invalid meta data key - not allowed to update other meta data")
+			}
+		}
+	}
+	return nil
+}
+
+func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
+	// Check if the name is empty
+	if score.Name == "" {
+		return errors.New("name cannot be empty")
+	}
+
+	// Check if all scores are greater than 0
+	for _, individualScore := range score.Scores {
+		if !individualScore.Score.Valid {
+			return errors.New("failed to parse score for entry")
+		}
+
+		scoreValue, err := individualScore.Score.Float64Value()
+		if err != nil {
+			return errors.New("failed to parse score for entry")
+		}
+		if scoreValue.Float64 <= 0 {
+			return errors.New("scores must be greater than 0")
+		}
+	}
+
+	return nil
 }

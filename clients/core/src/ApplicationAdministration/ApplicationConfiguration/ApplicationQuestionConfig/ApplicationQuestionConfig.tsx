@@ -18,7 +18,8 @@ import { handleSubmitAllQuestions } from './handlers/handleSubmitAllQuestions'
 import { computeQuestionsModified } from './handlers/computeQuestionsModified'
 import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
 import { AddQuestionMenu } from './components/AddQuestionMenu'
-import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
+import { ApplicationPreview } from '../../../Application/ApplicationPreview'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -75,7 +76,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
 
   useEffect(() => {
     if (fetchedForm) {
-      console.log(fetchedForm)
       setQuestionsFromForm(fetchedForm)
     }
   }, [fetchedForm])
@@ -141,6 +141,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     <div className='space-y-6 max-w-4xl mx-auto'>
       <div className='flex justify-between items-center'>
         <h2 className='text-2xl font-semibold'>Application Questions</h2>
+        <ApplicationPreview
+          questionsMultiSelect={applicationQuestions.filter((question) => 'options' in question)}
+          questionsText={applicationQuestions.filter((question) => 'options' in question === false)}
+        />
         <AddQuestionMenu
           setApplicationQuestions={setApplicationQuestions}
           applicationQuestions={applicationQuestions}
