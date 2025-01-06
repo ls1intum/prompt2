@@ -1,10 +1,13 @@
 import { FormDescription } from '@/components/ui/form'
+import DOMPurify from 'dompurify'
 
 interface FormDescriptionHTMLProps {
   htmlCode: string
 }
 
 export const FormDescriptionHTML = ({ htmlCode }: FormDescriptionHTMLProps): JSX.Element => {
+  const sanitizedHtmlCode = DOMPurify.sanitize(htmlCode)
+
   return (
     <FormDescription>
       <style>
@@ -19,7 +22,7 @@ export const FormDescriptionHTML = ({ htmlCode }: FormDescriptionHTMLProps): JSX
             }
     `}
       </style>
-      <div dangerouslySetInnerHTML={{ __html: htmlCode }} />
+      <div dangerouslySetInnerHTML={{ __html: sanitizedHtmlCode }} />
     </FormDescription>
   )
 }
