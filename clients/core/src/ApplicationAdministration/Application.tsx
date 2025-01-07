@@ -9,6 +9,7 @@ import { useGetApplicationParticipations } from './handlers/useGetApplicationPar
 import { AssessmentDiagram } from './components/AssessmentDiagram'
 import { ApplicationStatusCard } from './components/ApplicationStatusCard'
 import { ApplicationGenderDiagram } from './components/ApplicationGenderDiagram'
+import { ApplicationStudyBackgroundDiagram } from './components/ApplicationStudyBackgroundDiagram'
 import { ErrorPage } from '@/components/ErrorPage'
 
 export const Application = (): JSX.Element => {
@@ -88,6 +89,9 @@ export const Application = (): JSX.Element => {
             />
             <AssessmentDiagram applications={fetchedParticipations ?? []} />
             <ApplicationGenderDiagram applications={fetchedParticipations ?? []} />
+          </div>
+          <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
+            <ApplicationStudyBackgroundDiagram applications={fetchedParticipations ?? []} />
           </div>
         </>
       )}
