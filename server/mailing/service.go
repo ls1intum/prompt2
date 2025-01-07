@@ -11,27 +11,27 @@ import (
 )
 
 type MailingService struct {
-	smtpHost     string
-	smtpPort     string
-	senderEmail  mail.Address
-	replyToEmail mail.Address
+	smtpHost    string
+	smtpPort    string
+	senderEmail mail.Address
 }
 
 var MailingServiceSingleton *MailingService
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.
-func SendMail(htmlBody, recipientAddress, subject string) error {
+func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody string) error {
 	if MailingServiceSingleton.senderEmail.Address == "" {
 		return fmt.Errorf("sender email is not set, Setup the MailingService first")
 	}
 
 	to := mail.Address{Address: recipientAddress}
+	replyToEmail := mail.Address{Name: replyToName, Address: replyToAddress}
 
 	// Build email headers
 	header := map[string]string{
 		"From":         MailingServiceSingleton.senderEmail.String(),
 		"To":           to.String(),
-		"Reply-To":     MailingServiceSingleton.replyToEmail.String(),
+		"Reply-To":     replyToEmail.String(),
 		"Subject":      subject,
 		"Content-Type": `text/html; charset="UTF-8"`,
 	}

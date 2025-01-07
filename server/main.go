@@ -65,10 +65,8 @@ func initMailing() {
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt@ase.cit.tum.de")
 	senderName := utils.GetEnv("SENDER_NAME", "Prompt Mailing Service")
-	replyToEmail := utils.GetEnv("REPLY_TO_EMAIL", "prompt@ase.cit.tum.de")
-	replyToName := utils.GetEnv("REPLY_TO_NAME", "DO NOT REPLY")
 
-	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail, replyToName, replyToEmail)
+	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail)
 }
 
 func main() {
