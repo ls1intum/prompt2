@@ -29,7 +29,7 @@ import enLocale from 'i18n-iso-countries/langs/en.json'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import {
   Command,
   CommandEmpty,
@@ -270,7 +270,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                         {field.value
                           ? countriesArr.find((country) => country.value === field.value)?.label
                           : 'Select a nationality'}
-                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                        <ChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
