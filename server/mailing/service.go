@@ -1,38 +1,37 @@
 package mailing
 
 import (
+	"errors"
 	"fmt"
 	"net/mail"
 	"net/smtp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
-var senderEmail string
-var smtpHost = "127.0.0.1"
-var smtpPort = "25"
-var mailingName = "Prompt | Chair for Applied Teaching Technologies"
-var replyToEmail = "ipraktikum.ase@xcit.tum.de"
-
-// Setup initializes the sender email for the mailing service.
-func Setup(email string) {
-	senderEmail = email
+type MailingService struct {
+	smtpHost     string
+	smtpPort     string
+	senderEmail  mail.Address
+	replyToEmail mail.Address
 }
 
+var MailingServiceSingleton *MailingService
+
 // SendMail sends an email with the specified HTML body, recipient, and subject.
-func SendMail(htmlBody, recipient, subject string) error {
-	if senderEmail == "" {
-		return fmt.Errorf("sender email is not set, call Setup(email) first")
+func SendMail(htmlBody, recipientAddress, subject string) error {
+	if MailingServiceSingleton.senderEmail.Address == "" {
+		return fmt.Errorf("sender email is not set, Setup the MailingService first")
 	}
 
-	from := mail.Address{Name: mailingName, Address: senderEmail}
-	to := mail.Address{Name: "Recipient", Address: recipient}
-	replyTo := mail.Address{Name: mailingName, Address: senderEmail}
+	to := mail.Address{Address: recipientAddress}
 
 	// Build email headers
 	header := map[string]string{
-		"From":         from.String(),
+		"From":         MailingServiceSingleton.senderEmail.String(),
 		"To":           to.String(),
-		"Reply-To":     replyTo.String(),
+		"Reply-To":     MailingServiceSingleton.replyToEmail.String(),
 		"Subject":      subject,
 		"Content-Type": `text/html; charset="UTF-8"`,
 	}
@@ -46,33 +45,41 @@ func SendMail(htmlBody, recipient, subject string) error {
 	message.WriteString(htmlBody)
 
 	// Send the email
-	addr := fmt.Sprintf("%s:%s", smtpHost, smtpPort)
+	addr := fmt.Sprintf("%s:%s", MailingServiceSingleton.smtpHost, MailingServiceSingleton.smtpPort)
 	client, err := smtp.Dial(addr)
 	if err != nil {
-		return fmt.Errorf("failed to connect to SMTP server: %w", err)
+		log.Error("failed to connect to SMTP server: ", err.Error())
+		return errors.New("failed to send mail")
 	}
 	defer client.Close()
 
+	log.Info(MailingServiceSingleton.senderEmail.Address)
+
 	// Set the sender and recipient
-	if err := client.Mail(senderEmail); err != nil {
-		return fmt.Errorf("failed to set sender: %w", err)
+	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {
+		log.Error("failed to set sender: ", err)
+		return errors.New("failed to send mail")
 	}
-	if err := client.Rcpt(recipient); err != nil {
-		return fmt.Errorf("failed to set recipient: %w", err)
+	if err := client.Rcpt(recipientAddress); err != nil {
+		log.Error("failed to set recipient: ", err)
+		return errors.New("failed to send mail")
 	}
 
 	// Send the data
 	writer, err := client.Data()
 	if err != nil {
-		return fmt.Errorf("failed to send data: %w", err)
+		log.Error("failed to send data: ", err)
+		return errors.New("failed to send mail")
 	}
 	_, err = writer.Write([]byte(message.String()))
 	if err != nil {
-		return fmt.Errorf("failed to write message: %w", err)
+		log.Error("failed to write message: ", err)
+		return errors.New("failed to send mail")
 	}
 
 	if err := writer.Close(); err != nil {
-		return fmt.Errorf("failed to close writer: %w", err)
+		log.Error("failed to close writer: ", err)
+		return errors.New("failed to send mail")
 	}
 
 	return client.Quit()
