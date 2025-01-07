@@ -209,6 +209,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Success
 			Email:                "johndoe-new@example.com",
 			HasUniversityAccount: false,
 			Gender:               db.GenderMale,
+			Nationality:          "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -237,6 +238,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Already
 			Email:                "johndoe-new-2@example.com",
 			HasUniversityAccount: false,
 			Gender:               db.GenderDiverse,
+			Nationality:          "DE",
 		},
 	}
 
@@ -285,6 +287,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 			MatriculationNumber:  "03711111",
 			UniversityLogin:      "ab12cde",
 			Gender:               db.GenderFemale,
+			Nationality:          "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -315,6 +318,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 			MatriculationNumber:  "03711111",
 			UniversityLogin:      "ab12cde",
 			Gender:               db.GenderFemale,
+			Nationality:          "DE",
 		},
 	}
 

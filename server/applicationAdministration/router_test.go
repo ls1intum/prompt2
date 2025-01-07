@@ -190,10 +190,11 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
 	application := applicationDTO.PostApplication{
 		Student: studentDTO.CreateStudent{
-			FirstName: "John",
-			LastName:  "Doe",
-			Email:     "johndoe@example.com",
-			Gender:    db.GenderDiverse,
+			FirstName:   "John",
+			LastName:    "Doe",
+			Email:       "johndoe@example.com",
+			Gender:      db.GenderDiverse,
+			Nationality: "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -252,6 +253,7 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEn
 			HasUniversityAccount: true,
 			MatriculationNumber:  "03711111",
 			UniversityLogin:      "ab12cde",
+			Nationality:          "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -287,10 +289,11 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
 	application := applicationDTO.PostApplication{
 		Student: studentDTO.CreateStudent{
-			FirstName: "Jane",
-			LastName:  "Doe",
-			Email:     "janedoe@example.com",
-			Gender:    db.GenderFemale,
+			FirstName:   "Jane",
+			LastName:    "Doe",
+			Email:       "janedoe@example.com",
+			Gender:      db.GenderFemale,
+			Nationality: "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
