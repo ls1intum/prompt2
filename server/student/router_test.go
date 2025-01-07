@@ -84,6 +84,7 @@ func (suite *RouterTestSuite) TestRouterGetStudentByID() {
 		MatriculationNumber:  "01234567",
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
+		Nationality:          "DE",
 	}
 	createdStudent, err := CreateStudent(suite.ctx, newStudent)
 	assert.NoError(suite.T(), err)
@@ -109,6 +110,7 @@ func (suite *RouterTestSuite) TestRouterCreateStudent() {
 		MatriculationNumber:  "01234568",
 		UniversityLogin:      "bb12xyz",
 		Gender:               "male",
+		Nationality:          "DE",
 	}
 	jsonValue, err := json.Marshal(newStudent)
 	if err != nil {
@@ -134,6 +136,7 @@ func (suite *RouterTestSuite) TestRouterCreateStudent() {
 	assert.Equal(suite.T(), newStudent.MatriculationNumber, createdStudent.MatriculationNumber, "MatriculationNumber should match")
 	assert.Equal(suite.T(), newStudent.UniversityLogin, createdStudent.UniversityLogin, "UniversityLogin should match")
 	assert.Equal(suite.T(), newStudent.Gender, createdStudent.Gender, "Gender should match")
+	assert.Equal(suite.T(), newStudent.Nationality, createdStudent.Nationality, "Nationality should match")
 }
 
 func TestRouterTestSuite(t *testing.T) {

@@ -83,3 +83,5 @@ ALTER TABLE ONLY student
 -- PostgreSQL database dump complete
 --
 
+ALTER TABLE student
+    ADD COLUMN nationality VARCHAR(2);

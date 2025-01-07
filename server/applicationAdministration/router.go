@@ -165,7 +165,7 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	err = PostApplicationExtern(c, coursePhaseId, application)
+	err = PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {

@@ -105,6 +105,7 @@ func CreateOrUpdateStudent(ctx context.Context, studentObj studentDTO.CreateStud
 			UniversityLogin:      studentObj.UniversityLogin,
 			HasUniversityAccount: studentObj.HasUniversityAccount,
 			Gender:               studentObj.Gender,
+			Nationality:          studentObj.Nationality,
 		})
 	}
 }

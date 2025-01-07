@@ -15,6 +15,7 @@ type CreateStudent struct {
 	UniversityLogin      string    `json:"university_login"`
 	HasUniversityAccount bool      `json:"has_university_account"`
 	Gender               db.Gender `json:"gender"`
+	Nationality          string    `json:"nationality"`
 }
 
 func (c CreateStudent) GetDBModel() db.CreateStudentParams {
@@ -26,5 +27,6 @@ func (c CreateStudent) GetDBModel() db.CreateStudentParams {
 		UniversityLogin:      pgtype.Text{String: c.UniversityLogin, Valid: true},
 		HasUniversityAccount: pgtype.Bool{Bool: c.HasUniversityAccount, Valid: true},
 		Gender:               c.Gender,
+		Nationality:          pgtype.Text{String: c.Nationality, Valid: true},
 	}
 }

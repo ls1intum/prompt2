@@ -96,3 +96,7 @@ VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'Niclas', 'Heun', 'niclas.heun@t
 
 -- PostgreSQL database dump complete
 --
+
+
+ALTER TABLE student
+    ADD COLUMN nationality VARCHAR(2);

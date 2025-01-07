@@ -9,4 +9,5 @@ export interface Student {
   university_login?: string
   has_university_account: boolean
   gender?: Gender
+  nationality?: string
 }

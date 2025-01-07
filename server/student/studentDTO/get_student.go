@@ -15,6 +15,7 @@ type Student struct {
 	UniversityLogin      string    `json:"university_login"`
 	HasUniversityAccount bool      `json:"has_university_account"`
 	Gender               db.Gender `json:"gender"`
+	Nationality          string    `json:"nationality"`
 }
 
 func GetStudentDTOFromDBModel(model db.Student) Student {
@@ -27,6 +28,7 @@ func GetStudentDTOFromDBModel(model db.Student) Student {
 		UniversityLogin:      model.UniversityLogin.String,
 		HasUniversityAccount: model.HasUniversityAccount.Bool,
 		Gender:               model.Gender,
+		Nationality:          model.Nationality.String,
 	}
 }
 
@@ -40,5 +42,6 @@ func (s Student) GetDBModel() db.Student {
 		UniversityLogin:      pgtype.Text{String: s.UniversityLogin, Valid: true},
 		HasUniversityAccount: pgtype.Bool{Bool: s.HasUniversityAccount, Valid: true},
 		Gender:               s.Gender,
+		Nationality:          pgtype.Text{String: s.Nationality, Valid: true},
 	}
 }

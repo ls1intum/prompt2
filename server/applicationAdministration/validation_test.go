@@ -181,6 +181,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_Invali
 			LastName:             "Doe",
 			Email:                "test@test.de",
 			HasUniversityAccount: false,
+			Nationality:          "DE",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{

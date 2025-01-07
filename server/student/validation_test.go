@@ -15,7 +15,7 @@ func TestValidate(t *testing.T) {
 	}{
 		{
 			name:          "valid student data",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "ab12xyz"},
+			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "ab12xyz", Nationality: "DE"},
 			expectedError: "",
 		},
 		{
@@ -35,22 +35,22 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			name:          "valid student without university account",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false},
+			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false, Nationality: "DE"},
 			expectedError: "",
 		},
 		{
 			name:          "student with university account but invalid matriculation number",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "1234567", UniversityLogin: "ab12xyz"},
+			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "1234567", UniversityLogin: "ab12xyz", Nationality: "DE"},
 			expectedError: "invalid matriculation number",
 		},
 		{
 			name:          "student with university account but invalid university login",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "xyz123"},
+			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "xyz123", Nationality: "DE"},
 			expectedError: "invalid university login",
 		},
 		{
 			name:          "student without university account but with matriculation number",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false, MatriculationNumber: "01234567"},
+			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false, MatriculationNumber: "01234567", Nationality: "DE"},
 			expectedError: "student has no university account but has university data",
 		},
 	}

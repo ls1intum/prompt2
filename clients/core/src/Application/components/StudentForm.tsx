@@ -23,6 +23,32 @@ import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../validations/student'
 import translations from '@/lib/translations.json'
 
+// Getting the list of countries
+import countries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { Check, ChevronDown } from 'lucide-react'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+
+countries.registerLocale(enLocale)
+const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' })).map(
+  ([key, value]) => {
+    return {
+      label: value,
+      value: key,
+    }
+  },
+)
+
 interface StudentFormProps {
   student: Student
   disabled?: boolean
@@ -35,6 +61,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
+
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: hasUniversityAccount
@@ -45,6 +72,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           last_name: student.last_name || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
+          nationality: student.nationality ?? '',
           has_university_account: true,
         }
       : {
@@ -52,8 +80,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           last_name: student.last_name || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
+          nationality: student.nationality ?? '',
           has_university_account: false,
         },
+
     mode: 'onChange',
   })
 
@@ -72,6 +102,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               last_name: updatedStudent.last_name || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
+              nationality: updatedStudent.nationality ?? '',
               has_university_account: true,
             }
           : {
@@ -79,6 +110,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               last_name: updatedStudent.last_name || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
+              nationality: updatedStudent.nationality ?? '',
               has_university_account: false,
             },
       )
@@ -188,30 +220,93 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name='gender'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gender{requiredStar}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a gender' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(Gender).map((gender) => (
-                    <SelectItem key={gender} value={gender}>
-                      {getGenderString(gender)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <FormField
+            control={form.control}
+            name='gender'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gender{requiredStar}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={disabled}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a gender' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(Gender).map((gender) => (
+                      <SelectItem key={gender} value={gender}>
+                        {getGenderString(gender)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='nationality'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nationality</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground',
+                        )}
+                        disabled={disabled}
+                      >
+                        {field.value
+                          ? countriesArr.find((country) => country.value === field.value)?.label
+                          : 'Select a nationality'}
+                        <ChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-full p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search nationality...' />
+                      <CommandList>
+                        <CommandEmpty>No language found.</CommandEmpty>
+                        <CommandGroup>
+                          {countriesArr.map((country) => (
+                            <CommandItem
+                              value={country.label}
+                              key={country.value}
+                              onSelect={() => {
+                                form.setValue('nationality', country.value)
+                              }}
+                            >
+                              {country.label}
+                              <Check
+                                className={cn(
+                                  'ml-auto',
+                                  country.value === field.value ? 'opacity-100' : 'opacity-0',
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </form>
     </Form>
   )

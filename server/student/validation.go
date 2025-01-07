@@ -18,6 +18,10 @@ func Validate(c studentDTO.CreateStudent) error {
 	if err := validateUniversityData(c.HasUniversityAccount, c.MatriculationNumber, c.UniversityLogin); err != nil {
 		return err
 	}
+	if c.Nationality == "" {
+		log.Error("nationality is missing")
+		return errors.New("nationality is missing")
+	}
 	return nil
 }
 

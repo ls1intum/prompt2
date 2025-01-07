@@ -11,6 +11,7 @@ export const studentBaseSchema = z.object({
   last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
+  nationality: z.string().min(1, 'Please select a nationality.'),
   has_university_account: z.literal(false), // Explicit literal for base case
 })
 
@@ -20,6 +21,7 @@ export const studentUniversitySchema = z.object({
   last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
+  nationality: z.string().min(1, 'Please select a nationality.'),
   has_university_account: z.literal(true), // Explicit literal for university case
   matriculation_number: z
     .string()
