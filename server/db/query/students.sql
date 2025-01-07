@@ -13,8 +13,8 @@ WHERE cpp.id = $1;
 SELECT * FROM student;
 
 -- name: CreateStudent :one
-INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 RETURNING *;
 
 -- name: UpdateStudent :one
@@ -26,7 +26,10 @@ SET first_name = $2,
     university_login = $6,
     has_university_account = $7,
     gender = $8,
-    nationality = $9
+    nationality = $9,
+    study_program = $10,
+    study_degree = $11,
+    current_semester = $12
 WHERE id = $1
 RETURNING *;
 
