@@ -218,86 +218,92 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name='gender'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gender{requiredStar}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a gender' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(Gender).map((gender) => (
-                    <SelectItem key={gender} value={gender}>
-                      {getGenderString(gender)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='nationality'
-          render={({ field }) => (
-            <FormItem className='flex flex-col'>
-              <FormLabel>Nationality</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <FormField
+            control={form.control}
+            name='gender'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gender{requiredStar}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={disabled}
+                >
                   <FormControl>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-[200px] justify-between',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                    >
-                      {field.value
-                        ? countriesArr.find((country) => country.value === field.value)?.label
-                        : 'Select a nationality'}
-                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a gender' />
+                    </SelectTrigger>
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='w-[200px] p-0'>
-                  <Command>
-                    <CommandInput placeholder='Search nationality...' />
-                    <CommandList>
-                      <CommandEmpty>No language found.</CommandEmpty>
-                      <CommandGroup>
-                        {countriesArr.map((country) => (
-                          <CommandItem
-                            value={country.label}
-                            key={country.value}
-                            onSelect={() => {
-                              form.setValue('nationality', country.value)
-                            }}
-                          >
-                            {country.label}
-                            <Check
-                              className={cn(
-                                'ml-auto',
-                                country.value === field.value ? 'opacity-100' : 'opacity-0',
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <SelectContent>
+                    {Object.values(Gender).map((gender) => (
+                      <SelectItem key={gender} value={gender}>
+                        {getGenderString(gender)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='nationality'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nationality</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant='outline'
+                        role='combobox'
+                        className={cn(
+                          'w-full justify-between',
+                          !field.value && 'text-muted-foreground',
+                        )}
+                      >
+                        {field.value
+                          ? countriesArr.find((country) => country.value === field.value)?.label
+                          : 'Select a nationality'}
+                        <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-full p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search nationality...' />
+                      <CommandList>
+                        <CommandEmpty>No language found.</CommandEmpty>
+                        <CommandGroup>
+                          {countriesArr.map((country) => (
+                            <CommandItem
+                              value={country.label}
+                              key={country.value}
+                              onSelect={() => {
+                                form.setValue('nationality', country.value)
+                              }}
+                            >
+                              {country.label}
+                              <Check
+                                className={cn(
+                                  'ml-auto',
+                                  country.value === field.value ? 'opacity-100' : 'opacity-0',
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </form>
     </Form>
   )
