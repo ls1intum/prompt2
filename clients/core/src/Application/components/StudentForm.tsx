@@ -50,13 +50,7 @@ const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' }
   },
 )
 
-const studyPrograms = [
-  'Computer Science',
-  'Information Systems',
-  'Games Engineering',
-  'Management and Technology',
-  'Other',
-]
+const studyPrograms = translations.university.studyPrograms
 
 interface StudentFormProps {
   student: Student
