@@ -11,13 +11,18 @@ const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; title: stri
     goToPath: '',
     subitems: [
       {
+        title: 'Applications',
+        goToPath: '/applications',
+        requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+      },
+      {
         title: 'Configuration',
         goToPath: '/configuration',
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
       },
       {
-        title: 'Applications',
-        goToPath: '/applications',
+        title: 'Mailing',
+        goToPath: '/mailing',
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
       },
     ],
