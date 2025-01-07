@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -85,6 +86,9 @@ func (suite *RouterTestSuite) TestRouterGetStudentByID() {
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
 		Nationality:          "DE",
+		CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+		StudyProgram:         "Computer Science",
+		StudyDegree:          "bachelor",
 	}
 	createdStudent, err := CreateStudent(suite.ctx, newStudent)
 	assert.NoError(suite.T(), err)
@@ -111,6 +115,9 @@ func (suite *RouterTestSuite) TestRouterCreateStudent() {
 		UniversityLogin:      "bb12xyz",
 		Gender:               "male",
 		Nationality:          "DE",
+		CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+		StudyProgram:         "Computer Science",
+		StudyDegree:          "bachelor",
 	}
 	jsonValue, err := json.Marshal(newStudent)
 	if err != nil {

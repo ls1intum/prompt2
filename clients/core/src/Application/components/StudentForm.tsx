@@ -71,6 +71,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
 ) {
   const hasUniversityAccount = student.has_university_account
 
+  // this ugly setting is necessary due to typescript and two different validation schema
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: hasUniversityAccount
@@ -415,7 +416,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {...field}
                     disabled={disabled}
                     type='number'
-                    placeholder='Enter your current semester'
+                    placeholder='Bachelor (+ Master) Semesters'
                     onChange={(e) => {
                       const value = parseInt(e.target.value)
                       field.onChange(value)

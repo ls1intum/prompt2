@@ -210,6 +210,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Success
 			HasUniversityAccount: false,
 			Gender:               db.GenderMale,
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -239,6 +242,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Already
 			HasUniversityAccount: false,
 			Gender:               db.GenderDiverse,
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 	}
 
@@ -288,6 +294,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 			UniversityLogin:      "ab12cde",
 			Gender:               db.GenderFemale,
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -319,6 +328,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 			UniversityLogin:      "ab12cde",
 			Gender:               db.GenderFemale,
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 	}
 
