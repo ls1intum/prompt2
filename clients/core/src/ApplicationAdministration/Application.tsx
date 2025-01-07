@@ -11,6 +11,7 @@ import { ApplicationStatusCard } from './components/ApplicationStatusCard'
 import { ApplicationGenderDiagram } from './components/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './components/ApplicationStudyBackgroundDiagram'
 import { ErrorPage } from '@/components/ErrorPage'
+import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySemesterDiagram'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -92,6 +93,7 @@ export const Application = (): JSX.Element => {
           </div>
           <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
             <ApplicationStudyBackgroundDiagram applications={fetchedParticipations ?? []} />
+            <ApplicationStudySemesterDiagram applications={fetchedParticipations ?? []} />
           </div>
         </>
       )}
