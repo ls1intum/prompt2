@@ -61,27 +61,20 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
+  const generateDefaultValues = (studentValues: Student) => ({
+    matriculation_number: studentValues.matriculation_number || '',
+    university_login: studentValues.university_login || '',
+    first_name: studentValues.first_name || '',
+    last_name: studentValues.last_name || '',
+    email: studentValues.email || '',
+    gender: studentValues.gender ?? undefined,
+    nationality: studentValues.nationality ?? '',
+    has_university_account: studentValues.has_university_account,
+  })
+
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
-    defaultValues: hasUniversityAccount
-      ? {
-          matriculation_number: student.matriculation_number || '',
-          university_login: student.university_login || '',
-          first_name: student.first_name || '',
-          last_name: student.last_name || '',
-          email: student.email || '',
-          gender: student.gender ?? undefined,
-          nationality: student.nationality ?? '',
-          has_university_account: true,
-        }
-      : {
-          first_name: student.first_name || '',
-          last_name: student.last_name || '',
-          email: student.email || '',
-          gender: student.gender ?? undefined,
-          nationality: student.nationality ?? '',
-          has_university_account: false,
-        },
+    defaultValues: generateDefaultValues(student),
     mode: 'onChange',
   })
 
@@ -91,27 +84,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
       return valid
     },
     rerender(updatedStudent: Student) {
-      form.reset(
-        updatedStudent.has_university_account
-          ? {
-              matriculation_number: updatedStudent.matriculation_number || '',
-              university_login: updatedStudent.university_login || '',
-              first_name: updatedStudent.first_name || '',
-              last_name: updatedStudent.last_name || '',
-              email: updatedStudent.email || '',
-              gender: updatedStudent.gender ?? undefined,
-              nationality: updatedStudent.nationality ?? '',
-              has_university_account: true,
-            }
-          : {
-              first_name: updatedStudent.first_name || '',
-              last_name: updatedStudent.last_name || '',
-              email: updatedStudent.email || '',
-              gender: updatedStudent.gender ?? undefined,
-              nationality: updatedStudent.nationality ?? '',
-              has_university_account: false,
-            },
-      )
+      form.reset(generateDefaultValues(updatedStudent))
     },
   }))
 
