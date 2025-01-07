@@ -1,6 +1,5 @@
 import { FormDescription } from '@/components/ui/form'
 import DOMPurify from 'dompurify'
-import '@/components/minimal-tiptap/styles/index.css'
 
 interface FormDescriptionHTMLProps {
   htmlCode: string
