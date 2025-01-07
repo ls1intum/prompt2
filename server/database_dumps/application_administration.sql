@@ -309,3 +309,7 @@ ALTER TABLE ONLY application_assessment
 -- Name: application_assessment fk_course_phase_participation; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 
+
+
+ALTER TABLE student
+    ADD COLUMN nationality VARCHAR(2);

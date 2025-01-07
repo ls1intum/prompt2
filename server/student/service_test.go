@@ -63,6 +63,7 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 		MatriculationNumber:  "01234567",
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
+		Nationality:          "DE",
 	}
 
 	createdStudent, err := CreateStudent(suite.ctx, newStudent)
@@ -75,6 +76,7 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 	assert.Equal(suite.T(), newStudent.MatriculationNumber, createdStudent.MatriculationNumber, "MatriculationNumber should match")
 	assert.Equal(suite.T(), newStudent.UniversityLogin, createdStudent.UniversityLogin, "UniversityLogin should match")
 	assert.Equal(suite.T(), newStudent.Gender, createdStudent.Gender, "Gender should match")
+	assert.Equal(suite.T(), newStudent.Nationality, createdStudent.Nationality, "Nationality should match")
 
 	// Verify it exists in the database
 	fetchedStudent, err := GetStudentByID(suite.ctx, createdStudent.ID)
@@ -87,6 +89,7 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 	assert.Equal(suite.T(), createdStudent.MatriculationNumber, fetchedStudent.MatriculationNumber, "Fetched student MatriculationNumber should match created student MatriculationNumber")
 	assert.Equal(suite.T(), createdStudent.UniversityLogin, fetchedStudent.UniversityLogin, "Fetched student UniversityLogin should match created student UniversityLogin")
 	assert.Equal(suite.T(), createdStudent.Gender, fetchedStudent.Gender, "Fetched student Gender should match created student Gender")
+	assert.Equal(suite.T(), createdStudent.Nationality, fetchedStudent.Nationality, "Nationality should match")
 }
 
 func TestServiceTestSuite(t *testing.T) {

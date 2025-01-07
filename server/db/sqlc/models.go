@@ -245,4 +245,5 @@ type Student struct {
 	UniversityLogin      pgtype.Text `json:"university_login"`
 	HasUniversityAccount pgtype.Bool `json:"has_university_account"`
 	Gender               Gender      `json:"gender"`
+	Nationality          pgtype.Text `json:"nationality"`
 }
