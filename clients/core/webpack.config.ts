@@ -55,6 +55,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, '../shared_library/src'),
             path.resolve(__dirname, '../node_modules/@xyflow/react/dist/style.css'),
+            path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
           ],
           use: [
             'style-loader', // Injects styles into DOM

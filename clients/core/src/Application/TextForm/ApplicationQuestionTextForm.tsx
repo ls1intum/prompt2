@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { QuestionTextFormRef } from '../utils/QuestionTextFormRef'
 import { createValidationSchema } from './validationSchema'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
 
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText
@@ -72,9 +72,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                     {question.title}
                     {question.is_required ? <span className='text-destructive'> *</span> : ''}
                   </FormLabel>
-                  {question.description && (
-                    <FormDescription>{question.description}</FormDescription>
-                  )}
+                  {question.description && <FormDescriptionHTML htmlCode={question.description} />}
                   <div className='relative'>
                     {isTextArea ? (
                       <Textarea
