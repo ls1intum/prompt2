@@ -23,6 +23,20 @@ import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../validations/student'
 import translations from '@/lib/translations.json'
 
+// Getting the list of countries
+import countries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
+
+countries.registerLocale(enLocale)
+const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' })).map(
+  ([key, value]) => {
+    return {
+      label: value,
+      value: key,
+    }
+  },
+)
+
 interface StudentFormProps {
   student: Student
   disabled?: boolean
@@ -72,6 +86,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               last_name: updatedStudent.last_name || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
+              nationality: updatedStudent.nationality ?? '',
               has_university_account: true,
             }
           : {
@@ -79,6 +94,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               last_name: updatedStudent.last_name || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
+              nationality: updatedStudent.nationality ?? '',
               has_university_account: false,
             },
       )
@@ -204,6 +220,30 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   {Object.values(Gender).map((gender) => (
                     <SelectItem key={gender} value={gender}>
                       {getGenderString(gender)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='nationality'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nationality{requiredStar}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a nationality' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {countriesArr.map((country) => (
+                    <SelectItem key={country.value} value={country.value}>
+                      {country.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
