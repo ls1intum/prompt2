@@ -1,5 +1,5 @@
 import { Student } from '@/interfaces/student'
-import { forwardRef, useEffect, useImperativeHandle } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { StudentComponentRef } from '../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,6 +38,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
+import { getStudyDegreeString, StudyDegree } from '@/interfaces/study_degree'
 
 countries.registerLocale(enLocale)
 const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' })).map(
@@ -48,6 +49,14 @@ const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' }
     }
   },
 )
+
+const studyPrograms = [
+  'Computer Science',
+  'Information Systems',
+  'Games Engineering',
+  'Management and Technology',
+  'Other',
+]
 
 interface StudentFormProps {
   student: Student
@@ -73,6 +82,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           email: student.email || '',
           gender: student.gender ?? undefined,
           nationality: student.nationality ?? '',
+          study_degree: student.study_degree ?? undefined,
+          study_program: student.study_program ?? '',
+          current_semester: student.current_semester ?? undefined,
           has_university_account: true,
         }
       : {
@@ -81,6 +93,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           email: student.email || '',
           gender: student.gender ?? undefined,
           nationality: student.nationality ?? '',
+          study_degree: student.study_degree ?? undefined,
+          study_program: student.study_program ?? '',
+          current_semester: student.current_semester ?? undefined,
           has_university_account: false,
         },
 
@@ -103,6 +118,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
               nationality: updatedStudent.nationality ?? '',
+              study_degree: updatedStudent.study_degree ?? undefined,
+              study_program: updatedStudent.study_program ?? '',
+              current_semester: updatedStudent.current_semester ?? undefined,
               has_university_account: true,
             }
           : {
@@ -111,6 +129,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
               nationality: updatedStudent.nationality ?? '',
+              study_degree: updatedStudent.study_degree ?? undefined,
+              study_program: updatedStudent.study_program ?? '',
+              current_semester: updatedStudent.current_semester ?? undefined,
               has_university_account: false,
             },
       )
@@ -124,6 +145,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, student, onUpdate, form])
+
+  const [otherStudyProgram, setOtherStudyProgram] = useState(false)
+  const currStudyProgram = form.watch('study_program')
 
   const requiredStar = <span className='text-destructive'> *</span>
 
@@ -278,7 +302,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     <Command>
                       <CommandInput placeholder='Search nationality...' />
                       <CommandList>
-                        <CommandEmpty>No language found.</CommandEmpty>
+                        <CommandEmpty>No country found.</CommandEmpty>
                         <CommandGroup>
                           {countriesArr.map((country) => (
                             <CommandItem
@@ -307,6 +331,123 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             )}
           />
         </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <FormField
+            control={form.control}
+            name='study_degree'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Study Degree{requiredStar}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={disabled}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select your current study degree' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(StudyDegree).map((degree) => (
+                      <SelectItem key={degree} value={degree}>
+                        {getStudyDegreeString(degree)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='study_program'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Study Program{requiredStar}</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    if (value === 'Other') {
+                      setOtherStudyProgram(true)
+                      form.setValue('study_program', '')
+                    } else {
+                      setOtherStudyProgram(false)
+                      form.setValue('study_program', value)
+                    }
+                  }}
+                  defaultValue={field.value}
+                  disabled={disabled}
+                  value={
+                    otherStudyProgram || (field.value != '' && !studyPrograms.includes(field.value))
+                      ? 'Other'
+                      : field.value
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select your current study program' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {studyPrograms.map((program) => (
+                      <SelectItem key={program} value={program}>
+                        {program}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!otherStudyProgram && <FormMessage />}
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='current_semester'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Current Semester{requiredStar}</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    type='number'
+                    placeholder='Enter your current semester'
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value)
+                      field.onChange(value)
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {(otherStudyProgram ||
+          (currStudyProgram != '' && !studyPrograms.includes(currStudyProgram))) && (
+          <FormField
+            control={form.control}
+            name='study_program'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Specify Study Program{requiredStar}</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    placeholder='Please enter your other study program'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
       </form>
     </Form>
   )
