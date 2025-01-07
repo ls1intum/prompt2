@@ -29,16 +29,7 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllApplicationParticipat
 		ID:         model.CoursePhaseParticipationID,
 		PassStatus: coursePhaseParticipationDTO.GetPassStatusString(model.PassStatus),
 		MetaData:   metaData,
-		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{
-			ID:                   model.StudentID,
-			FirstName:            model.FirstName,
-			LastName:             model.LastName,
-			Email:                model.Email,
-			MatriculationNumber:  model.MatriculationNumber,
-			UniversityLogin:      model.UniversityLogin,
-			HasUniversityAccount: model.HasUniversityAccount,
-			Gender:               model.Gender,
-		}),
-		Score: model.Score,
+		Student:    studentDTO.GetStudentDTOFromApplicationParticipation(model),
+		Score:      model.Score,
 	}, nil
 }

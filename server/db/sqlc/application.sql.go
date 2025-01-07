@@ -328,6 +328,10 @@ SELECT
     s.university_login,
     s.has_university_account,
     s.gender, 
+    s.nationality,
+    s.study_degree,
+    s.study_program,
+    s.current_semester,
     a.score
 FROM
     course_phase_participation cpp
@@ -353,6 +357,10 @@ type GetAllApplicationParticipationsRow struct {
 	UniversityLogin            pgtype.Text    `json:"university_login"`
 	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
 	Gender                     Gender         `json:"gender"`
+	Nationality                pgtype.Text    `json:"nationality"`
+	StudyDegree                StudyDegree    `json:"study_degree"`
+	StudyProgram               pgtype.Text    `json:"study_program"`
+	CurrentSemester            pgtype.Int4    `json:"current_semester"`
 	Score                      pgtype.Int4    `json:"score"`
 }
 
@@ -377,6 +385,10 @@ func (q *Queries) GetAllApplicationParticipations(ctx context.Context, coursePha
 			&i.UniversityLogin,
 			&i.HasUniversityAccount,
 			&i.Gender,
+			&i.Nationality,
+			&i.StudyDegree,
+			&i.StudyProgram,
+			&i.CurrentSemester,
 			&i.Score,
 		); err != nil {
 			return nil, err
