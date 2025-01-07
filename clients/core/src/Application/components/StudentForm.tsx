@@ -265,6 +265,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground',
                         )}
+                        disabled={disabled}
                       >
                         {field.value
                           ? countriesArr.find((country) => country.value === field.value)?.label

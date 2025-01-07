@@ -84,4 +84,4 @@ ALTER TABLE ONLY student
 --
 
 ALTER TABLE student
-ADD COLUMN nationality VARCHAR(2);
+    ADD COLUMN nationality VARCHAR(2);
