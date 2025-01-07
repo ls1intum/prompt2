@@ -6,6 +6,6 @@
       "matriculationExample": "0xxxxxxx",
       "universityLoginRegex": "^[a-zA-Z]{2}\\d{2}[a-zA-Z]{3}$",
       "universityLoginExample": "ab12cde",
-      "studyPrograms": ["Computer Science", "Information Systems", "Games Engineering", "Management and Technology", "Other"]
+      "studyPrograms": ["Computer Science", "Information Systems", "Games Engineering", "Management and Technology"]
     }
 }

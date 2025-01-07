@@ -50,7 +50,7 @@ const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' }
   },
 )
 
-const studyPrograms = translations.university.studyPrograms
+const studyPrograms = translations.university.studyPrograms.concat('Other')
 
 interface StudentFormProps {
   student: Student
