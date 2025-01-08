@@ -14,13 +14,17 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
 import MinimalTiptapEditor from '@/components/minimal-tiptap/minimal-tiptap'
+import { useModifyCoursePhase } from '../handlers/useModifyCoursePhase'
+import { useToast } from '@/hooks/use-toast'
+import { UpdateCoursePhase } from '@/interfaces/course_phase'
+import { useParams } from 'react-router-dom'
 
 export const ApplicationMailingSettings = () => {
+  const { phaseId } = useParams<{ phaseId: string }>()
+  const { toast } = useToast()
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
       confirmationMail: '',
@@ -31,12 +35,29 @@ export const ApplicationMailingSettings = () => {
       sendAcceptanceMail: false,
     })
 
+  // Fetching meta data
   const {
     data: fetchedCoursePhase,
     isPending: isCoursePhasePending,
     error: coursePhaseError,
     isError: isCoursePhaseError,
   } = useGetCoursePhase()
+
+  // Updating state
+  const { mutate: mutateCoursePhase } = useModifyCoursePhase(
+    () => {
+      toast({
+        title: 'Application mailing settings updated',
+      })
+    },
+    () => {
+      toast({
+        title: 'Error updating application mailing settings',
+        description: 'Please try again later',
+        variant: 'destructive',
+      })
+    },
+  )
 
   useEffect(() => {
     if (fetchedCoursePhase?.meta_data) {
@@ -59,7 +80,14 @@ export const ApplicationMailingSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement save functionality
+    // get all the values+
+    const updatedCoursePhase: UpdateCoursePhase = {
+      id: phaseId ?? '',
+      meta_data: {
+        mailingConfig: applicationMailingMetaData,
+      },
+    }
+    mutateCoursePhase(updatedCoursePhase)
     console.log('Saving:', applicationMailingMetaData)
   }
 
@@ -133,7 +161,7 @@ export const ApplicationMailingSettings = () => {
                       } as any)
                     }
                     className='w-full'
-                    editorContentClassName='minimal-tiptap-editor'
+                    editorContentClassName='p-4'
                     output='html'
                     placeholder='Type your description here...'
                     autofocus={false}
@@ -155,7 +183,7 @@ export const ApplicationMailingSettings = () => {
                       } as any)
                     }
                     className='w-full'
-                    editorContentClassName='minimal-tiptap-editor'
+                    editorContentClassName='p-4'
                     output='html'
                     placeholder='Type your description here...'
                     autofocus={false}
@@ -177,7 +205,7 @@ export const ApplicationMailingSettings = () => {
                       } as any)
                     }
                     className='w-full'
-                    editorContentClassName='minimal-tiptap-editor'
+                    editorContentClassName='p-4'
                     output='html'
                     placeholder='Type your description here...'
                     autofocus={false}
