@@ -137,6 +137,7 @@ func getApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
+	// TODO: maybe rewrite in near future to MatrNr as this is safer to not change!
 	applicationForm, err := GetApplicationAuthenticatedByEmail(c, userEmail, coursePhaseId)
 	if err != nil {
 		log.Error(err)
@@ -241,6 +242,8 @@ func postApplicationAuthenticated(c *gin.Context) {
 	}
 
 	userEmail := c.GetString("userEmail")
+	matriculationNumber := c.GetString("matriculationNumber")
+	universityLogin := c.GetString("universityLogin")
 	if userEmail == "" {
 		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
 		return
@@ -259,9 +262,8 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	// TODO: Add authentication against first Name, last Name, matrNr, LDAP ID
-	if application.Student.Email != userEmail {
-		handleError(c, http.StatusUnauthorized, errors.New("email does not match - is not allowed to be changed"))
+	if application.Student.Email != userEmail || application.Student.MatriculationNumber != matriculationNumber || application.Student.UniversityLogin != universityLogin {
+		handleError(c, http.StatusUnauthorized, errors.New("credentials do not match payload"))
 		return
 	}
 
