@@ -109,6 +109,23 @@ func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, 
 			UniversityLogin:      studentObj.UniversityLogin,
 			HasUniversityAccount: studentObj.HasUniversityAccount,
 			Gender:               studentObj.Gender,
+			Nationality:          studentObj.Nationality,
+			StudyDegree:          studentObj.StudyDegree,
+			StudyProgram:         studentObj.StudyProgram,
+			CurrentSemester:      studentObj.CurrentSemester,
 		})
 	}
+}
+
+func SearchStudents(ctx context.Context, searchString string) ([]studentDTO.Student, error) {
+	students, err := StudentServiceSingleton.queries.SearchStudents(ctx, pgtype.Text{String: searchString, Valid: true})
+	if err != nil {
+		return nil, err
+	}
+
+	dtoStudents := make([]studentDTO.Student, 0, len(students))
+	for _, student := range students {
+		dtoStudents = append(dtoStudents, studentDTO.GetStudentDTOFromDBModel(student))
+	}
+	return dtoStudents, nil
 }

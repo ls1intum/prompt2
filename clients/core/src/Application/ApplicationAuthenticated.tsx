@@ -112,6 +112,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     last_name: user?.lastName ?? '',
     email: user?.email ?? '',
     has_university_account: true,
+    // TODO: get university data from keycloak
   }
   if (
     (application.status === 'applied' || application.status === 'not_applied') &&

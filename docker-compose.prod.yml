@@ -55,6 +55,11 @@ services:
       - KEYCLOAK_CLIENT_ID
       - KEYCLOAK_CLIENT_SECRET
       - KEYCLOAK_ID_OF_CLIENT
+      - CLIENT_URL
+      - SMTP_HOST
+      - SMTP_PORT
+      - SENDER_EMAIL
+      - SENDER_NAME
     networks:
       - prompt-network
 

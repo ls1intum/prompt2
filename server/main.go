@@ -16,6 +16,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/mailing"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -59,6 +60,16 @@ func initKeycloak() {
 	}
 }
 
+func initMailing(queries db.Queries, conn *pgxpool.Pool) {
+	clientURL := utils.GetEnv("CLIENT_URL", "prompt2.ase.cit.tum.de")
+	smtpHost := utils.GetEnv("SMTP_HOST", "127.0.0.1")
+	smtpPort := utils.GetEnv("SMTP_PORT", "25")
+	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt-dev@ase.cit.tum.de")
+	senderName := utils.GetEnv("SENDER_NAME", "Prompt Mailing Service")
+
+	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail, clientURL, queries, conn)
+}
+
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -79,6 +90,9 @@ func main() {
 
 	initKeycloak()
 	permissionValidation.InitValidationService(*query, conn)
+
+	// Init the Mailing System
+	initMailing(*query, conn)
 
 	router := gin.Default()
 	router.Use(utils.CORS())

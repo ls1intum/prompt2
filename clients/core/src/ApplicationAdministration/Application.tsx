@@ -1,27 +1,121 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Construction } from 'lucide-react'
+import { CalendarX, Loader2, Mail } from 'lucide-react'
+import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { useGetCoursePhase } from './handlers/useGetCoursePhase'
+import { getIsApplicationConfigured } from './utils/getApplicationIsConfigured'
+import { useEffect, useMemo, useState } from 'react'
+import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
+import { useLocation } from 'react-router-dom'
+import { useGetApplicationParticipations } from './handlers/useGetApplicationParticipations'
+import { AssessmentDiagram } from './components/AssessmentDiagram'
+import { ApplicationStatusCard } from './components/ApplicationStatusCard'
+import { ApplicationGenderDiagram } from './components/ApplicationGenderDiagram'
+import { ApplicationStudyBackgroundDiagram } from './components/ApplicationStudyBackgroundDiagram'
+import { ErrorPage } from '@/components/ErrorPage'
+import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySemesterDiagram'
+import { parseApplicationMailingMetaData } from './Mailing/utils/parseApplicaitonMailingMetaData'
+import { getIsApplicationMailingIsConfigured } from './utils/getApplicationMailingIsConfigured'
 
 export const Application = (): JSX.Element => {
+  const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
+  const path = useLocation().pathname
+  const {
+    data: fetchedCoursePhase,
+    isPending: isCoursePhasePending,
+    isError: isCoursePhaseError,
+    refetch: refetchCoursePhase,
+  } = useGetCoursePhase()
+
+  const {
+    data: fetchedParticipations,
+    isPending: isParticipationsPending,
+    isError: isParticipantsError,
+    refetch: refetchParticipations,
+  } = useGetApplicationParticipations()
+
+  const isPending = isCoursePhasePending || isParticipationsPending
+  const isError = isCoursePhaseError || isParticipantsError
+  const refetch = () => {
+    refetchCoursePhase()
+    refetchParticipations()
+  }
+
+  useEffect(() => {
+    if (fetchedCoursePhase) {
+      const externalStudentsAllowed = fetchedCoursePhase?.meta_data?.['externalStudentsAllowed']
+      const applicationStartDate = fetchedCoursePhase?.meta_data?.['applicationStartDate']
+      const applicationEndDate = fetchedCoursePhase?.meta_data?.['applicationEndDate']
+
+      const parsedMetaData: ApplicationMetaData = {
+        applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,
+        applicationEndDate: applicationEndDate ? new Date(applicationEndDate) : undefined,
+        externalStudentsAllowed: externalStudentsAllowed ? externalStudentsAllowed : false,
+      }
+      setApplicationMetaData(parsedMetaData)
+    }
+  }, [fetchedCoursePhase])
+
+  const missingConfigs: MissingConfigItem[] = useMemo(() => {
+    const missingConfigItems: MissingConfigItem[] = []
+    if (!getIsApplicationConfigured(applicationMetaData)) {
+      missingConfigItems.push({
+        title: 'Application Phase Deadlines',
+        icon: CalendarX,
+        link: `${path}/configuration`,
+      })
+    }
+
+    // TODO fix when mail is configured
+    if (fetchedCoursePhase?.meta_data?.['mailingConfig'] === undefined) {
+      missingConfigItems.push({
+        title: 'Mail Configuration',
+        icon: Mail,
+        link: `${path}/mailing`,
+      })
+    } else {
+      const mailingConfig = parseApplicationMailingMetaData(fetchedCoursePhase?.meta_data)
+      if (
+        // trying to send mails but reply to not set
+        !getIsApplicationMailingIsConfigured(mailingConfig) &&
+        (mailingConfig.sendAcceptanceMail ||
+          mailingConfig.sendConfirmationMail ||
+          mailingConfig.sendRejectionMail)
+      ) {
+        missingConfigItems.push({
+          title: 'Mail Replier Information',
+          icon: Mail,
+          link: `${path}/mailing`,
+        })
+      }
+    }
+    return missingConfigItems
+  }, [applicationMetaData, fetchedCoursePhase?.meta_data, path])
+
   return (
-    <Card className='w-full max-w-2xl mx-auto'>
-      <CardHeader>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center space-x-2'>
-            <Construction className='h-6 w-6 text-yellow-500' />
-            <CardTitle className='text-2xl'>ApplicationComponent</CardTitle>
+    <div className='container mx-auto p-6'>
+      <h1 className='text-4xl font-bold mb-6'>Application Administration</h1>
+      {isPending ? (
+        <div className='flex justify-center items-center h-64'>
+          <Loader2 className='h-12 w-12 animate-spin text-primary' />
+        </div>
+      ) : isError ? (
+        <ErrorPage onRetry={refetch} />
+      ) : (
+        <>
+          <MissingConfig elements={missingConfigs} />
+          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6'>
+            <ApplicationStatusCard
+              applicationMetaData={applicationMetaData}
+              applicationPhaseIsConfigured={getIsApplicationConfigured(applicationMetaData)}
+            />
+            <AssessmentDiagram applications={fetchedParticipations ?? []} />
+            <ApplicationGenderDiagram applications={fetchedParticipations ?? []} />
           </div>
-          <Badge variant='secondary' className='bg-yellow-200 text-yellow-800'>
-            In Development
-          </Badge>
-        </div>
-        <CardDescription>This component is currently under development</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className='p-4 border-2 border-dashed border-gray-300 rounded-lg'>
-          {/* Empty space for future component content */}
-        </div>
-      </CardContent>
-    </Card>
+          <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
+            <ApplicationStudyBackgroundDiagram applications={fetchedParticipations ?? []} />
+            <ApplicationStudySemesterDiagram applications={fetchedParticipations ?? []} />
+          </div>
+        </>
+      )}
+    </div>
   )
 }

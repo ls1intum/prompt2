@@ -13,3 +13,16 @@ export function getStatusBadge(status: PassStatus): JSX.Element {
       return <Badge className='bg-gray-500 hover:bg-gray-500'>Unknown</Badge>
   }
 }
+
+export function getStatusString(status: PassStatus): string {
+  switch (status) {
+    case 'passed':
+      return 'Accepted'
+    case 'failed':
+      return 'Rejected'
+    case 'not_assessed':
+      return 'Not Assessed'
+    default:
+      return 'Unknown'
+  }
+}

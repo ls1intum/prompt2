@@ -142,6 +142,48 @@ func (ns NullPassStatus) Value() (driver.Value, error) {
 	return string(ns.PassStatus), nil
 }
 
+type StudyDegree string
+
+const (
+	StudyDegreeBachelor StudyDegree = "bachelor"
+	StudyDegreeMaster   StudyDegree = "master"
+)
+
+func (e *StudyDegree) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = StudyDegree(s)
+	case string:
+		*e = StudyDegree(s)
+	default:
+		return fmt.Errorf("unsupported scan type for StudyDegree: %T", src)
+	}
+	return nil
+}
+
+type NullStudyDegree struct {
+	StudyDegree StudyDegree `json:"study_degree"`
+	Valid       bool        `json:"valid"` // Valid is true if StudyDegree is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStudyDegree) Scan(value interface{}) error {
+	if value == nil {
+		ns.StudyDegree, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.StudyDegree.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStudyDegree) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.StudyDegree), nil
+}
+
 type ApplicationAnswerMultiSelect struct {
 	ID                         uuid.UUID `json:"id"`
 	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
@@ -221,11 +263,12 @@ type CoursePhaseGraph struct {
 }
 
 type CoursePhaseParticipation struct {
-	ID                    uuid.UUID      `json:"id"`
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
-	MetaData              []byte         `json:"meta_data"`
-	PassStatus            NullPassStatus `json:"pass_status"`
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	MetaData              []byte           `json:"meta_data"`
+	PassStatus            NullPassStatus   `json:"pass_status"`
+	LastModified          pgtype.Timestamp `json:"last_modified"`
 }
 
 type CoursePhaseType struct {
@@ -237,12 +280,17 @@ type CoursePhaseType struct {
 }
 
 type Student struct {
-	ID                   uuid.UUID   `json:"id"`
-	FirstName            pgtype.Text `json:"first_name"`
-	LastName             pgtype.Text `json:"last_name"`
-	Email                pgtype.Text `json:"email"`
-	MatriculationNumber  pgtype.Text `json:"matriculation_number"`
-	UniversityLogin      pgtype.Text `json:"university_login"`
-	HasUniversityAccount pgtype.Bool `json:"has_university_account"`
-	Gender               Gender      `json:"gender"`
+	ID                   uuid.UUID        `json:"id"`
+	FirstName            pgtype.Text      `json:"first_name"`
+	LastName             pgtype.Text      `json:"last_name"`
+	Email                pgtype.Text      `json:"email"`
+	MatriculationNumber  pgtype.Text      `json:"matriculation_number"`
+	UniversityLogin      pgtype.Text      `json:"university_login"`
+	HasUniversityAccount pgtype.Bool      `json:"has_university_account"`
+	Gender               Gender           `json:"gender"`
+	Nationality          pgtype.Text      `json:"nationality"`
+	StudyProgram         pgtype.Text      `json:"study_program"`
+	StudyDegree          StudyDegree      `json:"study_degree"`
+	CurrentSemester      pgtype.Int4      `json:"current_semester"`
+	LastModified         pgtype.Timestamp `json:"last_modified"`
 }

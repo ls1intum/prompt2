@@ -40,7 +40,7 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['application'] })
-      queryClient.invalidateQueries({ queryKey: ['course_phase_participations'] })
+      queryClient.invalidateQueries({ queryKey: ['application_participations'] })
       setIsAddingData(false)
     },
   })

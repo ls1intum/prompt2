@@ -41,3 +41,7 @@ func GetMetaDataDTOFromDBModel(metaDataBytes []byte) (MetaData, error) {
 
 	return metaData, err
 }
+
+func (m MetaData) Length() int {
+	return len(m)
+}

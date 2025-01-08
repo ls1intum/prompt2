@@ -4,6 +4,7 @@ import { Application } from '../../ApplicationAdministration/Application'
 import { ApplicationConfiguration } from '../../ApplicationAdministration/ApplicationConfiguration/ApplicationConfiguration'
 import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationsOverview } from '../../ApplicationAdministration/ApplicationAssessment/ApplicationsOverview'
+import { ApplicationMailingSettings } from '../../ApplicationAdministration/Mailing/ApplicationMailingSettings'
 
 const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
@@ -19,6 +20,11 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
     path: '/applications',
     element: <ApplicationsOverview />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/mailing',
+    element: <ApplicationMailingSettings />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]

@@ -1,4 +1,5 @@
 import { Gender } from './gender'
+import { StudyDegree } from './study_degree'
 
 export interface Student {
   id?: string
@@ -9,4 +10,8 @@ export interface Student {
   university_login?: string
   has_university_account: boolean
   gender?: Gender
+  nationality?: string
+  study_degree?: StudyDegree
+  current_semester?: number
+  study_program?: string
 }

@@ -3,6 +3,7 @@ package student
 import (
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,43 +15,108 @@ func TestValidate(t *testing.T) {
 		expectedError string
 	}{
 		{
-			name:          "valid student data",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "ab12xyz"},
+			name: "valid student data",
+			input: studentDTO.CreateStudent{
+				FirstName:            "John",
+				LastName:             "Doe",
+				Email:                "john.doe@example.com",
+				HasUniversityAccount: true,
+				MatriculationNumber:  "01234567",
+				UniversityLogin:      "ab12xyz",
+				Nationality:          "DE",
+				CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:         "Computer Science",
+				StudyDegree:          "bachelor",
+			},
 			expectedError: "",
 		},
 		{
-			name:          "missing first name",
-			input:         studentDTO.CreateStudent{LastName: "Doe", Email: "john.doe@example.com"},
+			name: "missing first name",
+			input: studentDTO.CreateStudent{
+				LastName:        "Doe",
+				Email:           "john.doe@example.com",
+				CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:    "Computer Science",
+			},
 			expectedError: "first name is required",
 		},
 		{
-			name:          "missing last name",
-			input:         studentDTO.CreateStudent{FirstName: "John", Email: "john.doe@example.com"},
+			name: "missing last name",
+			input: studentDTO.CreateStudent{
+				FirstName:       "John",
+				Email:           "john.doe@example.com",
+				CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:    "Computer Science",
+			},
 			expectedError: "last name is required",
 		},
 		{
-			name:          "invalid email",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "invalid-email"},
+			name: "invalid email",
+			input: studentDTO.CreateStudent{
+				FirstName:       "John",
+				LastName:        "Doe",
+				Email:           "invalid-email",
+				CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:    "Computer Science",
+			},
 			expectedError: "invalid email address",
 		},
 		{
-			name:          "valid student without university account",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false},
+			name: "valid student without university account",
+			input: studentDTO.CreateStudent{
+				FirstName:            "John",
+				LastName:             "Doe",
+				Email:                "john.doe@example.com",
+				HasUniversityAccount: false,
+				Nationality:          "DE",
+				CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:         "Computer Science",
+				StudyDegree:          "bachelor",
+			},
 			expectedError: "",
 		},
 		{
-			name:          "student with university account but invalid matriculation number",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "1234567", UniversityLogin: "ab12xyz"},
+			name: "student with university account but invalid matriculation number",
+			input: studentDTO.CreateStudent{
+				FirstName:            "John",
+				LastName:             "Doe",
+				Email:                "john.doe@example.com",
+				HasUniversityAccount: true,
+				MatriculationNumber:  "1234567",
+				UniversityLogin:      "ab12xyz",
+				Nationality:          "DE",
+				CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:         "Computer Science",
+			},
 			expectedError: "invalid matriculation number",
 		},
 		{
-			name:          "student with university account but invalid university login",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: true, MatriculationNumber: "01234567", UniversityLogin: "xyz123"},
+			name: "student with university account but invalid university login",
+			input: studentDTO.CreateStudent{
+				FirstName:            "John",
+				LastName:             "Doe",
+				Email:                "john.doe@example.com",
+				HasUniversityAccount: true,
+				MatriculationNumber:  "01234567",
+				UniversityLogin:      "xyz123",
+				Nationality:          "DE",
+				CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:         "Computer Science",
+			},
 			expectedError: "invalid university login",
 		},
 		{
-			name:          "student without university account but with matriculation number",
-			input:         studentDTO.CreateStudent{FirstName: "John", LastName: "Doe", Email: "john.doe@example.com", HasUniversityAccount: false, MatriculationNumber: "01234567"},
+			name: "student without university account but with matriculation number",
+			input: studentDTO.CreateStudent{
+				FirstName:            "John",
+				LastName:             "Doe",
+				Email:                "john.doe@example.com",
+				HasUniversityAccount: false,
+				MatriculationNumber:  "01234567",
+				Nationality:          "DE",
+				CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+				StudyProgram:         "Computer Science",
+			},
 			expectedError: "student has no university account but has university data",
 		},
 	}

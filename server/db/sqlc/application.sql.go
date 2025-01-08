@@ -12,6 +12,64 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
+WITH updates AS (
+  SELECT 
+    UNNEST($1::uuid[]) AS id,
+    UNNEST($2::numeric[]) AS score,
+    $3::text[] AS path -- Use $3 as a JSON path array
+)
+UPDATE course_phase_participation
+SET    
+    meta_data = jsonb_set(
+        COALESCE(meta_data, '{}'),
+        updates.path, -- Use dynamic path
+        to_jsonb(ROUND(updates.score, 2)) -- Convert the float score to JSONB
+    )
+FROM updates
+WHERE 
+    course_phase_participation.id = updates.id
+    AND course_phase_participation.course_phase_id = $4
+`
+
+type BatchUpdateAdditionalScoresParams struct {
+	Column1       []uuid.UUID      `json:"column_1"`
+	Column2       []pgtype.Numeric `json:"column_2"`
+	Column3       []string         `json:"column_3"`
+	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
+}
+
+func (q *Queries) BatchUpdateAdditionalScores(ctx context.Context, arg BatchUpdateAdditionalScoresParams) error {
+	_, err := q.db.Exec(ctx, batchUpdateAdditionalScores,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.CoursePhaseID,
+	)
+	return err
+}
+
+const checkCoursePhaseParticipationPair = `-- name: CheckCoursePhaseParticipationPair :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.id = $1
+      AND cpp.course_phase_id = $2
+)
+`
+
+type CheckCoursePhaseParticipationPairParams struct {
+	ID            uuid.UUID `json:"id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) CheckCoursePhaseParticipationPair(ctx context.Context, arg CheckCoursePhaseParticipationPairParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCoursePhaseParticipationPair, arg.ID, arg.CoursePhaseID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkIfCoursePhaseIsApplicationPhase = `-- name: CheckIfCoursePhaseIsApplicationPhase :one
 SELECT 
     cpt.name = 'Application' AS is_application
@@ -235,6 +293,112 @@ WHERE id = $1
 func (q *Queries) DeleteApplicationQuestionText(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteApplicationQuestionText, id)
 	return err
+}
+
+const deleteApplications = `-- name: DeleteApplications :exec
+DELETE FROM course_participation
+WHERE id IN (
+      SELECT cpp.course_participation_id
+      FROM course_phase_participation cpp
+      WHERE cpp.id = ANY($2::uuid[])
+        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+  )
+`
+
+type DeleteApplicationsParams struct {
+	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
+	Column2       []uuid.UUID `json:"column_2"`
+}
+
+func (q *Queries) DeleteApplications(ctx context.Context, arg DeleteApplicationsParams) error {
+	_, err := q.db.Exec(ctx, deleteApplications, arg.CoursePhaseID, arg.Column2)
+	return err
+}
+
+const getAllApplicationParticipations = `-- name: GetAllApplicationParticipations :many
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender, 
+    s.nationality,
+    s.study_degree,
+    s.study_program,
+    s.current_semester,
+    a.score
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+LEFT JOIN
+    application_assessment a on cpp.id = a.course_phase_participation_id
+WHERE
+    cpp.course_phase_id = $1
+`
+
+type GetAllApplicationParticipationsRow struct {
+	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
+	PassStatus                 NullPassStatus `json:"pass_status"`
+	MetaData                   []byte         `json:"meta_data"`
+	StudentID                  uuid.UUID      `json:"student_id"`
+	FirstName                  pgtype.Text    `json:"first_name"`
+	LastName                   pgtype.Text    `json:"last_name"`
+	Email                      pgtype.Text    `json:"email"`
+	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text    `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
+	Gender                     Gender         `json:"gender"`
+	Nationality                pgtype.Text    `json:"nationality"`
+	StudyDegree                StudyDegree    `json:"study_degree"`
+	StudyProgram               pgtype.Text    `json:"study_program"`
+	CurrentSemester            pgtype.Int4    `json:"current_semester"`
+	Score                      pgtype.Int4    `json:"score"`
+}
+
+func (q *Queries) GetAllApplicationParticipations(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllApplicationParticipationsRow, error) {
+	rows, err := q.db.Query(ctx, getAllApplicationParticipations, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllApplicationParticipationsRow
+	for rows.Next() {
+		var i GetAllApplicationParticipationsRow
+		if err := rows.Scan(
+			&i.CoursePhaseParticipationID,
+			&i.PassStatus,
+			&i.MetaData,
+			&i.StudentID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+			&i.Nationality,
+			&i.StudyDegree,
+			&i.StudyProgram,
+			&i.CurrentSemester,
+			&i.Score,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAllOpenApplicationPhases = `-- name: GetAllOpenApplicationPhases :many
@@ -493,6 +657,22 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 	return items, nil
 }
 
+const getExistingAdditionalScores = `-- name: GetExistingAdditionalScores :one
+SELECT 
+    meta_data->>'additional_scores' AS additional_scores
+FROM
+    course_phase
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetExistingAdditionalScores(ctx context.Context, id uuid.UUID) (interface{}, error) {
+	row := q.db.QueryRow(ctx, getExistingAdditionalScores, id)
+	var additional_scores interface{}
+	err := row.Scan(&additional_scores)
+	return additional_scores, err
+}
+
 const getOpenApplicationPhase = `-- name: GetOpenApplicationPhase :one
 SELECT 
     cp.id AS course_phase_id,
@@ -544,6 +724,28 @@ func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (Ge
 		&i.ExternalStudentsAllowed,
 	)
 	return i, err
+}
+
+const updateApplicationAssessment = `-- name: UpdateApplicationAssessment :exec
+INSERT INTO application_assessment (id, course_phase_participation_id, score)
+VALUES (
+    gen_random_uuid(),    
+    $1,                   
+    $2             
+)
+ON CONFLICT (course_phase_participation_id) 
+DO UPDATE 
+SET score = EXCLUDED.score
+`
+
+type UpdateApplicationAssessmentParams struct {
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	Score                      pgtype.Int4 `json:"score"`
+}
+
+func (q *Queries) UpdateApplicationAssessment(ctx context.Context, arg UpdateApplicationAssessmentParams) error {
+	_, err := q.db.Exec(ctx, updateApplicationAssessment, arg.CoursePhaseParticipationID, arg.Score)
+	return err
 }
 
 const updateApplicationQuestionMultiSelect = `-- name: UpdateApplicationQuestionMultiSelect :exec
@@ -628,5 +830,21 @@ func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateA
 		arg.AllowedLength,
 		arg.OrderNum,
 	)
+	return err
+}
+
+const updateExistingAdditionalScores = `-- name: UpdateExistingAdditionalScores :exec
+UPDATE course_phase
+SET meta_data = meta_data || $2
+WHERE id = $1
+`
+
+type UpdateExistingAdditionalScoresParams struct {
+	ID       uuid.UUID `json:"id"`
+	MetaData []byte    `json:"meta_data"`
+}
+
+func (q *Queries) UpdateExistingAdditionalScores(ctx context.Context, arg UpdateExistingAdditionalScoresParams) error {
+	_, err := q.db.Exec(ctx, updateExistingAdditionalScores, arg.ID, arg.MetaData)
 	return err
 }

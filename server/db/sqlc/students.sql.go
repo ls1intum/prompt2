@@ -13,9 +13,9 @@ import (
 )
 
 const createStudent = `-- name: CreateStudent :one
-INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender
+INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+RETURNING id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified
 `
 
 type CreateStudentParams struct {
@@ -27,6 +27,10 @@ type CreateStudentParams struct {
 	UniversityLogin      pgtype.Text `json:"university_login"`
 	HasUniversityAccount pgtype.Bool `json:"has_university_account"`
 	Gender               Gender      `json:"gender"`
+	Nationality          pgtype.Text `json:"nationality"`
+	StudyProgram         pgtype.Text `json:"study_program"`
+	StudyDegree          StudyDegree `json:"study_degree"`
+	CurrentSemester      pgtype.Int4 `json:"current_semester"`
 }
 
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
@@ -39,6 +43,10 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 		arg.UniversityLogin,
 		arg.HasUniversityAccount,
 		arg.Gender,
+		arg.Nationality,
+		arg.StudyProgram,
+		arg.StudyDegree,
+		arg.CurrentSemester,
 	)
 	var i Student
 	err := row.Scan(
@@ -50,12 +58,17 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 		&i.UniversityLogin,
 		&i.HasUniversityAccount,
 		&i.Gender,
+		&i.Nationality,
+		&i.StudyProgram,
+		&i.StudyDegree,
+		&i.CurrentSemester,
+		&i.LastModified,
 	)
 	return i, err
 }
 
 const getAllStudents = `-- name: GetAllStudents :many
-SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender FROM student
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified FROM student
 `
 
 func (q *Queries) GetAllStudents(ctx context.Context) ([]Student, error) {
@@ -76,6 +89,11 @@ func (q *Queries) GetAllStudents(ctx context.Context) ([]Student, error) {
 			&i.UniversityLogin,
 			&i.HasUniversityAccount,
 			&i.Gender,
+			&i.Nationality,
+			&i.StudyProgram,
+			&i.StudyDegree,
+			&i.CurrentSemester,
+			&i.LastModified,
 		); err != nil {
 			return nil, err
 		}
@@ -88,7 +106,7 @@ func (q *Queries) GetAllStudents(ctx context.Context) ([]Student, error) {
 }
 
 const getStudent = `-- name: GetStudent :one
-SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender FROM student
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified FROM student
 WHERE id = $1 LIMIT 1
 `
 
@@ -104,12 +122,17 @@ func (q *Queries) GetStudent(ctx context.Context, id uuid.UUID) (Student, error)
 		&i.UniversityLogin,
 		&i.HasUniversityAccount,
 		&i.Gender,
+		&i.Nationality,
+		&i.StudyProgram,
+		&i.StudyDegree,
+		&i.CurrentSemester,
+		&i.LastModified,
 	)
 	return i, err
 }
 
 const getStudentByCoursePhaseParticipationID = `-- name: GetStudentByCoursePhaseParticipationID :one
-SELECT s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender
+SELECT s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender, s.nationality, s.study_program, s.study_degree, s.current_semester, s.last_modified
 FROM student s
 INNER JOIN course_participation cp ON s.id = cp.student_id
 INNER JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
@@ -128,12 +151,17 @@ func (q *Queries) GetStudentByCoursePhaseParticipationID(ctx context.Context, id
 		&i.UniversityLogin,
 		&i.HasUniversityAccount,
 		&i.Gender,
+		&i.Nationality,
+		&i.StudyProgram,
+		&i.StudyDegree,
+		&i.CurrentSemester,
+		&i.LastModified,
 	)
 	return i, err
 }
 
 const getStudentByEmail = `-- name: GetStudentByEmail :one
-SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender FROM student
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified FROM student
 WHERE email = $1 LIMIT 1
 `
 
@@ -149,8 +177,58 @@ func (q *Queries) GetStudentByEmail(ctx context.Context, email pgtype.Text) (Stu
 		&i.UniversityLogin,
 		&i.HasUniversityAccount,
 		&i.Gender,
+		&i.Nationality,
+		&i.StudyProgram,
+		&i.StudyDegree,
+		&i.CurrentSemester,
+		&i.LastModified,
 	)
 	return i, err
+}
+
+const searchStudents = `-- name: SearchStudents :many
+SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified
+FROM student
+WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
+   OR first_name ILIKE '%' || $1 || '%'
+   OR last_name ILIKE '%' || $1 || '%'
+   OR email ILIKE '%' || $1 || '%'
+   OR matriculation_number ILIKE '%' || $1 || '%'
+   OR university_login ILIKE '%' || $1 || '%'
+`
+
+func (q *Queries) SearchStudents(ctx context.Context, dollar_1 pgtype.Text) ([]Student, error) {
+	rows, err := q.db.Query(ctx, searchStudents, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Student
+	for rows.Next() {
+		var i Student
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+			&i.Nationality,
+			&i.StudyProgram,
+			&i.StudyDegree,
+			&i.CurrentSemester,
+			&i.LastModified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateStudent = `-- name: UpdateStudent :one
@@ -161,9 +239,13 @@ SET first_name = $2,
     matriculation_number = $5,
     university_login = $6,
     has_university_account = $7,
-    gender = $8
+    gender = $8,
+    nationality = $9,
+    study_program = $10,
+    study_degree = $11,
+    current_semester = $12
 WHERE id = $1
-RETURNING id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender
+RETURNING id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified
 `
 
 type UpdateStudentParams struct {
@@ -175,6 +257,10 @@ type UpdateStudentParams struct {
 	UniversityLogin      pgtype.Text `json:"university_login"`
 	HasUniversityAccount pgtype.Bool `json:"has_university_account"`
 	Gender               Gender      `json:"gender"`
+	Nationality          pgtype.Text `json:"nationality"`
+	StudyProgram         pgtype.Text `json:"study_program"`
+	StudyDegree          StudyDegree `json:"study_degree"`
+	CurrentSemester      pgtype.Int4 `json:"current_semester"`
 }
 
 func (q *Queries) UpdateStudent(ctx context.Context, arg UpdateStudentParams) (Student, error) {
@@ -187,6 +273,10 @@ func (q *Queries) UpdateStudent(ctx context.Context, arg UpdateStudentParams) (S
 		arg.UniversityLogin,
 		arg.HasUniversityAccount,
 		arg.Gender,
+		arg.Nationality,
+		arg.StudyProgram,
+		arg.StudyDegree,
+		arg.CurrentSemester,
 	)
 	var i Student
 	err := row.Scan(
@@ -198,6 +288,11 @@ func (q *Queries) UpdateStudent(ctx context.Context, arg UpdateStudentParams) (S
 		&i.UniversityLogin,
 		&i.HasUniversityAccount,
 		&i.Gender,
+		&i.Nationality,
+		&i.StudyProgram,
+		&i.StudyDegree,
+		&i.CurrentSemester,
+		&i.LastModified,
 	)
 	return i, err
 }

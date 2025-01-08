@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -52,7 +53,11 @@ func (suite *RouterTestSuite) TearDownSuite() {
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/api")
-	setupStudentRouter(api)
+	authMiddleware := func() gin.HandlerFunc {
+		return testutils.MockAuthMiddleware([]string{"PROMPT_Admin"})
+	}
+	permissionMiddleware := testutils.MockPermissionMiddleware
+	setupStudentRouter(api, authMiddleware, permissionMiddleware)
 	return router
 }
 
@@ -80,6 +85,10 @@ func (suite *RouterTestSuite) TestRouterGetStudentByID() {
 		MatriculationNumber:  "01234567",
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
+		Nationality:          "DE",
+		CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+		StudyProgram:         "Computer Science",
+		StudyDegree:          "bachelor",
 	}
 	createdStudent, err := CreateStudent(suite.ctx, nil, newStudent)
 	assert.NoError(suite.T(), err)
@@ -105,6 +114,10 @@ func (suite *RouterTestSuite) TestRouterCreateStudent() {
 		MatriculationNumber:  "01234568",
 		UniversityLogin:      "bb12xyz",
 		Gender:               "male",
+		Nationality:          "DE",
+		CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+		StudyProgram:         "Computer Science",
+		StudyDegree:          "bachelor",
 	}
 	jsonValue, err := json.Marshal(newStudent)
 	if err != nil {
@@ -130,6 +143,7 @@ func (suite *RouterTestSuite) TestRouterCreateStudent() {
 	assert.Equal(suite.T(), newStudent.MatriculationNumber, createdStudent.MatriculationNumber, "MatriculationNumber should match")
 	assert.Equal(suite.T(), newStudent.UniversityLogin, createdStudent.UniversityLogin, "UniversityLogin should match")
 	assert.Equal(suite.T(), newStudent.Gender, createdStudent.Gender, "Gender should match")
+	assert.Equal(suite.T(), newStudent.Nationality, createdStudent.Nationality, "Nationality should match")
 }
 
 func TestRouterTestSuite(t *testing.T) {

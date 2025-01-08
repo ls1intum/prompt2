@@ -2,7 +2,9 @@ package applicationAdministration
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"math/big"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -178,6 +181,10 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_Invali
 			LastName:             "Doe",
 			Email:                "test@test.de",
 			HasUniversityAccount: false,
+			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -371,6 +378,163 @@ func TestValidateMultiSelectAnswers_InvalidQuestionID(t *testing.T) {
 	err := validateMultiSelectAnswers(multiSelectQuestions, multiSelectAnswers)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "answer to question d1e74f8b-9f7f-4b87-94a5-1234567890ab does not belong to this course")
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_Success() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+	passStatus := db.PassStatusFailed
+	assessment := applicationDTO.PutAssessment{
+		PassStatus: &passStatus,
+	}
+
+	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_NotAssessmentPhase() {
+	coursePhaseID := uuid.MustParse("7062236a-e290-487c-be41-29b24e0afc64")
+	coursePhaseParticipationID := uuid.MustParse("3a774200-39a7-4656-bafb-92b7210a93c1")
+	assessment := applicationDTO.PutAssessment{}
+
+	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "course phase is not an assessment phase", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_InvalidParticipation() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	coursePhaseParticipationID := uuid.New() // Non-existent participation
+	assessment := applicationDTO.PutAssessment{}
+
+	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "course phase participation does not belong to this course phase", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_InvalidMetaDataKey() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+
+	jsonData := `{"invalid_key": "value"}`
+	var metaData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &metaData)
+	assert.NoError(suite.T(), err)
+
+	assessment := applicationDTO.PutAssessment{
+		MetaData: metaData,
+	}
+
+	err = validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "invalid meta data key - not allowed to update other meta data", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Success() {
+	validScore := applicationDTO.AdditionalScore{
+		Name: "ValidScore",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(validScore)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_EmptyName() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "name cannot be empty", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_NegativeScore() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "NegativeScore",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(-10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "InvalidScoreValue",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Valid: false, // Invalid value
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "failed to parse score for entry", err.Error())
+}
+
+func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
+	invalidScore := applicationDTO.AdditionalScore{
+		Name: "MixedScores",
+		Scores: []applicationDTO.IndividualScore{
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(10),
+					Valid: true,
+				},
+			},
+			{
+				CoursePhaseParticipationID: uuid.New(),
+				Score: pgtype.Numeric{
+					Int:   big.NewInt(-10),
+					Valid: true,
+				},
+			},
+		},
+	}
+
+	err := validateAdditionalScore(invalidScore)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
 }
 
 func TestValidateUpdateFormSuite(t *testing.T) {

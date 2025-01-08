@@ -6,7 +6,7 @@ export const postNewCoursePhase = async (
 ): Promise<string | undefined> => {
   try {
     return (
-      await axiosInstance.post(`/api/course_phases`, coursePhase, {
+      await axiosInstance.post(`/api/course_phases/course/${coursePhase.course_id}`, coursePhase, {
         headers: {
           'Content-Type': 'application/json-path+json',
         },

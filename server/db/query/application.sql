@@ -176,3 +176,94 @@ SELECT EXISTS (
     WHERE cpp.course_phase_id = $1
     AND cpp.id = $2
 );
+
+-- name: GetAllApplicationParticipations :many
+SELECT
+    cpp.id AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender, 
+    s.nationality,
+    s.study_degree,
+    s.study_program,
+    s.current_semester,
+    a.score
+FROM
+    course_phase_participation cpp
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+LEFT JOIN
+    application_assessment a on cpp.id = a.course_phase_participation_id
+WHERE
+    cpp.course_phase_id = $1;
+
+-- name: UpdateApplicationAssessment :exec
+INSERT INTO application_assessment (id, course_phase_participation_id, score)
+VALUES (
+    gen_random_uuid(),    
+    $1,                   
+    $2             
+)
+ON CONFLICT (course_phase_participation_id) 
+DO UPDATE 
+SET score = EXCLUDED.score; 
+
+-- name: CheckCoursePhaseParticipationPair :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.id = $1
+      AND cpp.course_phase_id = $2
+);
+
+
+-- name: BatchUpdateAdditionalScores :exec
+WITH updates AS (
+  SELECT 
+    UNNEST($1::uuid[]) AS id,
+    UNNEST($2::numeric[]) AS score,
+    $3::text[] AS path -- Use $3 as a JSON path array
+)
+UPDATE course_phase_participation
+SET    
+    meta_data = jsonb_set(
+        COALESCE(meta_data, '{}'),
+        updates.path, -- Use dynamic path
+        to_jsonb(ROUND(updates.score, 2)) -- Convert the float score to JSONB
+    )
+FROM updates
+WHERE 
+    course_phase_participation.id = updates.id
+    AND course_phase_participation.course_phase_id = $4;
+
+
+-- name: GetExistingAdditionalScores :one
+SELECT 
+    meta_data->>'additional_scores' AS additional_scores
+FROM
+    course_phase
+WHERE
+    id = $1;
+
+-- name: UpdateExistingAdditionalScores :exec
+UPDATE course_phase
+SET meta_data = meta_data || $2
+WHERE id = $1;
+
+-- name: DeleteApplications :exec
+DELETE FROM course_participation
+WHERE id IN (
+      SELECT cpp.course_participation_id
+      FROM course_phase_participation cpp
+      WHERE cpp.id = ANY($2::uuid[])
+        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+  );

@@ -26,7 +26,7 @@ func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation
 		ID:                    model.ID,
 		CourseParticipationID: model.CourseParticipationID,
 		CoursePhaseID:         model.CoursePhaseID,
-		PassStatus:            getPassStatusString(model.PassStatus),
+		PassStatus:            GetPassStatusString(model.PassStatus),
 		MetaData:              metaData,
 	}, nil
 }

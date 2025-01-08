@@ -7,14 +7,18 @@ import (
 )
 
 type CreateStudent struct {
-	ID                   uuid.UUID `json:"id"`
-	FirstName            string    `json:"first_name"`
-	LastName             string    `json:"last_name"`
-	Email                string    `json:"email"`
-	MatriculationNumber  string    `json:"matriculation_number"`
-	UniversityLogin      string    `json:"university_login"`
-	HasUniversityAccount bool      `json:"has_university_account"`
-	Gender               db.Gender `json:"gender"`
+	ID                   uuid.UUID      `json:"id"`
+	FirstName            string         `json:"first_name"`
+	LastName             string         `json:"last_name"`
+	Email                string         `json:"email"`
+	MatriculationNumber  string         `json:"matriculation_number"`
+	UniversityLogin      string         `json:"university_login"`
+	HasUniversityAccount bool           `json:"has_university_account"`
+	Gender               db.Gender      `json:"gender"`
+	Nationality          string         `json:"nationality"`
+	StudyDegree          db.StudyDegree `json:"study_degree"`
+	StudyProgram         string         `json:"study_program"`
+	CurrentSemester      pgtype.Int4    `json:"current_semester"`
 }
 
 func (c CreateStudent) GetDBModel() db.CreateStudentParams {
@@ -26,5 +30,9 @@ func (c CreateStudent) GetDBModel() db.CreateStudentParams {
 		UniversityLogin:      pgtype.Text{String: c.UniversityLogin, Valid: true},
 		HasUniversityAccount: pgtype.Bool{Bool: c.HasUniversityAccount, Valid: true},
 		Gender:               c.Gender,
+		Nationality:          pgtype.Text{String: c.Nationality, Valid: true},
+		StudyDegree:          c.StudyDegree,
+		StudyProgram:         pgtype.Text{String: c.StudyProgram, Valid: true},
+		CurrentSemester:      c.CurrentSemester,
 	}
 }

@@ -6,7 +6,8 @@ export const ErrorState = ({ error, onBack }: { error: Error; onBack: () => void
   let errorMessage = 'An error occurred while fetching the application form.'
 
   if (error.message.includes('404')) {
-    errorMessage = 'The requested application phase cannot be found or may have already passed.'
+    errorMessage =
+      'The requested application phase cannot be found. The application phase might be closed.'
   }
   console.error(error)
 
@@ -15,7 +16,7 @@ export const ErrorState = ({ error, onBack }: { error: Error; onBack: () => void
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
           <AlertCircle className='h-5 w-5 text-destructive' />
-          Error{error.message.includes('404') ? ': Not Found' : ''}
+          Error{error.message.includes('404') ? ': Application Phase Closed' : ''}
         </CardTitle>
       </CardHeader>
       <CardContent>

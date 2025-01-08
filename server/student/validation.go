@@ -4,6 +4,7 @@ import (
 	"errors"
 	"regexp"
 
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,6 +18,23 @@ func Validate(c studentDTO.CreateStudent) error {
 	}
 	if err := validateUniversityData(c.HasUniversityAccount, c.MatriculationNumber, c.UniversityLogin); err != nil {
 		return err
+	}
+	if c.Nationality == "" {
+		log.Error("nationality is missing")
+		return errors.New("nationality is missing")
+	}
+
+	if !c.CurrentSemester.Valid || c.CurrentSemester.Int32 < 1 {
+		log.Error("semester is invalid")
+		return errors.New("semester is invalid")
+	}
+	if c.StudyProgram == "" {
+		log.Error("study program is invalid")
+		return errors.New("study program is invalid")
+	}
+	if c.StudyDegree != db.StudyDegreeBachelor && c.StudyDegree != db.StudyDegreeMaster {
+		log.Error("study degree is invalid")
+		return errors.New("study degree is invalid")
 	}
 	return nil
 }
