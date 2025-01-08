@@ -428,8 +428,6 @@ func updateApplicationsStatus(c *gin.Context) {
 	}
 	log.Info("Updated ", len(participationIDs), " participations")
 
-	// TODO MAIL: send mail to student that status was updated
-
 	c.JSON(http.StatusOK, gin.H{"message": "application status updated"})
 }
 

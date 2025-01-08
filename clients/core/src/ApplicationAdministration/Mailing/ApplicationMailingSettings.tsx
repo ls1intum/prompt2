@@ -160,7 +160,7 @@ export const ApplicationMailingSettings = () => {
                 <Label htmlFor='confirmationMail'>Confirmation Email Template</Label>
                 <TooltipProvider>
                   <MinimalTiptapEditor
-                    value={applicationMailingMetaData.confirmationMail || ''}
+                    value={applicationMailingMetaData.confirmationMail}
                     onChange={(content) =>
                       handleInputChange({
                         target: { name: 'confirmationMail', value: content },
@@ -182,7 +182,7 @@ export const ApplicationMailingSettings = () => {
                 <Label htmlFor='rejectionMail'>Rejection Email Template</Label>
                 <TooltipProvider>
                   <MinimalTiptapEditor
-                    value={applicationMailingMetaData.rejectionMail || ''}
+                    value={applicationMailingMetaData.rejectionMail}
                     onChange={(content) =>
                       handleInputChange({
                         target: { name: 'rejectionMail', value: content },
@@ -204,7 +204,7 @@ export const ApplicationMailingSettings = () => {
                 <Label htmlFor='acceptanceMail'>Acceptance Email Template</Label>
                 <TooltipProvider>
                   <MinimalTiptapEditor
-                    value={applicationMailingMetaData.acceptanceMail || ''}
+                    value={applicationMailingMetaData.acceptanceMail}
                     onChange={(content) =>
                       handleInputChange({
                         target: { name: 'acceptanceMail', value: content },
