@@ -6,6 +6,15 @@ interface FormDescriptionHTMLProps {
 }
 
 export const FormDescriptionHTML = ({ htmlCode }: FormDescriptionHTMLProps): JSX.Element => {
+  // allowing _blank in links, but only with noopener
+  DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+    // set all elements owning target to target=_blank
+    if ('target' in node) {
+      node.setAttribute('target', '_blank')
+      node.setAttribute('rel', 'noopener')
+    }
+  })
+
   const sanitizedHtmlCode = DOMPurify.sanitize(htmlCode)
 
   return (
