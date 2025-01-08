@@ -1,6 +1,7 @@
 import * as z from 'zod'
 import { Gender } from '@/interfaces/gender'
 import translations from '@/lib/translations.json'
+import { StudyDegree } from '@/interfaces/study_degree'
 
 const universityLoginRegex = new RegExp(translations.university.universityLoginRegex)
 const matriculationNumberRegex = new RegExp(translations.university.matriculationNumberRegex)
@@ -12,6 +13,12 @@ export const studentBaseSchema = z.object({
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
   nationality: z.string().min(1, 'Please select a nationality.'),
+  study_program: z.string().min(1, 'Please select a study program.'),
+  study_degree: z.nativeEnum(StudyDegree),
+  current_semester: z
+    .number()
+    .int('Please enter your current semester')
+    .min(1, 'Please select a semester.'),
   has_university_account: z.literal(false), // Explicit literal for base case
 })
 
@@ -22,6 +29,12 @@ export const studentUniversitySchema = z.object({
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
   nationality: z.string().min(1, 'Please select a nationality.'),
+  study_program: z.string().min(1, 'Please select a study program.'),
+  study_degree: z.nativeEnum(StudyDegree),
+  current_semester: z
+    .number()
+    .int('Please enter your current semester')
+    .min(1, 'Please select a semester.'),
   has_university_account: z.literal(true), // Explicit literal for university case
   matriculation_number: z
     .string()

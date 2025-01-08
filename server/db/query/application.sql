@@ -190,6 +190,10 @@ SELECT
     s.university_login,
     s.has_university_account,
     s.gender, 
+    s.nationality,
+    s.study_degree,
+    s.study_program,
+    s.current_semester,
     a.score
 FROM
     course_phase_participation cpp

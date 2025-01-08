@@ -246,6 +246,7 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
+	// TODO: Add authentication against first Name, last Name, matrNr, LDAP ID
 	if application.Student.Email != userEmail {
 		handleError(c, http.StatusUnauthorized, errors.New("email does not match - is not allowed to be changed"))
 		return
