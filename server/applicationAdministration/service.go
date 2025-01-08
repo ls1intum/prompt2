@@ -66,9 +66,10 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		return err
 	}
 	defer tx.Rollback(ctx)
+	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// Check if course phase is application phase
-	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseId)
+	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseId)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -80,7 +81,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 
 	// Delete all questions to be deleted
 	for _, questionID := range form.DeleteQuestionsMultiSelect {
-		err := ApplicationServiceSingleton.queries.DeleteApplicationQuestionMultiSelect(ctx, questionID)
+		err := qtx.DeleteApplicationQuestionMultiSelect(ctx, questionID)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not delete question")
@@ -88,7 +89,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	}
 
 	for _, questionID := range form.DeleteQuestionsText {
-		err := ApplicationServiceSingleton.queries.DeleteApplicationQuestionText(ctx, questionID)
+		err := qtx.DeleteApplicationQuestionText(ctx, questionID)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not delete question")
@@ -102,7 +103,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		// force ensuring right course phase id -> but also checked in validation
 		questionDBModel.CoursePhaseID = coursePhaseId
 
-		err = ApplicationServiceSingleton.queries.CreateApplicationQuestionText(ctx, questionDBModel)
+		err = qtx.CreateApplicationQuestionText(ctx, questionDBModel)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not create question")
@@ -115,7 +116,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		// force ensuring right course phase id -> but also checked in validation
 		questionDBModel.CoursePhaseID = coursePhaseId
 
-		err = ApplicationServiceSingleton.queries.CreateApplicationQuestionMultiSelect(ctx, questionDBModel)
+		err = qtx.CreateApplicationQuestionMultiSelect(ctx, questionDBModel)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not create question")
@@ -125,7 +126,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	// Update the rest
 	for _, question := range form.UpdateQuestionsMultiSelect {
 		questionDBModel := question.GetDBModel()
-		err = ApplicationServiceSingleton.queries.UpdateApplicationQuestionMultiSelect(ctx, questionDBModel)
+		err = qtx.UpdateApplicationQuestionMultiSelect(ctx, questionDBModel)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not update question")
@@ -134,7 +135,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 
 	for _, question := range form.UpdateQuestionsText {
 		questionDBModel := question.GetDBModel()
-		err = ApplicationServiceSingleton.queries.UpdateApplicationQuestionText(ctx, questionDBModel)
+		err = qtx.UpdateApplicationQuestionText(ctx, questionDBModel)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not update question")
@@ -167,19 +168,21 @@ func GetOpenApplicationPhases(ctx context.Context) ([]applicationDTO.OpenApplica
 }
 
 func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.FormWithDetails, error) {
-	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctx, coursePhaseID)
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.FormWithDetails{}, ErrNotFound
 	}
 
-	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctx, coursePhaseID)
+	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
 	}
 
-	applicationFormMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctx, coursePhaseID)
+	applicationFormMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
@@ -196,6 +199,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		return uuid.Nil, err
 	}
 	defer tx.Rollback(ctx)
+	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// 1. Check if studentObj with this email already exists
 	studentObj, err := student.GetStudentByEmail(ctx, application.Student.Email)
@@ -212,7 +216,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 
 		// check if student already applied -> External students are not allowed to apply twice
-		exists, err := ApplicationServiceSingleton.queries.GetApplicationExistsForStudent(ctx, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
+		exists, err := qtx.GetApplicationExistsForStudent(ctx, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not get existing student")
@@ -222,7 +226,8 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 	} else {
 		// create student
-		studentObj, err = student.CreateStudent(ctx, application.Student)
+		// FIX THIS!!!!
+		studentObj, err = student.CreateStudent(ctx, qtx, application.Student)
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not save student")
@@ -230,19 +235,19 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	}
 
 	// 2. Create Course and Course Phase Participation
-	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
+	courseID, err := qtx.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not find the application")
 	}
 
-	cParticipation, err := courseParticipation.CreateCourseParticipation(ctx, courseParticipationDTO.CreateCourseParticipation{StudentID: studentObj.ID, CourseID: courseID})
+	cParticipation, err := courseParticipation.CreateCourseParticipation(ctx, qtx, courseParticipationDTO.CreateCourseParticipation{StudentID: studentObj.ID, CourseID: courseID})
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not create course participation")
 	}
 
-	cPhaseParticipation, err := coursePhaseParticipation.CreateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
+	cPhaseParticipation, err := coursePhaseParticipation.CreateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not create course phase participation")
@@ -253,7 +258,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
-		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerText(ctx, answerDBModel)
+		err = qtx.CreateApplicationAnswerText(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could save the application answers")
@@ -264,7 +269,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
-		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
+		err = qtx.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could save the application answers")
@@ -339,28 +344,29 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		return uuid.Nil, err
 	}
 	defer tx.Rollback(ctx)
+	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// 1. Update student details
-	studentObj, err := student.CreateOrUpdateStudent(ctx, application.Student)
+	studentObj, err := student.CreateOrUpdateStudent(ctx, qtx, application.Student)
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not save the student")
 	}
 
 	// 2. Possibly Create Course and Course Phase Participation
-	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
+	courseID, err := qtx.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not get the application phase")
 	}
 
-	cParticipation, err := courseParticipation.CreateIfNotExistingCourseParticipation(ctx, studentObj.ID, courseID)
+	cParticipation, err := courseParticipation.CreateIfNotExistingCourseParticipation(ctx, qtx, studentObj.ID, courseID)
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not save the course participation")
 	}
 
-	cPhaseParticipation, err := coursePhaseParticipation.CreateIfNotExistingPhaseParticipation(ctx, cParticipation.ID, coursePhaseID)
+	cPhaseParticipation, err := coursePhaseParticipation.CreateIfNotExistingPhaseParticipation(ctx, qtx, cParticipation.ID, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not save the course phase participation")
@@ -371,7 +377,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
-		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
+		err = qtx.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not save the application answers")
@@ -383,7 +389,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
-		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
+		err = qtx.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not save the application answers")
@@ -486,7 +492,7 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 		}
 
 		// TODO: implement transaction control here
-		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
+		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
 			ID:         coursePhaseParticipationID,
 			PassStatus: passStatus,
 			MetaData:   assessment.MetaData,

@@ -69,7 +69,7 @@ func createCoursePhaseParticipation(c *gin.Context) {
 		return
 	}
 
-	courseParticipation, err := CreateCoursePhaseParticipation(c, newCourseParticipation)
+	courseParticipation, err := CreateCoursePhaseParticipation(c, nil, newCourseParticipation)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -92,7 +92,7 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 
 	updatedCourseParticipation.ID = id
 
-	err = UpdateCoursePhaseParticipation(c, updatedCourseParticipation)
+	err = UpdateCoursePhaseParticipation(c, nil, updatedCourseParticipation)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

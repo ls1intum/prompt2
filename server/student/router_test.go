@@ -90,7 +90,7 @@ func (suite *RouterTestSuite) TestRouterGetStudentByID() {
 		StudyProgram:         "Computer Science",
 		StudyDegree:          "bachelor",
 	}
-	createdStudent, err := CreateStudent(suite.ctx, newStudent)
+	createdStudent, err := CreateStudent(suite.ctx, nil, newStudent)
 	assert.NoError(suite.T(), err)
 	expectedID = createdStudent.ID
 

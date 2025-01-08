@@ -70,7 +70,7 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 		StudyDegree:          "bachelor",
 	}
 
-	createdStudent, err := CreateStudent(suite.ctx, newStudent)
+	createdStudent, err := CreateStudent(suite.ctx, nil, newStudent)
 	assert.NoError(suite.T(), err)
 	assert.NotEqual(suite.T(), uuid.Nil, createdStudent.ID, "Created student should have a valid ID")
 	assert.Equal(suite.T(), newStudent.FirstName, createdStudent.FirstName, "First name should match")

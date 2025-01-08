@@ -54,7 +54,7 @@ func createCourseParticipation(c *gin.Context) {
 		return
 	}
 
-	courseParticipation, err := CreateCourseParticipation(c, newCourseParticipation)
+	courseParticipation, err := CreateCourseParticipation(c, nil, newCourseParticipation)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

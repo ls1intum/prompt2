@@ -64,7 +64,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 		MetaData:              metaData,
 	}
 
-	createdParticipation, err := CreateCoursePhaseParticipation(suite.ctx, newParticipation)
+	createdParticipation, err := CreateCoursePhaseParticipation(suite.ctx, nil, newParticipation)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newParticipation.CoursePhaseID, createdParticipation.CoursePhaseID, "CoursePhaseID should match")
 	assert.Equal(suite.T(), newParticipation.MetaData, createdParticipation.MetaData, "Meta data should match")
@@ -84,7 +84,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 		PassStatus: db.NullPassStatus{PassStatus: "passed", Valid: true},
 	}
 
-	err = UpdateCoursePhaseParticipation(suite.ctx, updatedParticipation)
+	err = UpdateCoursePhaseParticipation(suite.ctx, nil, updatedParticipation)
 	assert.NoError(suite.T(), err)
 	result, err := GetCoursePhaseParticipation(suite.ctx, participationID)
 	assert.NoError(suite.T(), err)
@@ -109,7 +109,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	BeforeResult, err := GetCoursePhaseParticipation(suite.ctx, participationID)
 	assert.NoError(suite.T(), err)
 
-	err = UpdateCoursePhaseParticipation(suite.ctx, updatedParticipation)
+	err = UpdateCoursePhaseParticipation(suite.ctx, nil, updatedParticipation)
 	assert.NoError(suite.T(), err)
 	result, err := GetCoursePhaseParticipation(suite.ctx, participationID)
 	assert.NoError(suite.T(), err)

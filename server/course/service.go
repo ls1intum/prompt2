@@ -86,6 +86,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 		return courseDTO.Course{}, err
 	}
 	defer tx.Rollback(ctx)
+	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
 	if err != nil {
@@ -93,7 +94,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	}
 
 	createCourseParams.ID = uuid.New()
-	createdCourse, err := CourseServiceSingleton.queries.CreateCourse(ctx, createCourseParams)
+	createdCourse, err := qtx.CreateCourse(ctx, createCourseParams)
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
@@ -102,6 +103,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
 	if err != nil {
 		log.Error("Failed to create keycloak roles for course: ", err)
+		tx.Rollback(ctx)
 		return courseDTO.Course{}, err
 	}
 
@@ -124,16 +126,17 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 		return err
 	}
 	defer tx.Rollback(ctx)
+	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
-	err = CourseServiceSingleton.queries.DeleteCourseGraph(ctx, courseID)
+	err = qtx.DeleteCourseGraph(ctx, courseID)
 	if err != nil {
 		return err
 	}
 
 	// create new connections
 	for _, graphItem := range graphUpdate.PhaseGraph {
-		err = CourseServiceSingleton.queries.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
+		err = qtx.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
 			FromCoursePhaseID: graphItem.FromCoursePhaseID,
 			ToCoursePhaseID:   graphItem.ToCoursePhaseID,
 		})
@@ -144,14 +147,14 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	}
 
 	// reset initial phase to not conflict with unique constraint
-	if err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
+	if err = qtx.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
 		CourseID: courseID,
 		ID:       uuid.UUID{},
 	}); err != nil {
 		return err
 	}
 
-	err = CourseServiceSingleton.queries.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
+	err = qtx.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
 		CourseID: courseID,
 		ID:       graphUpdate.InitialPhase,
 	})
