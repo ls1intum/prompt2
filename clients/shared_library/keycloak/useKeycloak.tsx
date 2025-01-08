@@ -12,6 +12,8 @@ const parseJwt = (token: string) => {
       family_name: string
       email: string
       preferred_username: string
+      matriculation_number: string
+      university_login: string
     }>(token)
   } catch {
     return null
@@ -69,6 +71,8 @@ export const useKeycloak = (): {
               lastName: decodedJwt.family_name || '',
               email: decodedJwt.email || '',
               username: decodedJwt.preferred_username || '',
+              matriculation_number: decodedJwt.matriculation_number || '',
+              university_login: decodedJwt.university_login || '',
             })
           } else {
             clearUser()
