@@ -62,8 +62,6 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	// replace values in subject
 	finalSubject := replacePlaceholders(mailingInfo.ConfirmationMailSubject, placeholderValues)
 
-	log.Info("Formatted html: ", finalMessage)
-
 	// TODO replace with with subject
 	err = SendMail(mailingInfo.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
 	if err != nil {
