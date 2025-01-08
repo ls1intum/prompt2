@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -35,7 +36,7 @@ func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, u
 		"courseName":          mailingInfo.CourseName,
 		"courseStartDate":     getPgtypeDateValue(mailingInfo.CourseStartDate),
 		"courseEndDate":       getPgtypeDateValue(mailingInfo.CourseEndDate),
-		"applicationEndDate":  mailingInfo.ApplicationEndDate,
+		"applicationEndDate":  formatStringDate(mailingInfo.ApplicationEndDate),
 		"applicationURL":      url,
 	}
 }
@@ -56,7 +57,22 @@ func getPgtypeInt4Value(int4 pgtype.Int4) string {
 
 func getPgtypeDateValue(date pgtype.Date) string {
 	if date.Valid {
-		return date.Time.Format("DD-MM-YYYY")
+		return date.Time.Format("02.01.2006") // go is officially weird !!
 	}
 	return ""
+}
+
+func formatStringDate(dateStr string) string {
+	// Parse the timestamp string into a time.Time object
+	const inputLayout = time.RFC3339
+	const outputLayout = "02-01-2006" // Format for dd-mm-yyyy
+
+	parsedTime, err := time.Parse(inputLayout, dateStr)
+	if err != nil {
+		// Handle parsing error (return empty string or log error)
+		return ""
+	}
+
+	// Format the parsed time into dd-mm-yyyy format
+	return parsedTime.Format(outputLayout)
 }

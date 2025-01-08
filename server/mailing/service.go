@@ -55,7 +55,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
 
-	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseParticipationID.String())
+	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseID.String())
 	placeholderValues := getPlaceholderValues(mailingInfo, applicationURL)
 	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholderValues)
 
