@@ -182,6 +182,7 @@ func postApplicationManual(c *gin.Context) {
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
@@ -226,6 +227,7 @@ func postApplicationExtern(c *gin.Context) {
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
@@ -274,6 +276,7 @@ func postApplicationAuthenticated(c *gin.Context) {
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
+		return
 	}
 
 	// TODO: send mail confirmation to student!
