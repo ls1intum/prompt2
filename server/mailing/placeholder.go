@@ -8,12 +8,13 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/yosssi/gohtml"
 )
 
 func replacePlaceholders(template string, values map[string]string) string {
 	// Regular expression to find placeholders in the format {{placeholderName}}
 	re := regexp.MustCompile(`{{\s*([^{}]+)\s*}}`)
-	return re.ReplaceAllStringFunc(template, func(placeholder string) string {
+	replacedHTML := re.ReplaceAllStringFunc(template, func(placeholder string) string {
 		key := strings.TrimSpace(strings.Trim(placeholder, "{{}}"))
 		if val, ok := values[key]; ok {
 			return val
@@ -21,6 +22,9 @@ func replacePlaceholders(template string, values map[string]string) string {
 		// If the key is not found, keep the placeholder as is
 		return placeholder
 	})
+
+	// prettify to prevent max line length issues
+	return prettifyHTML(replacedHTML)
 }
 
 func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, url string) map[string]string {
@@ -75,4 +79,8 @@ func formatStringDate(dateStr string) string {
 
 	// Format the parsed time into dd-mm-yyyy format
 	return parsedTime.Format(outputLayout)
+}
+
+func prettifyHTML(html string) string {
+	return gohtml.Format(html)
 }
