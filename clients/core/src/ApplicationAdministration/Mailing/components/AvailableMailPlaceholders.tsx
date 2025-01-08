@@ -15,9 +15,9 @@ import { Button } from '@/components/ui/button'
 import translations from '@/lib/translations.json'
 
 export const AvailableMailPlaceholders = () => {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
 
-  const availablePlaceholder = [
+  const availablePlaceholders = [
     {
       placeholder: '{{student.first_name}}',
       description: 'The first name of the student',
@@ -74,19 +74,24 @@ export const AvailableMailPlaceholders = () => {
   ]
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className='space-y-2'>
-      <div className='flex items-center justify-between space-x-4 px-4'>
-        <h3 className='text-lg font-medium'>Available Placeholders</h3>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className='space-y-2 border rounded-md'>
+      <div className='flex items-center justify-between p-4'>
+        <div>
+          <h3 className='text-sm font-medium'>Available Placeholders</h3>
+          <p className='text-xs text-muted-foreground mt-1'>
+            Use these placeholders in your email templates. They will be replaced with actual values
+            when the email is sent.
+          </p>
+        </div>
         <CollapsibleTrigger asChild>
-          <Button variant='ghost'>
-            {isOpen ? 'Show' : 'Hide'}
+          <Button variant='ghost' size='sm' className='w-9 p-0'>
             {isOpen ? <ChevronUp className='h-4 w-4' /> : <ChevronDown className='h-4 w-4' />}
-            <span className='sr-only'>Toggle</span>
+            <span className='sr-only'>Toggle placeholders</span>
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className='space-y-2'>
-        <div className='rounded-md border'>
+      <CollapsibleContent>
+        <div className='border-t'>
           <div className='max-h-[300px] overflow-auto'>
             <Table>
               <TableHeader>
@@ -96,20 +101,16 @@ export const AvailableMailPlaceholders = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {availablePlaceholder.map((placeholder) => (
+                {availablePlaceholders.map((placeholder) => (
                   <TableRow key={placeholder.placeholder}>
-                    <TableCell className='font-mono'>{placeholder.placeholder}</TableCell>
-                    <TableCell>{placeholder.description}</TableCell>
+                    <TableCell className='font-mono text-sm'>{placeholder.placeholder}</TableCell>
+                    <TableCell className='text-sm'>{placeholder.description}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
         </div>
-        <p className='text-sm text-muted-foreground'>
-          Use these placeholders in your email templates. They will be replaced with actual values
-          when the email is sent.
-        </p>
       </CollapsibleContent>
     </Collapsible>
   )

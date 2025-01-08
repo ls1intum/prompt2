@@ -6,7 +6,8 @@ export const ErrorState = ({ error, onBack }: { error: Error; onBack: () => void
   let errorMessage = 'An error occurred while fetching the application form.'
 
   if (error.message.includes('404')) {
-    errorMessage = 'The requested application phase cannot be found. The application phase might be closed.'
+    errorMessage =
+      'The requested application phase cannot be found. The application phase might be closed.'
   }
   console.error(error)
 
