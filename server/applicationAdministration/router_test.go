@@ -16,6 +16,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/mailing"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -56,6 +57,7 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
+	mailing.InitMailingModule("localhost", "25", "test@test.de", "Test-Email-Sender", "localhost", *testDB.Queries, testDB.Conn)
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TearDownSuite() {

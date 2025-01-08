@@ -12,6 +12,8 @@ import { ApplicationGenderDiagram } from './components/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './components/ApplicationStudyBackgroundDiagram'
 import { ErrorPage } from '@/components/ErrorPage'
 import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySemesterDiagram'
+import { parseApplicationMailingMetaData } from './Mailing/utils/parseApplicaitonMailingMetaData'
+import { getIsApplicationMailingIsConfigured } from './utils/getApplicationMailingIsConfigured'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -63,13 +65,30 @@ export const Application = (): JSX.Element => {
     }
 
     // TODO fix when mail is configured
-    missingConfigItems.push({
-      title: 'Mail Configuration',
-      icon: Mail,
-      link: `${path}`,
-    })
+    if (fetchedCoursePhase?.meta_data?.['mailingConfig'] === undefined) {
+      missingConfigItems.push({
+        title: 'Mail Configuration',
+        icon: Mail,
+        link: `${path}/mailing`,
+      })
+    } else {
+      const mailingConfig = parseApplicationMailingMetaData(fetchedCoursePhase?.meta_data)
+      if (
+        // trying to send mails but reply to not set
+        !getIsApplicationMailingIsConfigured(mailingConfig) &&
+        (mailingConfig.sendAcceptanceMail ||
+          mailingConfig.sendConfirmationMail ||
+          mailingConfig.sendRejectionMail)
+      ) {
+        missingConfigItems.push({
+          title: 'Mail Replier Information',
+          icon: Mail,
+          link: `${path}/mailing`,
+        })
+      }
+    }
     return missingConfigItems
-  }, [applicationMetaData, path])
+  }, [applicationMetaData, fetchedCoursePhase?.meta_data, path])
 
   return (
     <div className='container mx-auto p-6'>

@@ -228,7 +228,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Success
 		},
 	}
 
-	err := PostApplicationExtern(suite.ctx, coursePhaseID, application)
+	_, err := PostApplicationExtern(suite.ctx, coursePhaseID, application)
 	assert.NoError(suite.T(), err)
 }
 
@@ -249,11 +249,11 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Already
 	}
 
 	// Apply once
-	err := PostApplicationExtern(suite.ctx, coursePhaseID, application)
+	_, err := PostApplicationExtern(suite.ctx, coursePhaseID, application)
 	assert.NoError(suite.T(), err)
 
 	// Apply again, should fail
-	err = PostApplicationExtern(suite.ctx, coursePhaseID, application)
+	_, err = PostApplicationExtern(suite.ctx, coursePhaseID, application)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), ErrAlreadyApplied, err)
 }
@@ -312,7 +312,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 		},
 	}
 
-	err := PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
+	_, err := PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
 	assert.NoError(suite.T(), err)
 }
 
@@ -335,7 +335,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 	}
 
 	// Apply with existing email but updated details
-	err := PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
+	_, err := PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
 	assert.NoError(suite.T(), err)
 }
 

@@ -53,7 +53,7 @@ export const ApplicationManualAdd = ({ existingApplications }: ApplicationManual
     data: fetchedApplicationForm,
     isPending: isFetchingApplicationForm,
     isError: isApplicationFormError,
-    error,
+    error: fetchingError,
     refetch: refetchApplicationForm,
   } = useQuery<ApplicationForm>({
     queryKey: ['application_form', phaseId],
@@ -61,7 +61,7 @@ export const ApplicationManualAdd = ({ existingApplications }: ApplicationManual
     enabled: !!phaseId,
   })
 
-  const { mutate: mutateSendApplication, error: mutateError } = useMutation({
+  const { mutate: mutateSendApplication } = useMutation({
     mutationFn: (manualApplication: PostApplication) => {
       return postNewApplicationManual(phaseId ?? 'undefined', manualApplication)
     },
@@ -74,10 +74,10 @@ export const ApplicationManualAdd = ({ existingApplications }: ApplicationManual
         description: 'The application has been successfully added',
       })
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: 'Error',
-        description: `The application could not be addded. ${mutateError?.message}`,
+        description: `The application could not be added. ${error.message}`,
         variant: 'destructive',
       })
     },
@@ -181,7 +181,7 @@ export const ApplicationManualAdd = ({ existingApplications }: ApplicationManual
             <AlertCircle className='h-4 w-4' />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
-              Failed to fetch application form. {error?.message}
+              Failed to fetch application form. {fetchingError?.message}
               <Button variant='link' onClick={() => refetchApplicationForm()}>
                 Try again
               </Button>
