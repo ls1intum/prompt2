@@ -19,52 +19,52 @@ export const AvailableMailPlaceholders = () => {
 
   const availablePlaceholders = [
     {
-      placeholder: '{{student.first_name}}',
+      placeholder: '{{firstName}}',
       description: 'The first name of the student',
     },
     {
-      placeholder: '{{student.last_name}}',
+      placeholder: '{{lastName}',
       description: 'The last name of the student',
     },
     {
-      placeholder: '{{student.email}}',
+      placeholder: '{{email}}',
       description: 'The email of the student',
     },
     {
-      placeholder: '{{student.matriculation_number}}',
+      placeholder: '{{matriculationNumber}}',
       description: 'The matriculation number of the student. Might be empty',
     },
     {
-      placeholder: '{{student.university_login}}',
+      placeholder: '{{universityLogin}}',
       description: `The ${translations.university['login-name']} of the student. Might be empty`,
     },
     {
-      placeholder: '{{student.study_degree}}',
+      placeholder: '{{studyDegree}}',
       description: 'The study degree of the student',
     },
     {
-      placeholder: '{{student.current_semester}}',
+      placeholder: '{{currentSemester}}',
       description: 'The current semester of the student',
     },
     {
-      placeholder: '{{student.study_program}}',
+      placeholder: '{{studyProgram}}',
       description: 'The study program of the student',
     },
 
     {
-      placeholder: '{{course.name}}',
+      placeholder: '{{courseName}}',
       description: 'The name of the course',
     },
     {
-      placeholder: '{{course.start_date}}',
+      placeholder: '{{courseStartDate}}',
       description: 'The start date of the course',
     },
     {
-      placeholder: '{{course.end_date}}',
+      placeholder: '{{courseEndDate}}',
       description: 'The end date of the course',
     },
     {
-      placeholder: '{{meta_data.application_end_date}}',
+      placeholder: '{{applicationEndDate}}',
       description: 'The end date of the the application phase',
     },
     {
