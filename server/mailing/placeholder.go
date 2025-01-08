@@ -34,7 +34,7 @@ func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, u
 		"email":               getPgtypeTextValue(mailingInfo.Email),
 		"matriculationNumber": getPgtypeTextValue(mailingInfo.MatriculationNumber),
 		"universityLogin":     getPgtypeTextValue(mailingInfo.UniversityLogin),
-		"studyDegree":         string(mailingInfo.StudyDegree),
+		"studyDegree":         getStudyDegreeString(mailingInfo.StudyDegree),
 		"currentSemester":     getPgtypeInt4Value(mailingInfo.CurrentSemester),
 		"studyProgram":        getPgtypeTextValue(mailingInfo.StudyProgram),
 		"courseName":          mailingInfo.CourseName,
@@ -42,6 +42,17 @@ func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, u
 		"courseEndDate":       getPgtypeDateValue(mailingInfo.CourseEndDate),
 		"applicationEndDate":  formatStringDate(mailingInfo.ApplicationEndDate),
 		"applicationURL":      url,
+	}
+}
+
+func getStudyDegreeString(studyDegree db.StudyDegree) string {
+	switch studyDegree {
+	case db.StudyDegreeBachelor:
+		return "Bachelor"
+	case db.StudyDegreeMaster:
+		return "Master"
+	default:
+		return "Unknown"
 	}
 }
 
@@ -69,7 +80,7 @@ func getPgtypeDateValue(date pgtype.Date) string {
 func formatStringDate(dateStr string) string {
 	// Parse the timestamp string into a time.Time object
 	const inputLayout = time.RFC3339
-	const outputLayout = "02-01-2006" // Format for dd-mm-yyyy
+	const outputLayout = "02.01.2006" // Format for dd-mm-yyyy
 
 	parsedTime, err := time.Parse(inputLayout, dateStr)
 	if err != nil {

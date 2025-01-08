@@ -22,10 +22,13 @@ import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useParams } from 'react-router-dom'
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
+import { Input } from '@/components/ui/input'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { toast } = useToast()
+
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [initialMetaData, setInitialMetaData] = useState<ApplicationMailingMetaData | null>(null)
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
@@ -80,6 +83,17 @@ export const ApplicationMailingSettings = () => {
     const { name, value } = e.target
     console.log('Event name:', name)
     setApplicationMailingMetaData((prev) => ({ ...prev, [name]: value }))
+
+    if (name === 'replyToEmail') {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!value) {
+        setEmailError('Reply To Email is required.')
+      } else if (!emailPattern.test(value)) {
+        setEmailError('Please enter a valid email address.')
+      } else {
+        setEmailError(null)
+      }
+    }
   }
 
   const handleSwitchChange = (name: string) => {
@@ -91,7 +105,16 @@ export const ApplicationMailingSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // get all the values+
+    // get all the values
+    if (emailError) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors before submitting.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
       meta_data: {
@@ -139,6 +162,7 @@ export const ApplicationMailingSettings = () => {
             <div className='flex items-center space-x-2'>
               <Switch
                 id='sendRejectionMail'
+                disabled={true}
                 checked={applicationMailingMetaData.sendRejectionMail}
                 onCheckedChange={() => handleSwitchChange('sendRejectionMail')}
               />
@@ -147,6 +171,7 @@ export const ApplicationMailingSettings = () => {
             <div className='flex items-center space-x-2'>
               <Switch
                 id='sendAcceptanceMail'
+                disabled={true}
                 checked={applicationMailingMetaData.sendAcceptanceMail}
                 onCheckedChange={() => handleSwitchChange('sendAcceptanceMail')}
               />
@@ -157,7 +182,7 @@ export const ApplicationMailingSettings = () => {
           <div className='space-y-4 mb-4 columns-2'>
             <div>
               <Label htmlFor='replyToEmail'>Reply To Email</Label>
-              <input
+              <Input
                 type='email'
                 name='replyToEmail'
                 placeholder='i.e. course@management.de'
@@ -165,10 +190,11 @@ export const ApplicationMailingSettings = () => {
                 onChange={(e) => handleInputChange(e)}
                 className='w-full mt-1 p-2 border rounded'
               />
+              {emailError && <p className='text-red-500 p-2 text-sm'>{emailError}</p>}
             </div>
             <div>
               <Label htmlFor='replyToName'>Replier Name</Label>
-              <input
+              <Input
                 type='text'
                 name='replyToName'
                 placeholder='i.e. Course Management'
@@ -191,7 +217,7 @@ export const ApplicationMailingSettings = () => {
               <TabsContent value='confirmation'>
                 <div className='space-y-2'>
                   <Label htmlFor='confirmationMailSubject'>Confirmation Subject</Label>
-                  <input
+                  <Input
                     type='text'
                     name='confirmationMailSubject'
                     value={applicationMailingMetaData.confirmationMailSubject}
@@ -221,7 +247,7 @@ export const ApplicationMailingSettings = () => {
               <TabsContent value='rejection'>
                 <div className='space-y-2'>
                   <Label htmlFor='rejectionMailSubject'>Rejection Subject</Label>
-                  <input
+                  <Input
                     type='text'
                     name='rejectionMailSubject'
                     value={applicationMailingMetaData.rejectionMailSubject}
@@ -251,7 +277,7 @@ export const ApplicationMailingSettings = () => {
               <TabsContent value='acceptance'>
                 <div className='space-y-2'>
                   <Label htmlFor='acceptanceMailSubject'>Acceptance Subject</Label>
-                  <input
+                  <Input
                     type='text'
                     name='acceptanceMailSubject'
                     value={applicationMailingMetaData.acceptanceMailSubject}
