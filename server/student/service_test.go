@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
 	log "github.com/sirupsen/logrus"
@@ -64,6 +65,9 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 		UniversityLogin:      "as12xyz",
 		Gender:               "female",
 		Nationality:          "DE",
+		CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+		StudyProgram:         "Computer Science",
+		StudyDegree:          "bachelor",
 	}
 
 	createdStudent, err := CreateStudent(suite.ctx, newStudent)
@@ -77,6 +81,9 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 	assert.Equal(suite.T(), newStudent.UniversityLogin, createdStudent.UniversityLogin, "UniversityLogin should match")
 	assert.Equal(suite.T(), newStudent.Gender, createdStudent.Gender, "Gender should match")
 	assert.Equal(suite.T(), newStudent.Nationality, createdStudent.Nationality, "Nationality should match")
+	assert.Equal(suite.T(), newStudent.CurrentSemester.Int32, createdStudent.CurrentSemester.Int32, "CurrentSemester should match")
+	assert.Equal(suite.T(), newStudent.StudyProgram, createdStudent.StudyProgram, "StudyProgram should match")
+	assert.Equal(suite.T(), newStudent.StudyDegree, createdStudent.StudyDegree, "StudyDegree should match")
 
 	// Verify it exists in the database
 	fetchedStudent, err := GetStudentByID(suite.ctx, createdStudent.ID)
@@ -90,6 +97,9 @@ func (suite *ServiceTestSuite) TestCreateStudent() {
 	assert.Equal(suite.T(), createdStudent.UniversityLogin, fetchedStudent.UniversityLogin, "Fetched student UniversityLogin should match created student UniversityLogin")
 	assert.Equal(suite.T(), createdStudent.Gender, fetchedStudent.Gender, "Fetched student Gender should match created student Gender")
 	assert.Equal(suite.T(), createdStudent.Nationality, fetchedStudent.Nationality, "Nationality should match")
+	assert.Equal(suite.T(), createdStudent.CurrentSemester.Int32, fetchedStudent.CurrentSemester.Int32, "CurrentSemester should match")
+	assert.Equal(suite.T(), createdStudent.StudyProgram, fetchedStudent.StudyProgram, "StudyProgram should match")
+	assert.Equal(suite.T(), createdStudent.StudyDegree, fetchedStudent.StudyDegree, "StudyDegree should match")
 }
 
 func TestServiceTestSuite(t *testing.T) {

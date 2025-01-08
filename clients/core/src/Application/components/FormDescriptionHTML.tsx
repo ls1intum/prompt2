@@ -12,61 +12,61 @@ export const FormDescriptionHTML = ({ htmlCode }: FormDescriptionHTMLProps): JSX
     <FormDescription>
       <style>
         {`
-          a {
+          .descriptionText a {
               cursor: pointer;
               color: #1d4ed8; /* Equivalent to text-blue-700 */
               text-decoration: underline; /* Always underlined */
           }
-          a:hover {
+          .descriptionText a:hover {
               text-decoration: underline; /* Ensure underline on hover */
           }
 
-          ol {
+          .descriptionText ol {
               list-style: decimal; /* Restore list-style for ordered lists */
               margin: 0 0 1rem 1.5rem; /* Adjust spacing around lists */
               padding: 0;
           }
 
-          ol ol {
+          .descriptionText ol ol {
               list-style: lower-alpha; /* Nested ordered list with lower-alpha style */
               margin: 0.25rem 0 0.25rem 1rem; /* Adjust nested list margin */
           }
 
-          ol ol ol {
+          .descriptionText ol ol ol {
               list-style: lower-roman; /* Nested nested ordered list with lower-roman style */
               margin: 0.25rem 0 0.25rem 1rem;
           }
 
-          ul {
+          .descriptionText ul {
               list-style: disc; /* Restore list-style for unordered lists */
               margin: 0 0 1rem 1.5rem; /* Adjust spacing around lists */
               padding: 0;
           }
 
-          ul ul {
+          .descriptionText ul ul {
               list-style: circle; /* Nested unordered list with circle style */
               margin: 0.25rem 0 0.25rem 1rem;
           }
 
-          ul ul ul {
+          .descriptionText ul ul ul {
               list-style: square; /* Nested nested unordered list with square style */
               margin: 0.25rem 0 0.25rem 1rem;
           }
 
-          li {
+          .descriptionText li {
               margin: 0.25rem 0; /* Reduced spacing between list items */
           }
 
-          li p.text-node {
+          .descriptionText li p.text-node {
               margin: 0; /* Remove extra margin from text nodes inside list items */
           }
 
-          p.text-node {
+          .descriptionText p.text-node {
               margin: 0 0 1rem; /* Add smaller spacing between paragraphs */
           }
         `}
       </style>
-      <div dangerouslySetInnerHTML={{ __html: sanitizedHtmlCode }} />
+      <div className='descriptionText' dangerouslySetInnerHTML={{ __html: sanitizedHtmlCode }} />
     </FormDescription>
   )
 }

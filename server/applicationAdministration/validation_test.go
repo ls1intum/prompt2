@@ -182,6 +182,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_Invali
 			Email:                "test@test.de",
 			HasUniversityAccount: false,
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{

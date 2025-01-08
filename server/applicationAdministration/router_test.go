@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
@@ -190,11 +191,14 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
 	application := applicationDTO.PostApplication{
 		Student: studentDTO.CreateStudent{
-			FirstName:   "John",
-			LastName:    "Doe",
-			Email:       "johndoe@example.com",
-			Gender:      db.GenderDiverse,
-			Nationality: "DE",
+			FirstName:       "John",
+			LastName:        "Doe",
+			Email:           "johndoe@example.com",
+			Gender:          db.GenderDiverse,
+			Nationality:     "DE",
+			CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:    "Computer Science",
+			StudyDegree:     "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -254,6 +258,9 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEn
 			MatriculationNumber:  "03711111",
 			UniversityLogin:      "ab12cde",
 			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
@@ -289,11 +296,14 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
 	application := applicationDTO.PostApplication{
 		Student: studentDTO.CreateStudent{
-			FirstName:   "Jane",
-			LastName:    "Doe",
-			Email:       "janedoe@example.com",
-			Gender:      db.GenderFemale,
-			Nationality: "DE",
+			FirstName:       "Jane",
+			LastName:        "Doe",
+			Email:           "janedoe@example.com",
+			Gender:          db.GenderFemale,
+			Nationality:     "DE",
+			CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:    "Computer Science",
+			StudyDegree:     "bachelor",
 		},
 		AnswersText: []applicationDTO.CreateAnswerText{
 			{
