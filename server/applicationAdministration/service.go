@@ -276,6 +276,12 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 	}
 
+	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, cPhaseParticipation.ID)
+	if err != nil {
+		log.Error(err)
+		return uuid.Nil, errors.New("could not save the application answers")
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
@@ -397,6 +403,12 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 
 	}
 
+	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, cPhaseParticipation.ID)
+	if err != nil {
+		log.Error(err)
+		return uuid.Nil, errors.New("could not save the application answers")
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
@@ -509,6 +521,12 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 			log.Error(err)
 			return errors.New("could not update application assessment")
 		}
+	}
+
+	err = qtx.StoreApplicationAssessmentUpdateTimestamp(ctx, coursePhaseParticipationID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("could not save the assessment")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
