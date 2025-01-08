@@ -1,12 +1,16 @@
 package mailing
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/mail"
 	"net/smtp"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,9 +18,56 @@ type MailingService struct {
 	smtpHost    string
 	smtpPort    string
 	senderEmail mail.Address
+	clientURL   string
+	queries     db.Queries
+	conn        *pgxpool.Pool
 }
 
 var MailingServiceSingleton *MailingService
+
+func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, coursePhaseParticipationID uuid.UUID) error {
+	isApplicationPhase, err := MailingServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseID)
+	if err != nil {
+		return err
+	}
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
+	mailingInfo, err := MailingServiceSingleton.queries.GetConfirmationMailingInformation(ctx, db.GetConfirmationMailingInformationParams{
+		ID:            coursePhaseParticipationID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error("failed to get mailing information: ", err)
+		return errors.New("failed to send mail")
+	}
+
+	if !mailingInfo.SendConfirmationMail {
+		log.Debug("not sending because SendConfirmationMail is disabled")
+		return nil
+	}
+
+	if mailingInfo.ConfirmationMailTemplate == "" {
+		log.Error("mailing template is not correctly configured")
+		return nil
+	}
+
+	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
+
+	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseParticipationID.String())
+	placeholerValues := getPlaceholderValues(mailingInfo, applicationURL)
+	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholerValues)
+
+	// TODO replace with with subject
+	err = SendMail(mailingInfo.Email.String, "prompt@ase.cit.tum.de", "Do Not Reply", "Confirmation: Application Received", finalMessage)
+	if err != nil {
+		log.Error("failed to send mail: ", err)
+		return errors.New("failed to send mail")
+	}
+
+	return nil
+}
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.
 func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody string) error {

@@ -10,6 +10,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/mailing"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -165,7 +166,7 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	err = PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	coursePhaseParticipationId, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {
@@ -177,7 +178,12 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	// TODO: send mail confirmation to student!
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
@@ -201,7 +207,7 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	err = PostApplicationExtern(c, coursePhaseId, application)
+	coursePhaseParticipationId, err := PostApplicationExtern(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {
@@ -216,7 +222,12 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	// TODO: send mail confirmation to student!
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
@@ -252,11 +263,17 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	err = PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	coursePhaseParticipationId, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
 		return
+	}
+
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
 	}
 
 	// TODO: send mail confirmation to student!
@@ -340,8 +357,6 @@ func updateApplicationAssessment(c *gin.Context) {
 		return
 	}
 
-	// TODO MAIL: send mail to student that assessment was updated
-
 	c.JSON(http.StatusOK, gin.H{"message": "application assessment updated"})
 }
 
@@ -371,8 +386,6 @@ func uploadAdditionalScore(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, errors.New("could not upload additional score"))
 		return
 	}
-
-	// TODO MAIL: send mail to student that additional score was uploaded
 
 	c.JSON(http.StatusOK, gin.H{"message": "additional score uploaded"})
 }

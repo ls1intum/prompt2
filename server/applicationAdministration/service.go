@@ -190,10 +190,10 @@ func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID)
 	return openApplicationDTO, nil
 }
 
-func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) (uuid.UUID, error) {
 	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	defer tx.Rollback(ctx)
 
@@ -201,31 +201,31 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	studentObj, err := student.GetStudentByEmail(ctx, application.Student.Email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error(err)
-		return errors.New("could save the application")
+		return uuid.Nil, errors.New("could save the application")
 	}
 
 	// this means that a student with this email exists
 	if err == nil {
 		// check if student details are the same
 		if studentObj.FirstName != application.Student.FirstName || studentObj.LastName != application.Student.LastName {
-			return ErrStudentDetailsDoNotMatch
+			return uuid.Nil, ErrStudentDetailsDoNotMatch
 		}
 
 		// check if student already applied -> External students are not allowed to apply twice
 		exists, err := ApplicationServiceSingleton.queries.GetApplicationExistsForStudent(ctx, db.GetApplicationExistsForStudentParams{StudentID: studentObj.ID, ID: coursePhaseID})
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not get existing student")
+			return uuid.Nil, errors.New("could not get existing student")
 		}
 		if exists {
-			return ErrAlreadyApplied
+			return uuid.Nil, ErrAlreadyApplied
 		}
 	} else {
 		// create student
 		studentObj, err = student.CreateStudent(ctx, application.Student)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not save student")
+			return uuid.Nil, errors.New("could not save student")
 		}
 	}
 
@@ -233,19 +233,19 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not find the application")
+		return uuid.Nil, errors.New("could not find the application")
 	}
 
 	cParticipation, err := courseParticipation.CreateCourseParticipation(ctx, courseParticipationDTO.CreateCourseParticipation{StudentID: studentObj.ID, CourseID: courseID})
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not create course participation")
+		return uuid.Nil, errors.New("could not create course participation")
 	}
 
 	cPhaseParticipation, err := coursePhaseParticipation.CreateCoursePhaseParticipation(ctx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not create course phase participation")
+		return uuid.Nil, errors.New("could not create course phase participation")
 	}
 
 	// 3. Save answers
@@ -256,7 +256,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerText(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application answers")
+			return uuid.Nil, errors.New("could save the application answers")
 		}
 	}
 
@@ -267,16 +267,16 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		err = ApplicationServiceSingleton.queries.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
-			return errors.New("could save the application answers")
+			return uuid.Nil, errors.New("could save the application answers")
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return nil
+	return cPhaseParticipation.ID, nil
 }
 
 func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, coursePhaseID uuid.UUID) (applicationDTO.Application, error) {
@@ -333,10 +333,10 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 
 }
 
-func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) (uuid.UUID, error) {
 	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	defer tx.Rollback(ctx)
 
@@ -344,26 +344,26 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	studentObj, err := student.CreateOrUpdateStudent(ctx, application.Student)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the student")
+		return uuid.Nil, errors.New("could not save the student")
 	}
 
 	// 2. Possibly Create Course and Course Phase Participation
 	courseID, err := ApplicationServiceSingleton.queries.GetCourseIDByCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not get the application phase")
+		return uuid.Nil, errors.New("could not get the application phase")
 	}
 
 	cParticipation, err := courseParticipation.CreateIfNotExistingCourseParticipation(ctx, studentObj.ID, courseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the course participation")
+		return uuid.Nil, errors.New("could not save the course participation")
 	}
 
 	cPhaseParticipation, err := coursePhaseParticipation.CreateIfNotExistingPhaseParticipation(ctx, cParticipation.ID, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return errors.New("could not save the course phase participation")
+		return uuid.Nil, errors.New("could not save the course phase participation")
 	}
 
 	// 3. Save answers
@@ -374,7 +374,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not save the application answers")
+			return uuid.Nil, errors.New("could not save the application answers")
 		}
 
 	}
@@ -386,17 +386,17 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		err = ApplicationServiceSingleton.queries.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
-			return errors.New("could not save the application answers")
+			return uuid.Nil, errors.New("could not save the application answers")
 		}
 
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return nil
+	return cPhaseParticipation.ID, nil
 
 }
 

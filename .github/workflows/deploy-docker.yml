@@ -131,6 +131,7 @@ jobs:
             echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
 
+            echo "CLIENT_URL"=${{ vars.CLIENT_URL }} >> .env.prod
             echo "SENDER_EMAIL"=${{ vars.SENDER_EMAIL_ADDRESS }} >> .env.prod
             echo "SENDER_NAME"=${{ vars.SENDER_EMAIL_NAME }} >> .env.prod
             echo "SMTP_HOST"=${{ vars.SMTP_HOST }} >> .env.prod

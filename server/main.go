@@ -60,13 +60,14 @@ func initKeycloak() {
 	}
 }
 
-func initMailing() {
+func initMailing(queries db.Queries, conn *pgxpool.Pool) {
+	clientURL := utils.GetEnv("CLIENT_URL", "prompt2.ase.cit.tum.de")
 	smtpHost := utils.GetEnv("SMTP_HOST", "localhost")
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt@ase.cit.tum.de")
 	senderName := utils.GetEnv("SENDER_NAME", "Prompt Mailing Service")
 
-	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail)
+	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail, clientURL, queries, conn)
 }
 
 func main() {
@@ -91,7 +92,7 @@ func main() {
 	permissionValidation.InitValidationService(*query, conn)
 
 	// Init the Mailing System
-	initMailing()
+	initMailing(*query, conn)
 
 	router := gin.Default()
 	router.Use(utils.CORS())
