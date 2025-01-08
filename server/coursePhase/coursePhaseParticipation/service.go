@@ -78,14 +78,15 @@ func CreateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(createdParticipation)
 }
 
-func UpdateCoursePhaseParticipation(ctx context.Context, updatedCoursePhaseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) error {
+func UpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, updatedCoursePhaseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) error {
+	queries := utils.GetQueries(transactionQueries, &CoursePhaseParticipationServiceSingleton.queries)
 	participation, err := updatedCoursePhaseParticipation.GetDBModel()
 	if err != nil {
 		log.Error(err)
 		return errors.New("failed to create DB model from DTO")
 	}
 
-	err = CoursePhaseParticipationServiceSingleton.queries.UpdateCoursePhaseParticipation(ctx, participation)
+	err = queries.UpdateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
 		log.Error(err)
 		return errors.New("failed to update course phase participation")
