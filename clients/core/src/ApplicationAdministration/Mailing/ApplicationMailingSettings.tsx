@@ -21,10 +21,12 @@ import { useModifyCoursePhase } from '../handlers/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useParams } from 'react-router-dom'
+import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { toast } = useToast()
+  const [initialMetaData, setInitialMetaData] = useState<ApplicationMailingMetaData | null>(null)
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
       confirmationMail: '',
@@ -35,6 +37,7 @@ export const ApplicationMailingSettings = () => {
       sendAcceptanceMail: false,
     })
 
+  const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(applicationMailingMetaData)
   // Fetching meta data
   const {
     data: fetchedCoursePhase,
@@ -63,6 +66,7 @@ export const ApplicationMailingSettings = () => {
     if (fetchedCoursePhase?.meta_data) {
       const parsedMetaData = parseApplicationMailingMetaData(fetchedCoursePhase.meta_data)
       setApplicationMailingMetaData(parsedMetaData)
+      setInitialMetaData(parsedMetaData)
     }
   }, [fetchedCoursePhase])
 
@@ -143,6 +147,8 @@ export const ApplicationMailingSettings = () => {
             </div>
           </div>
 
+          <AvailableMailPlaceholders />
+
           <Tabs defaultValue='confirmation' className='w-full'>
             <TabsList className='grid w-full grid-cols-3'>
               <TabsTrigger value='confirmation'>Confirmation</TabsTrigger>
@@ -218,7 +224,7 @@ export const ApplicationMailingSettings = () => {
           </Tabs>
         </CardContent>
         <CardFooter>
-          <Button type='submit' className='ml-auto'>
+          <Button type='submit' className='ml-auto' disabled={!isModified}>
             Save Changes
           </Button>
         </CardFooter>

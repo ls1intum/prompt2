@@ -9,12 +9,12 @@ export const parseApplicationMailingMetaData = (metaData: JSON[]): ApplicationMa
   const sendAcceptanceMail = metaData?.['mailingConfig']?.['sendAcceptanceMail']
 
   const parsedMetaData: ApplicationMailingMetaData = {
-    confirmationMail: confirmationMail ? confirmationMail : undefined,
-    rejectionMail: rejectionMail ? rejectionMail : undefined,
-    acceptanceMail: acceptanceMail ? acceptanceMail : undefined,
-    sendConfirmationMail: sendConfirmationMail ? sendConfirmationMail : undefined,
-    sendRejectionMail: sendRejectionMail ? sendRejectionMail : undefined,
-    sendAcceptanceMail: sendAcceptanceMail ? sendAcceptanceMail : undefined,
+    confirmationMail: confirmationMail ? confirmationMail : '',
+    rejectionMail: rejectionMail ? rejectionMail : '',
+    acceptanceMail: acceptanceMail ? acceptanceMail : '',
+    sendConfirmationMail: sendConfirmationMail ? sendConfirmationMail : false,
+    sendRejectionMail: sendRejectionMail ? sendRejectionMail : false,
+    sendAcceptanceMail: sendAcceptanceMail ? sendAcceptanceMail : false,
   }
 
   return parsedMetaData
