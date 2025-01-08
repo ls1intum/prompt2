@@ -148,80 +148,81 @@ export const ApplicationMailingSettings = () => {
           </div>
 
           <AvailableMailPlaceholders />
-
-          <Tabs defaultValue='confirmation' className='w-full'>
-            <TabsList className='grid w-full grid-cols-3'>
-              <TabsTrigger value='confirmation'>Confirmation</TabsTrigger>
-              <TabsTrigger value='rejection'>Rejection</TabsTrigger>
-              <TabsTrigger value='acceptance'>Acceptance</TabsTrigger>
-            </TabsList>
-            <TabsContent value='confirmation'>
-              <div className='space-y-2'>
-                <Label htmlFor='confirmationMail'>Confirmation Email Template</Label>
-                <TooltipProvider>
-                  <MinimalTiptapEditor
-                    value={applicationMailingMetaData.confirmationMail}
-                    onChange={(content) =>
-                      handleInputChange({
-                        target: { name: 'confirmationMail', value: content },
-                      } as any)
-                    }
-                    className='w-full'
-                    editorContentClassName='p-4'
-                    output='html'
-                    placeholder='Type your description here...'
-                    autofocus={false}
-                    editable={true}
-                    editorClassName='focus:outline-none'
-                  />
-                </TooltipProvider>
-              </div>
-            </TabsContent>
-            <TabsContent value='rejection'>
-              <div className='space-y-2'>
-                <Label htmlFor='rejectionMail'>Rejection Email Template</Label>
-                <TooltipProvider>
-                  <MinimalTiptapEditor
-                    value={applicationMailingMetaData.rejectionMail}
-                    onChange={(content) =>
-                      handleInputChange({
-                        target: { name: 'rejectionMail', value: content },
-                      } as any)
-                    }
-                    className='w-full'
-                    editorContentClassName='p-4'
-                    output='html'
-                    placeholder='Type your description here...'
-                    autofocus={false}
-                    editable={true}
-                    editorClassName='focus:outline-none'
-                  />
-                </TooltipProvider>
-              </div>
-            </TabsContent>
-            <TabsContent value='acceptance'>
-              <div className='space-y-2'>
-                <Label htmlFor='acceptanceMail'>Acceptance Email Template</Label>
-                <TooltipProvider>
-                  <MinimalTiptapEditor
-                    value={applicationMailingMetaData.acceptanceMail}
-                    onChange={(content) =>
-                      handleInputChange({
-                        target: { name: 'acceptanceMail', value: content },
-                      } as any)
-                    }
-                    className='w-full'
-                    editorContentClassName='p-4'
-                    output='html'
-                    placeholder='Type your description here...'
-                    autofocus={false}
-                    editable={true}
-                    editorClassName='focus:outline-none'
-                  />
-                </TooltipProvider>
-              </div>
-            </TabsContent>
-          </Tabs>
+          {initialMetaData && (
+            <Tabs defaultValue='confirmation' className='w-full'>
+              <TabsList className='grid w-full grid-cols-3'>
+                <TabsTrigger value='confirmation'>Confirmation</TabsTrigger>
+                <TabsTrigger value='rejection'>Rejection</TabsTrigger>
+                <TabsTrigger value='acceptance'>Acceptance</TabsTrigger>
+              </TabsList>
+              <TabsContent value='confirmation'>
+                <div className='space-y-2'>
+                  <Label htmlFor='confirmationMail'>Confirmation Email Template</Label>
+                  <TooltipProvider>
+                    <MinimalTiptapEditor
+                      value={applicationMailingMetaData.confirmationMail}
+                      onChange={(content) =>
+                        handleInputChange({
+                          target: { name: 'confirmationMail', value: content },
+                        } as any)
+                      }
+                      className='w-full'
+                      editorContentClassName='p-4'
+                      output='html'
+                      placeholder='Type your description here...'
+                      autofocus={false}
+                      editable={true}
+                      editorClassName='focus:outline-none'
+                    />
+                  </TooltipProvider>
+                </div>
+              </TabsContent>
+              <TabsContent value='rejection'>
+                <div className='space-y-2'>
+                  <Label htmlFor='rejectionMail'>Rejection Email Template</Label>
+                  <TooltipProvider>
+                    <MinimalTiptapEditor
+                      value={applicationMailingMetaData.rejectionMail}
+                      onChange={(content) =>
+                        handleInputChange({
+                          target: { name: 'rejectionMail', value: content },
+                        } as any)
+                      }
+                      className='w-full'
+                      editorContentClassName='p-4'
+                      output='html'
+                      placeholder='Type your description here...'
+                      autofocus={false}
+                      editable={true}
+                      editorClassName='focus:outline-none'
+                    />
+                  </TooltipProvider>
+                </div>
+              </TabsContent>
+              <TabsContent value='acceptance'>
+                <div className='space-y-2'>
+                  <Label htmlFor='acceptanceMail'>Acceptance Email Template</Label>
+                  <TooltipProvider>
+                    <MinimalTiptapEditor
+                      value={applicationMailingMetaData.acceptanceMail}
+                      onChange={(content) =>
+                        handleInputChange({
+                          target: { name: 'acceptanceMail', value: content },
+                        } as any)
+                      }
+                      className='w-full'
+                      editorContentClassName='p-4'
+                      output='html'
+                      placeholder='Type your description here...'
+                      autofocus={false}
+                      editable={true}
+                      editorClassName='focus:outline-none'
+                    />
+                  </TooltipProvider>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
         </CardContent>
         <CardFooter>
           <Button type='submit' className='ml-auto' disabled={!isModified}>
