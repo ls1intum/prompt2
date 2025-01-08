@@ -29,12 +29,18 @@ export const ApplicationMailingSettings = () => {
   const [initialMetaData, setInitialMetaData] = useState<ApplicationMailingMetaData | null>(null)
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
+      confirmationMailSubject: '',
       confirmationMail: '',
+      rejectionMailSubject: '',
       rejectionMail: '',
+      acceptanceMailSubject: '',
       acceptanceMail: '',
       sendConfirmationMail: false,
       sendRejectionMail: false,
       sendAcceptanceMail: false,
+
+      replyToEmail: '',
+      replyToName: '',
     })
 
   const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(applicationMailingMetaData)
@@ -70,8 +76,9 @@ export const ApplicationMailingSettings = () => {
     }
   }, [fetchedCoursePhase])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    console.log('Event name:', name)
     setApplicationMailingMetaData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -147,7 +154,33 @@ export const ApplicationMailingSettings = () => {
             </div>
           </div>
 
+          <div className='space-y-4 mb-4 columns-2'>
+            <div>
+              <Label htmlFor='replyToEmail'>Reply To Email</Label>
+              <input
+                type='email'
+                name='replyToEmail'
+                placeholder='i.e. course@management.de'
+                value={applicationMailingMetaData.replyToEmail}
+                onChange={(e) => handleInputChange(e)}
+                className='w-full mt-1 p-2 border rounded'
+              />
+            </div>
+            <div>
+              <Label htmlFor='replyToName'>Replier Name</Label>
+              <input
+                type='text'
+                name='replyToName'
+                placeholder='i.e. Course Management'
+                value={applicationMailingMetaData.replyToName}
+                onChange={(e) => handleInputChange(e)}
+                className='w-full mt-1 p-2 border rounded'
+              />
+            </div>
+          </div>
+
           <AvailableMailPlaceholders />
+          {/* ensures that tiptap editor is only loaded after receiving meta data */}
           {initialMetaData && (
             <Tabs defaultValue='confirmation' className='w-full'>
               <TabsList className='grid w-full grid-cols-3'>
@@ -157,6 +190,14 @@ export const ApplicationMailingSettings = () => {
               </TabsList>
               <TabsContent value='confirmation'>
                 <div className='space-y-2'>
+                  <Label htmlFor='confirmationMailSubject'>Confirmation Subject</Label>
+                  <input
+                    type='text'
+                    name='confirmationMailSubject'
+                    value={applicationMailingMetaData.confirmationMailSubject}
+                    onChange={(e) => handleInputChange(e)}
+                    className='w-full mt-1 p-2 border rounded'
+                  />
                   <Label htmlFor='confirmationMail'>Confirmation Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
@@ -179,6 +220,14 @@ export const ApplicationMailingSettings = () => {
               </TabsContent>
               <TabsContent value='rejection'>
                 <div className='space-y-2'>
+                  <Label htmlFor='rejectionMailSubject'>Rejection Subject</Label>
+                  <input
+                    type='text'
+                    name='rejectionMailSubject'
+                    value={applicationMailingMetaData.rejectionMailSubject}
+                    onChange={(e) => handleInputChange(e)}
+                    className='w-full mt-1 p-2 border rounded'
+                  />
                   <Label htmlFor='rejectionMail'>Rejection Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
@@ -201,6 +250,14 @@ export const ApplicationMailingSettings = () => {
               </TabsContent>
               <TabsContent value='acceptance'>
                 <div className='space-y-2'>
+                  <Label htmlFor='acceptanceMailSubject'>Acceptance Subject</Label>
+                  <input
+                    type='text'
+                    name='acceptanceMailSubject'
+                    value={applicationMailingMetaData.acceptanceMailSubject}
+                    onChange={(e) => handleInputChange(e)}
+                    className='w-full mt-1 p-2 border rounded'
+                  />
                   <Label htmlFor='acceptanceMail'>Acceptance Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
