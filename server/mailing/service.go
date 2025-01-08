@@ -56,11 +56,14 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
 
 	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseParticipationID.String())
-	placeholerValues := getPlaceholderValues(mailingInfo, applicationURL)
-	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholerValues)
+	placeholderValues := getPlaceholderValues(mailingInfo, applicationURL)
+	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholderValues)
+
+	// replace values in subject
+	finalSubject := replacePlaceholders(mailingInfo.ConfirmationMailSubject, placeholderValues)
 
 	// TODO replace with with subject
-	err = SendMail(mailingInfo.Email.String, "prompt@ase.cit.tum.de", "Do Not Reply", "Confirmation: Application Received", finalMessage)
+	err = SendMail(mailingInfo.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
 	if err != nil {
 		log.Error("failed to send mail: ", err)
 		return errors.New("failed to send mail")
@@ -71,8 +74,12 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.
 func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody string) error {
-	if MailingServiceSingleton.senderEmail.Address == "" {
-		return fmt.Errorf("sender email is not set, Setup the MailingService first")
+	if MailingServiceSingleton.senderEmail.Address == "" ||
+		recipientAddress == "" ||
+		replyToAddress == "" ||
+		subject == "" ||
+		htmlBody == "" {
+		return fmt.Errorf("mailing is not correctly configured")
 	}
 
 	to := mail.Address{Address: recipientAddress}
@@ -104,7 +111,7 @@ func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody s
 	}
 	defer client.Close()
 
-	log.Info(MailingServiceSingleton.senderEmail.Address)
+	log.Debug(MailingServiceSingleton.senderEmail.Address)
 
 	// Set the sender and recipient
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {

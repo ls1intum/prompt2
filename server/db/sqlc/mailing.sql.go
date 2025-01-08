@@ -26,6 +26,9 @@ SELECT
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
     (p.meta_data->>'applicationEndDate')::text AS application_end_date,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMail'), '')::text AS confirmation_mail_template,
     COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
 FROM 
@@ -61,6 +64,9 @@ type GetConfirmationMailingInformationRow struct {
 	CourseStartDate          pgtype.Date `json:"course_start_date"`
 	CourseEndDate            pgtype.Date `json:"course_end_date"`
 	ApplicationEndDate       string      `json:"application_end_date"`
+	ReplyToEmail             string      `json:"reply_to_email"`
+	ReplyToName              string      `json:"reply_to_name"`
+	ConfirmationMailSubject  string      `json:"confirmation_mail_subject"`
 	ConfirmationMailTemplate string      `json:"confirmation_mail_template"`
 	SendConfirmationMail     bool        `json:"send_confirmation_mail"`
 }
@@ -81,6 +87,9 @@ func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg Get
 		&i.CourseStartDate,
 		&i.CourseEndDate,
 		&i.ApplicationEndDate,
+		&i.ReplyToEmail,
+		&i.ReplyToName,
+		&i.ConfirmationMailSubject,
 		&i.ConfirmationMailTemplate,
 		&i.SendConfirmationMail,
 	)
