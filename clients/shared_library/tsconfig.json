@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "module": "CommonJS",
+    "module": "esnext",
     "target": "es6",
     "jsx": "react-jsx",
     "allowJs": true,
