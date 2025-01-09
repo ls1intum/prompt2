@@ -244,6 +244,8 @@ func postApplicationAuthenticated(c *gin.Context) {
 	userEmail := c.GetString("userEmail")
 	matriculationNumber := c.GetString("matriculationNumber")
 	universityLogin := c.GetString("universityLogin")
+	firstName := c.GetString("firstName")
+	lastName := c.GetString("lastName")
 	if userEmail == "" {
 		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
 		return
@@ -262,7 +264,11 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	if application.Student.Email != userEmail || application.Student.MatriculationNumber != matriculationNumber || application.Student.UniversityLogin != universityLogin {
+	if application.Student.Email != userEmail ||
+		application.Student.MatriculationNumber != matriculationNumber ||
+		application.Student.UniversityLogin != universityLogin ||
+		application.Student.FirstName != firstName ||
+		application.Student.LastName != lastName {
 		handleError(c, http.StatusUnauthorized, errors.New("credentials do not match payload"))
 		return
 	}

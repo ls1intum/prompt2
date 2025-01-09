@@ -18,6 +18,8 @@ func MockAuthMiddlewareWithEmail(mockRoles []string, email, matriculationNumber,
 		c.Set("userEmail", email)
 		c.Set("matriculationNumber", matriculationNumber)
 		c.Set("universityLogin", universityLogin)
+		c.Set("firstName", "John")
+		c.Set("lastName", "Doe")
 		logrus.Info("MockAuthMiddleware: Mocked user mail: ", email)
 		c.Next()
 	}
