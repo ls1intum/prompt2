@@ -1,10 +1,17 @@
 import path from 'path'
-import { Configuration, container, DefinePlugin } from 'webpack'
 import 'webpack-dev-server'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import packageJson from '../package.json'
+import packageJson from '../package.json' with { type: 'json' }
+import webpack from 'webpack'
+import container from 'webpack'
+import { fileURLToPath } from 'url'
 
-const config: (env: Record<string, string>) => Configuration = (env) => {
+const { ModuleFederationPlugin } = webpack.container
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const config: (env: Record<string, string>) => container.Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
@@ -61,7 +68,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       },
     },
     plugins: [
-      new container.ModuleFederationPlugin({
+      new ModuleFederationPlugin({
         name: 'template_component',
         filename: 'remoteEntry.js',
         exposes: {
@@ -90,7 +97,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
           minifyURLs: true,
         },
       }),
-      new DefinePlugin({
+      new webpack.DefinePlugin({
         'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
         'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
           getVariable('REACT_APP_KEYCLOAK_HOST'),
