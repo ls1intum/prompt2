@@ -54,6 +54,7 @@ export const ApplicationFormView = ({
   const studentRef = useRef<StudentComponentRef>(null)
   const questionTextRefs = useRef<Array<QuestionTextFormRef | null | undefined>>([])
   const questionMultiSelectRefs = useRef<Array<QuestionMultiSelectFormRef | null | undefined>>([])
+  const [validationFailed, setValidationFailed] = useState(false)
 
   // correctly propagate student data changes
   useEffect(() => {
@@ -101,14 +102,17 @@ export const ApplicationFormView = ({
     }
 
     if (!allValid) {
+      setValidationFailed(true)
       return
+    } else {
+      setValidationFailed(false)
     }
     // call onSubmit
     onSubmit(studentData, answersText, answersMultiSelect)
   }
 
   return (
-    <Card>
+    <Card className={validationFailed ? 'border-red-500' : ''}>
       <CardHeader>
         <CardTitle>Application Form</CardTitle>
       </CardHeader>
