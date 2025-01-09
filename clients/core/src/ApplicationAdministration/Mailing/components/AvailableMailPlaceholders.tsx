@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import {
   Table,
   TableBody,
@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
 import translations from '@/lib/translations.json'
 
 export const AvailableMailPlaceholders = () => {
@@ -65,16 +64,23 @@ export const AvailableMailPlaceholders = () => {
     },
     {
       placeholder: '{{applicationEndDate}}',
-      description: 'The end date of the the application phase',
+      description:
+        'The end date of the the application phase. (Not available for acceptance/rejection mails). ',
     },
     {
       placeholder: 'https://{{applicationURL}}',
-      description: 'The direct link to the application form',
+      description:
+        'The direct link to the application form. (Not available for acceptance/rejection mails).',
     },
   ]
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className='space-y-2 border rounded-md'>
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      onClick={() => setIsOpen((prev) => !prev)}
+      className='space-y-2 border rounded-md'
+    >
       <div className='flex items-center justify-between p-4'>
         <div>
           <h3 className='text-sm font-medium'>Available Placeholders</h3>
@@ -83,12 +89,7 @@ export const AvailableMailPlaceholders = () => {
             when the email is sent.
           </p>
         </div>
-        <CollapsibleTrigger asChild>
-          <Button variant='ghost' size='sm' className='w-9 p-0'>
-            {isOpen ? <ChevronUp className='h-4 w-4' /> : <ChevronDown className='h-4 w-4' />}
-            <span className='sr-only'>Toggle placeholders</span>
-          </Button>
-        </CollapsibleTrigger>
+        {isOpen ? <ChevronUp className='h-4 w-4' /> : <ChevronDown className='h-4 w-4' />}
       </div>
       <CollapsibleContent>
         <div className='border-t'>
