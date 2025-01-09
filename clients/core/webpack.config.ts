@@ -1,5 +1,4 @@
 import path from 'path'
-import { Configuration, container, DefinePlugin } from 'webpack'
 import CompressionPlugin from 'compression-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import 'webpack-dev-server'
@@ -8,10 +7,18 @@ import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import ExternalTemplateRemotesPlugin from 'external-remotes-plugin'
-import packageJson from '../package.json'
+import packageJson from '../package.json' with { type: 'json' }
+import { fileURLToPath } from 'url'
+import container from 'webpack'
+import webpack from 'webpack'
+
+const { ModuleFederationPlugin } = webpack.container
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // TODO: specify the version for react in shared dependencies
-const config: (env: Record<string, string>) => Configuration = (env) => {
+const config: (env: Record<string, string>) => container.Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
@@ -77,7 +84,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       },
     },
     plugins: [
-      new container.ModuleFederationPlugin({
+      new ModuleFederationPlugin({
         name: 'core',
         remotes: {
           template_component: `template_component@${templateURL}/remoteEntry.js`,
@@ -107,7 +114,7 @@ const config: (env: Record<string, string>) => Configuration = (env) => {
       new CopyPlugin({
         patterns: [{ from: 'public' }],
       }),
-      new DefinePlugin({
+      new webpack.DefinePlugin({
         'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
         'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
           getVariable('REACT_APP_KEYCLOAK_HOST'),
