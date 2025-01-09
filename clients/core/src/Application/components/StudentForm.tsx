@@ -205,6 +205,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   <Input
                     {...field}
                     disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    maxLength={100}
                   />
                 </FormControl>
                 <FormMessage />
@@ -221,6 +222,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   <Input
                     {...field}
                     disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    maxLength={100}
                   />
                 </FormControl>
                 <FormMessage />
@@ -416,6 +418,8 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {...field}
                     disabled={disabled}
                     type='number'
+                    maxLength={2}
+                    pattern='\d{1,2}'
                     placeholder='Bachelor (+ Master) Semesters'
                     onChange={(e) => {
                       const value = parseInt(e.target.value)
@@ -442,6 +446,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {...field}
                     disabled={disabled}
                     placeholder='Please enter your other study program'
+                    maxLength={100}
                   />
                 </FormControl>
                 <FormMessage />
