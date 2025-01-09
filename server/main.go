@@ -60,14 +60,14 @@ func initKeycloak() {
 	}
 }
 
-func initMailing(queries db.Queries, conn *pgxpool.Pool) {
+func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
 	clientURL := utils.GetEnv("CLIENT_URL", "prompt2.ase.cit.tum.de")
 	smtpHost := utils.GetEnv("SMTP_HOST", "127.0.0.1")
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt-dev@ase.cit.tum.de")
 	senderName := utils.GetEnv("SENDER_NAME", "Prompt Mailing Service")
 
-	mailing.InitMailingModule(smtpHost, smtpPort, senderName, senderEmail, clientURL, queries, conn)
+	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, senderName, senderEmail, clientURL)
 }
 
 func main() {
@@ -91,9 +91,6 @@ func main() {
 	initKeycloak()
 	permissionValidation.InitValidationService(*query, conn)
 
-	// Init the Mailing System
-	initMailing(*query, conn)
-
 	router := gin.Default()
 	router.Use(utils.CORS())
 
@@ -104,6 +101,7 @@ func main() {
 		})
 	})
 
+	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
