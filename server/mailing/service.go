@@ -56,7 +56,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
 
 	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseID.String())
-	placeholderValues := getPlaceholderValues(mailingInfo, applicationURL)
+	placeholderValues := getApplicationConfirmationPlaceholderValues(mailingInfo, applicationURL)
 	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholderValues)
 
 	// replace values in subject
@@ -69,6 +69,57 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 		return errors.New("failed to send mail")
 	}
 
+	return nil
+}
+
+func SendFailedMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID) error {
+	number_of_errors := 0
+	mailsWithError := make([]string, 0)
+
+	// 1.) get mailing info for course phase
+	mailingInfo, err := MailingServiceSingleton.queries.GetFailedMailingInformation(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get mailing information: ", err)
+		return errors.New("failed to send mail")
+	}
+
+	// 2.) Check if mailing is configured -> return if not
+	if mailingInfo.FailedMailSubject == "" || mailingInfo.FailedMailContent == "" || mailingInfo.ReplyToEmail == "" || mailingInfo.ReplyToName == "" {
+		log.Error("mailing template is not correctly configured")
+		return errors.New("failed to send mail")
+	}
+
+	// 3.) Get all participants that have not been accepted incl. information
+	participants, err := MailingServiceSingleton.queries.GetParticipantMailingInformation(ctx, db.GetParticipantMailingInformationParams{
+		ID:         coursePhaseID,
+		PassStatus: db.NullPassStatus{PassStatus: db.PassStatusFailed, Valid: true},
+	})
+	if err != nil {
+		log.Error("failed to get participant mailing information: ", err)
+		return errors.New("failed to send mail")
+	}
+
+	// 4.) Send mail to all participants
+	for _, participant := range participants {
+		placeholderMap := getStatusEmailPlaceholderValues(mailingInfo.CourseName, mailingInfo.CourseStartDate, mailingInfo.CourseEndDate, participant)
+		// replace values in subject
+		finalSubject := replacePlaceholders(mailingInfo.FailedMailSubject, placeholderMap)
+
+		// replace values in content
+		finalMessage := replacePlaceholders(mailingInfo.FailedMailContent, placeholderMap)
+
+		err = SendMail(participant.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
+		if err != nil {
+			log.Error("failed to send mail: ", err)
+			number_of_errors++
+			mailsWithError = append(mailsWithError, participant.Email.String)
+		}
+	}
+
+	if number_of_errors > 0 {
+		log.Error("failed to send mail to ", number_of_errors, " participants: ", mailsWithError)
+		return fmt.Errorf("failed to send mail to %d participants: %v", number_of_errors, mailsWithError)
+	}
 	return nil
 }
 
