@@ -26,7 +26,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
   { question, initialAnswer, disabled = false }: ApplicationQuestionTextFormProps,
   ref: React.Ref<QuestionTextFormRef>,
 ) {
-  const [charCount, setCharCount] = useState(0)
+  const [charCount, setCharCount] = useState(initialAnswer?.length || 0)
 
   // Create validation schema dynamically based on question properties
   const validationSchema = createValidationSchema(question)
