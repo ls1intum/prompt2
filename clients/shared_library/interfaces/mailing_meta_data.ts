@@ -1,12 +1,12 @@
 export type ApplicationMailingMetaData = {
   confirmationMailSubject: string
-  confirmationMail: string
+  confirmationMailContent: string
 
-  rejectionMailSubject: string
-  rejectionMail: string
+  failedMailSubject: string
+  failedMailContent: string
 
-  acceptanceMailSubject: string
-  acceptanceMail: string
+  passedMailSubject: string
+  passedMailContent: string
 
   sendConfirmationMail: boolean
   sendRejectionMail: boolean

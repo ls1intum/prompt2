@@ -49,7 +49,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 		return nil
 	}
 
-	if mailingInfo.ConfirmationMailTemplate == "" {
+	if mailingInfo.ConfirmationMailContent == "" {
 		log.Error("mailing template is not correctly configured")
 		return nil
 	}
@@ -58,7 +58,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseID.String())
 	placeholderValues := getApplicationConfirmationPlaceholderValues(mailingInfo, applicationURL)
-	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholderValues)
+	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailContent, placeholderValues)
 
 	// replace values in subject
 	finalSubject := replacePlaceholders(mailingInfo.ConfirmationMailSubject, placeholderValues)

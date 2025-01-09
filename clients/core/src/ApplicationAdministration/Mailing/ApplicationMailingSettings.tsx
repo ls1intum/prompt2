@@ -33,11 +33,11 @@ export const ApplicationMailingSettings = () => {
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
       confirmationMailSubject: '',
-      confirmationMail: '',
-      rejectionMailSubject: '',
-      rejectionMail: '',
-      acceptanceMailSubject: '',
-      acceptanceMail: '',
+      confirmationMailContent: '',
+      failedMailSubject: '',
+      failedMailContent: '',
+      passedMailSubject: '',
+      passedMailContent: '',
       sendConfirmationMail: false,
       sendRejectionMail: false,
       sendAcceptanceMail: false,
@@ -224,13 +224,13 @@ export const ApplicationMailingSettings = () => {
                     onChange={(e) => handleInputChange(e)}
                     className='w-full mt-1 p-2 border rounded'
                   />
-                  <Label htmlFor='confirmationMail'>Confirmation Email Template</Label>
+                  <Label htmlFor='confirmationMailContent'>Confirmation Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
-                      value={applicationMailingMetaData.confirmationMail}
+                      value={applicationMailingMetaData.confirmationMailContent}
                       onChange={(content) =>
                         handleInputChange({
-                          target: { name: 'confirmationMail', value: content },
+                          target: { name: 'confirmationMailContent', value: content },
                         } as any)
                       }
                       className='w-full'
@@ -250,14 +250,14 @@ export const ApplicationMailingSettings = () => {
                   <Input
                     type='text'
                     name='rejectionMailSubject'
-                    value={applicationMailingMetaData.rejectionMailSubject}
+                    value={applicationMailingMetaData.failedMailSubject}
                     onChange={(e) => handleInputChange(e)}
                     className='w-full mt-1 p-2 border rounded'
                   />
                   <Label htmlFor='rejectionMail'>Rejection Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
-                      value={applicationMailingMetaData.rejectionMail}
+                      value={applicationMailingMetaData.failedMailContent}
                       onChange={(content) =>
                         handleInputChange({
                           target: { name: 'rejectionMail', value: content },
@@ -280,14 +280,14 @@ export const ApplicationMailingSettings = () => {
                   <Input
                     type='text'
                     name='acceptanceMailSubject'
-                    value={applicationMailingMetaData.acceptanceMailSubject}
+                    value={applicationMailingMetaData.passedMailSubject}
                     onChange={(e) => handleInputChange(e)}
                     className='w-full mt-1 p-2 border rounded'
                   />
                   <Label htmlFor='acceptanceMail'>Acceptance Email Template</Label>
                   <TooltipProvider>
                     <MinimalTiptapEditor
-                      value={applicationMailingMetaData.acceptanceMail}
+                      value={applicationMailingMetaData.passedMailContent}
                       onChange={(content) =>
                         handleInputChange({
                           target: { name: 'acceptanceMail', value: content },

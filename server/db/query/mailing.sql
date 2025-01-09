@@ -15,7 +15,7 @@ SELECT
     COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMail'), '')::text AS confirmation_mail_template,
+    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
     COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
 FROM 
     course_phase_participation cpp

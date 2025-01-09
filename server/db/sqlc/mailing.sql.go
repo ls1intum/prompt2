@@ -29,7 +29,7 @@ SELECT
     COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMail'), '')::text AS confirmation_mail_template,
+    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
     COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
 FROM 
     course_phase_participation cpp
@@ -52,23 +52,23 @@ type GetConfirmationMailingInformationParams struct {
 }
 
 type GetConfirmationMailingInformationRow struct {
-	FirstName                pgtype.Text `json:"first_name"`
-	LastName                 pgtype.Text `json:"last_name"`
-	Email                    pgtype.Text `json:"email"`
-	MatriculationNumber      pgtype.Text `json:"matriculation_number"`
-	UniversityLogin          pgtype.Text `json:"university_login"`
-	StudyDegree              StudyDegree `json:"study_degree"`
-	CurrentSemester          pgtype.Int4 `json:"current_semester"`
-	StudyProgram             pgtype.Text `json:"study_program"`
-	CourseName               string      `json:"course_name"`
-	CourseStartDate          pgtype.Date `json:"course_start_date"`
-	CourseEndDate            pgtype.Date `json:"course_end_date"`
-	ApplicationEndDate       string      `json:"application_end_date"`
-	ReplyToEmail             string      `json:"reply_to_email"`
-	ReplyToName              string      `json:"reply_to_name"`
-	ConfirmationMailSubject  string      `json:"confirmation_mail_subject"`
-	ConfirmationMailTemplate string      `json:"confirmation_mail_template"`
-	SendConfirmationMail     bool        `json:"send_confirmation_mail"`
+	FirstName               pgtype.Text `json:"first_name"`
+	LastName                pgtype.Text `json:"last_name"`
+	Email                   pgtype.Text `json:"email"`
+	MatriculationNumber     pgtype.Text `json:"matriculation_number"`
+	UniversityLogin         pgtype.Text `json:"university_login"`
+	StudyDegree             StudyDegree `json:"study_degree"`
+	CurrentSemester         pgtype.Int4 `json:"current_semester"`
+	StudyProgram            pgtype.Text `json:"study_program"`
+	CourseName              string      `json:"course_name"`
+	CourseStartDate         pgtype.Date `json:"course_start_date"`
+	CourseEndDate           pgtype.Date `json:"course_end_date"`
+	ApplicationEndDate      string      `json:"application_end_date"`
+	ReplyToEmail            string      `json:"reply_to_email"`
+	ReplyToName             string      `json:"reply_to_name"`
+	ConfirmationMailSubject string      `json:"confirmation_mail_subject"`
+	ConfirmationMailContent string      `json:"confirmation_mail_content"`
+	SendConfirmationMail    bool        `json:"send_confirmation_mail"`
 }
 
 func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg GetConfirmationMailingInformationParams) (GetConfirmationMailingInformationRow, error) {
@@ -90,7 +90,7 @@ func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg Get
 		&i.ReplyToEmail,
 		&i.ReplyToName,
 		&i.ConfirmationMailSubject,
-		&i.ConfirmationMailTemplate,
+		&i.ConfirmationMailContent,
 		&i.SendConfirmationMail,
 	)
 	return i, err
