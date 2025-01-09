@@ -36,7 +36,7 @@ export const studentUniversitySchema = z.object({
     .number()
     .int('Please enter your current semester')
     .min(1, 'Please select a semester.')
-    .max(20, 'Please enter a number lower than 20'),
+    .max(20, 'Please enter a current semester number lower than 20'),
   has_university_account: z.literal(true), // Explicit literal for university case
   matriculation_number: z
     .string()
