@@ -38,8 +38,24 @@ SELECT
     c.end_date AS course_end_date,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS failed_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS failed_mail_content
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS mail_content
+FROM
+    course_phase p
+JOIN
+    course c ON p.course_id = c.id
+WHERE
+    p.id = $1;
+
+-- name: GetPassedMailingInformation :one
+SELECT
+    c.name AS course_name,
+    c.start_date AS course_start_date,
+    c.end_date AS course_end_date,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailContent'), '')::text AS mail_content
 FROM
     course_phase p
 JOIN

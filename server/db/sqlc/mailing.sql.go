@@ -103,8 +103,8 @@ SELECT
     c.end_date AS course_end_date,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS failed_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS failed_mail_content
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS mail_content
 FROM
     course_phase p
 JOIN
@@ -114,13 +114,13 @@ WHERE
 `
 
 type GetFailedMailingInformationRow struct {
-	CourseName        string      `json:"course_name"`
-	CourseStartDate   pgtype.Date `json:"course_start_date"`
-	CourseEndDate     pgtype.Date `json:"course_end_date"`
-	ReplyToEmail      string      `json:"reply_to_email"`
-	ReplyToName       string      `json:"reply_to_name"`
-	FailedMailSubject string      `json:"failed_mail_subject"`
-	FailedMailContent string      `json:"failed_mail_content"`
+	CourseName      string      `json:"course_name"`
+	CourseStartDate pgtype.Date `json:"course_start_date"`
+	CourseEndDate   pgtype.Date `json:"course_end_date"`
+	ReplyToEmail    string      `json:"reply_to_email"`
+	ReplyToName     string      `json:"reply_to_name"`
+	MailSubject     string      `json:"mail_subject"`
+	MailContent     string      `json:"mail_content"`
 }
 
 func (q *Queries) GetFailedMailingInformation(ctx context.Context, id uuid.UUID) (GetFailedMailingInformationRow, error) {
@@ -132,8 +132,8 @@ func (q *Queries) GetFailedMailingInformation(ctx context.Context, id uuid.UUID)
 		&i.CourseEndDate,
 		&i.ReplyToEmail,
 		&i.ReplyToName,
-		&i.FailedMailSubject,
-		&i.FailedMailContent,
+		&i.MailSubject,
+		&i.MailContent,
 	)
 	return i, err
 }
@@ -205,4 +205,46 @@ func (q *Queries) GetParticipantMailingInformation(ctx context.Context, arg GetP
 		return nil, err
 	}
 	return items, nil
+}
+
+const getPassedMailingInformation = `-- name: GetPassedMailingInformation :one
+SELECT
+    c.name AS course_name,
+    c.start_date AS course_start_date,
+    c.end_date AS course_end_date,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailContent'), '')::text AS mail_content
+FROM
+    course_phase p
+JOIN
+    course c ON p.course_id = c.id
+WHERE
+    p.id = $1
+`
+
+type GetPassedMailingInformationRow struct {
+	CourseName      string      `json:"course_name"`
+	CourseStartDate pgtype.Date `json:"course_start_date"`
+	CourseEndDate   pgtype.Date `json:"course_end_date"`
+	ReplyToEmail    string      `json:"reply_to_email"`
+	ReplyToName     string      `json:"reply_to_name"`
+	MailSubject     string      `json:"mail_subject"`
+	MailContent     string      `json:"mail_content"`
+}
+
+func (q *Queries) GetPassedMailingInformation(ctx context.Context, id uuid.UUID) (GetPassedMailingInformationRow, error) {
+	row := q.db.QueryRow(ctx, getPassedMailingInformation, id)
+	var i GetPassedMailingInformationRow
+	err := row.Scan(
+		&i.CourseName,
+		&i.CourseStartDate,
+		&i.CourseEndDate,
+		&i.ReplyToEmail,
+		&i.ReplyToName,
+		&i.MailSubject,
+		&i.MailContent,
+	)
+	return i, err
 }
