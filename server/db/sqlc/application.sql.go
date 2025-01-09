@@ -726,6 +726,36 @@ func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (Ge
 	return i, err
 }
 
+const storeApplicationAnswerUpdateTimestamp = `-- name: StoreApplicationAnswerUpdateTimestamp :exec
+UPDATE course_phase_participation
+SET meta_data = jsonb_set(
+    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+    '{student_last_modified}', -- Path to the key
+    to_jsonb(NOW())::jsonb     -- Value to set
+)
+WHERE id = $1
+`
+
+func (q *Queries) StoreApplicationAnswerUpdateTimestamp(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, storeApplicationAnswerUpdateTimestamp, id)
+	return err
+}
+
+const storeApplicationAssessmentUpdateTimestamp = `-- name: StoreApplicationAssessmentUpdateTimestamp :exec
+UPDATE course_phase_participation
+SET meta_data = jsonb_set(
+    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+    '{assessment_last_modified}', -- Path to the key
+    to_jsonb(NOW())::jsonb     -- Value to set
+)
+WHERE id = $1
+`
+
+func (q *Queries) StoreApplicationAssessmentUpdateTimestamp(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, storeApplicationAssessmentUpdateTimestamp, id)
+	return err
+}
+
 const updateApplicationAssessment = `-- name: UpdateApplicationAssessment :exec
 INSERT INTO application_assessment (id, course_phase_participation_id, score)
 VALUES (

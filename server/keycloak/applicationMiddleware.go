@@ -47,12 +47,24 @@ func ApplicationMiddleware() gin.HandlerFunc {
 
 		userEmail, ok := claims["email"].(string)
 		if !ok {
-			log.Error("Failed to extract user ID (sub) from token claims")
+			log.Error("Failed to extract user email (sub) from token claims")
+		}
+
+		matriculationNumber, ok := claims["matriculation_number"].(string)
+		if !ok {
+			log.Error("Failed to extract user matriculation number (sub) from token claims")
+		}
+
+		universityLogin, ok := claims["university_login"].(string)
+		if !ok {
+			log.Error("Failed to extract user university login (sub) from token claims")
 		}
 
 		// Store the extracted roles in the context
 		c.Set("userID", userID)
 		c.Set("userEmail", userEmail)
+		c.Set("matriculationNumber", matriculationNumber)
+		c.Set("universityLogin", universityLogin)
 		c.Next()
 	}
 }

@@ -111,6 +111,8 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     first_name: user?.firstName ?? '',
     last_name: user?.lastName ?? '',
     email: user?.email ?? '',
+    matriculation_number: user?.matriculation_number ?? '',
+    university_login: user?.university_login ?? '',
     has_university_account: true,
     // TODO: get university data from keycloak
   }

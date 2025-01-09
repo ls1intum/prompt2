@@ -267,3 +267,21 @@ WHERE id IN (
       WHERE cpp.id = ANY($2::uuid[])
         AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
   );
+
+-- name: StoreApplicationAnswerUpdateTimestamp :exec
+UPDATE course_phase_participation
+SET meta_data = jsonb_set(
+    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+    '{student_last_modified}', -- Path to the key
+    to_jsonb(NOW())::jsonb     -- Value to set
+)
+WHERE id = $1;
+
+-- name: StoreApplicationAssessmentUpdateTimestamp :exec
+UPDATE course_phase_participation
+SET meta_data = jsonb_set(
+    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+    '{assessment_last_modified}', -- Path to the key
+    to_jsonb(NOW())::jsonb     -- Value to set
+)
+WHERE id = $1;

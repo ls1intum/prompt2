@@ -164,7 +164,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {requiredStar}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={disabled} />
+                    <Input
+                      {...field}
+                      disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -180,7 +183,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     {requiredStar}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={disabled} />
+                    <Input
+                      {...field}
+                      disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

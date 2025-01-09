@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func MockAuthMiddlewareWithEmail(mockRoles []string, email string) gin.HandlerFunc {
+func MockAuthMiddlewareWithEmail(mockRoles []string, email, matriculationNumber, universityLogin string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Optionally set mock data, such as roles, for downstream handlers
 		// Create a map for user roles
@@ -16,11 +16,13 @@ func MockAuthMiddlewareWithEmail(mockRoles []string, email string) gin.HandlerFu
 		// Store the roles map in the context
 		c.Set("userRoles", userRoles)
 		c.Set("userEmail", email)
+		c.Set("matriculationNumber", matriculationNumber)
+		c.Set("universityLogin", universityLogin)
 		logrus.Info("MockAuthMiddleware: Mocked user mail: ", email)
 		c.Next()
 	}
 }
 
 func MockAuthMiddleware(mockRoles []string) gin.HandlerFunc {
-	return MockAuthMiddlewareWithEmail(mockRoles, "")
+	return MockAuthMiddlewareWithEmail(mockRoles, "", "", "")
 }
