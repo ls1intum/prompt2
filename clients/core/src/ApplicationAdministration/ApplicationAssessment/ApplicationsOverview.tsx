@@ -38,6 +38,7 @@ import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNa
 import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 import { ApplicationManualAdd } from './ApplicationManualAdding/ApplicationManualAdd'
 import { useGetApplicationParticipations } from '../handlers/useGetApplicationParticipations'
+import { ManagementPageHeader } from '../../management/components/ManagementPageHeader'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -120,7 +121,7 @@ export const ApplicationsOverview = (): JSX.Element => {
 
   return (
     <div id='table-view' className='relative flex flex-col space-y-6'>
-      <h1 className='text-3xl md:text-4xl font-bold text-center'>Applications Overview</h1>
+      <ManagementPageHeader>Applications Overview</ManagementPageHeader>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
           <div className='relative flex-grow max-w-md w-full'>

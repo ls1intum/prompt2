@@ -133,7 +133,7 @@ export const ApplicationMailingSettings = () => {
   }
 
   return (
-    <>
+    <div className='space-y-6'>
       <ManagementPageHeader>Application Mailing Settings</ManagementPageHeader>
       <SettingsCard
         applicationMailingMetaData={applicationMailingMetaData}
@@ -186,9 +186,11 @@ export const ApplicationMailingSettings = () => {
         </Tabs>
       )}
 
-      <Button onClick={handleSubmit} type='submit' className='ml-auto' disabled={!isModified}>
-        Save Changes
-      </Button>
-    </>
+      <div className='justify-end flex'>
+        <Button onClick={handleSubmit} type='submit' className='ml-auto' disabled={!isModified}>
+          Save Changes
+        </Button>
+      </div>
+    </div>
   )
 }
