@@ -81,7 +81,7 @@ export const AvailableMailPlaceholders = () => {
       onClick={() => setIsOpen((prev) => !prev)}
       className='space-y-2 border rounded-md'
     >
-      <div className='flex items-center justify-between p-4'>
+      <div className='flex items-center justify-between p-4 cursor-pointer'>
         <div>
           <h3 className='text-sm font-medium'>Available Placeholders</h3>
           <p className='text-xs text-muted-foreground mt-1'>

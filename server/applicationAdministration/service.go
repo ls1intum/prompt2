@@ -503,7 +503,6 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 			}
 		}
 
-		// TODO: implement transaction control here
 		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
 			ID:         coursePhaseParticipationID,
 			PassStatus: passStatus,

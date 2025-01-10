@@ -3,15 +3,6 @@ import { useGetCoursePhase } from '../handlers/useGetCoursePhase'
 import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 import { parseApplicationMailingMetaData } from './utils/parseApplicaitonMailingMetaData'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
 import { useModifyCoursePhase } from '../handlers/useModifyCoursePhase'
@@ -19,12 +10,9 @@ import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useParams } from 'react-router-dom'
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { AutomaticMailSending } from './components/AutomaticMailSending'
-import { Badge } from '@/components/ui/badge'
 import { EmailTemplateEditor } from './components/MailingEditor'
-import { ManualMailSending } from './components/ManualMailSending'
+import { ManagementPageHeader } from '../../management/components/ManagementPageHeader'
+import { SettingsCard } from './components/SettingsCard'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -146,105 +134,61 @@ export const ApplicationMailingSettings = () => {
 
   return (
     <>
-      <Card className='w-full max-w-4xl mx-auto'>
-        <CardHeader>
-          <CardTitle className='flex items-center justify-between'>
-            Application Mailing Settings
-            {isModified && (
-              <Badge variant='outline' className=' bg-yellow-100 text-yellow-800 border-yellow-300'>
-                Unsaved Changes
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>Configure email settings for the application phase</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className='space-y-6'>
-            <ManualMailSending mailingMetaData={applicationMailingMetaData} />
+      <ManagementPageHeader>Application Mailing Settings</ManagementPageHeader>
+      <SettingsCard
+        applicationMailingMetaData={applicationMailingMetaData}
+        handleInputChange={handleInputChange}
+        handleSwitchChange={handleSwitchChange}
+        isModified={isModified}
+        emailError={emailError}
+      />
+      <h2 className='text-2xl font-bold'>Mailing Templates </h2>
 
-            <Separator />
-            <AutomaticMailSending
-              mailingMetaData={applicationMailingMetaData}
-              onChange={handleSwitchChange}
+      <AvailableMailPlaceholders />
+      {/* ensures that tiptap editor is only loaded after receiving meta data */}
+      {initialMetaData && (
+        <Tabs defaultValue='confirmation' className='w-full'>
+          <TabsList className='grid w-full grid-cols-3'>
+            <TabsTrigger value='confirmation'>1. Confirmation</TabsTrigger>
+            <TabsTrigger value='acceptance'>2. Acceptance</TabsTrigger>
+            <TabsTrigger value='rejection'>3. Rejection</TabsTrigger>
+          </TabsList>
+          <TabsContent value='confirmation'>
+            <EmailTemplateEditor
+              subject={applicationMailingMetaData.confirmationMailSubject}
+              content={applicationMailingMetaData.confirmationMailContent}
+              onInputChange={handleInputChange}
+              label='Confirmation'
+              subjectHTMLLabel='confirmationMailSubject'
+              contentHTMLLabel='confirmationMailContent'
             />
+          </TabsContent>
+          <TabsContent value='acceptance'>
+            <EmailTemplateEditor
+              subject={applicationMailingMetaData.passedMailSubject}
+              content={applicationMailingMetaData.passedMailContent}
+              onInputChange={handleInputChange}
+              label='Acceptance'
+              subjectHTMLLabel='passedMailSubject'
+              contentHTMLLabel='passedMailContent'
+            />
+          </TabsContent>
+          <TabsContent value='rejection'>
+            <EmailTemplateEditor
+              subject={applicationMailingMetaData.failedMailSubject}
+              content={applicationMailingMetaData.failedMailContent}
+              onInputChange={handleInputChange}
+              label='Rejection'
+              subjectHTMLLabel='failedMailSubject'
+              contentHTMLLabel='failedMailContent'
+            />
+          </TabsContent>
+        </Tabs>
+      )}
 
-            <Separator />
-            <h3 className='text-lg font-medium'>Mail Settings</h3>
-            <div className='space-y-4 mb-4 columns-2'>
-              <div>
-                <Label htmlFor='replyToEmail'>Reply To Email</Label>
-                <Input
-                  type='email'
-                  name='replyToEmail'
-                  placeholder='i.e. course@management.de'
-                  value={applicationMailingMetaData.replyToEmail}
-                  onChange={(e) => handleInputChange(e)}
-                  className='w-full mt-1 p-2 border rounded'
-                />
-                {emailError && <p className='text-red-500 p-2 text-sm'>{emailError}</p>}
-              </div>
-              <div>
-                <Label htmlFor='replyToName'>Replier Name</Label>
-                <Input
-                  type='text'
-                  name='replyToName'
-                  placeholder='i.e. Course Management'
-                  value={applicationMailingMetaData.replyToName}
-                  onChange={(e) => handleInputChange(e)}
-                  className='w-full mt-1 p-2 border rounded'
-                />
-              </div>
-            </div>
-
-            <AvailableMailPlaceholders />
-            {/* ensures that tiptap editor is only loaded after receiving meta data */}
-            {initialMetaData && (
-              <Tabs defaultValue='confirmation' className='w-full'>
-                <TabsList className='grid w-full grid-cols-3'>
-                  <TabsTrigger value='confirmation'>1. Confirmation</TabsTrigger>
-                  <TabsTrigger value='acceptance'>2. Acceptance</TabsTrigger>
-                  <TabsTrigger value='rejection'>3. Rejection</TabsTrigger>
-                </TabsList>
-                <TabsContent value='confirmation'>
-                  <EmailTemplateEditor
-                    subject={applicationMailingMetaData.confirmationMailSubject}
-                    content={applicationMailingMetaData.confirmationMailContent}
-                    onInputChange={handleInputChange}
-                    label='Confirmation'
-                    subjectHTMLLabel='confirmationMailSubject'
-                    contentHTMLLabel='confirmationMailContent'
-                  />
-                </TabsContent>
-                <TabsContent value='acceptance'>
-                  <EmailTemplateEditor
-                    subject={applicationMailingMetaData.passedMailSubject}
-                    content={applicationMailingMetaData.passedMailContent}
-                    onInputChange={handleInputChange}
-                    label='Acceptance'
-                    subjectHTMLLabel='passedMailSubject'
-                    contentHTMLLabel='passedMailContent'
-                  />
-                </TabsContent>
-                <TabsContent value='rejection'>
-                  <EmailTemplateEditor
-                    subject={applicationMailingMetaData.failedMailSubject}
-                    content={applicationMailingMetaData.failedMailContent}
-                    onInputChange={handleInputChange}
-                    label='Rejection'
-                    subjectHTMLLabel='failedMailSubject'
-                    contentHTMLLabel='failedMailContent'
-                  />
-                </TabsContent>
-              </Tabs>
-            )}
-          </CardContent>
-          <CardFooter>
-            <Button type='submit' className='ml-auto' disabled={!isModified}>
-              Save Changes
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+      <Button onClick={handleSubmit} type='submit' className='ml-auto' disabled={!isModified}>
+        Save Changes
+      </Button>
     </>
   )
 }

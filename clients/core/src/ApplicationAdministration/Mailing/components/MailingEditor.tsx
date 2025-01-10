@@ -2,6 +2,7 @@ import MinimalTiptapEditor from '@/components/minimal-tiptap/minimal-tiptap'
 import { Label } from '@/components/ui/label'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface EmailTemplateEditorProps {
   subject: string
@@ -21,37 +22,42 @@ export const EmailTemplateEditor = ({
   contentHTMLLabel,
 }: EmailTemplateEditorProps): JSX.Element => {
   return (
-    <div className='space-y-2'>
-      <div>
-        <Label htmlFor={subjectHTMLLabel}>{label} Subject</Label>
-        <Input
-          type='text'
-          id={subjectHTMLLabel}
-          value={subject}
-          onChange={(e) => onInputChange(e)}
-          className='w-full mt-1'
-        />
-      </div>
-      <div>
-        <Label htmlFor={contentHTMLLabel}>{label} E-Mail Template</Label>
-        <TooltipProvider>
-          <MinimalTiptapEditor
-            value={content}
-            onChange={(newContent) =>
-              onInputChange({
-                target: { name: contentHTMLLabel, value: newContent },
-              } as any)
-            }
+    <Card>
+      <CardHeader>
+        <CardTitle>{label} Mail Template</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div>
+          <Label htmlFor={subjectHTMLLabel}>{label} Subject</Label>
+          <Input
+            type='text'
+            name={subjectHTMLLabel}
+            value={subject}
+            onChange={(e) => onInputChange(e)}
             className='w-full mt-1'
-            editorContentClassName='p-4'
-            output='html'
-            placeholder={`Type your email here...`}
-            autofocus={false}
-            editable={true}
-            editorClassName='focus:outline-none'
           />
-        </TooltipProvider>
-      </div>
-    </div>
+        </div>
+        <div>
+          <Label htmlFor={contentHTMLLabel}>{label} E-Mail Template</Label>
+          <TooltipProvider>
+            <MinimalTiptapEditor
+              value={content}
+              onChange={(newContent) =>
+                onInputChange({
+                  target: { name: contentHTMLLabel, value: newContent },
+                } as any)
+              }
+              className='w-full mt-1'
+              editorContentClassName='p-4'
+              output='html'
+              placeholder={`Type your email here...`}
+              autofocus={false}
+              editable={true}
+              editorClassName='focus:outline-none'
+            />
+          </TooltipProvider>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
