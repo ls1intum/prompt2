@@ -26,7 +26,6 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { ConfirmSendEmailDialog } from './components/ConfirmSendEmailDialog'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { set } from 'date-fns'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -163,23 +162,6 @@ export const ApplicationMailingSettings = () => {
                 disabled={
                   initialMetaData?.replyToEmail === '' ||
                   initialMetaData?.replyToName === '' ||
-                  initialMetaData?.failedMailContent === '' ||
-                  initialMetaData?.failedMailSubject === ''
-                }
-                className='flex items-center space-x-2'
-                onClick={(e) => {
-                  e.preventDefault()
-                  setSendEmailType(PassStatus.FAILED)
-                  setConfirmationDialogOpen(true)
-                }}
-              >
-                <Send className='h-4 w-4' />
-                <span>Send Rejection Emails</span>
-              </Button>
-              <Button
-                disabled={
-                  initialMetaData?.replyToEmail === '' ||
-                  initialMetaData?.replyToName === '' ||
                   initialMetaData?.passedMailContent === '' ||
                   initialMetaData?.passedMailSubject === ''
                 }
@@ -192,6 +174,23 @@ export const ApplicationMailingSettings = () => {
               >
                 <Send className='h-4 w-4' />
                 <span>Send Acceptance Emails</span>
+              </Button>
+              <Button
+                disabled={
+                  initialMetaData?.replyToEmail === '' ||
+                  initialMetaData?.replyToName === '' ||
+                  initialMetaData?.failedMailContent === '' ||
+                  initialMetaData?.failedMailSubject === ''
+                }
+                className='flex items-center space-x-2'
+                onClick={(e) => {
+                  e.preventDefault()
+                  setSendEmailType(PassStatus.FAILED)
+                  setConfirmationDialogOpen(true)
+                }}
+              >
+                <Send className='h-4 w-4' />
+                <span>Send Rejection Emails</span>
               </Button>
             </div>
 
@@ -259,9 +258,9 @@ export const ApplicationMailingSettings = () => {
             {initialMetaData && (
               <Tabs defaultValue='confirmation' className='w-full'>
                 <TabsList className='grid w-full grid-cols-3'>
-                  <TabsTrigger value='confirmation'>Confirmation</TabsTrigger>
-                  <TabsTrigger value='rejection'>Rejection</TabsTrigger>
-                  <TabsTrigger value='acceptance'>Acceptance</TabsTrigger>
+                  <TabsTrigger value='confirmation'>1. Confirmation</TabsTrigger>
+                  <TabsTrigger value='acceptance'>2. Acceptance</TabsTrigger>
+                  <TabsTrigger value='rejection'>3. Rejection</TabsTrigger>
                 </TabsList>
                 <TabsContent value='confirmation'>
                   <div className='space-y-2'>
@@ -293,36 +292,6 @@ export const ApplicationMailingSettings = () => {
                     </TooltipProvider>
                   </div>
                 </TabsContent>
-                <TabsContent value='rejection'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='failedMailSubject'>Rejection Subject</Label>
-                    <Input
-                      type='text'
-                      name='failedMailSubject'
-                      value={applicationMailingMetaData.failedMailSubject}
-                      onChange={(e) => handleInputChange(e)}
-                      className='w-full mt-1 p-2 border rounded'
-                    />
-                    <Label htmlFor='failedMailContent'>Rejection Email Template</Label>
-                    <TooltipProvider>
-                      <MinimalTiptapEditor
-                        value={applicationMailingMetaData.failedMailContent}
-                        onChange={(content) =>
-                          handleInputChange({
-                            target: { name: 'failedMailContent', value: content },
-                          } as any)
-                        }
-                        className='w-full'
-                        editorContentClassName='p-4'
-                        output='html'
-                        placeholder='Type your description here...'
-                        autofocus={false}
-                        editable={true}
-                        editorClassName='focus:outline-none'
-                      />
-                    </TooltipProvider>
-                  </div>
-                </TabsContent>
                 <TabsContent value='acceptance'>
                   <div className='space-y-2'>
                     <Label htmlFor='passedMailSubject'>Acceptance Subject</Label>
@@ -340,6 +309,36 @@ export const ApplicationMailingSettings = () => {
                         onChange={(content) =>
                           handleInputChange({
                             target: { name: 'passedMailContent', value: content },
+                          } as any)
+                        }
+                        className='w-full'
+                        editorContentClassName='p-4'
+                        output='html'
+                        placeholder='Type your description here...'
+                        autofocus={false}
+                        editable={true}
+                        editorClassName='focus:outline-none'
+                      />
+                    </TooltipProvider>
+                  </div>
+                </TabsContent>
+                <TabsContent value='rejection'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='failedMailSubject'>Rejection Subject</Label>
+                    <Input
+                      type='text'
+                      name='failedMailSubject'
+                      value={applicationMailingMetaData.failedMailSubject}
+                      onChange={(e) => handleInputChange(e)}
+                      className='w-full mt-1 p-2 border rounded'
+                    />
+                    <Label htmlFor='failedMailContent'>Rejection Email Template</Label>
+                    <TooltipProvider>
+                      <MinimalTiptapEditor
+                        value={applicationMailingMetaData.failedMailContent}
+                        onChange={(content) =>
+                          handleInputChange({
+                            target: { name: 'failedMailContent', value: content },
                           } as any)
                         }
                         className='w-full'
