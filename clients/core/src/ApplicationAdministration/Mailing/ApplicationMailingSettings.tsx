@@ -4,7 +4,6 @@ import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 import { parseApplicationMailingMetaData } from './utils/parseApplicaitonMailingMetaData'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import {
   Card,
   CardContent,
@@ -14,9 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Send } from 'lucide-react'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import MinimalTiptapEditor from '@/components/minimal-tiptap/minimal-tiptap'
+import { Loader2 } from 'lucide-react'
 import { useModifyCoursePhase } from '../handlers/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
@@ -24,8 +21,10 @@ import { useParams } from 'react-router-dom'
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { ConfirmSendEmailDialog } from './components/ConfirmSendEmailDialog'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { AutomaticMailSending } from './components/AutomaticMailSending'
+import { Badge } from '@/components/ui/badge'
+import { EmailTemplateEditor } from './components/MailingEditor'
+import { ManualMailSending } from './components/ManualMailSending'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -50,8 +49,6 @@ export const ApplicationMailingSettings = () => {
     })
 
   const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(applicationMailingMetaData)
-  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-  const [sendEmailType, setSendEmailType] = useState<PassStatus | null>(null)
 
   // Fetching meta data
   const {
@@ -151,82 +148,28 @@ export const ApplicationMailingSettings = () => {
     <>
       <Card className='w-full max-w-4xl mx-auto'>
         <CardHeader>
-          <CardTitle>Application Mailing Settings</CardTitle>
+          <CardTitle className='flex items-center justify-between'>
+            Application Mailing Settings
+            {isModified && (
+              <Badge variant='outline' className=' bg-yellow-100 text-yellow-800 border-yellow-300'>
+                Unsaved Changes
+              </Badge>
+            )}
+          </CardTitle>
           <CardDescription>Configure email settings for the application phase</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className='space-y-6'>
-            <h3 className='text-lg font-medium'>Manual Email Sending</h3>
-            <div className='mt-4 flex space-x-4'>
-              <Button
-                disabled={
-                  initialMetaData?.replyToEmail === '' ||
-                  initialMetaData?.replyToName === '' ||
-                  initialMetaData?.passedMailContent === '' ||
-                  initialMetaData?.passedMailSubject === ''
-                }
-                className='flex items-center space-x-2'
-                onClick={(e) => {
-                  e.preventDefault()
-                  setSendEmailType(PassStatus.PASSED)
-                  setConfirmationDialogOpen(true)
-                }}
-              >
-                <Send className='h-4 w-4' />
-                <span>Send Acceptance Emails</span>
-              </Button>
-              <Button
-                disabled={
-                  initialMetaData?.replyToEmail === '' ||
-                  initialMetaData?.replyToName === '' ||
-                  initialMetaData?.failedMailContent === '' ||
-                  initialMetaData?.failedMailSubject === ''
-                }
-                className='flex items-center space-x-2'
-                onClick={(e) => {
-                  e.preventDefault()
-                  setSendEmailType(PassStatus.FAILED)
-                  setConfirmationDialogOpen(true)
-                }}
-              >
-                <Send className='h-4 w-4' />
-                <span>Send Rejection Emails</span>
-              </Button>
-            </div>
+            <ManualMailSending mailingMetaData={applicationMailingMetaData} />
 
             <Separator />
-            <div className='space-y-4'>
-              <h3 className='text-lg font-medium'>Automatic Email Sending</h3>
-              <div className='flex items-center space-x-2'>
-                <Switch
-                  id='sendConfirmationMail'
-                  checked={applicationMailingMetaData.sendConfirmationMail}
-                  onCheckedChange={() => handleSwitchChange('sendConfirmationMail')}
-                />
-                <Label htmlFor='sendConfirmationMail'>Send Confirmation Email</Label>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Switch
-                  id='sendRejectionMail'
-                  disabled={true}
-                  checked={applicationMailingMetaData.sendRejectionMail}
-                  onCheckedChange={() => handleSwitchChange('sendRejectionMail')}
-                />
-                <Label htmlFor='sendRejectionMail'>Send Rejection Email</Label>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Switch
-                  id='sendAcceptanceMail'
-                  disabled={true}
-                  checked={applicationMailingMetaData.sendAcceptanceMail}
-                  onCheckedChange={() => handleSwitchChange('sendAcceptanceMail')}
-                />
-                <Label htmlFor='sendAcceptanceMail'>Send Acceptance Email</Label>
-              </div>
-            </div>
+            <AutomaticMailSending
+              mailingMetaData={applicationMailingMetaData}
+              onChange={handleSwitchChange}
+            />
 
             <Separator />
-            <h3 className='text-lg font-medium'>Automatic Email Sending</h3>
+            <h3 className='text-lg font-medium'>Mail Settings</h3>
             <div className='space-y-4 mb-4 columns-2'>
               <div>
                 <Label htmlFor='replyToEmail'>Reply To Email</Label>
@@ -263,94 +206,34 @@ export const ApplicationMailingSettings = () => {
                   <TabsTrigger value='rejection'>3. Rejection</TabsTrigger>
                 </TabsList>
                 <TabsContent value='confirmation'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='confirmationMailSubject'>Confirmation Subject</Label>
-                    <Input
-                      type='text'
-                      name='confirmationMailSubject'
-                      value={applicationMailingMetaData.confirmationMailSubject}
-                      onChange={(e) => handleInputChange(e)}
-                      className='w-full mt-1 p-2 border rounded'
-                    />
-                    <Label htmlFor='confirmationMailContent'>Confirmation Email Template</Label>
-                    <TooltipProvider>
-                      <MinimalTiptapEditor
-                        value={applicationMailingMetaData.confirmationMailContent}
-                        onChange={(content) =>
-                          handleInputChange({
-                            target: { name: 'confirmationMailContent', value: content },
-                          } as any)
-                        }
-                        className='w-full'
-                        editorContentClassName='p-4'
-                        output='html'
-                        placeholder='Type your description here...'
-                        autofocus={false}
-                        editable={true}
-                        editorClassName='focus:outline-none'
-                      />
-                    </TooltipProvider>
-                  </div>
+                  <EmailTemplateEditor
+                    subject={applicationMailingMetaData.confirmationMailSubject}
+                    content={applicationMailingMetaData.confirmationMailContent}
+                    onInputChange={handleInputChange}
+                    label='Confirmation'
+                    subjectHTMLLabel='confirmationMailSubject'
+                    contentHTMLLabel='confirmationMailContent'
+                  />
                 </TabsContent>
                 <TabsContent value='acceptance'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='passedMailSubject'>Acceptance Subject</Label>
-                    <Input
-                      type='text'
-                      name='passedMailSubject'
-                      value={applicationMailingMetaData.passedMailSubject}
-                      onChange={(e) => handleInputChange(e)}
-                      className='w-full mt-1 p-2 border rounded'
-                    />
-                    <Label htmlFor='passedMailContent'>Acceptance Email Template</Label>
-                    <TooltipProvider>
-                      <MinimalTiptapEditor
-                        value={applicationMailingMetaData.passedMailContent}
-                        onChange={(content) =>
-                          handleInputChange({
-                            target: { name: 'passedMailContent', value: content },
-                          } as any)
-                        }
-                        className='w-full'
-                        editorContentClassName='p-4'
-                        output='html'
-                        placeholder='Type your description here...'
-                        autofocus={false}
-                        editable={true}
-                        editorClassName='focus:outline-none'
-                      />
-                    </TooltipProvider>
-                  </div>
+                  <EmailTemplateEditor
+                    subject={applicationMailingMetaData.passedMailSubject}
+                    content={applicationMailingMetaData.passedMailContent}
+                    onInputChange={handleInputChange}
+                    label='Acceptance'
+                    subjectHTMLLabel='passedMailSubject'
+                    contentHTMLLabel='passedMailContent'
+                  />
                 </TabsContent>
                 <TabsContent value='rejection'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='failedMailSubject'>Rejection Subject</Label>
-                    <Input
-                      type='text'
-                      name='failedMailSubject'
-                      value={applicationMailingMetaData.failedMailSubject}
-                      onChange={(e) => handleInputChange(e)}
-                      className='w-full mt-1 p-2 border rounded'
-                    />
-                    <Label htmlFor='failedMailContent'>Rejection Email Template</Label>
-                    <TooltipProvider>
-                      <MinimalTiptapEditor
-                        value={applicationMailingMetaData.failedMailContent}
-                        onChange={(content) =>
-                          handleInputChange({
-                            target: { name: 'failedMailContent', value: content },
-                          } as any)
-                        }
-                        className='w-full'
-                        editorContentClassName='p-4'
-                        output='html'
-                        placeholder='Type your description here...'
-                        autofocus={false}
-                        editable={true}
-                        editorClassName='focus:outline-none'
-                      />
-                    </TooltipProvider>
-                  </div>
+                  <EmailTemplateEditor
+                    subject={applicationMailingMetaData.failedMailSubject}
+                    content={applicationMailingMetaData.failedMailContent}
+                    onInputChange={handleInputChange}
+                    label='Rejection'
+                    subjectHTMLLabel='failedMailSubject'
+                    contentHTMLLabel='failedMailContent'
+                  />
                 </TabsContent>
               </Tabs>
             )}
@@ -362,13 +245,6 @@ export const ApplicationMailingSettings = () => {
           </CardFooter>
         </form>
       </Card>
-      {confirmationDialogOpen && sendEmailType && (
-        <ConfirmSendEmailDialog
-          isOpen={confirmationDialogOpen}
-          onClose={() => setConfirmationDialogOpen(false)}
-          emailType={sendEmailType}
-        />
-      )}
     </>
   )
 }

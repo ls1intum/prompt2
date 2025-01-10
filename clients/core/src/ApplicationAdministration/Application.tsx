@@ -14,6 +14,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySemesterDiagram'
 import { parseApplicationMailingMetaData } from './Mailing/utils/parseApplicaitonMailingMetaData'
 import { getIsApplicationMailingIsConfigured } from './utils/getApplicationMailingIsConfigured'
+import { ManagementPageHeader } from '../management/components/ManagementPageHeader'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -91,8 +92,8 @@ export const Application = (): JSX.Element => {
   }, [applicationMetaData, fetchedCoursePhase?.meta_data, path])
 
   return (
-    <div className='container mx-auto p-6'>
-      <h1 className='text-4xl font-bold mb-6'>Application Administration</h1>
+    <div>
+      <ManagementPageHeader>Application Administration</ManagementPageHeader>
       {isPending ? (
         <div className='flex justify-center items-center h-64'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
