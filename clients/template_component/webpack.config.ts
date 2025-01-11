@@ -5,6 +5,7 @@ import packageJson from '../package.json' with { type: 'json' }
 import webpack from 'webpack'
 import container from 'webpack'
 import { fileURLToPath } from 'url'
+import CopyPlugin from 'copy-webpack-plugin'
 
 const { ModuleFederationPlugin } = webpack.container
 
@@ -91,6 +92,9 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
           'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
         },
+      }),
+      new CopyPlugin({
+        patterns: [{ from: 'public' }],
       }),
       new HtmlWebpackPlugin({
         template: 'public/template.html',
