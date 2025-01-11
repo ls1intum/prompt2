@@ -2,6 +2,10 @@ name: Build and Push Clients Docker Clients
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
     outputs:
       base_image_tag: 
         description: "The tag of the base image that was built"
@@ -26,11 +30,13 @@ jobs:
     needs: build-and-push-clients-base
     uses: ./.github/workflows/build-and-push-docker-image.yml
     with:
+     
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "CLIENT_HOST=${{ vars.CLIENT_HOST }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
@@ -46,6 +52,7 @@ jobs:
       docker-context: ./clients/template_component
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "CLIENT_HOST=${{ vars.CLIENT_HOST }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
         "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}"
     secrets: inherit
