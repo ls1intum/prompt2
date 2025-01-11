@@ -69,7 +69,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: 'auto',
+      publicPath: '/template', // Ensures assets are served relative to /template/
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -80,7 +80,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     plugins: [
       new ModuleFederationPlugin({
         name: 'template_component', // TODO: rename this to your component name
-        filename: 'template/remoteEntry.js',
+        filename: 'remoteEntry.js',
         exposes: {
           './routers': './routers',
           './sidebar': './sidebar',
