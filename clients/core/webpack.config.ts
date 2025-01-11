@@ -26,7 +26,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const deps = packageJson.dependencies
 
   // Adjust this to match your deployment URL
-  const rootURL = getVariable('CLIENT_HOST')
+  const rootURL = getVariable('REACT_APP_SERVER_HOST')
   let templateURL = getVariable('REACT_TEMPLATE_COMPONENT_SUBDOMAIN')
   if (!templateURL) {
     // Adjust this to match your local dev port

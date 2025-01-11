@@ -89,7 +89,7 @@ services:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/template`)"
+      - "traefik.http.routers.template.rule=Host(`${SERVER_HOST}`) && PathPrefix(`${TEMPLATE_COMPONENT_SUBDOMAIN}`)"
       - "traefik.http.routers.template.entrypoints=websecure"
       - "traefik.http.routers.template.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.template-compress.compress=true"
