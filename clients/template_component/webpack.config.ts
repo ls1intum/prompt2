@@ -69,7 +69,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: 'https://prompt2.ase.cit.tum.de/template/', // Whole Domain is crucial when deployed under other domain!
+      publicPath: '/template/', // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
