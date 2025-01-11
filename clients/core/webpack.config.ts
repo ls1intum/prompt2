@@ -25,10 +25,14 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
 
-  // get the url of the template component
-  let templateURL = getVariable('REACT_APP_TEMPLATE_HOST')
+  // Adjust this to match your deployment URL
+  const rootURL = getVariable('CLIENT_HOST')
+  let templateURL = getVariable('REACT_TEMPLATE_COMPONENT_SUBDOMAIN')
   if (!templateURL) {
+    // Adjust this to match your local dev port
     templateURL = 'http://localhost:3001'
+  } else {
+    templateURL = `${rootURL}/${templateURL}`
   }
 
   return {

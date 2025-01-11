@@ -8,12 +8,22 @@ import { fileURLToPath } from 'url'
 
 const { ModuleFederationPlugin } = webpack.container
 
+// Set the following variables to correctly configure the webpack
+// In Environment Variables
+// DEPLOYMENT_SUBDOMAIN=template_component
+
+// Fixed variables
+const localDevPort = 3001
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
+  // Here we only need the subdomain. Leave empty if deployed at someURL.com/
+  // Only fill out if deployed at someURL.com/subdomain/
+  const deploymentSubDomain = getVariable('REACT_TEMPLATE_COMPONENT_SUBDOMAIN') ?? ''
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
 
@@ -29,7 +39,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: 3001,
+      port: localDevPort,
       client: {
         progress: true,
       },
@@ -69,8 +79,9 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: 'template_component',
-        filename: 'remoteEntry.js',
+        name: 'template_component', // TODO: rename this to your component name
+        filename:
+          deploymentSubDomain !== '' ? `${deploymentSubDomain}/remoteEntry.js` : 'remoteEntry.js',
         exposes: {
           './routers': './routers',
           './sidebar': './sidebar',
