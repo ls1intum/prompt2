@@ -27,7 +27,7 @@ func replacePlaceholders(template string, values map[string]string) string {
 	return prettifyHTML(replacedHTML)
 }
 
-func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, url string) map[string]string {
+func getApplicationConfirmationPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, url string) map[string]string {
 	return map[string]string{
 		"firstName":           getPgtypeTextValue(mailingInfo.FirstName),
 		"lastName":            getPgtypeTextValue(mailingInfo.LastName),
@@ -42,6 +42,22 @@ func getPlaceholderValues(mailingInfo db.GetConfirmationMailingInformationRow, u
 		"courseEndDate":       getPgtypeDateValue(mailingInfo.CourseEndDate),
 		"applicationEndDate":  formatStringDate(mailingInfo.ApplicationEndDate),
 		"applicationURL":      url,
+	}
+}
+
+func getStatusEmailPlaceholderValues(courseName string, courseStartDate, courseEndDate pgtype.Date, participant db.GetParticipantMailingInformationRow) map[string]string {
+	return map[string]string{
+		"firstName":           getPgtypeTextValue(participant.FirstName),
+		"lastName":            getPgtypeTextValue(participant.LastName),
+		"email":               getPgtypeTextValue(participant.Email),
+		"matriculationNumber": getPgtypeTextValue(participant.MatriculationNumber),
+		"universityLogin":     getPgtypeTextValue(participant.UniversityLogin),
+		"studyDegree":         getStudyDegreeString(participant.StudyDegree),
+		"currentSemester":     getPgtypeInt4Value(participant.CurrentSemester),
+		"studyProgram":        getPgtypeTextValue(participant.StudyProgram),
+		"courseName":          courseName,
+		"courseStartDate":     getPgtypeDateValue(courseStartDate),
+		"courseEndDate":       getPgtypeDateValue(courseEndDate),
 	}
 }
 

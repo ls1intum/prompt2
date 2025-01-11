@@ -4,11 +4,11 @@ export const parseApplicationMailingMetaData = (metaData: any): ApplicationMaili
   const {
     mailingConfig: {
       confirmationMailSubject = '',
-      confirmationMail = '',
-      rejectionMailSubject = '',
-      rejectionMail = '',
-      acceptanceMailSubject = '',
-      acceptanceMail = '',
+      confirmationMailContent = '',
+      failedMailSubject = '',
+      failedMailContent = '',
+      passedMailSubject = '',
+      passedMailContent = '',
       sendConfirmationMail = false,
       sendRejectionMail = false,
       sendAcceptanceMail = false,
@@ -19,11 +19,11 @@ export const parseApplicationMailingMetaData = (metaData: any): ApplicationMaili
 
   return {
     confirmationMailSubject,
-    confirmationMail,
-    rejectionMailSubject,
-    rejectionMail,
-    acceptanceMailSubject,
-    acceptanceMail,
+    confirmationMailContent,
+    failedMailSubject,
+    failedMailContent,
+    passedMailSubject,
+    passedMailContent,
     sendConfirmationMail,
     sendRejectionMail,
     sendAcceptanceMail,

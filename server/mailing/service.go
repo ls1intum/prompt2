@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/mailing/mailingDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,7 +49,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 		return nil
 	}
 
-	if mailingInfo.ConfirmationMailTemplate == "" {
+	if mailingInfo.ConfirmationMailContent == "" {
 		log.Error("mailing template is not correctly configured")
 		return nil
 	}
@@ -56,8 +57,8 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
 
 	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseID.String())
-	placeholderValues := getPlaceholderValues(mailingInfo, applicationURL)
-	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailTemplate, placeholderValues)
+	placeholderValues := getApplicationConfirmationPlaceholderValues(mailingInfo, applicationURL)
+	finalMessage := replacePlaceholders(mailingInfo.ConfirmationMailContent, placeholderValues)
 
 	// replace values in subject
 	finalSubject := replacePlaceholders(mailingInfo.ConfirmationMailSubject, placeholderValues)
@@ -70,6 +71,70 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	}
 
 	return nil
+}
+
+func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, status db.PassStatus) (mailingDTO.MailingReport, error) {
+	response := mailingDTO.MailingReport{}
+	mailingInfo := mailingDTO.MailingInfo{}
+
+	// 1.) get mailing info for course phase
+	if status == db.PassStatusPassed {
+		infos, err := MailingServiceSingleton.queries.GetPassedMailingInformation(ctx, coursePhaseID)
+		if err != nil {
+			log.Error("failed to get mailing information: ", err)
+			return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+		}
+		mailingInfo = mailingDTO.GetMailingInfoFromPassedMailingInformation(infos)
+
+	} else if status == db.PassStatusFailed {
+		infos, err := MailingServiceSingleton.queries.GetFailedMailingInformation(ctx, coursePhaseID)
+		if err != nil {
+			log.Error("failed to get mailing information: ", err)
+			return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+		}
+		mailingInfo = mailingDTO.GetMailingInfoFromFailedMailingInformation(infos)
+
+	} else {
+		log.Error("invalid status")
+		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+
+	}
+
+	// 2.) Check if mailing is configured -> return if not
+	if mailingInfo.MailSubject == "" || mailingInfo.MailContent == "" || mailingInfo.ReplyToEmail == "" || mailingInfo.ReplyToName == "" {
+		log.Error("mailing template is not correctly configured")
+		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+	}
+
+	// 3.) Get all participants that have not been accepted incl. information
+	participants, err := MailingServiceSingleton.queries.GetParticipantMailingInformation(ctx, db.GetParticipantMailingInformationParams{
+		ID:         coursePhaseID,
+		PassStatus: db.NullPassStatus{PassStatus: status, Valid: true},
+	})
+	if err != nil {
+		log.Error("failed to get participant mailing information: ", err)
+		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+	}
+
+	// 4.) Send mail to all participants
+	for _, participant := range participants {
+		placeholderMap := getStatusEmailPlaceholderValues(mailingInfo.CourseName, mailingInfo.CourseStartDate, mailingInfo.CourseEndDate, participant)
+		// replace values in subject
+		finalSubject := replacePlaceholders(mailingInfo.MailSubject, placeholderMap)
+
+		// replace values in content
+		finalMessage := replacePlaceholders(mailingInfo.MailContent, placeholderMap)
+
+		err = SendMail(participant.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
+		if err != nil {
+			log.Error("failed to send mail: ", err)
+			response.FailedEmails = append(response.FailedEmails, participant.Email.String)
+		} else {
+			response.SuccessfulEmails = append(response.SuccessfulEmails, participant.Email.String)
+		}
+	}
+
+	return response, nil
 }
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.

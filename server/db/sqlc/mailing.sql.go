@@ -29,7 +29,7 @@ SELECT
     COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMail'), '')::text AS confirmation_mail_template,
+    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
     COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
 FROM 
     course_phase_participation cpp
@@ -52,23 +52,23 @@ type GetConfirmationMailingInformationParams struct {
 }
 
 type GetConfirmationMailingInformationRow struct {
-	FirstName                pgtype.Text `json:"first_name"`
-	LastName                 pgtype.Text `json:"last_name"`
-	Email                    pgtype.Text `json:"email"`
-	MatriculationNumber      pgtype.Text `json:"matriculation_number"`
-	UniversityLogin          pgtype.Text `json:"university_login"`
-	StudyDegree              StudyDegree `json:"study_degree"`
-	CurrentSemester          pgtype.Int4 `json:"current_semester"`
-	StudyProgram             pgtype.Text `json:"study_program"`
-	CourseName               string      `json:"course_name"`
-	CourseStartDate          pgtype.Date `json:"course_start_date"`
-	CourseEndDate            pgtype.Date `json:"course_end_date"`
-	ApplicationEndDate       string      `json:"application_end_date"`
-	ReplyToEmail             string      `json:"reply_to_email"`
-	ReplyToName              string      `json:"reply_to_name"`
-	ConfirmationMailSubject  string      `json:"confirmation_mail_subject"`
-	ConfirmationMailTemplate string      `json:"confirmation_mail_template"`
-	SendConfirmationMail     bool        `json:"send_confirmation_mail"`
+	FirstName               pgtype.Text `json:"first_name"`
+	LastName                pgtype.Text `json:"last_name"`
+	Email                   pgtype.Text `json:"email"`
+	MatriculationNumber     pgtype.Text `json:"matriculation_number"`
+	UniversityLogin         pgtype.Text `json:"university_login"`
+	StudyDegree             StudyDegree `json:"study_degree"`
+	CurrentSemester         pgtype.Int4 `json:"current_semester"`
+	StudyProgram            pgtype.Text `json:"study_program"`
+	CourseName              string      `json:"course_name"`
+	CourseStartDate         pgtype.Date `json:"course_start_date"`
+	CourseEndDate           pgtype.Date `json:"course_end_date"`
+	ApplicationEndDate      string      `json:"application_end_date"`
+	ReplyToEmail            string      `json:"reply_to_email"`
+	ReplyToName             string      `json:"reply_to_name"`
+	ConfirmationMailSubject string      `json:"confirmation_mail_subject"`
+	ConfirmationMailContent string      `json:"confirmation_mail_content"`
+	SendConfirmationMail    bool        `json:"send_confirmation_mail"`
 }
 
 func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg GetConfirmationMailingInformationParams) (GetConfirmationMailingInformationRow, error) {
@@ -90,8 +90,161 @@ func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg Get
 		&i.ReplyToEmail,
 		&i.ReplyToName,
 		&i.ConfirmationMailSubject,
-		&i.ConfirmationMailTemplate,
+		&i.ConfirmationMailContent,
 		&i.SendConfirmationMail,
+	)
+	return i, err
+}
+
+const getFailedMailingInformation = `-- name: GetFailedMailingInformation :one
+SELECT
+    c.name AS course_name,
+    c.start_date AS course_start_date,
+    c.end_date AS course_end_date,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS mail_content
+FROM
+    course_phase p
+JOIN
+    course c ON p.course_id = c.id
+WHERE
+    p.id = $1
+`
+
+type GetFailedMailingInformationRow struct {
+	CourseName      string      `json:"course_name"`
+	CourseStartDate pgtype.Date `json:"course_start_date"`
+	CourseEndDate   pgtype.Date `json:"course_end_date"`
+	ReplyToEmail    string      `json:"reply_to_email"`
+	ReplyToName     string      `json:"reply_to_name"`
+	MailSubject     string      `json:"mail_subject"`
+	MailContent     string      `json:"mail_content"`
+}
+
+func (q *Queries) GetFailedMailingInformation(ctx context.Context, id uuid.UUID) (GetFailedMailingInformationRow, error) {
+	row := q.db.QueryRow(ctx, getFailedMailingInformation, id)
+	var i GetFailedMailingInformationRow
+	err := row.Scan(
+		&i.CourseName,
+		&i.CourseStartDate,
+		&i.CourseEndDate,
+		&i.ReplyToEmail,
+		&i.ReplyToName,
+		&i.MailSubject,
+		&i.MailContent,
+	)
+	return i, err
+}
+
+const getParticipantMailingInformation = `-- name: GetParticipantMailingInformation :many
+SELECT
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.study_degree,
+    s.current_semester,
+    s.study_program
+FROM
+    course_phase p
+JOIN
+    course_phase_participation cpp ON p.id = cpp.course_phase_id
+JOIN
+    course_participation cp ON cpp.course_participation_id = cp.id
+JOIN
+    student s ON cp.student_id = s.id
+WHERE
+    p.id = $1
+AND 
+    cpp.pass_status = $2
+`
+
+type GetParticipantMailingInformationParams struct {
+	ID         uuid.UUID      `json:"id"`
+	PassStatus NullPassStatus `json:"pass_status"`
+}
+
+type GetParticipantMailingInformationRow struct {
+	FirstName           pgtype.Text `json:"first_name"`
+	LastName            pgtype.Text `json:"last_name"`
+	Email               pgtype.Text `json:"email"`
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+	StudyDegree         StudyDegree `json:"study_degree"`
+	CurrentSemester     pgtype.Int4 `json:"current_semester"`
+	StudyProgram        pgtype.Text `json:"study_program"`
+}
+
+func (q *Queries) GetParticipantMailingInformation(ctx context.Context, arg GetParticipantMailingInformationParams) ([]GetParticipantMailingInformationRow, error) {
+	rows, err := q.db.Query(ctx, getParticipantMailingInformation, arg.ID, arg.PassStatus)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetParticipantMailingInformationRow
+	for rows.Next() {
+		var i GetParticipantMailingInformationRow
+		if err := rows.Scan(
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.StudyDegree,
+			&i.CurrentSemester,
+			&i.StudyProgram,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPassedMailingInformation = `-- name: GetPassedMailingInformation :one
+SELECT
+    c.name AS course_name,
+    c.start_date AS course_start_date,
+    c.end_date AS course_end_date,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingConfig'->>'passedMailContent'), '')::text AS mail_content
+FROM
+    course_phase p
+JOIN
+    course c ON p.course_id = c.id
+WHERE
+    p.id = $1
+`
+
+type GetPassedMailingInformationRow struct {
+	CourseName      string      `json:"course_name"`
+	CourseStartDate pgtype.Date `json:"course_start_date"`
+	CourseEndDate   pgtype.Date `json:"course_end_date"`
+	ReplyToEmail    string      `json:"reply_to_email"`
+	ReplyToName     string      `json:"reply_to_name"`
+	MailSubject     string      `json:"mail_subject"`
+	MailContent     string      `json:"mail_content"`
+}
+
+func (q *Queries) GetPassedMailingInformation(ctx context.Context, id uuid.UUID) (GetPassedMailingInformationRow, error) {
+	row := q.db.QueryRow(ctx, getPassedMailingInformation, id)
+	var i GetPassedMailingInformationRow
+	err := row.Scan(
+		&i.CourseName,
+		&i.CourseStartDate,
+		&i.CourseEndDate,
+		&i.ReplyToEmail,
+		&i.ReplyToName,
+		&i.MailSubject,
+		&i.MailContent,
 	)
 	return i, err
 }

@@ -1,4 +1,3 @@
-import { Label } from '@/components/ui/label'
 import {
   Sidebar,
   SidebarContent,
@@ -23,11 +22,8 @@ export const InsideSidebar = (): JSX.Element => {
 
   return (
     <Sidebar collapsible='none' className='flex-1 flex'>
-      <SidebarHeader className='gap-3.5 border-b p-4'>
-        <div className='flex w-full items-center justify-between'>
-          <div className='text-base font-medium text-foreground'>{headerName}</div>
-          <Label className='flex items-center gap-2 text-sm'></Label>
-        </div>
+      <SidebarHeader className='flex h-14 border-b justify-center'>
+        <div className='text-base font-medium text-foreground'>{headerName}</div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className='px-2 py-4'>
