@@ -85,7 +85,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       new ModuleFederationPlugin({
         name: 'core',
         remotes: {
-          template_component: `template_component@${templateURL}/remoteEntry.js`,
+          template_component: `template_component@https://prompt2.ase.cit.tum.de/template/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
