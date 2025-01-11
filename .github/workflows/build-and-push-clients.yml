@@ -2,10 +2,6 @@ name: Build and Push Clients Docker Clients
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
     outputs:
       base_image_tag: 
         description: "The tag of the base image that was built"
@@ -30,7 +26,6 @@ jobs:
     needs: build-and-push-clients-base
     uses: ./.github/workflows/build-and-push-docker-image.yml
     with:
-     
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core

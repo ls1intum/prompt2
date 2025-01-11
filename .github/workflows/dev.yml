@@ -11,8 +11,6 @@ jobs:
   build-and-push-clients:
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
-    with:
-      environment: dev
   deploy-dev-container:
     needs: [build-and-push-clients, build-and-push-server]
     uses: ./.github/workflows/deploy-docker.yml
