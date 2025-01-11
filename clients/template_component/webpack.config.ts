@@ -11,10 +11,7 @@ const { ModuleFederationPlugin } = webpack.container
 
 // Set the following variables to correctly configure the webpack
 // In Environment Variables
-// DEPLOYMENT_SUBDOMAIN=template_component
-
-// Fixed variables
-const localDevPort = 3001
+// DEPLOYMENT_SUBPATH=template
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -24,7 +21,12 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
 
   // Here we only need the subdomain. Leave empty if deployed at someURL.com/
   // Only fill out if deployed at someURL.com/subdomain/
-  const deploymentSubDomain = 'template'
+  let deploymentPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
+  if (deploymentPath !== '') {
+    deploymentPath = '/' + deploymentPath + '/'
+  } else {
+    deploymentPath = 'auto'
+  }
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
 
@@ -40,7 +42,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: localDevPort,
+      port: 3001, // Adjust this if you have multiple components running
       client: {
         progress: true,
       },
@@ -70,7 +72,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: '/template/', // Whole Domain is crucial when deployed under other domain!
+      publicPath: deploymentPath, // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],

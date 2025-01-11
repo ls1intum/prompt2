@@ -27,7 +27,8 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
 
   // Adjust this to match your deployment URL
   const rootURL = getVariable('REACT_APP_SERVER_HOST')
-  const templateURL = 'https://prompt2.ase.cit.tum.de/template'
+  const templateSubPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
+  const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
 
   return {
     target: 'web',
@@ -85,7 +86,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       new ModuleFederationPlugin({
         name: 'core',
         remotes: {
-          template_component: `template_component@https://prompt2.ase.cit.tum.de/template/remoteEntry.js`,
+          template_component: `template_component@${templateURL}/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
