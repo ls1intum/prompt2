@@ -27,13 +27,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
 
   // Adjust this to match your deployment URL
   const rootURL = getVariable('REACT_APP_SERVER_HOST')
-  let templateURL = getVariable('REACT_TEMPLATE_COMPONENT_SUBDOMAIN')
-  if (!templateURL) {
-    // Adjust this to match your local dev port
-    templateURL = 'http://localhost:3001'
-  } else {
-    templateURL = `${rootURL}/${templateURL}`
-  }
+  const templateURL = 'https://prompt2.ase.cit.tum.de/template'
 
   return {
     target: 'web',

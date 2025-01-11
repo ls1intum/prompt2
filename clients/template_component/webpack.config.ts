@@ -23,7 +23,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
 
   // Here we only need the subdomain. Leave empty if deployed at someURL.com/
   // Only fill out if deployed at someURL.com/subdomain/
-  const deploymentSubDomain = getVariable('REACT_TEMPLATE_COMPONENT_SUBDOMAIN') ?? ''
+  const deploymentSubDomain = 'template'
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
 
@@ -80,8 +80,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     plugins: [
       new ModuleFederationPlugin({
         name: 'template_component', // TODO: rename this to your component name
-        filename:
-          deploymentSubDomain !== '' ? `${deploymentSubDomain}/remoteEntry.js` : 'remoteEntry.js',
+        filename: 'template/remoteEntry.js',
         exposes: {
           './routers': './routers',
           './sidebar': './sidebar',
