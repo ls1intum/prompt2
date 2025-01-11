@@ -1,7 +1,10 @@
 ARG IMAGE_TAG
 FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG} AS core-base
 
+# can also be dynamically in ENV Variables
 ARG SERVER_HOST
+# MUST BE defined in repository env variables as it is required for the build
+# ENV Variables are not available at build time
 ARG TEMPLATE_COMPONENT_SUBPATH
 
 ENV REACT_APP_SERVER_HOST=$SERVER_HOST
