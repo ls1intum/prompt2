@@ -5,8 +5,13 @@ import packageJson from '../package.json' with { type: 'json' }
 import webpack from 'webpack'
 import container from 'webpack'
 import { fileURLToPath } from 'url'
+import CopyPlugin from 'copy-webpack-plugin'
 
 const { ModuleFederationPlugin } = webpack.container
+
+// Set the following variables to correctly configure the webpack
+// In Environment Variables
+// DEPLOYMENT_SUBPATH=template
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -14,6 +19,14 @@ const __dirname = path.dirname(__filename)
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
 
+  // Here we only need the subdomain. Leave empty if deployed at someURL.com/
+  // Only fill out if deployed at someURL.com/subdomain/
+  let deploymentPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
+  if (deploymentPath !== '') {
+    deploymentPath = '/' + deploymentPath + '/'
+  } else {
+    deploymentPath = 'auto'
+  }
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
 
@@ -29,7 +42,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: 3001,
+      port: 3001, // Adjust this if you have multiple components running
       client: {
         progress: true,
       },
@@ -59,7 +72,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: 'auto',
+      publicPath: deploymentPath, // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -69,7 +82,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: 'template_component',
+        name: 'template_component', // TODO: rename this to your component name
         filename: 'remoteEntry.js',
         exposes: {
           './routers': './routers',
@@ -81,6 +94,9 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
           'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
         },
+      }),
+      new CopyPlugin({
+        patterns: [{ from: 'public' }],
       }),
       new HtmlWebpackPlugin({
         template: 'public/template.html',
@@ -99,12 +115,6 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       }),
       new webpack.DefinePlugin({
         'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
-        'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_HOST'),
-        ),
-        'process.env.REACT_APP_KEYCLOAK_REALM_NAME': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_REALM_NAME'),
-        ),
       }),
     ].filter(Boolean),
     cache: {

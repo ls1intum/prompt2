@@ -3,6 +3,7 @@ declare module 'template_component/App' {
   export default App
 }
 
+// TODO: add your new components here!
 declare module 'template_component/routers' {
   import { RouteObject } from 'react-router-dom'
 

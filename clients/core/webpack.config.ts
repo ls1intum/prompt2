@@ -25,11 +25,10 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
 
-  // get the url of the template component
-  let templateURL = getVariable('REACT_APP_TEMPLATE_HOST')
-  if (!templateURL) {
-    templateURL = 'http://localhost:3001'
-  }
+  // Adjust this to match your deployment URL
+  const rootURL = getVariable('REACT_APP_CLIENT_HOST')
+  const templateSubPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
+  const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
 
   return {
     target: 'web',
