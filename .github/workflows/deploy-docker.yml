@@ -111,7 +111,7 @@ jobs:
           
             echo "SERVER_HOST=${{ vars.SERVER_HOST }}" >> .env.prod
             echo "CLIENT_HOST=${{ vars.CLIENT_HOST }}" >> .env.prod
-            echo "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}" >> .env.prod
+            echo "TEMPLATE_COMPONENT_SUBDOMAIN=${{ vars.TEMPLATE_COMPONENT_SUBDOMAIN }}" >> .env.prod
 
             echo "SERVER_ADDRESS=${{ vars.SERVER_ADDRESS }}" >> .env.prod 
             echo "DB_HOST=${{ vars.DB_HOST }}" >> .env.prod

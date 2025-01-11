@@ -34,7 +34,7 @@ jobs:
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
-        "TEMPLATE_HOST=${{ vars.TEMPLATE_HOST }}"
+        "TEMPLATE_COMPONENT_SUBDOMAIN=${{ vars.TEMPLATE_COMPONENT_SUBDOMAIN }}"
     secrets: inherit
    
   build-and-push-clients-template:
