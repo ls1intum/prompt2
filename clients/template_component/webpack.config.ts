@@ -110,12 +110,6 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       }),
       new webpack.DefinePlugin({
         'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
-        'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_HOST'),
-        ),
-        'process.env.REACT_APP_KEYCLOAK_REALM_NAME': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_REALM_NAME'),
-        ),
       }),
     ].filter(Boolean),
     cache: {
