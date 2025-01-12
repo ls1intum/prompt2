@@ -257,6 +257,29 @@ SELECT
         (
           ----------------------------------------------------------------
           -- Getting meta data from the application phase (if it is a meta-data predecessor)
+          -- We are expecting the following application meta data:
+          -- {
+          --   "exportAnswers": {
+            --     "applicationScore": true,
+            --     "additionalScores": [
+            --       {  
+            --         "key": "newName/Key",
+            --         "name": "score1ToBeExported"
+            --       }
+            --     "answersText": [
+            --       {
+            --         "questionID": "uuid",
+            --         "key": "string"
+            --       }
+            --     ],
+            --     "answersMultiSelect": [
+            --       {
+            --         "questionID": "uuid",
+            --         "key": "string"
+            --       }
+            --     ]
+            --   }
+          -- }
           ----------------------------------------------------------------
          SELECT appdata.obj
          FROM direct_predecessors_for_meta dpm
@@ -300,6 +323,19 @@ SELECT
                  LEFT JOIN application_answer_multi_select aams
                    ON aams.course_phase_participation_id = pcpp.id
                   AND aams.application_question_id = (question_config->>'questionID')::uuid
+                
+                  UNION ALL
+
+                 -- 2d) Get additional scores
+                  SELECT
+                    question_config->>'key'  AS key,
+                    to_jsonb(
+                        pcpp.meta_data -> (question_config->>'name')
+                    )                       AS value
+                  FROM jsonb_array_elements(
+                          dpm.course_phase_meta_data->'exportAnswers'->'additionalScores'
+                        ) question_config
+                
              ) x
          ) appdata
        ),
