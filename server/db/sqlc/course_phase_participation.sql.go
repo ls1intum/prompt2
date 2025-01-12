@@ -229,7 +229,7 @@ qualified_non_participants AS (
 
 SELECT
     main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.course_participation_id,
-    COALESCE(
+    (COALESCE(
        (
           ----------------------------------------------------------------
           -- Getting non application meta data
@@ -251,7 +251,13 @@ SELECT
                     FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
                 ) 
        ),
+       '{}'
+    )::jsonb ||
+    COALESCE (
         (
+          ----------------------------------------------------------------
+          -- Getting meta data from the application phase (if it is a meta-data predecessor)
+          ----------------------------------------------------------------
          SELECT appdata.obj
          FROM direct_predecessors_for_meta dpm
          JOIN course_phase_participation pcpp
@@ -298,7 +304,7 @@ SELECT
          ) appdata
        ),
        '{}'
-    )::jsonb AS prev_meta_data
+    )::jsonb)::jsonb AS prev_meta_data
 
 FROM
 (

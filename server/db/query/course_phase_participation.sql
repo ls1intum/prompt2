@@ -155,7 +155,7 @@ qualified_non_participants AS (
 -----------------------------------------------------------------------
 SELECT
     main.*,
-    COALESCE(
+    (COALESCE(
        (
           ----------------------------------------------------------------
           -- Getting non application meta data
@@ -177,6 +177,9 @@ SELECT
                     FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
                 ) 
        ),
+       '{}'
+    )::jsonb ||
+    COALESCE (
         (
           ----------------------------------------------------------------
           -- Getting meta data from the application phase (if it is a meta-data predecessor)
@@ -227,7 +230,7 @@ SELECT
          ) appdata
        ),
        '{}'
-    )::jsonb AS prev_meta_data
+    )::jsonb)::jsonb AS prev_meta_data
 
 FROM
 (
