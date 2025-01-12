@@ -147,6 +147,108 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Cont
 	return items, nil
 }
 
+const getAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious = `-- name: GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious :many
+WITH previous_phase AS (
+    SELECT
+        from_course_phase_id AS prev_id
+    FROM course_phase_graph
+    WHERE to_course_phase_id = $1
+)
+SELECT
+    -- Existing participation in the current phase
+    cpp.id                          AS course_phase_participation_id,
+    cpp.pass_status,
+    cpp.meta_data,
+    s.id                           AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender
+FROM course_phase_participation cpp
+JOIN course_participation cp ON cpp.course_participation_id = cp.id
+JOIN student s ON cp.student_id = s.id
+WHERE cpp.course_phase_id = $1
+
+UNION
+
+SELECT
+    -- Students who do NOT yet have a participation for the current phase,
+    -- but have passed the previous phase.
+    NULL                           AS course_phase_participation_id,
+    prev_cpp.pass_status           AS pass_status,
+    prev_cpp.meta_data            AS meta_data,
+    s.id                           AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender
+FROM course_participation cp
+JOIN student s ON cp.student_id = s.id
+JOIN course_phase_participation prev_cpp
+    ON cp.id = prev_cpp.course_participation_id
+JOIN previous_phase cpg
+    ON prev_cpp.course_phase_id = cpg.prev_id
+WHERE prev_cpp.pass_status = 'passed'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM course_phase_participation new_cpp
+      WHERE new_cpp.course_phase_id = $1
+        AND new_cpp.course_participation_id = cp.id
+  )
+`
+
+type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
+	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
+	PassStatus                 NullPassStatus `json:"pass_status"`
+	MetaData                   []byte         `json:"meta_data"`
+	StudentID                  uuid.UUID      `json:"student_id"`
+	FirstName                  pgtype.Text    `json:"first_name"`
+	LastName                   pgtype.Text    `json:"last_name"`
+	Email                      pgtype.Text    `json:"email"`
+	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text    `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
+	Gender                     Gender         `json:"gender"`
+}
+
+func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx context.Context, toCoursePhaseID uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow, error) {
+	rows, err := q.db.Query(ctx, getAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious, toCoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow
+	for rows.Next() {
+		var i GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow
+		if err := rows.Scan(
+			&i.CoursePhaseParticipationID,
+			&i.PassStatus,
+			&i.MetaData,
+			&i.StudentID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCoursePhaseParticipation = `-- name: GetCoursePhaseParticipation :one
 SELECT id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified FROM course_phase_participation
 WHERE id = $1 LIMIT 1
