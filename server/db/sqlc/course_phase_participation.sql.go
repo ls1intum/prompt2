@@ -148,35 +148,29 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Cont
 }
 
 const getAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious = `-- name: GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious :many
-WITH RECURSIVE backward_chain AS (
-    /*
-     * Starting from the *current* phase $1, walk backwards
-     * via ` + "`" + `course_phase_graph` + "`" + ` until we can no longer go back.
-     * This will gather all the "previous" phases (including the current one).
-     */
-    SELECT
-        cp.id AS phase_id,
-        cp.course_phase_type_id
-    FROM course_phase cp
-    WHERE cp.id = $1
-    
-    UNION ALL
-
-    SELECT
-        cpg.from_course_phase_id AS phase_id,
-        cp2.course_phase_type_id
+WITH 
+direct_predecessor_for_pass AS (
+    SELECT cpg.from_course_phase_id AS phase_id
     FROM course_phase_graph cpg
-    JOIN course_phase cp2
-      ON cp2.id = cpg.from_course_phase_id
-    JOIN backward_chain bc
-      ON bc.phase_id = cpg.to_course_phase_id
-), 
+    WHERE cpg.to_course_phase_id = $1
+),
+
+direct_predecessors_for_meta AS (
+  SELECT 
+    from_phase_id AS phase_id,
+    cp.course_phase_type_id AS course_phase_type_id
+  FROM meta_data_dependency_graph
+  JOIN course_phase cp
+    ON cp.id = from_phase_id
+  WHERE to_phase_id = $1
+),
+
 current_phase_participations AS (
     SELECT
-        cpp.id            AS course_phase_participation_id,
-        cpp.pass_status   AS pass_status,
-        cpp.meta_data     AS meta_data,
-        s.id             AS student_id,
+        cpp.id                   AS course_phase_participation_id,
+        cpp.pass_status          AS pass_status,
+        cpp.meta_data            AS meta_data,
+        s.id                     AS student_id,
         s.first_name,
         s.last_name,
         s.email,
@@ -184,21 +178,21 @@ current_phase_participations AS (
         s.university_login,
         s.has_university_account,
         s.gender,
-        cp.id            AS course_participation_id
+        cp.id                    AS course_participation_id
     FROM course_phase_participation cpp
-    JOIN course_participation cp
+    JOIN course_participation cp 
       ON cpp.course_participation_id = cp.id
-    JOIN student s
+    JOIN student s 
       ON cp.student_id = s.id
     WHERE cpp.course_phase_id = $1
 ),
+
 qualified_non_participants AS (
     SELECT
-        -- No current participation for this phase
-        NULL::uuid                     AS course_phase_participation_id,
-        'not_assessed'::pass_status    AS pass_status,
-        '{}'::jsonb                    AS meta_data,
-        s.id                           AS student_id,
+        NULL::uuid                   AS course_phase_participation_id,
+        'not_assessed'::pass_status  AS pass_status,
+        '{}'::jsonb                  AS meta_data,
+        s.id                         AS student_id,
         s.first_name,
         s.last_name,
         s.email,
@@ -206,57 +200,59 @@ qualified_non_participants AS (
         s.university_login,
         s.has_university_account,
         s.gender,
-        cp.id                          AS course_participation_id
+        cp.id                        AS course_participation_id
     FROM course_participation cp
     JOIN student s 
       ON cp.student_id = s.id
 
-    -- Filter out those who already have a row for course_phase_id = $1
-    WHERE NOT EXISTS (
+    WHERE 
+      -- Exclude if they already have a participation in the current phase
+      NOT EXISTS (
         SELECT 1
         FROM course_phase_participation new_cpp
         WHERE new_cpp.course_phase_id = $1
           AND new_cpp.course_participation_id = cp.id
-    )
-
-    -- And ensure they have 'passed' in the previous phase
+      )
+      
+    -- And ensure they have 'passed' in the previous phase 
+    -- We filter just previous, not all since phase order might change or get unlinear at some point
     AND EXISTS (
         SELECT 1
-        FROM backward_chain bc
-        JOIN course_phase_participation pcpp
-          ON pcpp.course_phase_id = bc.phase_id
-         AND pcpp.course_participation_id = cp.id
-        WHERE bc.phase_id != $1
-          AND (pcpp.pass_status = 'passed')
+        FROM direct_predecessor_for_pass dpp
+        JOIN  course_phase_participation pcpp
+          ON pcpp.course_phase_id = dpp.phase_id
+          AND pcpp.course_participation_id = cp.id
+        WHERE (pcpp.pass_status = 'passed')
     )
 )
+
 SELECT
     main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.course_participation_id,
-
-   COALESCE((
-       SELECT jsonb_object_agg(each.key, each.value)
-       FROM backward_chain bc
-       JOIN course_phase_participation pcpp
-         ON pcpp.course_phase_id = bc.phase_id
-        AND pcpp.course_participation_id = main.course_participation_id
-       JOIN course_phase_type cpt
-         ON cpt.id = bc.course_phase_type_id
-       CROSS JOIN LATERAL jsonb_each(pcpp.meta_data) each
-       WHERE 
-         -- Only keep meta_data where the JSON key matches one of the "name" attributes
-         each.key IN (
-             SELECT elem->>'name'
-             FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
-         )
-    ), '{}')::jsonb AS prev_meta_data
+    COALESCE(
+       (
+          SELECT jsonb_object_agg(each.key, each.value)
+          FROM direct_predecessors_for_meta dpm
+          JOIN course_phase_participation pcpp
+            ON pcpp.course_phase_id = dpm.phase_id
+            AND pcpp.course_participation_id = main.course_participation_id
+          JOIN course_phase_type cpt
+            ON cpt.id = dpm.course_phase_type_id
+          CROSS JOIN LATERAL jsonb_each(pcpp.meta_data) each
+            WHERE 
+            -- Only keep meta_data where the JSON key matches one of the "name" attributes
+                each.key IN (
+                    SELECT elem->>'name'
+                    FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
+                ) 
+       ), 
+       '{}'
+    )::jsonb AS prev_meta_data
 
 FROM
 (
-    -- Combine existing participants + new "qualified" participants
     SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, course_participation_id FROM current_phase_participations
     UNION
     SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, course_participation_id FROM qualified_non_participants
-
 ) AS main
 ORDER BY main.last_name, main.first_name
 `
@@ -278,18 +274,29 @@ type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
 }
 
 // ---------------------------------------------------------------------
+// A) Phases a student must have 'passed' (per course_phase_graph)
+// Identify the single previous phase (if any) required for PASS
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// B) Phases from which we pull metadata (per meta_data_dependency_graph)
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
 // 1) Existing participants in the current phase
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
-//  2. “Would-be” participants: those who do NOT yet have a participation
-//     for this phase but have 'passed' the chain of *all* previous phases.
+// 2) Would-be participants:
+//   - They do NOT yet have a course_phase_participation for $1
+//   - Must have passed ALL direct_predecessors_for_pass
 //
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
-// Final selection with "prev_meta_data" included
+//  3. Final SELECT:
+//     a) Combine existing + qualified participants
+//     b) Merge all relevant meta_data from *all* direct_predecessors_for_meta
+//
 // ---------------------------------------------------------------------
-func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx context.Context, id uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow, error) {
-	rows, err := q.db.Query(ctx, getAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious, id)
+func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx context.Context, toCoursePhaseID uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow, error) {
+	rows, err := q.db.Query(ctx, getAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious, toCoursePhaseID)
 	if err != nil {
 		return nil, err
 	}

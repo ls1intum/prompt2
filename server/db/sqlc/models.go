@@ -279,6 +279,11 @@ type CoursePhaseType struct {
 	InitialPhase           bool      `json:"initial_phase"`
 }
 
+type MetaDataDependencyGraph struct {
+	FromPhaseID uuid.UUID `json:"from_phase_id"`
+	ToPhaseID   uuid.UUID `json:"to_phase_id"`
+}
+
 type Student struct {
 	ID                   uuid.UUID        `json:"id"`
 	FirstName            pgtype.Text      `json:"first_name"`
