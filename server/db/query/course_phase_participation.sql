@@ -137,7 +137,7 @@ qualified_non_participants AS (
       )
       
     -- And ensure they have 'passed' in the previous phase 
-    -- We filter just previous, not all since phase order might change or get unlinear at some point
+    -- We filter just previous, not all since phase order might change or allow for non-linear courses at some point
     AND EXISTS (
         SELECT 1
         FROM direct_predecessor_for_pass dpp
