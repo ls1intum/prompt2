@@ -158,6 +158,7 @@ direct_predecessor_for_pass AS (
 direct_predecessors_for_meta AS (
   SELECT 
     from_phase_id AS phase_id,
+    cp.meta_data AS course_phase_meta_data,
     cp.course_phase_type_id AS course_phase_type_id
   FROM meta_data_dependency_graph
   JOIN course_phase cp
@@ -230,6 +231,10 @@ SELECT
     main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.course_participation_id,
     COALESCE(
        (
+          ----------------------------------------------------------------
+          -- Getting non application meta data
+          ----------------------------------------------------------------
+          
           SELECT jsonb_object_agg(each.key, each.value)
           FROM direct_predecessors_for_meta dpm
           JOIN course_phase_participation pcpp
@@ -237,6 +242,7 @@ SELECT
             AND pcpp.course_participation_id = main.course_participation_id
           JOIN course_phase_type cpt
             ON cpt.id = dpm.course_phase_type_id
+            AND cpt.name != 'Application'
           CROSS JOIN LATERAL jsonb_each(pcpp.meta_data) each
             WHERE 
             -- Only keep meta_data where the JSON key matches one of the "name" attributes
@@ -244,7 +250,53 @@ SELECT
                     SELECT elem->>'name'
                     FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
                 ) 
-       ), 
+       ),
+        (
+         SELECT appdata.obj
+         FROM direct_predecessors_for_meta dpm
+         JOIN course_phase_participation pcpp
+           ON pcpp.course_phase_id = dpm.phase_id
+          AND pcpp.course_participation_id = main.course_participation_id
+         JOIN course_phase_type cpt
+           ON cpt.id = dpm.course_phase_type_id
+          AND cpt.name = 'Application'
+         CROSS JOIN LATERAL (
+             SELECT
+                 jsonb_object_agg(x.key, x.value) AS obj
+             FROM
+             (
+                 -- 2a) Optional applicationScore
+                 SELECT 
+                     'applicationScore' AS key,
+                     to_jsonb(aasm.score) AS value
+                 FROM application_assessment aasm
+                 WHERE aasm.course_phase_participation_id = pcpp.id
+                   AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
+                 
+                 UNION ALL
+
+                 -- 2b) Text answers
+                 SELECT
+                     question_config->>'key' AS key,
+                     to_jsonb(aat.answer)    AS value
+                 FROM jsonb_array_elements(dpm.course_phase_meta_data->'exportAnswers'->'answersText') question_config
+                 LEFT JOIN application_answer_text aat
+                   ON aat.course_phase_participation_id = pcpp.id
+                  AND aat.application_question_id = (question_config->>'questionID')::uuid
+
+                 UNION ALL
+
+                 -- 2c) Multi-select answers
+                 SELECT
+                     question_config->>'key' AS key,
+                     to_jsonb(aams.answer)   AS value
+                 FROM jsonb_array_elements(dpm.course_phase_meta_data->'exportAnswers'->'answersMultiSelect') question_config
+                 LEFT JOIN application_answer_multi_select aams
+                   ON aams.course_phase_participation_id = pcpp.id
+                  AND aams.application_question_id = (question_config->>'questionID')::uuid
+             ) x
+         ) appdata
+       ),
        '{}'
     )::jsonb AS prev_meta_data
 
