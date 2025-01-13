@@ -5,7 +5,7 @@ import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
 import { ExternalRoutes } from './ExternalRoutes'
 
 export const InterviewRoutes = React.lazy(() =>
-  import('interview_component/routers')
+  import('interview_component/routes')
     .then((module): { default: React.FC } => ({
       default: () => {
         const routes: ExtendedRouteObject[] = module.default || []

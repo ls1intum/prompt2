@@ -1,5 +1,5 @@
 // Matches all * _component files
-declare module '*_component/routers' {
+declare module '*_component/routes' {
   import { RouteObject } from 'react-router-dom'
 
   const routes: RouteObject[]

@@ -79,7 +79,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         name: COMPONENT_NAME,
         filename: 'remoteEntry.js',
         exposes: {
-          './routers': './routers',
+          './routes': './routes',
           './sidebar': './sidebar',
         },
         shared: {

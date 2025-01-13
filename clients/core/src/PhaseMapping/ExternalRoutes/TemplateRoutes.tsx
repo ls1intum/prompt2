@@ -9,7 +9,7 @@ import { ExternalRoutes } from './ExternalRoutes'
 /** but this requires a dictionary for static compilation + leads to re-renders every time */
 /** Hence this way allows for better UI expierence */
 export const TemplateRoutes = React.lazy(() =>
-  import('template_component/routers')
+  import('template_component/routes')
     .then((module): { default: React.FC } => ({
       default: () => {
         const routes: ExtendedRouteObject[] = module.default || []
