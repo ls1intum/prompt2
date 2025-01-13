@@ -12,6 +12,9 @@ on:
       template_image_tag:
         description: "The tag of the template component image that was built"
         value: ${{ jobs.build-and-push-clients-template.outputs.image_tag }}
+      interview_image_tag:
+        description: "The tag of the interview component image that was built"
+        value: ${{ jobs.build-and-push-clients-interview.outputs.image_tag }}
 
 jobs:
   build-and-push-clients-base:
@@ -36,6 +39,7 @@ jobs:
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
         "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}"
+        "INTERVIEW_COMPONENT_SUBPATH=${{ vars.INTERVIEW_COMPONENT_SUBPATH }}"
     secrets: inherit
    
   build-and-push-clients-template:
@@ -45,6 +49,18 @@ jobs:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/template_component
+      build-args: |
+        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+    secrets: inherit
+
+  build-and-push-clients-interview:
+    needs: build-and-push-clients-base
+    uses: ./.github/workflows/build-and-push-docker-image.yml
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-interview-component
+      docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients/interview_component
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
