@@ -41,17 +41,6 @@ This guide explains how to add a new microfrontend component (ending with `_comp
 7. **Implement Your Functionality**  
    - Add pages, components, and other logic as needed for your new microfrontend.  
 
-8. **Export Your Functionality via routes and sidebar**  
-   - Configure your **sidebar** entries in 'routes/index.tsx'
-     - You can define one Sidebar Item with multiple subitems. 
-     - Each Sidebar Item has an icon (not the subitems). 
-     - Each Item and Subitem can have different permission restrictions. 
-     - Be careful: The Top-Sidebar Item should have the lowest required permissions, as the subitems will not be shown if the Top-Level Item is not displayed.
-   - Configure your **routes** entries in 'sidebar/index.tsx'
-     - Make sure your routes are consistent with your sidebar
-     - Each sidebar element path should also be reflected in your routes with same restrictions. 
-     - Your routes can, of course, have additonal routes which are not reflected in the sidebar. But not the other way around.
-
 8. **Export Your Functionality via Routes and Sidebar**  
    - **Configure your sidebar** in `sidebar/index.tsx`  
      - You can define a single sidebar item that contains multiple subitems.  
