@@ -1,12 +1,13 @@
 import { useCourseStore } from '@/zustand/useCourseStore'
-import { Suspense } from 'react'
 import { useParams } from 'react-router-dom'
-import { TemplateRoutes } from './ExternalRouters/TemplateRoutes'
-import { ApplicationRoutes } from './ExternalRouters/ApplicationRoutes'
+import { TemplateRoutes } from './ExternalRoutes/TemplateRoutes'
+import { ApplicationRoutes } from './ExternalRoutes/ApplicationRoutes'
+import { InterviewRoutes } from './ExternalRoutes/InterviewRoutes'
 
 const PhaseRouter: { [key: string]: React.FC } = {
   template_component: TemplateRoutes,
   Application: ApplicationRoutes,
+  Interview: InterviewRoutes,
 }
 
 export const PhaseRouterMapping = (): JSX.Element => {
@@ -28,9 +29,5 @@ export const PhaseRouterMapping = (): JSX.Element => {
     return <div>Phase Module not found</div>
   }
 
-  return (
-    <Suspense fallback={<div>Fallback</div>}>
-      <PhaseComponent />
-    </Suspense>
-  )
+  return <PhaseComponent />
 }

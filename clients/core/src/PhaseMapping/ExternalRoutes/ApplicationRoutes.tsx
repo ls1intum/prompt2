@@ -2,7 +2,7 @@ import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
 import { Role } from '@/interfaces/permission_roles'
 import { Application } from '../../ApplicationAdministration/Application'
 import { ApplicationConfiguration } from '../../ApplicationAdministration/ApplicationConfiguration/ApplicationConfiguration'
-import { ExternalRoutes } from './ExternalRoutes'
+import { ExternalRoutes } from '../RouteLoaders/ExternalRoutes'
 import { ApplicationsOverview } from '../../ApplicationAdministration/ApplicationAssessment/ApplicationsOverview'
 import { ApplicationMailingSettings } from '../../ApplicationAdministration/Mailing/ApplicationMailingSettings'
 
