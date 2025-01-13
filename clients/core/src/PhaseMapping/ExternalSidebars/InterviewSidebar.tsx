@@ -3,14 +3,14 @@ import { DisabledSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { ExternalSidebarComponent } from '../SidebarLoaders/ExternalSidebar'
 
-interface TemplateSidebarProps {
+interface InterviewSidebarProps {
   rootPath: string
   title?: string
 }
 
-export const TemplateSidebar = React.lazy(() =>
-  import('template_component/sidebar')
-    .then((module): { default: React.FC<TemplateSidebarProps> } => ({
+export const InterviewSidebar = React.lazy(() =>
+  import('interview_component/sidebar')
+    .then((module): { default: React.FC<InterviewSidebarProps> } => ({
       default: ({ title, rootPath }) => {
         const sidebarElement: SidebarMenuItemProps = module.default || {}
         return (
@@ -24,8 +24,8 @@ export const TemplateSidebar = React.lazy(() =>
     }))
     .catch((): { default: React.FC } => ({
       default: () => {
-        console.warn('Failed to load template routes')
-        return <DisabledSidebarMenuItem title={'Template Not Available'} />
+        console.warn('Failed to load interview sidebar')
+        return <DisabledSidebarMenuItem title={'Interview Not Available'} />
       },
     })),
 )

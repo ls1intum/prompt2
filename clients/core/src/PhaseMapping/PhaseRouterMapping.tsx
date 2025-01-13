@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { TemplateRoutes } from './ExternalRoutes/TemplateRoutes'
 import { ApplicationRoutes } from './ExternalRoutes/ApplicationRoutes'
 import { InterviewRoutes } from './ExternalRoutes/InterviewRoutes'
+import { Suspense } from 'react'
 
 const PhaseRouter: { [key: string]: React.FC } = {
   template_component: TemplateRoutes,
@@ -29,5 +30,9 @@ export const PhaseRouterMapping = (): JSX.Element => {
     return <div>Phase Module not found</div>
   }
 
-  return <PhaseComponent />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PhaseComponent />
+    </Suspense>
+  )
 }

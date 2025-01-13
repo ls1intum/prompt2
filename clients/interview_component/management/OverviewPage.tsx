@@ -2,14 +2,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Construction } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
 
 export const OverviewPage = (): JSX.Element => {
   const path = useLocation().pathname
-
-  const token = localStorage.getItem('jwt_token')
-  const queryClient = useQueryClient()
-  queryClient.clear()
 
   return (
     <Card className='w-full max-w-2xl mx-auto'>

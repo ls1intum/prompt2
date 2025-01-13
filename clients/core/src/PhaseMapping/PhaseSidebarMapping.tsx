@@ -1,8 +1,9 @@
 import { Role } from '@/interfaces/permission_roles'
 import { TemplateSidebar } from './ExternalSidebars/TemplateSidebar'
 import { FileUser } from 'lucide-react'
-import { ExternalSidebarComponent } from './ExternalSidebars/ExternalSidebar'
+import { ExternalSidebarComponent } from './SidebarLoaders/ExternalSidebar'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
+import { InterviewSidebar } from './ExternalSidebars/InterviewSidebar'
 
 const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; title: string }) => {
   const applicationSidebarItems: SidebarMenuItemProps = {
@@ -40,4 +41,5 @@ export const PhaseSidebarMapping: { [key: string]: React.FC<{ rootPath: string; 
   {
     template_component: TemplateSidebar,
     Application: ApplicationSidebar,
+    Interview: InterviewSidebar,
   }

@@ -30,6 +30,9 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const templateSubPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
   const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
 
+  const interviewSubPath = getVariable('REACT_INTERVIEW_COMPONENT_SUBPATH')
+  const interviewURL = IS_DEV ? `http://localhost:3002` : `${rootURL}/${interviewSubPath}`
+
   return {
     target: 'web',
     mode: IS_DEV ? 'development' : 'production',
@@ -87,6 +90,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         name: 'core',
         remotes: {
           template_component: `template_component@${templateURL}/remoteEntry.js`,
+          interview_component: `interview_component@${interviewURL}/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

@@ -1,10 +1,12 @@
 import { Mic } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
+import { Role } from '@/interfaces/permission_roles'
 
-const templateSidebarItems: SidebarMenuItemProps = {
+const interviewSidebarItems: SidebarMenuItemProps = {
   title: 'Interview',
   icon: <Mic />,
   goToPath: '',
+  requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   subitems: [
     // {
     //   title: 'Settings',
@@ -14,4 +16,4 @@ const templateSidebarItems: SidebarMenuItemProps = {
   ],
 }
 
-export default templateSidebarItems
+export default interviewSidebarItems

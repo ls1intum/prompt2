@@ -37,7 +37,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
             </Suspense>
           )
         } else {
-          return <DisabledSidebarMenuItem key={phase.id} title={'Unknown' + phase.name} />
+          return <DisabledSidebarMenuItem key={phase.id} title={'Unknown ' + phase.name} />
         }
       })}
 
