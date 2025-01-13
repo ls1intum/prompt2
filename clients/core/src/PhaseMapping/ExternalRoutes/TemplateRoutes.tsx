@@ -2,7 +2,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import React from 'react'
 import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
-import { ExternalRoutes } from '../RouteLoaders/ExternalRoutes'
+import { ExternalRoutes } from './ExternalRoutes'
 
 /** We use this style with a separate loading file for better performance */
 /** It would be possible to have one loading script and pass the import path as variable */

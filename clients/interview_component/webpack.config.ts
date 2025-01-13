@@ -13,7 +13,6 @@ const { ModuleFederationPlugin } = webpack.container
 // ### Component specific configuration ###
 // ########################################
 const COMPONENT_NAME = 'interview_component'
-const COMPONENT_SUBPATH_ENV_NAME = 'REACT_INTERVIEW_COMPONENT_SUBPATH'
 const COMPONENT_DEV_PORT = 3002
 
 const __filename = fileURLToPath(import.meta.url)
@@ -21,15 +20,6 @@ const __dirname = path.dirname(__filename)
 
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
   const getVariable = (name: string) => env[name] ?? process.env[name]
-
-  // Here we only need the subdomain. Leave empty if deployed at someURL.com/
-  // Only fill out if deployed at someURL.com/subdomain/
-  let deploymentPath = getVariable(COMPONENT_SUBPATH_ENV_NAME)
-  if (deploymentPath && deploymentPath !== '') {
-    deploymentPath = '/' + deploymentPath + '/'
-  } else {
-    deploymentPath = 'auto'
-  }
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
@@ -76,7 +66,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: deploymentPath, // Whole Domain is crucial when deployed under other domain!
+      publicPath: 'auto', // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],

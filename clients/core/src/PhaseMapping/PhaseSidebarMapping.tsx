@@ -1,7 +1,7 @@
 import { Role } from '@/interfaces/permission_roles'
 import { TemplateSidebar } from './ExternalSidebars/TemplateSidebar'
 import { FileUser } from 'lucide-react'
-import { ExternalSidebarComponent } from './SidebarLoaders/ExternalSidebar'
+import { ExternalSidebarComponent } from './ExternalSidebars/ExternalSidebar'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { InterviewSidebar } from './ExternalSidebars/InterviewSidebar'
 

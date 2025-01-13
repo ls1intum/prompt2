@@ -1,7 +1,7 @@
 import React from 'react'
 import { DisabledSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/DisabledSidebarMenuItem'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-import { ExternalSidebarComponent } from '../SidebarLoaders/ExternalSidebar'
+import { ExternalSidebarComponent } from './ExternalSidebar'
 
 interface InterviewSidebarProps {
   rootPath: string
