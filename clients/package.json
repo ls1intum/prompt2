@@ -6,6 +6,7 @@
         "packages": [
             "core",
             "interview_component",
+            "matching_component",
             "template_component",
             "shared_library"
         ]
