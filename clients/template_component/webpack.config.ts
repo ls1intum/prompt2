@@ -9,9 +9,12 @@ import CopyPlugin from 'copy-webpack-plugin'
 
 const { ModuleFederationPlugin } = webpack.container
 
-// Set the following variables to correctly configure the webpack
-// In Environment Variables
-// DEPLOYMENT_SUBPATH=template
+// ########################################
+// ### Component specific configuration ###
+// ########################################
+const COMPONENT_NAME = 'template_component'
+const COMPONENT_SUBPATH_ENV_NAME = 'REACT_TEMPLATE_COMPONENT_SUBPATH'
+const COMPONENT_DEV_PORT = 3001
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -21,7 +24,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
 
   // Here we only need the subdomain. Leave empty if deployed at someURL.com/
   // Only fill out if deployed at someURL.com/subdomain/
-  let deploymentPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
+  let deploymentPath = getVariable(COMPONENT_SUBPATH_ENV_NAME)
   if (deploymentPath && deploymentPath !== '') {
     deploymentPath = '/' + deploymentPath + '/'
   } else {
@@ -43,7 +46,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: 3001, // Adjust this if you have multiple components running
+      port: COMPONENT_DEV_PORT,
       client: {
         progress: true,
       },
@@ -83,12 +86,11 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: 'template_component', // TODO: rename this to your component name
+        name: COMPONENT_NAME, // TODO: rename this to your component name
         filename: 'remoteEntry.js',
         exposes: {
           './routers': './routers',
           './sidebar': './sidebar',
-          './OverviewPage': './src/OverviewPage',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
