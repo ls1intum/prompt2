@@ -47,7 +47,5 @@ jobs:
       docker-context: ./clients/template_component
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
-        "CLIENT_HOST=${{ vars.CLIENT_HOST }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
-        "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}"
     secrets: inherit
