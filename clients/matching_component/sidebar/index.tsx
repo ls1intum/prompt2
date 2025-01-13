@@ -1,10 +1,9 @@
-import { Construction } from 'lucide-react'
+import { Puzzle } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-import { Role } from '@/interfaces/permission_roles'
 
 const sidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',
-  icon: <Construction />,
+  icon: <Puzzle />,
   goToPath: '',
   subitems: [],
 }

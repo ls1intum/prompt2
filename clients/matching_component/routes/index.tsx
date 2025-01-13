@@ -1,6 +1,5 @@
-import OverviewPage from 'template_component/src/OverviewPage'
+import OverviewPage from '../management/OverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
-import { Role } from '@/interfaces/permission_roles'
 
 const routes: ExtendedRouteObject[] = [
   {
