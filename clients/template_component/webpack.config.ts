@@ -22,11 +22,12 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   // Here we only need the subdomain. Leave empty if deployed at someURL.com/
   // Only fill out if deployed at someURL.com/subdomain/
   let deploymentPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
-  if (deploymentPath !== '') {
+  if (deploymentPath && deploymentPath !== '') {
     deploymentPath = '/' + deploymentPath + '/'
   } else {
     deploymentPath = 'auto'
   }
+
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
 
@@ -93,6 +94,10 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           react: { singleton: true, requiredVersion: deps.react },
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
           'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
+          '@tanstack/react-query': {
+            singleton: true,
+            requiredVersion: deps['@tanstack/react-query'],
+          },
         },
       }),
       new CopyPlugin({

@@ -92,6 +92,10 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           react: { singleton: true, requiredVersion: deps.react },
           'react-dom': { singleton: true, requiredVersion: deps['react-dom'] },
           'react-router-dom': { singleton: true, requiredVersion: deps['react-router-dom'] },
+          '@tanstack/react-query': {
+            singleton: true,
+            requiredVersion: deps['@tanstack/react-query'],
+          },
         },
       }),
       new ExternalTemplateRemotesPlugin(),
