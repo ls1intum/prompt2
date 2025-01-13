@@ -15,6 +15,9 @@ on:
       interview_image_tag:
         description: "The tag of the interview component image that was built"
         value: ${{ jobs.build-and-push-clients-interview.outputs.image_tag }}
+      matching_image_tag:
+        description: "The tag of the matching component image that was built"
+        value: ${{ jobs.build-and-push-clients-matching.outputs.image_tag }}
 
 jobs:
   build-and-push-clients-base:
@@ -65,3 +68,15 @@ jobs:
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
         "SERVER_HOST=${{ vars.SERVER_HOST }}"
     secrets: inherit
+
+  build-and-push-clients-matching:
+      needs: build-and-push-clients-base
+      uses: ./.github/workflows/build-and-push-docker-image.yml
+      with:
+        image-name: ghcr.io/ls1intum/prompt2/prompt-clients-matching-component
+        docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
+        docker-context: ./clients/matching_component
+        build-args: |
+          "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+          "SERVER_HOST=${{ vars.SERVER_HOST }}"
+      secrets: inherit

@@ -102,6 +102,26 @@ services:
     networks:
       - prompt-network
 
+  client-matching-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-matching-component:${MATCHING_IMAGE_TAG}"
+    container_name: prompt-client-matching-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matching.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/${MATCHING_COMPONENT_SUBPATH}`)"
+      - "traefik.http.routers.matching.entrypoints=websecure"
+      - "traefik.http.routers.matching.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.matching-strip-prefix.stripPrefix.prefixes=/${MATCHING_COMPONENT_SUBPATH}"
+      - "traefik.http.routers.matching.middlewares=matching-strip-prefix,matching-compress"
+      - "traefik.http.middlewares.matching-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
   client-template-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component

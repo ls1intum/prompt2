@@ -99,7 +99,7 @@ The course phase types are stored in the DB. We assume here that you already hav
 
 2. **GitHub Workflows**  
    - **`build-and-push-clients.yml`**: Add another output image tag and the building script for for your component. Use the template component as example. 
-   - **`deploy-docker`**: Include the new image tag in the “SSH to VM and create .env.prod file” step to ensure Docker Compose picks it up.  
+   - **`deploy-docker`**: Include the new image tag (and path env variable) in the “SSH to VM and create .env.prod file” step to ensure Docker Compose picks it up.  
    - **`dev.yml`**: Reference the new image tag.
 
 3. **Docker Compose**  

@@ -20,5 +20,6 @@ jobs:
       core_image_tag: ${{ needs.build-and-push-clients.outputs.core_image_tag }}
       template_image_tag: ${{ needs.build-and-push-clients.outputs.template_image_tag }}
       interview_image_tag: ${{ needs.build-and-push-clients.outputs.interview_image_tag }}
+      matching_image_tag: ${{ needs.build-and-push-clients.outputs.matching_image_tag }}
       server_image_tag: ${{ needs.build-and-push-server.outputs.server_image_tag }}
 
