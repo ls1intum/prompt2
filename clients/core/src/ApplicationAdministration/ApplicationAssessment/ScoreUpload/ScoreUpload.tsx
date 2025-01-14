@@ -11,7 +11,7 @@ import { AssessmentScoreUploadPage1, Page1Ref } from './components/AssessmentSco
 import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentScoreUploadPage2'
 import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPage3'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { AdditionalScore, IndividualScore } from '@/interfaces/additional_score'
+import { AdditionalScoreUpload, IndividualScore } from '@/interfaces/additional_score'
 import { Upload } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postAdditionalScore } from '../../../network/mutations/postAdditionalScore'
@@ -67,7 +67,7 @@ export default function AssessmentScoreUpload({
   }, [])
 
   const { mutate: mutateSendScore } = useMutation({
-    mutationFn: (additionalScore: AdditionalScore) => {
+    mutationFn: (additionalScore: AdditionalScoreUpload) => {
       return postAdditionalScore(phaseId ?? 'undefined', additionalScore)
     },
     onSuccess: () => {
@@ -115,8 +115,9 @@ export default function AssessmentScoreUpload({
         }
       } else if (state.page === 3) {
         const page1Values = page1Ref.current?.getValues()
-        const newScore: AdditionalScore = {
+        const newScore: AdditionalScoreUpload = {
           name: page1Values?.scoreName ?? '',
+          key: page1Values?.scoreName.toLowerCase().replace(/\s+/g, '') ?? '',
           threshold_active: !!page1Values?.hasThreshold,
           threshold: page1Values?.hasThreshold ? parseFloat(page1Values.threshold) : 0,
           scores: state.additionalScores,

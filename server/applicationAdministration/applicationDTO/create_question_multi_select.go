@@ -17,20 +17,25 @@ type CreateQuestionMultiSelect struct {
 	MaxSelect     int       `json:"max_select"`
 	Options       []string  `json:"options"`
 	OrderNum      int       `json:"order_num"`
+	// using pgtype as this allows for optional values
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (a CreateQuestionMultiSelect) GetDBModel() db.CreateApplicationQuestionMultiSelectParams {
 	return db.CreateApplicationQuestionMultiSelectParams{
-		CoursePhaseID: a.CoursePhaseID,
-		Title:         pgtype.Text{String: a.Title, Valid: true},
-		Description:   pgtype.Text{String: a.Description, Valid: true},
-		Placeholder:   pgtype.Text{String: a.Placeholder, Valid: true},
-		ErrorMessage:  pgtype.Text{String: a.ErrorMessage, Valid: true},
-		IsRequired:    pgtype.Bool{Bool: a.IsRequired, Valid: true},
-		MinSelect:     pgtype.Int4{Int32: int32(a.MinSelect), Valid: true},
-		MaxSelect:     pgtype.Int4{Int32: int32(a.MaxSelect), Valid: true},
-		Options:       a.Options,
-		OrderNum:      pgtype.Int4{Int32: int32(a.OrderNum), Valid: true},
+		CoursePhaseID:            a.CoursePhaseID,
+		Title:                    pgtype.Text{String: a.Title, Valid: true},
+		Description:              pgtype.Text{String: a.Description, Valid: true},
+		Placeholder:              pgtype.Text{String: a.Placeholder, Valid: true},
+		ErrorMessage:             pgtype.Text{String: a.ErrorMessage, Valid: true},
+		IsRequired:               pgtype.Bool{Bool: a.IsRequired, Valid: true},
+		MinSelect:                pgtype.Int4{Int32: int32(a.MinSelect), Valid: true},
+		MaxSelect:                pgtype.Int4{Int32: int32(a.MaxSelect), Valid: true},
+		Options:                  a.Options,
+		OrderNum:                 pgtype.Int4{Int32: int32(a.OrderNum), Valid: true},
+		AccessibleForOtherPhases: a.AccessibleForOtherPhases,
+		AccessKey:                a.AccessKey,
 	}
 
 }

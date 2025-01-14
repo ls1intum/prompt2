@@ -121,37 +121,37 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_Invalid
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionText_EmptyTitle() {
-	err := validateQuestionText("", "", 100)
+	err := validateQuestionText("", "", 100, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "title is required", err.Error())
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionText_InvalidRegex() {
-	err := validateQuestionText("Valid Title", "[", 100)
+	err := validateQuestionText("Valid Title", "[", 100, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Contains(suite.T(), err.Error(), "invalid regex pattern")
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_EmptyTitle() {
-	err := validateQuestionMultiSelect("", 1, 3, []string{"Option1", "Option2"})
+	err := validateQuestionMultiSelect("", 1, 3, []string{"Option1", "Option2"}, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "title is required", err.Error())
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_EmptyOptions() {
-	err := validateQuestionMultiSelect("Valid Title", 1, 3, []string{})
+	err := validateQuestionMultiSelect("Valid Title", 1, 3, []string{}, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "options cannot be empty", err.Error())
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_MinSelectNegative() {
-	err := validateQuestionMultiSelect("Valid Title", -1, 3, []string{"Option1", "Option2"})
+	err := validateQuestionMultiSelect("Valid Title", -1, 3, []string{"Option1", "Option2"}, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "minimum selection must be at least 0", err.Error())
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateQuestionMultiSelect_MaxSelectLessThanOne() {
-	err := validateQuestionMultiSelect("Valid Title", 0, 0, []string{"Option1", "Option2"})
+	err := validateQuestionMultiSelect("Valid Title", 0, 0, []string{"Option1", "Option2"}, pgtype.Bool{Bool: true, Valid: true}, pgtype.Text{String: "test", Valid: true})
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "maximum selection must be at least 1", err.Error())
 }
@@ -431,8 +431,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Success() {
-	validScore := applicationDTO.AdditionalScore{
+	validScore := applicationDTO.AdditionalScoreUpload{
 		Name: "ValidScore",
+		Key:  "valid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
 				CoursePhaseParticipationID: uuid.New(),
@@ -456,8 +457,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Su
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_EmptyName() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "",
+		Key:  "invalid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
 				CoursePhaseParticipationID: uuid.New(),
@@ -475,8 +477,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Em
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_NegativeScore() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "NegativeScore",
+		Key:  "negative_score",
 		Scores: []applicationDTO.IndividualScore{
 			{
 				CoursePhaseParticipationID: uuid.New(),
@@ -494,8 +497,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Ne
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "InvalidScoreValue",
+		Key:  "invalid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
 				CoursePhaseParticipationID: uuid.New(),
@@ -512,8 +516,9 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_In
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "MixedScores",
+		Key:  "mixed_scores",
 		Scores: []applicationDTO.IndividualScore{
 			{
 				CoursePhaseParticipationID: uuid.New(),

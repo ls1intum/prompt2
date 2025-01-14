@@ -369,8 +369,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_S
 
 func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	additionalScore := applicationDTO.AdditionalScore{
+	additionalScore := applicationDTO.AdditionalScoreUpload{
 		Name: "TestScore",
+		Key:  "TestScore",
 		Threshold: pgtype.Numeric{
 			Int:   big.NewInt(50),
 			Valid: true,
@@ -414,7 +415,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 	// Verify the scores are stored correctly
 	scoreNames, err := GetAdditionalScores(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
-	assert.Contains(suite.T(), scoreNames, "TestScore")
+	assert.Contains(suite.T(), scoreNames, applicationDTO.AdditionalScore{Key: "TestScore", Name: "TestScore"})
 }
 
 func TestApplicationAdminServiceTestSuite(t *testing.T) {

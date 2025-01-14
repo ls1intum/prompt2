@@ -16,19 +16,20 @@ import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { numericRangeFilter } from '../utils/numericRangeFilter'
+import { AdditionalScore } from '@/interfaces/additional_score'
 
 export const columns = (
   onViewApplication: (id: string) => void,
   onDeleteApplication: (coursePhaseParticipationID: string) => void,
-  additionalScores: string[],
+  additionalScores: AdditionalScore[],
 ): ColumnDef<ApplicationParticipation>[] => {
   let additionalScoreColumns: ColumnDef<ApplicationParticipation>[] = []
   if (additionalScores.length > 0) {
-    additionalScoreColumns = additionalScores.map((scoreName) => {
+    additionalScoreColumns = additionalScores.map((additionalScore) => {
       return {
-        id: scoreName,
-        accessorFn: (row) => row.meta_data?.[scoreName] ?? null,
-        header: ({ column }) => <SortableHeader column={column} title={scoreName} />,
+        id: additionalScore.key,
+        accessorFn: (row) => row.meta_data?.[additionalScore.key] ?? null,
+        header: ({ column }) => <SortableHeader column={column} title={additionalScore.name} />,
       }
     })
   }
