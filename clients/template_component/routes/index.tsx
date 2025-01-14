@@ -3,7 +3,7 @@ import SettingsPage from 'template_component/src/SettingsPage'
 import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
 import { Role } from '@/interfaces/permission_roles'
 
-const templateRoutes: ExtendedRouteObject[] = [
+const routes: ExtendedRouteObject[] = [
   {
     path: '',
     element: <OverviewPage />,
@@ -17,4 +17,4 @@ const templateRoutes: ExtendedRouteObject[] = [
   // Add more routes here as needed
 ]
 
-export default templateRoutes
+export default routes

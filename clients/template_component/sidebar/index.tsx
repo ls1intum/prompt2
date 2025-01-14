@@ -2,7 +2,7 @@ import { Construction } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@/interfaces/permission_roles'
 
-const templateSidebarItems: SidebarMenuItemProps = {
+const sidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',
   icon: <Construction />,
   goToPath: '',
@@ -15,4 +15,4 @@ const templateSidebarItems: SidebarMenuItemProps = {
   ],
 }
 
-export default templateSidebarItems
+export default sidebarItems

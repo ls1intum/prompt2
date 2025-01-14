@@ -82,6 +82,26 @@ services:
     networks:
       - prompt-network
 
+  client-interview-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
+    container_name: prompt-client-interview-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.interview.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/${INTERVIEW_COMPONENT_SUBPATH}`)"
+      - "traefik.http.routers.interview.entrypoints=websecure"
+      - "traefik.http.routers.interview.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.interview-strip-prefix.stripPrefix.prefixes=/${INTERVIEW_COMPONENT_SUBPATH}"
+      - "traefik.http.routers.interview.middlewares=interview-strip-prefix,interview-compress"
+      - "traefik.http.middlewares.interview-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
   client-template-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component
@@ -89,9 +109,11 @@ services:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/template`)"
+      - "traefik.http.routers.template.rule=Host(`${SERVER_HOST}`) && PathPrefix(`/${TEMPLATE_COMPONENT_SUBPATH}`)"
       - "traefik.http.routers.template.entrypoints=websecure"
       - "traefik.http.routers.template.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.template-strip-prefix.stripPrefix.prefixes=/${TEMPLATE_COMPONENT_SUBPATH}"
+      - "traefik.http.routers.template.middlewares=template-strip-prefix,template-compress"
       - "traefik.http.middlewares.template-compress.compress=true"
     expose:
       - "80"

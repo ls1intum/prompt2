@@ -12,8 +12,8 @@ const { ModuleFederationPlugin } = webpack.container
 // ########################################
 // ### Component specific configuration ###
 // ########################################
-const COMPONENT_NAME = 'template_component'
-const COMPONENT_DEV_PORT = 3001
+const COMPONENT_NAME = 'interview_component'
+const COMPONENT_DEV_PORT = 3002
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -76,7 +76,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: COMPONENT_NAME, // TODO: rename this to your component name
+        name: COMPONENT_NAME,
         filename: 'remoteEntry.js',
         exposes: {
           './routes': './routes',

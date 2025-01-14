@@ -3,6 +3,7 @@
   "npmClient": "yarn",
   "packages": [
     "core",
+    "interview_component",
     "template_component", 
     "shared_library"
   ]
