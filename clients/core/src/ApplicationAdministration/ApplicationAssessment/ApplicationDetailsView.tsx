@@ -2,7 +2,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -18,7 +17,6 @@ import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from './utils/getStatusBadge'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { Button } from '@/components/ui/button'
 
 import { AssessmentCard } from './components/AssessmentCard'
 import { ApplicationAssessment } from '@/interfaces/application_assessment'
@@ -170,31 +168,13 @@ export const ApplicationDetailsView = ({
             <AssessmentCard
               score={score}
               metaData={metaData}
+              acceptanceStatus={status}
+              handleAcceptanceStatusChange={handleAcceptanceStatusChange}
               onScoreSubmission={handleScoreSubmit}
               onCommentSubmission={handleCommentSubmit}
             />
           </div>
         </div>
-        <DialogFooter className='space-x-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            disabled={status === PassStatus.FAILED}
-            className='border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-red-50'
-            onClick={() => handleAcceptanceStatusChange(PassStatus.FAILED)}
-          >
-            Reject
-          </Button>
-          <Button
-            variant='default'
-            size='sm'
-            disabled={status === PassStatus.PASSED}
-            className='bg-green-500 hover:bg-green-600'
-            onClick={() => handleAcceptanceStatusChange(PassStatus.PASSED)}
-          >
-            Accept
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
