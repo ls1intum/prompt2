@@ -135,3 +135,46 @@ CREATE TRIGGER set_last_modified_course_phase_participation
 BEFORE UPDATE ON course_phase_participation
 FOR EACH ROW
 EXECUTE FUNCTION update_last_modified_column();
+
+CREATE TABLE course_phase (
+    id uuid NOT NULL,
+    course_id uuid NOT NULL,
+    name text,
+    meta_data jsonb,
+    is_initial_phase boolean NOT NULL,
+    course_phase_type_id uuid NOT NULL
+);
+
+--
+-- Data for Name: course_phase; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'be780b32-a678-4b79-ae1c-80071771d254', 'Dev Application', '{"applicationEndDate": "2030-01-18T00:00:00.000Z", "applicationStartDate": "2024-12-24T00:00:00.000Z", "externalStudentsAllowed": false}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
+INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('7062236a-e290-487c-be41-29b24e0afc64', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382');
+INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d3', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030');
+
+
+CREATE TABLE course_phase_graph (
+    from_course_phase_id uuid NOT NULL,
+    to_course_phase_id uuid NOT NULL
+);
+
+CREATE TABLE course_phase_type (
+    id uuid NOT NULL,
+    name text NOT NULL,
+    required_input_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
+    provided_output_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
+    initial_phase boolean DEFAULT false NOT NULL
+);
+
+CREATE TABLE application_assessment (
+    id uuid NOT NULL,
+    course_phase_participation_id uuid NOT NULL,
+    score integer
+);
+
+CREATE TABLE meta_data_dependency_graph (
+    from_phase_id uuid NOT NULL,
+    to_phase_id   uuid NOT NULL,
+    PRIMARY KEY (from_phase_id, to_phase_id)
+);

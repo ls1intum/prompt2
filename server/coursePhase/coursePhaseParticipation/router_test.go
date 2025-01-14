@@ -31,7 +31,7 @@ func (suite *RouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/course_phase_participation_test.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/full_db.sql")
 	if err != nil {
 		log.Fatalf("Failed to set up test database: %v", err)
 	}
@@ -60,7 +60,7 @@ func setupRouter() *gin.Engine {
 }
 
 func (suite *RouterTestSuite) TestGetParticipationsForCoursePhase() {
-	req := httptest.NewRequest(http.MethodGet, "/api/course_phases/3d1f3b00-87f3-433b-a713-178c4050411b/participations", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations", nil)
 	w := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(w, req)
@@ -79,13 +79,13 @@ func (suite *RouterTestSuite) TestCreateCoursePhaseParticipation() {
 	assert.NoError(suite.T(), err)
 
 	newParticipation := coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
-		CourseParticipationID: uuid.MustParse("65dcc535-a9ab-4421-a2bc-0f09780ca59e"),
+		CourseParticipationID: uuid.MustParse("ca41772a-e06d-40eb-9c4b-ab44e06a890c"),
 		PassStatus:            db.NullPassStatus{PassStatus: "failed", Valid: true},
 		MetaData:              metaData,
 	}
 	body, _ := json.Marshal(newParticipation)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/course_phases/3d1f3b00-87f3-433b-a713-178c4050411b/participations", bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
@@ -105,14 +105,14 @@ func (suite *RouterTestSuite) TestUpdateCoursePhaseParticipation() {
 	assert.NoError(suite.T(), err)
 
 	updatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-		ID:         uuid.MustParse("7698f081-df55-4136-a58c-1a166bb1bbda"),
+		ID:         uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4"),
 		MetaData:   metaData,
 		PassStatus: db.NullPassStatus{PassStatus: "passed", Valid: true},
 	}
 	body, _ := json.Marshal(updatedParticipation)
 
 	// Send the update request
-	req := httptest.NewRequest(http.MethodPut, "/api/course_phases/3d1f3b00-87f3-433b-a713-178c4050411b/participations/7698f081-df55-4136-a58c-1a166bb1bbda", bytes.NewReader(body))
+	req := httptest.NewRequest(http.MethodPut, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations/83d88b1f-1435-4c36-b8ca-6741094f35e4", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
@@ -122,7 +122,7 @@ func (suite *RouterTestSuite) TestUpdateCoursePhaseParticipation() {
 	assert.Equal(suite.T(), http.StatusOK, w.Code)
 
 	// Perform a GET request to verify the changes
-	getReq := httptest.NewRequest(http.MethodGet, "/api/course_phases/3d1f3b00-87f3-433b-a713-178c4050411b/participations/7698f081-df55-4136-a58c-1a166bb1bbda", nil)
+	getReq := httptest.NewRequest(http.MethodGet, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations/83d88b1f-1435-4c36-b8ca-6741094f35e4", nil)
 	getW := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(getW, getReq)
