@@ -36,8 +36,6 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
     })
   }
 
-  console.log('filters', filters)
-
   return (
     <div className='flex flex-wrap gap-2'>
       {filters.map((filter) =>

@@ -24,6 +24,7 @@ import { postApplicationAssessment } from '../../network/mutations/postApplicati
 import { InstructorComment } from '@/interfaces/instructor_comment'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { useToast } from '@/hooks/use-toast'
+import { StudentProfile } from './components/StudentProfile'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
@@ -154,15 +155,7 @@ export const ApplicationDetailsView = ({
               fetchedApplication &&
               fetchedApplicationForm &&
               fetchedApplication.student && (
-                <ApplicationFormView
-                  questionsText={fetchedApplicationForm.questions_text}
-                  questionsMultiSelect={fetchedApplicationForm.questions_multi_select}
-                  initialAnswersText={fetchedApplication.answers_text}
-                  initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
-                  student={fetchedApplication.student}
-                  isInstructorView={true}
-                  onSubmit={() => console.log('submit')}
-                />
+                <StudentProfile student={fetchedApplication.student} status={status} />
               )}
 
             <AssessmentCard

@@ -23,9 +23,6 @@ import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../validations/student'
 import translations from '@/lib/translations.json'
 
-// Getting the list of countries
-import countries from 'i18n-iso-countries'
-import enLocale from 'i18n-iso-countries/langs/en.json'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -39,16 +36,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { getStudyDegreeString, StudyDegree } from '@/interfaces/study_degree'
-
-countries.registerLocale(enLocale)
-const countriesArr = Object.entries(countries.getNames('en', { select: 'alias' })).map(
-  ([key, value]) => {
-    return {
-      label: value,
-      value: key,
-    }
-  },
-)
+import { countriesArr } from '@/lib/getCountries'
 
 const studyPrograms = translations.university.studyPrograms.concat('Other')
 
