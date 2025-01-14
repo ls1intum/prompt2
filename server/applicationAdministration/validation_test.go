@@ -431,7 +431,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Success() {
-	validScore := applicationDTO.AdditionalScore{
+	validScore := applicationDTO.AdditionalScoreUpload{
 		Name: "ValidScore",
 		Scores: []applicationDTO.IndividualScore{
 			{
@@ -456,7 +456,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Su
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_EmptyName() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "",
 		Scores: []applicationDTO.IndividualScore{
 			{
@@ -475,7 +475,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Em
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_NegativeScore() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "NegativeScore",
 		Scores: []applicationDTO.IndividualScore{
 			{
@@ -494,7 +494,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Ne
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "InvalidScoreValue",
 		Scores: []applicationDTO.IndividualScore{
 			{
@@ -512,7 +512,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_In
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_MixedValidAndInvalidScores() {
-	invalidScore := applicationDTO.AdditionalScore{
+	invalidScore := applicationDTO.AdditionalScoreUpload{
 		Name: "MixedScores",
 		Scores: []applicationDTO.IndividualScore{
 			{

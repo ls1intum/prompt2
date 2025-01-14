@@ -5,7 +5,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type AdditionalScore struct {
+type AdditionalScoreUpload struct {
 	Name            string            `json:"name"`
 	Key             string            `json:"key"`
 	Threshold       pgtype.Numeric    `json:"threshold"`
@@ -20,7 +20,7 @@ type IndividualScore struct {
 
 // used to store the additional score objects in the meta data
 // we do not store the Threshold as not required after adding
-type AdditionalScoreObject struct {
+type AdditionalScore struct {
 	Key  string `json:"key"`
 	Name string `json:"name"`
 }

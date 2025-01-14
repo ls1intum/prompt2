@@ -351,7 +351,7 @@ func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhasePar
 	return nil
 }
 
-func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
+func validateAdditionalScore(score applicationDTO.AdditionalScoreUpload) error {
 	// Check if the name is empty
 	if score.Name == "" {
 		return errors.New("name cannot be empty")

@@ -369,7 +369,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_S
 
 func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	additionalScore := applicationDTO.AdditionalScore{
+	additionalScore := applicationDTO.AdditionalScoreUpload{
 		Name: "TestScore",
 		Threshold: pgtype.Numeric{
 			Int:   big.NewInt(50),

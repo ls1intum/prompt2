@@ -535,7 +535,7 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	return nil
 }
 
-func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additionalScore applicationDTO.AdditionalScore) error {
+func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additionalScore applicationDTO.AdditionalScoreUpload) error {
 	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -634,7 +634,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	return nil
 }
 
-func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applicationDTO.AdditionalScoreObject, error) {
+func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applicationDTO.AdditionalScore, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
