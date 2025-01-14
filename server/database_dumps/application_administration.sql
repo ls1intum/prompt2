@@ -347,3 +347,23 @@ CREATE TRIGGER set_last_modified_course_phase_participation
 BEFORE UPDATE ON course_phase_participation
 FOR EACH ROW
 EXECUTE FUNCTION update_last_modified_column();
+
+CREATE TABLE meta_data_dependency_graph (
+    from_phase_id uuid NOT NULL,
+    to_phase_id   uuid NOT NULL,
+    PRIMARY KEY (from_phase_id, to_phase_id),
+    CONSTRAINT fk_from_phase
+      FOREIGN KEY (from_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE,
+    CONSTRAINT fk_to_phase
+      FOREIGN KEY (to_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE
+);
+
+-- Add new fields to application_question_text
+ALTER TABLE application_question_text
+ADD COLUMN accessible_for_other_phases boolean DEFAULT false,
+ADD COLUMN access_key VARCHAR(50);
+
+-- Add new fields to application_question_multi_select
+ALTER TABLE application_question_multi_select
+ADD COLUMN accessible_for_other_phases boolean DEFAULT false,
+ADD COLUMN access_key VARCHAR(50);

@@ -156,22 +156,24 @@ func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApp
 }
 
 const createApplicationQuestionMultiSelect = `-- name: CreateApplicationQuestionMultiSelect :exec
-INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num, accessible_for_other_phases, access_key)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 `
 
 type CreateApplicationQuestionMultiSelectParams struct {
-	ID            uuid.UUID   `json:"id"`
-	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
-	Title         pgtype.Text `json:"title"`
-	Description   pgtype.Text `json:"description"`
-	Placeholder   pgtype.Text `json:"placeholder"`
-	ErrorMessage  pgtype.Text `json:"error_message"`
-	IsRequired    pgtype.Bool `json:"is_required"`
-	MinSelect     pgtype.Int4 `json:"min_select"`
-	MaxSelect     pgtype.Int4 `json:"max_select"`
-	Options       []string    `json:"options"`
-	OrderNum      pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	MinSelect                pgtype.Int4 `json:"min_select"`
+	MaxSelect                pgtype.Int4 `json:"max_select"`
+	Options                  []string    `json:"options"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (q *Queries) CreateApplicationQuestionMultiSelect(ctx context.Context, arg CreateApplicationQuestionMultiSelectParams) error {
@@ -187,26 +189,30 @@ func (q *Queries) CreateApplicationQuestionMultiSelect(ctx context.Context, arg 
 		arg.MaxSelect,
 		arg.Options,
 		arg.OrderNum,
+		arg.AccessibleForOtherPhases,
+		arg.AccessKey,
 	)
 	return err
 }
 
 const createApplicationQuestionText = `-- name: CreateApplicationQuestionText :exec
-INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num, accessible_for_other_phases, access_key)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 `
 
 type CreateApplicationQuestionTextParams struct {
-	ID              uuid.UUID   `json:"id"`
-	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
-	Title           pgtype.Text `json:"title"`
-	Description     pgtype.Text `json:"description"`
-	Placeholder     pgtype.Text `json:"placeholder"`
-	ValidationRegex pgtype.Text `json:"validation_regex"`
-	ErrorMessage    pgtype.Text `json:"error_message"`
-	IsRequired      pgtype.Bool `json:"is_required"`
-	AllowedLength   pgtype.Int4 `json:"allowed_length"`
-	OrderNum        pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ValidationRegex          pgtype.Text `json:"validation_regex"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	AllowedLength            pgtype.Int4 `json:"allowed_length"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateApplicationQuestionTextParams) error {
@@ -221,6 +227,8 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 		arg.IsRequired,
 		arg.AllowedLength,
 		arg.OrderNum,
+		arg.AccessibleForOtherPhases,
+		arg.AccessKey,
 	)
 	return err
 }
@@ -793,21 +801,25 @@ SET
     min_select = COALESCE($7, min_select),
     max_select = COALESCE($8, max_select),
     options = COALESCE($9, options),
-    order_num = COALESCE($10, order_num)
+    order_num = COALESCE($10, order_num), 
+    accessible_for_other_phases = COALESCE($11, accessible_for_other_phases),
+    access_key = COALESCE($12, access_key)
 WHERE id = $1
 `
 
 type UpdateApplicationQuestionMultiSelectParams struct {
-	ID           uuid.UUID   `json:"id"`
-	Title        pgtype.Text `json:"title"`
-	Description  pgtype.Text `json:"description"`
-	Placeholder  pgtype.Text `json:"placeholder"`
-	ErrorMessage pgtype.Text `json:"error_message"`
-	IsRequired   pgtype.Bool `json:"is_required"`
-	MinSelect    pgtype.Int4 `json:"min_select"`
-	MaxSelect    pgtype.Int4 `json:"max_select"`
-	Options      []string    `json:"options"`
-	OrderNum     pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	MinSelect                pgtype.Int4 `json:"min_select"`
+	MaxSelect                pgtype.Int4 `json:"max_select"`
+	Options                  []string    `json:"options"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (q *Queries) UpdateApplicationQuestionMultiSelect(ctx context.Context, arg UpdateApplicationQuestionMultiSelectParams) error {
@@ -822,6 +834,8 @@ func (q *Queries) UpdateApplicationQuestionMultiSelect(ctx context.Context, arg 
 		arg.MaxSelect,
 		arg.Options,
 		arg.OrderNum,
+		arg.AccessibleForOtherPhases,
+		arg.AccessKey,
 	)
 	return err
 }
@@ -836,20 +850,24 @@ SET
     error_message = COALESCE($6, error_message),
     is_required = COALESCE($7, is_required),
     allowed_length = COALESCE($8, allowed_length),
-    order_num = COALESCE($9, order_num)
+    order_num = COALESCE($9, order_num),
+    accessible_for_other_phases = COALESCE($10, accessible_for_other_phases),
+    access_key = COALESCE($11, access_key)
 WHERE id = $1
 `
 
 type UpdateApplicationQuestionTextParams struct {
-	ID              uuid.UUID   `json:"id"`
-	Title           pgtype.Text `json:"title"`
-	Description     pgtype.Text `json:"description"`
-	Placeholder     pgtype.Text `json:"placeholder"`
-	ValidationRegex pgtype.Text `json:"validation_regex"`
-	ErrorMessage    pgtype.Text `json:"error_message"`
-	IsRequired      pgtype.Bool `json:"is_required"`
-	AllowedLength   pgtype.Int4 `json:"allowed_length"`
-	OrderNum        pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ValidationRegex          pgtype.Text `json:"validation_regex"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	AllowedLength            pgtype.Int4 `json:"allowed_length"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateApplicationQuestionTextParams) error {
@@ -863,6 +881,8 @@ func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateA
 		arg.IsRequired,
 		arg.AllowedLength,
 		arg.OrderNum,
+		arg.AccessibleForOtherPhases,
+		arg.AccessKey,
 	)
 	return err
 }
