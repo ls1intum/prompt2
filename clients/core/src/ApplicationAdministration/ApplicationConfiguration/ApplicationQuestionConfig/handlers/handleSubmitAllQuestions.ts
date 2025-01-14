@@ -41,10 +41,30 @@ export const handleSubmitAllQuestions = async ({
     const questions_multi_select = applicationQuestions
       .filter((q) => 'options' in q)
       .map((q) => q as ApplicationQuestionMultiSelect)
+      .map((q) => {
+        if (!q.accessible_for_other_phases) {
+          return {
+            ...q,
+            access_key: '', // Do not modify access key (is not shown if export switched off)
+          }
+        } else {
+          return q
+        }
+      })
 
     const questions_text = applicationQuestions
       .filter((q) => !('options' in q))
       .map((q) => q as ApplicationQuestionText)
+      .map((q) => {
+        if (!q.accessible_for_other_phases) {
+          return {
+            ...q,
+            access_key: '', // Do not modify access key (is not shown if export switched off)
+          }
+        } else {
+          return q
+        }
+      })
 
     const updateForm: UpdateApplicationForm = {
       delete_questions_text: deletedTextQuestion ?? [],

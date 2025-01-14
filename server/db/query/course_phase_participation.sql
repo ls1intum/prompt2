@@ -245,6 +245,8 @@ SELECT
                      AND aat.course_phase_participation_id = pcpp.id
                     WHERE qt.course_phase_id = dpm.phase_id
                       AND qt.accessible_for_other_phases = true
+                      AND qt.access_key IS NOT NULL
+                      AND qt.access_key != ''
 
                     UNION ALL
                     
@@ -261,6 +263,8 @@ SELECT
                      AND aams.course_phase_participation_id = pcpp.id
                     WHERE qm.course_phase_id = dpm.phase_id
                       AND qm.accessible_for_other_phases = true
+                      AND qm.access_key IS NOT NULL
+                      AND qm.access_key != ''
                 
                   UNION ALL
 
