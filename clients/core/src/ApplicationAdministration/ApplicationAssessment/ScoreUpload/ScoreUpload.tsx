@@ -117,7 +117,7 @@ export default function AssessmentScoreUpload({
         const page1Values = page1Ref.current?.getValues()
         const newScore: AdditionalScoreUpload = {
           name: page1Values?.scoreName ?? '',
-          key: page1Values?.scoreName ?? '', // TODO replace this with stripped key
+          key: page1Values?.scoreName.toLowerCase().replace(/\s+/g, '') ?? '',
           threshold_active: !!page1Values?.hasThreshold,
           threshold: page1Values?.hasThreshold ? parseFloat(page1Values.threshold) : 0,
           scores: state.additionalScores,
