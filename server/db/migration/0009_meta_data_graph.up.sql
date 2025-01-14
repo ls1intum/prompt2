@@ -11,4 +11,15 @@ CREATE TABLE meta_data_dependency_graph (
       FOREIGN KEY (to_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE
 );
 
+-- Add new fields to application_question_text
+ALTER TABLE application_question_text
+ADD COLUMN accessible_for_other_phases boolean DEFAULT false,
+ADD COLUMN access_key VARCHAR(50);
+
+-- Add new fields to application_question_multi_select
+ALTER TABLE application_question_multi_select
+ADD COLUMN accessible_for_other_phases boolean DEFAULT false,
+ADD COLUMN access_key VARCHAR(50);
+
+
 COMMIT;

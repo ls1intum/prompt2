@@ -21,7 +21,7 @@ type CoursePhaseParticipationService struct {
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
 
 func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, error) {
-	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhase(ctx, coursePhaseID)
+	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}

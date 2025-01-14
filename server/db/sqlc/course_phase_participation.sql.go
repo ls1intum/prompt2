@@ -216,7 +216,7 @@ qualified_non_participants AS (
       )
       
     -- And ensure they have 'passed' in the previous phase 
-    -- We filter just previous, not all since phase order might change or get unlinear at some point
+    -- We filter just previous, not all since phase order might change or allow for non-linear courses at some point
     AND EXISTS (
         SELECT 1
         FROM direct_predecessor_for_pass dpp
@@ -294,35 +294,47 @@ SELECT
                  jsonb_object_agg(x.key, x.value) AS obj
              FROM
              (
-                 -- 2a) Optional applicationScore
-                 SELECT 
-                     'applicationScore' AS key,
-                     to_jsonb(aasm.score) AS value
-                 FROM application_assessment aasm
-                 WHERE aasm.course_phase_participation_id = pcpp.id
-                   AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
-                 
-                 UNION ALL
+                  ----------------------------------------------------------
+                    -- (A) Always export applicationScore
+                  ----------------------------------------------------------
+                    SELECT 
+                        'applicationScore' AS key,
+                        to_jsonb(aasm.score) AS value
+                    FROM application_assessment aasm
+                    WHERE aasm.course_phase_participation_id = pcpp.id
+                      AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
+                    
+                    UNION ALL
 
-                 -- 2b) Text answers
-                 SELECT
-                     question_config->>'key' AS key,
-                     to_jsonb(aat.answer)    AS value
-                 FROM jsonb_array_elements(dpm.course_phase_meta_data->'exportAnswers'->'answersText') question_config
-                 LEFT JOIN application_answer_text aat
-                   ON aat.course_phase_participation_id = pcpp.id
-                  AND aat.application_question_id = (question_config->>'questionID')::uuid
+                    ----------------------------------------------------------
+                    -- (B) For each text question with accessibleForOtherPhases=true,
+                    --     store the answer under the question's accessKey.
+                    ----------------------------------------------------------
+                    SELECT
+                        qt.access_key AS key,
+                        to_jsonb(aat.answer) AS value
+                    FROM application_question_text qt
+                    JOIN application_answer_text aat
+                      ON aat.application_question_id = qt.id
+                     AND aat.course_phase_participation_id = pcpp.id
+                    WHERE qt.course_phase_id = dpm.phase_id
+                      AND qt.accessible_for_other_phases = true
 
-                 UNION ALL
-
-                 -- 2c) Multi-select answers
-                 SELECT
-                     question_config->>'key' AS key,
-                     to_jsonb(aams.answer)   AS value
-                 FROM jsonb_array_elements(dpm.course_phase_meta_data->'exportAnswers'->'answersMultiSelect') question_config
-                 LEFT JOIN application_answer_multi_select aams
-                   ON aams.course_phase_participation_id = pcpp.id
-                  AND aams.application_question_id = (question_config->>'questionID')::uuid
+                    UNION ALL
+                    
+                    ----------------------------------------------------------
+                    -- (C) For each multi-select question with accessibleForOtherPhases=true,
+                    --     store the answer under the question's accessKey.
+                    ----------------------------------------------------------
+                    SELECT
+                        qm.access_key AS key,
+                        to_jsonb(aams.answer) AS value
+                    FROM application_question_multi_select qm
+                    JOIN application_answer_multi_select aams
+                      ON aams.application_question_id = qm.id
+                     AND aams.course_phase_participation_id = pcpp.id
+                    WHERE qm.course_phase_id = dpm.phase_id
+                      AND qm.accessible_for_other_phases = true
                 
                   UNION ALL
 

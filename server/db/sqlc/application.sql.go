@@ -585,7 +585,7 @@ func (q *Queries) GetApplicationExistsForStudent(ctx context.Context, arg GetApp
 }
 
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many
-SELECT id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num FROM application_question_multi_select
+SELECT id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num, accessible_for_other_phases, access_key FROM application_question_multi_select
 WHERE course_phase_id = $1
 `
 
@@ -610,6 +610,8 @@ func (q *Queries) GetApplicationQuestionsMultiSelectForCoursePhase(ctx context.C
 			&i.MaxSelect,
 			&i.Options,
 			&i.OrderNum,
+			&i.AccessibleForOtherPhases,
+			&i.AccessKey,
 		); err != nil {
 			return nil, err
 		}
@@ -622,7 +624,7 @@ func (q *Queries) GetApplicationQuestionsMultiSelectForCoursePhase(ctx context.C
 }
 
 const getApplicationQuestionsTextForCoursePhase = `-- name: GetApplicationQuestionsTextForCoursePhase :many
-SELECT id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num FROM application_question_text
+SELECT id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num, accessible_for_other_phases, access_key FROM application_question_text
 WHERE course_phase_id = $1
 `
 
@@ -646,6 +648,8 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 			&i.IsRequired,
 			&i.AllowedLength,
 			&i.OrderNum,
+			&i.AccessibleForOtherPhases,
+			&i.AccessKey,
 		); err != nil {
 			return nil, err
 		}
