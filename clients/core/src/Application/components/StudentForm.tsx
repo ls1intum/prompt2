@@ -54,13 +54,13 @@ const studyPrograms = translations.university.studyPrograms.concat('Other')
 
 interface StudentFormProps {
   student: Student
-  disabled?: boolean
+  isInstructorView?: boolean
   allowEditUniversityData: boolean
   onUpdate: (updatedStudent: Student) => void
 }
 
 export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(function StudentForm(
-  { student, disabled = false, allowEditUniversityData, onUpdate },
+  { student, isInstructorView = false, allowEditUniversityData, onUpdate },
   ref,
 ) {
   const hasUniversityAccount = student.has_university_account
@@ -166,7 +166,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                      disabled={
+                        (!allowEditUniversityData && hasUniversityAccount) || isInstructorView
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -185,7 +187,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                      disabled={
+                        (!allowEditUniversityData && hasUniversityAccount) || isInstructorView
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -204,7 +208,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    disabled={
+                      (!allowEditUniversityData && hasUniversityAccount) || isInstructorView
+                    }
                     maxLength={100}
                   />
                 </FormControl>
@@ -221,7 +227,9 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                    disabled={
+                      (!allowEditUniversityData && hasUniversityAccount) || isInstructorView
+                    }
                     maxLength={100}
                   />
                 </FormControl>
@@ -240,7 +248,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <Input
                   {...field}
                   type='email'
-                  disabled={(!allowEditUniversityData && hasUniversityAccount) || disabled}
+                  disabled={(!allowEditUniversityData && hasUniversityAccount) || isInstructorView}
                 />
               </FormControl>
               <FormMessage />
@@ -257,7 +265,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={disabled}
+                  disabled={isInstructorView}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -292,7 +300,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                           'w-full justify-between',
                           !field.value && 'text-muted-foreground',
                         )}
-                        disabled={disabled}
+                        disabled={isInstructorView}
                       >
                         {field.value
                           ? countriesArr.find((country) => country.value === field.value)?.label
@@ -345,7 +353,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={disabled}
+                  disabled={isInstructorView}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -382,7 +390,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                     }
                   }}
                   defaultValue={field.value}
-                  disabled={disabled}
+                  disabled={isInstructorView}
                   value={
                     otherStudyProgram || (field.value != '' && !studyPrograms.includes(field.value))
                       ? 'Other'
@@ -416,7 +424,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={disabled}
+                    disabled={isInstructorView}
                     type='number'
                     maxLength={2}
                     pattern='\d{1,2}'
@@ -444,7 +452,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={disabled}
+                    disabled={isInstructorView}
                     placeholder='Please enter your other study program'
                     maxLength={100}
                   />

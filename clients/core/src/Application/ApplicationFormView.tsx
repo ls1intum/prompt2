@@ -26,7 +26,7 @@ interface ApplicationFormProps {
   initialAnswersText?: ApplicationAnswerText[]
   initialAnswersMultiSelect?: ApplicationAnswerMultiSelect[]
   student?: Student
-  disabled?: boolean
+  isInstructorView?: boolean
   allowEditUniversityData?: boolean
   onSubmit: (
     student: Student,
@@ -41,7 +41,7 @@ export const ApplicationFormView = ({
   initialAnswersMultiSelect,
   initialAnswersText,
   student,
-  disabled = false,
+  isInstructorView = false,
   allowEditUniversityData = false,
   onSubmit,
 }: ApplicationFormProps): JSX.Element => {
@@ -114,24 +114,41 @@ export const ApplicationFormView = ({
   return (
     <Card className={validationFailed ? 'border-red-500' : ''}>
       <CardHeader>
-        <CardTitle>Application Form</CardTitle>
+        <CardTitle>Application Form{isInstructorView}</CardTitle>
+        {isInstructorView && (
+          <div className='text-sm text-muted-foreground'>
+            This form is in read-only mode because you are viewing this application as an
+            instructor. Further, the input field descriptions are hidden for better readability.
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className='space-y-8'>
+        <div
+          className={`${
+            isInstructorView
+              ? // On instructor view + large screen, we use grid with 2 columns
+                'space-y-8 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0'
+              : // Otherwise, maintain the original vertical spacing
+                'space-y-8'
+          }`}
+        >
           <div>
             <h2 className='text-lg font-semibold mb-2'>Personal Information</h2>
-            <p className='text-sm text-muted-foreground mb-4'>
-              This information will be applied for all applications at this chair.
-            </p>
+            {!isInstructorView && (
+              <p className='text-sm text-muted-foreground mb-4'>
+                This information will be applied for all applications at this chair.
+              </p>
+            )}
             <StudentForm
               student={studentData}
               onUpdate={setStudentData}
               ref={studentRef}
-              disabled={disabled}
+              isInstructorView={isInstructorView}
               allowEditUniversityData={allowEditUniversityData}
             />
           </div>
-          <Separator />
+          {!isInstructorView && <Separator />}
+
           <div>
             <h2 className='text-lg font-semibold mb-4'>Course Specific Questions</h2>
             {questions.map((question, index) => (
@@ -145,7 +162,7 @@ export const ApplicationFormView = ({
                       )?.answer ?? []
                     }
                     ref={(el) => (questionMultiSelectRefs.current[index] = el)}
-                    disabled={disabled}
+                    isInstructorView={isInstructorView}
                   />
                 ) : (
                   <ApplicationQuestionTextForm
@@ -155,16 +172,16 @@ export const ApplicationFormView = ({
                         ?.answer ?? ''
                     }
                     ref={(el) => (questionTextRefs.current[index] = el)}
-                    disabled={disabled}
+                    isInstructorView={isInstructorView}
                   />
                 )}
               </div>
             ))}
           </div>
 
-          {!disabled && (
+          {!isInstructorView && (
             <div className='flex justify-end'>
-              <Button onClick={handleSubmit} disabled={disabled}>
+              <Button onClick={handleSubmit} disabled={isInstructorView}>
                 Submit
               </Button>
             </div>

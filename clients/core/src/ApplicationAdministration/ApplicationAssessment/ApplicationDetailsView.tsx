@@ -120,7 +120,7 @@ export const ApplicationDetailsView = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='max-w-4xl w-full max-h-[90vh] flex flex-col'>
+      <DialogContent className='max-w-8xl w-full max-h-[90vh] max-w-[90vw] flex flex-col'>
         {(isFetchingApplication || isFetchingApplicationForm) && (
           <div className='flex justify-center items-center flex-grow'>
             <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -162,7 +162,7 @@ export const ApplicationDetailsView = ({
                   initialAnswersText={fetchedApplication.answers_text}
                   initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
                   student={fetchedApplication.student}
-                  disabled={true}
+                  isInstructorView={true}
                   onSubmit={() => console.log('submit')}
                 />
               )}
