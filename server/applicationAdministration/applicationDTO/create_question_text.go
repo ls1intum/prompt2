@@ -18,7 +18,7 @@ type CreateQuestionText struct {
 	OrderNum        int       `json:"order_num"`
 	// using pgtype as this allows for optional values
 	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
-	AccessKey                pgtype.Text `json:"access"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 func (a CreateQuestionText) GetDBModel() db.CreateApplicationQuestionTextParams {

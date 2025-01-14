@@ -9,4 +9,6 @@ export interface ApplicationQuestionText {
   is_required: boolean
   allowed_length?: number
   order_num: number
+  accessible_for_other_phases?: boolean
+  access_key?: string
 }

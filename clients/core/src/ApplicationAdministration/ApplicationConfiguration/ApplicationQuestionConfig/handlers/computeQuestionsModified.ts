@@ -38,7 +38,10 @@ export const questionsEqual = (
     question1.placeholder === question2.placeholder &&
     question1.error_message === question2.error_message &&
     question1.is_required === question2.is_required &&
-    question1.order_num === question2.order_num
+    question1.order_num === question2.order_num &&
+    question1.accessible_for_other_phases === question2.accessible_for_other_phases &&
+    // key will be ignored if accessible_for_other_phases is false
+    (question1.accessible_for_other_phases ? question1.access_key === question2.access_key : true)
 
   if (!basicEqual) return false
 

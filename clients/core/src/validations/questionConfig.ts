@@ -9,6 +9,8 @@ const baseQuestionSchema = z.object({
   placeholder: z.string().optional(),
   error_message: z.string().optional(),
   is_required: z.boolean(),
+  accessible_for_other_phases: z.boolean(),
+  access_key: z.string().optional(),
 })
 
 // Schema for text questions
@@ -45,10 +47,26 @@ export const multiSelectQuestionSchema = baseQuestionSchema.extend({
 })
 
 // Combine schemas using discriminated union
-export const questionConfigSchema = z.discriminatedUnion('type', [
-  multiSelectQuestionSchema,
-  textQuestionSchema,
-])
+export const questionConfigSchema = z
+  .discriminatedUnion('type', [multiSelectQuestionSchema, textQuestionSchema])
+  .refine(
+    (data) => {
+      // If accessible_for_other_phases = false, no validation needed.
+      if (!data.accessible_for_other_phases) return true
+
+      // Otherwise, require access_key to exist and to have no spaces:
+      return (
+        typeof data.access_key === 'string' &&
+        data.access_key.trim().length > 0 && // optional: require it to be non-empty
+        !/\s/.test(data.access_key) // no spaces
+      )
+    },
+    {
+      message:
+        'If "accessible_for_other_phases" is checked, "access_key" must be provided and cannot contain spaces.',
+      path: ['access_key'], // Attach the error to "access_key"
+    },
+  )
 
 // Export TypeScript types
 export type QuestionConfigFormData = z.infer<typeof questionConfigSchema>

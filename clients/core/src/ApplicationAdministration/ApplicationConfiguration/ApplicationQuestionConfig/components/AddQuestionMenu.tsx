@@ -31,6 +31,8 @@ export const AddQuestionMenu = ({
       is_required: false,
       order_num: applicationQuestions.length + 1,
       allowed_length: 500,
+      access_key: '',
+      accessible_for_other_phases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
@@ -45,6 +47,8 @@ export const AddQuestionMenu = ({
       min_select: 0,
       max_select: 0,
       options: [],
+      access_key: '',
+      accessible_for_other_phases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
