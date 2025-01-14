@@ -39,6 +39,7 @@ import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 import { ApplicationManualAdd } from './ApplicationManualAdding/ApplicationManualAdd'
 import { useGetApplicationParticipations } from '../handlers/useGetApplicationParticipations'
 import { ManagementPageHeader } from '../../management/components/ManagementPageHeader'
+import { AdditionalScore } from '@/interfaces/additional_score'
 
 export const ApplicationsOverview = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -65,7 +66,7 @@ export const ApplicationsOverview = (): JSX.Element => {
     isPending: isAdditionalScoresPending,
     isError: isAdditionalScoresError,
     refetch: refetchScores,
-  } = useQuery<string[]>({
+  } = useQuery<AdditionalScore[]>({
     queryKey: ['application_participations', phaseId],
     queryFn: () => getAdditionalScoreNames(phaseId ?? ''),
   })

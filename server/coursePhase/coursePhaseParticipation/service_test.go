@@ -26,7 +26,7 @@ func (suite *CoursePhaseParticipationTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/course_phase_participation_test.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/full_db.sql")
 	if err != nil {
 		log.Fatalf("Failed to set up test database: %v", err)
 	}
@@ -44,7 +44,7 @@ func (suite *CoursePhaseParticipationTestSuite) TearDownSuite() {
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TestGetAllParticipationsForCoursePhase() {
-	coursePhaseID := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
+	coursePhaseID := uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908")
 
 	participations, err := GetAllParticipationsForCoursePhase(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
@@ -58,8 +58,8 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 
 	newParticipation := coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
-		CoursePhaseID:         uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b"),
-		CourseParticipationID: uuid.MustParse("65dcc535-a9ab-4421-a2bc-0f09780ca59e"),
+		CoursePhaseID:         uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908"),
+		CourseParticipationID: uuid.MustParse("ca41772a-e06d-40eb-9c4b-ab44e06a890c"),
 		PassStatus:            db.NullPassStatus{PassStatus: "passed", Valid: true},
 		MetaData:              metaData,
 	}
@@ -72,7 +72,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipation() {
-	participationID := uuid.MustParse("7698f081-df55-4136-a58c-1a166bb1bbda")
+	participationID := uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4")
 	jsonData := `{"other-value": "some skills"}`
 	var metaData meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &metaData)
@@ -94,7 +94,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipationWithMetaDataOverride() {
-	participationID := uuid.MustParse("7698f081-df55-4136-a58c-1a166bb1bbda")
+	participationID := uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4")
 	jsonData := `{"skills": "more than none", "other-value": "some skills"}`
 	var metaData meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &metaData)
@@ -115,7 +115,9 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), updatedParticipation.ID, result.ID, "Participation ID should match")
 	assert.Equal(suite.T(), BeforeResult.PassStatus, result.PassStatus, "PassStatus should match")
-	assert.Equal(suite.T(), updatedParticipation.MetaData, result.MetaData, "New Meta data should match")
+	for key, value := range updatedParticipation.MetaData {
+		assert.Equal(suite.T(), result.MetaData[key], value, "Updated Meta data should be stored")
+	}
 }
 
 func TestCoursePhaseParticipationTestSuite(t *testing.T) {

@@ -32,6 +32,7 @@ import { checkCheckBoxQuestion } from '../../../../Application/utils/CheckBoxReq
 import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -261,6 +262,51 @@ export const ApplicationQuestionCard = forwardRef<
                 ) : (
                   <TextConfig form={form as UseFormReturn<QuestionConfigFormDataText>} />
                 )}
+
+                <Separator />
+                <div className='space-y-2'>
+                  <h2 className='text-lg font-semibold'>Export Settings</h2>
+                  <FormField
+                    control={form.control}
+                    name='accessible_for_other_phases'
+                    render={({ field }) => (
+                      <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                        <div className='space-y-0.5'>
+                          <FormLabel className='text-base'>Accessible for Other Phases</FormLabel>
+                          <FormDescription>
+                            Allow this question to be accessed in other application phases
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            aria-label='Toggle accessibility for other phases'
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  {form.watch('accessible_for_other_phases') && (
+                    <FormField
+                      control={form.control}
+                      name='access_key'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Access Key</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder='Enter access key' />
+                          </FormControl>
+                          <FormDescription>
+                            Provide a unique key to identify this question when accessing it from
+                            other phases
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
               </form>
             </Form>
           </CardContent>
