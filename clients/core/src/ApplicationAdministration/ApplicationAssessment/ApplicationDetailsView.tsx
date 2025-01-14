@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../network/queries/applicationAssessment'
 import { ApplicationForm } from '@/interfaces/application_form'
 import { getApplicationForm } from '../../network/queries/applicationForm'
-import { ApplicationFormView } from '../../Application/ApplicationFormView'
 import { MissingUniversityData } from './components/MissingUniversityData'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
@@ -25,6 +24,7 @@ import { InstructorComment } from '@/interfaces/instructor_comment'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { useToast } from '@/hooks/use-toast'
 import { StudentProfile } from './components/StudentProfile'
+import { ApplicationAnswersTable } from './components/ApplicationAnswersTable'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
@@ -155,7 +155,17 @@ export const ApplicationDetailsView = ({
               fetchedApplication &&
               fetchedApplicationForm &&
               fetchedApplication.student && (
-                <StudentProfile student={fetchedApplication.student} status={status} />
+                <>
+                  <StudentProfile student={fetchedApplication.student} status={status} />
+                  <ApplicationAnswersTable
+                    questions={[
+                      ...fetchedApplicationForm.questions_multi_select,
+                      ...fetchedApplicationForm.questions_text,
+                    ]}
+                    answers_multi_select={fetchedApplication.answers_multi_select}
+                    answers_text={fetchedApplication.answers_text}
+                  />
+                </>
               )}
 
             <AssessmentCard
