@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
@@ -354,6 +355,10 @@ func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
 	// Check if the name is empty
 	if score.Name == "" {
 		return errors.New("name cannot be empty")
+	}
+
+	if score.Key == "" || strings.Contains(score.Key, " ") {
+		return errors.New("key cannot be empty or contain whitespaces")
 	}
 
 	// Check if all scores are greater than 0

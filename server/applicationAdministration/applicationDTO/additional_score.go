@@ -7,6 +7,7 @@ import (
 
 type AdditionalScore struct {
 	Name            string            `json:"name"`
+	Key             string            `json:"key"`
 	Threshold       pgtype.Numeric    `json:"threshold"`
 	ThresholdActive bool              `json:"threshold_active"`
 	Scores          []IndividualScore `json:"scores"`
@@ -15,4 +16,11 @@ type AdditionalScore struct {
 type IndividualScore struct {
 	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
 	Score                      pgtype.Numeric `json:"score"`
+}
+
+// used to store the additional score objects in the meta data
+// we do not store the Threshold as not required after adding
+type AdditionalScoreObject struct {
+	Key  string `json:"key"`
+	Name string `json:"name"`
 }

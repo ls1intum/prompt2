@@ -16,7 +16,6 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/student"
 	log "github.com/sirupsen/logrus"
 )
@@ -554,7 +553,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		coursePhaseIDs = append(coursePhaseIDs, score.CoursePhaseParticipationID)
 	}
 	scoreNameArray := make([]string, 0, 1)
-	scoreNameArray = append(scoreNameArray, additionalScore.Name)
+	scoreNameArray = append(scoreNameArray, additionalScore.Key)
 
 	// 1.) Store the new score for each participation
 	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
@@ -601,11 +600,11 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	}
 
 	// 3.) score the score name in the course phase
-	_, err = qtx.GetExistingAdditionalScores(ctx, coursePhaseID)
-	if err != nil {
-		log.Error(err)
-		return errors.New("could not update additional scores")
-	}
+	// _, err = qtx.GetExistingAdditionalScores(ctx, coursePhaseID)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return errors.New("could not update additional scores")
+	// }
 
 	coursePhaseDTO, err := coursePhase.GetCoursePhaseByID(ctx, coursePhaseID)
 	if err != nil {
@@ -613,7 +612,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		return errors.New("could not update additional scores")
 	}
 
-	metaDataUpdate, err := addScoreName(coursePhaseDTO.MetaData, additionalScore.Name)
+	metaDataUpdate, err := addScoreName(coursePhaseDTO.MetaData, additionalScore.Name, additionalScore.Key)
 	if err != nil {
 		return err
 	}
@@ -635,7 +634,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 	return nil
 }
 
-func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]string, error) {
+func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applicationDTO.AdditionalScoreObject, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
@@ -646,65 +645,6 @@ func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]string
 	}
 
 	return metaToScoresArray(coursePhaseDTO.MetaData)
-}
-
-func metaToScoresArray(metaData meta.MetaData) ([]string, error) {
-	var scoreNamesArray []string
-
-	oldNames, ok := metaData["additionalScores"]
-	if ok && oldNames != nil {
-		// Assert that oldNames is a slice of interface{}
-		oldNamesArray, ok := oldNames.([]interface{})
-		if !ok {
-			log.Error("expected []interface{}, got: ", oldNames)
-			return nil, errors.New("could not update additional scores")
-		}
-
-		// Convert each element to string
-		for _, name := range oldNamesArray {
-			nameStr, ok := name.(string)
-			if !ok {
-				log.Error("expected string, got: ", name)
-				return nil, errors.New("could not update additional scores")
-			}
-			scoreNamesArray = append(scoreNamesArray, nameStr)
-		}
-	}
-
-	return scoreNamesArray, nil
-}
-
-func addScoreName(oldMetaData meta.MetaData, newName string) ([]byte, error) {
-	var newScoreNamesArray []string
-
-	newScoreNamesArray, err := metaToScoresArray(oldMetaData)
-	if err != nil {
-		return nil, err
-	}
-
-	nameExists := false
-	for _, name := range newScoreNamesArray {
-		if name == newName {
-			nameExists = true
-			break
-		}
-	}
-
-	if !nameExists {
-		newScoreNamesArray = append(newScoreNamesArray, newName)
-	}
-
-	metaDataUpdate := meta.MetaData{
-		"additionalScores": newScoreNamesArray,
-	}
-
-	byteArray, err := metaDataUpdate.GetDBModel()
-	if err != nil {
-		log.Error(err)
-		return nil, errors.New("could not update additional scores")
-	}
-
-	return byteArray, nil
 }
 
 func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID) error {

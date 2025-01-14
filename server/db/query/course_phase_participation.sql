@@ -264,15 +264,17 @@ SELECT
                 
                   UNION ALL
 
-                 -- 2d) Get additional scores
-                  SELECT
-                    question_config->>'key'  AS key,
-                    to_jsonb(
-                        pcpp.meta_data -> (question_config->>'name')
-                    )                       AS value
-                  FROM jsonb_array_elements(
-                          dpm.course_phase_meta_data->'exportAnswers'->'additionalScores'
-                        ) question_config
+                    ----------------------------------------------------------
+                    -- (D) Get all additional scores
+                    ----------------------------------------------------------
+                    SELECT
+                      question_config->>'key'  AS key,
+                      to_jsonb(
+                          pcpp.meta_data -> (question_config->>'key')
+                      )                       AS value
+                    FROM jsonb_array_elements(
+                            dpm.course_phase_meta_data->'additionalScores'
+                          ) question_config
                 
              ) x
          ) appdata

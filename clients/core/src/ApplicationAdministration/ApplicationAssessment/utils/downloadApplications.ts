@@ -1,9 +1,10 @@
+import { AdditionalScore } from '@/interfaces/additional_score'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 import { saveAs } from 'file-saver'
 
 export const downloadApplications = (
   data: ApplicationParticipation[],
-  additionalScoreNames: string[] = [],
+  additionalScores: AdditionalScore[] = [],
   filename = 'application-export.csv',
 ) => {
   if (!data || data.length === 0) {
@@ -21,7 +22,7 @@ export const downloadApplications = (
     'gender',
     'pass_status',
     'score',
-    ...additionalScoreNames,
+    ...additionalScores.map((score) => score.key),
   ]
   const csvRows = data.map((row) => {
     // Extract student data
@@ -37,7 +38,7 @@ export const downloadApplications = (
           return JSON.stringify(row.pass_status ?? '')
         } else if (header === 'score') {
           return JSON.stringify(row.score ?? '')
-        } else if (additionalScoreNames.includes(header)) {
+        } else if (additionalScores.map((score) => score.key).includes(header)) {
           // Fetch additional scores from the `meta_data` object
           return JSON.stringify(row.meta_data?.[header] ?? '')
         } else {
