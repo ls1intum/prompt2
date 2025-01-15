@@ -83,7 +83,8 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
                 onChange={(e) => handleNameChange(e.target.value)}
                 className='w-48 mb-2'
                 autoFocus
-                onKeyPress={(e) => e.key === 'Enter' && setIsEditing((prev) => !prev)}
+                onBlur={() => setIsEditing(false)}
+                onKeyUp={(e) => e.key === 'Enter' && setIsEditing((prev) => !prev)}
               />
             ) : (
               <CardTitle className='text-lg font-bold text-primary mb-2'>
