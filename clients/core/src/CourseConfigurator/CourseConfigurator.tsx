@@ -42,9 +42,6 @@ export default function CourseConfiguratorPage() {
     setFinishedCoursePhaseSetup(false)
     setFinishedMetaDataGraphSetup(false)
     setCoursePhases([])
-    // Optionally refetch queries if needed
-    refetchGraph()
-    refetchMetaGraph()
   }, [courseId])
 
   const {
@@ -126,7 +123,7 @@ export default function CourseConfiguratorPage() {
         if (
           coursePhaseType.name === 'Application' &&
           fetchedApplicationForm &&
-          fetchedAdditionalScores
+          !isAdditionalScoresPending
         ) {
           fetchedApplicationForm.questions_multi_select
             .filter(
@@ -151,12 +148,15 @@ export default function CourseConfiguratorPage() {
               })
             })
 
-          fetchedAdditionalScores.forEach((score) => {
-            additionalMetaData.push({
-              name: score.name,
-              type: 'integer',
+          if (fetchedAdditionalScores) {
+            fetchedAdditionalScores.forEach((score) => {
+              additionalMetaData.push({
+                name: score.name,
+                type: 'integer',
+              })
             })
-          })
+          }
+
           additionalMetaData.push({ name: 'assessmentScore', type: 'integer' })
         }
 
@@ -178,6 +178,7 @@ export default function CourseConfiguratorPage() {
     setCoursePhaseTypes,
     fetchedApplicationForm,
     fetchedAdditionalScores,
+    isAdditionalScoresPending,
   ])
 
   useEffect(() => {
@@ -199,6 +200,7 @@ export default function CourseConfiguratorPage() {
       // TODO replace by error page
       console.log('Course not found')
     } else {
+      console.log('Setting course phases')
       setCoursePhases([
         ...course.course_phases.map((phase) => ({
           ...phase,

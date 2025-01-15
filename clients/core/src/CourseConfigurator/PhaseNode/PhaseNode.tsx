@@ -3,7 +3,7 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Save, Pen, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
+import { Save, Pen, ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { getPermissionString, Role } from '@/interfaces/permission_roles'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   const { courseId } = useParams<{ courseId: string }>()
@@ -102,6 +103,30 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           )}
         </CardHeader>
         <CardContent className='p-4 pt-2'>
+          {phaseType?.name === 'Application' &&
+            (!phaseType?.provided_output_meta_data ||
+              phaseType?.provided_output_meta_data.length === 0) && (
+              // TODO
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant='ghost' className=''>
+                      <TriangleAlert className='h-4 w-4' />
+                      Requires Configuration
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side='right' className='max-w-xs'>
+                    <p>
+                      This metadata includes the assessment score, all additional scores, and
+                      answers to exported questions. To configure what&apos;s exported, first save
+                      the application phase, then choose the questions in the Application Question
+                      Config.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
           {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
             <MetaDataBadges
               metaData={phaseType.required_input_meta_data}
