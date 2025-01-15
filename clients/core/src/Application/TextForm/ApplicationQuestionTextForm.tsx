@@ -19,11 +19,11 @@ import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText
   initialAnswer?: string
-  disabled?: boolean
+  isInstructorView?: boolean
 }
 
 export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuestionTextForm(
-  { question, initialAnswer, disabled = false }: ApplicationQuestionTextFormProps,
+  { question, initialAnswer, isInstructorView = false }: ApplicationQuestionTextFormProps,
   ref: React.Ref<QuestionTextFormRef>,
 ) {
   const [charCount, setCharCount] = useState(initialAnswer?.length || 0)
@@ -72,7 +72,9 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                     {question.title}
                     {question.is_required ? <span className='text-destructive'> *</span> : ''}
                   </FormLabel>
-                  {question.description && <FormDescriptionHTML htmlCode={question.description} />}
+                  {!isInstructorView && question.description && (
+                    <FormDescriptionHTML htmlCode={question.description} />
+                  )}
                   <div className='relative'>
                     {isTextArea ? (
                       <Textarea
@@ -80,8 +82,8 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                         placeholder={question.placeholder || ''}
                         maxLength={question.allowed_length}
                         className='pr-12'
-                        rows={4}
-                        disabled={disabled}
+                        rows={isInstructorView ? 8 : 4}
+                        disabled={isInstructorView}
                       />
                     ) : (
                       <Input
@@ -89,7 +91,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                         placeholder={question.placeholder || ''}
                         maxLength={question.allowed_length}
                         className='pr-12'
-                        disabled={disabled}
+                        disabled={isInstructorView}
                       />
                     )}
                     <div className='absolute right-2 bottom-2 text-sm text-gray-500'>

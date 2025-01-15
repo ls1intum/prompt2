@@ -2,7 +2,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -12,13 +11,11 @@ import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../network/queries/applicationAssessment'
 import { ApplicationForm } from '@/interfaces/application_form'
 import { getApplicationForm } from '../../network/queries/applicationForm'
-import { ApplicationFormView } from '../../Application/ApplicationFormView'
 import { MissingUniversityData } from './components/MissingUniversityData'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from './utils/getStatusBadge'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { Button } from '@/components/ui/button'
 
 import { AssessmentCard } from './components/AssessmentCard'
 import { ApplicationAssessment } from '@/interfaces/application_assessment'
@@ -26,6 +23,8 @@ import { postApplicationAssessment } from '../../network/mutations/postApplicati
 import { InstructorComment } from '@/interfaces/instructor_comment'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { useToast } from '@/hooks/use-toast'
+import { StudentProfile } from '@/components/StudentProfile'
+import { ApplicationAnswersTable } from './components/ApplicationAnswersTable'
 
 interface ApplicationDetailsViewProps {
   coursePhaseParticipationID: string
@@ -120,7 +119,7 @@ export const ApplicationDetailsView = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='max-w-4xl w-full max-h-[90vh] flex flex-col'>
+      <DialogContent className='max-w-8xl w-full max-h-[90vh] max-w-[90vw] flex flex-col'>
         {(isFetchingApplication || isFetchingApplicationForm) && (
           <div className='flex justify-center items-center flex-grow'>
             <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -156,45 +155,29 @@ export const ApplicationDetailsView = ({
               fetchedApplication &&
               fetchedApplicationForm &&
               fetchedApplication.student && (
-                <ApplicationFormView
-                  questionsText={fetchedApplicationForm.questions_text}
-                  questionsMultiSelect={fetchedApplicationForm.questions_multi_select}
-                  initialAnswersText={fetchedApplication.answers_text}
-                  initialAnswersMultiSelect={fetchedApplication.answers_multi_select}
-                  student={fetchedApplication.student}
-                  disabled={true}
-                  onSubmit={() => console.log('submit')}
-                />
+                <>
+                  <StudentProfile student={fetchedApplication.student} status={status} />
+                  <ApplicationAnswersTable
+                    questions={[
+                      ...fetchedApplicationForm.questions_multi_select,
+                      ...fetchedApplicationForm.questions_text,
+                    ]}
+                    answers_multi_select={fetchedApplication.answers_multi_select}
+                    answers_text={fetchedApplication.answers_text}
+                  />
+                </>
               )}
 
             <AssessmentCard
               score={score}
               metaData={metaData}
+              acceptanceStatus={status}
+              handleAcceptanceStatusChange={handleAcceptanceStatusChange}
               onScoreSubmission={handleScoreSubmit}
               onCommentSubmission={handleCommentSubmit}
             />
           </div>
         </div>
-        <DialogFooter className='space-x-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            disabled={status === PassStatus.FAILED}
-            className='border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-red-50'
-            onClick={() => handleAcceptanceStatusChange(PassStatus.FAILED)}
-          >
-            Reject
-          </Button>
-          <Button
-            variant='default'
-            size='sm'
-            disabled={status === PassStatus.PASSED}
-            className='bg-green-500 hover:bg-green-600'
-            onClick={() => handleAcceptanceStatusChange(PassStatus.PASSED)}
-          >
-            Accept
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

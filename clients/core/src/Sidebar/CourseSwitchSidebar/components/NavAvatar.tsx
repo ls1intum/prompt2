@@ -1,12 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { sha256 } from 'js-sha256'
-
-const getGravatarUrl = (email) => {
-  const hash = sha256(email.trim().toLowerCase())
-
-  return `https://www.gravatar.com/avatar/${hash}?d=identicon&d=404`
-}
+import { getGravatarUrl } from '@/lib/getGravatarUrl'
 
 export function NavAvatar(): JSX.Element {
   const { user } = useAuthStore()
