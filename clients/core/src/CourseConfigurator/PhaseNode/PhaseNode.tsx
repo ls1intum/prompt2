@@ -3,7 +3,7 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Save, Pen, ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
+import { Pen, ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
@@ -85,7 +85,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
                 className='w-48 mb-2'
                 autoFocus
                 onBlur={() => setIsEditing(false)}
-                onKeyUp={(e) => e.key === 'Enter' && setIsEditing((prev) => !prev)}
+                onKeyUp={(e) => e.key === 'Enter' && setIsEditing(false)}
               />
             ) : (
               <CardTitle className='text-lg font-bold text-primary mb-2'>
@@ -96,9 +96,17 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
               {phaseType?.name}
             </Badge>
           </div>
-          {canEdit && (
-            <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
-              {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}
+          {canEdit && !isEditing && (
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsEditing((prev) => !prev)
+              }}
+            >
+              <Pen className='h-4 w-4' />
             </Button>
           )}
         </CardHeader>
