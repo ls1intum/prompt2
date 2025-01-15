@@ -1,4 +1,9 @@
-import { SidebarMenu } from '@/components/ui/sidebar'
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+} from '@/components/ui/sidebar'
 import { Gauge, Settings } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
@@ -23,29 +28,40 @@ export const InsideCourseSidebar = (): JSX.Element => {
   }, [courseId, courses])
 
   return (
-    <SidebarMenu>
-      <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
-      {sortedPhases.map((phase) => {
-        if (phase.course_phase_type in PhaseSidebarMapping) {
-          const PhaseComponent = PhaseSidebarMapping[phase.course_phase_type]
-          return (
-            <Suspense
-              key={phase.id}
-              fallback={<DisabledSidebarMenuItem key={phase.id} title={'Loading...'} />}
-            >
-              <PhaseComponent rootPath={rootPath + '/' + phase.id} title={phase.name} />
-            </Suspense>
-          )
-        } else {
-          return <DisabledSidebarMenuItem key={phase.id} title={'Unknown ' + phase.name} />
-        }
-      })}
+    <SidebarMenu className='space-y-4'>
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
+          <InsideSidebarMenuItem
+            goToPath={`${rootPath}/course_configurator`}
+            icon={<Settings />}
+            title='Configure Course'
+          />
+        </SidebarGroupContent>
+      </SidebarGroup>
 
-      <InsideSidebarMenuItem
-        goToPath={rootPath + '/settings'}
-        icon={<Settings />}
-        title='Settings'
-      />
+      {sortedPhases.length > 0 && (
+        <SidebarGroup>
+          <SidebarGroupLabel>Course Phases</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {sortedPhases.map((phase) => {
+              if (phase.course_phase_type in PhaseSidebarMapping) {
+                const PhaseComponent = PhaseSidebarMapping[phase.course_phase_type]
+                return (
+                  <Suspense
+                    key={phase.id}
+                    fallback={<DisabledSidebarMenuItem key={phase.id} title={'Loading...'} />}
+                  >
+                    <PhaseComponent rootPath={rootPath + '/' + phase.id} title={phase.name} />
+                  </Suspense>
+                )
+              } else {
+                return <DisabledSidebarMenuItem key={phase.id} title={'Unknown ' + phase.name} />
+              }
+            })}
+          </SidebarGroupContent>
+        </SidebarGroup>
+      )}
     </SidebarMenu>
   )
 }
