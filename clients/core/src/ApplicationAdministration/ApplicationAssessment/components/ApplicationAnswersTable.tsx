@@ -12,6 +12,7 @@ import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_mu
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
 import { ApplicationAnswerText } from '@/interfaces/application_answer_text'
 import { AlignLeft, CheckSquare } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 interface ApplicationAnswersTableProps {
   questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
@@ -65,14 +66,13 @@ export const ApplicationAnswersTable = ({
                     </TableCell>
                     <TableCell>
                       {Array.isArray(answer) ? (
-                        <ul className='list-none space-y-1'>
+                        <div>
                           {answer.map((item, idx) => (
-                            <li key={idx} className='flex items-center space-x-2'>
-                              <span className='h-1.5 w-1.5 rounded-full bg-primary' />
-                              <span>{item}</span>
-                            </li>
+                            <Badge key={idx} className='mr-1'>
+                              {item}
+                            </Badge>
                           ))}
-                        </ul>
+                        </div>
                       ) : (
                         <p className='whitespace-pre-wrap break-words'>{answer}</p>
                       )}
