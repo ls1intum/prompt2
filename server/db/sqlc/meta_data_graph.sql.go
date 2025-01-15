@@ -11,6 +11,32 @@ import (
 	"github.com/google/uuid"
 )
 
+const createMetaDataConnection = `-- name: CreateMetaDataConnection :exec
+INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id)
+VALUES ($1, $2)
+`
+
+type CreateMetaDataConnectionParams struct {
+	FromPhaseID uuid.UUID `json:"from_phase_id"`
+	ToPhaseID   uuid.UUID `json:"to_phase_id"`
+}
+
+func (q *Queries) CreateMetaDataConnection(ctx context.Context, arg CreateMetaDataConnectionParams) error {
+	_, err := q.db.Exec(ctx, createMetaDataConnection, arg.FromPhaseID, arg.ToPhaseID)
+	return err
+}
+
+const deleteMetaDataGraphConnections = `-- name: DeleteMetaDataGraphConnections :exec
+DELETE FROM meta_data_dependency_graph
+WHERE from_phase_id IN 
+    (SELECT id FROM course_phase WHERE course_id = $1)
+`
+
+func (q *Queries) DeleteMetaDataGraphConnections(ctx context.Context, courseID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteMetaDataGraphConnections, courseID)
+	return err
+}
+
 const getMetaDataGraph = `-- name: GetMetaDataGraph :many
 SELECT mg.from_phase_id, mg.to_phase_id
 FROM meta_data_dependency_graph mg

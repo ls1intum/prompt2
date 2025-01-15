@@ -199,3 +199,36 @@ func GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.Meta
 	}
 	return dtoGraph, nil
 }
+
+func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	tx, err := CourseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	qtx := CourseServiceSingleton.queries.WithTx(tx)
+
+	// delete all previous connections
+	err = qtx.DeleteMetaDataGraphConnections(ctx, courseID)
+	if err != nil {
+		return err
+	}
+
+	// create new connections
+	for _, graphItem := range graphUpdate {
+		err = qtx.CreateMetaDataConnection(ctx, db.CreateMetaDataConnectionParams{
+			FromPhaseID: graphItem.FromCoursePhaseID,
+			ToPhaseID:   graphItem.ToCoursePhaseID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+
+}
