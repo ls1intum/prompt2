@@ -4,13 +4,14 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
 } from '@/components/ui/sidebar'
-import { Gauge, Settings } from 'lucide-react'
+import { Gauge } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
 import { Suspense, useMemo } from 'react'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { DisabledSidebarMenuItem } from './components/DisabledSidebarMenuItem'
 import { PhaseSidebarMapping } from '../../PhaseMapping/PhaseSidebarMapping'
+import { CourseConfiguratorSidebar } from '../../PhaseMapping/ExternalSidebars/CourseConfiguratorSidebar'
 
 export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -32,11 +33,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
       <SidebarGroup>
         <SidebarGroupContent>
           <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
-          <InsideSidebarMenuItem
-            goToPath={`${rootPath}/course_configurator`}
-            icon={<Settings />}
-            title='Configure Course'
-          />
+          <CourseConfiguratorSidebar rootPath={rootPath} title='Configure Course' />
         </SidebarGroupContent>
       </SidebarGroup>
 

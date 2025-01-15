@@ -43,7 +43,12 @@ export const Breadcrumbs: React.FC = () => {
         if (course) {
           breadcrumbs.push({ title: course.name, path: `/management/course/${courseId}` })
 
-          if (pathSegments.length >= 3) {
+          if (pathSegments.length >= 3 && pathSegments[3] === 'configurator') {
+            breadcrumbs.push({
+              title: 'Course Configurator',
+              path: `/management/course/${courseId}/configurator`,
+            })
+          } else if (pathSegments.length >= 3) {
             const phaseId = pathSegments[3]
             const phase = course.course_phases.find((p) => p.id === phaseId)
             if (phase) {
