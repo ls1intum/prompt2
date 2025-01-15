@@ -37,6 +37,7 @@ import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { getPermissionString, Role } from '@/interfaces/permission_roles'
 import { useCourseStore } from '@/zustand/useCourseStore'
+import { DataEdgeProps } from './Edges/DataEdgeProps'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -59,7 +60,7 @@ export function CourseConfigurator() {
     ) || permissions.includes(Role.PROMPT_ADMIN)
 
   const queryClient = useQueryClient()
-  const { coursePhases, coursePhaseGraph, removeUnsavedCoursePhases } =
+  const { coursePhases, coursePhaseGraph, metaDataGraph, removeUnsavedCoursePhases } =
     useCourseConfigurationState()
   const initialNodes = coursePhases.map((phase) => ({
     id: phase.id || `no-valid-id-${Date.now()}`,
@@ -68,9 +69,18 @@ export function CourseConfigurator() {
     data: {},
   }))
 
-  const initialEdges = coursePhaseGraph.map((item) => {
+  const initialPersonEdges = coursePhaseGraph.map((item) => {
     return {
-      id: 'edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
+      id: 'person-edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
+      source: item.from_course_phase_id,
+      target: item.to_course_phase_id,
+      type: 'iconEdge',
+    }
+  })
+
+  const initialMetaEdges = metaDataGraph.map((item) => {
+    return {
+      id: 'data-edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
       source: item.from_course_phase_id,
       target: item.to_course_phase_id,
       type: 'iconEdge',
@@ -79,18 +89,34 @@ export function CourseConfigurator() {
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements({
     nodes: initialNodes,
-    edges: initialEdges,
+    edges: [...initialPersonEdges, ...initialMetaEdges],
   })
 
-  const designedEdges = layoutedEdges.map((edge) => {
-    const participantEdge = ParticipantEdgeProps(edge)
-    return {
-      ...participantEdge,
-      id: edge.id,
-      sourceHandle: `participants-out-${edge.source}`,
-      targetHandle: `participants-in-${edge.target}`,
-    }
-  })
+  const designedPersonEdges = layoutedEdges
+    .filter((edge) => edge.id.startsWith('person-edge'))
+    .map((edge) => {
+      const participantEdge = ParticipantEdgeProps(edge)
+      return {
+        ...participantEdge,
+        id: edge.id,
+        sourceHandle: `participants-out-${edge.source}`,
+        targetHandle: `participants-in-${edge.target}`,
+      }
+    })
+
+  const designedMetaDataEdges = layoutedEdges
+    .filter((edge) => edge.id.startsWith('data-edge'))
+    .map((edge) => {
+      const metaDataEdge = DataEdgeProps(edge)
+      return {
+        ...metaDataEdge,
+        id: edge.id,
+        sourceHandle: `metadata-out-${edge.source}`,
+        targetHandle: `metadata-in-${edge.target}`,
+      }
+    })
+
+  const designedEdges = [...designedPersonEdges, ...designedMetaDataEdges]
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)

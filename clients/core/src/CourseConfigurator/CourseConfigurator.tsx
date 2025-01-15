@@ -11,24 +11,36 @@ import { getCoursePhaseGraph } from '../network/queries/coursePhaseGraph'
 import { CoursePhaseGraphItem } from '@/interfaces/course_phase_graph'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { Loader2 } from 'lucide-react'
+import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
+import { getMetaDataGraph } from '../network/queries/courseMetaDataGraph'
 
 export default function CourseConfiguratorPage() {
   const { courses } = useCourseStore()
   const courseId = useParams<{ courseId: string }>().courseId
   const course = courses.find((c) => c.id === courseId)
-  const { setCoursePhaseTypes, appendCoursePhaseType, setCoursePhaseGraph, setCoursePhases } =
-    useCourseConfigurationState()
+  const {
+    setCoursePhaseTypes,
+    appendCoursePhaseType,
+    setCoursePhaseGraph,
+    setCoursePhases,
+    setMetaDataGraph,
+  } = useCourseConfigurationState()
 
+  // makes sure to delay the loading of the canvas until all data is fetched and set
   const [finishedGraphSetup, setFinishedGraphSetup] = useState(false)
   const [finishedCoursePhaseSetup, setFinishedCoursePhaseSetup] = useState(false)
+  const [finishedMetaDataGraphSetup, setFinishedMetaDataGraphSetup] = useState(false)
+  const finishedSetup = finishedGraphSetup && finishedCoursePhaseSetup && finishedMetaDataGraphSetup
 
   useEffect(() => {
     // If courseId changes, reset graph setup states
     setFinishedGraphSetup(false)
     setFinishedCoursePhaseSetup(false)
+    setFinishedMetaDataGraphSetup(false)
     setCoursePhases([])
     // Optionally refetch queries if needed
     refetchGraph()
+    refetchMetaGraph()
   }, [courseId])
 
   const {
@@ -53,6 +65,20 @@ export default function CourseConfiguratorPage() {
     queryFn: () => getCoursePhaseGraph(courseId ?? ''),
   })
 
+  const {
+    data: fetchedMetaDataGraph,
+    isPending: isMetaGraphPending,
+    error: metaGraphError,
+    isError: iseMetaGraphError,
+    refetch: refetchMetaGraph,
+  } = useQuery<MetaDataGraphItem[]>({
+    queryKey: ['course_phases', 'meta_phase_graph', courseId],
+    queryFn: () => getMetaDataGraph(courseId ?? ''),
+  })
+
+  const isError = isCoursePhaseTypesError || isGraphError || iseMetaGraphError
+  const isPending = isCoursePhaseTypesPending || isGraphPending || isMetaGraphPending
+
   useEffect(() => {
     if (fetchedCoursePhaseTypes) {
       setCoursePhaseTypes([])
@@ -75,6 +101,13 @@ export default function CourseConfiguratorPage() {
       setFinishedGraphSetup(true)
     }
   }, [fetchedCourseGraph, setCoursePhaseGraph])
+
+  useEffect(() => {
+    if (fetchedMetaDataGraph) {
+      setMetaDataGraph([...fetchedMetaDataGraph])
+      setFinishedMetaDataGraphSetup(true)
+    }
+  }, [fetchedMetaDataGraph, setMetaDataGraph])
 
   useEffect(() => {
     if (!course) {
@@ -110,21 +143,21 @@ export default function CourseConfiguratorPage() {
       </Card>
 
       <Card className='m-8'>
-        {isCoursePhaseTypesError || isGraphError ? (
+        {isError ? (
           <ErrorPage
             title='Error'
             description='Failed to fetch course phase types'
-            message={error?.message || graphError?.message}
+            message={error?.message || graphError?.message || metaGraphError?.message}
             onRetry={() => {
               refetchCoursePhaseTypes()
               refetchGraph()
+              refetchMetaGraph()
             }}
           />
-        ) : isCoursePhaseTypesPending ||
-          isGraphPending ||
-          !finishedCoursePhaseSetup ||
-          !finishedGraphSetup ? (
-          <Loader2 className='w-12 h-12 m-8' />
+        ) : isPending || !finishedSetup ? (
+          <div className='flex justify-center items-center h-64'>
+            <Loader2 className='h-12 w-12 animate-spin text-primary' />
+          </div>
         ) : (
           <Canvas />
         )}
