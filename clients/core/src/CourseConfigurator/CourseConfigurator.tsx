@@ -1,4 +1,4 @@
-import { CoursePhaseType } from '@/interfaces/course_phase_type'
+import { CoursePhaseType, MetaDataItem } from '@/interfaces/course_phase_type'
 import { Canvas } from './Canvas'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getAllCoursePhaseTypes } from '../network/queries/coursePhaseTypes'
@@ -13,6 +13,10 @@ import { useCourseStore } from '@/zustand/useCourseStore'
 import { Loader2 } from 'lucide-react'
 import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
 import { getMetaDataGraph } from '../network/queries/courseMetaDataGraph'
+import { getApplicationForm } from '../network/queries/applicationForm'
+import { ApplicationForm } from '@/interfaces/application_form'
+import { AdditionalScore } from '@/interfaces/additional_score'
+import { getAdditionalScoreNames } from '../network/queries/additionalScoreNames'
 
 export default function CourseConfiguratorPage() {
   const { courses } = useCourseStore()
@@ -76,24 +80,105 @@ export default function CourseConfiguratorPage() {
     queryFn: () => getMetaDataGraph(courseId ?? ''),
   })
 
-  const isError = isCoursePhaseTypesError || isGraphError || iseMetaGraphError
-  const isPending = isCoursePhaseTypesPending || isGraphPending || isMetaGraphPending
+  // get the application form for the exported meta data details
+  const applicationPhase = course?.course_phases.find(
+    (phase) => phase.course_phase_type === 'Application',
+  )
+  const {
+    data: fetchedApplicationForm,
+    isPending: isFetchingApplicationForm,
+    isError: isApplicationFormError,
+  } = useQuery<ApplicationForm>({
+    queryKey: ['application_form', applicationPhase?.id],
+    queryFn: () => getApplicationForm(applicationPhase?.id ?? ''),
+    enabled: applicationPhase?.id !== undefined,
+  })
+
+  const {
+    data: fetchedAdditionalScores,
+    isPending: isAdditionalScoresPending,
+    isError: isAdditionalScoresError,
+  } = useQuery<AdditionalScore[]>({
+    queryKey: ['application_participations', applicationPhase?.id],
+    queryFn: () => getAdditionalScoreNames(applicationPhase?.id ?? ''),
+    enabled: applicationPhase?.id !== undefined,
+  })
+
+  const isError =
+    isCoursePhaseTypesError ||
+    isGraphError ||
+    iseMetaGraphError ||
+    isApplicationFormError ||
+    isAdditionalScoresError
+  const isPending =
+    isCoursePhaseTypesPending ||
+    isGraphPending ||
+    isMetaGraphPending ||
+    (applicationPhase?.id !== undefined && isFetchingApplicationForm) ||
+    (applicationPhase?.id !== undefined && isAdditionalScoresPending)
 
   useEffect(() => {
     if (fetchedCoursePhaseTypes) {
       setCoursePhaseTypes([])
       // deep copy of course phase data
       fetchedCoursePhaseTypes.forEach((coursePhaseType) => {
+        const additionalMetaData: MetaDataItem[] = []
+        if (
+          coursePhaseType.name === 'Application' &&
+          fetchedApplicationForm &&
+          fetchedAdditionalScores
+        ) {
+          fetchedApplicationForm.questions_multi_select
+            .filter(
+              (question) =>
+                question.access_key !== undefined && question.accessible_for_other_phases === true,
+            )
+            .forEach((question) => {
+              additionalMetaData.push({
+                name: question.access_key ?? 'undefined',
+                type: 'array',
+              })
+            })
+          fetchedApplicationForm.questions_text
+            .filter(
+              (question) =>
+                question.access_key !== undefined && question.accessible_for_other_phases === true,
+            )
+            .forEach((question) => {
+              additionalMetaData.push({
+                name: question.access_key ?? 'undefined',
+                type: 'string',
+              })
+            })
+
+          fetchedAdditionalScores.forEach((score) => {
+            additionalMetaData.push({
+              name: score.name,
+              type: 'integer',
+            })
+          })
+          additionalMetaData.push({ name: 'assessmentScore', type: 'integer' })
+        }
+
         appendCoursePhaseType({
           id: coursePhaseType.id,
           name: coursePhaseType.name,
           initial_phase: coursePhaseType.initial_phase,
           required_input_meta_data: [...coursePhaseType.required_input_meta_data],
-          provided_output_meta_data: [...coursePhaseType.provided_output_meta_data],
+          provided_output_meta_data: [
+            ...coursePhaseType.provided_output_meta_data,
+            ...additionalMetaData,
+          ],
         })
       })
     }
-  }, [appendCoursePhaseType, fetchedCoursePhaseTypes, setCoursePhaseTypes])
+  }, [
+    appendCoursePhaseType,
+    fetchedCoursePhaseTypes,
+    setCoursePhaseTypes,
+    fetchedApplicationForm,
+    fetchedAdditionalScores,
+  ])
 
   useEffect(() => {
     if (fetchedCourseGraph) {

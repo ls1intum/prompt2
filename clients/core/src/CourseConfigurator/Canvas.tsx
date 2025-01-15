@@ -185,10 +185,6 @@ export function CourseConfigurator() {
     mutationFn: (coursePhaseGraphUpdate: CoursePhaseGraphUpdate) => {
       return updatePhaseGraph(courseId ?? '', coursePhaseGraphUpdate)
     },
-    onSuccess: () => {
-      // reload window to get the updated UI and Sidebar
-      window.location.reload()
-    },
   })
 
   const { mutate: mutateMetaDataGraph, isError: isMetaDataGraphError } = useMutation({
