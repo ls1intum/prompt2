@@ -22,7 +22,9 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
 
           if (!targetHasIncoming && !sourceHasOutgoing) {
             const newEdge = ParticipantEdgeProps(params)
-            setEdges((eds) => addEdge(newEdge, eds))
+            setEdges((eds) =>
+              addEdge({ ...newEdge, id: `person-edge-${newEdge.source}-${newEdge.target}` }, eds),
+            )
             setIsModified(true)
           } else {
             console.log(
@@ -34,7 +36,9 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
           const targetNode = nodes.find((node) => node.id === params.target)
           if (sourceNode && targetNode) {
             const newEdge = DataEdgeProps(params)
-            setEdges((eds) => addEdge(newEdge, eds))
+            setEdges((eds) =>
+              addEdge({ ...newEdge, id: `data-edge-${newEdge.source}-${newEdge.target}` }, eds),
+            )
             setIsModified(true)
           } else {
             console.log('Metadata connection not allowed: can only connect to subsequent phases.')

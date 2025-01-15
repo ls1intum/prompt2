@@ -38,6 +38,8 @@ import { useAuthStore } from '@/zustand/useAuthStore'
 import { getPermissionString, Role } from '@/interfaces/permission_roles'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { DataEdgeProps } from './Edges/DataEdgeProps'
+import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
+import { updateMetaDataGraph } from '../network/mutations/updateMetaDataGraph'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -179,9 +181,19 @@ export function CourseConfigurator() {
     },
   })
 
-  const { mutate: mutateGraph, isError: isGraphError } = useMutation({
+  const { mutate: mutateCoursePhaseGraph, isError: isGraphError } = useMutation({
     mutationFn: (coursePhaseGraphUpdate: CoursePhaseGraphUpdate) => {
       return updatePhaseGraph(courseId ?? '', coursePhaseGraphUpdate)
+    },
+    onSuccess: () => {
+      // reload window to get the updated UI and Sidebar
+      window.location.reload()
+    },
+  })
+
+  const { mutate: mutateMetaDataGraph, isError: isMetaDataGraphError } = useMutation({
+    mutationFn: (updatedMetaDataGraph: MetaDataGraphItem[]) => {
+      return updateMetaDataGraph(courseId ?? '', updatedMetaDataGraph)
     },
     onSuccess: () => {
       // reload window to get the updated UI and Sidebar
@@ -203,6 +215,9 @@ export function CourseConfigurator() {
     onSuccess: () => {},
   })
 
+  const isError =
+    isPhaseError || isGraphError || isDeleteError || isRenameError || isMetaDataGraphError
+
   const saveChanges = async () => {
     await handleSave({
       nodes,
@@ -211,7 +226,8 @@ export function CourseConfigurator() {
       mutateDeletePhase,
       mutateAsyncPhases,
       mutateRenamePhase,
-      mutateGraph,
+      mutateCoursePhaseGraph,
+      mutateMetaDataGraph,
       queryClient,
       setIsModified,
     })
@@ -239,9 +255,7 @@ export function CourseConfigurator() {
     <>
       <CourseConfigSidebar canEdit={canEdit} />
       <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
-        {(isPhaseError || isGraphError || isDeleteError || isRenameError) && (
-          <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />
-        )}
+        {isError && <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />}
         {(isModified || phaseNameModified) && (
           <Alert variant='destructive' className='mb-4'>
             <AlertCircle className='h-4 w-4' />
