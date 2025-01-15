@@ -183,3 +183,19 @@ func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.C
 	}
 	return dtoGraph, nil
 }
+
+func GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.MetaDataGraph, error) {
+	graph, err := CourseServiceSingleton.queries.GetMetaDataGraph(ctx, courseID)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoGraph := make([]courseDTO.MetaDataGraph, 0, len(graph))
+	for _, g := range graph {
+		dtoGraph = append(dtoGraph, courseDTO.MetaDataGraph{
+			FromCoursePhaseID: g.FromPhaseID,
+			ToCoursePhaseID:   g.ToPhaseID,
+		})
+	}
+	return dtoGraph, nil
+}

@@ -21,6 +21,7 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
 	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
 	course.GET("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseGraph)
+	course.GET("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getMetaDataGraph)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -106,6 +107,22 @@ func getCoursePhaseGraph(c *gin.Context) {
 	}
 
 	graph, err := GetCoursePhaseGraph(c, courseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, graph)
+}
+
+func getMetaDataGraph(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	graph, err := GetMetaDataGraph(c, courseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
