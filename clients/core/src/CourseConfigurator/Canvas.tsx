@@ -14,13 +14,11 @@ import { PhaseNode } from './PhaseNode/PhaseNode'
 import { CourseConfigSidebar } from './components/CourseConfigSidebar'
 import { IconEdge } from './Edges/IconEdge'
 import { DeleteConfirmation } from './components/DeleteConfirmation'
-import { getLayoutedElements } from './utils/getLayoutedElements'
 import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { ParticipantEdgeProps } from './Edges/ParticipantEdgeProps'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -37,7 +35,6 @@ import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { getPermissionString, Role } from '@/interfaces/permission_roles'
 import { useCourseStore } from '@/zustand/useCourseStore'
-import { DataEdgeProps } from './Edges/DataEdgeProps'
 import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
 import { updateMetaDataGraph } from '../network/mutations/updateMetaDataGraph'
 import { useComputeLayoutedElements } from './handlers/useComputeLayoutedElements'
@@ -52,6 +49,7 @@ const edgeTypes: EdgeTypes = {
 
 export function CourseConfigurator() {
   // getting the data
+  const { theme } = useDarkMode()
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)
@@ -73,8 +71,6 @@ export function CourseConfigurator() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedInitalEdges)
   const [isModified, setIsModified] = useState(false)
   const phaseNameModified = coursePhases.some((phase) => phase.is_modified)
-
-  const { theme } = useDarkMode()
 
   // For deletion confirmation dialog
   const [deleteDialogIsOpen, setDeleteDialogOpen] = useState(false)

@@ -31,18 +31,9 @@ export default function CourseConfiguratorPage() {
   } = useCourseConfigurationState()
 
   // makes sure to delay the loading of the canvas until all data is fetched and set
-  const [finishedGraphSetup, setFinishedGraphSetup] = useState(false)
-  const [finishedCoursePhaseSetup, setFinishedCoursePhaseSetup] = useState(false)
-  const [finishedMetaDataGraphSetup, setFinishedMetaDataGraphSetup] = useState(false)
-  const finishedSetup = finishedGraphSetup && finishedCoursePhaseSetup && finishedMetaDataGraphSetup
-
-  useEffect(() => {
-    // If courseId changes, reset graph setup states
-    setFinishedGraphSetup(false)
-    setFinishedCoursePhaseSetup(false)
-    setFinishedMetaDataGraphSetup(false)
-    setCoursePhases([])
-  }, [courseId])
+  const [finishedGraphSetup, setFinishedGraphSetup] = useState<string>('')
+  const [finishedCoursePhaseSetup, setFinishedCoursePhaseSetup] = useState<string>('')
+  const finishedSetup = finishedGraphSetup === courseId && finishedCoursePhaseSetup === courseId
 
   const {
     data: fetchedCoursePhaseTypes,
@@ -182,25 +173,18 @@ export default function CourseConfiguratorPage() {
   ])
 
   useEffect(() => {
-    if (fetchedCourseGraph) {
+    if (fetchedCourseGraph && fetchedMetaDataGraph) {
       setCoursePhaseGraph([...fetchedCourseGraph])
-      setFinishedGraphSetup(true)
-    }
-  }, [fetchedCourseGraph, setCoursePhaseGraph])
-
-  useEffect(() => {
-    if (fetchedMetaDataGraph) {
       setMetaDataGraph([...fetchedMetaDataGraph])
-      setFinishedMetaDataGraphSetup(true)
+      setFinishedGraphSetup(courseId ?? 'undefined')
     }
-  }, [fetchedMetaDataGraph, setMetaDataGraph])
+  }, [fetchedCourseGraph, setCoursePhaseGraph, courseId, fetchedMetaDataGraph, setMetaDataGraph])
 
   useEffect(() => {
     if (!course) {
       // TODO replace by error page
       console.log('Course not found')
     } else {
-      console.log('Setting course phases')
       setCoursePhases([
         ...course.course_phases.map((phase) => ({
           ...phase,
@@ -209,7 +193,7 @@ export default function CourseConfiguratorPage() {
         })),
       ])
     }
-    setFinishedCoursePhaseSetup(true)
+    setFinishedCoursePhaseSetup(courseId ?? 'undefined')
   }, [course, setCoursePhases, courseId])
 
   return (
