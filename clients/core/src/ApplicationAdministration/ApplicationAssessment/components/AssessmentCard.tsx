@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -31,12 +31,14 @@ export const AssessmentCard = ({
   const comments = metaData.comments as InstructorComment[]
 
   return (
-    <Card>
-      <CardContent className='pt-6'>
-        <CardTitle className='text-xl font-semibold mb-4'>Assessment</CardTitle>
+    <Card className='w-full'>
+      <CardHeader>
+        <CardTitle className='text-2xl font-bold'>Assessment</CardTitle>
+      </CardHeader>
+      <CardContent className='space-y-6'>
         <div className='space-y-4'>
-          <div className='space-y-4'>
-            <Label htmlFor='new-score' className='mb-2 block font-medium'>
+          <div>
+            <Label htmlFor='new-score' className='text-sm font-medium'>
               Assessment Score
             </Label>
             <div className='flex items-center space-x-2 mt-1'>
@@ -49,6 +51,7 @@ export const AssessmentCard = ({
                 onChange={(e) =>
                   setCurrentScore(e.target.value === '' ? null : Number(e.target.value))
                 }
+                className='w-28'
               />
               <Button
                 disabled={!currentScore || currentScore === score}
@@ -58,15 +61,17 @@ export const AssessmentCard = ({
                 Submit
               </Button>
             </div>
-            <Label htmlFor='new-score' className='mb-2 block font-medium'>
+          </div>
+          <div>
+            <Label htmlFor='resolution' className='text-sm font-medium'>
               Resolution
             </Label>
-            <div className='flex items-center space-x-4 mt-4'>
+            <div className='flex items-center space-x-4 mt-2'>
               <Button
                 variant='outline'
                 size='lg'
                 disabled={acceptanceStatus === PassStatus.FAILED}
-                className='border-red-500 text-red-500 hover:border-red-600 hover:text-red-600 hover:bg-red-50'
+                className='border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600'
                 onClick={() => handleAcceptanceStatusChange(PassStatus.FAILED)}
               >
                 Reject
@@ -75,18 +80,21 @@ export const AssessmentCard = ({
                 variant='default'
                 size='lg'
                 disabled={acceptanceStatus === PassStatus.PASSED}
-                className='bg-green-500 hover:bg-green-600'
+                className='bg-green-500 hover:bg-green-600 text-white'
                 onClick={() => handleAcceptanceStatusChange(PassStatus.PASSED)}
               >
                 Accept
               </Button>
             </div>
           </div>
+        </div>
 
-          <Separator className='my-4' />
-          {comments !== undefined && comments.length > 0 && (
-            <div className='space-y-2 mt-4'>
-              <Label className='mb-2 block font-medium'>Previous Comments</Label>
+        <Separator />
+
+        {comments && comments.length > 0 && (
+          <div className='space-y-2'>
+            <Label className='text-sm font-medium'>Previous Comments</Label>
+            <div className='space-y-2 max-h-60 overflow-y-auto'>
               {comments.map((comment, index) => (
                 <div
                   key={index}
@@ -104,31 +112,33 @@ export const AssessmentCard = ({
                 </div>
               ))}
             </div>
-          )}
-          <div>
-            <Label htmlFor='new-comment' className='mb-2 block font-medium'>
-              Add Comment
-            </Label>
-            <div className='flex items-start space-x-2'>
-              <Textarea
-                id='new-comment'
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder='Type your comment here...'
-                className='flex-grow'
-              />
-              <Button
-                size='sm'
-                disabled={!newComment}
-                onClick={() => {
-                  onCommentSubmission(newComment)
-                  setNewComment('')
-                }}
-              >
-                <Send className='h-4 w-4 mr-2' />
-                Send
-              </Button>
-            </div>
+          </div>
+        )}
+
+        <div>
+          <Label htmlFor='new-comment' className='text-sm font-medium'>
+            Add Comment
+          </Label>
+          <div className='flex items-start space-x-2 mt-1'>
+            <Textarea
+              id='new-comment'
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder='Type your comment here...'
+              className='flex-grow'
+              rows={3}
+            />
+            <Button
+              size='sm'
+              disabled={!newComment}
+              onClick={() => {
+                onCommentSubmission(newComment)
+                setNewComment('')
+              }}
+            >
+              <Send className='h-4 w-4 mr-2' />
+              Send
+            </Button>
           </div>
         </div>
       </CardContent>
