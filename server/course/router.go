@@ -21,6 +21,8 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
 	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
 	course.GET("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseGraph)
+	course.GET("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getMetaDataGraph)
+	course.PUT("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), updateMetaDataGraph)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -67,7 +69,7 @@ func getCourseByID(c *gin.Context) {
 
 	course, err := GetCourseByID(c, id)
 	if err != nil {
-		log.Debug(err)
+		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to get course"))
 		return
 	}
@@ -91,7 +93,7 @@ func createCourse(c *gin.Context) {
 
 	course, err := CreateCourse(c, newCourse, userID)
 	if err != nil {
-		log.Debug(err)
+		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to create course"))
 		return
 	}
@@ -106,6 +108,22 @@ func getCoursePhaseGraph(c *gin.Context) {
 	}
 
 	graph, err := GetCoursePhaseGraph(c, courseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, graph)
+}
+
+func getMetaDataGraph(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	graph, err := GetMetaDataGraph(c, courseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -134,8 +152,36 @@ func updateCoursePhaseOrder(c *gin.Context) {
 
 	err = UpdateCoursePhaseOrder(c, courseID, graphUpdate)
 	if err != nil {
-		log.Debug(err)
+		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to update course phase order"))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func updateMetaDataGraph(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var newGraph []courseDTO.MetaDataGraphItem
+	if err := c.BindJSON(&newGraph); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := validateMetaDataGraph(c, courseID, newGraph); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdateMetaDataGraph(c, courseID, newGraph)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update meta data order"))
 		return
 	}
 

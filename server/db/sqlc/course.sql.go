@@ -12,6 +12,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCoursePhasesBelongToCourse = `-- name: CheckCoursePhasesBelongToCourse :one
+WITH matched_phases AS (
+  SELECT id
+  FROM course_phase
+  WHERE id = ANY($1::uuid[])
+    AND course_id = $2
+)
+SELECT CASE 
+         WHEN COUNT(*) = cardinality($1::uuid[]) THEN true 
+         ELSE false 
+       END AS all_exist_and_match_course
+FROM matched_phases
+`
+
+type CheckCoursePhasesBelongToCourseParams struct {
+	Column1  []uuid.UUID `json:"column_1"`
+	CourseID uuid.UUID   `json:"course_id"`
+}
+
+func (q *Queries) CheckCoursePhasesBelongToCourse(ctx context.Context, arg CheckCoursePhasesBelongToCourseParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCoursePhasesBelongToCourse, arg.Column1, arg.CourseID)
+	var all_exist_and_match_course bool
+	err := row.Scan(&all_exist_and_match_course)
+	return all_exist_and_match_course, err
+}
+
 const createCourse = `-- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 

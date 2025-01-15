@@ -61,3 +61,38 @@ func validateUpdateCourseOrder(ctx context.Context, courseID uuid.UUID, c []cour
 
 	return nil
 }
+
+func validateMetaDataGraph(ctx context.Context, courseID uuid.UUID, newGraph []courseDTO.MetaDataGraphItem) error {
+	// for each check if the course phase really belongs to this course
+	uniqueCoursePhaseIDs := make([]uuid.UUID, 0)
+	seen := make(map[uuid.UUID]bool)
+
+	// Loop through each graph item.
+	for _, graphItem := range newGraph {
+		// Check and add the FromCoursePhaseID if it's not already added.
+		if !seen[graphItem.FromCoursePhaseID] {
+			uniqueCoursePhaseIDs = append(uniqueCoursePhaseIDs, graphItem.FromCoursePhaseID)
+			seen[graphItem.FromCoursePhaseID] = true
+		}
+
+		// Check and add the ToCoursePhaseID if it's not already added.
+		if !seen[graphItem.ToCoursePhaseID] {
+			uniqueCoursePhaseIDs = append(uniqueCoursePhaseIDs, graphItem.ToCoursePhaseID)
+			seen[graphItem.ToCoursePhaseID] = true
+		}
+	}
+
+	// Check if they all belong to this course and exist
+	valid, err := coursePhase.CheckCoursePhasesBelongToCourse(ctx, courseID, uniqueCoursePhaseIDs)
+	if err != nil {
+		return err
+	}
+
+	if !valid {
+		errorMessage := "not all course phases belong to this course"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}

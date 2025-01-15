@@ -3,6 +3,7 @@ import { CreateCoursePhase, UpdateCoursePhase } from '@/interfaces/course_phase'
 import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
 import { UseMutateFunction } from '@tanstack/react-query'
 import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
 
 interface HandleSaveProps {
   nodes: Node[]
@@ -11,7 +12,8 @@ interface HandleSaveProps {
   mutateDeletePhase: UseMutateFunction<string | undefined, Error, string, unknown>
   mutateAsyncPhases: (coursePhase: CreateCoursePhase) => Promise<string | undefined>
   mutateRenamePhase: UseMutateFunction<string | undefined, Error, UpdateCoursePhase, unknown>
-  mutateGraph: UseMutateFunction<string | undefined, Error, CoursePhaseGraphUpdate, unknown>
+  mutateCoursePhaseGraph: UseMutateFunction<void, Error, CoursePhaseGraphUpdate, unknown>
+  mutateMetaDataGraph: UseMutateFunction<void, Error, MetaDataGraphItem[], unknown>
   queryClient: any
   setIsModified: (val: boolean) => void
 }
@@ -24,7 +26,8 @@ export async function handleSave({
   mutateDeletePhase,
   mutateAsyncPhases,
   mutateRenamePhase,
-  mutateGraph,
+  mutateCoursePhaseGraph,
+  mutateMetaDataGraph,
   queryClient,
   setIsModified,
 }: HandleSaveProps) {
@@ -78,14 +81,18 @@ export async function handleSave({
     }
   }
 
-  // 3.) Update edges with replaced IDs if necessary
-  const updatedEdges = edges.map((edge) => {
-    const newSource = idReplacementMap[edge.source] || edge.source
-    const newTarget = idReplacementMap[edge.target] || edge.target
-    return { ...edge, source: newSource, target: newTarget }
-  })
+  // 3.) Update Course Graph Edges with replaced IDs if necessary
+  const updatedPersonEdges = edges
+    .filter((edge) => {
+      return edge.id.startsWith('person-edge-')
+    })
+    .map((edge) => {
+      const newSource = idReplacementMap[edge.source] || edge.source
+      const newTarget = idReplacementMap[edge.target] || edge.target
+      return { ...edge, source: newSource, target: newTarget }
+    })
 
-  const orderArray: CoursePhaseGraphItem[] = updatedEdges.map((edge) => ({
+  const orderArray: CoursePhaseGraphItem[] = updatedPersonEdges.map((edge) => ({
     from_course_phase_id: edge.source,
     to_course_phase_id: edge.target,
   }))
@@ -105,9 +112,32 @@ export async function handleSave({
   }
 
   try {
-    await mutateGraph(graphUpdate)
+    await mutateCoursePhaseGraph(graphUpdate)
+  } catch (err) {
+    console.error('Error saving course phase', err)
+    return err
+  }
+
+  // 4.) Update the graph with the new edges
+  const updatedMetaDataEdges = edges
+    .filter((edge) => {
+      return edge.id.startsWith('data-edge-')
+    })
+    .map((edge) => {
+      const newSource = idReplacementMap[edge.source] || edge.source
+      const newTarget = idReplacementMap[edge.target] || edge.target
+      return { ...edge, source: newSource, target: newTarget }
+    })
+
+  const metaDataGraph: MetaDataGraphItem[] = updatedMetaDataEdges.map((edge) => ({
+    from_course_phase_id: edge.source,
+    to_course_phase_id: edge.target,
+  }))
+
+  try {
+    await mutateMetaDataGraph(metaDataGraph)
     queryClient.invalidateQueries({
-      queryKey: ['courses', 'course_phase_types', 'course_phase_graph'],
+      queryKey: ['courses', 'meta_phase_graph', 'course_phase_types', 'course_phase_graph'],
     })
     setIsModified(false)
     // Optionally reload if needed

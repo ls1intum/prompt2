@@ -3,8 +3,8 @@ import { Node, Edge, Position } from '@xyflow/react'
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
 
-const nodeWidth = 400 // TODO maybe update at some point
-const nodeHeight = 400
+const nodeWidth = 700 // TODO maybe update at some point
+const nodeHeight = 300
 const direction = 'TB'
 
 interface getLayoutedElementsProps {

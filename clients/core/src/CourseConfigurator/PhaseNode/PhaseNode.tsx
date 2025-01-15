@@ -3,7 +3,7 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Save, Pen, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
+import { Pen, ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { getPermissionString, Role } from '@/interfaces/permission_roles'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   const { courseId } = useParams<{ courseId: string }>()
@@ -83,7 +84,8 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
                 onChange={(e) => handleNameChange(e.target.value)}
                 className='w-48 mb-2'
                 autoFocus
-                onKeyPress={(e) => e.key === 'Enter' && setIsEditing((prev) => !prev)}
+                onBlur={() => setIsEditing(false)}
+                onKeyUp={(e) => e.key === 'Enter' && setIsEditing(false)}
               />
             ) : (
               <CardTitle className='text-lg font-bold text-primary mb-2'>
@@ -94,13 +96,45 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
               {phaseType?.name}
             </Badge>
           </div>
-          {canEdit && (
-            <Button variant='ghost' size='icon' onClick={() => setIsEditing((prev) => !prev)}>
-              {isEditing ? <Save className='h-4 w-4' /> : <Pen className='h-4 w-4' />}
+          {canEdit && !isEditing && (
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsEditing((prev) => !prev)
+              }}
+            >
+              <Pen className='h-4 w-4' />
             </Button>
           )}
         </CardHeader>
         <CardContent className='p-4 pt-2'>
+          {phaseType?.name === 'Application' &&
+            (!phaseType?.provided_output_meta_data ||
+              phaseType?.provided_output_meta_data.length === 0) && (
+              // TODO
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant='ghost' className=''>
+                      <TriangleAlert className='h-4 w-4' />
+                      Requires Configuration
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side='right' className='max-w-xs'>
+                    <p>
+                      This metadata includes the assessment score, all additional scores, and
+                      answers to exported questions. To configure what&apos;s exported, first save
+                      the application phase, then choose the questions in the Application Question
+                      Config.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
           {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
             <MetaDataBadges
               metaData={phaseType.required_input_meta_data}
