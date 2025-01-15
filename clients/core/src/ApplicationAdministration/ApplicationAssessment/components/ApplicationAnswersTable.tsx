@@ -40,6 +40,7 @@ export const ApplicationAnswersTable = ({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className='w-1/12'>Type</TableHead>
                 <TableHead className='w-1/3'>Question</TableHead>
                 <TableHead>Answer</TableHead>
               </TableRow>
@@ -54,13 +55,16 @@ export const ApplicationAnswersTable = ({
 
                 return (
                   <TableRow key={question.id} className={index % 2 === 0 ? 'bg-muted/50' : ''}>
+                    <TableCell>
+                      {Array.isArray(answer) ? (
+                        <CheckSquare className='h-4 w-4 text-muted-foreground' />
+                      ) : (
+                        <AlignLeft className='h-4 w-4 text-muted-foreground' />
+                      )}
+                    </TableCell>
+
                     <TableCell className='font-medium'>
                       <div className='flex items-center space-x-2'>
-                        {Array.isArray(answer) ? (
-                          <CheckSquare className='h-4 w-4 text-muted-foreground' />
-                        ) : (
-                          <AlignLeft className='h-4 w-4 text-muted-foreground' />
-                        )}
                         <span>{question.title}</span>
                       </div>
                     </TableCell>
