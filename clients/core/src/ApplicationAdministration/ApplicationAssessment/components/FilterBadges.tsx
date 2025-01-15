@@ -4,6 +4,7 @@ import { PassStatus } from '@/interfaces/course_phase_participation'
 import { getStatusString } from '../utils/getStatusBadge'
 import { Gender, getGenderString } from '@/interfaces/gender'
 import { X } from 'lucide-react'
+import { ScoreFilterBadges, ScoreFilters } from './ScoreFilterBadges'
 
 interface FilterBadgesProps {
   filters: ColumnFiltersState
@@ -38,7 +39,13 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
   return (
     <div className='flex flex-wrap gap-2'>
       {filters.map((filter) =>
-        Array.isArray(filter.value) ? (
+        filter.id === 'score' ? (
+          <ScoreFilterBadges
+            key={filter.id}
+            filter={filter.value as ScoreFilters}
+            onRemoveFilter={onRemoveFilter}
+          />
+        ) : Array.isArray(filter.value) ? (
           filter.value.map((value) => (
             <Badge
               variant='secondary'

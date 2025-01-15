@@ -12,6 +12,7 @@ import { getStatusBadge } from '../utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { Gender, getGenderString } from '@/interfaces/gender'
 import { Filter } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState
@@ -69,6 +70,53 @@ export const FilterMenu = ({
     })
   }
 
+  const assessmentScoreFilter = columnFilters.find((f) => f.id === 'score')
+  const assessmentScoreValue =
+    assessmentScoreFilter && typeof assessmentScoreFilter.value === 'object'
+      ? (assessmentScoreFilter.value as {
+          min?: string
+          max?: string
+          noScore?: boolean
+        })
+      : {}
+
+  const setAssessmentScoreFilter = (
+    updates: Partial<{ min?: string; max?: string; noScore?: boolean }>,
+  ) => {
+    setColumnFilters((prevFilters) => {
+      const existing = prevFilters.find((filter) => filter.id === 'score')
+
+      const newValue = {
+        ...(existing?.value || {}),
+        ...updates,
+      }
+      // If user toggled noScore on, reset min/max
+      if (updates.noScore === true) {
+        newValue.min = ''
+        newValue.max = ''
+      }
+      // If user changes min or max, automatically disable noScore
+      if (typeof updates.min !== 'undefined' || typeof updates.max !== 'undefined') {
+        newValue.noScore = false
+      }
+
+      // If all fields in newValue are empty/false, remove the filter entirely
+      const isEmpty = !newValue.min && !newValue.max && !newValue.noScore
+      if (isEmpty) {
+        return prevFilters.filter((filter) => filter.id !== 'score')
+      }
+
+      // Otherwise, update or create the filter
+      if (existing) {
+        return prevFilters.map((filter) =>
+          filter.id === 'score' ? { ...filter, value: newValue } : filter,
+        )
+      } else {
+        return [...prevFilters, { id: 'score', value: newValue }]
+      }
+    })
+  }
+
   const resetFilters = () => {
     setColumnFilters([])
   }
@@ -89,6 +137,36 @@ export const FilterMenu = ({
         <DropdownMenuLabel>Gender</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {renderFilterItems('gender', Gender, getGenderString)}
+
+        <DropdownMenuLabel>Assessment Score</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className='p-2 space-y-2'>
+          <div className='flex items-center gap-2'>
+            <Input
+              type='number'
+              placeholder='Min'
+              value={assessmentScoreValue.min ?? ''}
+              onChange={(e) => setAssessmentScoreFilter({ min: e.target.value })}
+              className='w-full'
+            />
+            <Input
+              type='number'
+              placeholder='Max'
+              value={assessmentScoreValue.max ?? ''}
+              onChange={(e) => setAssessmentScoreFilter({ max: e.target.value })}
+              className='w-full'
+            />
+          </div>
+          <DropdownMenuCheckboxItem
+            checked={assessmentScoreValue.noScore || false}
+            onClick={(e) => {
+              e.preventDefault()
+              setAssessmentScoreFilter({ noScore: !assessmentScoreValue.noScore })
+            }}
+          >
+            No Score
+          </DropdownMenuCheckboxItem>
+        </div>
 
         <DropdownMenuSeparator />
         <div className='p-2'>

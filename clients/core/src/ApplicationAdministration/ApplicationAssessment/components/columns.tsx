@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Eye, MoreHorizontal, Trash2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { numericRangeFilter } from '../utils/numericRangeFilter'
 import { AdditionalScore } from '@/interfaces/additional_score'
 
 export const columns = (
@@ -101,6 +102,11 @@ export const columns = (
       id: 'score',
       accessorKey: 'score',
       header: ({ column }) => <SortableHeader column={column} title='Score' />,
+      filterFn: (row, columnId, filterValue) => {
+        const rowScore = row.getValue<number | null>(columnId) // row.original.score
+        if (!filterValue || typeof filterValue !== 'object') return true
+        return numericRangeFilter(rowScore, filterValue)
+      },
     },
     ...additionalScoreColumns,
     {

@@ -16,14 +16,14 @@ interface MultiSelectQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
   question: ApplicationQuestionMultiSelect
   initialAnswers: string[]
-  disabled?: boolean
+  isInstructorView?: boolean
 }
 
 export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
   form,
   question,
   initialAnswers,
-  disabled = false,
+  isInstructorView = false,
 }) => {
   const multiSelectOptions = question.options.map((option) => ({
     label: option,
@@ -36,7 +36,9 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
         {question.title}
         {question.min_select > 0 && <span className='text-destructive'> *</span>}
       </FormLabel>
-      {question.description && <FormDescriptionHTML htmlCode={question.description} />}
+      {!isInstructorView && question.description && (
+        <FormDescriptionHTML htmlCode={question.description} />
+      )}
       {question.max_select > 1 ? (
         <MultiSelect
           options={multiSelectOptions}
@@ -47,7 +49,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
           }}
           maxCount={question.max_select}
           variant='inverted'
-          disabled={disabled}
+          disabled={isInstructorView}
         />
       ) : (
         <Select
@@ -55,7 +57,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
             form.setValue('answers', [value], { shouldValidate: true })
           }}
           defaultValue={initialAnswers.length === 1 ? initialAnswers[0] : ''}
-          disabled={disabled}
+          disabled={isInstructorView}
         >
           <SelectTrigger>
             <SelectValue placeholder={question.placeholder || 'Please select...'} />

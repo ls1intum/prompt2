@@ -8,13 +8,13 @@ import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
 interface CheckboxQuestionProps {
   form: UseFormReturn<{ answers: string[] }>
   question: ApplicationQuestionMultiSelect
-  disabled?: boolean
+  isInstructorView?: boolean
 }
 
 export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
   form,
   question,
-  disabled = false,
+  isInstructorView = false,
 }) => (
   <div className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
     <Checkbox
@@ -22,14 +22,16 @@ export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
       onCheckedChange={(checked) => {
         form.setValue('answers', checked ? ['Yes'] : [], { shouldValidate: true })
       }}
-      disabled={disabled}
+      disabled={isInstructorView}
     />
     <div className='space-y-1 leading-none'>
       <FormLabel>
         {question.title}
         {question.is_required && <span className='text-destructive'> *</span>}
       </FormLabel>
-      {question.description && <FormDescriptionHTML htmlCode={question.description} />}
+      {!isInstructorView && question.description && (
+        <FormDescriptionHTML htmlCode={question.description} />
+      )}
     </div>
   </div>
 )
