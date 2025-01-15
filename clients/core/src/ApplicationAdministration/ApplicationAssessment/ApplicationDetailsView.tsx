@@ -23,7 +23,7 @@ import { postApplicationAssessment } from '../../network/mutations/postApplicati
 import { InstructorComment } from '@/interfaces/instructor_comment'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { useToast } from '@/hooks/use-toast'
-import { StudentProfile } from './components/StudentProfile'
+import { StudentProfile } from '@/components/StudentProfile'
 import { ApplicationAnswersTable } from './components/ApplicationAnswersTable'
 
 interface ApplicationDetailsViewProps {
