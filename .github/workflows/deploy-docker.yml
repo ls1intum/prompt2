@@ -111,7 +111,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production > .env.prod
+            echo "ENVIRONMENT=production" >> .env.prod
           
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}" >> .env.prod
@@ -124,7 +124,6 @@ jobs:
             echo "DB_USER=${{ vars.DB_USER }}" >> .env.prod
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
 
-            
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_ID=${{ vars.KEYCLOAK_CLIENT_ID }}" >> .env.prod
