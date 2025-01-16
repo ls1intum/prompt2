@@ -1,31 +1,46 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Construction } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getCoursePhaseParticipations } from './network/queries/getCoursePhaseParticipations'
+import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
+import { useEffect } from 'react'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { Loader2 } from 'lucide-react'
+import { StudentCard } from './components/StudentCard'
 
 export const OverviewPage = (): JSX.Element => {
-  const path = useLocation().pathname
+  const { phaseId } = useParams<{ phaseId: string }>()
+
+  const {
+    data: coursePhaseParticipations,
+    isPending,
+    isError,
+    error,
+  } = useQuery<CoursePhaseParticipationWithStudent[]>({
+    queryKey: ['participants', phaseId],
+    queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
+  })
+
+  useEffect(() => {
+    if (coursePhaseParticipations) {
+      console.log(coursePhaseParticipations)
+    }
+  }, [coursePhaseParticipations])
 
   return (
-    <Card className='w-full max-w-2xl mx-auto'>
-      <CardHeader>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center space-x-2'>
-            <Construction className='h-6 w-6 text-yellow-500' />
-            <CardTitle className='text-2xl'>Interview Component</CardTitle>
-          </div>
-          <Badge variant='secondary' className='bg-yellow-200 text-yellow-800'>
-            In Development
-          </Badge>
+    <div>
+      <ManagementPageHeader>Interview</ManagementPageHeader>
+      {isPending ? (
+        <div className='flex justify-center items-center h-64'>
+          <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
-        <CardDescription>This component is currently under development</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className='p-4 border-2 border-dashed border-gray-300 rounded-lg'>
-          You are currently at {path}
+      ) : (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8'>
+          {coursePhaseParticipations?.map((participation) => (
+            <StudentCard key={participation.student.last_name} participation={participation} />
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }
 

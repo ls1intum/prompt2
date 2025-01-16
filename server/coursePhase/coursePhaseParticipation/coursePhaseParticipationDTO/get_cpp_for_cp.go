@@ -43,6 +43,10 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 			UniversityLogin:      model.UniversityLogin,
 			HasUniversityAccount: model.HasUniversityAccount,
 			Gender:               model.Gender,
+			Nationality:          model.Nationality,
+			StudyDegree:          model.StudyDegree,
+			StudyProgram:         model.StudyProgram,
+			CurrentSemester:      model.CurrentSemester,
 		}),
 	}, nil
 }

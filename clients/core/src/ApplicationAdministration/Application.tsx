@@ -14,7 +14,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySemesterDiagram'
 import { parseApplicationMailingMetaData } from './Mailing/utils/parseApplicaitonMailingMetaData'
 import { getIsApplicationMailingIsConfigured } from './utils/getApplicationMailingIsConfigured'
-import { ManagementPageHeader } from '../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)

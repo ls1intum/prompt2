@@ -11,7 +11,7 @@ import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useParams } from 'react-router-dom'
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
 import { EmailTemplateEditor } from './components/MailingEditor'
-import { ManagementPageHeader } from '../../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
 
 export const ApplicationMailingSettings = () => {

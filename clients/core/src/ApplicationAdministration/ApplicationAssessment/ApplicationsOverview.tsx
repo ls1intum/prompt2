@@ -38,7 +38,7 @@ import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNa
 import { useCustomElementWidth } from '../../handlers/useCustomElementWidth'
 import { ApplicationManualAdd } from './ApplicationManualAdding/ApplicationManualAdd'
 import { useGetApplicationParticipations } from '../handlers/useGetApplicationParticipations'
-import { ManagementPageHeader } from '../../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { AdditionalScore } from '@/interfaces/additional_score'
 
 export const ApplicationsOverview = (): JSX.Element => {

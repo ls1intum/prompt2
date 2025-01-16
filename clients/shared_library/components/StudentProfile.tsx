@@ -10,6 +10,7 @@ import { getCountryName } from '@/lib/getCountries'
 import translations from '@/lib/translations.json'
 import { AvatarImage } from '@radix-ui/react-avatar'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
+import { getStatusColor } from '@/lib/getStatusColor'
 
 interface StudentProfileProps {
   student: Student
@@ -17,18 +18,6 @@ interface StudentProfileProps {
 }
 
 export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.Element => {
-  const getStatusColor = (assessmentStatus: PassStatus) => {
-    switch (assessmentStatus) {
-      case PassStatus.PASSED:
-        return 'bg-green-500 dark:bg-green-700'
-      case PassStatus.FAILED:
-        return 'bg-red-500 dark:bg-red-700'
-      case PassStatus.NOT_ASSESSED:
-      default:
-        return 'bg-gray-500 dark:bg-gray-700'
-    }
-  }
-
   return (
     <Card className='overflow-hidden'>
       {/* Status indicator */}
