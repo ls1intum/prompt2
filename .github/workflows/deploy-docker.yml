@@ -31,6 +31,7 @@ jobs:
       url: 'https://${{ vars.CORE_HOST }}'
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VM_HOST }}
