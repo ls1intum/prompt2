@@ -46,7 +46,7 @@ func runMigrations(databaseURL string) {
 
 func initKeycloak() {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
-	realm := utils.GetEnv("KEYCLOAK_REALM", "prompt")
+	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
 	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
 	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
