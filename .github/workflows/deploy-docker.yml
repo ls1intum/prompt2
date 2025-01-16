@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: ${{ inputs.environment }}
-      url: 'https://${{ vars.SERVER_HOST }}'
+      url: 'https://${{ vars.CORE_HOST }}'
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         uses: appleboy/ssh-action@v1.0.3
@@ -110,10 +110,9 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=${{ vars.ENVIRONMENT }}" > .env.prod
+            echo "ENVIRONMENT=production > .env.prod
           
-            echo "SERVER_HOST=${{ vars.SERVER_HOST }}" >> .env.prod
-            echo "CLIENT_HOST=${{ vars.CLIENT_HOST }}" >> .env.prod
+            echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}" >> .env.prod
             echo "INTERVIEW_COMPONENT_SUBPATH=${{ vars.INTERVIEW_COMPONENT_SUBPATH }}" >> .env.prod
 
@@ -137,7 +136,6 @@ jobs:
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
 
-            echo "CLIENT_URL"=${{ vars.CLIENT_URL }} >> .env.prod
             echo "SENDER_EMAIL"=${{ vars.SENDER_EMAIL_ADDRESS }} >> .env.prod
             echo "SENDER_NAME"=${{ vars.SENDER_EMAIL_NAME }} >> .env.prod
             echo "SMTP_HOST"=${{ vars.SMTP_HOST }} >> .env.prod

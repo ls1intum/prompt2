@@ -34,8 +34,7 @@ jobs:
       docker-context: ./clients/core
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
-        "CLIENT_HOST=${{ vars.CLIENT_HOST }}"
-        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+        "CORE_HOST"=${{ vars.CORE_HOST }}
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
         "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}"
@@ -51,7 +50,7 @@ jobs:
       docker-context: ./clients/template_component
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
-        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+        "CORE_HOST"=${{ vars.CORE_HOST }}
     secrets: inherit
 
   build-and-push-clients-interview:
@@ -63,5 +62,5 @@ jobs:
       docker-context: ./clients/interview_component
       build-args: |
         "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
-        "SERVER_HOST=${{ vars.SERVER_HOST }}"
+        "CORE_HOST"=${{ vars.CORE_HOST }}
     secrets: inherit

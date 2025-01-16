@@ -61,7 +61,7 @@ func initKeycloak() {
 }
 
 func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
-	clientURL := utils.GetEnv("CLIENT_URL", "prompt2.ase.cit.tum.de")
+	clientURL := utils.GetEnv("CORE_HOST", "prompt.aet.cit.tum.de") // required for application link in mails
 	smtpHost := utils.GetEnv("SMTP_HOST", "127.0.0.1")
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt-dev@ase.cit.tum.de")

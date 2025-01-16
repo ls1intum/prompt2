@@ -2,7 +2,7 @@ name: Build and Deploy to Dev
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [main]
 
 jobs:
   build-and-push-server:
