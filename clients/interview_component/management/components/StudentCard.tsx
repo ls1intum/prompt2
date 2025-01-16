@@ -7,7 +7,6 @@ import { AvatarImage } from '@radix-ui/react-avatar'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 import { getStatusColor } from '@/lib/getStatusColor'
 import { Separator } from '@/components/ui/separator'
-import { useLocation, useNavigate } from 'react-router-dom'
 
 interface StudentCardProps {
   participation: CoursePhaseParticipationWithStudent
@@ -16,14 +15,9 @@ interface StudentCardProps {
 export function StudentCard({ participation }: StudentCardProps) {
   const assessmentScore = participation.prev_meta_data?.applicationScore ?? 'N/A'
   const interviewScore = participation.meta_data?.interviewScore ?? 'Not assessed'
-  const navigate = useNavigate()
-  const path = useLocation().pathname
 
   return (
-    <Card
-      className='h-full relative overflow-hidden'
-      onClick={() => navigate(`${path}/details/${participation.student.id}`)}
-    >
+    <Card className='h-full relative overflow-hidden'>
       <div className={`h-16 ${getStatusColor(participation.pass_status)}`} />
 
       <div className='mb-8'>

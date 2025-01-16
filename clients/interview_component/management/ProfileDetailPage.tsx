@@ -2,8 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useParticipationStore } from './zustand/useParticipationStore'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
-import { StudentProfile } from '@/components/StudentProfile'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { StudentCard } from './components/StudentCard'
 
 export const ProfileDetailPage = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -31,10 +30,7 @@ export const ProfileDetailPage = (): JSX.Element => {
       </div>
       {participation && (
         <div className='pt-6'>
-          <StudentProfile
-            student={participation.student}
-            status={participation?.pass_status ?? PassStatus.NOT_ASSESSED}
-          />
+          <StudentCard participation={participation} />
         </div>
       )}
     </div>
