@@ -27,14 +27,14 @@ export const OverviewPage = (): JSX.Element => {
   }, [coursePhaseParticipations])
 
   return (
-    <div>
+    <div className='w-full'>
       <ManagementPageHeader>Interview</ManagementPageHeader>
       {isPending ? (
         <div className='flex justify-center items-center h-64'>
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8'>
+        <div className='grid grid-cols-3  gap-2 mt-8'>
           {coursePhaseParticipations?.map((participation) => (
             <StudentCard key={participation.student.last_name} participation={participation} />
           ))}
