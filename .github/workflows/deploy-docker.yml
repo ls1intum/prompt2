@@ -125,7 +125,7 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
 
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
-            echo "KEYCLOAK_REALM=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
+            echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_ID=${{ vars.KEYCLOAK_CLIENT_ID }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env.prod
             echo "KEYCLOAK_ID_OF_CLIENT=${{ secrets.KEYCLOAK_ID_OF_SERVER_CLIENT }}" >> .env.prod

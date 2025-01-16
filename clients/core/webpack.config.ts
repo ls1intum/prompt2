@@ -28,7 +28,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   // Adjust this to match your deployment URL
   const rootURL = getVariable('REACT_APP_CORE_HOST')
   const templateSubPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
-  const templateURL = IS_DEV ? `http://localhost:3001` : `https://${rootURL}/${templateSubPath}`
+  const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
 
   const interviewSubPath = getVariable('REACT_INTERVIEW_COMPONENT_SUBPATH')
   const interviewURL = IS_DEV ? `http://localhost:3002` : `https://${rootURL}/${interviewSubPath}`
