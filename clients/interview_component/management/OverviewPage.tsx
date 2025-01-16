@@ -1,45 +1,18 @@
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { getCoursePhaseParticipations } from './network/queries/getCoursePhaseParticipations'
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
-import { useEffect } from 'react'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { Loader2 } from 'lucide-react'
 import { StudentCard } from './components/StudentCard'
+import { useParticipationStore } from './zustand/useParticipationStore'
 
 export const OverviewPage = (): JSX.Element => {
-  const { phaseId } = useParams<{ phaseId: string }>()
-
-  const {
-    data: coursePhaseParticipations,
-    isPending,
-    isError,
-    error,
-  } = useQuery<CoursePhaseParticipationWithStudent[]>({
-    queryKey: ['participants', phaseId],
-    queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
-  })
-
-  useEffect(() => {
-    if (coursePhaseParticipations) {
-      console.log(coursePhaseParticipations)
-    }
-  }, [coursePhaseParticipations])
+  const { participations } = useParticipationStore()
 
   return (
     <div className='w-full'>
       <ManagementPageHeader>Interview</ManagementPageHeader>
-      {isPending ? (
-        <div className='flex justify-center items-center h-64'>
-          <Loader2 className='h-12 w-12 animate-spin text-primary' />
-        </div>
-      ) : (
-        <div className='grid grid-cols-3  gap-2 mt-8'>
-          {coursePhaseParticipations?.map((participation) => (
-            <StudentCard key={participation.student.last_name} participation={participation} />
-          ))}
-        </div>
-      )}
+      <div className='grid grid-cols-3  gap-2 mt-8'>
+        {participations?.map((participation) => (
+          <StudentCard key={participation.student.last_name} participation={participation} />
+        ))}
+      </div>
     </div>
   )
 }
