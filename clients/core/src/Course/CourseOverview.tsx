@@ -1,7 +1,7 @@
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
+import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
 import { CourseTypeDetails } from '@/interfaces/course_type'
 
 export const CourseOverview = (): JSX.Element => {
@@ -13,6 +13,8 @@ export const CourseOverview = (): JSX.Element => {
     const [year, month, date] = dateString.split('-')
     return `${date}.${month}.${year}`
   }
+
+  const bgColor = course?.meta_data?.['bg-color'] || 'bg-gray-50'
 
   if (!course) {
     return (
@@ -32,12 +34,12 @@ export const CourseOverview = (): JSX.Element => {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8 max-w-6xl'>
+    <div className='container mx-auto px-4 py-8'>
       <Card className='mb-8 shadow-lg'>
-        <CardHeader className='rounded-t-lg'>
+        <CardHeader className={`rounded-t-lg ${bgColor}`}>
           <div className='flex justify-between items-center'>
             <div>
-              <CardTitle className='text-3xl font-bold'>{course.name}</CardTitle>
+              <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
               <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
             </div>
           </div>
@@ -53,15 +55,6 @@ export const CourseOverview = (): JSX.Element => {
                 </div>
               </div>
               <div className='flex items-center space-x-3'>
-                <Clock className='w-6 h-6 ' />
-                <div>
-                  <p className='text-secondary-foreground'>ECTS</p>
-                  <p className='text-lg'>{course.ects}</p>
-                </div>
-              </div>
-            </div>
-            <div className='space-y-4'>
-              <div className='flex items-center space-x-3'>
                 <Calendar className='w-6 h-6' />
                 <div>
                   <p className='text-secondary-foreground'>Duration</p>
@@ -70,6 +63,8 @@ export const CourseOverview = (): JSX.Element => {
                   </p>
                 </div>
               </div>
+            </div>
+            <div className='space-y-4'>
               <div className='flex items-center space-x-3'>
                 <GraduationCap className='w-6 h-6' />
                 <div>
@@ -77,10 +72,41 @@ export const CourseOverview = (): JSX.Element => {
                   <p className='text-lg'>{CourseTypeDetails[course.course_type].name}</p>
                 </div>
               </div>
+              <div className='flex items-center space-x-3'>
+                <Clock className='w-6 h-6 ' />
+                <div>
+                  <p className='text-secondary-foreground'>ECTS</p>
+                  <p className='text-lg'>{course.ects}</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <div className='grid md:grid-cols-2 gap-8'>
+        <Card className='shadow-lg'>
+          <CardHeader>
+            <CardTitle className='text-2xl font-semibold'>Course Stats</CardTitle>
+          </CardHeader>
+          <CardContent className='flex flex-col items-center justify-center'>
+            <Construction className='h-16 w-16 text-yellow-500' />
+            <p className='text-lg font-medium text-secondary-foreground'>Under Construction</p>
+            <p className='text-sm text-secondary-foreground'>This feature is coming soon!</p>
+          </CardContent>
+        </Card>
+
+        <Card className='shadow-lg'>
+          <CardHeader>
+            <CardTitle className='text-2xl font-semibold'>Upcoming To Dos</CardTitle>
+          </CardHeader>
+          <CardContent className='flex flex-col items-center justify-center'>
+            <Construction className='h-16 w-16 text-yellow-500' />
+            <p className='text-lg font-medium text-secondary-foreground'>Under Construction</p>
+            <p className='text-sm text-secondary-foreground'>This feature is coming soon!</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
