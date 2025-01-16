@@ -24,7 +24,7 @@ export function StudentCard({ participation }: StudentCardProps) {
       className='h-full relative overflow-hidden'
       onClick={() => navigate(`${path}/details/${participation.student.id}`)}
     >
-      <div className={`h-20 ${getStatusColor(participation.pass_status)}`} />
+      <div className={`h-16 ${getStatusColor(participation.pass_status)}`} />
 
       <div className='mb-8'>
         <Avatar className='absolute w-24 h-24 border-4 border-background rounded-full transform left-3 -translate-y-1/2'>

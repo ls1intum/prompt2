@@ -19,22 +19,22 @@ interface StudentProfileProps {
 
 export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.Element => {
   return (
-    <Card className='overflow-hidden'>
+    <Card className='relative overflow-hidden'>
       {/* Status indicator */}
       <div className={`h-16 ${getStatusColor(status)}`} />
-
-      <CardHeader className='pt-0'>
+      <div className='mb-4'>
+        <Avatar className='absolute w-24 h-24 border-4 border-background rounded-full transform left-3 -translate-y-1/2'>
+          <AvatarImage src={getGravatarUrl(student.email)} alt={student.last_name} />
+          <AvatarFallback className='rounded-lg font-bold text-lg'>
+            {student.first_name[0]}
+            {student.last_name[0]}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      <CardHeader>
         <div className='flex flex-col sm:flex-row items-center'>
           {/* Avatar */}
-          <div className='relative sm:mr-6'>
-            <Avatar className='w-24 h-24 border-4 border-background'>
-              <AvatarImage src={getGravatarUrl(student.email)} alt={student.last_name} />
-              <AvatarFallback className='rounded-lg font-bold text-lg'>
-                {student.first_name[0]}
-                {student.last_name[0]}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+
           <div className='flex-1 text-center sm:text-left'>
             <div className='flex flex-col items-center sm:items-start pt-6'>
               <h1 className='text-2xl font-bold'>
