@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/toaster'
 import CourseConfiguratorPage from './CourseConfigurator/CourseConfiguratorPage'
 import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
+import { env } from './env'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,11 +26,13 @@ const queryClient = new QueryClient({
   },
 })
 
-const keycloakUrl = `${process.env.REACT_APP_KEYCLOAK_HOST ?? 'http://localhost:8081'}`
+const keycloakUrl = env.REACT_APP_KEYCLOAK_HOST
+const keycloakRealmName = env.REACT_APP_KEYCLOAK_REALM_NAME
+console.log('Keycloak URL:', env.REACT_APP_KEYCLOAK_REALM_NAME)
 
 export const App = (): JSX.Element => {
   return (
-    <KeycloakProvider keycloakRealmName={'lool'} keycloakUrl={keycloakUrl}>
+    <KeycloakProvider keycloakRealmName={keycloakRealmName} keycloakUrl={keycloakUrl}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>

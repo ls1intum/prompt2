@@ -1,8 +1,9 @@
 // TODO rewrite this as context provider and re-integrate it into the shared library
 
 import axios from 'axios'
+import { env } from '../env'
 
-export const serverBaseUrl = `${process.env.REACT_APP_CORE_HOST ?? 'http://localhost:8080'}`
+export const serverBaseUrl = env.REACT_APP_CORE_HOST
 console.log('serverBaseUrl: ', serverBaseUrl)
 
 export interface Patch {

@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js'
 import { KeycloakContext } from './KeycloakProvider'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { jwtDecode } from 'jwt-decode'
+// import { env } from '../env'
 
 // Helper function to decode JWT safely
 const parseJwt = (token: string) => {
@@ -20,8 +21,8 @@ const parseJwt = (token: string) => {
   }
 }
 
-const realm = `${process.env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
-console.log('Realm manual read', realm)
+// const realm = `${env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
+// console.log('Realm manual read', realm)
 
 export const useKeycloak = (): {
   keycloak: Keycloak | undefined
@@ -35,11 +36,11 @@ export const useKeycloak = (): {
     throw new Error('useKeycloak must be used within a KeycloakProvider')
   }
 
-  const { keycloakUrl, keycloakValue } = context
+  const { keycloakUrl, keycloakRealmName, keycloakValue } = context
 
   const initializeKeycloak = useCallback(() => {
     const keycloak = new Keycloak({
-      realm: realm,
+      realm: keycloakRealmName,
       url: keycloakUrl,
       clientId: 'prompt-client',
     })
@@ -91,7 +92,15 @@ export const useKeycloak = (): {
       })
 
     return keycloak
-  }, [context, clearUser, clearPermissions, setUser, setPermissions, realm, keycloakUrl])
+  }, [
+    context,
+    clearUser,
+    clearPermissions,
+    setUser,
+    setPermissions,
+    keycloakRealmName,
+    keycloakUrl,
+  ])
 
   useEffect(() => {
     if (!keycloakValue) {

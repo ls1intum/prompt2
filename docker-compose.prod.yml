@@ -89,10 +89,10 @@ services:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.interview.rule=Host(`${CORE_HOST}`) && PathPrefix(`/${INTERVIEW_COMPONENT_SUBPATH}`)"
+      - "traefik.http.routers.interview.rule=Host(`${CORE_HOST}`) && PathPrefix(`/interview`)"
       - "traefik.http.routers.interview.entrypoints=websecure"
       - "traefik.http.routers.interview.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.interview-strip-prefix.stripPrefix.prefixes=/${INTERVIEW_COMPONENT_SUBPATH}"
+      - "traefik.http.middlewares.interview-strip-prefix.stripPrefix.prefixes=/interview"
       - "traefik.http.routers.interview.middlewares=interview-strip-prefix,interview-compress"
       - "traefik.http.middlewares.interview-compress.compress=true"
     expose:
@@ -109,10 +109,10 @@ services:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`${CORE_HOST}`) && PathPrefix(`/${TEMPLATE_COMPONENT_SUBPATH}`)"
+      - "traefik.http.routers.template.rule=Host(`${CORE_HOST}`) && PathPrefix(`/template`)"
       - "traefik.http.routers.template.entrypoints=websecure"
       - "traefik.http.routers.template.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.template-strip-prefix.stripPrefix.prefixes=/${TEMPLATE_COMPONENT_SUBPATH}"
+      - "traefik.http.middlewares.template-strip-prefix.stripPrefix.prefixes=/template"
       - "traefik.http.routers.template.middlewares=template-strip-prefix,template-compress"
       - "traefik.http.middlewares.template-compress.compress=true"
     expose:
@@ -127,6 +127,9 @@ services:
     container_name: prompt-client-core
     environment:
       - TZ=Europe/Berlin
+      - CORE_HOST
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
