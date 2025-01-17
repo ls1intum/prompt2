@@ -31,7 +31,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
 
   const interviewSubPath = getVariable('REACT_INTERVIEW_COMPONENT_SUBPATH')
-  const interviewURL = IS_DEV ? `http://localhost:3002` : `https://${rootURL}/${interviewSubPath}`
+  const interviewURL = IS_DEV ? `http://localhost:3002` : `${rootURL}/${interviewSubPath}`
 
   return {
     target: 'web',
