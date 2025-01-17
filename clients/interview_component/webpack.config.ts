@@ -111,7 +111,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         },
       }),
       new webpack.DefinePlugin({
-        'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
+        'process.env.REACT_APP_CORE_HOST': JSON.stringify(getVariable('REACT_APP_CORE_HOST')),
       }),
     ].filter(Boolean),
     cache: {

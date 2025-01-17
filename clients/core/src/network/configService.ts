@@ -1,8 +1,19 @@
 // TODO rewrite this as context provider and re-integrate it into the shared library
 
 import axios from 'axios'
+import { env } from '../env'
 
-export const serverBaseUrl = `${process.env.REACT_APP_SERVER_HOST ?? 'http://localhost:8080'}`
+const coreURL = env.CORE_HOST || ''
+
+export const serverBaseUrl = (): string => {
+  if (coreURL === '') {
+    return window.location.origin // defaults to location
+  } else if (coreURL.startsWith('http')) {
+    return coreURL // absolute URL
+  } else {
+    return `https://${coreURL}` // relative URL
+  }
+}
 
 export interface Patch {
   op: 'replace' | 'add' | 'remove' | 'copy'
@@ -11,7 +22,7 @@ export interface Patch {
 }
 
 const authenticatedAxiosInstance = axios.create({
-  baseURL: serverBaseUrl,
+  baseURL: serverBaseUrl(),
 })
 
 authenticatedAxiosInstance.interceptors.request.use((config) => {
@@ -22,7 +33,7 @@ authenticatedAxiosInstance.interceptors.request.use((config) => {
 })
 
 const notAuthenticatedAxiosInstance = axios.create({
-  baseURL: serverBaseUrl,
+  baseURL: serverBaseUrl(),
 })
 
 export { authenticatedAxiosInstance as axiosInstance, notAuthenticatedAxiosInstance }

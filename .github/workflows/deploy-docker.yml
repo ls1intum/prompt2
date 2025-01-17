@@ -28,9 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: ${{ inputs.environment }}
-      url: 'https://${{ vars.SERVER_HOST }}'
+      url: 'https://${{ vars.CORE_HOST }}'
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
+        continue-on-error: true
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.VM_HOST }}
@@ -110,12 +111,9 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=${{ vars.ENVIRONMENT }}" > .env.prod
+            echo "ENVIRONMENT=production" > .env.prod
           
-            echo "SERVER_HOST=${{ vars.SERVER_HOST }}" >> .env.prod
-            echo "CLIENT_HOST=${{ vars.CLIENT_HOST }}" >> .env.prod
-            echo "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}" >> .env.prod
-            echo "INTERVIEW_COMPONENT_SUBPATH=${{ vars.INTERVIEW_COMPONENT_SUBPATH }}" >> .env.prod
+            echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
 
             echo "SERVER_ADDRESS=${{ vars.SERVER_ADDRESS }}" >> .env.prod 
             echo "DB_HOST=${{ vars.DB_HOST }}" >> .env.prod
@@ -124,9 +122,8 @@ jobs:
             echo "DB_USER=${{ vars.DB_USER }}" >> .env.prod
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
 
-            
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
-            echo "KEYCLOAK_REALM=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
+            echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_ID=${{ vars.KEYCLOAK_CLIENT_ID }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env.prod
             echo "KEYCLOAK_ID_OF_CLIENT=${{ secrets.KEYCLOAK_ID_OF_SERVER_CLIENT }}" >> .env.prod
@@ -137,7 +134,6 @@ jobs:
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
 
-            echo "CLIENT_URL"=${{ vars.CLIENT_URL }} >> .env.prod
             echo "SENDER_EMAIL"=${{ vars.SENDER_EMAIL_ADDRESS }} >> .env.prod
             echo "SENDER_NAME"=${{ vars.SENDER_EMAIL_NAME }} >> .env.prod
             echo "SMTP_HOST"=${{ vars.SMTP_HOST }} >> .env.prod
