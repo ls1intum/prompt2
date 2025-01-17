@@ -26,9 +26,9 @@ const queryClient = new QueryClient({
   },
 })
 
-const keycloakUrl = env.REACT_APP_KEYCLOAK_HOST
-const keycloakRealmName = env.REACT_APP_KEYCLOAK_REALM_NAME
-console.log('Keycloak URL:', env.REACT_APP_KEYCLOAK_REALM_NAME)
+const keycloakUrl = env.KEYCLOAK_HOST
+const keycloakRealmName = env.KEYCLOAK_REALM_NAME
+console.log('Keycloak URL:', env.KEYCLOAK_REALM_NAME)
 
 export const App = (): JSX.Element => {
   return (

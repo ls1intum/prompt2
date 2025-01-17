@@ -3,8 +3,8 @@
 import axios from 'axios'
 import { env } from '../env'
 
-export const serverBaseUrl = env.REACT_APP_CORE_HOST
-console.log('serverBaseUrl: ', serverBaseUrl)
+export const serverBaseUrl = env.CORE_HOST
+console.log('serverBaseUrl:', serverBaseUrl)
 
 export interface Patch {
   op: 'replace' | 'add' | 'remove' | 'copy'
