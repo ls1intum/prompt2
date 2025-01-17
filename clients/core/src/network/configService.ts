@@ -3,8 +3,19 @@
 import axios from 'axios'
 import { env } from '../env'
 
-export const serverBaseUrl = env.CORE_HOST
-console.log('serverBaseUrl:', serverBaseUrl)
+const coreURL = env.CORE_HOST || ''
+
+export const serverBaseUrl = (): string => {
+  if (coreURL === '') {
+    return window.location.origin // defaults to location
+  } else if (coreURL.startsWith('http')) {
+    return coreURL // absolute URL
+  } else {
+    return `https://${coreURL}` // relative URL
+  }
+}
+
+console.log('Server base URL:', serverBaseUrl())
 
 export interface Patch {
   op: 'replace' | 'add' | 'remove' | 'copy'
@@ -13,7 +24,7 @@ export interface Patch {
 }
 
 const authenticatedAxiosInstance = axios.create({
-  baseURL: serverBaseUrl,
+  baseURL: serverBaseUrl(),
 })
 
 authenticatedAxiosInstance.interceptors.request.use((config) => {
@@ -24,7 +35,7 @@ authenticatedAxiosInstance.interceptors.request.use((config) => {
 })
 
 const notAuthenticatedAxiosInstance = axios.create({
-  baseURL: serverBaseUrl,
+  baseURL: serverBaseUrl(),
 })
 
 export { authenticatedAxiosInstance as axiosInstance, notAuthenticatedAxiosInstance }
