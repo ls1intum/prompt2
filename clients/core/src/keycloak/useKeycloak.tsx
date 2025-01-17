@@ -21,9 +21,6 @@ const parseJwt = (token: string) => {
   }
 }
 
-// const realm = `${env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
-// console.log('Realm manual read', realm)
-
 export const useKeycloak = (): {
   keycloak: Keycloak | undefined
   logout: (redirectUri?: string) => void

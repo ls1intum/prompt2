@@ -15,8 +15,6 @@ export const serverBaseUrl = (): string => {
   }
 }
 
-console.log('Server base URL:', serverBaseUrl())
-
 export interface Patch {
   op: 'replace' | 'add' | 'remove' | 'copy'
   path: string

@@ -72,7 +72,6 @@ export const ApplicationMailingSettings = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    console.log('Event name:', name)
     setApplicationMailingMetaData((prev) => ({ ...prev, [name]: value }))
 
     if (name === 'replyToEmail') {
