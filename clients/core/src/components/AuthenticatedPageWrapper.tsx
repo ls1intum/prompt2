@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { useKeycloak } from '@/keycloak/useKeycloak'
+import { useKeycloak } from '../keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
   children: React.ReactNode

@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { useKeycloak } from '@/keycloak/useKeycloak'
+import { useKeycloak } from '../../keycloak/useKeycloak'
 import { AlertTriangle, ArrowLeft, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 

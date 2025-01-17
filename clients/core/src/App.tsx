@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import { LandingPage } from './LandingPage/LandingPage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { KeycloakProvider } from '@/keycloak/KeycloakProvider'
+import { KeycloakProvider } from './keycloak/KeycloakProvider'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ManagementRoot } from './management/ManagementConsole'
 import { TemplateRoutes } from './PhaseMapping/ExternalRoutes/TemplateRoutes'
@@ -26,11 +26,10 @@ const queryClient = new QueryClient({
 })
 
 const keycloakUrl = `${process.env.REACT_APP_KEYCLOAK_HOST ?? 'http://localhost:8081'}`
-const keycloakRealmName = `${process.env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
 
 export const App = (): JSX.Element => {
   return (
-    <KeycloakProvider keycloakRealmName={keycloakRealmName} keycloakUrl={keycloakUrl}>
+    <KeycloakProvider keycloakRealmName={'lool'} keycloakUrl={keycloakUrl}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>

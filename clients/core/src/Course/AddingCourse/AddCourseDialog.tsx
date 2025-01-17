@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PostCourse } from '@/interfaces/post_course'
 import { postNewCourse } from '../../network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
-import { useKeycloak } from '@/keycloak/useKeycloak'
+import { useKeycloak } from '../../keycloak/useKeycloak'
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 

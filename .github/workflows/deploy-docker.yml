@@ -111,7 +111,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" >> .env.prod
+            echo "ENVIRONMENT=production" > .env.prod
           
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "TEMPLATE_COMPONENT_SUBPATH=${{ vars.TEMPLATE_COMPONENT_SUBPATH }}" >> .env.prod

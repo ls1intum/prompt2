@@ -20,6 +20,9 @@ const parseJwt = (token: string) => {
   }
 }
 
+const realm = `${process.env.REACT_APP_KEYCLOAK_REALM_NAME ?? 'prompt'}`
+console.log('Realm manual read', realm)
+
 export const useKeycloak = (): {
   keycloak: Keycloak | undefined
   logout: (redirectUri?: string) => void
@@ -32,11 +35,11 @@ export const useKeycloak = (): {
     throw new Error('useKeycloak must be used within a KeycloakProvider')
   }
 
-  const { keycloakUrl, keycloakRealmName, keycloakValue } = context
+  const { keycloakUrl, keycloakValue } = context
 
   const initializeKeycloak = useCallback(() => {
     const keycloak = new Keycloak({
-      realm: keycloakRealmName,
+      realm: realm,
       url: keycloakUrl,
       clientId: 'prompt-client',
     })
@@ -88,15 +91,7 @@ export const useKeycloak = (): {
       })
 
     return keycloak
-  }, [
-    context,
-    clearUser,
-    clearPermissions,
-    setUser,
-    setPermissions,
-    keycloakRealmName,
-    keycloakUrl,
-  ])
+  }, [context, clearUser, clearPermissions, setUser, setPermissions, realm, keycloakUrl])
 
   useEffect(() => {
     if (!keycloakValue) {

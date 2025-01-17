@@ -3,6 +3,7 @@
 import axios from 'axios'
 
 export const serverBaseUrl = `${process.env.REACT_APP_CORE_HOST ?? 'http://localhost:8080'}`
+console.log('serverBaseUrl: ', serverBaseUrl)
 
 export interface Patch {
   op: 'replace' | 'add' | 'remove' | 'copy'
