@@ -114,7 +114,6 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           {phaseType?.name === 'Application' &&
             (!phaseType?.provided_output_meta_data ||
               phaseType?.provided_output_meta_data.length === 0) && (
-              // TODO
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

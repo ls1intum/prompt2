@@ -121,16 +121,15 @@ export function useCourseConfiguratorDataSetup() {
           fetchedApplicationForm &&
           !isAdditionalScoresPending
         ) {
+          const applicationAnswers: { key: string; type: string }[] = []
+
           fetchedApplicationForm.questions_multi_select
             .filter(
               (question) =>
                 question.access_key !== undefined && question.accessible_for_other_phases === true,
             )
             .forEach((question) => {
-              additionalMetaData.push({
-                name: question.access_key || 'undefined',
-                type: 'array',
-              })
+              applicationAnswers.push({ key: question.access_key ?? '', type: 'Multi-Select' })
             })
 
           fetchedApplicationForm.questions_text
@@ -139,22 +138,29 @@ export function useCourseConfiguratorDataSetup() {
                 question.access_key !== undefined && question.accessible_for_other_phases === true,
             )
             .forEach((question) => {
-              additionalMetaData.push({
-                name: question.access_key || 'undefined',
-                type: 'string',
-              })
+              applicationAnswers.push({ key: question.access_key ?? '', type: 'Text' })
             })
 
-          if (fetchedAdditionalScores) {
-            fetchedAdditionalScores.forEach((score) => {
-              additionalMetaData.push({
-                name: score.name,
-                type: 'integer',
-              })
+          if (applicationAnswers.length > 0) {
+            additionalMetaData.push({
+              name: 'applicationAnswers',
+              // Convert the object array to a properly formatted JSON string
+              type: JSON.stringify(applicationAnswers),
             })
           }
 
-          additionalMetaData.push({ name: 'assessmentScore', type: 'integer' })
+          if (fetchedAdditionalScores) {
+            const additionScores: string[] = []
+            fetchedAdditionalScores.forEach((score) => {
+              additionScores.push(score.name)
+            })
+            additionalMetaData.push({
+              name: 'additionalScores',
+              type: JSON.stringify(additionScores),
+            })
+          }
+
+          additionalMetaData.push({ name: 'applicationScore', type: 'integer' })
         }
 
         appendCoursePhaseType({
