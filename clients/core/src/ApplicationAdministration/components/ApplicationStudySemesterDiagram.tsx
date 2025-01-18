@@ -30,7 +30,6 @@ export const ApplicationStudySemesterDiagram = ({
   const { semesterData } = useMemo(() => {
     const semesterCounts = applications.reduce(
       (acc, app) => {
-        console.log(app.student.study_degree)
         const semester = app.student.current_semester || 1
         const degree = app.student.study_degree || 'bachelor'
         const key = semester > 12 ? '12+' : semester.toString()

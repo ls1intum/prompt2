@@ -19,19 +19,15 @@ const __dirname = path.dirname(__filename)
 
 // TODO: specify the version for react in shared dependencies
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
-  const getVariable = (name: string) => env[name] ?? process.env[name]
+  const getVariable = (name: string) => env[name] // These variables are all determined at build time
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
 
   // Adjust this to match your deployment URL
-  const rootURL = getVariable('REACT_APP_CLIENT_HOST')
-  const templateSubPath = getVariable('REACT_TEMPLATE_COMPONENT_SUBPATH')
-  const templateURL = IS_DEV ? `http://localhost:3001` : `${rootURL}/${templateSubPath}`
-
-  const interviewSubPath = getVariable('REACT_INTERVIEW_COMPONENT_SUBPATH')
-  const interviewURL = IS_DEV ? `http://localhost:3002` : `${rootURL}/${interviewSubPath}`
+  const templateURL = IS_DEV ? `http://localhost:3001` : `/template`
+  const interviewURL = IS_DEV ? `http://localhost:3002` : `/interview`
 
   return {
     target: 'web',
@@ -119,16 +115,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         },
       }),
       new CopyPlugin({
-        patterns: [{ from: 'public' }],
-      }),
-      new webpack.DefinePlugin({
-        'process.env.REACT_APP_SERVER_HOST': JSON.stringify(getVariable('REACT_APP_SERVER_HOST')),
-        'process.env.REACT_APP_KEYCLOAK_HOST': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_HOST'),
-        ),
-        'process.env.REACT_APP_KEYCLOAK_REALM_NAME': JSON.stringify(
-          getVariable('REACT_APP_KEYCLOAK_REALM_NAME'),
-        ),
+        patterns: [{ from: 'public' }], // Copies env.js to your output root
       }),
       IS_PERF && new BundleAnalyzerPlugin(),
       new CleanWebpackPlugin(),

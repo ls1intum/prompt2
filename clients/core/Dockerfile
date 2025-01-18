@@ -4,20 +4,6 @@ FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG} AS core-base
 
 WORKDIR /app/core
 
-ARG CLIENT_HOST
-ARG SERVER_HOST
-ARG KEYCLOAK_HOST
-ARG KEYCLOAK_REALM_NAME
-ARG TEMPLATE_COMPONENT_SUBPATH
-ARG INTERVIEW_COMPONENT_SUBPATH
-
-ENV REACT_APP_CLIENT_HOST=$CLIENT_HOST
-ENV REACT_APP_SERVER_HOST=$SERVER_HOST
-ENV REACT_APP_KEYCLOAK_HOST=$KEYCLOAK_HOST
-ENV REACT_APP_KEYCLOAK_REALM_NAME=$KEYCLOAK_REALM_NAME
-ENV REACT_TEMPLATE_COMPONENT_SUBPATH=$TEMPLATE_COMPONENT_SUBPATH
-ENV REACT_INTERVIEW_COMPONENT_SUBPATH=$INTERVIEW_COMPONENT_SUBPATH
-
 COPY . ./
 RUN yarn install
 
@@ -26,5 +12,21 @@ RUN yarn build
 FROM nginx:stable-alpine
 COPY --from=core-base /app/core/build /usr/share/nginx/html
 COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
+
+
+COPY --from=core-base /app/core/build /usr/share/nginx/html
+COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=core-base /app/core/build/env.template.js /usr/share/nginx/html/env.template.js
+
+# Copy the entrypoint script to the image.
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+# Use the custom entrypoint to generate env.js and start Nginx.
+ENTRYPOINT ["/docker-entrypoint.sh"]
