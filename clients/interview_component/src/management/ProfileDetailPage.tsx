@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useParticipationStore } from './zustand/useParticipationStore'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, FileText, MessageSquare } from 'lucide-react'
+import { ChevronLeft, FileUserIcon, MessageSquare } from 'lucide-react'
 import { StudentCard } from './components/StudentCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -38,7 +38,7 @@ export const ProfileDetailPage = (): JSX.Element => {
             <Card>
               <CardHeader>
                 <CardTitle className='flex items-center'>
-                  <FileText className='h-5 w-5 mr-2' />
+                  <FileUserIcon className='h-5 w-5 mr-2' />
                   Application
                 </CardTitle>
               </CardHeader>

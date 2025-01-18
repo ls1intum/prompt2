@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { GraduationCap, BookOpen, FileIcon as FileUser, Mic } from 'lucide-react'
+import { GraduationCap, BookOpen, Mic, FileUserIcon } from 'lucide-react'
 import { getStudyDegreeString } from '@/interfaces/study_degree'
 import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -56,7 +56,7 @@ export function StudentCard({ participation }: StudentCardProps) {
           <h4 className='text-sm font-semibold'>Scores</h4>
           <div className='grid gap-2 sm:grid-cols-2'>
             <div className='flex items-center gap-3'>
-              <FileUser className='h-4 w-4 text-muted-foreground mr-2' />
+              <FileUserIcon className='h-4 w-4 text-muted-foreground mr-2' />
               <div className='flex flex-col'>
                 <span className='text-xs text-muted-foreground'>Application</span>
                 <span className='text-sm'>{assessmentScore}</span>
