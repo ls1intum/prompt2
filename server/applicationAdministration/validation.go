@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student"
@@ -68,7 +70,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		if question.CoursePhaseID != coursePhaseID {
 			return errors.New("course phase id is not correct")
 		}
-		err := validateQuestionText(question.Title, question.ValidationRegex, question.AllowedLength)
+		err := validateQuestionText(question.Title, question.ValidationRegex, question.AllowedLength, question.AccessibleForOtherPhases, question.AccessKey)
 		if err != nil {
 			return err
 		}
@@ -77,7 +79,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		if question.CoursePhaseID != coursePhaseID {
 			return errors.New("course phase id is not correct")
 		}
-		err := validateQuestionMultiSelect(question.Title, question.MinSelect, question.MaxSelect, question.Options)
+		err := validateQuestionMultiSelect(question.Title, question.MinSelect, question.MaxSelect, question.Options, question.AccessibleForOtherPhases, question.AccessKey)
 		if err != nil {
 			return err
 		}
@@ -88,7 +90,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		if question.CoursePhaseID != coursePhaseID || !textQuestionsMap[question.ID] {
 			return errors.New("course phase id is not correct")
 		}
-		err := validateQuestionText(question.Title, question.ValidationRegex, question.AllowedLength)
+		err := validateQuestionText(question.Title, question.ValidationRegex, question.AllowedLength, question.AccessibleForOtherPhases, question.AccessKey)
 		if err != nil {
 			return err
 		}
@@ -98,7 +100,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 		if question.CoursePhaseID != coursePhaseID || !multiSelectQuestionsMap[question.ID] {
 			return errors.New("course phase id is not correct")
 		}
-		err := validateQuestionMultiSelect(question.Title, question.MinSelect, question.MaxSelect, question.Options)
+		err := validateQuestionMultiSelect(question.Title, question.MinSelect, question.MaxSelect, question.Options, question.AccessibleForOtherPhases, question.AccessKey)
 		if err != nil {
 			return err
 		}
@@ -107,7 +109,7 @@ func validateUpdateForm(ctx context.Context, coursePhaseID uuid.UUID, updateForm
 	return nil
 }
 
-func validateQuestionText(title, validationRegex string, allowedLength int) error {
+func validateQuestionText(title, validationRegex string, allowedLength int, accessibleForOtherPhases pgtype.Bool, accessKey pgtype.Text) error {
 	// Check that the title is not empty
 	if len(title) == 0 {
 		return errors.New("title is required")
@@ -126,11 +128,16 @@ func validateQuestionText(title, validationRegex string, allowedLength int) erro
 		}
 	}
 
+	err := validateExportSettings(accessibleForOtherPhases, accessKey)
+	if err != nil {
+		return err
+	}
+
 	// No issues, return nil
 	return nil
 }
 
-func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options []string) error {
+func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options []string, accessibleForOtherPhases pgtype.Bool, accessKey pgtype.Text) error {
 	// Check that the title is not empty
 	if len(title) == 0 {
 		return errors.New("title is required")
@@ -162,7 +169,26 @@ func validateQuestionMultiSelect(title string, minSelect, maxSelect int, options
 		}
 	}
 
+	err := validateExportSettings(accessibleForOtherPhases, accessKey)
+	if err != nil {
+		return err
+	}
+
 	// No issues, return nil
+	return nil
+}
+
+func validateExportSettings(accessibleForOtherPhases pgtype.Bool, accessKey pgtype.Text) error {
+	if accessibleForOtherPhases.Valid && accessibleForOtherPhases.Bool {
+		if accessKey.String == "" {
+			return errors.New("access key is required when question is accessible for other phases")
+		}
+	}
+
+	if strings.Contains(accessKey.String, " ") {
+		return errors.New("access key cannot contain whitespaces")
+	}
+
 	return nil
 }
 
@@ -350,10 +376,14 @@ func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhasePar
 	return nil
 }
 
-func validateAdditionalScore(score applicationDTO.AdditionalScore) error {
+func validateAdditionalScore(score applicationDTO.AdditionalScoreUpload) error {
 	// Check if the name is empty
 	if score.Name == "" {
 		return errors.New("name cannot be empty")
+	}
+
+	if score.Key == "" || strings.Contains(score.Key, " ") {
+		return errors.New("key cannot be empty or contain whitespaces")
 	}
 
 	// Check if all scores are greater than 0

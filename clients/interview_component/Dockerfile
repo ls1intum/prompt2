@@ -1,8 +1,8 @@
 ARG IMAGE_TAG
 FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG} AS core-base
 
-ARG SERVER_HOST
-ENV REACT_APP_SERVER_HOST=$SERVER_HOST
+ARG CORE_HOST
+ENV REACT_APP_CORE_HOST=$CORE_HOST
 
 WORKDIR /app/interview_component
 COPY . ./

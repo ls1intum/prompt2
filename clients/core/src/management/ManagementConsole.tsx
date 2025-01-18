@@ -1,4 +1,4 @@
-import { useKeycloak } from '@/keycloak/useKeycloak'
+import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import UnauthorizedPage from './components/UnauthorizedPage'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'

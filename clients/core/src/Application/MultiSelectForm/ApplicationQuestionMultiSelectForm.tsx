@@ -12,12 +12,16 @@ import { checkCheckBoxQuestion } from '../utils/CheckBoxRequirements'
 interface ApplicationQuestionMultiSelectFormProps {
   question: ApplicationQuestionMultiSelect
   initialAnswers?: string[]
-  disabled?: boolean
+  isInstructorView?: boolean
 }
 
 export const ApplicationQuestionMultiSelectForm = forwardRef(
   function ApplicationQuestionMultiSelectForm(
-    { question, initialAnswers = [], disabled = false }: ApplicationQuestionMultiSelectFormProps,
+    {
+      question,
+      initialAnswers = [],
+      isInstructorView = false,
+    }: ApplicationQuestionMultiSelectFormProps,
     ref: React.Ref<QuestionMultiSelectFormRef>,
   ) {
     const isCheckboxQuestion = checkCheckBoxQuestion(question)
@@ -51,13 +55,17 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
                 render={({ fieldState }) => (
                   <>
                     {isCheckboxQuestion ? (
-                      <CheckboxQuestion form={form} question={question} disabled={disabled} />
+                      <CheckboxQuestion
+                        form={form}
+                        question={question}
+                        isInstructorView={isInstructorView}
+                      />
                     ) : (
                       <MultiSelectQuestion
                         form={form}
                         question={question}
                         initialAnswers={initialAnswers}
-                        disabled={disabled}
+                        isInstructorView={isInstructorView}
                       />
                     )}
                     <FormMessage>{fieldState.error?.message}</FormMessage>

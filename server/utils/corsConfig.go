@@ -1,11 +1,18 @@
 package utils
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
 
 func CORS() gin.HandlerFunc {
-	clientHost := GetEnv("CLIENT_HOST", "http://localhost:3000")
+	localHost := "http://localhost:3000"
+	clientHost := GetEnv("CORE_HOST", localHost)
+	// if not localhost add https
+	if clientHost != localHost && !strings.HasPrefix(clientHost, "https://") {
+		clientHost = "https://" + clientHost
+	}
 
 	return func(context *gin.Context) {
 		context.Writer.Header().Add("Access-Control-Allow-Origin", clientHost)

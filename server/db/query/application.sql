@@ -15,12 +15,12 @@ INSERT INTO application_answer_multi_select (id, application_question_id, course
 VALUES ($1, $2, $3, $4);
 
 -- name: CreateApplicationQuestionText :exec
-INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num, accessible_for_other_phases, access_key)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
 
 -- name: CreateApplicationQuestionMultiSelect :exec
-INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
+INSERT INTO application_question_multi_select (id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num, accessible_for_other_phases, access_key)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
 
 -- name: UpdateApplicationQuestionMultiSelect :exec
 UPDATE application_question_multi_select
@@ -33,7 +33,9 @@ SET
     min_select = COALESCE($7, min_select),
     max_select = COALESCE($8, max_select),
     options = COALESCE($9, options),
-    order_num = COALESCE($10, order_num)
+    order_num = COALESCE($10, order_num), 
+    accessible_for_other_phases = COALESCE($11, accessible_for_other_phases),
+    access_key = COALESCE($12, access_key)
 WHERE id = $1;
 
 -- name: UpdateApplicationQuestionText :exec
@@ -46,7 +48,9 @@ SET
     error_message = COALESCE($6, error_message),
     is_required = COALESCE($7, is_required),
     allowed_length = COALESCE($8, allowed_length),
-    order_num = COALESCE($9, order_num)
+    order_num = COALESCE($9, order_num),
+    accessible_for_other_phases = COALESCE($10, accessible_for_other_phases),
+    access_key = COALESCE($11, access_key)
 WHERE id = $1;
 
 

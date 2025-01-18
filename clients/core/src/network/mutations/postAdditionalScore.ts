@@ -1,9 +1,9 @@
 import { axiosInstance } from '../configService'
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { AdditionalScoreUpload } from '@/interfaces/additional_score'
 
 export const postAdditionalScore = async (
   phaseId: string,
-  additionalScore: AdditionalScore,
+  additionalScore: AdditionalScoreUpload,
 ): Promise<void> => {
   try {
     return await axiosInstance.post(`/api/applications/${phaseId}/score`, additionalScore, {

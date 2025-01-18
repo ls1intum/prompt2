@@ -46,7 +46,7 @@ func runMigrations(databaseURL string) {
 
 func initKeycloak() {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
-	realm := utils.GetEnv("KEYCLOAK_REALM", "prompt")
+	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
 	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
 	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
@@ -61,7 +61,7 @@ func initKeycloak() {
 }
 
 func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
-	clientURL := utils.GetEnv("CLIENT_URL", "prompt2.ase.cit.tum.de")
+	clientURL := utils.GetEnv("CORE_HOST", "prompt.aet.cit.tum.de") // required for application link in mails
 	smtpHost := utils.GetEnv("SMTP_HOST", "127.0.0.1")
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "prompt-dev@ase.cit.tum.de")

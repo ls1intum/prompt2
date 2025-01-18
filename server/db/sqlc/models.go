@@ -205,30 +205,34 @@ type ApplicationAssessment struct {
 }
 
 type ApplicationQuestionMultiSelect struct {
-	ID            uuid.UUID   `json:"id"`
-	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
-	Title         pgtype.Text `json:"title"`
-	Description   pgtype.Text `json:"description"`
-	Placeholder   pgtype.Text `json:"placeholder"`
-	ErrorMessage  pgtype.Text `json:"error_message"`
-	IsRequired    pgtype.Bool `json:"is_required"`
-	MinSelect     pgtype.Int4 `json:"min_select"`
-	MaxSelect     pgtype.Int4 `json:"max_select"`
-	Options       []string    `json:"options"`
-	OrderNum      pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	MinSelect                pgtype.Int4 `json:"min_select"`
+	MaxSelect                pgtype.Int4 `json:"max_select"`
+	Options                  []string    `json:"options"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 type ApplicationQuestionText struct {
-	ID              uuid.UUID   `json:"id"`
-	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
-	Title           pgtype.Text `json:"title"`
-	Description     pgtype.Text `json:"description"`
-	Placeholder     pgtype.Text `json:"placeholder"`
-	ValidationRegex pgtype.Text `json:"validation_regex"`
-	ErrorMessage    pgtype.Text `json:"error_message"`
-	IsRequired      pgtype.Bool `json:"is_required"`
-	AllowedLength   pgtype.Int4 `json:"allowed_length"`
-	OrderNum        pgtype.Int4 `json:"order_num"`
+	ID                       uuid.UUID   `json:"id"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	Title                    pgtype.Text `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	Placeholder              pgtype.Text `json:"placeholder"`
+	ValidationRegex          pgtype.Text `json:"validation_regex"`
+	ErrorMessage             pgtype.Text `json:"error_message"`
+	IsRequired               pgtype.Bool `json:"is_required"`
+	AllowedLength            pgtype.Int4 `json:"allowed_length"`
+	OrderNum                 pgtype.Int4 `json:"order_num"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
 }
 
 type Course struct {
@@ -277,6 +281,11 @@ type CoursePhaseType struct {
 	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
 	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
 	InitialPhase           bool      `json:"initial_phase"`
+}
+
+type MetaDataDependencyGraph struct {
+	FromPhaseID uuid.UUID `json:"from_phase_id"`
+	ToPhaseID   uuid.UUID `json:"to_phase_id"`
 }
 
 type Student struct {

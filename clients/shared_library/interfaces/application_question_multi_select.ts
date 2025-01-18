@@ -10,4 +10,6 @@ export interface ApplicationQuestionMultiSelect {
   max_select: number
   options: string[]
   order_num: number
+  accessible_for_other_phases?: boolean
+  access_key?: string
 }

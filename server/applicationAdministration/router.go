@@ -378,7 +378,7 @@ func uploadAdditionalScore(c *gin.Context) {
 		return
 	}
 
-	var additionalScore applicationDTO.AdditionalScore
+	var additionalScore applicationDTO.AdditionalScoreUpload
 	if err := c.BindJSON(&additionalScore); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return

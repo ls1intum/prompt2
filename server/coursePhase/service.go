@@ -7,6 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type CoursePhaseService struct {
@@ -52,4 +54,18 @@ func CreateCoursePhase(ctx context.Context, coursePhase coursePhaseDTO.CreateCou
 
 func DeleteCoursePhase(ctx context.Context, id uuid.UUID) error {
 	return CoursePhaseServiceSingleton.queries.DeleteCoursePhase(ctx, id)
+}
+
+func CheckCoursePhasesBelongToCourse(ctx context.Context, courseId uuid.UUID, coursePhaseIds []uuid.UUID) (bool, error) {
+	ok, err := CoursePhaseServiceSingleton.queries.CheckCoursePhasesBelongToCourse(ctx, db.CheckCoursePhasesBelongToCourseParams{
+		CourseID: courseId,
+		Column1:  coursePhaseIds,
+	})
+
+	if err != nil {
+		log.Error(err)
+		return false, errors.New("error checking course phases")
+	}
+
+	return ok, nil
 }
