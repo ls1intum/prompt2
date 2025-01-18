@@ -3,7 +3,7 @@ import { Handle, Position, useHandleConnections, useReactFlow } from '@xyflow/re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Pen, ArrowDownToLine, ArrowUpFromLine, TriangleAlert } from 'lucide-react'
+import { Pen, TriangleAlert, FileInput, FileOutput } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
 import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
@@ -137,7 +137,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
             <MetaDataBadges
               metaData={phaseType.required_input_meta_data}
-              icon={<ArrowDownToLine className='w-4 h-4 text-green-500' />}
+              icon={<FileInput className='w-5 h-5 text-green-500' />}
               label='Required Input Metadata'
               providedMetaData={incomingMetaData}
             />
@@ -147,7 +147,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             phaseType.provided_output_meta_data.length > 0 && (
               <MetaDataBadges
                 metaData={phaseType.provided_output_meta_data}
-                icon={<ArrowUpFromLine className='w-4 h-4 text-green-500' />}
+                icon={<FileOutput className='w-5 h-5 text-green-500' />}
                 label='Provided Output Metadata'
               />
             )}
