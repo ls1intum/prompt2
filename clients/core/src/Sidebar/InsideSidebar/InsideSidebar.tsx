@@ -1,10 +1,4 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-} from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useLocation, useParams } from 'react-router-dom'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
@@ -21,16 +15,12 @@ export const InsideSidebar = (): JSX.Element => {
   const headerName = isCourseSidebar ? currentCourse?.name || 'Unknown Course' : 'General'
 
   return (
-    <Sidebar collapsible='none' className='flex-1 flex'>
+    <Sidebar collapsible='none' className='flex'>
       <SidebarHeader className='flex h-14 border-b justify-center'>
         <div className='text-base font-medium text-foreground'>{headerName}</div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className='px-2 py-4'>
-          <SidebarGroupContent>
-            {isCourseSidebar ? <InsideCourseSidebar /> : <InsideGeneralSidebar />}
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isCourseSidebar ? <InsideCourseSidebar /> : <InsideGeneralSidebar />}
       </SidebarContent>
     </Sidebar>
   )

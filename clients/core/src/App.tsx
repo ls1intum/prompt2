@@ -13,6 +13,9 @@ import { CourseOverview } from './Course/CourseOverview'
 import { ApplicationLoginPage } from './Application/ApplicationLoginPage'
 import { ApplicationAuthenticated } from './Application/ApplicationAuthenticated'
 import { Toaster } from '@/components/ui/toaster'
+import CourseConfiguratorPage from './CourseConfigurator/CourseConfiguratorPage'
+import { PermissionRestriction } from './management/PermissionRestriction'
+import { Role } from '@/interfaces/permission_roles'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +47,22 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <CourseOverview />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/configurator'
+              element={
+                <ManagementRoot>
+                  <PermissionRestriction
+                    requiredPermissions={[
+                      Role.PROMPT_ADMIN,
+                      Role.COURSE_LECTURER,
+                      Role.COURSE_EDITOR,
+                    ]}
+                  >
+                    <CourseConfiguratorPage />
+                  </PermissionRestriction>
                 </ManagementRoot>
               }
             />
