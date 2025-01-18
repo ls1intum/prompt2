@@ -95,12 +95,13 @@ The course phase types are stored in the DB. We assume here that you already hav
 ## 3. Deploy Your Component
 
 1. **Environment Variables**  
-   - If your component references an environment variable (e.g., `COMPONENT_SUBPATH`), add it in GitHub’s settings and pass it as an `ARG` in the Core Dockerfile so it is available at runtime.
+   - If your component references an environment variable (e.g., `COMPONENT_SUBPATH`), add it in GitHub’s settings and add it in `core/public/env.template.js` so that it is available at runtime.
 
 2. **GitHub Workflows**  
    - **`build-and-push-clients.yml`**: Add another output image tag and the building script for for your component. Use the template component as example. 
    - **`deploy-docker`**: Include the new image tag (and path env variable) in the “SSH to VM and create .env.prod file” step to ensure Docker Compose picks it up.  
    - **`dev.yml`**: Reference the new image tag.
+   - **`prod.yml`**: Reference the new image tag.
 
 3. **Docker Compose**  
    - In `docker-compose.prod.yml`, follow the existing template for deployment. Rename or adjust the middlewares/services as needed to match your new component.

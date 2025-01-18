@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
-  const getVariable = (name: string) => env[name] ?? process.env[name]
+  const getVariable = (name: string) => env[name]
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
   const deps = packageJson.dependencies
