@@ -41,6 +41,17 @@ This guide explains how to add a new microfrontend component (ending with `_comp
 7. **Implement Your Functionality**  
    - Add pages, components, and other logic as needed for your new microfrontend.  
 
+8. **Export Your Functionality via routes and sidebar**  
+   - Configure your **sidebar** entries in 'routes/index.tsx'
+     - You can define one Sidebar Item with multiple subitems. 
+     - Each Sidebar Item has an icon (not the subitems). 
+     - Each Item and Subitem can have different permission restrictions. 
+     - Be careful: The Top-Sidebar Item should have the lowest required permissions, as the subitems will not be shown if the Top-Level Item is not displayed.
+   - Configure your **routes** entries in 'sidebar/index.tsx'
+     - Make sure your routes are consistent with your sidebar
+     - Each sidebar element path should also be reflected in your routes with same restrictions. 
+     - Your routes can, of course, have additonal routes which are not reflected in the sidebar. But not the other way around.
+
 8. **Export Your Functionality via Routes and Sidebar**  
    - **Configure your sidebar** in `sidebar/index.tsx`  
      - You can define a single sidebar item that contains multiple subitems.  
@@ -95,13 +106,12 @@ The course phase types are stored in the DB. We assume here that you already hav
 ## 3. Deploy Your Component
 
 1. **Environment Variables**  
-   - If your component references an environment variable (e.g., `COMPONENT_SUBPATH`), add it in GitHub’s settings and add it in `core/public/env.template.js` so that it is available at runtime.
+   - If your component references an environment variable (e.g., `COMPONENT_SUBPATH`), add it in GitHub’s settings and pass it as an `ARG` in the Core Dockerfile so it is available at runtime.
 
 2. **GitHub Workflows**  
    - **`build-and-push-clients.yml`**: Add another output image tag and the building script for for your component. Use the template component as example. 
-   - **`deploy-docker`**: Include the new image tag (and path env variable) in the “SSH to VM and create .env.prod file” step to ensure Docker Compose picks it up.  
+   - **`deploy-docker`**: Include the new image tag in the “SSH to VM and create .env.prod file” step to ensure Docker Compose picks it up.  
    - **`dev.yml`**: Reference the new image tag.
-   - **`prod.yml`**: Reference the new image tag.
 
 3. **Docker Compose**  
    - In `docker-compose.prod.yml`, follow the existing template for deployment. Rename or adjust the middlewares/services as needed to match your new component.
