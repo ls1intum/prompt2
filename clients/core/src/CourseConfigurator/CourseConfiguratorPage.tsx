@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ErrorPage } from '@/components/ErrorPage'
 import { Loader2 } from 'lucide-react'
 import { useCourseConfiguratorDataSetup } from './handlers/useCourseConfiguratorDataSetup'
-import { ManagementPageHeader } from '../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 
 export default function CourseConfiguratorPage() {
   const { courseId, isError, isPending, error, finishedSetup, refetchAll } =
