@@ -9,11 +9,12 @@ import (
 )
 
 type GetAllCPPsForCoursePhase struct {
-	ID           uuid.UUID          `json:"id"`
-	PassStatus   string             `json:"pass_status"`
-	MetaData     meta.MetaData      `json:"meta_data"`
-	PrevMetaData meta.MetaData      `json:"prev_meta_data"`
-	Student      studentDTO.Student `json:"student"`
+	ID                    uuid.UUID          `json:"id"`
+	PassStatus            string             `json:"pass_status"`
+	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
+	MetaData              meta.MetaData      `json:"meta_data"`
+	PrevMetaData          meta.MetaData      `json:"prev_meta_data"`
+	Student               studentDTO.Student `json:"student"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow) (GetAllCPPsForCoursePhase, error) {
@@ -30,10 +31,11 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 	}
 
 	return GetAllCPPsForCoursePhase{
-		ID:           model.CoursePhaseParticipationID,
-		PassStatus:   GetPassStatusString(model.PassStatus),
-		MetaData:     metaData,
-		PrevMetaData: prevMetaData,
+		ID:                    model.CoursePhaseParticipationID,
+		CourseParticipationID: model.CourseParticipationID,
+		PassStatus:            GetPassStatusString(model.PassStatus),
+		MetaData:              metaData,
+		PrevMetaData:          prevMetaData,
 		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{
 			ID:                   model.StudentID,
 			FirstName:            model.FirstName,
