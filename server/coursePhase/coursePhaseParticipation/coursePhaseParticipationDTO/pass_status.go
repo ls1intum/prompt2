@@ -8,3 +8,15 @@ func GetPassStatusString(passStatus db.NullPassStatus) string {
 	}
 	return string(db.PassStatusNotAssessed)
 }
+
+func GetPassStatusDBModel(passStatus *db.PassStatus) db.NullPassStatus {
+	if passStatus == nil {
+		return db.NullPassStatus{
+			Valid: false,
+		}
+	}
+	return db.NullPassStatus{
+		Valid:      true,
+		PassStatus: *passStatus,
+	}
+}

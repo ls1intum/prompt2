@@ -78,26 +78,58 @@ func createCoursePhaseParticipation(c *gin.Context) {
 }
 
 func updateCoursePhaseParticipation(c *gin.Context) {
+	// this might be uuid.Nil
 	id, err := uuid.Parse(c.Param("participation_uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	var updatedCourseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation
-	if err := c.BindJSON(&updatedCourseParticipation); err != nil {
+	coursePhaseId, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	updatedCourseParticipation.ID = id
-
-	err = UpdateCoursePhaseParticipation(c, nil, updatedCourseParticipation)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+	var updatedCourseParticipationRequest coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest
+	if err := c.BindJSON(&updatedCourseParticipationRequest); err != nil {
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "updated course phase participation"})
+
+	if id == uuid.Nil {
+		// Case 1: create a new course phase participation
+		createCourseParticipationDTO := coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
+			CourseParticipationID: updatedCourseParticipationRequest.CourseParticipationID,
+			CoursePhaseID:         coursePhaseId,
+			PassStatus:            updatedCourseParticipationRequest.PassStatus,
+			MetaData:              updatedCourseParticipationRequest.MetaData,
+		}
+
+		if err := Validate(createCourseParticipationDTO); err != nil {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
+
+		coursePhaseParticipation, err := CreateCoursePhaseParticipation(c, nil, createCourseParticipationDTO)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		c.IndentedJSON(http.StatusCreated, coursePhaseParticipation.ID)
+	} else {
+		// Case 2: update an existing course phase participation
+		err = UpdateCoursePhaseParticipation(c, nil, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
+			ID:         id,
+			PassStatus: updatedCourseParticipationRequest.PassStatus,
+			MetaData:   updatedCourseParticipationRequest.MetaData,
+		})
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		c.IndentedJSON(http.StatusOK, id)
+	}
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

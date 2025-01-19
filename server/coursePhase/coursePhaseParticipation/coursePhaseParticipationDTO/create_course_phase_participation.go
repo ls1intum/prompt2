@@ -8,10 +8,10 @@ import (
 )
 
 type CreateCoursePhaseParticipation struct {
-	CourseParticipationID uuid.UUID         `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID         `json:"course_phase_id"`
-	PassStatus            db.NullPassStatus `json:"pass_status"`
-	MetaData              meta.MetaData     `json:"meta_data"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	PassStatus            *db.PassStatus `json:"pass_status"`
+	MetaData              meta.MetaData  `json:"meta_data"`
 }
 
 func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateCoursePhaseParticipationParams, error) {
@@ -24,7 +24,7 @@ func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateCoursePhasePartic
 	return db.CreateCoursePhaseParticipationParams{
 		CourseParticipationID: c.CourseParticipationID,
 		CoursePhaseID:         c.CoursePhaseID,
-		PassStatus:            c.PassStatus,
+		PassStatus:            GetPassStatusDBModel(c.PassStatus),
 		MetaData:              metaDataBytes,
 	}, nil
 

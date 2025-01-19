@@ -74,6 +74,9 @@ func CreateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 	if err != nil {
 		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
 	}
+	if createdParticipation.ID == uuid.Nil {
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create course phase participation due to mismatch in CourseParticipationID and CoursePhaseID")
+	}
 
 	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(createdParticipation)
 }

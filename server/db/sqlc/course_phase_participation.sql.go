@@ -13,8 +13,18 @@ import (
 )
 
 const createCoursePhaseParticipation = `-- name: CreateCoursePhaseParticipation :one
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, pass_status, meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase_participation
+    (id, course_participation_id, course_phase_id, pass_status, meta_data)
+SELECT
+    $1 AS id,
+    $2 AS course_participation_id,
+    $3 AS course_phase_id,
+    $4 AS pass_status,
+    $5 AS meta_data
+FROM course_participation cp
+JOIN course_phase cph ON cp.course_id = cph.course_id
+WHERE cp.id = $2
+  AND cph.id = $3
 RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified
 `
 
@@ -26,6 +36,8 @@ type CreateCoursePhaseParticipationParams struct {
 	MetaData              []byte         `json:"meta_data"`
 }
 
+// - We need to ensure that the course_participation_id and course_phase_id
+// - belong to the same course.
 func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg CreateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
 	row := q.db.QueryRow(ctx, createCoursePhaseParticipation,
 		arg.ID,

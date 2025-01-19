@@ -489,22 +489,9 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	if assessment.PassStatus != nil || assessment.MetaData.Length() > 0 {
-		var passStatus db.NullPassStatus
-		if assessment.PassStatus != nil {
-			passStatus = db.NullPassStatus{
-				Valid:      true,
-				PassStatus: *assessment.PassStatus,
-			}
-		} else {
-			passStatus = db.NullPassStatus{
-				Valid:      false,
-				PassStatus: "",
-			}
-		}
-
 		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
 			ID:         coursePhaseParticipationID,
-			PassStatus: passStatus,
+			PassStatus: assessment.PassStatus,
 			MetaData:   assessment.MetaData,
 		})
 		if err != nil {
