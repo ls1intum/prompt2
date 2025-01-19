@@ -12,8 +12,8 @@ const { ModuleFederationPlugin } = webpack.container
 // ########################################
 // ### Component specific configuration ###
 // ########################################
-const COMPONENT_NAME = 'interview_component'
-const COMPONENT_DEV_PORT = 3002
+const COMPONENT_NAME = 'matching_component'
+const COMPONENT_DEV_PORT = 3003
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -76,7 +76,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: COMPONENT_NAME,
+        name: COMPONENT_NAME, // TODO: rename this to your component name
         filename: 'remoteEntry.js',
         exposes: {
           './routes': './routes',
@@ -109,9 +109,6 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           minifyCSS: true,
           minifyURLs: true,
         },
-      }),
-      new webpack.DefinePlugin({
-        'process.env.REACT_APP_CORE_HOST': JSON.stringify(getVariable('REACT_APP_CORE_HOST')),
       }),
     ].filter(Boolean),
     cache: {

@@ -28,6 +28,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   // Adjust this to match your deployment URL
   const templateURL = IS_DEV ? `http://localhost:3001` : `/template`
   const interviewURL = IS_DEV ? `http://localhost:3002` : `/interview`
+  const matchingURL = IS_DEV ? `http://localhost:3003` : `/matching`
 
   return {
     target: 'web',
@@ -87,6 +88,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         remotes: {
           template_component: `template_component@${templateURL}/remoteEntry.js`,
           interview_component: `interview_component@${interviewURL}/remoteEntry.js`,
+          matching_component: `matching_component@${matchingURL}/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

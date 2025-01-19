@@ -297,72 +297,73 @@ SELECT
          JOIN course_phase_type cpt
            ON cpt.id = dpm.course_phase_type_id
           AND cpt.name = 'Application'
-         CROSS JOIN LATERAL (
-             SELECT
-                 jsonb_object_agg(x.key, x.value) AS obj
-             FROM
-             (
-                  ----------------------------------------------------------
-                    -- (A) Always export applicationScore
-                  ----------------------------------------------------------
-                    SELECT 
-                        'applicationScore' AS key,
-                        to_jsonb(aasm.score) AS value
-                    FROM application_assessment aasm
-                    WHERE aasm.course_phase_participation_id = pcpp.id
-                      AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
-                    
-                    UNION ALL
-
-                    ----------------------------------------------------------
-                    -- (B) For each text question with accessibleForOtherPhases=true,
-                    --     store the answer under the question's accessKey.
-                    ----------------------------------------------------------
-                    SELECT
-                        qt.access_key AS key,
-                        to_jsonb(aat.answer) AS value
-                    FROM application_question_text qt
-                    JOIN application_answer_text aat
-                      ON aat.application_question_id = qt.id
-                     AND aat.course_phase_participation_id = pcpp.id
-                    WHERE qt.course_phase_id = dpm.phase_id
-                      AND qt.accessible_for_other_phases = true
-                      AND qt.access_key IS NOT NULL
-                      AND qt.access_key != ''
-
-                    UNION ALL
-                    
-                    ----------------------------------------------------------
-                    -- (C) For each multi-select question with accessibleForOtherPhases=true,
-                    --     store the answer under the question's accessKey.
-                    ----------------------------------------------------------
-                    SELECT
-                        qm.access_key AS key,
-                        to_jsonb(aams.answer) AS value
-                    FROM application_question_multi_select qm
-                    JOIN application_answer_multi_select aams
-                      ON aams.application_question_id = qm.id
-                     AND aams.course_phase_participation_id = pcpp.id
-                    WHERE qm.course_phase_id = dpm.phase_id
-                      AND qm.accessible_for_other_phases = true
-                      AND qm.access_key IS NOT NULL
-                      AND qm.access_key != ''
-                
-                  UNION ALL
-
-                    ----------------------------------------------------------
-                    -- (D) Get all additional scores
-                    ----------------------------------------------------------
-                    SELECT
-                      question_config->>'key'  AS key,
-                      to_jsonb(
-                          pcpp.meta_data -> (question_config->>'key')
-                      )                       AS value
-                    FROM jsonb_array_elements(
-                            dpm.course_phase_meta_data->'additionalScores'
-                          ) question_config
-                
-             ) x
+          CROSS JOIN LATERAL (
+             SELECT jsonb_build_object(
+                     ----------------------------------------------------------
+                     -- (A) Application Score
+                     ----------------------------------------------------------
+                     'applicationScore', (
+                         SELECT to_jsonb(aasm.score)
+                         FROM application_assessment aasm
+                         WHERE aasm.course_phase_participation_id = pcpp.id
+                           AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
+                     ),
+                     ----------------------------------------------------------
+                     -- (B) Additional Scores
+                     ----------------------------------------------------------
+                     'additionalScores', (
+                         SELECT jsonb_agg(
+                             jsonb_build_object(
+                               'key', question_config->>'key',
+                               'answer', pcpp.meta_data -> (question_config->>'key')
+                             )
+                         )
+                         FROM jsonb_array_elements(
+                                dpm.course_phase_meta_data->'additionalScores'
+                              ) question_config
+                     ),
+                     ----------------------------------------------------------
+                     -- (C) Aggregate Answers from text and multi-select questions
+                     ----------------------------------------------------------
+                     'applicationAnswers', (
+                         SELECT jsonb_agg(answer_obj)
+                         FROM (
+                            -- Text answers
+                            SELECT jsonb_build_object(
+                                'key', qt.access_key,
+                                'answer', to_jsonb(aat.answer),
+                                'order_num', qt.order_num, 
+                                'type', 'text'
+                            ) AS answer_obj
+                            FROM application_question_text qt
+                            JOIN application_answer_text aat
+                              ON aat.application_question_id = qt.id
+                             AND aat.course_phase_participation_id = pcpp.id
+                            WHERE qt.course_phase_id = dpm.phase_id
+                              AND qt.accessible_for_other_phases = true
+                              AND qt.access_key IS NOT NULL
+                              AND qt.access_key <> ''
+                            
+                            UNION ALL
+                            
+                            -- Multi-select answers
+                            SELECT jsonb_build_object(
+                                'key', qm.access_key,
+                                'answer', to_jsonb(aams.answer),
+                                'order_num', qm.order_num, 
+                                'type', 'multiselect'
+                            ) AS answer_obj
+                            FROM application_question_multi_select qm
+                            JOIN application_answer_multi_select aams
+                              ON aams.application_question_id = qm.id
+                             AND aams.course_phase_participation_id = pcpp.id
+                            WHERE qm.course_phase_id = dpm.phase_id
+                              AND qm.accessible_for_other_phases = true
+                              AND qm.access_key IS NOT NULL
+                              AND qm.access_key <> ''
+                         ) answer_union
+                 )
+             ) AS obj
          ) appdata
        ),
        '{}'

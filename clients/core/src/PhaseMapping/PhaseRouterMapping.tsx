@@ -4,11 +4,13 @@ import { TemplateRoutes } from './ExternalRoutes/TemplateRoutes'
 import { ApplicationRoutes } from './ExternalRoutes/ApplicationRoutes'
 import { InterviewRoutes } from './ExternalRoutes/InterviewRoutes'
 import { Suspense } from 'react'
+import { MatchingRoutes } from './ExternalRoutes/MatchingRoutes'
 
 const PhaseRouter: { [key: string]: React.FC } = {
   template_component: TemplateRoutes,
   Application: ApplicationRoutes,
   Interview: InterviewRoutes,
+  Matching: MatchingRoutes,
 }
 
 export const PhaseRouterMapping = (): JSX.Element => {

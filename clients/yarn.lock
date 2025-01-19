@@ -10295,6 +10295,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"matching_component@workspace:matching_component":
+  version: 0.0.0-use.local
+  resolution: "matching_component@workspace:matching_component"
+  dependencies:
+    webpack: "npm:^5.91.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
+
 "mdn-data@npm:2.0.28":
   version: 2.0.28
   resolution: "mdn-data@npm:2.0.28"
