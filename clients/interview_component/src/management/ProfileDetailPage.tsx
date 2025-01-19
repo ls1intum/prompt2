@@ -4,12 +4,17 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, FileUserIcon, MessageSquare } from 'lucide-react'
 import { StudentCard } from './components/StudentCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ExportedApplicationAnswer } from '@/interfaces/export_application_answer'
+import { ExportedApplicationAnswerTable } from '@/components/ExportedApplicationAnswerTable'
 
 export const ProfileDetailPage = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)
   const navigate = useNavigate()
+
+  const applicationAnswers =
+    (participation?.prev_meta_data?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
 
   return (
     <div className=''>
@@ -43,20 +48,14 @@ export const ProfileDetailPage = (): JSX.Element => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <dl className='space-y-2'>
+                {applicationAnswers.length === 0 ? (
                   <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Status</dt>
-                    <dd className='text-sm font-semibold'>Submitted</dd>
+                    No Application Exported - Please check your export Settings in Application
+                    Configuration
                   </div>
-                  <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Date Submitted</dt>
-                    <dd className='text-sm font-semibold'>June 15, 2023</dd>
-                  </div>
-                  <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Course</dt>
-                    <dd className='text-sm font-semibold'>Web Development Bootcamp</dd>
-                  </div>
-                </dl>
+                ) : (
+                  <ExportedApplicationAnswerTable applicationAnswers={applicationAnswers} />
+                )}
               </CardContent>
             </Card>
             <Card>
