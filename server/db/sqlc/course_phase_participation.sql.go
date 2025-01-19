@@ -497,14 +497,14 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 	return i, err
 }
 
-const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :exec
+const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
 WHERE id = $1
 AND course_phase_id = $4
-RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified
+RETURNING id
 `
 
 type UpdateCoursePhaseParticipationParams struct {
@@ -514,14 +514,16 @@ type UpdateCoursePhaseParticipationParams struct {
 	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
 }
 
-func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation,
+func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, updateCoursePhaseParticipation,
 		arg.ID,
 		arg.PassStatus,
 		arg.MetaData,
 		arg.CoursePhaseID,
 	)
-	return err
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many

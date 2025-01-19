@@ -90,7 +90,7 @@ func UpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 		return errors.New("failed to create DB model from DTO")
 	}
 
-	err = queries.UpdateCoursePhaseParticipation(ctx, participation)
+	_, err = queries.UpdateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
 		log.Error(err)
 		return errors.New("failed to update course phase participation")
