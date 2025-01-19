@@ -12,9 +12,11 @@ import (
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
 	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipationsForCoursePhase)
-	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), createCoursePhaseParticipation)
+	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhaseParticipation)
 	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipation)
-	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), updateCoursePhaseParticipation)
+	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseParticipation)
+	// allow to modify multiple at once
+	courseParticipation.PUT("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateBatchCoursePhaseParticipation)
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {
@@ -120,9 +122,10 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 	} else {
 		// Case 2: update an existing course phase participation
 		err = UpdateCoursePhaseParticipation(c, nil, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-			ID:         id,
-			PassStatus: updatedCourseParticipationRequest.PassStatus,
-			MetaData:   updatedCourseParticipationRequest.MetaData,
+			ID:            id,
+			PassStatus:    updatedCourseParticipationRequest.PassStatus,
+			MetaData:      updatedCourseParticipationRequest.MetaData,
+			CoursePhaseID: coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
 		})
 		if err != nil {
 			handleError(c, http.StatusInternalServerError, err)
@@ -130,6 +133,57 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 		}
 		c.IndentedJSON(http.StatusOK, id)
 	}
+}
+
+func updateBatchCoursePhaseParticipation(c *gin.Context) {
+	coursePhaseId, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// we expect an array of updates
+	var updatedCourseParticipationRequest []coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest
+	if err := c.BindJSON(&updatedCourseParticipationRequest); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// we filter in the two different kinds
+	var createCourseParticipationDTOs []coursePhaseParticipationDTO.CreateCoursePhaseParticipation
+	var updateCourseParticipationDTOs []coursePhaseParticipationDTO.UpdateCoursePhaseParticipation
+	for _, update := range updatedCourseParticipationRequest {
+		if update.ID == uuid.Nil {
+			newParticipation := coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
+				CourseParticipationID: update.CourseParticipationID,
+				CoursePhaseID:         coursePhaseId,
+				PassStatus:            update.PassStatus,
+				MetaData:              update.MetaData,
+			}
+
+			// Validate for complete new participations
+			if err := Validate(newParticipation); err != nil {
+				handleError(c, http.StatusBadRequest, err)
+				return
+			}
+			createCourseParticipationDTOs = append(createCourseParticipationDTOs, newParticipation)
+		} else {
+			updateCourseParticipationDTOs = append(updateCourseParticipationDTOs, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
+				ID:            update.ID,
+				PassStatus:    update.PassStatus,
+				MetaData:      update.MetaData,
+				CoursePhaseID: coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
+			})
+		}
+	}
+
+	ids, err := UpdateBatchCoursePhaseParticipation(c, createCourseParticipationDTOs, updateCourseParticipationDTOs)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, ids)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

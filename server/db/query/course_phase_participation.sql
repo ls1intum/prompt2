@@ -50,7 +50,9 @@ UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
-WHERE id = $1;
+WHERE id = $1
+AND course_phase_id = $4
+RETURNING *;
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 SELECT * FROM course_phase_participation

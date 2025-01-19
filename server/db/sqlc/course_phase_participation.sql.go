@@ -503,16 +503,24 @@ SET
     pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
 WHERE id = $1
+AND course_phase_id = $4
+RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified
 `
 
 type UpdateCoursePhaseParticipationParams struct {
-	ID         uuid.UUID      `json:"id"`
-	PassStatus NullPassStatus `json:"pass_status"`
-	MetaData   []byte         `json:"meta_data"`
+	ID            uuid.UUID      `json:"id"`
+	PassStatus    NullPassStatus `json:"pass_status"`
+	MetaData      []byte         `json:"meta_data"`
+	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
 }
 
 func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation, arg.ID, arg.PassStatus, arg.MetaData)
+	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation,
+		arg.ID,
+		arg.PassStatus,
+		arg.MetaData,
+		arg.CoursePhaseID,
+	)
 	return err
 }
 
