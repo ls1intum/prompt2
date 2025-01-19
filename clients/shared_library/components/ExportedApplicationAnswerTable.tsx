@@ -38,7 +38,7 @@ export const ExportedApplicationAnswerTable = ({
             return (
               <TableRow key={answer.key} className={index % 2 === 0 ? 'bg-muted/50' : ''}>
                 <TableCell>
-                  {answer.type === 'Multi-Select' ? (
+                  {answer.type === 'multiselect' ? (
                     <CheckSquare className='h-4 w-4 text-muted-foreground' />
                   ) : (
                     <AlignLeft className='h-4 w-4 text-muted-foreground' />

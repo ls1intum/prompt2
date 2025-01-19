@@ -1,6 +1,6 @@
 export interface ExportedApplicationAnswer {
   key: string
   answer: string
-  type: 'Text' | 'Multi-Select'
+  type: 'text' | 'multiselect'
   order_num: number
 }
