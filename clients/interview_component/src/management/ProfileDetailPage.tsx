@@ -40,7 +40,7 @@ export const ProfileDetailPage = (): JSX.Element => {
           <div className='pt-6 mb-8'>
             <StudentCard participation={participation} />
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
             <Card>
               <CardHeader>
                 <CardTitle className='flex items-center'>
