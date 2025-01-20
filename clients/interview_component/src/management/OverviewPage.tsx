@@ -10,6 +10,7 @@ import { ClipboardList, Clock } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { SortDropdownMenu } from './components/SortDropdownMenu'
 import { PassStatus } from '@/interfaces/course_phase_participation'
+import { InterviewQuestionsModal } from './components/InterviewQuestionsModal'
 
 export const OverviewPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -52,7 +53,7 @@ export const OverviewPage = (): JSX.Element => {
       <div className='flex justify-between items-center mt-4 mb-6'>
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
-
+          <InterviewQuestionsModal />
           <Button variant='outline'>
             <Clock className='h-4 w-4' />
             Set Interview Times
