@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useState } from 'react'
 import {
   Dialog,
@@ -11,7 +9,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, ChevronUp, ChevronDown, ClipboardList } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { ClipboardList, Trash2, ChevronUp, ChevronDown, Plus } from 'lucide-react'
 import type { InterviewQuestion } from 'src/management/interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { useUpdateMetaData } from '../hooks/useUpdateMetaData'
@@ -33,16 +33,14 @@ export const InterviewQuestionsModal = () => {
 
   const addQuestion = () => {
     if (newQuestion.trim()) {
-      setInterviewQuestions((prev) => {
-        return [
-          ...prev,
-          {
-            id: Date.now(),
-            question: newQuestion.trim(),
-            order_num: interviewQuestions.length,
-          },
-        ]
-      })
+      setInterviewQuestions((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          question: newQuestion.trim(),
+          order_num: interviewQuestions.length,
+        },
+      ])
       setNewQuestion('')
     }
   }
@@ -84,12 +82,12 @@ export const InterviewQuestionsModal = () => {
 
   return (
     <>
-      <Button variant='outline' onClick={() => setIsOpen(true)}>
+      <Button variant='outline' onClick={() => setIsOpen(true)} className='gap-2'>
         <ClipboardList className='h-4 w-4' />
         Set Interview Questions
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className='sm:max-w-[700px]'>
+        <DialogContent className='max-w-2xl'>
           <DialogHeader>
             <DialogTitle>Manage Interview Questions</DialogTitle>
             <DialogDescription>
@@ -98,65 +96,79 @@ export const InterviewQuestionsModal = () => {
               question unaccessible.
             </DialogDescription>
           </DialogHeader>
-          <ul className='space-y-2'>
-            {interviewQuestions.map((question, index) => (
-              <li
-                key={question.id}
-                className='flex items-center space-x-2 bg-secondary p-2 rounded-md'
-              >
-                <div className='flex flex-col'>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => moveQuestion(index, 'up')}
-                    disabled={index === 0}
-                    aria-label='Move question up'
-                  >
-                    <ChevronUp className='h-4 w-4' />
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => moveQuestion(index, 'down')}
-                    disabled={index === interviewQuestions.length - 1}
-                    aria-label='Move question down'
-                  >
-                    <ChevronDown className='h-4 w-4' />
-                  </Button>
-                </div>
-                <span className='flex-grow'>{question.question}</span>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  onClick={() => deleteQuestion(question.id)}
-                  aria-label='Delete question'
+          <Separator className='my-4' />
+          <ScrollArea className='h-[300px] pr-4'>
+            <ul className='space-y-4'>
+              {interviewQuestions.map((question, index) => (
+                <li
+                  key={question.id}
+                  className='flex items-center space-x-2 bg-secondary p-3 rounded-lg shadow-sm'
                 >
-                  <X className='h-4 w-4' />
-                </Button>
-              </li>
-            ))}
-          </ul>
-
-          <div className='flex flex-row'>
-            <Input
-              id='new-question'
-              value={newQuestion}
-              placeholder='Enter new question'
-              onChange={(e) => setNewQuestion(e.target.value)}
-            />
-            <Button onClick={addQuestion} className='ml-2'>
-              Add
-            </Button>
-          </div>
-          <DialogFooter>
-            <div className='flex flex-row justify-between'>
-              <Button variant='outline' onClick={() => setIsOpen(false)}>
-                Revert
-              </Button>
-              <Button className='ml-2' onClick={saveQuestions}>
-                Save
+                  <div className='flex flex-col'>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => moveQuestion(index, 'up')}
+                      disabled={index === 0}
+                      aria-label='Move question up'
+                      className='h-8 w-8'
+                    >
+                      <ChevronUp className='h-4 w-4' />
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => moveQuestion(index, 'down')}
+                      disabled={index === interviewQuestions.length - 1}
+                      aria-label='Move question down'
+                      className='h-8 w-8'
+                    >
+                      <ChevronDown className='h-4 w-4' />
+                    </Button>
+                  </div>
+                  <span className='flex-grow text-sm'>{question.question}</span>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={() => deleteQuestion(question.id)}
+                    aria-label='Delete question'
+                    className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                  >
+                    <Trash2 className='h-4 w-4' />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+          <Separator className='my-4' />
+          <div className='flex flex-col space-y-2'>
+            <div className='flex items-center space-x-2'>
+              <Input
+                id='new-question'
+                value={newQuestion}
+                placeholder='Enter new question'
+                onChange={(e) => setNewQuestion(e.target.value)}
+                className='flex-grow'
+                maxLength={200}
+              />
+              <Button
+                onClick={addQuestion}
+                disabled={!newQuestion.trim()}
+                aria-label='Add question'
+              >
+                <Plus className='h-4 w-4 mr-2' />
+                Add
               </Button>
             </div>
+            <p className='text-xs text-muted-foreground text-right'>
+              {newQuestion.length}/200 characters
+            </p>
+          </div>
+          <DialogFooter className='sm:justify-between'>
+            <Button variant='outline' onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveQuestions}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
