@@ -13,8 +13,18 @@ import (
 )
 
 const createCoursePhaseParticipation = `-- name: CreateCoursePhaseParticipation :one
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, pass_status, meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase_participation
+    (id, course_participation_id, course_phase_id, pass_status, meta_data)
+SELECT
+    $1 AS id,
+    $2 AS course_participation_id,
+    $3 AS course_phase_id,
+    $4 AS pass_status,
+    $5 AS meta_data
+FROM course_participation cp
+JOIN course_phase cph ON cp.course_id = cph.course_id
+WHERE cp.id = $2
+  AND cph.id = $3
 RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified
 `
 
@@ -26,6 +36,8 @@ type CreateCoursePhaseParticipationParams struct {
 	MetaData              []byte         `json:"meta_data"`
 }
 
+// - We need to ensure that the course_participation_id and course_phase_id
+// - belong to the same course.
 func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg CreateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
 	row := q.db.QueryRow(ctx, createCoursePhaseParticipation,
 		arg.ID,
@@ -501,23 +513,33 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 	return i, err
 }
 
-const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :exec
+const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
 WHERE id = $1
+AND course_phase_id = $4
+RETURNING id
 `
 
 type UpdateCoursePhaseParticipationParams struct {
-	ID         uuid.UUID      `json:"id"`
-	PassStatus NullPassStatus `json:"pass_status"`
-	MetaData   []byte         `json:"meta_data"`
+	ID            uuid.UUID      `json:"id"`
+	PassStatus    NullPassStatus `json:"pass_status"`
+	MetaData      []byte         `json:"meta_data"`
+	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
 }
 
-func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhaseParticipation, arg.ID, arg.PassStatus, arg.MetaData)
-	return err
+func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, updateCoursePhaseParticipation,
+		arg.ID,
+		arg.PassStatus,
+		arg.MetaData,
+		arg.CoursePhaseID,
+	)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many

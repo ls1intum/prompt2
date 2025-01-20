@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -74,6 +75,9 @@ func CreateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 	if err != nil {
 		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
 	}
+	if createdParticipation.ID == uuid.Nil {
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create course phase participation due to mismatch in CourseParticipationID and CoursePhaseID")
+	}
 
 	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(createdParticipation)
 }
@@ -86,13 +90,51 @@ func UpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 		return errors.New("failed to create DB model from DTO")
 	}
 
-	err = queries.UpdateCoursePhaseParticipation(ctx, participation)
+	_, err = queries.UpdateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
 		log.Error(err)
 		return errors.New("failed to update course phase participation")
 	}
 
 	return nil
+}
+
+func UpdateBatchCoursePhaseParticipation(ctx context.Context, newCoursePhaseParticipations []coursePhaseParticipationDTO.CreateCoursePhaseParticipation, updatedCoursePhaseParticipation []coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) ([]uuid.UUID, error) {
+	tx, err := CoursePhaseParticipationServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+	qtx := CoursePhaseParticipationServiceSingleton.queries.WithTx(tx)
+
+	updatedIDs := make([]uuid.UUID, 0, len(updatedCoursePhaseParticipation)+len(newCoursePhaseParticipations))
+
+	// Replace for loop by DB batch operation in near future
+	for _, participation := range updatedCoursePhaseParticipation {
+		err := UpdateCoursePhaseParticipation(ctx, qtx, participation)
+		if err != nil {
+			log.Error(err)
+			return nil, errors.New("failed to update course phase participation")
+		}
+		updatedIDs = append(updatedIDs, participation.ID)
+	}
+
+	for _, participation := range newCoursePhaseParticipations {
+		newParticipation, err := CreateCoursePhaseParticipation(ctx, qtx, participation)
+		if err != nil {
+			log.Error(err)
+			return nil, errors.New("failed to create course phase participation")
+		}
+		updatedIDs = append(updatedIDs, newParticipation.ID)
+	}
+
+	// commit if all updates were successful
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return updatedIDs, nil
 }
 
 func CreateIfNotExistingPhaseParticipation(ctx context.Context, transactionQueries *db.Queries, CourseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {

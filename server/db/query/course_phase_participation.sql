@@ -28,17 +28,31 @@ WHERE
 SELECT * FROM course_phase_participation
 WHERE course_participation_id = $1;
 
+--- We need to ensure that the course_participation_id and course_phase_id 
+--- belong to the same course.
 -- name: CreateCoursePhaseParticipation :one
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, pass_status, meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase_participation
+    (id, course_participation_id, course_phase_id, pass_status, meta_data)
+SELECT
+    $1 AS id,
+    $2 AS course_participation_id,
+    $3 AS course_phase_id,
+    $4 AS pass_status,
+    $5 AS meta_data
+FROM course_participation cp
+JOIN course_phase cph ON cp.course_id = cph.course_id
+WHERE cp.id = $2
+  AND cph.id = $3
 RETURNING *;
 
--- name: UpdateCoursePhaseParticipation :exec
+-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
     meta_data = meta_data || $3
-WHERE id = $1;
+WHERE id = $1
+AND course_phase_id = $4
+RETURNING id; -- important to trigger a no rows in result set error if ids mismatch
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 SELECT * FROM course_phase_participation

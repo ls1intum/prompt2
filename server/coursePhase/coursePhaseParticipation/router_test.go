@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -77,10 +78,11 @@ func (suite *RouterTestSuite) TestCreateCoursePhaseParticipation() {
 	var metaData meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &metaData)
 	assert.NoError(suite.T(), err)
+	fail := db.PassStatusFailed
 
 	newParticipation := coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
 		CourseParticipationID: uuid.MustParse("ca41772a-e06d-40eb-9c4b-ab44e06a890c"),
-		PassStatus:            db.NullPassStatus{PassStatus: "failed", Valid: true},
+		PassStatus:            &fail,
 		MetaData:              metaData,
 	}
 	body, _ := json.Marshal(newParticipation)
@@ -103,11 +105,12 @@ func (suite *RouterTestSuite) TestUpdateCoursePhaseParticipation() {
 	var metaData meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &metaData)
 	assert.NoError(suite.T(), err)
+	pass := db.PassStatusPassed
 
-	updatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
+	updatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest{
 		ID:         uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4"),
 		MetaData:   metaData,
-		PassStatus: db.NullPassStatus{PassStatus: "passed", Valid: true},
+		PassStatus: &pass,
 	}
 	body, _ := json.Marshal(updatedParticipation)
 
@@ -137,6 +140,50 @@ func (suite *RouterTestSuite) TestUpdateCoursePhaseParticipation() {
 	assert.Equal(suite.T(), updatedParticipation.ID, updated.ID, "Participation ID should match")
 	assert.Equal(suite.T(), "passed", updated.PassStatus, "PassStatus should match")
 	assert.Equal(suite.T(), updatedParticipation.MetaData["other-value"], updated.MetaData["other-value"], "New Meta data should match")
+}
+
+func (suite *RouterTestSuite) TestUpdateNewCoursePhaseParticipation() {
+	jsonData := `{"other-value": "some skills"}`
+	var metaData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &metaData)
+	assert.NoError(suite.T(), err)
+	pass := db.PassStatusPassed
+
+	toBecreatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest{
+		CourseParticipationID: uuid.MustParse("f6744410-cfe2-456d-96fa-e857cf989569"),
+		MetaData:              metaData,
+		PassStatus:            &pass,
+	}
+	body, _ := json.Marshal(toBecreatedParticipation)
+
+	// Send the update request
+	req := httptest.NewRequest(http.MethodPut, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations/00000000-0000-0000-0000-000000000000", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(w, req)
+
+	// Assert the update request was successful
+	assert.Equal(suite.T(), http.StatusCreated, w.Code)
+
+	newId := strings.ReplaceAll(w.Body.String(), "\"", "")
+
+	// Perform a GET request to verify the changes
+	getReq := httptest.NewRequest(http.MethodGet, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations/"+newId, nil)
+	getW := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(getW, getReq)
+
+	// Assert the GET request was successful
+	assert.Equal(suite.T(), http.StatusOK, getW.Code)
+
+	// Verify the returned data matches the expected updated data
+	var createdParticipation coursePhaseParticipationDTO.GetCoursePhaseParticipation
+	err = json.Unmarshal(getW.Body.Bytes(), &createdParticipation)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), createdParticipation.ID, uuid.MustParse(newId), "Participation ID should match")
+	assert.Equal(suite.T(), "passed", createdParticipation.PassStatus, "PassStatus should match")
+	assert.Equal(suite.T(), toBecreatedParticipation.MetaData["other-value"], createdParticipation.MetaData["other-value"], "New Meta data should match")
 }
 
 func TestRouterTestSuite(t *testing.T) {
