@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,15 @@ export const InterviewQuestionsModal = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [newQuestion, setNewQuestion] = useState('')
   const [interviewQuestions, setInterviewQuestions] = useState([] as InterviewQuestion[])
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView(false)
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [interviewQuestions])
 
   const { mutate } = useUpdateCoursePhaseMetaData()
 
@@ -95,51 +104,53 @@ export const InterviewQuestionsModal = () => {
               question unaccessible.
             </DialogDescription>
           </DialogHeader>
-          <Separator className='my-4' />
+          <Separator />
           <ScrollArea className='h-[300px] pr-4'>
-            <ul className='space-y-4'>
-              {interviewQuestions.map((question, index) => (
-                <li
-                  key={question.id}
-                  className='flex items-center space-x-2 bg-secondary p-3 rounded-lg shadow-sm'
-                >
-                  <div className='flex flex-col'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      onClick={() => moveQuestion(index, 'up')}
-                      disabled={index === 0}
-                      aria-label='Move question up'
-                      className='h-8 w-8'
-                    >
-                      <ChevronUp className='h-4 w-4' />
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      onClick={() => moveQuestion(index, 'down')}
-                      disabled={index === interviewQuestions.length - 1}
-                      aria-label='Move question down'
-                      className='h-8 w-8'
-                    >
-                      <ChevronDown className='h-4 w-4' />
-                    </Button>
-                  </div>
-                  <span className='flex-grow text-sm'>{question.question}</span>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => deleteQuestion(question.id)}
-                    aria-label='Delete question'
-                    className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            <div ref={scrollRef}>
+              <ul className='space-y-4'>
+                {interviewQuestions.map((question, index) => (
+                  <li
+                    key={question.id}
+                    className='flex items-center space-x-1 bg-secondary p-2 rounded-lg shadow-sm'
                   >
-                    <Trash2 className='h-4 w-4' />
-                  </Button>
-                </li>
-              ))}
-            </ul>
+                    <div className='flex flex-col'>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        onClick={() => moveQuestion(index, 'up')}
+                        disabled={index === 0}
+                        aria-label='Move question up'
+                        className='h-6 w-6'
+                      >
+                        <ChevronUp className='h-4 w-4' />
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        onClick={() => moveQuestion(index, 'down')}
+                        disabled={index === interviewQuestions.length - 1}
+                        aria-label='Move question down'
+                        className='h-6 w-6'
+                      >
+                        <ChevronDown className='h-4 w-4' />
+                      </Button>
+                    </div>
+                    <span className='flex-grow text-sm'>{question.question}</span>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => deleteQuestion(question.id)}
+                      aria-label='Delete question'
+                      className='h-7 w-7 mr-4 text-destructive hover:text-destructive hover:bg-destructive/10'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </ScrollArea>
-          <Separator className='my-4' />
+          <Separator />
           <div className='flex flex-col space-y-2'>
             <div className='flex items-center space-x-2'>
               <Input
