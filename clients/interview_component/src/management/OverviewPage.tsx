@@ -9,6 +9,7 @@ import { ClipboardList, Clock } from 'lucide-react'
 
 import { useEffect, useMemo, useState } from 'react'
 import { SortDropdownMenu } from './components/SortDropdownMenu'
+import { PassStatus } from '@/interfaces/course_phase_participation'
 
 export const OverviewPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -28,7 +29,11 @@ export const OverviewPage = (): JSX.Element => {
         case 'Last Name':
           return a.student.last_name.localeCompare(b.student.last_name)
         case 'Acceptance Status':
-          return a.pass_status.localeCompare(b.pass_status)
+          const statusOrder = [PassStatus.PASSED, PassStatus.NOT_ASSESSED, PassStatus.FAILED]
+
+          return (
+            (statusOrder.indexOf(a.pass_status) || 0) - (statusOrder.indexOf(b.pass_status) || 0)
+          )
         // case 'Interview Date':
         //   return new Date(a.interviewDate).getTime() - new Date(b.interviewDate).getTime()
         default:

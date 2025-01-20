@@ -6,6 +6,9 @@ import { getCoursePhaseParticipations } from './network/queries/getCoursePhasePa
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
+import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
+import { getCoursePhase } from './network/queries/getCoursePhase'
+import { useCoursePhaseStore } from './zustand/useCoursePhaseStore'
 
 interface InterviewDataShellProps {
   children: React.ReactNode
@@ -14,21 +17,46 @@ interface InterviewDataShellProps {
 export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { setParticipations } = useParticipationStore()
+  const { setCoursePhase } = useCoursePhaseStore()
   const {
     data: coursePhaseParticipations,
-    isPending,
-    isError,
-    refetch,
+    isPending: isCoursePhaseParticipationsPending,
+    isError: isParticipationsError,
+    refetch: refetchCoursePhaseParticipations,
   } = useQuery<CoursePhaseParticipationWithStudent[]>({
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
+
+  // TODO: replace this with the course store once we have shared library
+  const {
+    data: coursePhase,
+    isPending: isCoursePhasePending,
+    isError: isCoursePhaseError,
+    refetch: refetchCoursePhase,
+  } = useQuery<CoursePhaseWithMetaData>({
+    queryKey: ['course_phase', phaseId],
+    queryFn: () => getCoursePhase(phaseId ?? ''),
+  })
+
+  const isError = isParticipationsError || isCoursePhaseError
+  const isPending = isCoursePhaseParticipationsPending || isCoursePhasePending
+  const refetch = () => {
+    refetchCoursePhaseParticipations()
+    refetchCoursePhase()
+  }
 
   useEffect(() => {
     if (coursePhaseParticipations) {
       setParticipations(coursePhaseParticipations)
     }
   }, [coursePhaseParticipations, setParticipations])
+
+  useEffect(() => {
+    if (coursePhase) {
+      setCoursePhase(coursePhase)
+    }
+  }, [coursePhase, setCoursePhase])
 
   return (
     <>
