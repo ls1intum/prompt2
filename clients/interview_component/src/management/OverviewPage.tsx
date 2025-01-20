@@ -5,7 +5,7 @@ import { useParticipationStore } from './zustand/useParticipationStore'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useScreenSize } from '@/hooks/useScreenSize'
 import { Button } from '@/components/ui/button'
-import { ClipboardList, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 
 import { useEffect, useMemo, useState } from 'react'
 import { SortDropdownMenu } from './components/SortDropdownMenu'

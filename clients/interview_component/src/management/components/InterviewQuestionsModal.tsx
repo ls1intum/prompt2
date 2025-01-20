@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ClipboardList, Trash2, ChevronUp, ChevronDown, Plus } from 'lucide-react'
 import type { InterviewQuestion } from 'src/management/interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
-import { useUpdateMetaData } from '../hooks/useUpdateMetaData'
+import { useUpdateCoursePhaseMetaData } from '../hooks/useUpdateCoursePhaseMetaData'
 
 export const InterviewQuestionsModal = () => {
   const { coursePhase } = useCoursePhaseStore()
@@ -22,7 +22,7 @@ export const InterviewQuestionsModal = () => {
   const [newQuestion, setNewQuestion] = useState('')
   const [interviewQuestions, setInterviewQuestions] = useState([] as InterviewQuestion[])
 
-  const { mutate } = useUpdateMetaData()
+  const { mutate } = useUpdateCoursePhaseMetaData()
 
   useEffect(() => {
     if (coursePhase && coursePhase.meta_data?.interview_questions) {
@@ -72,7 +72,6 @@ export const InterviewQuestionsModal = () => {
       mutate({
         id: coursePhase.id,
         meta_data: {
-          ...coursePhase.meta_data,
           interview_questions: interviewQuestions,
         },
       })

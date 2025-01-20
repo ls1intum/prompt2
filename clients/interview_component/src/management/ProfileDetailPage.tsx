@@ -1,11 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useParticipationStore } from './zustand/useParticipationStore'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, FileUserIcon, MessageSquare } from 'lucide-react'
+import { ChevronLeft, FileUserIcon } from 'lucide-react'
 import { StudentCard } from './components/StudentCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExportedApplicationAnswer } from '@/interfaces/export_application_answer'
 import { ExportedApplicationAnswerTable } from '@/components/ExportedApplicationAnswerTable'
+import { InterviewCard } from './components/InterviewCard'
 
 export const ProfileDetailPage = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -58,30 +59,7 @@ export const ProfileDetailPage = (): JSX.Element => {
                 )}
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className='flex items-center'>
-                  <MessageSquare className='h-5 w-5 mr-2' />
-                  Interview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className='space-y-2'>
-                  <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Status</dt>
-                    <dd className='text-sm font-semibold'>Scheduled</dd>
-                  </div>
-                  <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Date</dt>
-                    <dd className='text-sm font-semibold'>June 22, 2023</dd>
-                  </div>
-                  <div>
-                    <dt className='text-sm font-medium text-muted-foreground'>Interviewer</dt>
-                    <dd className='text-sm font-semibold'>John Doe</dd>
-                  </div>
-                </dl>
-              </CardContent>
-            </Card>
+            <InterviewCard />
           </div>
         </>
       )}

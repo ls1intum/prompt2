@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 
-export const useUpdateMetaData = (): UseMutationResult<
+export const useUpdateCoursePhaseMetaData = (): UseMutationResult<
   string | undefined,
   Error,
   UpdateCoursePhase,
@@ -29,7 +29,7 @@ export const useUpdateMetaData = (): UseMutationResult<
     onError: () => {
       toast({
         title: 'Error',
-        description: 'Failed to delete the applications.',
+        description: 'Failed to update the interview questions.',
         variant: 'destructive',
       })
     },
