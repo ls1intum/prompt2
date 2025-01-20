@@ -7,10 +7,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type UpdateCoursePhaseParticipationRequest struct {
+	// for individual updates, the ID is in the url
+	// for batch updates, the ID is in the body
+	ID                    uuid.UUID      `json:"id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	PassStatus            *db.PassStatus `json:"pass_status"`
+	MetaData              meta.MetaData  `json:"meta_data"`
+}
+
 type UpdateCoursePhaseParticipation struct {
-	ID         uuid.UUID         `json:"id"`
-	PassStatus db.NullPassStatus `json:"passed"`
-	MetaData   meta.MetaData     `json:"meta_data"`
+	ID            uuid.UUID      `json:"id"`
+	PassStatus    *db.PassStatus `json:"passed"`
+	MetaData      meta.MetaData  `json:"meta_data"`
+	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
 }
 
 func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhaseParticipationParams, error) {
@@ -21,9 +31,9 @@ func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhasePartic
 	}
 
 	return db.UpdateCoursePhaseParticipationParams{
-		ID:         c.ID,
-		PassStatus: c.PassStatus,
-		MetaData:   metaDataBytes,
+		ID:            c.ID,
+		PassStatus:    GetPassStatusDBModel(c.PassStatus),
+		MetaData:      metaDataBytes,
+		CoursePhaseID: c.CoursePhaseID,
 	}, nil
-
 }
