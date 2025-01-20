@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, ChevronUp, ChevronDown } from 'lucide-react'
+import { X, ChevronUp, ChevronDown, ClipboardList } from 'lucide-react'
 import type { InterviewQuestion } from 'src/management/interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { useUpdateMetaData } from '../hooks/useUpdateMetaData'
@@ -83,11 +84,19 @@ export const InterviewQuestionsModal = () => {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Manage Interview Questions</Button>
+      <Button variant='outline' onClick={() => setIsOpen(true)}>
+        <ClipboardList className='h-4 w-4' />
+        Set Interview Questions
+      </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className='sm:max-w-[600px]'>
+        <DialogContent className='sm:max-w-[700px]'>
           <DialogHeader>
             <DialogTitle>Manage Interview Questions</DialogTitle>
+            <DialogDescription>
+              These questions will be the template for questions asked by the interviewer during the
+              interview. Deleting a question will make already written notes / responses to this
+              question unaccessible.
+            </DialogDescription>
           </DialogHeader>
           <ul className='space-y-2'>
             {interviewQuestions.map((question, index) => (

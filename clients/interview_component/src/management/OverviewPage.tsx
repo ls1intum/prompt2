@@ -53,15 +53,11 @@ export const OverviewPage = (): JSX.Element => {
       <div className='flex justify-between items-center mt-4 mb-6'>
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
-          <InterviewQuestionsModal />
           <Button variant='outline'>
             <Clock className='h-4 w-4' />
             Set Interview Times
           </Button>
-          <Button variant='outline'>
-            <ClipboardList className='h-4 w-4' />
-            Set Interview Questions
-          </Button>
+          <InterviewQuestionsModal />
         </div>
       </div>
       <div
