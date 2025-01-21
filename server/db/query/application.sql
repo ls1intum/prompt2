@@ -136,7 +136,8 @@ SELECT EXISTS (
 
 -- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT 
-    cpt.name = 'Application' AS is_application
+    cpt.name = 'Application' AS is_application,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available 
 FROM 
     course_phase cp
 JOIN 

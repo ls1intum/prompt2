@@ -202,7 +202,7 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	err = validateApplication(c, coursePhaseId, application)
+	err = validateApplication(c, coursePhaseId, application, false)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusBadRequest, err)
@@ -257,7 +257,7 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	err = validateApplication(c, coursePhaseId, application)
+	err = validateApplication(c, coursePhaseId, application, true)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusBadRequest, err)

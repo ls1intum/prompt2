@@ -92,7 +92,8 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 
 const checkIfCoursePhaseIsOpenApplicationPhase = `-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT 
-    cpt.name = 'Application' AS is_application
+    cpt.name = 'Application' AS is_application,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -104,11 +105,16 @@ WHERE
     AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
 `
 
-func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (bool, error) {
+type CheckIfCoursePhaseIsOpenApplicationPhaseRow struct {
+	IsApplication            bool `json:"is_application"`
+	UniversityLoginAvailable bool `json:"university_login_available"`
+}
+
+func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (CheckIfCoursePhaseIsOpenApplicationPhaseRow, error) {
 	row := q.db.QueryRow(ctx, checkIfCoursePhaseIsOpenApplicationPhase, id)
-	var is_application bool
-	err := row.Scan(&is_application)
-	return is_application, err
+	var i CheckIfCoursePhaseIsOpenApplicationPhaseRow
+	err := row.Scan(&i.IsApplication, &i.UniversityLoginAvailable)
+	return i, err
 }
 
 const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
