@@ -318,7 +318,6 @@ SELECT
                          SELECT to_jsonb(aasm.score)
                          FROM application_assessment aasm
                          WHERE aasm.course_phase_participation_id = pcpp.id
-                           AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
                      ),
                      ----------------------------------------------------------
                      -- (B) Additional Scores

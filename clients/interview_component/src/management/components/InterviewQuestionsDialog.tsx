@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ClipboardList, Trash2, ChevronUp, ChevronDown, Plus } from 'lucide-react'
-import type { InterviewQuestion } from 'src/management/interfaces/InterviewQuestion'
+import { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '../hooks/useUpdateCoursePhaseMetaData'
 

@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
-import { QuestionConfigFormDataMultiSelect } from 'src/validations/questionConfig'
+import { QuestionConfigFormDataMultiSelect } from '../../../../validations/questionConfig'
 
 export function MultiSelectConfig({
   form,

@@ -8,7 +8,7 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { UseFormReturn } from 'react-hook-form'
-import { QuestionConfigFormDataText } from 'src/validations/questionConfig'
+import { QuestionConfigFormDataText } from '../../../../validations/questionConfig'
 
 export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDataText> }) {
   return (
