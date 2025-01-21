@@ -19,7 +19,7 @@ import { computeQuestionsModified } from './handlers/computeQuestionsModified'
 import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
 import { AddQuestionMenu } from './components/AddQuestionMenu'
 import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd'
-import { ApplicationPreview } from '../../../../Application/ApplicationPreview'
+import { ApplicationPreview } from '../../../../Application/pages/ApplicationPreview/ApplicationPreview'
 
 export const ApplicationQuestionConfig = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

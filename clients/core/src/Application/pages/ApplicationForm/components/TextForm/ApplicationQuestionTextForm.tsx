@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { QuestionTextFormRef } from '../utils/QuestionTextFormRef'
+import { QuestionTextFormRef } from '../../utils/QuestionTextFormRef'
 import { createValidationSchema } from './validationSchema'
 import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
+import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface ApplicationQuestionTextFormProps {
   question: ApplicationQuestionText

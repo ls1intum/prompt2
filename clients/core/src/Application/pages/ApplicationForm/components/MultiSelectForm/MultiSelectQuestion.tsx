@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
+import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface MultiSelectQuestionProps {
   form: UseFormReturn<{ answers: string[] }>

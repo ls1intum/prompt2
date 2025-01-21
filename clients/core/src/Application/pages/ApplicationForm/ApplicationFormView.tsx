@@ -11,13 +11,13 @@ import {
 } from '@/interfaces/application_answer_multi_select'
 import { Student } from '@/interfaces/student'
 import { useEffect, useRef, useState } from 'react'
-import { StudentForm } from './components/StudentForm'
-import { ApplicationQuestionTextForm } from './TextForm/ApplicationQuestionTextForm'
+import { StudentForm } from './components/StudentForm/StudentForm'
+import { ApplicationQuestionTextForm } from './components/TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
 import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
-import { ApplicationQuestionMultiSelectForm } from './MultiSelectForm/ApplicationQuestionMultiSelectForm'
+import { ApplicationQuestionMultiSelectForm } from './components/MultiSelectForm/ApplicationQuestionMultiSelectForm'
 import { Separator } from '@/components/ui/separator'
 
 interface ApplicationFormProps {

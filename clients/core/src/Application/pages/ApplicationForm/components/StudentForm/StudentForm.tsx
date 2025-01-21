@@ -1,6 +1,6 @@
 import { Student } from '@/interfaces/student'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { StudentComponentRef } from '../utils/StudentComponentRef'
+import { StudentComponentRef } from '../../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Gender, getGenderString } from '@/interfaces/gender'
-import { studentSchema, StudentFormValues } from '../../validations/student'
+import { studentSchema, StudentFormValues } from '../../../../../validations/student'
 import translations from '@/lib/translations.json'
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

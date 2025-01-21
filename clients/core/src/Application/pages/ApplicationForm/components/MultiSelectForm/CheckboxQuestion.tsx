@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { FormDescriptionHTML } from '../components/FormDescriptionHTML'
+import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface CheckboxQuestionProps {
   form: UseFormReturn<{ answers: string[] }>

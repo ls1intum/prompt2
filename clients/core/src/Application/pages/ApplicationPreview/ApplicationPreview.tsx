@@ -11,7 +11,7 @@ import { ApplicationQuestionText } from '@/interfaces/application_question_text'
 import { Student } from '@/interfaces/student'
 import { Eye } from 'lucide-react'
 import { useState } from 'react'
-import { ApplicationFormView } from './ApplicationFormView'
+import { ApplicationFormView } from '../ApplicationForm/ApplicationFormView'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ApplicationPreviewProps {
