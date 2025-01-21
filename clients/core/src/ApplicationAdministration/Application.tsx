@@ -2,7 +2,7 @@ import { CalendarX, Loader2, Mail } from 'lucide-react'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { useGetCoursePhase } from './handlers/useGetCoursePhase'
 import { getIsApplicationConfigured } from './utils/getApplicationIsConfigured'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ApplicationMetaData } from './interfaces/ApplicationMetaData'
 import { useLocation } from 'react-router-dom'
 import { useGetApplicationParticipations } from './handlers/useGetApplicationParticipations'
@@ -15,6 +15,7 @@ import { ApplicationStudySemesterDiagram } from './components/ApplicationStudySe
 import { parseApplicationMailingMetaData } from './Mailing/utils/parseApplicaitonMailingMetaData'
 import { getIsApplicationMailingIsConfigured } from './utils/getApplicationMailingIsConfigured'
 import { ManagementPageHeader } from '../management/components/ManagementPageHeader'
+import { useParseApplicationMetaData } from './handlers/useParseApplicationMetaData'
 
 export const Application = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -40,20 +41,7 @@ export const Application = (): JSX.Element => {
     refetchParticipations()
   }
 
-  useEffect(() => {
-    if (fetchedCoursePhase) {
-      const externalStudentsAllowed = fetchedCoursePhase?.meta_data?.['externalStudentsAllowed']
-      const applicationStartDate = fetchedCoursePhase?.meta_data?.['applicationStartDate']
-      const applicationEndDate = fetchedCoursePhase?.meta_data?.['applicationEndDate']
-
-      const parsedMetaData: ApplicationMetaData = {
-        applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,
-        applicationEndDate: applicationEndDate ? new Date(applicationEndDate) : undefined,
-        externalStudentsAllowed: externalStudentsAllowed ? externalStudentsAllowed : false,
-      }
-      setApplicationMetaData(parsedMetaData)
-    }
-  }, [fetchedCoursePhase])
+  useParseApplicationMetaData(fetchedCoursePhase, setApplicationMetaData)
 
   const missingConfigs: MissingConfigItem[] = useMemo(() => {
     const missingConfigItems: MissingConfigItem[] = []

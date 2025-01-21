@@ -39,12 +39,14 @@ export function ApplicationConfigDialog({
 }: ApplicationConfigDialogProps) {
   const queryClient = useQueryClient()
   const { phaseId } = useParams<{ phaseId: string }>()
+
   const [startDate, setStartDate] = useState<Date | undefined>(
     initialData.applicationStartDate ? new Date(initialData.applicationStartDate) : undefined,
   )
   const [endDate, setEndDate] = useState<Date | undefined>(
     initialData.applicationEndDate ? new Date(initialData.applicationEndDate) : undefined,
   )
+
   const [startTime, setStartTime] = useState(() => {
     if (initialData.applicationStartDate) {
       const date = new Date(initialData.applicationStartDate)
@@ -53,8 +55,6 @@ export function ApplicationConfigDialog({
     return '00:00'
   })
 
-  const timeZone = 'Europe/Berlin'
-
   const [endTime, setEndTime] = useState(() => {
     if (initialData.applicationEndDate) {
       const date = new Date(initialData.applicationEndDate)
@@ -62,8 +62,15 @@ export function ApplicationConfigDialog({
     }
     return '23:59'
   })
+
+  const timeZone = 'Europe/Berlin'
+
   const [externalStudentsAllowed, setExternalStudentsAllowed] = useState(
     initialData.externalStudentsAllowed,
+  )
+
+  const [universityLoginAvailable, setUniversityLoginAvailable] = useState(
+    initialData.universityLoginAvailable,
   )
 
   const {
@@ -109,6 +116,7 @@ export function ApplicationConfigDialog({
             )
           : undefined,
         externalStudentsAllowed,
+        universityLoginAvailable,
       },
     }
     mutatePhase(updatedPhase)
@@ -129,8 +137,10 @@ export function ApplicationConfigDialog({
             <DialogDescription>
               Note: All times are in German time (Europe/Berlin).
             </DialogDescription>
+
             <form onSubmit={handleSubmit}>
               <div className='grid gap-4 py-4'>
+                {/* Start Date/Time */}
                 <div className='grid grid-cols-4 items-center gap-4'>
                   <Label htmlFor='startDate' className='text-right'>
                     Start Date
@@ -151,39 +161,67 @@ export function ApplicationConfigDialog({
                     />
                   </div>
                 </div>
+
+                {/* End Date/Time */}
                 <div className='grid grid-cols-4 items-center gap-4'>
                   <Label htmlFor='endDate' className='text-right'>
                     End Date
                   </Label>
-                  <div className='col-span-3 flex flex-col gap-2'>
-                    <div className='flex items-center gap-2'>
-                      <DatePicker
-                        date={endDate}
-                        onSelect={(date) =>
-                          setEndDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-                        }
-                      />
-                      <Input
-                        id='endTime'
-                        type='time'
-                        value={endTime}
-                        onChange={(e) => setEndTime(e.target.value)}
-                        className='w-24'
-                      />
-                    </div>
+                  <div className='col-span-3 flex items-center gap-2'>
+                    <DatePicker
+                      date={endDate}
+                      onSelect={(date) =>
+                        setEndDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
+                      }
+                    />
+                    <Input
+                      id='endTime'
+                      type='time'
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className='w-24'
+                    />
                   </div>
                 </div>
-                <div className='grid grid-cols-4 items-center gap-4'>
-                  <Label htmlFor='externalStudents' className='text-right'>
-                    External Students Allowed
+
+                {/* University Login Available */}
+                <div className='grid grid-cols-4 items-start gap-4'>
+                  <Label htmlFor='universityLoginAvailable' className='text-right pt-2'>
+                    Enforce Student Login
                   </Label>
-                  <Switch
-                    id='externalStudents'
-                    checked={externalStudentsAllowed}
-                    onCheckedChange={setExternalStudentsAllowed}
-                  />
+                  <div className='col-span-3 flex flex-col gap-2'>
+                    <Switch
+                      id='universityLoginAvailable'
+                      checked={universityLoginAvailable}
+                      onCheckedChange={setUniversityLoginAvailable}
+                    />
+                    <p className='text-sm text-muted-foreground'>
+                      This option is highly recommended. But, it requires a Keycloak Login for
+                      Students which provides Matriculation number and University Login in the token
+                      data.
+                    </p>
+                  </div>
+                </div>
+
+                {/* External Students Allowed */}
+                <div className='grid grid-cols-4 items-start gap-4'>
+                  <Label htmlFor='externalStudentsAllowed' className='text-right pt-2'>
+                    Allow External Students
+                  </Label>
+                  <div className='col-span-3 flex flex-col gap-2'>
+                    <Switch
+                      id='externalStudentsAllowed'
+                      checked={externalStudentsAllowed}
+                      onCheckedChange={setExternalStudentsAllowed}
+                    />
+                    <p className='text-sm text-muted-foreground'>
+                      This option is to allow external students to apply without login and
+                      matriculation number.
+                    </p>
+                  </div>
                 </div>
               </div>
+
               <DialogFooter>
                 <Button type='submit'>Save changes</Button>
               </DialogFooter>

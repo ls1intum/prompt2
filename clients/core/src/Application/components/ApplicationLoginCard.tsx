@@ -36,7 +36,7 @@ export const ApplicationLoginCard = ({
           <p>
             Are you a {translations.university.name} student?
             {universityLoginAvailable &&
-              `Then please log in using your ${translations.university['login-name']}`}
+              ` Then please log in using your ${translations.university['login-name']}.`}
           </p>
           <Button
             className='w-full bg-[#0065BD] hover:bg-[#005299] text-white'
@@ -51,7 +51,7 @@ export const ApplicationLoginCard = ({
           >
             <GraduationCap className='mr-2 h-5 w-5' />
             {universityLoginAvailable
-              ? `Log in with {translations.university['login-name']`
+              ? `Log in with ${translations.university['login-name']}`
               : `Continue as ${translations.university.name} student`}
           </Button>
         </div>

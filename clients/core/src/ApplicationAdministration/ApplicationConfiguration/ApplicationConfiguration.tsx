@@ -14,9 +14,10 @@ import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
 import { useGetCoursePhase } from '../handlers/useGetCoursePhase'
 import { getIsApplicationConfigured } from '../utils/getApplicationIsConfigured'
+import { useParseApplicationMetaData } from '../handlers/useParseApplicationMetaData'
 
 export const ApplicationConfiguration = (): JSX.Element => {
-  const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | null>(null)
+  const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | undefined>(undefined)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
 
@@ -33,20 +34,7 @@ export const ApplicationConfiguration = (): JSX.Element => {
     }
   }, [fetchedCoursePhase])
 
-  useEffect(() => {
-    if (coursePhase?.meta_data) {
-      const externalStudentsAllowed = coursePhase?.meta_data?.['externalStudentsAllowed']
-      const applicationStartDate = coursePhase?.meta_data?.['applicationStartDate']
-      const applicationEndDate = coursePhase?.meta_data?.['applicationEndDate']
-
-      const parsedMetaData: ApplicationMetaData = {
-        applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,
-        applicationEndDate: applicationEndDate ? new Date(applicationEndDate) : undefined,
-        externalStudentsAllowed: externalStudentsAllowed ? externalStudentsAllowed : false,
-      }
-      setApplicationMetaData(parsedMetaData)
-    }
-  }, [coursePhase, fetchedCoursePhase])
+  useParseApplicationMetaData(coursePhase, setApplicationMetaData)
 
   const applicationPhaseIsConfigured = getIsApplicationConfigured(applicationMetaData)
 
