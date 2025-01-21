@@ -13,6 +13,7 @@ import type { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import type { InterviewAnswer } from '../interfaces/InterviewAnswer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PassStatus } from '@/interfaces/course_phase_participation'
 
 export const InterviewCard = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -62,7 +63,7 @@ export const InterviewCard = (): JSX.Element => {
     })
   }
 
-  const saveChanges = () => {
+  const saveChanges = (pass_status?: PassStatus) => {
     if (participation && coursePhase) {
       mutate({
         id: participation.id,
@@ -72,6 +73,7 @@ export const InterviewCard = (): JSX.Element => {
           interview_answers: answers,
           interviewScore: score,
         },
+        pass_status: pass_status ?? participation.pass_status,
       })
     }
   }
@@ -85,6 +87,42 @@ export const InterviewCard = (): JSX.Element => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className='flex flex-row space-x-4 mb-4 justify-between'>
+          <div className='space-y-2'>
+            <Label htmlFor='score'>Interview Score</Label>
+            <Input
+              id='score'
+              className='w-48'
+              value={score}
+              onChange={(e) => setScore(Number(e.target.value))}
+              type='number'
+              min='0'
+              max='100'
+              placeholder='Enter an interview score'
+            />
+          </div>
+          <div className='col-span-2 space-y-2'>
+            <Label>Resolution</Label>
+            <div className='space-x-2'>
+              <Button
+                variant='outline'
+                disabled={participation?.pass_status === PassStatus.FAILED}
+                className='border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600'
+                onClick={() => saveChanges(PassStatus.FAILED)}
+              >
+                Reject
+              </Button>
+              <Button
+                variant='default'
+                disabled={participation?.pass_status === PassStatus.PASSED}
+                className='bg-green-500 hover:bg-green-600 text-white'
+                onClick={() => saveChanges(PassStatus.PASSED)}
+              >
+                Accept
+              </Button>
+            </div>
+          </div>
+        </div>
         <div className='space-y-2'>
           <div className='space-y-2'>
             <Label htmlFor='interviewer'>Interviewer</Label>
@@ -100,19 +138,6 @@ export const InterviewCard = (): JSX.Element => {
                 Set as Self
               </Button>
             </div>
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='score'>Interview Score</Label>
-            <Input
-              id='score'
-              className='w-48'
-              value={score}
-              onChange={(e) => setScore(Number(e.target.value))}
-              type='number'
-              min='0'
-              max='100'
-              placeholder='Enter a interview score'
-            />
           </div>
         </div>
         <Separator className='mt-3 mb-3' />
@@ -139,9 +164,10 @@ export const InterviewCard = (): JSX.Element => {
               {index < interviewQuestions.length - 1 && <Separator className='mt-3 mb-3' />}
             </div>
           ))}
+
         <div className='mt-6 flex justify-end'>
           <Button
-            onClick={saveChanges}
+            onClick={() => saveChanges()}
             disabled={isLoading || !isModified}
             className='flex items-center'
           >
