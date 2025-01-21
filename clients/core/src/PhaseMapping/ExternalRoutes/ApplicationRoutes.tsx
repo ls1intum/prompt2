@@ -5,26 +5,43 @@ import { ApplicationConfiguration } from '../../ApplicationAdministration/pages/
 import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationsAssessment } from '../../ApplicationAdministration/pages/ApplicationAssessment/ApplicationsAssessment'
 import { ApplicationMailingSettings } from '../../ApplicationAdministration/pages/Mailing/ApplicationMailingSettings'
+import { ApplicationDataWrapper } from '../../ApplicationAdministration/components/ApplicationDataWrapper'
 
 const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <ApplicationLandingPage />,
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationLandingPage />
+      </ApplicationDataWrapper>
+    ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR], // empty means no permissions required
   },
   {
     path: '/configuration',
-    element: <ApplicationConfiguration />,
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationConfiguration />
+      </ApplicationDataWrapper>
+    ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/applications',
-    element: <ApplicationsAssessment />,
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationsAssessment />
+      </ApplicationDataWrapper>
+    ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/mailing',
-    element: <ApplicationMailingSettings />,
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationMailingSettings />
+      </ApplicationDataWrapper>
+    ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]

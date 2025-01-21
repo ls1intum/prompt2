@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Loader2, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
 import { ApplicationTimeline } from './components/ApplicationTimeline'
 import { ApplicationConfigurationHeader } from './components/ConfigurationHeader'
 import { ExternalStudentsStatus } from './components/ExternalStudentsAllowed'
@@ -12,55 +11,20 @@ import { ApplicationMetaData } from '../../interfaces/ApplicationMetaData'
 import { getApplicationStatus } from '../../utils/getApplicationStatus'
 import { ApplicationConfigDialog } from './components/ApplicationConfigDialog'
 import { ApplicationQuestionConfig } from './ApplicationQuestionConfig/ApplicationQuestionConfig'
-import { useGetCoursePhase } from '../../hooks/useGetCoursePhase'
 import { getIsApplicationConfigured } from '../../utils/getApplicationIsConfigured'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
+import { useApplicationStore } from '../../zustand/useApplicationStore'
 
 export const ApplicationConfiguration = (): JSX.Element => {
-  const [coursePhase, setCoursePhase] = useState<CoursePhaseWithMetaData | undefined>(undefined)
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false)
-
-  const {
-    data: fetchedCoursePhase,
-    isPending: isCoursePhasePending,
-    error: coursePhaseError,
-    isError: isCoursePhaseError,
-  } = useGetCoursePhase()
-
-  useEffect(() => {
-    if (fetchedCoursePhase) {
-      setCoursePhase(fetchedCoursePhase)
-    }
-  }, [fetchedCoursePhase])
+  const { coursePhase } = useApplicationStore()
 
   useParseApplicationMetaData(coursePhase, setApplicationMetaData)
 
   const applicationPhaseIsConfigured = getIsApplicationConfigured(applicationMetaData)
 
   const applicationStatus = getApplicationStatus(applicationMetaData, applicationPhaseIsConfigured)
-
-  if (isCoursePhasePending) {
-    return (
-      <Card className='w-full max-w-3xl mx-auto'>
-        <CardContent className='flex items-center justify-center h-64'>
-          <Loader2 className='h-8 w-8 animate-spin text-primary' />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (isCoursePhaseError) {
-    return (
-      <Card className='w-full max-w-3xl mx-auto'>
-        <CardContent className='p-6'>
-          <p className='text-red-500'>
-            Error: {coursePhaseError?.message || 'Failed to load course phase'}
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
 
   const handleModifyConfiguration = () => {
     setIsConfigDialogOpen(true)

@@ -1,47 +1,26 @@
-import { CalendarX, Loader2, Mail } from 'lucide-react'
+import { CalendarX, Mail } from 'lucide-react'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
-import { useGetCoursePhase } from '../../hooks/useGetCoursePhase'
 import { getIsApplicationConfigured } from '../../utils/getApplicationIsConfigured'
 import { useMemo, useState } from 'react'
 import { ApplicationMetaData } from '../../interfaces/ApplicationMetaData'
 import { useLocation } from 'react-router-dom'
-import { useGetApplicationParticipations } from '../../hooks/useGetApplicationParticipations'
 import { AssessmentDiagram } from './diagrams/AssessmentDiagram'
 import { ApplicationStatusCard } from './diagrams/ApplicationStatusCard'
 import { ApplicationGenderDiagram } from './diagrams/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './diagrams/ApplicationStudyBackgroundDiagram'
-import { ErrorPage } from '@/components/ErrorPage'
 import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySemesterDiagram'
 import { parseApplicationMailingMetaData } from '../Mailing/utils/parseApplicaitonMailingMetaData'
 import { getIsApplicationMailingIsConfigured } from '../../utils/getApplicationMailingIsConfigured'
 import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
+import { useApplicationStore } from '../../zustand/useApplicationStore'
 
 export const ApplicationLandingPage = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const path = useLocation().pathname
-  const {
-    data: fetchedCoursePhase,
-    isPending: isCoursePhasePending,
-    isError: isCoursePhaseError,
-    refetch: refetchCoursePhase,
-  } = useGetCoursePhase()
+  const { coursePhase, participations } = useApplicationStore()
 
-  const {
-    data: fetchedParticipations,
-    isPending: isParticipationsPending,
-    isError: isParticipantsError,
-    refetch: refetchParticipations,
-  } = useGetApplicationParticipations()
-
-  const isPending = isCoursePhasePending || isParticipationsPending
-  const isError = isCoursePhaseError || isParticipantsError
-  const refetch = () => {
-    refetchCoursePhase()
-    refetchParticipations()
-  }
-
-  useParseApplicationMetaData(fetchedCoursePhase, setApplicationMetaData)
+  useParseApplicationMetaData(coursePhase, setApplicationMetaData)
 
   const missingConfigs: MissingConfigItem[] = useMemo(() => {
     const missingConfigItems: MissingConfigItem[] = []
@@ -53,15 +32,14 @@ export const ApplicationLandingPage = (): JSX.Element => {
       })
     }
 
-    // TODO fix when mail is configured
-    if (fetchedCoursePhase?.meta_data?.['mailingConfig'] === undefined) {
+    if (coursePhase?.meta_data?.['mailingConfig'] === undefined) {
       missingConfigItems.push({
         title: 'Mail Configuration',
         icon: Mail,
         link: `${path}/mailing`,
       })
     } else {
-      const mailingConfig = parseApplicationMailingMetaData(fetchedCoursePhase?.meta_data)
+      const mailingConfig = parseApplicationMailingMetaData(coursePhase?.meta_data)
       if (
         // trying to send mails but reply to not set
         !getIsApplicationMailingIsConfigured(mailingConfig) &&
@@ -77,34 +55,27 @@ export const ApplicationLandingPage = (): JSX.Element => {
       }
     }
     return missingConfigItems
-  }, [applicationMetaData, fetchedCoursePhase?.meta_data, path])
+  }, [applicationMetaData, coursePhase?.meta_data, path])
 
   return (
     <div>
       <ManagementPageHeader>Application Administration</ManagementPageHeader>
-      {isPending ? (
-        <div className='flex justify-center items-center h-64'>
-          <Loader2 className='h-12 w-12 animate-spin text-primary' />
+
+      <>
+        <MissingConfig elements={missingConfigs} />
+        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6'>
+          <ApplicationStatusCard
+            applicationMetaData={applicationMetaData}
+            applicationPhaseIsConfigured={getIsApplicationConfigured(applicationMetaData)}
+          />
+          <AssessmentDiagram applications={participations ?? []} />
+          <ApplicationGenderDiagram applications={participations ?? []} />
         </div>
-      ) : isError ? (
-        <ErrorPage onRetry={refetch} />
-      ) : (
-        <>
-          <MissingConfig elements={missingConfigs} />
-          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6'>
-            <ApplicationStatusCard
-              applicationMetaData={applicationMetaData}
-              applicationPhaseIsConfigured={getIsApplicationConfigured(applicationMetaData)}
-            />
-            <AssessmentDiagram applications={fetchedParticipations ?? []} />
-            <ApplicationGenderDiagram applications={fetchedParticipations ?? []} />
-          </div>
-          <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
-            <ApplicationStudyBackgroundDiagram applications={fetchedParticipations ?? []} />
-            <ApplicationStudySemesterDiagram applications={fetchedParticipations ?? []} />
-          </div>
-        </>
-      )}
+        <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
+          <ApplicationStudyBackgroundDiagram applications={participations ?? []} />
+          <ApplicationStudySemesterDiagram applications={participations ?? []} />
+        </div>
+      </>
     </div>
   )
 }

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useGetCoursePhase } from '../../hooks/useGetCoursePhase'
 import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 import { parseApplicationMailingMetaData } from './utils/parseApplicaitonMailingMetaData'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2 } from 'lucide-react'
 import { useModifyCoursePhase } from '../../hooks/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
@@ -13,11 +11,12 @@ import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholder
 import { EmailTemplateEditor } from './components/MailingEditor'
 import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
+import { useApplicationStore } from '../../zustand/useApplicationStore'
 
 export const ApplicationMailingSettings = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { toast } = useToast()
-
+  const { coursePhase } = useApplicationStore()
   const [emailError, setEmailError] = useState<string | null>(null)
   const [initialMetaData, setInitialMetaData] = useState<ApplicationMailingMetaData | null>(null)
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
@@ -38,14 +37,6 @@ export const ApplicationMailingSettings = () => {
 
   const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(applicationMailingMetaData)
 
-  // Fetching meta data
-  const {
-    data: fetchedCoursePhase,
-    isPending: isCoursePhasePending,
-    error: coursePhaseError,
-    isError: isCoursePhaseError,
-  } = useGetCoursePhase()
-
   // Updating state
   const { mutate: mutateCoursePhase } = useModifyCoursePhase(
     () => {
@@ -63,12 +54,12 @@ export const ApplicationMailingSettings = () => {
   )
 
   useEffect(() => {
-    if (fetchedCoursePhase?.meta_data) {
-      const parsedMetaData = parseApplicationMailingMetaData(fetchedCoursePhase.meta_data)
+    if (coursePhase?.meta_data) {
+      const parsedMetaData = parseApplicationMailingMetaData(coursePhase.meta_data)
       setApplicationMailingMetaData(parsedMetaData)
       setInitialMetaData(parsedMetaData)
     }
-  }, [fetchedCoursePhase])
+  }, [coursePhase])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -113,22 +104,6 @@ export const ApplicationMailingSettings = () => {
     }
     mutateCoursePhase(updatedCoursePhase)
     console.log('Saving:', applicationMailingMetaData)
-  }
-
-  if (isCoursePhasePending) {
-    return (
-      <div className='flex justify-center items-center h-screen'>
-        <Loader2 className='h-8 w-8 animate-spin' />
-      </div>
-    )
-  }
-
-  if (isCoursePhaseError) {
-    return (
-      <div className='text-red-500'>
-        Error: {coursePhaseError?.message || 'An error occurred while fetching course phase data.'}
-      </div>
-    )
   }
 
   return (
