@@ -8,7 +8,7 @@ import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
 import { useState } from 'react'
 import { ApplicationLoginCard } from './components/ApplicationLoginCard'
-import { ApplicationFormView } from './ApplicationFormView'
+import { ApplicationFormView } from './pages/ApplicationForm/ApplicationFormView'
 import { Student } from '@/interfaces/student'
 import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
 import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
@@ -20,6 +20,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const [selectedContinueAsExternal, setSelectedContinueAsExternal] = useState(false)
+  const [selectedContinueWithoutLogin, setSelectedContinueWithoutLogin] = useState(false)
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
 
   const {
@@ -80,25 +81,49 @@ export const ApplicationLoginPage = (): JSX.Element => {
 
   const { application_phase } = applicationForm
   const externalStudentsAllowed = application_phase.externalStudentsAllowed
+  const universityLoginAvailable = application_phase.universityLoginAvailable
+
+  const continueWithOutLogin = (isExternalStudent: boolean) => {
+    setSelectedContinueAsExternal(isExternalStudent)
+    setSelectedContinueWithoutLogin(true)
+  }
 
   return (
     <NonAuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
         <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
-        {!selectedContinueAsExternal && (
+        {!selectedContinueWithoutLogin && (
           <ApplicationLoginCard
+            universityLoginAvailable={universityLoginAvailable}
             externalStudentsAllowed={externalStudentsAllowed}
-            onContinueAsExtern={() => setSelectedContinueAsExternal(true)}
+            onContinueWithoutLogin={continueWithOutLogin}
           />
         )}
-        {/** display non authenticated applicationForm here */}
-        {externalStudentsAllowed && selectedContinueAsExternal && (
-          <ApplicationFormView
-            questionsText={applicationForm.questions_text}
-            questionsMultiSelect={applicationForm.questions_multi_select}
-            onSubmit={handleSubmit}
-          />
-        )}
+        {selectedContinueWithoutLogin &&
+          (externalStudentsAllowed && selectedContinueAsExternal ? (
+            // enforce Login and get MatriculationNumber and university login from token
+            <ApplicationFormView
+              questionsText={applicationForm.questions_text}
+              questionsMultiSelect={applicationForm.questions_multi_select}
+              onSubmit={handleSubmit}
+            />
+          ) : (
+            // continue with form that allows to enter university login and matriculationNumber
+            <ApplicationFormView
+              questionsText={applicationForm.questions_text}
+              questionsMultiSelect={applicationForm.questions_multi_select}
+              onSubmit={handleSubmit}
+              allowEditUniversityData={true}
+              student={{
+                first_name: '',
+                last_name: '',
+                email: '',
+                matriculation_number: '',
+                university_login: '',
+                has_university_account: true,
+              }}
+            />
+          ))}
       </div>
       <ApplicationSavingDialog
         showDialog={showDialog}

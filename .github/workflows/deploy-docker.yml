@@ -117,6 +117,9 @@ jobs:
             echo "ENVIRONMENT=production" > .env.prod
           
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
+            echo "CHAIR_NAME_SHORT=${{ vars.CHAIR_NAME_SHORT }}" >> .env.prod
+            echo "CHAIR_NAME_LONG=${{ vars.CHAIR_NAME_LONG }}" >> .env.prod
+
 
             echo "SERVER_ADDRESS=${{ vars.SERVER_ADDRESS }}" >> .env.prod 
             echo "DB_HOST=${{ vars.DB_HOST }}" >> .env.prod

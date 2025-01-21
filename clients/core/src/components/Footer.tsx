@@ -8,9 +8,6 @@ export const Footer = (): JSX.Element => {
   return (
     <footer className='w-full mt-16 py-6 px-4 sm:px-6 lg:px-8 border-t border-gray-200'>
       <div className='max-w-[1400px] mx-auto text-center text-sm text-gray-500'>
-        <p className='mb-2'>
-          &copy; 2024 TUM, CIT Research Group for Applied Education Technologies.
-        </p>
         <nav className='space-x-4'>
           <a
             href={`https://github.com/ls1intum/prompt2`}

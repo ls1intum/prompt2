@@ -210,18 +210,22 @@ func validateApplicationManualAdd(ctx context.Context, coursePhaseID uuid.UUID, 
 	return validateAnswers(ctx, coursePhaseID, application)
 }
 
-func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication) error {
+func validateApplication(ctx context.Context, coursePhaseID uuid.UUID, application applicationDTO.PostApplication, authenticatedRoute bool) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
 	// Check if course phase is application phase
-	isApplicationPhase, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
+	applicationDetails, err := ApplicationServiceSingleton.queries.CheckIfCoursePhaseIsOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
 		log.Error("could not validate application: ", err)
 		return errors.New("could not validate the application. the application deadline might have passed")
 	}
-	if !isApplicationPhase {
+	if !applicationDetails.IsApplication {
 		return errors.New("course phase is not an application phase")
+	}
+
+	if !authenticatedRoute && applicationDetails.UniversityLoginAvailable && application.Student.HasUniversityAccount {
+		return errors.New("student with university data MUST log in to apply")
 	}
 
 	return validateAnswers(ctx, coursePhaseID, application)

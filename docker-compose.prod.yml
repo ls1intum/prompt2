@@ -150,6 +150,8 @@ services:
       - CORE_HOST
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
+      - CHAIR_NAME_SHORT
+      - CHAIR_NAME_LONG
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"

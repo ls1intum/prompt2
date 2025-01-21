@@ -92,7 +92,8 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 
 const checkIfCoursePhaseIsOpenApplicationPhase = `-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT 
-    cpt.name = 'Application' AS is_application
+    cpt.name = 'Application' AS is_application,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -104,11 +105,16 @@ WHERE
     AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
 `
 
-func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (bool, error) {
+type CheckIfCoursePhaseIsOpenApplicationPhaseRow struct {
+	IsApplication            bool `json:"is_application"`
+	UniversityLoginAvailable bool `json:"university_login_available"`
+}
+
+func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, id uuid.UUID) (CheckIfCoursePhaseIsOpenApplicationPhaseRow, error) {
 	row := q.db.QueryRow(ctx, checkIfCoursePhaseIsOpenApplicationPhase, id)
-	var is_application bool
-	err := row.Scan(&is_application)
-	return is_application, err
+	var i CheckIfCoursePhaseIsOpenApplicationPhaseRow
+	err := row.Scan(&i.IsApplication, &i.UniversityLoginAvailable)
+	return i, err
 }
 
 const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
@@ -418,7 +424,8 @@ SELECT
     c.course_type, 
     c.ects,
     (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -435,14 +442,15 @@ WHERE
 `
 
 type GetAllOpenApplicationPhasesRow struct {
-	CoursePhaseID           uuid.UUID   `json:"course_phase_id"`
-	CourseName              string      `json:"course_name"`
-	StartDate               pgtype.Date `json:"start_date"`
-	EndDate                 pgtype.Date `json:"end_date"`
-	CourseType              CourseType  `json:"course_type"`
-	Ects                    pgtype.Int4 `json:"ects"`
-	ApplicationEndDate      string      `json:"application_end_date"`
-	ExternalStudentsAllowed bool        `json:"external_students_allowed"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	CourseName               string      `json:"course_name"`
+	StartDate                pgtype.Date `json:"start_date"`
+	EndDate                  pgtype.Date `json:"end_date"`
+	CourseType               CourseType  `json:"course_type"`
+	Ects                     pgtype.Int4 `json:"ects"`
+	ApplicationEndDate       string      `json:"application_end_date"`
+	ExternalStudentsAllowed  bool        `json:"external_students_allowed"`
+	UniversityLoginAvailable bool        `json:"university_login_available"`
 }
 
 func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpenApplicationPhasesRow, error) {
@@ -463,6 +471,7 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 			&i.Ects,
 			&i.ApplicationEndDate,
 			&i.ExternalStudentsAllowed,
+			&i.UniversityLoginAvailable,
 		); err != nil {
 			return nil, err
 		}
@@ -694,7 +703,8 @@ SELECT
     c.course_type, 
     c.ects,
     (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -712,14 +722,15 @@ WHERE
 `
 
 type GetOpenApplicationPhaseRow struct {
-	CoursePhaseID           uuid.UUID   `json:"course_phase_id"`
-	CourseName              string      `json:"course_name"`
-	StartDate               pgtype.Date `json:"start_date"`
-	EndDate                 pgtype.Date `json:"end_date"`
-	CourseType              CourseType  `json:"course_type"`
-	Ects                    pgtype.Int4 `json:"ects"`
-	ApplicationEndDate      string      `json:"application_end_date"`
-	ExternalStudentsAllowed bool        `json:"external_students_allowed"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	CourseName               string      `json:"course_name"`
+	StartDate                pgtype.Date `json:"start_date"`
+	EndDate                  pgtype.Date `json:"end_date"`
+	CourseType               CourseType  `json:"course_type"`
+	Ects                     pgtype.Int4 `json:"ects"`
+	ApplicationEndDate       string      `json:"application_end_date"`
+	ExternalStudentsAllowed  bool        `json:"external_students_allowed"`
+	UniversityLoginAvailable bool        `json:"university_login_available"`
 }
 
 func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (GetOpenApplicationPhaseRow, error) {
@@ -734,6 +745,7 @@ func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (Ge
 		&i.Ects,
 		&i.ApplicationEndDate,
 		&i.ExternalStudentsAllowed,
+		&i.UniversityLoginAvailable,
 	)
 	return i, err
 }
