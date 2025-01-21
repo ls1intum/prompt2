@@ -10,7 +10,8 @@ import { Clock } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { SortDropdownMenu } from './components/SortDropdownMenu'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { InterviewQuestionsModal } from './components/InterviewQuestionsModal'
+import { InterviewQuestionsDialog } from './components/InterviewQuestionsDialog'
+import { InterviewTimesDialog } from './components/InterviewTimesDialog'
 
 export const OverviewPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -57,7 +58,8 @@ export const OverviewPage = (): JSX.Element => {
             <Clock className='h-4 w-4' />
             Set Interview Times
           </Button>
-          <InterviewQuestionsModal />
+          <InterviewTimesDialog />
+          <InterviewQuestionsDialog />
         </div>
       </div>
       <div

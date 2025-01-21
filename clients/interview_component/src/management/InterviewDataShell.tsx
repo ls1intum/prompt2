@@ -28,7 +28,6 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.E
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
 
-  // TODO: replace this with the course store once we have shared library
   const {
     data: coursePhase,
     isPending: isCoursePhasePending,

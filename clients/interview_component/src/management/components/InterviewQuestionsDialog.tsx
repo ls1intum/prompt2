@@ -16,7 +16,7 @@ import type { InterviewQuestion } from 'src/management/interfaces/InterviewQuest
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '../hooks/useUpdateCoursePhaseMetaData'
 
-export const InterviewQuestionsModal = () => {
+export const InterviewQuestionsDialog = () => {
   const { coursePhase } = useCoursePhaseStore()
   const [isOpen, setIsOpen] = useState(false)
   const [newQuestion, setNewQuestion] = useState('')
