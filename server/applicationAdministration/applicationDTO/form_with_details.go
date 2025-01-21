@@ -10,14 +10,15 @@ type FormWithDetails struct {
 
 func GetFormWithDetailsDTOFromDBModel(applicationPhase db.GetOpenApplicationPhaseRow, questionsText []db.ApplicationQuestionText, questionsMultiSelect []db.ApplicationQuestionMultiSelect) FormWithDetails {
 	applicationPhaseDTO := OpenApplication{
-		CourseName:              applicationPhase.CourseName,
-		CoursePhaseID:           applicationPhase.CoursePhaseID,
-		CourseType:              string(applicationPhase.CourseType),
-		ECTS:                    int(applicationPhase.Ects.Int32),
-		StartDate:               applicationPhase.StartDate,
-		EndDate:                 applicationPhase.EndDate,
-		ApplicationDeadline:     applicationPhase.ApplicationEndDate,
-		ExternalStudentsAllowed: applicationPhase.ExternalStudentsAllowed,
+		CourseName:               applicationPhase.CourseName,
+		CoursePhaseID:            applicationPhase.CoursePhaseID,
+		CourseType:               string(applicationPhase.CourseType),
+		ECTS:                     int(applicationPhase.Ects.Int32),
+		StartDate:                applicationPhase.StartDate,
+		EndDate:                  applicationPhase.EndDate,
+		ApplicationDeadline:      applicationPhase.ApplicationEndDate,
+		ExternalStudentsAllowed:  applicationPhase.ExternalStudentsAllowed,
+		UniversityLoginAvailable: applicationPhase.UniversityLoginAvailable,
 	}
 
 	applicationFormDTO := FormWithDetails{

@@ -160,13 +160,14 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_Invali
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	application := applicationDTO.PostApplication{
 		Student: studentDTO.CreateStudent{
-			ID: uuid.New(),
+			ID:                   uuid.New(),
+			HasUniversityAccount: false,
 		},
 		AnswersText:        []applicationDTO.CreateAnswerText{},
 		AnswersMultiSelect: []applicationDTO.CreateAnswerMultiSelect{},
 	}
 
-	err := validateApplication(suite.ctx, coursePhaseID, application)
+	err := validateApplication(suite.ctx, coursePhaseID, application, false)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "invalid student", err.Error())
 }
@@ -194,7 +195,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_Invali
 		},
 	}
 
-	err := validateApplication(suite.ctx, coursePhaseID, application)
+	err := validateApplication(suite.ctx, coursePhaseID, application, false)
 	assert.Error(suite.T(), err)
 	assert.Contains(suite.T(), err.Error(), "required question")
 }

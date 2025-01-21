@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { LogIn, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { env } from '../env'
 
 interface HeaderProps {
   withLoginButton?: boolean
@@ -17,8 +18,8 @@ export const Header = ({
   return (
     <div className='flex flex-col sm:flex-row justify-between items-center mb-12 gap-4'>
       <div className='flex items-center space-x-4'>
-        <img src='/ase.jpeg' alt='TUM Logo' className='h-12 w-12' />
-        <h1 className='text-xl'>Applied Education Technologies</h1>
+        <img src='/chair-logo.jpeg' alt='TUM Logo' className='h-12 w-12' />
+        <h1 className='text-xl'>{env.CHAIR_NAME_SHORT}</h1>
       </div>
       {withLoginButton && !userName && (
         <Button

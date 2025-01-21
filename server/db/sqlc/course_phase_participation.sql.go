@@ -474,6 +474,7 @@ func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID)
 }
 
 const getCoursePhaseParticipationByCourseParticipationAndCoursePhase = `-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
+
 SELECT id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified FROM course_phase_participation
 WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1
 `
@@ -483,6 +484,7 @@ type GetCoursePhaseParticipationByCourseParticipationAndCoursePhaseParams struct
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
+// important to trigger a no rows in result set error if ids mismatch
 func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase(ctx context.Context, arg GetCoursePhaseParticipationByCourseParticipationAndCoursePhaseParams) (CoursePhaseParticipation, error) {
 	row := q.db.QueryRow(ctx, getCoursePhaseParticipationByCourseParticipationAndCoursePhase, arg.CourseParticipationID, arg.CoursePhaseID)
 	var i CoursePhaseParticipation

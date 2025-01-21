@@ -9,4 +9,5 @@ export interface OpenApplicationDetails {
   endDate: Date
   applicationDeadline: Date
   externalStudentsAllowed: boolean
+  universityLoginAvailable: boolean
 }

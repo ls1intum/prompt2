@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { getAllOpenApplications } from '../network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
+import { env } from '../env'
 
 export function LandingPage(): JSX.Element {
   const {
@@ -23,8 +24,8 @@ export function LandingPage(): JSX.Element {
           Course Application Portal
         </h2>
         <p className='text-xl text-gray-600 max-w-4xl mx-auto mb-8'>
-          Welcome to the TUM Research Group for Applied Education Technologies&apos; official
-          platform for course and seminar applications.
+          Welcome to the {env.CHAIR_NAME_LONG}&apos; official platform for course and seminar
+          applications.
         </p>
       </section>
 

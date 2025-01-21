@@ -84,7 +84,8 @@ SELECT
     c.course_type, 
     c.ects,
     (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -108,7 +109,8 @@ SELECT
     c.course_type, 
     c.ects,
     (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed
+    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -134,7 +136,8 @@ SELECT EXISTS (
 
 -- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT 
-    cpt.name = 'Application' AS is_application
+    cpt.name = 'Application' AS is_application,
+    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available 
 FROM 
     course_phase cp
 JOIN 
