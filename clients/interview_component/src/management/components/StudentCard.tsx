@@ -7,14 +7,17 @@ import { AvatarImage } from '@radix-ui/react-avatar'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 import { getStatusColor } from '@/lib/getStatusColor'
 import { Separator } from '@/components/ui/separator'
+import { InterviewSlot } from '../interfaces/InterviewSlots'
+import { Badge } from '@/components/ui/badge'
 
 interface StudentCardProps {
   participation: CoursePhaseParticipationWithStudent
+  interviewSlot?: InterviewSlot
 }
 
-export function StudentCard({ participation }: StudentCardProps) {
+export function StudentCard({ participation, interviewSlot }: StudentCardProps) {
   const assessmentScore = participation.prev_meta_data?.applicationScore ?? 'N/A'
-  const interviewScore = participation.meta_data?.interviewScore ?? 'Not assessed'
+  const interviewScore = participation.meta_data?.interviewScore ?? 'N/A'
 
   return (
     <Card className='h-full relative overflow-hidden'>
@@ -31,6 +34,13 @@ export function StudentCard({ participation }: StudentCardProps) {
             {participation.student.last_name[0]}
           </AvatarFallback>
         </Avatar>
+        <div className='absolute right-0'>
+          {interviewSlot && (
+            <Badge className='ml-auto mr-2 mt-2' variant='outline'>
+              #{interviewSlot.index}: {interviewSlot.startTime} - {interviewSlot.endTime}
+            </Badge>
+          )}
+        </div>
       </div>
 
       <CardHeader>

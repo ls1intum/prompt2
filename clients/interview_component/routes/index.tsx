@@ -1,8 +1,8 @@
-import OverviewPage from '../src/management/OverviewPage'
+import OverviewPage from '../src/management/pages/OverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
 import { Role } from '@/interfaces/permission_roles'
-import { InterviewDataShell } from '../src/management/InterviewDataShell'
-import { ProfileDetailPage } from '../src/management/ProfileDetailPage'
+import { InterviewDataShell } from '../src/management/pages/InterviewDataShell'
+import { ProfileDetailPage } from '../src/management/pages/ProfileDetailPage'
 
 const interviewRoutes: ExtendedRouteObject[] = [
   {

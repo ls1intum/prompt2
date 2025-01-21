@@ -27,10 +27,6 @@ export const InterviewQuestionsDialog = () => {
     scrollRef.current?.scrollIntoView(false)
   }
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [interviewQuestions])
-
   const { mutate } = useUpdateCoursePhaseMetaData()
 
   useEffect(() => {
@@ -51,6 +47,9 @@ export const InterviewQuestionsDialog = () => {
         },
       ])
       setNewQuestion('')
+      requestAnimationFrame(() => {
+        scrollToBottom()
+      })
     }
   }
 

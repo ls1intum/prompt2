@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -22,21 +22,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-interface InterviewSlot {
-  id: string
-  startTime?: string
-  endTime?: string
-  courseParticipationId?: string
-}
+import { InterviewSlot } from '../interfaces/InterviewSlots'
 
 export const InterviewTimesDialog = () => {
   const { coursePhase } = useCoursePhaseStore()
   const [isOpen, setIsOpen] = useState(false)
   const { participations } = useParticipationStore()
   const [interviewSlots, setInterviewSlots] = useState<InterviewSlot[]>([])
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const { mutate } = useUpdateCoursePhaseMetaData()
+
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView(false)
+  }
 
   useEffect(() => {
     if (coursePhase?.meta_data?.interview_slots) {
@@ -45,7 +44,16 @@ export const InterviewTimesDialog = () => {
   }, [coursePhase])
 
   const addSlot = () => {
-    setInterviewSlots([...interviewSlots, { id: Date.now().toString() }])
+    setInterviewSlots((prevSlots) => [
+      ...prevSlots,
+      {
+        id: Date.now().toString(),
+        startTime: prevSlots.length ? prevSlots[prevSlots.length - 1].endTime : '',
+      },
+    ])
+    requestAnimationFrame(() => {
+      scrollToBottom()
+    })
   }
 
   const removeSlot = (id: string) => {
@@ -87,7 +95,7 @@ export const InterviewTimesDialog = () => {
           <Separator />
 
           <div className='space-y-4 overflow-hidden'>
-            <ScrollArea className='h-[300px] '>
+            <ScrollArea className='h-[300px]'>
               {interviewSlots.map((slot, index) => (
                 <div key={slot.id} className='flex flex-row items-center space-x-2 p-2 pr-4'>
                   <span className='font-medium w-1/12'>{index + 1}.</span>

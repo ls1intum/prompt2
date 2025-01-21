@@ -1,14 +1,15 @@
 import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
 import { useParams } from 'react-router-dom'
-import { useParticipationStore } from './zustand/useParticipationStore'
+import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useEffect } from 'react'
-import { getCoursePhaseParticipations } from './network/queries/getCoursePhaseParticipations'
+import { getCoursePhaseParticipations } from '../network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
-import { getCoursePhase } from './network/queries/getCoursePhase'
-import { useCoursePhaseStore } from './zustand/useCoursePhaseStore'
+import { getCoursePhase } from '../network/queries/getCoursePhase'
+import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
+import { InterviewSlot } from '../interfaces/InterviewSlots'
 
 interface InterviewDataShellProps {
   children: React.ReactNode
@@ -16,7 +17,7 @@ interface InterviewDataShellProps {
 
 export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const { setParticipations } = useParticipationStore()
+  const { setParticipations, setInterviewSlots } = useParticipationStore()
   const { setCoursePhase } = useCoursePhaseStore()
   const {
     data: coursePhaseParticipations,
@@ -54,8 +55,14 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.E
   useEffect(() => {
     if (coursePhase) {
       setCoursePhase(coursePhase)
+
+      const interviewSlots =
+        (coursePhase?.meta_data?.interview_slots as InterviewSlot[]).map((slot, index) => {
+          return { ...slot, index: index + 1 }
+        }) ?? []
+      setInterviewSlots(interviewSlots)
     }
-  }, [coursePhase, setCoursePhase])
+  }, [coursePhase, setCoursePhase, setInterviewSlots])
 
   return (
     <>

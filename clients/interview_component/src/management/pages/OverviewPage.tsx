@@ -1,20 +1,18 @@
 import { cn } from '@/lib/utils'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { StudentCard } from './components/StudentCard'
-import { useParticipationStore } from './zustand/useParticipationStore'
+import { StudentCard } from '../components/StudentCard'
+import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useScreenSize } from '@/hooks/useScreenSize'
-import { Button } from '@/components/ui/button'
-import { Clock } from 'lucide-react'
 
 import { useEffect, useMemo, useState } from 'react'
-import { SortDropdownMenu } from './components/SortDropdownMenu'
+import { SortDropdownMenu } from '../components/SortDropdownMenu'
 import { PassStatus } from '@/interfaces/course_phase_participation'
-import { InterviewQuestionsDialog } from './components/InterviewQuestionsDialog'
-import { InterviewTimesDialog } from './components/InterviewTimesDialog'
+import { InterviewQuestionsDialog } from '../components/InterviewQuestionsDialog'
+import { InterviewTimesDialog } from '../components/InterviewTimesDialog'
 
 export const OverviewPage = (): JSX.Element => {
-  const { participations } = useParticipationStore()
+  const { participations, interviewSlots } = useParticipationStore()
   const navigate = useNavigate()
   const path = useLocation().pathname
   const { width } = useScreenSize() // use this for more fine-grained control over the layout
@@ -24,6 +22,17 @@ export const OverviewPage = (): JSX.Element => {
     if (!sortBy) return participations
     return participations.sort((a, b) => {
       switch (sortBy) {
+        case 'Interview Date':
+          const aSlot = interviewSlots.find(
+            (slot) => slot.courseParticipationId === a.course_participation_id,
+          )
+          const bSlot = interviewSlots.find(
+            (slot) => slot.courseParticipationId === b.course_participation_id,
+          )
+          return (
+            (aSlot?.index || interviewSlots.length + 1) -
+            (bSlot?.index || interviewSlots.length + 1)
+          )
         case 'First Name':
           console.log('a:', a.student.first_name)
           console.log('b:', b.student.first_name)
@@ -36,13 +45,16 @@ export const OverviewPage = (): JSX.Element => {
           return (
             (statusOrder.indexOf(a.pass_status) || 0) - (statusOrder.indexOf(b.pass_status) || 0)
           )
-        // case 'Interview Date':
-        //   return new Date(a.interviewDate).getTime() - new Date(b.interviewDate).getTime()
+        case 'Interview Score':
+          return (
+            (a.meta_data.interviewScore || Number.MAX_VALUE) -
+            (b.meta_data.interviewScore || Number.MAX_VALUE)
+          )
         default:
           return 0
       }
     })
-  }, [participations, sortBy])
+  }, [participations, sortBy, interviewSlots])
 
   useEffect(() => {
     console.log('Sort by:', sortBy)
@@ -54,10 +66,6 @@ export const OverviewPage = (): JSX.Element => {
       <div className='flex justify-between items-center mt-4 mb-6'>
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
-          <Button variant='outline'>
-            <Clock className='h-4 w-4' />
-            Set Interview Times
-          </Button>
           <InterviewTimesDialog />
           <InterviewQuestionsDialog />
         </div>
@@ -74,7 +82,12 @@ export const OverviewPage = (): JSX.Element => {
             onClick={() => navigate(`${path}/details/${participation.student.id}`)}
             className='cursor-pointer'
           >
-            <StudentCard participation={participation} />
+            <StudentCard
+              participation={participation}
+              interviewSlot={interviewSlots.find(
+                (slot) => slot.courseParticipationId === participation.course_participation_id,
+              )}
+            />
           </div>
         ))}
       </div>

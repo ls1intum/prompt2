@@ -46,6 +46,12 @@ export const SortDropdownMenu = ({ sortBy, setSortBy }: SortDropdownMenuProps): 
         >
           Interview Date
         </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={sortBy === 'Interview Score'}
+          onClick={() => setSortBy('Interview Score')}
+        >
+          Interview Score
+        </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
