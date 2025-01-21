@@ -44,13 +44,39 @@ export const InterviewTimesDialog = () => {
   }, [coursePhase])
 
   const addSlot = () => {
-    setInterviewSlots((prevSlots) => [
-      ...prevSlots,
-      {
-        id: Date.now().toString(),
-        startTime: prevSlots.length ? prevSlots[prevSlots.length - 1].endTime : '',
-      },
-    ])
+    setInterviewSlots((prevSlots) => {
+      const prevStartTime = prevSlots.length > 0 ? prevSlots[prevSlots.length - 1].startTime : ''
+      const prevEndTime = prevSlots.length > 0 ? prevSlots[prevSlots.length - 1].endTime : ''
+
+      let newEndTime = ''
+
+      if (prevStartTime && prevEndTime) {
+        // Convert existing times to milliseconds
+        const startTimeMs = new Date(`1970-01-01T${prevStartTime}`).getTime()
+        const endTimeMs = new Date(`1970-01-01T${prevEndTime}`).getTime()
+
+        // Calculate the difference and apply it to prevEndTime
+        const diff = endTimeMs - startTimeMs
+        const newTimeMs = endTimeMs + diff
+
+        // Convert the resulting milliseconds back to "HH:MM"
+        const newDate = new Date(newTimeMs)
+        const hours = String(newDate.getHours()).padStart(2, '0')
+        const minutes = String(newDate.getMinutes()).padStart(2, '0')
+        newEndTime = `${hours}:${minutes}`
+      }
+
+      // Return new array of slots with the newly added slot
+      return [
+        ...prevSlots,
+        {
+          id: Date.now().toString(),
+          startTime: prevEndTime,
+          endTime: newEndTime,
+        },
+      ]
+    })
+
     requestAnimationFrame(() => {
       scrollToBottom()
     })

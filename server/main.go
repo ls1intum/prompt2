@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/applicationAdministration"
 	"github.com/niclasheun/prompt2.0/course"
@@ -17,6 +18,7 @@ import (
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/mailing"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -70,6 +72,51 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, senderName, senderEmail, clientURL)
 }
 
+func initInterview(queries db.Queries) {
+	ctx := context.Background()
+	exists, err := queries.TestInterviewPhaseTypeExists(ctx)
+	if err != nil {
+		log.Error("failed to check if interview phase type exists: ", err)
+	}
+	if !exists {
+		// create the interview module
+		requiredInputMetaData := meta.MetaRequirements{
+			{Name: "applicationScore", Type: "integer"},
+			{Name: "applicationAnswers", Type: "[]"},
+		}
+
+		providedOutputMetaData := meta.MetaRequirements{
+			{Name: "interviewScore", Type: "integer"},
+		}
+
+		requiredInputMetaDataBytes, err := requiredInputMetaData.GetDBModel()
+		if err != nil {
+			log.Error("failed to parse required input meta data")
+			return
+		}
+
+		providedOutputMetaDataBytes, err := providedOutputMetaData.GetDBModel()
+		if err != nil {
+			log.Error("failed to parse provided output meta data")
+			return
+		}
+
+		newInterviewPhaseType := db.CreateCoursePhaseTypeParams{
+			ID:                     uuid.New(),
+			Name:                   "Interview",
+			InitialPhase:           false,
+			RequiredInputMetaData:  requiredInputMetaDataBytes,
+			ProvidedOutputMetaData: providedOutputMetaDataBytes,
+		}
+		err = queries.CreateCoursePhaseType(ctx, newInterviewPhaseType)
+		if err != nil {
+			log.Error("failed to create interview module: ", err)
+		}
+	} else {
+		log.Debug("interview module already exists")
+	}
+}
+
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -101,6 +148,7 @@ func main() {
 		})
 	})
 
+	initInterview(*query)
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)

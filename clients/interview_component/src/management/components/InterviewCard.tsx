@@ -142,8 +142,12 @@ export const InterviewCard = (): JSX.Element => {
             </div>
           </div>
         </div>
-        <Separator className='mt-3 mb-3' />
-        <Label className='text-lg'>Interview Questions</Label>
+        {interviewQuestions.length > 0 && (
+          <>
+            <Separator className='mt-3 mb-3' />
+            <Label className='text-lg'>Interview Questions</Label>
+          </>
+        )}
         {interviewQuestions
           .sort((a, b) => a.order_num - b.order_num)
           .map((question, index) => (
