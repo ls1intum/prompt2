@@ -19,9 +19,11 @@ export const InterviewCard = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)
+
   const { coursePhase } = useCoursePhaseStore()
   const interviewQuestions =
     (coursePhase?.meta_data?.interview_questions as InterviewQuestion[]) ?? []
+
   const [answers, setAnswers] = useState<InterviewAnswer[]>([])
   const [score, setScore] = useState<number | undefined>(undefined)
   const [interviewer, setInterviewer] = useState<string | undefined>(undefined)
