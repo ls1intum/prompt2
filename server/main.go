@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -46,6 +47,10 @@ func runMigrations(databaseURL string) {
 
 func initKeycloak() {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
+	if !strings.HasPrefix(baseURL, "http") {
+		baseURL = "https://" + baseURL
+	}
+
 	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
 	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
