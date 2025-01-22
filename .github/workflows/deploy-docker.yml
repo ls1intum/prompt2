@@ -135,6 +135,8 @@ jobs:
             echo "KEYCLOAK_ID_OF_CLIENT=${{ vars.KEYCLOAK_ID_OF_SERVER_CLIENT }}" >> .env.prod
             echo "KEYCLOAK_AUTHORIZED_PARTY=${{ vars.KEYCLOAK_AUTHORIZED_PARTY }}" >> .env.prod
 
+            echo "GITHUB_SHA=${{ github.sha }}" >> .env.prod
+            echo "GITHUB_REF=${{ github.head_ref }}" >> .env.prod
             echo "SERVER_IMAGE_TAG=${{ inputs.server_image_tag }}" >> .env.prod
             echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
