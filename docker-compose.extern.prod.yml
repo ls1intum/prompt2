@@ -108,7 +108,7 @@ services:
     container_name: prompt-keycloak
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_URL}`)"
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_HOST}`)"
       - "traefik.http.routers.keycloak.entrypoints=websecure"
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
@@ -119,7 +119,7 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HOSTNAME: ${KEYCLOAK_URL}
+      KC_HOSTNAME: ${KEYCLOAK_HOST}
       KC_HTTP_ENABLED: "true"
       KC_PROXY: edge
     entrypoint: /opt/keycloak/bin/kc.sh start --auto-build --metrics-enabled=true
