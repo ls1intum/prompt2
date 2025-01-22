@@ -109,6 +109,10 @@ current_phase_participations AS (
         s.university_login,
         s.has_university_account,
         s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
         cp.id                    AS course_participation_id
     FROM course_phase_participation cpp
     JOIN course_participation cp 
@@ -136,6 +140,10 @@ qualified_non_participants AS (
         s.university_login,
         s.has_university_account,
         s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
         cp.id                        AS course_participation_id
     FROM course_participation cp
     JOIN student s 
@@ -238,7 +246,6 @@ SELECT
                          SELECT to_jsonb(aasm.score)
                          FROM application_assessment aasm
                          WHERE aasm.course_phase_participation_id = pcpp.id
-                           AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
                      ),
                      ----------------------------------------------------------
                      -- (B) Additional Scores

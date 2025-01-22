@@ -39,7 +39,7 @@ export const AssessmentCard = ({
         <div className='space-y-4'>
           <div>
             <Label htmlFor='new-score' className='text-sm font-medium'>
-              Assessment Score
+              Application Score
             </Label>
             <div className='flex items-center space-x-2 mt-1'>
               <Input

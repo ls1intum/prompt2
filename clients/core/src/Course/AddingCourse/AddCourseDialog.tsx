@@ -9,7 +9,7 @@ import {
 import { CourseFormValues } from '../../validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'
-import { CourseAppearanceFormValues } from 'src/validations/courseAppearance'
+import { CourseAppearanceFormValues } from '../../validations/courseAppearance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PostCourse } from '@/interfaces/post_course'
 import { postNewCourse } from '../../network/mutations/postNewCourse'

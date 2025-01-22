@@ -11,7 +11,7 @@ import { ApplicationStudyBackgroundDiagram } from './diagrams/ApplicationStudyBa
 import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySemesterDiagram'
 import { parseApplicationMailingMetaData } from '../Mailing/utils/parseApplicaitonMailingMetaData'
 import { getIsApplicationMailingIsConfigured } from '../../utils/getApplicationMailingIsConfigured'
-import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 

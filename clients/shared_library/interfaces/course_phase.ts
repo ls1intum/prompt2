@@ -27,7 +27,7 @@ export interface CoursePhaseWithMetaData {
   id: string
   course_id: string
   name: string
-  meta_data: Array<JSON>
+  meta_data: { [key: string]: any }
   is_initial_phase: boolean
   course_phase_type_id: string
 }
