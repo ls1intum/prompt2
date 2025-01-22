@@ -197,7 +197,7 @@ export const ApplicationQuestionCard = forwardRef<
                             <DescriptionMinimalTiptapEditor
                               {...field}
                               className='w-full'
-                              editorContentClassName='minimal-tiptap-editor'
+                              editorContentClassName='p-3'
                               output='html'
                               placeholder='Type your description here...'
                               autofocus={false}

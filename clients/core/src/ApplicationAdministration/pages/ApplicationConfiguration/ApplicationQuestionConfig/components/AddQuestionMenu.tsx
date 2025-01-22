@@ -64,6 +64,8 @@ export const AddQuestionMenu = ({
       min_select: 0,
       max_select: 1,
       options: ['Yes'],
+      access_key: '',
+      accessible_for_other_phases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }

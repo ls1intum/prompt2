@@ -13,7 +13,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=niclas.heun@tum.de"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--experimental.plugins.jwt.moduleName=github.com/traefik-plugins/traefik-jwt-plugin"
       - "--experimental.plugins.jwt.version=v0.7.1"
@@ -41,6 +41,8 @@ services:
       - "traefik.http.routers.server.middlewares=api-ratelimit"
     depends_on:
       db:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     expose:
       - "8080"
@@ -82,6 +84,61 @@ services:
     networks:
       - prompt-network
 
+  keycloak-db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-keycloak-db
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - POSTGRES_DB=keycloak
+      - TZ=Europe/Berlin
+    volumes:
+      - ./keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER} -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+  
+  # To use keycloak you need to manually create the database keycloak once
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.0
+    container_name: prompt-keycloak
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_HOST}`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_HOST}
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+    entrypoint: /opt/keycloak/bin/kc.sh start --auto-build --metrics-enabled=true
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks:
+      - prompt-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+        ]
+
+
   client-interview-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
     container_name: prompt-client-interview-component
@@ -122,26 +179,6 @@ services:
     networks:
       - prompt-network
 
-  client-template-component:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
-    container_name: prompt-client-template-component
-    environment:
-      - TZ=Europe/Berlin
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.template.rule=Host(`${CORE_HOST}`) && PathPrefix(`/template`)"
-      - "traefik.http.routers.template.entrypoints=websecure"
-      - "traefik.http.routers.template.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.template-strip-prefix.stripPrefix.prefixes=/template"
-      - "traefik.http.routers.template.middlewares=template-strip-prefix,template-compress"
-      - "traefik.http.middlewares.template-compress.compress=true"
-    expose:
-      - "80"
-    depends_on:
-      - server
-    networks:
-      - prompt-network
-
   client-core:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-core:${CORE_IMAGE_TAG}"
     container_name: prompt-client-core
@@ -152,9 +189,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - CHAIR_NAME_SHORT
       - CHAIR_NAME_LONG
-      - GITHUB_SHA
-      - GITHUB_REF
-      - SERVER_IMAGE_TAG
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
@@ -165,21 +199,16 @@ services:
       - "80"
     depends_on:
       - server
+    volumes:
+      # Mount your own imprint, privacy policy and logo
+      - ./privacy.html:/usr/share/nginx/html/privacy.html:ro
+      - ./imprint.html:/usr/share/nginx/html/imprint.html:ro
+      # for now please provide your logo in jpeg format - will be improved later
+      - ./chair-logo.jpeg:/usr/share/nginx/html/chair-logo.jpeg:ro
     networks:
       - prompt-network
 
-  postfix:
-    image: ghcr.io/ls1admin/postfix:latest
-    container_name: prompt-postfix
-    restart: unless-stopped
-    volumes:
-      - ./postfix-config:/config
-    hostname: ${CORE_HOST}
-    networks:
-      - prompt-network
 
 networks:
-  # Create network manually in advance: docker network create prompt-network
   prompt-network:
     name: prompt-network
-    external: true
