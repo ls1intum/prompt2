@@ -498,6 +498,29 @@
     "webAuthnPolicyPasswordlessCreateTimeout": 0,
     "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister": false,
     "webAuthnPolicyPasswordlessAcceptableAaguids": [],
+    "users": [
+      {
+        "id": "64b1e229-1f45-4cd8-b1ef-12ab6a694f73",
+        "createdTimestamp": 1737552859689,
+        "username": "service-account-prompt-server",
+        "enabled": true,
+        "totp": false,
+        "emailVerified": false,
+        "serviceAccountClientId": "prompt-server",
+        "disableableCredentialTypes": [],
+        "requiredActions": [],
+        "realmRoles": [
+          "default-roles-prompt"
+        ],
+        "clientRoles": {
+          "realm-management": [
+            "realm-admin"
+          ]
+        },
+        "notBefore": 0,
+        "groups": []
+      }
+    ],
     "scopeMappings": [
       {
         "clientScope": "offline_access",

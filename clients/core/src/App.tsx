@@ -17,6 +17,7 @@ import CourseConfiguratorPage from './CourseConfigurator/CourseConfiguratorPage'
 import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
 import { env } from './env'
+import { parseURL } from './utils/parseURL'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,7 +27,7 @@ const queryClient = new QueryClient({
   },
 })
 
-const keycloakUrl = env.KEYCLOAK_HOST
+const keycloakUrl = parseURL(env.KEYCLOAK_HOST)
 const keycloakRealmName = env.KEYCLOAK_REALM_NAME
 
 export const App = (): JSX.Element => {
