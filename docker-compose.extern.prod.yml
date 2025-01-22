@@ -83,6 +83,24 @@ services:
       retries: 5
     networks:
       - prompt-network
+
+  keycloak-db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-keycloak-db
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - POSTGRES_DB=keycloak
+      - TZ=Europe/Berlin
+    volumes:
+      - ./keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
   
   # To use keycloak you need to manually create the database keycloak once
   keycloak:
@@ -96,9 +114,9 @@ services:
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
     environment:
       KC_DB: postgres
-      KC_DB_URL_HOST: db
-      KC_DB_USERNAME: ${DB_USER}
-      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HOSTNAME: ${KEYCLOAK_URL}
@@ -106,7 +124,8 @@ services:
       KC_PROXY: edge
     entrypoint: /opt/keycloak/bin/kc.sh start --auto-build --metrics-enabled=true
     depends_on:
-        - db
+      keycloak-db:
+        condition: service_healthy
     restart: unless-stopped
     expose:
       - "8080"

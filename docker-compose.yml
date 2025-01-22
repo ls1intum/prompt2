@@ -71,21 +71,39 @@ services:
     ports:
       - "5432:5432"
 
+  keycloak-db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-keycloak-db
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
+      - TZ=Europe/Berlin
+    volumes:
+      - ./keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
   # To use keycloak you need to manually create the database keycloak once
   keycloak:
     image: quay.io/keycloak/keycloak:21.0
     container_name: prompt-keycloak
     environment:
       KC_DB: postgres
-      KC_DB_URL_HOST: db
-      KC_DB_USERNAME: prompt-postgres
-      KC_DB_PASSWORD: prompt-postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HOSTNAME: localhost
     entrypoint: /opt/keycloak/bin/kc.sh start-dev
     depends_on:
-      db:
+      keycloak-db:
         condition: service_healthy
     restart: unless-stopped
     ports:
