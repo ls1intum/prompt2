@@ -18,6 +18,7 @@ import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
 import { env } from './env'
 import { parseURL } from './utils/parseURL'
+import { MailingConfigPage } from './MailingConfig/MailingConfigPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +65,18 @@ export const App = (): JSX.Element => {
                     ]}
                   >
                     <CourseConfiguratorPage />
+                  </PermissionRestriction>
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/mailing'
+              element={
+                <ManagementRoot>
+                  <PermissionRestriction
+                    requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
+                  >
+                    <MailingConfigPage />
                   </PermissionRestriction>
                 </ManagementRoot>
               }

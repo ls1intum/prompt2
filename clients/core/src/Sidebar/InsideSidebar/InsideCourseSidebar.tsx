@@ -12,6 +12,7 @@ import { useCourseStore } from '@/zustand/useCourseStore'
 import { DisabledSidebarMenuItem } from './components/DisabledSidebarMenuItem'
 import { PhaseSidebarMapping } from '../../PhaseMapping/PhaseSidebarMapping'
 import { CourseConfiguratorSidebar } from '../../PhaseMapping/ExternalSidebars/CourseConfiguratorSidebar'
+import { MailingConfigSidebar } from '../../PhaseMapping/ExternalSidebars/MailingConfigSidebar'
 
 export const InsideCourseSidebar = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -34,6 +35,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
         <SidebarGroupContent>
           <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
           <CourseConfiguratorSidebar rootPath={rootPath} title='Configure Course' />
+          <MailingConfigSidebar rootPath={rootPath} title='Mailing Settings' />
         </SidebarGroupContent>
       </SidebarGroup>
 

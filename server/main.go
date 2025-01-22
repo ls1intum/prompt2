@@ -53,8 +53,8 @@ func initKeycloak() {
 
 	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
-	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
-	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "")
+	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "iKtGMR8PSjSYmIFfgWWbuJJXxIjXd3DL")
+	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "a584ca61-fa83-4e95-98b6-c5f3157ae4b4")
 	expectedAuthorizedParty := utils.GetEnv("KEYCLOAK_AUTHORIZED_PARTY", "prompt-client")
 
 	log.Info("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " idOfClient: ", idOfClient, " expectedAuthorizedParty: ", expectedAuthorizedParty)
