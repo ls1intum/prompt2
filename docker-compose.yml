@@ -7,9 +7,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
+      - CORE_HOST=http://localhost:3000
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
       - DB_HOST=db
@@ -17,6 +20,12 @@ services:
       - DB_NAME=prompt
       - SSL_MODE=disable
       - SERVER_ADDRESS=0.0.0.0:8080
+      - KEYCLOAK_HOST=localhost:8081
+      - KEYCLOAK_REALM_NAME=prompt
+      - KEYCLOAK_CLIENT_ID=prompt-server
+      - KEYCLOAK_CLIENT_SECRET=TvoTuMQWcwXTk8bqY49ElCVz8JthXyMb #DO NOT USE IN PRODUCTION !!!
+      - KEYCLOAK_ID_OF_CLIENT=a584ca61-fa83-4e95-98b6-c5f3157ae4b4
+      - KEYCLOAK_AUTHORIZED_PARTY=prompt-client
 
   core:
     build:
@@ -52,6 +61,8 @@ services:
       - POSTGRES_PASSWORD=prompt-postgres
       - POSTGRES_DB=prompt
       - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
       interval: 5s
@@ -60,15 +71,49 @@ services:
     ports:
       - "5432:5432"
 
+  keycloak-db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-keycloak-db
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_DB=keycloak
+      - TZ=Europe/Berlin
+    volumes:
+      - ./keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
+  # To use keycloak you need to manually create the database keycloak once
   keycloak:
-    image: quay.io/keycloak/keycloak:20.0
+    image: quay.io/keycloak/keycloak:21.0
     container_name: prompt-keycloak
     environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
     entrypoint: /opt/keycloak/bin/kc.sh start-dev
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+        ]
 
   postfix:
     image: ghcr.io/ls1admin/postfix:latest

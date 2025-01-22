@@ -1,0 +1,208 @@
+version: "1.0"
+
+services:
+  reverse-proxy:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=prompt-network"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=niclas.heun@tum.de"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--experimental.plugins.jwt.moduleName=github.com/traefik-plugins/traefik-jwt-plugin"
+      - "--experimental.plugins.jwt.version=v0.7.1"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - prompt-network
+
+  server:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_IMAGE_TAG}"
+    container_name: prompt-server
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server.rule=Host(`${CORE_HOST}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.server.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server.middlewares=api-ratelimit"
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_PASSWORD
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - KEYCLOAK_CLIENT_ID
+      - KEYCLOAK_CLIENT_SECRET
+      - KEYCLOAK_ID_OF_CLIENT
+      - KEYCLOAK_AUTHORIZED_PARTY
+      - SMTP_HOST
+      - SMTP_PORT
+      - SENDER_EMAIL
+      - SENDER_NAME
+    networks:
+      - prompt-network
+
+  db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
+  keycloak-db:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-keycloak-db
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - POSTGRES_DB=keycloak
+      - TZ=Europe/Berlin
+    volumes:
+      - ./keycloak_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+  
+  # To use keycloak you need to manually create the database keycloak once
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.0
+    container_name: prompt-keycloak
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_HOST}`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_HOST}
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+    entrypoint: /opt/keycloak/bin/kc.sh start --auto-build --metrics-enabled=true
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks:
+      - prompt-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+        ]
+
+
+  client-interview-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
+    container_name: prompt-client-interview-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.interview.rule=Host(`${CORE_HOST}`) && PathPrefix(`/interview`)"
+      - "traefik.http.routers.interview.entrypoints=websecure"
+      - "traefik.http.routers.interview.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.interview-strip-prefix.stripPrefix.prefixes=/interview"
+      - "traefik.http.routers.interview.middlewares=interview-strip-prefix,interview-compress"
+      - "traefik.http.middlewares.interview-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
+  client-matching-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-matching-component:${MATCHING_IMAGE_TAG}"
+    container_name: prompt-client-matching-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matching.rule=Host(`${CORE_HOST}`) && PathPrefix(`/matching`)"
+      - "traefik.http.routers.matching.entrypoints=websecure"
+      - "traefik.http.routers.matching.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.matching-strip-prefix.stripPrefix.prefixes=/matching"
+      - "traefik.http.routers.matching.middlewares=matching-strip-prefix,matching-compress"
+      - "traefik.http.middlewares.matching-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
+  client-core:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-core:${CORE_IMAGE_TAG}"
+    container_name: prompt-client-core
+    environment:
+      - TZ=Europe/Berlin
+      - CORE_HOST
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - CHAIR_NAME_SHORT
+      - CHAIR_NAME_LONG
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
+      - "traefik.http.routers.core.entrypoints=websecure"
+      - "traefik.http.routers.core.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.core-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server
+    networks:
+      - prompt-network
+
+
+networks:
+  prompt-network:
+    name: prompt-network
