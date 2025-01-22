@@ -50,7 +50,7 @@ services:
     environment:
       - POSTGRES_USER=prompt-postgres
       - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_DB=prompt-postgres
       - TZ=Europe/Berlin
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
@@ -61,14 +61,21 @@ services:
       - "5432:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:20.0
+    image: quay.io/keycloak/keycloak:21.0
     container_name: prompt-keycloak
     environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_USERNAME: prompt-postgres
+      KC_DB_PASSWORD: prompt-postgres
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     entrypoint: /opt/keycloak/bin/kc.sh start-dev
+    depends_on:
+        - db
+    restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
 
   postfix:
     image: ghcr.io/ls1admin/postfix:latest
