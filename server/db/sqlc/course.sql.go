@@ -134,3 +134,20 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 	)
 	return i, err
 }
+
+const updateCourse = `-- name: UpdateCourse :exec
+UPDATE course
+SET 
+  meta_data = meta_data || $2
+WHERE id = $1
+`
+
+type UpdateCourseParams struct {
+	ID       uuid.UUID `json:"id"`
+	MetaData []byte    `json:"meta_data"`
+}
+
+func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) error {
+	_, err := q.db.Exec(ctx, updateCourse, arg.ID, arg.MetaData)
+	return err
+}

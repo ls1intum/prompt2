@@ -23,3 +23,9 @@ SELECT CASE
          ELSE false 
        END AS all_exist_and_match_course
 FROM matched_phases;
+
+-- name: UpdateCourse :exec
+UPDATE course
+SET 
+  meta_data = meta_data || $2
+WHERE id = $1;
