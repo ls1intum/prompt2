@@ -12,8 +12,6 @@ export const parseApplicationMailingMetaData = (metaData: any): ApplicationMaili
       sendConfirmationMail = false,
       sendRejectionMail = false,
       sendAcceptanceMail = false,
-      replyToName = '',
-      replyToEmail = '',
     } = {},
   } = metaData || {}
 
@@ -27,7 +25,5 @@ export const parseApplicationMailingMetaData = (metaData: any): ApplicationMaili
     sendConfirmationMail,
     sendRejectionMail,
     sendAcceptanceMail,
-    replyToName,
-    replyToEmail,
   }
 }

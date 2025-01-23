@@ -11,7 +11,4 @@ export type ApplicationMailingMetaData = {
   sendConfirmationMail: boolean
   sendRejectionMail: boolean // for automatic mail - not yet implemented
   sendAcceptanceMail: boolean // for automatic mail - not yet implemented
-
-  replyToName: string
-  replyToEmail: string
 }

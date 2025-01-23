@@ -12,12 +12,14 @@ import { EmailTemplateEditor } from './components/MailingEditor'
 import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
+import { useGetMailingIsConfigured } from '../../../hooks/useGetMailingIsConfigured'
+import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { MailWarningIcon } from 'lucide-react'
 
 export const ApplicationMailingSettings = () => {
-  const { phaseId } = useParams<{ phaseId: string }>()
+  const { phaseId, courseId } = useParams<{ courseId: string; phaseId: string }>()
   const { toast } = useToast()
   const { coursePhase } = useApplicationStore()
-  const [emailError, setEmailError] = useState<string | null>(null)
   const [initialMetaData, setInitialMetaData] = useState<ApplicationMailingMetaData | null>(null)
   const [applicationMailingMetaData, setApplicationMailingMetaData] =
     useState<ApplicationMailingMetaData>({
@@ -30,12 +32,12 @@ export const ApplicationMailingSettings = () => {
       sendConfirmationMail: false,
       sendRejectionMail: false,
       sendAcceptanceMail: false,
-
-      replyToEmail: '',
-      replyToName: '',
     })
 
   const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(applicationMailingMetaData)
+
+  const courseMailingIsConfigured = useGetMailingIsConfigured()
+  const [missingConfigs, setMissingConfigs] = useState<MissingConfigItem[]>([])
 
   // Updating state
   const { mutate: mutateCoursePhase } = useModifyCoursePhase(
@@ -64,17 +66,6 @@ export const ApplicationMailingSettings = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setApplicationMailingMetaData((prev) => ({ ...prev, [name]: value }))
-
-    if (name === 'replyToEmail') {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!value) {
-        setEmailError('Reply To Email is required.')
-      } else if (!emailPattern.test(value)) {
-        setEmailError('Please enter a valid email address.')
-      } else {
-        setEmailError(null)
-      }
-    }
   }
 
   const handleSwitchChange = (name: string) => {
@@ -86,16 +77,6 @@ export const ApplicationMailingSettings = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // get all the values
-    if (emailError) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fix the errors before submitting.',
-        variant: 'destructive',
-      })
-      return
-    }
-
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
       meta_data: {
@@ -103,18 +84,29 @@ export const ApplicationMailingSettings = () => {
       },
     }
     mutateCoursePhase(updatedCoursePhase)
-    console.log('Saving:', applicationMailingMetaData)
   }
+
+  useEffect(() => {
+    if (!courseMailingIsConfigured) {
+      setMissingConfigs([
+        {
+          title: 'Application Mailing',
+          description: 'Please configure course mailing settings',
+          link: `/management/course/${courseId}/mailing`,
+          icon: MailWarningIcon,
+        },
+      ])
+    }
+  }, [courseId, courseMailingIsConfigured])
 
   return (
     <div className='space-y-6'>
       <ManagementPageHeader>Application Mailing Settings</ManagementPageHeader>
+      <MissingConfig elements={missingConfigs} />
       <SettingsCard
         applicationMailingMetaData={applicationMailingMetaData}
-        handleInputChange={handleInputChange}
         handleSwitchChange={handleSwitchChange}
         isModified={isModified}
-        emailError={emailError}
       />
       <h2 className='text-2xl font-bold'>Mailing Templates </h2>
 
