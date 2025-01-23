@@ -7,13 +7,12 @@ export const useGetMailingIsConfigured = (): boolean => {
   const { courses } = useCourseStore()
   const activeCourse = courses.find((course) => course.id === courseId)
 
-  const mailingConfig = activeCourse?.meta_data?.mailingMetaConfiguration as MailingMetaData
-  console.log('mailingConfig', mailingConfig)
+  const mailingSettings = activeCourse?.meta_data?.mailingSettings as MailingMetaData
 
   if (
-    mailingConfig !== undefined &&
-    mailingConfig?.replyToEmail !== '' &&
-    mailingConfig?.replyToName !== ''
+    mailingSettings !== undefined &&
+    mailingSettings?.replyToEmail !== '' &&
+    mailingSettings?.replyToName !== ''
   ) {
     return true
   } else {

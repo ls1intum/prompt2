@@ -80,7 +80,7 @@ export const ApplicationMailingSettings = () => {
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
       meta_data: {
-        mailingConfig: applicationMailingMetaData,
+        mailingSettings: applicationMailingMetaData,
       },
     }
     mutateCoursePhase(updatedCoursePhase)

@@ -6,7 +6,7 @@ export const emailWithNameSchema = z.object({
 })
 
 export const courseMailingSchema = z.object({
-  replyToName: z.string().optional(),
+  replyToName: z.string(),
   replyToEmail: z.string().email('Invalid email format').optional(),
   ccAddresses: z.array(emailWithNameSchema).optional(),
   bccAddresses: z.array(emailWithNameSchema).optional(),

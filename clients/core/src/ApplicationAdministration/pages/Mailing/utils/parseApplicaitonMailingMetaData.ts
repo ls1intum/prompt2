@@ -2,7 +2,7 @@ import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 
 export const parseApplicationMailingMetaData = (metaData: any): ApplicationMailingMetaData => {
   const {
-    mailingConfig: {
+    mailingSettings: {
       confirmationMailSubject = '',
       confirmationMailContent = '',
       failedMailSubject = '',

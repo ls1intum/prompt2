@@ -26,9 +26,9 @@ SELECT
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
     (p.meta_data->>'applicationEndDate')::text AS application_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
-    COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
+    COALESCE((p.meta_data->'mailingSettings'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
+    COALESCE((p.meta_data->'mailingSettings'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
+    COALESCE((p.meta_data->'mailingSettings'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
 FROM 
     course_phase_participation cpp
 JOIN 
@@ -134,8 +134,8 @@ SELECT
     c.name AS course_name,
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS mail_content
+    COALESCE((p.meta_data->'mailingSettings'->>'failedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingSettings'->>'failedMailContent'), '')::text AS mail_content
 FROM
     course_phase p
 JOIN
@@ -239,8 +239,8 @@ SELECT
     c.name AS course_name,
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'passedMailSubject'), '')::text AS mail_subject,
-    COALESCE((p.meta_data->'mailingConfig'->>'passedMailContent'), '')::text AS mail_content
+    COALESCE((p.meta_data->'mailingSettings'->>'passedMailSubject'), '')::text AS mail_subject,
+    COALESCE((p.meta_data->'mailingSettings'->>'passedMailContent'), '')::text AS mail_content
 FROM
     course_phase p
 JOIN
