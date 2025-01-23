@@ -1,5 +1,5 @@
-FROM golang:1.23-alpine
-
+# Stage 1: Build
+FROM golang:1.23-alpine AS build
 
 # Install dependencies
 RUN apk add --no-cache curl
@@ -8,23 +8,36 @@ RUN apk add --no-cache curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz && \
     mv migrate /usr/local/bin/
 
-# Set the Current Working Directory inside the container
+# Set the working directory
 WORKDIR /app
 
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+# Download dependencies
 RUN go mod download
 
-# Copy the source from the current directory to the Working Directory inside the container
+# Copy the source code
 COPY . .
 
 # Build the Go app
 RUN go build -o main .
 
-# Expose port 8080 to the outside world
+# Stage 2: Final (distroless)
+FROM gcr.io/distroless/base-debian11
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the built binary and necessary files from the build stage
+COPY --from=build /app/main /app/main
+COPY --from=build /usr/local/bin/migrate /usr/local/bin/migrate
+COPY --from=build /app/db/migration /app/db/migration
+
+# Expose the application port
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["./main"]
+# Run the application
+CMD ["/app/main"]
+
+
