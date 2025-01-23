@@ -35,6 +35,7 @@ import { useCustomElementWidth } from '../../../hooks/useCustomElementWidth'
 import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
+import { useDeleteApplications } from './hooks/useDeleteApplications'
 
 export const ApplicationsAssessment = (): JSX.Element => {
   const { additionalScores, participations } = useApplicationStore()
@@ -47,13 +48,15 @@ export const ApplicationsAssessment = (): JSX.Element => {
   const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
   const tableWidth = useCustomElementWidth('table-view')
 
+  const { mutate: mutateDeleteApplications } = useDeleteApplications()
+
   const viewApplication = (id: string) => {
     setSelectedApplicationID(id)
     setDialogOpen(true)
   }
 
   const deleteApplication = (coursePhaseParticipationID: string) => {
-    console.log('delete', coursePhaseParticipationID)
+    mutateDeleteApplications([coursePhaseParticipationID])
   }
 
   const selectedApplication = participations?.find(
