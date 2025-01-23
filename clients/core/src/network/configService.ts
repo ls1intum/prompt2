@@ -1,7 +1,7 @@
 // TODO rewrite this as context provider and re-integrate it into the shared library
 
 import axios from 'axios'
-import { env } from '../env'
+import { env } from '@/env'
 import { parseURL } from '../utils/parseURL'
 
 const coreURL = env.CORE_HOST || ''
