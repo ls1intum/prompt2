@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { AdditionalScoreUpload } from '@/interfaces/additional_score'
 
 export const postAdditionalScore = async (

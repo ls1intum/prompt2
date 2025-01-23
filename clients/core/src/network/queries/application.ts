@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { GetApplication } from '@/interfaces/get_application'
 
 export const getApplication = async (coursePhaseId: string): Promise<GetApplication> => {

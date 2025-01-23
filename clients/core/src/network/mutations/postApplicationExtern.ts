@@ -1,4 +1,4 @@
-import { notAuthenticatedAxiosInstance } from '../configService'
+import { notAuthenticatedAxiosInstance } from '@/network/configService'
 import { PostApplication } from '@/interfaces/post_application'
 
 export const postNewApplicationExtern = async (

@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { PostApplication } from '@/interfaces/post_application'
 
 export const postNewApplicationAuthenticated = async (

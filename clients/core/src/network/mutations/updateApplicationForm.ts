@@ -1,5 +1,5 @@
 import { UpdateApplicationForm } from '@/interfaces/application_form'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const updateApplicationForm = async (
   coursePhaseID: string,

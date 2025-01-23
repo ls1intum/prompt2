@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { ApplicationParticipation } from '@/interfaces/application_participations'
 
 export const getApplicationParticipations = async (

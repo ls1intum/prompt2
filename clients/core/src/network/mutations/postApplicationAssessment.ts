@@ -1,5 +1,5 @@
 import { ApplicationAssessment } from '@/interfaces/application_assessment'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const postApplicationAssessment = async (
   phaseId: string,

@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
 
 export const getCoursePhaseByID = async (phaseId: string): Promise<CoursePhaseWithMetaData> => {

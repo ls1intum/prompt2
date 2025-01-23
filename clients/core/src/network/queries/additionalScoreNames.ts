@@ -1,5 +1,5 @@
 import { AdditionalScore } from '@/interfaces/additional_score'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const getAdditionalScoreNames = async (
   coursePhaseId: string,

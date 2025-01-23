@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { UpdateCoursePhaseParticipationStatus } from '@/interfaces/update_course_phase_participation_status'
 
 export const updateApplicationStatus = async (
