@@ -160,29 +160,8 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 
 	to := mail.Address{Address: recipientAddress}
 
-	// Build email headers
-	header := map[string]string{
-		"From":         MailingServiceSingleton.senderEmail.String(),
-		"To":           to.String(),
-		"Reply-To":     courseMailingSettings.ReplyTo.String(),
-		"Subject":      subject,
-		"Content-Type": `text/html; charset="UTF-8"`,
-	}
-
-	if courseMailingSettings.CC.Address != "" {
-		header["Cc"] = courseMailingSettings.CC.String()
-	}
-
-	if courseMailingSettings.BCC.Address != "" {
-		header["Bcc"] = courseMailingSettings.BCC.String()
-	}
-
-	// Construct the message
 	var message strings.Builder
-	for k, v := range header {
-		message.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
-	}
-	message.WriteString("\r\n")
+	buildMailHeader(&message, courseMailingSettings, to.String(), subject)
 	message.WriteString(htmlBody)
 
 	// Send the email
@@ -194,16 +173,31 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 	}
 	defer client.Close()
 
-	log.Debug(MailingServiceSingleton.senderEmail.Address)
-
 	// Set the sender and recipient
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {
 		log.Error("failed to set sender: ", err)
 		return errors.New("failed to send mail")
 	}
+
 	if err := client.Rcpt(recipientAddress); err != nil {
 		log.Error("failed to set recipient: ", err)
 		return errors.New("failed to send mail")
+	}
+
+	// set all cc mails
+	for _, cc := range courseMailingSettings.CC {
+		if err := client.Rcpt(cc.Address); err != nil {
+			log.Error("failed to set cc: ", err)
+			return errors.New("failed to send mail")
+		}
+	}
+
+	// set all bcc mails
+	for _, bcc := range courseMailingSettings.BCC {
+		if err := client.Rcpt(bcc.Address); err != nil {
+			log.Error("failed to set bcc: ", err)
+			return errors.New("failed to send mail")
+		}
 	}
 
 	// Send the data
@@ -238,12 +232,32 @@ func getSenderInformation(ctx context.Context, coursePhaseID uuid.UUID) (mailing
 		return mailingDTO.CourseMailingSettings{}, errors.New("reply to email or name is not set")
 	}
 
-	courseMailingSettings := mailingDTO.CourseMailingSettings{
-		ReplyTo: mail.Address{Name: courseMailing.ReplyToName, Address: courseMailing.ReplyToEmail},
-		CC:      mail.Address{Name: courseMailing.CcName, Address: courseMailing.CcEmail},
-		BCC:     mail.Address{Name: courseMailing.BccName, Address: courseMailing.BccEmail},
+	courseMailingSettings, err := mailingDTO.GetCourseMailingSettingsFromDBModel(courseMailing)
+	if err != nil {
+		log.Error("failed to get course mailing settings: ", err)
+		return mailingDTO.CourseMailingSettings{}, errors.New("failed to get course mailing infos")
 	}
 
 	return courseMailingSettings, nil
 
+}
+
+func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.CourseMailingSettings, recipient, subject string) {
+	// using this instead of map to geth a nicely formatted Mailing Header
+	message.WriteString(fmt.Sprintf("From: %s\r\n", courseMailingSettings.ReplyTo.String()))
+	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
+	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
+	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
+
+	if len(courseMailingSettings.CC) > 0 {
+		var ccString string
+		for _, cc := range courseMailingSettings.CC {
+			ccString += cc.String() + ","
+		}
+		message.WriteString(fmt.Sprintf("CC: %s\r\n", ccString))
+	}
+
+	// BCC are set in the client and not the header
+	message.WriteString("\r\n")
 }

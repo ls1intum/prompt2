@@ -84,10 +84,8 @@ AND
 SELECT
     COALESCE((c.meta_data->'mailingSettings'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((c.meta_data->'mailingSettings'->>'replyToName')::text, '')::text AS reply_to_name,
-    COALESCE((c.meta_data->'mailingSettings'->>'ccEmail')::text, '')::text AS cc_email,
-    COALESCE((c.meta_data->'mailingSettings'->>'ccName')::text, '')::text AS cc_name,
-    COALESCE((c.meta_data->'mailingSettings'->>'bccEmail')::text, '')::text AS bcc_email,
-    COALESCE((c.meta_data->'mailingSettings'->>'bccName')::text, '')::text AS bcc_name
+    COALESCE((c.meta_data->'mailingSettings'->>'ccAddresses')::jsonb, '[]')::jsonb AS cc_addresses,
+    COALESCE((c.meta_data->'mailingSettings'->>'bccAddresses')::jsonb, '[]')::json AS bcc_addresses
 FROM 
   course c
 INNER JOIN

@@ -94,10 +94,8 @@ const getCourseMailingSettingsForCoursePhaseID = `-- name: GetCourseMailingSetti
 SELECT
     COALESCE((c.meta_data->'mailingSettings'->>'replyToEmail')::text, '')::text AS reply_to_email,
     COALESCE((c.meta_data->'mailingSettings'->>'replyToName')::text, '')::text AS reply_to_name,
-    COALESCE((c.meta_data->'mailingSettings'->>'ccEmail')::text, '')::text AS cc_email,
-    COALESCE((c.meta_data->'mailingSettings'->>'ccName')::text, '')::text AS cc_name,
-    COALESCE((c.meta_data->'mailingSettings'->>'bccEmail')::text, '')::text AS bcc_email,
-    COALESCE((c.meta_data->'mailingSettings'->>'bccName')::text, '')::text AS bcc_name
+    COALESCE((c.meta_data->'mailingSettings'->>'ccAddresses')::jsonb, '{}')::jsonb AS cc_addresses,
+    COALESCE((c.meta_data->'mailingSettings'->>'bccAddresses')::jsonb, '{}')::json AS bcc_addresses
 FROM 
   course c
 INNER JOIN
@@ -109,10 +107,8 @@ WHERE
 type GetCourseMailingSettingsForCoursePhaseIDRow struct {
 	ReplyToEmail string `json:"reply_to_email"`
 	ReplyToName  string `json:"reply_to_name"`
-	CcEmail      string `json:"cc_email"`
-	CcName       string `json:"cc_name"`
-	BccEmail     string `json:"bcc_email"`
-	BccName      string `json:"bcc_name"`
+	CcAddresses  []byte `json:"cc_addresses"`
+	BccAddresses []byte `json:"bcc_addresses"`
 }
 
 func (q *Queries) GetCourseMailingSettingsForCoursePhaseID(ctx context.Context, id uuid.UUID) (GetCourseMailingSettingsForCoursePhaseIDRow, error) {
@@ -121,10 +117,8 @@ func (q *Queries) GetCourseMailingSettingsForCoursePhaseID(ctx context.Context, 
 	err := row.Scan(
 		&i.ReplyToEmail,
 		&i.ReplyToName,
-		&i.CcEmail,
-		&i.CcName,
-		&i.BccEmail,
-		&i.BccName,
+		&i.CcAddresses,
+		&i.BccAddresses,
 	)
 	return i, err
 }
