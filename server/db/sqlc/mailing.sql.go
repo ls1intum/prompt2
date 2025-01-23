@@ -26,8 +26,6 @@ SELECT
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
     (p.meta_data->>'applicationEndDate')::text AS application_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
     COALESCE((p.meta_data->'mailingConfig'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
     COALESCE((p.meta_data->'mailingConfig'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail
@@ -64,8 +62,6 @@ type GetConfirmationMailingInformationRow struct {
 	CourseStartDate         pgtype.Date `json:"course_start_date"`
 	CourseEndDate           pgtype.Date `json:"course_end_date"`
 	ApplicationEndDate      string      `json:"application_end_date"`
-	ReplyToEmail            string      `json:"reply_to_email"`
-	ReplyToName             string      `json:"reply_to_name"`
 	ConfirmationMailSubject string      `json:"confirmation_mail_subject"`
 	ConfirmationMailContent string      `json:"confirmation_mail_content"`
 	SendConfirmationMail    bool        `json:"send_confirmation_mail"`
@@ -87,11 +83,48 @@ func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg Get
 		&i.CourseStartDate,
 		&i.CourseEndDate,
 		&i.ApplicationEndDate,
-		&i.ReplyToEmail,
-		&i.ReplyToName,
 		&i.ConfirmationMailSubject,
 		&i.ConfirmationMailContent,
 		&i.SendConfirmationMail,
+	)
+	return i, err
+}
+
+const getCourseMailingSettingsForCoursePhaseID = `-- name: GetCourseMailingSettingsForCoursePhaseID :one
+SELECT
+    COALESCE((c.meta_data->'mailingSettings'->>'replyToEmail')::text, '')::text AS reply_to_email,
+    COALESCE((c.meta_data->'mailingSettings'->>'replyToName')::text, '')::text AS reply_to_name,
+    COALESCE((c.meta_data->'mailingSettings'->>'ccEmail')::text, '')::text AS cc_email,
+    COALESCE((c.meta_data->'mailingSettings'->>'ccName')::text, '')::text AS cc_name,
+    COALESCE((c.meta_data->'mailingSettings'->>'bccEmail')::text, '')::text AS bcc_email,
+    COALESCE((c.meta_data->'mailingSettings'->>'bccName')::text, '')::text AS bcc_name
+FROM 
+  course c
+INNER JOIN
+  course_phase p ON c.id = p.course_id
+WHERE
+  p.id = $1
+`
+
+type GetCourseMailingSettingsForCoursePhaseIDRow struct {
+	ReplyToEmail string `json:"reply_to_email"`
+	ReplyToName  string `json:"reply_to_name"`
+	CcEmail      string `json:"cc_email"`
+	CcName       string `json:"cc_name"`
+	BccEmail     string `json:"bcc_email"`
+	BccName      string `json:"bcc_name"`
+}
+
+func (q *Queries) GetCourseMailingSettingsForCoursePhaseID(ctx context.Context, id uuid.UUID) (GetCourseMailingSettingsForCoursePhaseIDRow, error) {
+	row := q.db.QueryRow(ctx, getCourseMailingSettingsForCoursePhaseID, id)
+	var i GetCourseMailingSettingsForCoursePhaseIDRow
+	err := row.Scan(
+		&i.ReplyToEmail,
+		&i.ReplyToName,
+		&i.CcEmail,
+		&i.CcName,
+		&i.BccEmail,
+		&i.BccName,
 	)
 	return i, err
 }
@@ -101,8 +134,6 @@ SELECT
     c.name AS course_name,
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'failedMailSubject'), '')::text AS mail_subject,
     COALESCE((p.meta_data->'mailingConfig'->>'failedMailContent'), '')::text AS mail_content
 FROM
@@ -117,8 +148,6 @@ type GetFailedMailingInformationRow struct {
 	CourseName      string      `json:"course_name"`
 	CourseStartDate pgtype.Date `json:"course_start_date"`
 	CourseEndDate   pgtype.Date `json:"course_end_date"`
-	ReplyToEmail    string      `json:"reply_to_email"`
-	ReplyToName     string      `json:"reply_to_name"`
 	MailSubject     string      `json:"mail_subject"`
 	MailContent     string      `json:"mail_content"`
 }
@@ -130,8 +159,6 @@ func (q *Queries) GetFailedMailingInformation(ctx context.Context, id uuid.UUID)
 		&i.CourseName,
 		&i.CourseStartDate,
 		&i.CourseEndDate,
-		&i.ReplyToEmail,
-		&i.ReplyToName,
 		&i.MailSubject,
 		&i.MailContent,
 	)
@@ -212,8 +239,6 @@ SELECT
     c.name AS course_name,
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToEmail')::text, '')::text AS reply_to_email,
-    COALESCE((p.meta_data->'mailingConfig'->>'replyToName')::text, '')::text AS reply_to_name,
     COALESCE((p.meta_data->'mailingConfig'->>'passedMailSubject'), '')::text AS mail_subject,
     COALESCE((p.meta_data->'mailingConfig'->>'passedMailContent'), '')::text AS mail_content
 FROM
@@ -228,8 +253,6 @@ type GetPassedMailingInformationRow struct {
 	CourseName      string      `json:"course_name"`
 	CourseStartDate pgtype.Date `json:"course_start_date"`
 	CourseEndDate   pgtype.Date `json:"course_end_date"`
-	ReplyToEmail    string      `json:"reply_to_email"`
-	ReplyToName     string      `json:"reply_to_name"`
 	MailSubject     string      `json:"mail_subject"`
 	MailContent     string      `json:"mail_content"`
 }
@@ -241,8 +264,6 @@ func (q *Queries) GetPassedMailingInformation(ctx context.Context, id uuid.UUID)
 		&i.CourseName,
 		&i.CourseStartDate,
 		&i.CourseEndDate,
-		&i.ReplyToEmail,
-		&i.ReplyToName,
 		&i.MailSubject,
 		&i.MailContent,
 	)
