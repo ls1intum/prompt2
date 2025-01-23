@@ -143,15 +143,12 @@ export const MailingConfigPage = (): JSX.Element => {
 
                   <div className='space-y-4'>
                     {ccFields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className='grid grid-cols-1 md:grid-cols-2 gap-6 items-end'
-                      >
+                      <div key={field.id} className='flex flex-row gap-4 items-end'>
                         <FormField
                           control={form.control}
                           name={`ccAddresses.${index}.email`}
                           render={({ field: formField }) => (
-                            <FormItem>
+                            <FormItem className='flex-1'>
                               <FormLabel>CC Email</FormLabel>
                               <FormControl>
                                 <Input placeholder='i.e. cc@management.de' {...formField} />
@@ -164,7 +161,7 @@ export const MailingConfigPage = (): JSX.Element => {
                           control={form.control}
                           name={`ccAddresses.${index}.name`}
                           render={({ field: formField }) => (
-                            <FormItem>
+                            <FormItem className='flex-1'>
                               <FormLabel>CC Name</FormLabel>
                               <FormControl>
                                 <Input placeholder='i.e. CC Recipient' {...formField} />
@@ -173,23 +170,18 @@ export const MailingConfigPage = (): JSX.Element => {
                             </FormItem>
                           )}
                         />
-
-                        {/* Remove CC Entry Button */}
-                        <div className='md:col-span-2 flex justify-end'>
-                          <Button
-                            variant='destructive'
-                            type='button'
-                            onClick={() => removeCC(index)}
-                          >
-                            <Trash2 className='mr-2 h-4 w-4' />
-                            Remove CC
-                          </Button>
-                        </div>
+                        <Button variant='destructive' type='button' onClick={() => removeCC(index)}>
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
                       </div>
                     ))}
 
                     {/* Add new CC entry button */}
-                    <Button type='button' onClick={() => appendCC({ email: '', name: '' })}>
+                    <Button
+                      variant='outline'
+                      type='button'
+                      onClick={() => appendCC({ email: '', name: '' })}
+                    >
                       <Plus className='mr-2 h-4 w-4' />
                       Add CC
                     </Button>
@@ -211,19 +203,15 @@ export const MailingConfigPage = (): JSX.Element => {
 
                   <div className='space-y-4'>
                     {bccFields.map((field, index) => (
-                      <div key={field.id} className='flex flex-row gap-6 items-end'>
+                      <div key={field.id} className='flex flex-row gap-4 items-end'>
                         <FormField
                           control={form.control}
                           name={`bccAddresses.${index}.email`}
                           render={({ field: formField }) => (
-                            <FormItem>
+                            <FormItem className='flex-1'>
                               <FormLabel>BCC Email</FormLabel>
                               <FormControl>
-                                <Input
-                                  className='w-full'
-                                  placeholder='i.e. bcc@management.de'
-                                  {...formField}
-                                />
+                                <Input placeholder='i.e. bcc@management.de' {...formField} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -233,7 +221,7 @@ export const MailingConfigPage = (): JSX.Element => {
                           control={form.control}
                           name={`bccAddresses.${index}.name`}
                           render={({ field: formField }) => (
-                            <FormItem>
+                            <FormItem className='flex-1'>
                               <FormLabel>BCC Name</FormLabel>
                               <FormControl>
                                 <Input placeholder='i.e. BCC Recipient' {...formField} />
@@ -242,8 +230,6 @@ export const MailingConfigPage = (): JSX.Element => {
                             </FormItem>
                           )}
                         />
-
-                        {/* Remove BCC Entry Button */}
                         <Button
                           variant='destructive'
                           type='button'
@@ -256,7 +242,7 @@ export const MailingConfigPage = (): JSX.Element => {
 
                     {/* Add new BCC entry button */}
                     <Button
-                      className='outline'
+                      variant='outline'
                       type='button'
                       onClick={() => appendBCC({ email: '', name: '' })}
                     >
