@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { CoursePhaseGraphItem } from '@/interfaces/course_phase_graph'
 
 export const getCoursePhaseGraph = async (course_id: string): Promise<CoursePhaseGraphItem[]> => {

@@ -1,5 +1,5 @@
 import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const updateMetaDataGraph = async (
   courseID: string,

@@ -7,8 +7,8 @@ import { useModifyCoursePhase } from '../../hooks/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@/interfaces/course_phase'
 import { useParams } from 'react-router-dom'
-import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
-import { EmailTemplateEditor } from './components/MailingEditor'
+import { CustomApplicationPlaceHolder } from './components/CustomApplicationPlaceHolder'
+import { EmailTemplateEditor } from '@/components/pages/Mailing/components/MailingEditor'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
@@ -110,7 +110,7 @@ export const ApplicationMailingSettings = () => {
       />
       <h2 className='text-2xl font-bold'>Mailing Templates </h2>
 
-      <AvailableMailPlaceholders />
+      <CustomApplicationPlaceHolder />
       {/* ensures that tiptap editor is only loaded after receiving meta data */}
       {initialMetaData && (
         <Tabs defaultValue='confirmation' className='w-full'>

@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/network/configService'
+import { axiosInstance } from '../configService'
 import { SendStatusMail } from '@/interfaces/send_status_mail'
 import { MailingReport } from '@/interfaces/mailing_report'
 

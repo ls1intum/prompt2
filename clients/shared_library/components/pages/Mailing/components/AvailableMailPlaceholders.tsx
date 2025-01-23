@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
@@ -13,7 +11,13 @@ import {
 } from '@/components/ui/table'
 import translations from '@/lib/translations.json'
 
-export const AvailableMailPlaceholders = () => {
+interface AvailableMailPlaceholdersProps {
+  customAdditionalPlaceholders?: { placeholder: string; description: string }[]
+}
+
+export const AvailableMailPlaceholders = ({
+  customAdditionalPlaceholders,
+}: AvailableMailPlaceholdersProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const availablePlaceholders = [
@@ -62,17 +66,11 @@ export const AvailableMailPlaceholders = () => {
       placeholder: '{{courseEndDate}}',
       description: 'The end date of the course',
     },
-    {
-      placeholder: '{{applicationEndDate}}',
-      description:
-        'The end date of the the application phase. (Not available for acceptance/rejection mails). ',
-    },
-    {
-      placeholder: 'https://{{applicationURL}}',
-      description:
-        'The direct link to the application form. (Not available for acceptance/rejection mails).',
-    },
   ]
+
+  if (customAdditionalPlaceholders) {
+    availablePlaceholders.push(...customAdditionalPlaceholders)
+  }
 
   return (
     <Collapsible

@@ -1,5 +1,5 @@
 import { Course } from '@/interfaces/course'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const getAllCourses = async (): Promise<Course[]> => {
   try {

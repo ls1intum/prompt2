@@ -26,7 +26,7 @@ export const EmailTemplateEditor = ({
       <CardHeader>
         <CardTitle>{label} Mail Template</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className='space-y-4'>
         <div>
           <Label htmlFor={subjectHTMLLabel}>{label} Subject</Label>
           <Input

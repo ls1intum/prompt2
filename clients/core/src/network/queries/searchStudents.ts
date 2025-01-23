@@ -1,5 +1,5 @@
 import { Student } from '@/interfaces/student'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const searchStudents = async (searchString: string): Promise<Student[]> => {
   try {

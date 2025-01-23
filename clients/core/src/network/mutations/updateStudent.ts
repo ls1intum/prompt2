@@ -1,5 +1,5 @@
 import { Student } from '@/interfaces/student'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const updateStudent = async (student: Student): Promise<string | undefined> => {
   try {

@@ -1,5 +1,5 @@
 import { CreateCoursePhase } from '@/interfaces/course_phase'
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const postNewCoursePhase = async (
   coursePhase: CreateCoursePhase,

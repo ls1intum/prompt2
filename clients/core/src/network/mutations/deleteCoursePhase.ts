@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 
 export const deleteCoursePhase = async (coursePhaseID: string): Promise<string | undefined> => {
   try {

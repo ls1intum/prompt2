@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 import { Switch } from '@/components/ui/switch'
-import { ManualMailSending } from './ManualMailSending'
+import { ManualMailSending } from '@/components/pages/Mailing/components/ManualMailSending'
 import { useGetMailingIsConfigured } from '../../../../hooks/useGetMailingIsConfigured'
 
 interface SettingsCardProps {

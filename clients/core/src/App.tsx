@@ -16,7 +16,7 @@ import { Toaster } from '@/components/ui/toaster'
 import CourseConfiguratorPage from './CourseConfigurator/CourseConfiguratorPage'
 import { PermissionRestriction } from './management/PermissionRestriction'
 import { Role } from '@/interfaces/permission_roles'
-import { env } from './env'
+import { env } from '@/env'
 import { parseURL } from './utils/parseURL'
 import { MailingConfigPage } from './MailingConfig/MailingConfigPage'
 

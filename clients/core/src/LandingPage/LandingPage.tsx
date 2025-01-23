@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { OpenApplicationDetails } from '@/interfaces/open_application_details'
 import { getAllOpenApplications } from '../network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
-import { env } from '../env'
+import { env } from '@/env'
 
 export function LandingPage(): JSX.Element {
   const {

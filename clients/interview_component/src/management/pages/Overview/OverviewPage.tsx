@@ -1,14 +1,14 @@
 import { cn } from '@/lib/utils'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { StudentCard } from '../components/StudentCard'
-import { useParticipationStore } from '../zustand/useParticipationStore'
+import { StudentCard } from '../../components/StudentCard'
+import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useScreenSize } from '@/hooks/useScreenSize'
 import { useState } from 'react'
-import { SortDropdownMenu } from '../components/SortDropdownMenu'
-import { InterviewQuestionsDialog } from '../components/InterviewQuestionsDialog'
-import { InterviewTimesDialog } from '../components/InterviewTimesDialog'
-import { useSorting } from '../hooks/useSorting'
+import { SortDropdownMenu } from '../../components/SortDropdownMenu'
+import { InterviewQuestionsDialog } from '../../components/InterviewQuestionsDialog'
+import { InterviewTimesDialog } from '../../components/InterviewTimesDialog'
+import { useSorting } from '../../hooks/useSorting'
 
 export const OverviewPage = (): JSX.Element => {
   const { interviewSlots } = useParticipationStore()

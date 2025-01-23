@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { SendStatusMail } from '@/interfaces/send_status_mail'
-import { sendStatusMail } from '../../../../network/mutations/sendStatusMail'
+import { sendStatusMail } from '@/network/mutations/sendStatusMail'
 import { PassStatus } from '@/interfaces/course_phase_participation'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 

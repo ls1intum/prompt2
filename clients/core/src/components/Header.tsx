@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { LogIn, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { env } from '../env'
+import { env } from '@/env'
 
 interface HeaderProps {
   withLoginButton?: boolean

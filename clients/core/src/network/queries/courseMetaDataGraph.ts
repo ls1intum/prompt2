@@ -1,4 +1,4 @@
-import { axiosInstance } from '../configService'
+import { axiosInstance } from '@/network/configService'
 import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
 
 export const getMetaDataGraph = async (course_id: string): Promise<MetaDataGraphItem[]> => {

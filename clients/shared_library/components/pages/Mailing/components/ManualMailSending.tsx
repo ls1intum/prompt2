@@ -3,13 +3,12 @@ import { Send } from 'lucide-react'
 import { PassStatus } from '@/interfaces/course_phase_participation'
 import { useState } from 'react'
 import { ConfirmSendEmailDialog } from './ConfirmSendEmailDialog'
-import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useGetMailingIsConfigured } from '../../../../hooks/useGetMailingIsConfigured'
+import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
 
 interface ManualMailSendingProps {
-  mailingMetaData: ApplicationMailingMetaData | null
+  mailingMetaData: CoursePhaseMailingConfigData | null
   isModified: boolean
 }
 
@@ -20,7 +19,8 @@ export const ManualMailSending = ({
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const [sendEmailType, setSendEmailType] = useState<PassStatus | null>(null)
 
-  const courseMailingIsConfigured = useGetMailingIsConfigured()
+  // TODO: AFTER shared library!!!
+  // const courseMailingIsConfigured = useGetMailingIsConfigured()
 
   const isDisabled = (type: PassStatus) => {
     if (isModified) return true
@@ -30,12 +30,14 @@ export const ManualMailSending = ({
         ? mailingMetaData?.passedMailContent && mailingMetaData?.passedMailSubject
         : mailingMetaData?.failedMailContent && mailingMetaData?.failedMailSubject
 
-    return !(contentCheck && courseMailingIsConfigured)
+    return !contentCheck
+    // return !(contentCheck && courseMailingIsConfigured)
   }
 
-  const tooltipMessage = courseMailingIsConfigured
-    ? 'Configure the mailing in the course mail settings before sending.'
-    : 'Configure the mail and save changes before sending.'
+  const tooltipMessage = 'Configure the mail and save changes before sending.'
+  // const tooltipMessage = courseMailingIsConfigured
+  //   ? 'Configure the mailing in the course mail settings before sending.'
+  //   : 'Configure the mail and save changes before sending.'
 
   return (
     <>
