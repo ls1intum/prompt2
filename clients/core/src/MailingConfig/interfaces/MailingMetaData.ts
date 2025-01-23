@@ -1,8 +1,6 @@
 export interface MailingMetaData {
   replyToName?: string
   replyToEmail?: string
-  ccName?: string
-  ccEmail?: string
-  bccName?: string
-  bccEmail?: string
+  ccAddresses?: { name?: string; email: string }[]
+  bccAddresses?: { name?: string; email: string }[]
 }
