@@ -9,7 +9,7 @@ import { ApplicationStatusCard } from './diagrams/ApplicationStatusCard'
 import { ApplicationGenderDiagram } from './diagrams/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './diagrams/ApplicationStudyBackgroundDiagram'
 import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySemesterDiagram'
-import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { ManagementPageHeader } from '../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import type { MailingMetaData } from './interfaces/MailingMetaData'
 import { type CourseMailingFormValues, courseMailingSchema } from '../validations/courseMailing'

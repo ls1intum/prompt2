@@ -191,6 +191,10 @@ current_phase_participations AS (
         s.university_login,
         s.has_university_account,
         s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
         cp.id                    AS course_participation_id
     FROM course_phase_participation cpp
     JOIN course_participation cp 
@@ -213,6 +217,10 @@ qualified_non_participants AS (
         s.university_login,
         s.has_university_account,
         s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
         cp.id                        AS course_participation_id
     FROM course_participation cp
     JOIN student s 
@@ -240,7 +248,7 @@ qualified_non_participants AS (
 )
 
 SELECT
-    main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.course_participation_id,
+    main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id,
     (COALESCE(
        (
           ----------------------------------------------------------------
@@ -310,7 +318,6 @@ SELECT
                          SELECT to_jsonb(aasm.score)
                          FROM application_assessment aasm
                          WHERE aasm.course_phase_participation_id = pcpp.id
-                           AND (dpm.course_phase_meta_data->'exportAnswers'->>'applicationScore') = 'true'
                      ),
                      ----------------------------------------------------------
                      -- (B) Additional Scores
@@ -375,9 +382,9 @@ SELECT
 
 FROM
 (
-    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, course_participation_id FROM current_phase_participations
+    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participations
     UNION
-    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, course_participation_id FROM qualified_non_participants
+    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participants
 ) AS main
 ORDER BY main.last_name, main.first_name
 `
@@ -394,6 +401,10 @@ type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
 	UniversityLogin            pgtype.Text    `json:"university_login"`
 	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
 	Gender                     Gender         `json:"gender"`
+	Nationality                pgtype.Text    `json:"nationality"`
+	StudyDegree                StudyDegree    `json:"study_degree"`
+	StudyProgram               pgtype.Text    `json:"study_program"`
+	CurrentSemester            pgtype.Int4    `json:"current_semester"`
 	CourseParticipationID      uuid.UUID      `json:"course_participation_id"`
 	PrevMetaData               []byte         `json:"prev_meta_data"`
 }
@@ -441,6 +452,10 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 			&i.UniversityLogin,
 			&i.HasUniversityAccount,
 			&i.Gender,
+			&i.Nationality,
+			&i.StudyDegree,
+			&i.StudyProgram,
+			&i.CurrentSemester,
 			&i.CourseParticipationID,
 			&i.PrevMetaData,
 		); err != nil {

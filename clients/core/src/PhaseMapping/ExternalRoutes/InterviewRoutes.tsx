@@ -12,9 +12,10 @@ export const InterviewRoutes = React.lazy(() =>
         return <ExternalRoutes routes={routes} />
       },
     }))
-    .catch((): { default: React.FC } => ({
+    .catch((error): { default: React.FC } => ({
       default: () => {
         console.warn('Failed to load interview routes')
+        console.warn(error)
         return (
           <Alert variant='destructive'>
             <AlertCircle className='h-4 w-4' />

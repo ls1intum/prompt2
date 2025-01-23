@@ -33,7 +33,7 @@ import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useCustomElementWidth } from '../../../hooks/useCustomElementWidth'
 import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
-import { ManagementPageHeader } from '../../../management/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 
 export const ApplicationsAssessment = (): JSX.Element => {

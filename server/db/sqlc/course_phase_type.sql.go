@@ -12,18 +12,26 @@ import (
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase)
-VALUES ($1, $2, $3)
+INSERT INTO course_phase_type (id, name, initial_phase, required_input_meta_data, provided_output_meta_data)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
+	ID                     uuid.UUID `json:"id"`
+	Name                   string    `json:"name"`
+	InitialPhase           bool      `json:"initial_phase"`
+	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
+	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
-	_, err := q.db.Exec(ctx, createCoursePhaseType, arg.ID, arg.Name, arg.InitialPhase)
+	_, err := q.db.Exec(ctx, createCoursePhaseType,
+		arg.ID,
+		arg.Name,
+		arg.InitialPhase,
+		arg.RequiredInputMetaData,
+		arg.ProvidedOutputMetaData,
+	)
 	return err
 }
 
@@ -67,6 +75,21 @@ SELECT EXISTS (
 
 func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, error) {
 	row := q.db.QueryRow(ctx, testApplicationPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
+const testInterviewPhaseTypeExists = `-- name: TestInterviewPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Interview'
+) AS does_exist
+`
+
+func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testInterviewPhaseTypeExists)
 	var does_exist bool
 	err := row.Scan(&does_exist)
 	return does_exist, err
