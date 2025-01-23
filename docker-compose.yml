@@ -15,7 +15,7 @@ services:
       - CORE_HOST=http://localhost:3000
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - DB_HOST=db
+      - DB_HOST=localhost
       - DB_PORT=5432
       - DB_NAME=prompt
       - SSL_MODE=disable
@@ -82,25 +82,24 @@ services:
     volumes:
       - ./keycloak_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - prompt-network
+    ports:
+      - "5431:5432"
 
-  # To use keycloak you need to manually create the database keycloak once
   keycloak:
     image: quay.io/keycloak/keycloak:21.0
     container_name: prompt-keycloak
     environment:
       KC_DB: postgres
       KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: localhost
     entrypoint: /opt/keycloak/bin/kc.sh start-dev
     depends_on:
       keycloak-db:
@@ -112,7 +111,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit'
         ]
 
   postfix:

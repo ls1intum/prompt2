@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -231,4 +232,25 @@ func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []
 	}
 	return nil
 
+}
+
+func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData courseDTO.UpdateCourseData) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	updateCourseParams, err := courseData.GetDBModel()
+	if err != nil {
+		log.Error(err)
+		return errors.New("failed to update course data")
+	}
+
+	updateCourseParams.ID = courseID
+
+	err = CourseServiceSingleton.queries.UpdateCourse(ctxWithTimeout, updateCourseParams)
+	if err != nil {
+		log.Error(err)
+		return errors.New("failed to update course data")
+	}
+
+	return nil
 }

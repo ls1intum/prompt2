@@ -11,8 +11,6 @@ type MailingInfo struct {
 	CourseEndDate   pgtype.Date
 	MailSubject     string
 	MailContent     string
-	ReplyToEmail    string
-	ReplyToName     string
 }
 
 func GetMailingInfoFromFailedMailingInformation(infos db.GetFailedMailingInformationRow) MailingInfo {
@@ -22,8 +20,6 @@ func GetMailingInfoFromFailedMailingInformation(infos db.GetFailedMailingInforma
 		CourseEndDate:   infos.CourseEndDate,
 		MailSubject:     infos.MailSubject,
 		MailContent:     infos.MailContent,
-		ReplyToEmail:    infos.ReplyToEmail,
-		ReplyToName:     infos.ReplyToName,
 	}
 }
 
@@ -34,7 +30,5 @@ func GetMailingInfoFromPassedMailingInformation(infos db.GetPassedMailingInforma
 		CourseEndDate:   infos.CourseEndDate,
 		MailSubject:     infos.MailSubject,
 		MailContent:     infos.MailContent,
-		ReplyToEmail:    infos.ReplyToEmail,
-		ReplyToName:     infos.ReplyToName,
 	}
 }

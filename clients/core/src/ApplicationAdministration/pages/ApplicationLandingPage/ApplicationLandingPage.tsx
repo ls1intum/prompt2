@@ -1,4 +1,4 @@
-import { CalendarX, Mail } from 'lucide-react'
+import { CalendarX } from 'lucide-react'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { getIsApplicationConfigured } from '../../utils/getApplicationIsConfigured'
 import { useMemo, useState } from 'react'
@@ -9,8 +9,6 @@ import { ApplicationStatusCard } from './diagrams/ApplicationStatusCard'
 import { ApplicationGenderDiagram } from './diagrams/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './diagrams/ApplicationStudyBackgroundDiagram'
 import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySemesterDiagram'
-import { parseApplicationMailingMetaData } from '../Mailing/utils/parseApplicaitonMailingMetaData'
-import { getIsApplicationMailingIsConfigured } from '../../utils/getApplicationMailingIsConfigured'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
@@ -31,31 +29,8 @@ export const ApplicationLandingPage = (): JSX.Element => {
         link: `${path}/configuration`,
       })
     }
-
-    if (coursePhase?.meta_data?.['mailingConfig'] === undefined) {
-      missingConfigItems.push({
-        title: 'Mail Configuration',
-        icon: Mail,
-        link: `${path}/mailing`,
-      })
-    } else {
-      const mailingConfig = parseApplicationMailingMetaData(coursePhase?.meta_data)
-      if (
-        // trying to send mails but reply to not set
-        !getIsApplicationMailingIsConfigured(mailingConfig) &&
-        (mailingConfig.sendAcceptanceMail ||
-          mailingConfig.sendConfirmationMail ||
-          mailingConfig.sendRejectionMail)
-      ) {
-        missingConfigItems.push({
-          title: 'Mail Replier Information',
-          icon: Mail,
-          link: `${path}/mailing`,
-        })
-      }
-    }
     return missingConfigItems
-  }, [applicationMetaData, coursePhase?.meta_data, path])
+  }, [applicationMetaData, path])
 
   return (
     <div>

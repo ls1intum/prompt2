@@ -54,6 +54,12 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 		return nil
 	}
 
+	courseMailingSettings, err := getSenderInformation(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get sender information")
+		return err
+	}
+
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
 
 	applicationURL := fmt.Sprintf("%s/apply/%s", MailingServiceSingleton.clientURL, coursePhaseID.String())
@@ -63,8 +69,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	// replace values in subject
 	finalSubject := replacePlaceholders(mailingInfo.ConfirmationMailSubject, placeholderValues)
 
-	// TODO replace with with subject
-	err = SendMail(mailingInfo.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
+	err = SendMail(courseMailingSettings, mailingInfo.Email.String, finalSubject, finalMessage)
 	if err != nil {
 		log.Error("failed to send mail: ", err)
 		return errors.New("failed to send mail")
@@ -100,8 +105,15 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 
 	}
 
+	// Get the course mailing settings
+	courseMailingSettings, err := getSenderInformation(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get sender information")
+		return mailingDTO.MailingReport{}, err
+	}
+
 	// 2.) Check if mailing is configured -> return if not
-	if mailingInfo.MailSubject == "" || mailingInfo.MailContent == "" || mailingInfo.ReplyToEmail == "" || mailingInfo.ReplyToName == "" {
+	if mailingInfo.MailSubject == "" || mailingInfo.MailContent == "" {
 		log.Error("mailing template is not correctly configured")
 		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
 	}
@@ -125,7 +137,7 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 		// replace values in content
 		finalMessage := replacePlaceholders(mailingInfo.MailContent, placeholderMap)
 
-		err = SendMail(participant.Email.String, mailingInfo.ReplyToEmail, mailingInfo.ReplyToName, finalSubject, finalMessage)
+		err = SendMail(courseMailingSettings, participant.Email.String, finalSubject, finalMessage)
 		if err != nil {
 			log.Error("failed to send mail: ", err)
 			response.FailedEmails = append(response.FailedEmails, participant.Email.String)
@@ -138,33 +150,18 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 }
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.
-func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody string) error {
+func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientAddress, subject, htmlBody string) error {
 	if MailingServiceSingleton.senderEmail.Address == "" ||
 		recipientAddress == "" ||
-		replyToAddress == "" ||
 		subject == "" ||
 		htmlBody == "" {
 		return fmt.Errorf("mailing is not correctly configured")
 	}
 
 	to := mail.Address{Address: recipientAddress}
-	replyToEmail := mail.Address{Name: replyToName, Address: replyToAddress}
 
-	// Build email headers
-	header := map[string]string{
-		"From":         MailingServiceSingleton.senderEmail.String(),
-		"To":           to.String(),
-		"Reply-To":     replyToEmail.String(),
-		"Subject":      subject,
-		"Content-Type": `text/html; charset="UTF-8"`,
-	}
-
-	// Construct the message
 	var message strings.Builder
-	for k, v := range header {
-		message.WriteString(fmt.Sprintf("%s: %s\r\n", k, v))
-	}
-	message.WriteString("\r\n")
+	buildMailHeader(&message, courseMailingSettings, to.String(), subject)
 	message.WriteString(htmlBody)
 
 	// Send the email
@@ -176,16 +173,31 @@ func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody s
 	}
 	defer client.Close()
 
-	log.Debug(MailingServiceSingleton.senderEmail.Address)
-
 	// Set the sender and recipient
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {
 		log.Error("failed to set sender: ", err)
 		return errors.New("failed to send mail")
 	}
+
 	if err := client.Rcpt(recipientAddress); err != nil {
 		log.Error("failed to set recipient: ", err)
 		return errors.New("failed to send mail")
+	}
+
+	// set all cc mails
+	for _, cc := range courseMailingSettings.CC {
+		if err := client.Rcpt(cc.Address); err != nil {
+			log.Error("failed to set cc: ", err)
+			return errors.New("failed to send mail")
+		}
+	}
+
+	// set all bcc mails
+	for _, bcc := range courseMailingSettings.BCC {
+		if err := client.Rcpt(bcc.Address); err != nil {
+			log.Error("failed to set bcc: ", err)
+			return errors.New("failed to send mail")
+		}
 	}
 
 	// Send the data
@@ -206,4 +218,46 @@ func SendMail(recipientAddress, replyToAddress, replyToName, subject, htmlBody s
 	}
 
 	return client.Quit()
+}
+
+func getSenderInformation(ctx context.Context, coursePhaseID uuid.UUID) (mailingDTO.CourseMailingSettings, error) {
+	courseMailing, err := MailingServiceSingleton.queries.GetCourseMailingSettingsForCoursePhaseID(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get course mailing settings: ", err)
+		return mailingDTO.CourseMailingSettings{}, errors.New("failed to get course mailing infos")
+	}
+
+	if courseMailing.ReplyToEmail == "" || courseMailing.ReplyToName == "" {
+		log.Error("reply to email or name is not set")
+		return mailingDTO.CourseMailingSettings{}, errors.New("reply to email or name is not set")
+	}
+
+	courseMailingSettings, err := mailingDTO.GetCourseMailingSettingsFromDBModel(courseMailing)
+	if err != nil {
+		log.Error("failed to get course mailing settings: ", err)
+		return mailingDTO.CourseMailingSettings{}, errors.New("failed to get course mailing infos")
+	}
+
+	return courseMailingSettings, nil
+
+}
+
+func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.CourseMailingSettings, recipient, subject string) {
+	// using this instead of map to geth a nicely formatted Mailing Header
+	message.WriteString(fmt.Sprintf("From: %s\r\n", courseMailingSettings.ReplyTo.String()))
+	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
+	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
+	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
+
+	if len(courseMailingSettings.CC) > 0 {
+		var ccString string
+		for _, cc := range courseMailingSettings.CC {
+			ccString += cc.String() + ","
+		}
+		message.WriteString(fmt.Sprintf("CC: %s\r\n", ccString))
+	}
+
+	// BCC are set in the client and not the header
+	message.WriteString("\r\n")
 }
