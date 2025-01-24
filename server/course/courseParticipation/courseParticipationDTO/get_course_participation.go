@@ -7,8 +7,8 @@ import (
 
 type GetCourseParticipation struct {
 	ID        uuid.UUID `json:"id"`
-	CourseID  uuid.UUID `json:"course_id"`
-	StudentID uuid.UUID `json:"student_id"`
+	CourseID  uuid.UUID `json:"courseID"`
+	StudentID uuid.UUID `json:"studentID"`
 }
 
 func GetCourseParticipationDTOFromDBModel(model db.CourseParticipation) GetCourseParticipation {

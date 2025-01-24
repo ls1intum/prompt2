@@ -11,7 +11,7 @@ interface FilterBadgesProps {
 }
 
 const getDisplayString = (id: string, value: string): string => {
-  if (id.includes('status')) {
+  if (id.includes('passStatus')) {
     return `Status: ${getStatusString(value as PassStatus)}`
   } else if (id.includes('gender')) {
     return `Gender: ${getGenderString(value as Gender)}`

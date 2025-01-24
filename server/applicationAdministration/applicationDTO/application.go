@@ -15,6 +15,6 @@ const (
 type Application struct {
 	Status             StatusEnum          `json:"status"`
 	Student            *studentDTO.Student `json:"student"`
-	AnswersText        []AnswerText        `json:"answers_text"`
-	AnswersMultiSelect []AnswerMultiSelect `json:"answers_multi_select"`
+	AnswersText        []AnswerText        `json:"answersText"`
+	AnswersMultiSelect []AnswerMultiSelect `json:"answersMultiSelect"`
 }

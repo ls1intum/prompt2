@@ -7,8 +7,8 @@ import (
 
 type AnswerMultiSelect struct {
 	ID                         uuid.UUID `json:"id"`
-	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
-	CoursePhaseParticipationID uuid.UUID `json:"course_phase_participation_id"`
+	ApplicationQuestionID      uuid.UUID `json:"applicationQuestionID"`
+	CoursePhaseParticipationID uuid.UUID `json:"coursePhaseParticipationID"`
 	Answer                     []string  `json:"answer"`
 }
 

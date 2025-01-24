@@ -9,11 +9,11 @@ import (
 
 type CreateCourse struct {
 	Name        string        `json:"name"`
-	StartDate   pgtype.Date   `json:"start_date"`
-	EndDate     pgtype.Date   `json:"end_date"`
-	SemesterTag pgtype.Text   `json:"semester_tag"`
-	MetaData    meta.MetaData `json:"meta_data"`
-	CourseType  db.CourseType `json:"course_type"`
+	StartDate   pgtype.Date   `json:"startDate"`
+	EndDate     pgtype.Date   `json:"endDate"`
+	SemesterTag pgtype.Text   `json:"semesterTag"`
+	MetaData    meta.MetaData `json:"metaData"`
+	CourseType  db.CourseType `json:"courseType"`
 	Ects        pgtype.Int4   `json:"ects"`
 }
 

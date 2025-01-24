@@ -12,8 +12,8 @@ import (
 
 type ApplicationParticipation struct {
 	ID         uuid.UUID          `json:"id"`
-	PassStatus string             `json:"pass_status"`
-	MetaData   meta.MetaData      `json:"meta_data"`
+	PassStatus string             `json:"passStatus"`
+	MetaData   meta.MetaData      `json:"metaData"`
 	Student    studentDTO.Student `json:"student"`
 	Score      pgtype.Int4        `json:"score"`
 }

@@ -131,7 +131,7 @@ export const FilterMenu = ({
       <DropdownMenuContent className='w-56'>
         <DropdownMenuLabel>Assessment</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {renderFilterItems('pass_status', PassStatus, getStatusBadge)}
+        {renderFilterItems('passStatus', PassStatus, getStatusBadge)}
 
         <DropdownMenuLabel>Gender</DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -12,13 +12,13 @@ import (
 type CourseWithPhases struct {
 	ID           uuid.UUID                            `json:"id"`
 	Name         string                               `json:"name"`
-	StartDate    pgtype.Date                          `json:"start_date"`
-	EndDate      pgtype.Date                          `json:"end_date"`
-	SemesterTag  string                               `json:"semester_tag"`
-	CourseType   db.CourseType                        `json:"course_type"`
+	StartDate    pgtype.Date                          `json:"startDate"`
+	EndDate      pgtype.Date                          `json:"endDate"`
+	SemesterTag  string                               `json:"semesterTag"`
+	CourseType   db.CourseType                        `json:"courseType"`
 	ECTS         int                                  `json:"ects"`
-	MetaData     meta.MetaData                        `json:"meta_data"`
-	CoursePhases []coursePhaseDTO.CoursePhaseSequence `json:"course_phases"`
+	MetaData     meta.MetaData                        `json:"metaData"`
+	CoursePhases []coursePhaseDTO.CoursePhaseSequence `json:"coursePhases"`
 }
 
 func GetCourseByIDFromDBModel(course db.Course) (CourseWithPhases, error) {

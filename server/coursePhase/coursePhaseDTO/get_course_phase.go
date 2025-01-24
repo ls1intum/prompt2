@@ -8,12 +8,12 @@ import (
 
 type CoursePhase struct {
 	ID                  uuid.UUID     `json:"id"`
-	CourseID            uuid.UUID     `json:"course_id"`
+	CourseID            uuid.UUID     `json:"courseID"`
 	Name                string        `json:"name"`
-	IsInitialPhase      bool          `json:"is_initial_phase"`
-	MetaData            meta.MetaData `json:"meta_data"`
-	CoursePhaseTypeID   uuid.UUID     `json:"course_phase_type_id"`
-	CoursePhaseTypeName string        `json:"course_phase_type_name"`
+	IsInitialPhase      bool          `json:"isInitialPhase"`
+	MetaData            meta.MetaData `json:"metaData"`
+	CoursePhaseTypeID   uuid.UUID     `json:"coursePhaseTypeID"`
+	CoursePhaseTypeName string        `json:"coursePhaseTypeName"`
 }
 
 func GetCoursePhaseDTOFromDBModel(model db.GetCoursePhaseRow) (CoursePhase, error) {

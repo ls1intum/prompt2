@@ -8,11 +8,11 @@ import (
 )
 
 type CreateCoursePhase struct {
-	CourseID          uuid.UUID     `json:"course_id"`
+	CourseID          uuid.UUID     `json:"courseID"`
 	Name              string        `json:"name"`
-	IsInitialPhase    bool          `json:"is_initial_phase"`
-	MetaData          meta.MetaData `json:"meta_data"`
-	CoursePhaseTypeID uuid.UUID     `json:"course_phase_type_id"`
+	IsInitialPhase    bool          `json:"isInitialPhase"`
+	MetaData          meta.MetaData `json:"metaData"`
+	CoursePhaseTypeID uuid.UUID     `json:"coursePhaseTypeID"`
 }
 
 func (cp CreateCoursePhase) GetDBModel() (db.CreateCoursePhaseParams, error) {

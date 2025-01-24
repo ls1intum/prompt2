@@ -9,10 +9,10 @@ import (
 
 type GetCoursePhaseParticipation struct {
 	ID                    uuid.UUID     `json:"id"`
-	CourseParticipationID uuid.UUID     `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID     `json:"course_phase_id"`
-	PassStatus            string        `json:"passed_status"`
-	MetaData              meta.MetaData `json:"meta_data"`
+	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
+	PassStatus            string        `json:"passStatus"`
+	MetaData              meta.MetaData `json:"metaData"`
 }
 
 func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation) (GetCoursePhaseParticipation, error) {
