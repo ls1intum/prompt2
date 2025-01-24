@@ -1,4 +1,4 @@
-import { OpenApplicationDetails } from '@/interfaces/open_application_details'
+import { OpenApplicationDetails } from '../../interfaces/application/openApplicationDetails'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'

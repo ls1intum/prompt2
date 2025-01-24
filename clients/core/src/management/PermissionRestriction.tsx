@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { Role, getPermissionString } from '@/interfaces/permission_roles'
+import { Role, getPermissionString } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import UnauthorizedPage from './components/UnauthorizedPage'
@@ -32,7 +32,7 @@ export const PermissionRestriction = ({
   let hasPermission = true
   if (requiredPermissions.length > 0) {
     hasPermission = requiredPermissions.some((role) => {
-      return permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
+      return permissions.includes(getPermissionString(role, course?.name, course?.semesterTag))
     })
   }
 

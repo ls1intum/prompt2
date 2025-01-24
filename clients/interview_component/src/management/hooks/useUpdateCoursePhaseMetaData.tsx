@@ -2,7 +2,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { updateCoursePhase } from '../network/mutations/updateCoursePhase'
-import { UpdateCoursePhase } from '@/interfaces/course_phase'
+import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 
 export const useUpdateCoursePhaseMetaData = (): UseMutationResult<
   string | undefined,

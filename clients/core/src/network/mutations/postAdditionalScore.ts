@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { AdditionalScoreUpload } from '@/interfaces/additional_score'
+import { AdditionalScoreUpload } from '../../ApplicationAdministration/interfaces/additionalScore/additionalScoreUpload'
 
 export const postAdditionalScore = async (
   phaseId: string,

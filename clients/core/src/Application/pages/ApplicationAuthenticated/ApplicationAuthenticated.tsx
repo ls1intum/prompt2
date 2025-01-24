@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
 import { AuthenticatedPageWrapper } from '../../../components/AuthenticatedPageWrapper'
-import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getApplicationFormWithDetails } from '../../../network/queries/applicationFormWithDetails'
 import { LoadingState } from '../../components/LoadingState'
@@ -8,16 +7,17 @@ import { ErrorState } from '../../components/ErrorState'
 import { ApplicationHeader } from '../../components/ApplicationHeader'
 import { ApplicationFormView } from '../ApplicationForm/ApplicationFormView'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { Student } from '@/interfaces/student'
 import { getApplication } from '../../../network/queries/application'
-import { GetApplication } from '@/interfaces/get_application'
-import { PostApplication } from '@/interfaces/post_application'
 import { postNewApplicationAuthenticated } from '../../../network/mutations/postApplicationAuthenticated'
 import { useState } from 'react'
 import { ApplicationSavingDialog } from '../../components/ApplicationSavingDialog'
-import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
-import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
 import { InfoBanner } from './components/InfoBanner'
+import { Student } from '@tumaet/prompt-shared-state'
+import { GetApplication } from '../../../interfaces/application/getApplication'
+import { PostApplication } from '../../../interfaces/application/postApplication'
+import { CreateApplicationAnswerText } from '../../../interfaces/application/applicationAnswer/text/createApplicationAnswerText'
+import { CreateApplicationAnswerMultiSelect } from '../../../interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
+import { ApplicationFormWithDetails } from '../../../interfaces/application/applicationFormWithDetails'
 
 export const ApplicationAuthenticated = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -66,8 +66,8 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   ) => {
     const modifiedApplication: PostApplication = {
       student,
-      answers_text: answersText,
-      answers_multi_select: answersMultiSelect,
+      answersText: answersText,
+      answersMultiSelect: answersMultiSelect,
     }
     setShowDialog('saving')
     mutateSendApplication(modifiedApplication)
@@ -105,16 +105,15 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     )
   }
 
-  const { application_phase } = applicationForm
+  const { applicationPhase } = applicationForm
 
   let student: Student = {
-    first_name: user?.firstName ?? '',
-    last_name: user?.lastName ?? '',
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
     email: user?.email ?? '',
-    matriculation_number: user?.matriculation_number ?? '',
-    university_login: user?.university_login ?? '',
-    has_university_account: true,
-    // TODO: get university data from keycloak
+    matriculationNumber: user?.matriculationNumber ?? '',
+    universityLogin: user?.universityLogin ?? '',
+    hasUniversityAccount: true,
   }
   if (
     (application.status === 'applied' || application.status === 'not_applied') &&
@@ -122,19 +121,19 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   ) {
     student = application.student
     // enforcing that student has university account
-    student.has_university_account = true
+    student.hasUniversityAccount = true
   }
 
   return (
     <AuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} onBackClick={handleBack} />
+        <ApplicationHeader applicationPhase={applicationPhase} onBackClick={handleBack} />
         <InfoBanner status={application.status} />
         <ApplicationFormView
-          questionsText={applicationForm.questions_text}
-          questionsMultiSelect={applicationForm.questions_multi_select}
-          initialAnswersMultiSelect={application.answers_multi_select}
-          initialAnswersText={application.answers_text}
+          questionsText={applicationForm.questionsText}
+          questionsMultiSelect={applicationForm.questionsMultiSelect}
+          initialAnswersMultiSelect={application.answersMultiSelect}
+          initialAnswersText={application.answersText}
           student={student}
           onSubmit={handleSubmit}
         />

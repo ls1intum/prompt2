@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Node, useReactFlow } from '@xyflow/react'
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
+import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 import { useParams } from 'react-router-dom'
 
 export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
@@ -35,14 +35,14 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
 
         const id = `no-valid-id-${Date.now()}`
 
-        const coursePhase: CoursePhasePosition = {
+        const coursePhase: CoursePhaseWithPosition = {
           id: id,
-          course_id: courseId ?? 'no-valid-id',
+          courseID: courseId ?? 'no-valid-id',
           name: `New ${coursePhaseType.name}`,
           position: position,
-          is_initial_phase: coursePhaseType.initial_phase,
-          course_phase_type_id: coursePhaseType.id,
-          meta_data: [], // TODO: maybe fix this to be {} instead of []
+          isInitialPhase: coursePhaseType.initialPhase,
+          coursePhaseTypeID: coursePhaseType.id,
+          metaData: [], // TODO: maybe fix this to be {} instead of []
         }
 
         appendCoursePhase(coursePhase)

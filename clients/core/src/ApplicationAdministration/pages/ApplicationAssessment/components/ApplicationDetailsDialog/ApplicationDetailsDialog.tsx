@@ -5,22 +5,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { GetApplication } from '@/interfaces/get_application'
+import { GetApplication } from '../../../../../interfaces/application/getApplication'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '../../../../../network/queries/applicationAssessment'
-import { ApplicationForm } from '@/interfaces/application_form'
+import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '../../../../../network/queries/applicationForm'
 import { MissingUniversityData } from './components/MissingUniversityData'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from '../../utils/getStatusBadge'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 import { AssessmentCard } from './components/AssessmentCard'
-import { ApplicationAssessment } from '@/interfaces/application_assessment'
+import { ApplicationAssessment } from '../../../../interfaces/applicationAssessment'
 import { postApplicationAssessment } from '../../../../../network/mutations/postApplicationAssessment'
-import { InstructorComment } from '@/interfaces/instructor_comment'
+import { InstructorComment } from '../../../../interfaces/instructorComment'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { useToast } from '@/hooks/use-toast'
 import { StudentProfile } from '@/components/StudentProfile'
@@ -103,7 +103,7 @@ export const ApplicationDetailsDialog = ({
       author: `${user?.firstName} ${user?.lastName}`,
     })
     const assessment: ApplicationAssessment = {
-      meta_data: {
+      metaData: {
         comments,
       },
     }
@@ -112,7 +112,7 @@ export const ApplicationDetailsDialog = ({
 
   const handleAcceptanceStatusChange = (newStatus: PassStatus) => {
     const assessment: ApplicationAssessment = {
-      pass_status: newStatus,
+      passStatus: newStatus,
     }
     mutateAssessment(assessment)
   }
@@ -127,7 +127,7 @@ export const ApplicationDetailsDialog = ({
         )}
         <DialogHeader>
           <DialogTitle>
-            {fetchedApplication?.student?.first_name} {fetchedApplication?.student?.last_name}{' '}
+            {fetchedApplication?.student?.firstName} {fetchedApplication?.student?.lastName}{' '}
           </DialogTitle>
           <DialogDescription>{getStatusBadge(status)}</DialogDescription>
         </DialogHeader>
@@ -148,7 +148,7 @@ export const ApplicationDetailsDialog = ({
             )}
             {fetchedApplication &&
               fetchedApplication.student &&
-              !fetchedApplication.student.has_university_account && (
+              !fetchedApplication.student.hasUniversityAccount && (
                 <MissingUniversityData student={fetchedApplication.student} />
               )}
             {!isFetchingApplication &&
@@ -159,11 +159,11 @@ export const ApplicationDetailsDialog = ({
                   <StudentProfile student={fetchedApplication.student} status={status} />
                   <ApplicationAnswersTable
                     questions={[
-                      ...fetchedApplicationForm.questions_multi_select,
-                      ...fetchedApplicationForm.questions_text,
+                      ...fetchedApplicationForm.questionsMultiSelect,
+                      ...fetchedApplicationForm.questionsText,
                     ]}
-                    answers_multi_select={fetchedApplication.answers_multi_select}
-                    answers_text={fetchedApplication.answers_text}
+                    answersMultiSelect={fetchedApplication.answersMultiSelect}
+                    answersText={fetchedApplication.answersText}
                   />
                 </>
               )}

@@ -1,4 +1,4 @@
-import { CreateCoursePhase } from '@/interfaces/course_phase'
+import { CreateCoursePhase } from '@tumaet/prompt-shared-state'
 import { axiosInstance } from '@/network/configService'
 
 export const postNewCoursePhase = async (
@@ -6,7 +6,7 @@ export const postNewCoursePhase = async (
 ): Promise<string | undefined> => {
   try {
     return (
-      await axiosInstance.post(`/api/course_phases/course/${coursePhase.course_id}`, coursePhase, {
+      await axiosInstance.post(`/api/course_phases/course/${coursePhase.courseID}`, coursePhase, {
         headers: {
           'Content-Type': 'application/json-path+json',
         },

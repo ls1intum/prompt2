@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { useMemo } from 'react'
 
 const chartConfig = {
@@ -30,8 +30,8 @@ export const ApplicationStudySemesterDiagram = ({
   const { semesterData } = useMemo(() => {
     const semesterCounts = applications.reduce(
       (acc, app) => {
-        const semester = app.student.current_semester || 1
-        const degree = app.student.study_degree || 'bachelor'
+        const semester = app.student.currentSemester || 1
+        const degree = app.student.studyDegree || 'bachelor'
         const key = semester > 12 ? '12+' : semester.toString()
 
         acc[key] = acc[key] || { bachelor: 0, master: 0 }

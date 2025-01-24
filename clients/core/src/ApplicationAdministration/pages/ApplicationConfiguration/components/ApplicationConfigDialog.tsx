@@ -10,12 +10,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { ApplicationMetaData } from '../../../interfaces/ApplicationMetaData'
+import { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
 import { DatePicker } from '@/components/DatePicker'
 import { format, set, parse, formatISO } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { UpdateCoursePhase } from '@/interfaces/course_phase'
+import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { updateCoursePhase } from '../../../../network/mutations/updateCoursePhase'
 import { useParams } from 'react-router-dom'
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
@@ -92,7 +92,7 @@ export function ApplicationConfigDialog({
     e.preventDefault()
     const updatedPhase: UpdateCoursePhase = {
       id: phaseId ?? '',
-      meta_data: {
+      metaData: {
         applicationStartDate: startDate
           ? formatISO(
               toZonedTime(

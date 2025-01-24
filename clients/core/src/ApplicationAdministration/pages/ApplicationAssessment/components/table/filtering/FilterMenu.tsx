@@ -7,10 +7,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus, Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { getStatusBadge } from '../../../utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
-import { Gender, getGenderString } from '@/interfaces/gender'
 import { Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 

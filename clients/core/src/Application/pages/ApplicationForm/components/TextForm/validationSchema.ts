@@ -1,17 +1,17 @@
 import * as z from 'zod'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 
 export const createValidationSchema = (question: ApplicationQuestionText) =>
   z.object({
     answer: z
       .string()
-      .min(question.is_required ? 1 : 0, 'This field is required')
+      .min(question.isRequired ? 1 : 0, 'This field is required')
       .max(
-        question.allowed_length || 255,
-        `Answer must be less than ${question.allowed_length || 255} characters`,
+        question.allowedLength || 255,
+        `Answer must be less than ${question.allowedLength || 255} characters`,
       )
       .regex(
-        new RegExp(question.validation_regex || '.*'),
-        question.error_message || 'Invalid format',
+        new RegExp(question.validationRegex || '.*'),
+        question.errorMessage || 'Invalid format',
       ),
   })

@@ -1,6 +1,6 @@
-import { AdditionalScore } from '@/interfaces/additional_score'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
+import { AdditionalScore } from '../interfaces/additionalScore/additionalScore'
+import { ApplicationParticipation } from '../interfaces/applicationParticipation'
+import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'
 import { create } from 'zustand'
 
 interface ApplicationStoreState {

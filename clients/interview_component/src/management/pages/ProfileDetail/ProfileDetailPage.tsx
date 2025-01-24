@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, FileUserIcon } from 'lucide-react'
 import { StudentCard } from '../../components/StudentCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ExportedApplicationAnswer } from '@/interfaces/export_application_answer'
+import { ExportedApplicationAnswer } from '@tumaet/prompt-shared-state'
 import { ExportedApplicationAnswerTable } from '@/components/ExportedApplicationAnswerTable'
 import { InterviewCard } from '../../components/InterviewCard'
 
@@ -15,7 +15,7 @@ export const ProfileDetailPage = (): JSX.Element => {
   const navigate = useNavigate()
 
   const applicationAnswers =
-    (participation?.prev_meta_data?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
+    (participation?.prevMetaData?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
 
   return (
     <div className=''>

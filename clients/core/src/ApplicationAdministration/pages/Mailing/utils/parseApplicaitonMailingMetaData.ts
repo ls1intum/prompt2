@@ -1,4 +1,4 @@
-import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
+import { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
 
 export const parseApplicationMailingMetaData = (metaData: any): ApplicationMailingMetaData => {
   const {

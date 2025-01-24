@@ -1,5 +1,5 @@
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
-import { Course } from '@/interfaces/course'
+import { Course } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -28,8 +28,8 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const { courseId } = useParams<{ courseId: string }>()
 
   const isActive = course.id === courseId
-  const bgColor = course.meta_data?.['bg-color'] || subtleColors['bg-grey-100']
-  const iconName = course.meta_data?.['icon'] || 'graduation-cap'
+  const bgColor = course.metaData?.['bg-color'] || subtleColors['bg-grey-100']
+  const iconName = course.metaData?.['icon'] || 'graduation-cap'
 
   const MemoizedIcon = useMemo(() => {
     return (

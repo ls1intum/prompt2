@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ManualMailSending } from './ManualMailSending'
-import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
+import { CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 // import { useGetMailingIsConfigured } from '../../../../hooks/useGetMailingIsConfigured'
 
 interface SettingsCardProps {

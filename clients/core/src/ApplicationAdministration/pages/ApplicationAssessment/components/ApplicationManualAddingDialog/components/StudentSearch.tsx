@@ -16,9 +16,9 @@ import { useParams } from 'react-router-dom'
 import translations from '@/lib/translations.json'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Student } from '@/interfaces/student'
+import { Student } from '@tumaet/prompt-shared-state'
 import { searchStudents } from '../../../../../../network/queries/searchStudents'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { Badge } from '@/components/ui/badge'
 
 interface StudentSearchProps {
@@ -99,11 +99,11 @@ export const StudentSearch = ({
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.first_name}</TableCell>
-                  <TableCell>{user.last_name}</TableCell>
+                  <TableCell>{user.firstName}</TableCell>
+                  <TableCell>{user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.university_login}</TableCell>
-                  <TableCell>{user.matriculation_number}</TableCell>
+                  <TableCell>{user.universityLogin}</TableCell>
+                  <TableCell>{user.matriculationNumber}</TableCell>
                   <TableCell>
                     {existingApplications.some(
                       (application) => application.student.id === user.id,

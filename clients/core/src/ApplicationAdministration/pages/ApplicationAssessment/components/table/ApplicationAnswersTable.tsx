@@ -7,25 +7,26 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { ApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationAnswerText } from '@/interfaces/application_answer_text'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationAnswerText } from '../../../../../interfaces/application/applicationAnswer/text/applicationAnswerText'
+import { ApplicationAnswerMultiSelect } from '../../../../../interfaces/application/applicationAnswer/multiSelect/applicationAnswerMultiSelect'
+
 import { AlignLeft, CheckSquare } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 interface ApplicationAnswersTableProps {
   questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
-  answers_multi_select: ApplicationAnswerMultiSelect[]
-  answers_text: ApplicationAnswerText[]
+  answersMultiSelect: ApplicationAnswerMultiSelect[]
+  answersText: ApplicationAnswerText[]
 }
 
 export const ApplicationAnswersTable = ({
   questions,
-  answers_multi_select,
-  answers_text,
+  answersMultiSelect,
+  answersText,
 }: ApplicationAnswersTableProps) => {
-  const sortedQuestions = [...questions].sort((a, b) => a.order_num - b.order_num)
+  const sortedQuestions = [...questions].sort((a, b) => a.orderNum - b.orderNum)
 
   return (
     <Card className='w-full'>
@@ -48,9 +49,8 @@ export const ApplicationAnswersTable = ({
             <TableBody>
               {sortedQuestions.map((question, index) => {
                 const answer =
-                  answers_multi_select.find((a) => a.application_question_id === question.id)
-                    ?.answer ||
-                  answers_text.find((a) => a.application_question_id === question.id)?.answer ||
+                  answersMultiSelect.find((a) => a.applicationQuestionID === question.id)?.answer ||
+                  answersText.find((a) => a.applicationQuestionID === question.id)?.answer ||
                   ''
 
                 return (

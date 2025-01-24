@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 
 export const createValidationSchema = (
   question: ApplicationQuestionMultiSelect,
@@ -9,15 +9,15 @@ export const createValidationSchema = (
     answers: z
       .array(z.string())
       .min(
-        isCheckboxQuestion ? (question.is_required ? 1 : 0) : question.min_select,
+        isCheckboxQuestion ? (question.isRequired ? 1 : 0) : question.minSelect,
         isCheckboxQuestion
-          ? question.error_message || 'This checkbox is required'
-          : question.max_select === 1
+          ? question.errorMessage || 'This checkbox is required'
+          : question.maxSelect === 1
             ? 'Select an option'
-            : `Select at least ${question.min_select} option${question.min_select > 1 ? 's' : ''}.`,
+            : `Select at least ${question.minSelect} option${question.minSelect > 1 ? 's' : ''}.`,
       )
       .max(
-        question.max_select,
-        `Select no more than ${question.max_select} option${question.max_select > 1 ? 's' : ''}.`,
+        question.maxSelect,
+        `Select no more than ${question.maxSelect} option${question.maxSelect > 1 ? 's' : ''}.`,
       ),
   })

@@ -15,7 +15,7 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
     <div className='space-y-4'>
       <FormField
         control={form.control}
-        name='validation_regex'
+        name='validationRegex'
         render={({ field }) => (
           <FormItem>
             <FormLabel>Validation Regex</FormLabel>
@@ -32,7 +32,7 @@ export function TextConfig({ form }: { form: UseFormReturn<QuestionConfigFormDat
       />
       <FormField
         control={form.control}
-        name='allowed_length'
+        name='allowedLength'
         render={({ field }) => (
           <FormItem>
             <FormLabel>

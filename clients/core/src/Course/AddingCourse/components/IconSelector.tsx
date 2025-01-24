@@ -1,6 +1,6 @@
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import {
-  Calendar,
+  Book,
   Cpu,
   Folder,
   Gamepad2Icon,
@@ -13,7 +13,7 @@ import {
 const iconList = [
   { name: 'Monitor', icon: Monitor, lucideName: 'monitor' },
   { name: 'Graduation Cap', icon: GraduationCap, lucideName: 'graduation-cap' },
-  { name: 'Book', icon: Calendar, lucideName: 'book-open-text' },
+  { name: 'Book', icon: Book, lucideName: 'book-open-text' },
   { name: 'Smartphone', icon: Smartphone, lucideName: 'smartphone' },
   { name: 'Gamepad', icon: Gamepad2Icon, lucideName: 'gamepad-2' },
   { name: 'Folder', icon: Folder, lucideName: 'folder' },

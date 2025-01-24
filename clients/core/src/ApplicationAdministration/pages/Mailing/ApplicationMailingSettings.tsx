@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
+import { ApplicationMailingMetaData } from '../../interfaces/applicationMailingMetaData'
 import { parseApplicationMailingMetaData } from './utils/parseApplicaitonMailingMetaData'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useModifyCoursePhase } from '../../hooks/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
-import { UpdateCoursePhase } from '@/interfaces/course_phase'
+import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { CustomApplicationPlaceHolder } from './components/CustomApplicationPlaceHolder'
 import { EmailTemplateEditor } from '@/components/pages/Mailing/components/MailingEditor'
@@ -56,8 +56,8 @@ export const ApplicationMailingSettings = () => {
   )
 
   useEffect(() => {
-    if (coursePhase?.meta_data) {
-      const parsedMetaData = parseApplicationMailingMetaData(coursePhase.meta_data)
+    if (coursePhase?.metaData) {
+      const parsedMetaData = parseApplicationMailingMetaData(coursePhase.metaData)
       setApplicationMailingMetaData(parsedMetaData)
       setInitialMetaData(parsedMetaData)
     }
@@ -79,7 +79,7 @@ export const ApplicationMailingSettings = () => {
     e.preventDefault()
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
-      meta_data: {
+      metaData: {
         mailingSettings: applicationMailingMetaData,
       },
     }

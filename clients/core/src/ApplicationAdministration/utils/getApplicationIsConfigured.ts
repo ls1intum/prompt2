@@ -1,4 +1,4 @@
-import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
+import { ApplicationMetaData } from '../interfaces/applicationMetaData'
 
 export function getIsApplicationConfigured(metaData: ApplicationMetaData | null): boolean {
   return metaData?.applicationStartDate &&

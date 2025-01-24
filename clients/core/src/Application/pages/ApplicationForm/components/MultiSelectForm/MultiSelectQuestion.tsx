@@ -2,7 +2,7 @@ import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import { MultiSelect } from '@/components/MultiSelect'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import {
   Select,
   SelectContent,
@@ -34,12 +34,12 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
     <>
       <FormLabel>
         {question.title}
-        {question.min_select > 0 && <span className='text-destructive'> *</span>}
+        {question.minSelect > 0 && <span className='text-destructive'> *</span>}
       </FormLabel>
       {!isInstructorView && question.description && (
         <FormDescriptionHTML htmlCode={question.description} />
       )}
-      {question.max_select > 1 ? (
+      {question.maxSelect > 1 ? (
         <MultiSelect
           options={multiSelectOptions}
           placeholder={question.placeholder || 'Please select...'}
@@ -47,7 +47,7 @@ export const MultiSelectQuestion: React.FC<MultiSelectQuestionProps> = ({
           onValueChange={(values) => {
             form.setValue('answers', values, { shouldValidate: true })
           }}
-          maxCount={question.max_select}
+          maxCount={question.maxSelect}
           variant='inverted'
           disabled={isInstructorView}
         />

@@ -5,8 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 import { Plus } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
@@ -27,12 +27,12 @@ export const AddQuestionMenu = ({
     const newQuestion: ApplicationQuestionText = {
       id: `not-valid-id-question-${applicationQuestions.length + 1}`,
       title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-      allowed_length: 500,
-      access_key: '',
-      accessible_for_other_phases: false,
+      coursePhaseID: phaseId!,
+      isRequired: false,
+      orderNum: applicationQuestions.length + 1,
+      allowedLength: 500,
+      accessKey: '',
+      accessibleForOtherPhases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
@@ -41,14 +41,14 @@ export const AddQuestionMenu = ({
     const newQuestion: ApplicationQuestionMultiSelect = {
       id: `not-valid-id-question-${applicationQuestions.length + 1}`,
       title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
-      min_select: 0,
-      max_select: 0,
+      coursePhaseID: phaseId!,
+      isRequired: false,
+      orderNum: applicationQuestions.length + 1,
+      minSelect: 0,
+      maxSelect: 0,
       options: [],
-      access_key: '',
-      accessible_for_other_phases: false,
+      accessKey: '',
+      accessibleForOtherPhases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }
@@ -57,15 +57,15 @@ export const AddQuestionMenu = ({
     const newQuestion: ApplicationQuestionMultiSelect = {
       id: `not-valid-id-question-${applicationQuestions.length + 1}`,
       title: ``,
-      course_phase_id: phaseId!,
-      is_required: false,
-      order_num: applicationQuestions.length + 1,
+      coursePhaseID: phaseId!,
+      isRequired: false,
+      orderNum: applicationQuestions.length + 1,
       placeholder: 'CheckBoxQuestion',
-      min_select: 0,
-      max_select: 1,
+      minSelect: 0,
+      maxSelect: 1,
       options: ['Yes'],
-      access_key: '',
-      accessible_for_other_phases: false,
+      accessKey: '',
+      accessibleForOtherPhases: false,
     }
     setApplicationQuestions([...applicationQuestions, newQuestion])
   }

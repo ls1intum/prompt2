@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/input'
 import { Pen, TriangleAlert, FileInput, FileOutput } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MetaDataBadges } from './components/MetaDataBadges'
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
+import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { getPermissionString, Role } from '@/interfaces/permission_roles'
+import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
@@ -20,13 +20,13 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
   const course = courses.find((c) => c.id === courseId)
   const { permissions } = useAuthStore()
   const canEdit = permissions.includes(
-    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
+    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
   )
 
   const { coursePhases } = useCourseConfigurationState()
   const coursePhase = coursePhases.find((phase) => phase.id === id)
 
-  const [phaseData, setPhaseData] = useState<CoursePhasePosition | undefined>(coursePhase)
+  const [phaseData, setPhaseData] = useState<CoursePhaseWithPosition | undefined>(coursePhase)
   const [isEditing, setIsEditing] = useState(false)
   const { coursePhaseTypes } = useCourseConfigurationState()
 
@@ -39,17 +39,17 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
   })
 
   const incomingMetaData = connections
-    .map((conn) => coursePhases.find((phase) => phase.id === conn.source)?.course_phase_type_id)
-    .map((typeId) => coursePhaseTypes.find((type) => type.id === typeId)?.provided_output_meta_data)
+    .map((conn) => coursePhases.find((phase) => phase.id === conn.source)?.coursePhaseTypeID)
+    .map((typeId) => coursePhaseTypes.find((type) => type.id === typeId)?.providedOutputMetaData)
     .filter((meta) => meta !== undefined)
     .flat()
 
   // type of the selected phase:
-  const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.course_phase_type_id)
+  const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.coursePhaseTypeID)
 
   const handleNameChange = (value: string) => {
     if (coursePhase) {
-      coursePhase.is_modified = true
+      coursePhase.isModified = true
       coursePhase.name = value
     }
     setPhaseData((prev) => (prev ? { ...prev, name: value } : undefined))
@@ -112,8 +112,8 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         </CardHeader>
         <CardContent className='p-4 pt-2'>
           {phaseType?.name === 'Application' &&
-            (!phaseType?.provided_output_meta_data ||
-              phaseType?.provided_output_meta_data.length === 0) && (
+            (!phaseType?.providedOutputMetaData ||
+              phaseType?.providedOutputMetaData.length === 0) && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -134,26 +134,25 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
               </TooltipProvider>
             )}
 
-          {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
+          {phaseType?.requiredInputMetaData && phaseType.requiredInputMetaData.length > 0 && (
             <MetaDataBadges
-              metaData={phaseType.required_input_meta_data}
+              metaData={phaseType.requiredInputMetaData}
               icon={<FileInput className='w-5 h-5 text-green-500' />}
               label='Required Input Metadata'
               providedMetaData={incomingMetaData}
             />
           )}
 
-          {phaseType?.provided_output_meta_data &&
-            phaseType.provided_output_meta_data.length > 0 && (
-              <MetaDataBadges
-                metaData={phaseType.provided_output_meta_data}
-                icon={<FileOutput className='w-5 h-5 text-green-500' />}
-                label='Provided Output Metadata'
-              />
-            )}
+          {phaseType?.providedOutputMetaData && phaseType.providedOutputMetaData.length > 0 && (
+            <MetaDataBadges
+              metaData={phaseType.providedOutputMetaData}
+              icon={<FileOutput className='w-5 h-5 text-green-500' />}
+              label='Provided Output Metadata'
+            />
+          )}
         </CardContent>
       </Card>
-      {!phaseData?.is_initial_phase && (
+      {!phaseData?.isInitialPhase && (
         <Handle
           type='target'
           position={Position.Top}
@@ -162,7 +161,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           className='!w-3 !h-3 !bg-blue-500 rounded-full'
         />
       )}
-      {phaseType?.required_input_meta_data && phaseType.required_input_meta_data.length > 0 && (
+      {phaseType?.requiredInputMetaData && phaseType.requiredInputMetaData.length > 0 && (
         <Handle
           type='target'
           position={Position.Top}
@@ -178,7 +177,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         style={{ left: 50, bottom: -10 }}
         className='!w-3 !h-3 !bg-blue-500 rounded-full'
       />
-      {phaseType?.provided_output_meta_data && phaseType.provided_output_meta_data.length > 0 && (
+      {phaseType?.providedOutputMetaData && phaseType.providedOutputMetaData.length > 0 && (
         <Handle
           type='source'
           position={Position.Bottom}

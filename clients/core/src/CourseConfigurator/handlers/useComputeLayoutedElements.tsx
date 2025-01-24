@@ -1,4 +1,4 @@
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
 import { getLayoutedElements } from '../utils/getLayoutedElements'
 import { ParticipantEdgeProps } from '../Edges/ParticipantEdgeProps'
 import { DataEdgeProps } from '../Edges/DataEdgeProps'
@@ -15,18 +15,18 @@ export const useComputeLayoutedElements = () => {
 
   const initialPersonEdges = coursePhaseGraph.map((item) => {
     return {
-      id: 'person-edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
-      source: item.from_course_phase_id,
-      target: item.to_course_phase_id,
+      id: 'person-edge-' + item.fromCoursePhaseID + '-' + item.toCoursePhaseID,
+      source: item.fromCoursePhaseID,
+      target: item.toCoursePhaseID,
       type: 'iconEdge',
     }
   })
 
   const initialMetaEdges = metaDataGraph.map((item) => {
     return {
-      id: 'data-edge-' + item.from_course_phase_id + '-' + item.to_course_phase_id,
-      source: item.from_course_phase_id,
-      target: item.to_course_phase_id,
+      id: 'data-edge-' + item.fromCoursePhaseID + '-' + item.toCoursePhaseID,
+      source: item.fromCoursePhaseID,
+      target: item.toCoursePhaseID,
       type: 'iconEdge',
     }
   })

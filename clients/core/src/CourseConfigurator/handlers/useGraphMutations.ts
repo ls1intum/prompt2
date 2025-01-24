@@ -4,9 +4,9 @@ import { updatePhaseGraph } from '../../network/mutations/updatePhaseGraph'
 import { updateMetaDataGraph } from '../../network/mutations/updateMetaDataGraph'
 import { deleteCoursePhase } from '../../network/mutations/deleteCoursePhase'
 import { updateCoursePhase } from '../../network/mutations/updateCoursePhase'
-import { CreateCoursePhase, UpdateCoursePhase } from '@/interfaces/course_phase'
-import { CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
-import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
+import { CreateCoursePhase, UpdateCoursePhase } from '@tumaet/prompt-shared-state'
+import { CoursePhaseGraphUpdate } from '../interfaces/coursePhaseGraphUpdate'
+import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
 import { useParams } from 'react-router-dom'
 
 export function useMutations() {

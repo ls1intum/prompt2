@@ -38,8 +38,8 @@ export const InterviewTimesDialog = () => {
   }
 
   useEffect(() => {
-    if (coursePhase?.meta_data?.interview_slots) {
-      setInterviewSlots(coursePhase.meta_data.interview_slots)
+    if (coursePhase?.metaData?.interviewSlots) {
+      setInterviewSlots(coursePhase.metaData.interviewSlots)
     }
   }, [coursePhase])
 
@@ -96,8 +96,8 @@ export const InterviewTimesDialog = () => {
     if (coursePhase) {
       mutate({
         id: coursePhase.id,
-        meta_data: {
-          interview_slots: interviewSlots,
+        metaData: {
+          interviewSlots: interviewSlots,
         },
       })
     }
@@ -140,8 +140,8 @@ export const InterviewTimesDialog = () => {
                     className='w-1/6'
                   />
                   <Select
-                    value={slot.courseParticipationId}
-                    onValueChange={(value) => updateSlot(slot.id, 'courseParticipationId', value)}
+                    value={slot.courseParticipationID}
+                    onValueChange={(value) => updateSlot(slot.id, 'courseParticipationID', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder='Select participant' />
@@ -149,10 +149,10 @@ export const InterviewTimesDialog = () => {
                     <SelectContent>
                       {participations.map((participant) => (
                         <SelectItem
-                          key={participant.course_participation_id}
-                          value={participant.course_participation_id}
+                          key={participant.courseParticipationID}
+                          value={participant.courseParticipationID}
                         >
-                          {participant.student.first_name} {participant.student.last_name}
+                          {participant.student.firstName} {participant.student.lastName}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -2,7 +2,7 @@ import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { FormLabel } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface CheckboxQuestionProps {
@@ -27,7 +27,7 @@ export const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
     <div className='space-y-1 leading-none'>
       <FormLabel>
         {question.title}
-        {question.is_required && <span className='text-destructive'> *</span>}
+        {question.isRequired && <span className='text-destructive'> *</span>}
       </FormLabel>
       {!isInstructorView && question.description && (
         <FormDescriptionHTML htmlCode={question.description} />

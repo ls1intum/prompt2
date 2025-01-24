@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CourseType, CourseTypeDetails } from '@/interfaces/course_type'
+import { CourseType, CourseTypeDetails } from '@tumaet/prompt-shared-state'
 
 interface AddCoursePropertiesProps {
   onNext: (data: CourseFormValues) => void
@@ -39,9 +39,9 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
     defaultValues: {
       name: initialValues?.name || '',
       dateRange: initialValues?.dateRange,
-      course_type: initialValues?.course_type || '',
+      courseType: initialValues?.courseType || '',
       ects: initialValues?.ects || 0,
-      semester_tag: initialValues?.semester_tag || '',
+      semesterTag: initialValues?.semesterTag || '',
     },
   })
 
@@ -49,7 +49,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
     onNext(data)
   }
 
-  const selectedCourseType = form.watch('course_type')
+  const selectedCourseType = form.watch('courseType')
   const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <FormField
             control={form.control}
-            name='course_type'
+            name='courseType'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Course Type</FormLabel>
@@ -139,7 +139,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
         </div>
         <FormField
           control={form.control}
-          name='semester_tag'
+          name='semesterTag'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Semester Tag</FormLabel>

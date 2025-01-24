@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { UpdateCoursePhaseParticipationStatus } from '@/interfaces/update_course_phase_participation_status'
+import { UpdateCoursePhaseParticipationStatus } from '@tumaet/prompt-shared-state'
 
 export const updateApplicationStatus = async (
   coursePhaseID: string,

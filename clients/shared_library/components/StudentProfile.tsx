@@ -1,11 +1,13 @@
 import React from 'react'
-import { Student } from '@/interfaces/student'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import {
+  Student,
+  PassStatus,
+  getGenderString,
+  getStudyDegreeString,
+} from '@tumaet/prompt-shared-state'
 import { Mail, Flag, Book, GraduationCap, Calendar, Hash, Users, KeyRound } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getGenderString } from '@/interfaces/gender'
-import { getStudyDegreeString } from '@/interfaces/study_degree'
 import { getCountryName } from '@/lib/getCountries'
 import translations from '@/lib/translations.json'
 import { AvatarImage } from '@radix-ui/react-avatar'
@@ -24,10 +26,10 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
       <div className={`h-16 ${getStatusColor(status)}`} />
       <div className='mb-4'>
         <Avatar className='absolute w-24 h-24 border-4 border-background rounded-full transform left-3 -translate-y-1/2'>
-          <AvatarImage src={getGravatarUrl(student.email)} alt={student.last_name} />
+          <AvatarImage src={getGravatarUrl(student.email)} alt={student.lastName} />
           <AvatarFallback className='rounded-lg font-bold text-lg'>
-            {student.first_name[0]}
-            {student.last_name[0]}
+            {student.firstName[0]}
+            {student.lastName[0]}
           </AvatarFallback>
         </Avatar>
       </div>
@@ -37,7 +39,7 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
           <div className='flex-1 text-center sm:text-left'>
             <div className='flex flex-col items-center sm:items-start pt-6'>
               <h1 className='text-2xl font-bold'>
-                {student.first_name} {student.last_name}
+                {student.firstName} {student.lastName}
               </h1>
             </div>
             <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground'>
@@ -60,18 +62,18 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
                 )}
               </div>
               <div className='space-y-1'>
-                {student.university_login && (
+                {student.universityLogin && (
                   <p className='flex items-center justify-center sm:justify-start'>
                     <KeyRound className='w-4 h-4 mr-2' />
                     <strong className='mr-1'>{translations.university['login-name']}:</strong>
-                    {student.university_login}
+                    {student.universityLogin}
                   </p>
                 )}
-                {student.matriculation_number && (
+                {student.matriculationNumber && (
                   <p className='flex items-center justify-center sm:justify-start'>
                     <Hash className='w-4 h-4 mr-2' />
                     <strong className='mr-1'>Matriculation:</strong>
-                    {student.matriculation_number}
+                    {student.matriculationNumber}
                   </p>
                 )}
               </div>
@@ -85,19 +87,19 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
           <div className='flex items-center'>
             <Book className='w-5 h-5 mr-2 text-primary' />
             <strong className='mr-2'>Program:</strong>
-            <span className='text-muted-foreground'>{student.study_program || 'N/A'}</span>
+            <span className='text-muted-foreground'>{student.studyProgram || 'N/A'}</span>
           </div>
           <div className='flex items-center'>
             <GraduationCap className='w-5 h-5 mr-2 text-primary' />
             <strong className='mr-2'>Degree:</strong>
             <span className='text-muted-foreground'>
-              {getStudyDegreeString(student.study_degree) || 'N/A'}
+              {getStudyDegreeString(student.studyDegree) || 'N/A'}
             </span>
           </div>
           <div className='flex items-center'>
             <Calendar className='w-5 h-5 mr-2 text-primary' />
             <strong className='mr-2'>Semester:</strong>
-            <span className='text-muted-foreground'>{student.current_semester || 'N/A'}</span>
+            <span className='text-muted-foreground'>{student.currentSemester || 'N/A'}</span>
           </div>
         </div>
       </CardContent>

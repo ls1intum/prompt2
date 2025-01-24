@@ -1,4 +1,4 @@
-import { UpdateCoursePhase } from '@/interfaces/course_phase'
+import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { axiosInstance } from '@/network/configService'
 
 export const updateCoursePhase = async (

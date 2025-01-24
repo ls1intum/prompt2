@@ -3,8 +3,8 @@ import { differenceInDays, format } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ApplicationStatusBadge } from '../../../components/ApplicationStatusBadge'
 import { getApplicationStatus } from '../../../utils/getApplicationStatus'
-import { ApplicationMetaData } from '../../../interfaces/ApplicationMetaData'
-import { ApplicationStatus } from '../../../interfaces/ApplicationStatus'
+import { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
+import { ApplicationStatus } from '../../../interfaces/applicationStatus'
 
 interface ApplicationStatusCardProps {
   applicationMetaData: ApplicationMetaData | null

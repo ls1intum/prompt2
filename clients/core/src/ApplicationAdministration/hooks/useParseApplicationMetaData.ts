@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { ApplicationMetaData } from '../interfaces/ApplicationMetaData'
-import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
+import { ApplicationMetaData } from '../interfaces/applicationMetaData'
+import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'
 
 export const useParseApplicationMetaData = (
   coursePhase: CoursePhaseWithMetaData | undefined,
@@ -8,10 +8,10 @@ export const useParseApplicationMetaData = (
 ) => {
   return useEffect(() => {
     if (coursePhase) {
-      const externalStudentsAllowed = coursePhase?.meta_data?.['externalStudentsAllowed']
-      const applicationStartDate = coursePhase?.meta_data?.['applicationStartDate']
-      const applicationEndDate = coursePhase?.meta_data?.['applicationEndDate']
-      const universityLoginAvailable = coursePhase?.meta_data?.['universityLoginAvailable']
+      const externalStudentsAllowed = coursePhase?.metaData?.['externalStudentsAllowed']
+      const applicationStartDate = coursePhase?.metaData?.['applicationStartDate']
+      const applicationEndDate = coursePhase?.metaData?.['applicationEndDate']
+      const universityLoginAvailable = coursePhase?.metaData?.['universityLoginAvailable']
 
       const parsedMetaData: ApplicationMetaData = {
         applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,

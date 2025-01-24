@@ -4,8 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DeadlineInfo } from './DeadlineInfo'
 import { Calendar } from 'lucide-react'
 import { format } from 'date-fns'
-import { OpenApplicationDetails } from '@/interfaces/open_application_details'
-import { CourseTypeDetails } from '@/interfaces/course_type'
+import { OpenApplicationDetails } from '../../interfaces/application/openApplicationDetails'
+import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { useNavigate } from 'react-router-dom'
 
 // todo fix this in the data model and import an actual course here!!

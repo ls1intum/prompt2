@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { PostApplication } from '@/interfaces/post_application'
+import { PostApplication } from '../../interfaces/application/postApplication'
 
 export const postNewApplicationAuthenticated = async (
   phaseId: string,

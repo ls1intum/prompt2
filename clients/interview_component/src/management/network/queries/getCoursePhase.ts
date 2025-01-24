@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
+import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'
 
 export const getCoursePhase = async (coursePhaseID: string): Promise<CoursePhaseWithMetaData> => {
   try {

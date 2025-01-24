@@ -2,19 +2,21 @@ import { useCourseStore } from '@/zustand/useCourseStore'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
-import { CourseTypeDetails } from '@/interfaces/course_type'
+import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
+import { useDemoStore } from '@tumaet/prompt-shared-state'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const course = courses.find((c) => c.id === courseId)
+  const { count } = useDemoStore()
 
   const formatDate = (dateString: string): string => {
     const [year, month, date] = dateString.split('-')
     return `${date}.${month}.${year}`
   }
 
-  const bgColor = course?.meta_data?.['bg-color'] || 'bg-gray-50'
+  const bgColor = course?.metaData?.['bg-color'] || 'bg-gray-50'
 
   if (!course) {
     return (
@@ -35,6 +37,7 @@ export const CourseOverview = (): JSX.Element => {
 
   return (
     <div className='container mx-auto px-4 py-8'>
+      <h2>The current count is: {count}</h2>
       <Card className='mb-8 shadow-lg'>
         <CardHeader className={`rounded-t-lg ${bgColor}`}>
           <div className='flex justify-between items-center'>
@@ -51,7 +54,7 @@ export const CourseOverview = (): JSX.Element => {
                 <CalendarDays className='w-6 h-6' />
                 <div>
                   <p className='text-secondary-foreground'>Semester</p>
-                  <p className='text-lg'>{course.semester_tag}</p>
+                  <p className='text-lg'>{course.semesterTag}</p>
                 </div>
               </div>
               <div className='flex items-center space-x-3'>
@@ -59,7 +62,7 @@ export const CourseOverview = (): JSX.Element => {
                 <div>
                   <p className='text-secondary-foreground'>Duration</p>
                   <p className='text-lg'>
-                    {`${formatDate(course.start_date.toString())} - ${formatDate(course.end_date.toString())}`}
+                    {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
                   </p>
                 </div>
               </div>
@@ -69,7 +72,7 @@ export const CourseOverview = (): JSX.Element => {
                 <GraduationCap className='w-6 h-6' />
                 <div>
                   <p className='text-secondary-foreground'>Course Type</p>
-                  <p className='text-lg'>{CourseTypeDetails[course.course_type].name}</p>
+                  <p className='text-lg'>{CourseTypeDetails[course.courseType].name}</p>
                 </div>
               </div>
               <div className='flex items-center space-x-3'>

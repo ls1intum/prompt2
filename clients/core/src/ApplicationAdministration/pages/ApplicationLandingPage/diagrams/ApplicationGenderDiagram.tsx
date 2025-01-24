@@ -6,8 +6,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { Gender } from '@/interfaces/gender'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
+import { Gender } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
 
 const chartConfig = {

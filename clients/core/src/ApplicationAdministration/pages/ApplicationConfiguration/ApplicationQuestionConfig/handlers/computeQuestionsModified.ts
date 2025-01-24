@@ -1,14 +1,14 @@
-import { ApplicationForm } from '@/interfaces/application_form'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 
 export const computeQuestionsModified = (
   fetchedForm: ApplicationForm | undefined,
   storedApplicationQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[],
 ) => {
   const combinedQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
-    ...(fetchedForm?.questions_multi_select ?? []),
-    ...(fetchedForm?.questions_text ?? []),
+    ...(fetchedForm?.questionsMultiSelect ?? []),
+    ...(fetchedForm?.questionsText ?? []),
   ]
   const modified = !storedApplicationQuestions.every((q) => {
     const originalQuestion = combinedQuestions.find((aq) => aq.id === q.id)
@@ -32,31 +32,31 @@ export const questionsEqual = (
   if (question1IsMultiSelect !== question2IsMultiSelect) return false
   const basicEqual =
     question1.id === question2.id &&
-    question1.course_phase_id === question2.course_phase_id &&
+    question1.coursePhaseID === question2.coursePhaseID &&
     question1.title === question2.title &&
     question1.description === question2.description &&
     question1.placeholder === question2.placeholder &&
-    question1.error_message === question2.error_message &&
-    question1.is_required === question2.is_required &&
-    question1.order_num === question2.order_num &&
-    question1.accessible_for_other_phases === question2.accessible_for_other_phases &&
-    // key will be ignored if accessible_for_other_phases is false
-    (question1.accessible_for_other_phases ? question1.access_key === question2.access_key : true)
+    question1.errorMessage === question2.errorMessage &&
+    question1.isRequired === question2.isRequired &&
+    question1.orderNum === question2.orderNum &&
+    question1.accessibleForOtherPhases === question2.accessibleForOtherPhases &&
+    // key will be ignored if accessibleForOtherPhases is false
+    (question1.accessibleForOtherPhases ? question1.accessKey === question2.accessKey : true)
 
   if (!basicEqual) return false
 
   if (question1IsMultiSelect && question2IsMultiSelect) {
     return (
-      question1.min_select === question2.min_select &&
-      question1.max_select === question2.max_select &&
+      question1.minSelect === question2.minSelect &&
+      question1.maxSelect === question2.maxSelect &&
       JSON.stringify(question1.options) === JSON.stringify(question2.options)
     )
   }
   if (!question1IsMultiSelect && !question2IsMultiSelect) {
     return (
       question1.id === question2.id &&
-      question1.allowed_length === question2.allowed_length &&
-      question1.validation_regex === question2.validation_regex
+      question1.allowedLength === question2.allowedLength &&
+      question1.validationRegex === question2.validationRegex
     )
   }
   return false

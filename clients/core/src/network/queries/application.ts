@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { GetApplication } from '@/interfaces/get_application'
+import { GetApplication } from '../../interfaces/application/getApplication'
 
 export const getApplication = async (coursePhaseId: string): Promise<GetApplication> => {
   try {

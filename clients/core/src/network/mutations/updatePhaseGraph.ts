@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
+import { CoursePhaseGraphUpdate } from '../../CourseConfigurator/interfaces/coursePhaseGraphUpdate'
 
 export const updatePhaseGraph = async (
   courseID: string,

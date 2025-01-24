@@ -1,15 +1,15 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { MetaDataItem } from '@/interfaces/course_phase_type'
+import { CoursePhaseTypeMetaDataItem } from '@tumaet/prompt-shared-state'
 import { getMetaDataStatus } from './utils/getBadgeStatus'
 import { renderBadgeTooltipContent } from './utils/renderBadgeTooltip'
 
 interface MetaDataBadgesProps {
-  metaData: MetaDataItem[]
+  metaData: CoursePhaseTypeMetaDataItem[]
   icon: React.ReactNode
   label: string
-  providedMetaData?: MetaDataItem[]
+  providedMetaData?: CoursePhaseTypeMetaDataItem[]
 }
 
 export const MetaDataBadges = ({

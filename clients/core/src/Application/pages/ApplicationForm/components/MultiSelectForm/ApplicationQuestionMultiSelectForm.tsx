@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { QuestionMultiSelectFormRef } from '../../utils/QuestionMultiSelectFormRef'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { createValidationSchema } from './validationSchema'
 import { CheckboxQuestion } from './CheckboxQuestion'
 import { MultiSelectQuestion } from './MultiSelectQuestion'
@@ -40,7 +40,7 @@ export const ApplicationQuestionMultiSelectForm = forwardRef(
         return isValid
       },
       getValues() {
-        return { application_question_id: question.id, answer: form.getValues().answers }
+        return { applicationQuestionID: question.id, answer: form.getValues().answers }
       },
     }))
 

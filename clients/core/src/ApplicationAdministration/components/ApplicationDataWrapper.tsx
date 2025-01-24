@@ -1,4 +1,4 @@
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { AdditionalScore } from '../interfaces/additionalScore/additionalScore'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
 import { useGetApplicationParticipations } from '../hooks/useGetApplicationParticipations'
 import { useQuery } from '@tanstack/react-query'

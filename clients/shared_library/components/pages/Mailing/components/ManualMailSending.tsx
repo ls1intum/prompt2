@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Send } from 'lucide-react'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus, CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { ConfirmSendEmailDialog } from './ConfirmSendEmailDialog'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
 
 interface ManualMailSendingProps {
   mailingMetaData: CoursePhaseMailingConfigData | null

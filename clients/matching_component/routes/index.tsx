@@ -1,5 +1,5 @@
 import OverviewPage from '../management/OverviewPage'
-import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
+import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 
 const routes: ExtendedRouteObject[] = [
   {

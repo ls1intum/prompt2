@@ -1,7 +1,7 @@
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { useAuthStore } from '@/zustand/useAuthStore'
 import { InsideSidebarMenuItem } from '../../Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
-import { getPermissionString } from '@/interfaces/permission_roles'
+import { getPermissionString } from '@tumaet/prompt-shared-state'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useParams } from 'react-router-dom'
 
@@ -26,7 +26,7 @@ export const ExternalSidebarComponent: React.FC<ExternalSidebarProps> = ({
   let hasComponentPermission = false
   if (sidebarElement.requiredPermissions && sidebarElement.requiredPermissions.length > 0) {
     hasComponentPermission = sidebarElement.requiredPermissions.some((role) => {
-      return permissions.includes(getPermissionString(role, course?.name, course?.semester_tag))
+      return permissions.includes(getPermissionString(role, course?.name, course?.semesterTag))
     })
   } else {
     // no permissions required
@@ -45,7 +45,7 @@ export const ExternalSidebarComponent: React.FC<ExternalSidebarProps> = ({
               ?.filter((subitem) => {
                 const hasPermission = subitem.requiredPermissions?.some((role) => {
                   return permissions.includes(
-                    getPermissionString(role, course?.name, course?.semester_tag),
+                    getPermissionString(role, course?.name, course?.semesterTag),
                   )
                 })
                 if (subitem.requiredPermissions && !hasPermission) {

@@ -10,8 +10,9 @@ import {
 import { AssessmentScoreUploadPage1, Page1Ref } from './components/AssessmentScoreUploadPage1'
 import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentScoreUploadPage2'
 import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPage3'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
-import { AdditionalScoreUpload, IndividualScore } from '@/interfaces/additional_score'
+import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
+import { AdditionalScoreUpload } from '../../../../interfaces/additionalScore/additionalScoreUpload'
+import { IndividualScore } from '../../../../interfaces/additionalScore/individualScore'
 import { Upload } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postAdditionalScore } from '../../../../../network/mutations/postAdditionalScore'
@@ -118,7 +119,7 @@ export default function AssessmentScoreUpload({
         const newScore: AdditionalScoreUpload = {
           name: page1Values?.scoreName ?? '',
           key: page1Values?.scoreName.toLowerCase().replace(/\s+/g, '') ?? '',
-          threshold_active: !!page1Values?.hasThreshold,
+          thresholdActive: !!page1Values?.hasThreshold,
           threshold: page1Values?.hasThreshold ? parseFloat(page1Values.threshold) : 0,
           scores: state.additionalScores,
         }

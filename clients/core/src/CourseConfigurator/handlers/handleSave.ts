@@ -1,14 +1,15 @@
 import { Node, Edge } from '@xyflow/react'
-import { CreateCoursePhase, UpdateCoursePhase } from '@/interfaces/course_phase'
-import { CoursePhaseGraphItem, CoursePhaseGraphUpdate } from '@/interfaces/course_phase_graph'
+import { CreateCoursePhase, UpdateCoursePhase } from '@tumaet/prompt-shared-state'
+import { CoursePhaseGraphItem } from '../interfaces/coursePhaseGraphItem'
+import { CoursePhaseGraphUpdate } from '../interfaces/coursePhaseGraphUpdate'
+import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
+import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
 import { UseMutateFunction } from '@tanstack/react-query'
-import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
-import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
 
 interface HandleSaveProps {
   nodes: Node[]
   edges: Edge[]
-  coursePhases: CoursePhasePosition[]
+  coursePhases: CoursePhaseWithPosition[]
   mutateDeletePhase: UseMutateFunction<string | undefined, Error, string, unknown>
   mutateAsyncPhases: (coursePhase: CreateCoursePhase) => Promise<string | undefined>
   mutateRenamePhase: UseMutateFunction<string | undefined, Error, UpdateCoursePhase, unknown>
@@ -50,10 +51,10 @@ export async function handleSave({
   const newPhases = coursePhases.filter((phase) => !phase.id || phase.id.startsWith('no-valid-id'))
   for (const phase of newPhases) {
     const createPhase: CreateCoursePhase = {
-      course_id: phase.course_id,
+      courseID: phase.courseID,
       name: phase.name,
-      course_phase_type_id: phase.course_phase_type_id,
-      is_initial_phase: phase.is_initial_phase,
+      coursePhaseTypeID: phase.coursePhaseTypeID,
+      isInitialPhase: phase.isInitialPhase,
     }
 
     try {
@@ -68,7 +69,7 @@ export async function handleSave({
   }
 
   // 2.) Update the names of the phases if any
-  const updatedPhases = coursePhases.filter((phase) => phase.is_modified)
+  const updatedPhases = coursePhases.filter((phase) => phase.isModified)
   for (const updatedPhase of updatedPhases) {
     try {
       await mutateRenamePhase({
@@ -93,11 +94,11 @@ export async function handleSave({
     })
 
   const orderArray: CoursePhaseGraphItem[] = updatedPersonEdges.map((edge) => ({
-    from_course_phase_id: edge.source,
-    to_course_phase_id: edge.target,
+    fromCoursePhaseID: edge.source,
+    toCoursePhaseID: edge.target,
   }))
 
-  let initialPhase = coursePhases.find((phase) => phase.is_initial_phase)?.id ?? 'undefined'
+  let initialPhase = coursePhases.find((phase) => phase.isInitialPhase)?.id ?? 'undefined'
   if (initialPhase.startsWith('no-valid-id')) {
     if (idReplacementMap[initialPhase]) {
       initialPhase = idReplacementMap[initialPhase]
@@ -107,8 +108,8 @@ export async function handleSave({
   }
 
   const graphUpdate: CoursePhaseGraphUpdate = {
-    initial_phase: initialPhase,
-    course_phase_graph: orderArray,
+    initialPhase: initialPhase,
+    coursePhaseGraph: orderArray,
   }
 
   try {
@@ -130,8 +131,8 @@ export async function handleSave({
     })
 
   const metaDataGraph: MetaDataGraphItem[] = updatedMetaDataEdges.map((edge) => ({
-    from_course_phase_id: edge.source,
-    to_course_phase_id: edge.target,
+    fromCoursePhaseID: edge.source,
+    toCoursePhaseID: edge.target,
   }))
 
   try {

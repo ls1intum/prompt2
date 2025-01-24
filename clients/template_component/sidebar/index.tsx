@@ -1,6 +1,6 @@
 import { Construction } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-import { Role } from '@/interfaces/permission_roles'
+import { Role } from '@tumaet/prompt-shared-state'
 
 const sidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',

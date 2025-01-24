@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { Column } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'
 

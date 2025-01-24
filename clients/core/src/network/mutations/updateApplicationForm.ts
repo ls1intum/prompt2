@@ -1,4 +1,4 @@
-import { UpdateApplicationForm } from '@/interfaces/application_form'
+import { UpdateApplicationForm } from '../../ApplicationAdministration/interfaces/form/updateApplicationForm'
 import { axiosInstance } from '@/network/configService'
 
 export const updateApplicationForm = async (
