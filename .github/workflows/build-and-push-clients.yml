@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-and-push-clients-base:
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: ls1intum/.github/.github/workflows/native-build-and-push-docker-image.yml@feat/native-runner-add-label-output
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
       docker-file: clients/Dockerfile # Defaults to Dockerfile
@@ -30,7 +30,7 @@ jobs:
 
   build-and-push-clients-core:
     needs: build-and-push-clients-base
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: ls1intum/.github/.github/workflows/native-build-and-push-docker-image.yml@feat/native-runner-add-label-output
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
@@ -44,7 +44,7 @@ jobs:
    
   build-and-push-clients-template:
     needs: build-and-push-clients-base
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: ls1intum/.github/.github/workflows/native-build-and-push-docker-image.yml@feat/native-runner-add-label-output
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
@@ -56,7 +56,7 @@ jobs:
 
   build-and-push-clients-interview:
     needs: build-and-push-clients-base
-    uses: ./.github/workflows/build-and-push-docker-image.yml
+    uses: ls1intum/.github/.github/workflows/native-build-and-push-docker-image.yml@feat/native-runner-add-label-output
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-interview-component
       docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
@@ -68,7 +68,7 @@ jobs:
 
   build-and-push-clients-matching:
       needs: build-and-push-clients-base
-      uses: ./.github/workflows/build-and-push-docker-image.yml
+      uses: ls1intum/.github/.github/workflows/native-build-and-push-docker-image.yml@feat/native-runner-add-label-output
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-clients-matching-component
         docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
