@@ -3,13 +3,11 @@ import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
-import { useDemoStore } from '@tumaet/prompt-shared-state'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const course = courses.find((c) => c.id === courseId)
-  const { count } = useDemoStore()
 
   const formatDate = (dateString: string): string => {
     const [year, month, date] = dateString.split('-')
@@ -37,7 +35,6 @@ export const CourseOverview = (): JSX.Element => {
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <h2>The current count is: {count}</h2>
       <Card className='mb-8 shadow-lg'>
         <CardHeader className={`rounded-t-lg ${bgColor}`}>
           <div className='flex justify-between items-center'>

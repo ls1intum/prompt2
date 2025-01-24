@@ -9,8 +9,6 @@ import { SortDropdownMenu } from '../../components/SortDropdownMenu'
 import { InterviewQuestionsDialog } from '../../components/InterviewQuestionsDialog'
 import { InterviewTimesDialog } from '../../components/InterviewTimesDialog'
 import { useSorting } from '../../hooks/useSorting'
-import { useDemoStore } from '@tumaet/prompt-shared-state'
-import { Button } from '@/components/ui/button'
 
 export const OverviewPage = (): JSX.Element => {
   const { interviewSlots } = useParticipationStore()
@@ -20,13 +18,9 @@ export const OverviewPage = (): JSX.Element => {
   const [sortBy, setSortBy] = useState<string | undefined>(undefined)
   const orderedParticipations = useSorting(sortBy)
 
-  const { count, increment } = useDemoStore()
-
   return (
     <div>
       <ManagementPageHeader>Interview</ManagementPageHeader>
-      <h2>The current count is {count}</h2>
-      <Button onClick={increment}>Increment</Button>
       <div className='flex justify-between items-center mt-4 mb-6'>
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
