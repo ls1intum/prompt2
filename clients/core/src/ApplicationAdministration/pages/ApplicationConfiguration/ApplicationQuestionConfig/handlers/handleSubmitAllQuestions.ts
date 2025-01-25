@@ -1,7 +1,9 @@
-import { ApplicationForm, UpdateApplicationForm } from '@/interfaces/application_form'
+import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
+import { UpdateApplicationForm } from '../../../../interfaces/form/updateApplicationForm'
+
 import { ApplicationQuestionCardRef } from '../FormPages/ApplicationQuestionCard'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 
 interface handleSubmitAllQuestionsProps {
   questionRefs: React.MutableRefObject<(ApplicationQuestionCardRef | null | undefined)[]>
@@ -30,36 +32,36 @@ export const handleSubmitAllQuestions = async ({
   }
   setSubmitAttempted(true)
   if (allValid) {
-    const deletedTextQuestion = fetchedForm?.questions_text
+    const deletedTextQuestion = fetchedForm?.questionsText
       .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
       .map((q) => q.id)
 
-    const deletedMultiSelectQuestion = fetchedForm?.questions_multi_select
+    const deletedMultiSelectQuestion = fetchedForm?.questionsMultiSelect
       .filter((q) => !applicationQuestions.some((aq) => aq.id === q.id))
       .map((q) => q.id)
 
-    const questions_multi_select = applicationQuestions
+    const questionsMultiSelect = applicationQuestions
       .filter((q) => 'options' in q)
       .map((q) => q as ApplicationQuestionMultiSelect)
       .map((q) => {
-        if (!q.accessible_for_other_phases) {
+        if (!q.accessibleForOtherPhases) {
           return {
             ...q,
-            access_key: '', // Do not modify access key (is not shown if export switched off)
+            accessKey: '', // Do not modify access key (is not shown if export switched off)
           }
         } else {
           return q
         }
       })
 
-    const questions_text = applicationQuestions
+    const questionsText = applicationQuestions
       .filter((q) => !('options' in q))
       .map((q) => q as ApplicationQuestionText)
       .map((q) => {
-        if (!q.accessible_for_other_phases) {
+        if (!q.accessibleForOtherPhases) {
           return {
             ...q,
-            access_key: '', // Do not modify access key (is not shown if export switched off)
+            accessKey: '', // Do not modify access key (is not shown if export switched off)
           }
         } else {
           return q
@@ -67,18 +69,14 @@ export const handleSubmitAllQuestions = async ({
       })
 
     const updateForm: UpdateApplicationForm = {
-      delete_questions_text: deletedTextQuestion ?? [],
-      delete_questions_multi_select: deletedMultiSelectQuestion ?? [],
-      create_questions_text: questions_text.filter((q) =>
+      deleteQuestionsText: deletedTextQuestion ?? [],
+      deleteQuestionsMultiSelect: deletedMultiSelectQuestion ?? [],
+      createQuestionsText: questionsText.filter((q) => q.id.startsWith('not-valid-id-question-')),
+      createQuestionsMultiSelect: questionsMultiSelect.filter((q) =>
         q.id.startsWith('not-valid-id-question-'),
       ),
-      create_questions_multi_select: questions_multi_select.filter((q) =>
-        q.id.startsWith('not-valid-id-question-'),
-      ),
-      update_questions_text: questions_text.filter(
-        (q) => !q.id.startsWith('not-valid-id-question-'),
-      ),
-      update_questions_multi_select: questions_multi_select.filter(
+      updateQuestionsText: questionsText.filter((q) => !q.id.startsWith('not-valid-id-question-')),
+      updateQuestionsMultiSelect: questionsMultiSelect.filter(
         (q) => !q.id.startsWith('not-valid-id-question-'),
       ),
     }

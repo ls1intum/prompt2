@@ -1,4 +1,4 @@
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 import {
   ColumnFiltersState,
@@ -39,7 +39,7 @@ import { useDeleteApplications } from './hooks/useDeleteApplications'
 
 export const ApplicationsAssessment = (): JSX.Element => {
   const { additionalScores, participations } = useApplicationStore()
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'last_name', desc: false }])
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
@@ -75,10 +75,10 @@ export const ApplicationsAssessment = (): JSX.Element => {
     globalFilterFn: (row, columnId, filterValue) => {
       const { student } = row.original
       const searchableValues = [
-        `${student.first_name} ${student.last_name}`.toLowerCase(),
+        `${student.firstName} ${student.lastName}`.toLowerCase(),
         student.email?.toLowerCase(),
-        student.matriculation_number?.toString(),
-        student.university_login?.toLowerCase(),
+        student.matriculationNumber?.toString(),
+        student.universityLogin?.toLowerCase(),
       ]
       return searchableValues.some((value) => value?.includes(filterValue.toLowerCase()))
     },
@@ -178,9 +178,9 @@ export const ApplicationsAssessment = (): JSX.Element => {
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           coursePhaseParticipationID={selectedApplicationID ?? ''}
-          status={selectedApplication?.pass_status ?? PassStatus.NOT_ASSESSED}
+          status={selectedApplication?.passStatus ?? PassStatus.NOT_ASSESSED}
           score={selectedApplication?.score ?? null}
-          metaData={selectedApplication?.meta_data ?? {}}
+          metaData={selectedApplication?.metaData ?? {}}
         />
       )}
     </div>

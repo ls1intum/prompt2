@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
+import { ApplicationFormWithDetails } from '../interfaces/application/applicationFormWithDetails'
 import { getApplicationFormWithDetails } from '../network/queries/applicationFormWithDetails'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { NonAuthenticatedPageWrapper } from '../components/NonAuthenticatedPageWrapper'
@@ -9,10 +9,10 @@ import { ErrorState } from './components/ErrorState'
 import { useState } from 'react'
 import { ApplicationLoginCard } from './components/ApplicationLoginCard'
 import { ApplicationFormView } from './pages/ApplicationForm/ApplicationFormView'
-import { Student } from '@/interfaces/student'
-import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
-import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
-import { PostApplication } from '@/interfaces/post_application'
+import { Student } from '@tumaet/prompt-shared-state'
+import { CreateApplicationAnswerText } from '../interfaces/application/applicationAnswer/text/createApplicationAnswerText'
+import { CreateApplicationAnswerMultiSelect } from '../interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
+import { PostApplication } from '../interfaces/application/postApplication'
 import { postNewApplicationExtern } from '../network/mutations/postApplicationExtern'
 import { ApplicationSavingDialog } from './components/ApplicationSavingDialog'
 
@@ -52,8 +52,8 @@ export const ApplicationLoginPage = (): JSX.Element => {
   ) => {
     const application: PostApplication = {
       student,
-      answers_text: answersText,
-      answers_multi_select: answersMultiSelect,
+      answersText: answersText,
+      answersMultiSelect: answersMultiSelect,
     }
     setShowDialog('saving')
     mutateSendApplication(application)
@@ -79,9 +79,9 @@ export const ApplicationLoginPage = (): JSX.Element => {
     )
   }
 
-  const { application_phase } = applicationForm
-  const externalStudentsAllowed = application_phase.externalStudentsAllowed
-  const universityLoginAvailable = application_phase.universityLoginAvailable
+  const { applicationPhase } = applicationForm
+  const externalStudentsAllowed = applicationPhase.externalStudentsAllowed
+  const universityLoginAvailable = applicationPhase.universityLoginAvailable
 
   const continueWithOutLogin = (isExternalStudent: boolean) => {
     setSelectedContinueAsExternal(isExternalStudent)
@@ -91,7 +91,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
   return (
     <NonAuthenticatedPageWrapper withLoginButton={false}>
       <div className='max-w-4xl mx-auto space-y-6'>
-        <ApplicationHeader applicationPhase={application_phase} onBackClick={() => navigate('/')} />
+        <ApplicationHeader applicationPhase={applicationPhase} onBackClick={() => navigate('/')} />
         {!selectedContinueWithoutLogin && (
           <ApplicationLoginCard
             universityLoginAvailable={universityLoginAvailable}
@@ -103,24 +103,24 @@ export const ApplicationLoginPage = (): JSX.Element => {
           (externalStudentsAllowed && selectedContinueAsExternal ? (
             // enforce Login and get MatriculationNumber and university login from token
             <ApplicationFormView
-              questionsText={applicationForm.questions_text}
-              questionsMultiSelect={applicationForm.questions_multi_select}
+              questionsText={applicationForm.questionsText}
+              questionsMultiSelect={applicationForm.questionsMultiSelect}
               onSubmit={handleSubmit}
             />
           ) : (
             // continue with form that allows to enter university login and matriculationNumber
             <ApplicationFormView
-              questionsText={applicationForm.questions_text}
-              questionsMultiSelect={applicationForm.questions_multi_select}
+              questionsText={applicationForm.questionsText}
+              questionsMultiSelect={applicationForm.questionsMultiSelect}
               onSubmit={handleSubmit}
               allowEditUniversityData={true}
               student={{
-                first_name: '',
-                last_name: '',
+                firstName: '',
+                lastName: '',
                 email: '',
-                matriculation_number: '',
-                university_login: '',
-                has_university_account: true,
+                matriculationNumber: '',
+                universityLogin: '',
+                hasUniversityAccount: true,
               }}
             />
           ))}

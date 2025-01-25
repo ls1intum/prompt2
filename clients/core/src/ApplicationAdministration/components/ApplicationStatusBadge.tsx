@@ -1,4 +1,4 @@
-import { ApplicationStatus } from '../interfaces/ApplicationStatus'
+import { ApplicationStatus } from '../interfaces/applicationStatus'
 import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 

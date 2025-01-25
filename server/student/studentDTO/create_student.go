@@ -8,17 +8,17 @@ import (
 
 type CreateStudent struct {
 	ID                   uuid.UUID      `json:"id"`
-	FirstName            string         `json:"first_name"`
-	LastName             string         `json:"last_name"`
+	FirstName            string         `json:"firstName"`
+	LastName             string         `json:"lastName"`
 	Email                string         `json:"email"`
-	MatriculationNumber  string         `json:"matriculation_number"`
-	UniversityLogin      string         `json:"university_login"`
-	HasUniversityAccount bool           `json:"has_university_account"`
+	MatriculationNumber  string         `json:"matriculationNumber"`
+	UniversityLogin      string         `json:"universityLogin"`
+	HasUniversityAccount bool           `json:"hasUniversityAccount"`
 	Gender               db.Gender      `json:"gender"`
 	Nationality          string         `json:"nationality"`
-	StudyDegree          db.StudyDegree `json:"study_degree"`
-	StudyProgram         string         `json:"study_program"`
-	CurrentSemester      pgtype.Int4    `json:"current_semester"`
+	StudyDegree          db.StudyDegree `json:"studyDegree"`
+	StudyProgram         string         `json:"studyProgram"`
+	CurrentSemester      pgtype.Int4    `json:"currentSemester"`
 }
 
 func (c CreateStudent) GetDBModel() db.CreateStudentParams {

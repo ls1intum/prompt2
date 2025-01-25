@@ -43,7 +43,7 @@ export const OverviewPage = (): JSX.Element => {
             <StudentCard
               participation={participation}
               interviewSlot={interviewSlots.find(
-                (slot) => slot.courseParticipationId === participation.course_participation_id,
+                (slot) => slot.courseParticipationID === participation.courseParticipationID,
               )}
             />
           </div>

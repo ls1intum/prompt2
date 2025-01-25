@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import React from 'react'
-import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
+import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { ExternalRoutes } from './ExternalRoutes'
 
 export const InterviewRoutes = React.lazy(() =>

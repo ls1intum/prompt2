@@ -6,9 +6,9 @@ export const courseFormSchema = z.object({
     from: z.date(),
     to: z.date(),
   }),
-  course_type: z.string().min(1, 'Course type is required'),
+  courseType: z.string().min(1, 'Course type is required'),
   ects: z.number().min(0, 'ECTS must be a positive number'),
-  semester_tag: z.string().min(1, 'Semester tag is required'),
+  semesterTag: z.string().min(1, 'Semester tag is required'),
 })
 
 export type CourseFormValues = z.infer<typeof courseFormSchema>

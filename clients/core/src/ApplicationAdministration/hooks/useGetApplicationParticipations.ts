@@ -1,4 +1,4 @@
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../interfaces/applicationParticipation'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getApplicationParticipations } from '../../network/queries/applicationParticipations'

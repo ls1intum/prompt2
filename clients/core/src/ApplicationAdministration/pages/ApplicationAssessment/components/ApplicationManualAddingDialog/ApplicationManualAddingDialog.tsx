@@ -13,18 +13,18 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ApplicationForm } from '@/interfaces/application_form'
+import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '../../../../../network/queries/applicationForm'
 import { UniversitySelection } from './components/UniversitySelection'
 import { ApplicationFormView } from '../../../../../Application/pages/ApplicationForm/ApplicationFormView'
 import { StudentSearch } from './components/StudentSearch'
-import { Student } from '@/interfaces/student'
+import { Student } from '@tumaet/prompt-shared-state'
 import { postNewApplicationManual } from '../../../../../network/mutations/postApplicationManual'
-import { PostApplication } from '@/interfaces/post_application'
+import { PostApplication } from '../../../../../interfaces/application/postApplication'
 import { useToast } from '@/hooks/use-toast'
-import { CreateApplicationAnswerText } from '@/interfaces/application_answer_text'
-import { CreateApplicationAnswerMultiSelect } from '@/interfaces/application_answer_multi_select'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { CreateApplicationAnswerText } from '../../../../../interfaces/application/applicationAnswer/text/createApplicationAnswerText'
+import { CreateApplicationAnswerMultiSelect } from '../../../../../interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
+import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
 
 interface ApplicationManualAddingDialog {
   existingApplications: ApplicationParticipation[]
@@ -92,8 +92,8 @@ export const ApplicationManualAddingDialog = ({
   ) => {
     const manualApplication: PostApplication = {
       student: student,
-      answers_text: answersText,
-      answers_multi_select: answersMultiSelect,
+      answersText: answersText,
+      answersMultiSelect: answersMultiSelect,
     }
     mutateSendApplication(manualApplication)
     resetStates()
@@ -122,8 +122,8 @@ export const ApplicationManualAddingDialog = ({
         ) : (
           <ScrollArea className='max-h-[calc(90vh-150px)]'>
             <ApplicationFormView
-              questionsText={fetchedApplicationForm?.questions_text ?? []}
-              questionsMultiSelect={fetchedApplicationForm?.questions_multi_select ?? []}
+              questionsText={fetchedApplicationForm?.questionsText ?? []}
+              questionsMultiSelect={fetchedApplicationForm?.questionsMultiSelect ?? []}
               onSubmit={submitManualApplication}
             />
           </ScrollArea>
@@ -132,16 +132,16 @@ export const ApplicationManualAddingDialog = ({
         return (
           <ScrollArea className='max-h-[calc(90vh-150px)]'>
             <ApplicationFormView
-              questionsText={fetchedApplicationForm?.questions_text ?? []}
-              questionsMultiSelect={fetchedApplicationForm?.questions_multi_select ?? []}
+              questionsText={fetchedApplicationForm?.questionsText ?? []}
+              questionsMultiSelect={fetchedApplicationForm?.questionsMultiSelect ?? []}
               student={
                 selectedStudent !== null
                   ? selectedStudent
                   : {
-                      first_name: '',
-                      last_name: '',
+                      firstName: '',
+                      lastName: '',
                       email: '',
-                      has_university_account: true,
+                      hasUniversityAccount: true,
                     }
               }
               allowEditUniversityData={selectedStudent === null}

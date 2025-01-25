@@ -98,6 +98,10 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
             singleton: true,
             requiredVersion: deps['@tanstack/react-query'],
           },
+          '@tumaet/prompt-shared-state': {
+            singleton: true,
+            requiredVersion: deps['@tumaet/prompt-shared-state'],
+          },
         },
       }),
       new ExternalTemplateRemotesPlugin(),

@@ -1,4 +1,4 @@
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export const getStatusColor = (assessmentStatus: PassStatus) => {
   switch (assessmentStatus) {

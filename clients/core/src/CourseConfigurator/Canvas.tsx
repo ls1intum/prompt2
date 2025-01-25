@@ -17,7 +17,7 @@ import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { useCourseConfigurationState } from './zustand/useCourseConfigurationStore'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { useParams } from 'react-router-dom'
 import { handleSave } from './handlers/handleSave'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { getPermissionString, Role } from '@/interfaces/permission_roles'
+import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
 import { useCourseStore } from '@/zustand/useCourseStore'
 import { useComputeLayoutedElements } from './handlers/useComputeLayoutedElements'
 import { useDeleteConfirmation } from './handlers/useDeleteConfirmation'
@@ -49,7 +49,7 @@ export function CourseConfigurator() {
   const { permissions } = useAuthStore()
   const canEdit =
     permissions.includes(
-      getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semester_tag),
+      getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
     ) || permissions.includes(Role.PROMPT_ADMIN)
 
   const queryClient = useQueryClient()
@@ -61,7 +61,7 @@ export function CourseConfigurator() {
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedInitialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedInitialEdges)
   const [isModified, setIsModified] = useState(false)
-  const phaseNameModified = coursePhases.some((phase) => phase.is_modified)
+  const phaseNameModified = coursePhases.some((phase) => phase.isModified)
 
   // ---------- Delete Confirmation ----------
   const { onBeforeDelete, DeleteConfirmationComponent } = useDeleteConfirmation({

@@ -1,4 +1,4 @@
-import { Role } from '@/interfaces/permission_roles'
+import { Role } from '@tumaet/prompt-shared-state'
 import { Mail } from 'lucide-react'
 import { ExternalSidebarComponent } from './ExternalSidebar'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'

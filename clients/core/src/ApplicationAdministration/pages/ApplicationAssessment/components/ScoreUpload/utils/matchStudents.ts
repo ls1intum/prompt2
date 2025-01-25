@@ -1,5 +1,5 @@
-import { IndividualScore } from '@/interfaces/additional_score'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { IndividualScore } from '../../../../../interfaces/additionalScore/individualScore'
+import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 
 export const matchStudents = (
   csvData: string[][],
@@ -44,7 +44,7 @@ export const matchStudents = (
       const score = parseFloat(commaSeparatedScores)
       if (!isNaN(score)) {
         matchedApplications.push({
-          course_phase_participation_id: app.id,
+          coursePhaseParticipationID: app.id,
           score,
         })
         if (threshold !== null && score < threshold) {

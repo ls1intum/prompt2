@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export function getStatusBadge(status: PassStatus): JSX.Element {
   switch (status) {

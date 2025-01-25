@@ -6,9 +6,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { Student } from '@/interfaces/student'
+import { ApplicationQuestionMultiSelect } from '../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../interfaces/application/applicationQuestion/applicationQuestionText'
+import { Student } from '@tumaet/prompt-shared-state'
 import { Eye } from 'lucide-react'
 import { useState } from 'react'
 import { ApplicationFormView } from '../ApplicationForm/ApplicationFormView'
@@ -26,10 +26,10 @@ export const ApplicationPreview = ({
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const initialStudent: Student = {
-    first_name: 'Demo',
-    last_name: 'Student',
+    firstName: 'Demo',
+    lastName: 'Student',
     email: 'example@application.com',
-    has_university_account: true,
+    hasUniversityAccount: true,
   }
   return (
     <Dialog open={dialogOpen} onOpenChange={(isOpen) => setDialogOpen(isOpen)}>

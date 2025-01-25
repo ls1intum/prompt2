@@ -7,19 +7,19 @@ import (
 )
 
 type CreateQuestionMultiSelect struct {
-	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+	CoursePhaseID uuid.UUID `json:"coursePhaseID"`
 	Title         string    `json:"title"`
 	Description   string    `json:"description"`
 	Placeholder   string    `json:"placeholder"`
-	ErrorMessage  string    `json:"error_message"`
-	IsRequired    bool      `json:"is_required"`
-	MinSelect     int       `json:"min_select"`
-	MaxSelect     int       `json:"max_select"`
+	ErrorMessage  string    `json:"errorMessage"`
+	IsRequired    bool      `json:"isRequired"`
+	MinSelect     int       `json:"minSelect"`
+	MaxSelect     int       `json:"maxSelect"`
 	Options       []string  `json:"options"`
-	OrderNum      int       `json:"order_num"`
+	OrderNum      int       `json:"orderNum"`
 	// using pgtype as this allows for optional values
-	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
-	AccessKey                pgtype.Text `json:"access_key"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases"`
+	AccessKey                pgtype.Text `json:"accessKey"`
 }
 
 func (a CreateQuestionMultiSelect) GetDBModel() db.CreateApplicationQuestionMultiSelectParams {

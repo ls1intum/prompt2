@@ -1,4 +1,4 @@
 export interface InterviewAnswer {
-  questionId: number
+  questionID: number
   answer: string
 }

@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { QuestionTextFormRef } from '../../utils/QuestionTextFormRef'
 import { createValidationSchema } from './validationSchema'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface ApplicationQuestionTextFormProps {
@@ -44,7 +44,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
       return isValid
     },
     getValues() {
-      return { application_question_id: question.id, answer: form.getValues().answer }
+      return { applicationQuestionID: question.id, answer: form.getValues().answer }
     },
   }))
 
@@ -56,7 +56,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
     return () => subscription.unsubscribe()
   }, [form, form.watch])
 
-  const isTextArea = (question.allowed_length || 255) > 100
+  const isTextArea = (question.allowedLength || 255) > 100
 
   return (
     <Form {...form}>
@@ -70,7 +70,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                 <>
                   <FormLabel>
                     {question.title}
-                    {question.is_required ? <span className='text-destructive'> *</span> : ''}
+                    {question.isRequired ? <span className='text-destructive'> *</span> : ''}
                   </FormLabel>
                   {!isInstructorView && question.description && (
                     <FormDescriptionHTML htmlCode={question.description} />
@@ -80,7 +80,7 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                       <Textarea
                         {...field}
                         placeholder={question.placeholder || ''}
-                        maxLength={question.allowed_length}
+                        maxLength={question.allowedLength}
                         className='pr-12'
                         rows={isInstructorView ? 8 : 4}
                         disabled={isInstructorView}
@@ -89,13 +89,13 @@ export const ApplicationQuestionTextForm = forwardRef(function ApplicationQuesti
                       <Input
                         {...field}
                         placeholder={question.placeholder || ''}
-                        maxLength={question.allowed_length}
+                        maxLength={question.allowedLength}
                         className='pr-12'
                         disabled={isInstructorView}
                       />
                     )}
                     <div className='absolute right-2 bottom-2 text-sm text-gray-500'>
-                      {charCount}/{question.allowed_length || 255}
+                      {charCount}/{question.allowedLength || 255}
                     </div>
                   </div>
                   <FormMessage>{fieldState.error?.message}</FormMessage>

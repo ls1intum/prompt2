@@ -24,7 +24,7 @@ export interface Page2Ref {
   getValues: () => {
     file: File | null
     csvData: string[][]
-    matchBy: 'email' | 'university_login' | 'matriculation_number'
+    matchBy: 'email' | 'universityLogin' | 'matriculationNumber'
     matchColumn: string
     scoreColumn: string
   }
@@ -35,8 +35,8 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
   function AssessmentScoreUploadPage2(props, ref) {
     const [file, setFile] = useState<File | null>(null)
     const [csvData, setCsvData] = useState<string[][]>([])
-    const [matchBy, setMatchBy] = useState<'email' | 'university_login' | 'matriculation_number'>(
-      'university_login',
+    const [matchBy, setMatchBy] = useState<'email' | 'universityLogin' | 'matriculationNumber'>(
+      'universityLogin',
     )
     const [matchColumn, setMatchColumn] = useState('')
     const [scoreColumn, setScoreColumn] = useState('')
@@ -45,7 +45,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
     const reset = () => {
       setFile(null)
       setCsvData([])
-      setMatchBy('university_login')
+      setMatchBy('universityLogin')
       setMatchColumn('')
       setScoreColumn('')
       setErrors({})
@@ -112,7 +112,7 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
                   <Label htmlFor='matchBy'>Match students by</Label>
                   <Select
                     value={matchBy}
-                    onValueChange={(value: 'email' | 'university_login' | 'matriculation_number') =>
+                    onValueChange={(value: 'email' | 'universityLogin' | 'matriculationNumber') =>
                       setMatchBy(value)
                     }
                   >
@@ -120,11 +120,11 @@ export const AssessmentScoreUploadPage2 = forwardRef<Page2Ref>(
                       <SelectValue placeholder='Select matching criteria' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value='university_login'>
+                      <SelectItem value='universityLogin'>
                         {translations.university['login-name']}
                       </SelectItem>
                       <SelectItem value='email'>Email</SelectItem>
-                      <SelectItem value='matriculation_number'>Matriculation Number</SelectItem>
+                      <SelectItem value='matriculationNumber'>Matriculation Number</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

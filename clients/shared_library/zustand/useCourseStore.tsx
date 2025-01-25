@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Course } from '@/interfaces/course'
+import { Course } from '@tumaet/prompt-shared-state'
 
 interface CourseStoreState {
   selectedCourse?: Course

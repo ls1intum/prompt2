@@ -10,9 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { SendStatusMail } from '@/interfaces/send_status_mail'
+import { SendStatusMail, PassStatus } from '@tumaet/prompt-shared-state'
 import { sendStatusMail } from '@/network/mutations/sendStatusMail'
-import { PassStatus } from '@/interfaces/course_phase_participation'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface ConfirmSendEmailDialogProps {
@@ -42,7 +41,7 @@ export const ConfirmSendEmailDialog = ({
   })
 
   const onConfirm = () => {
-    sendEmails({ status_mail_to_be_send: emailType })
+    sendEmails({ statusMailToBeSend: emailType })
   }
 
   const handleClose = () => {
@@ -92,9 +91,9 @@ export const ConfirmSendEmailDialog = ({
             <CheckCircle className='h-4 w-4 text-green-500' />
             <AlertTitle>Email Send Results</AlertTitle>
             <AlertDescription>
-              Successfully sent: {data.successful_emails ? data.successful_emails.length : 0} emails
+              Successfully sent: {data.successfulEmails ? data.successfulEmails.length : 0} emails
               <br />
-              Failed to send: {data.failed_emails ? data.failed_emails.length : 0} emails
+              Failed to send: {data.failedEmails ? data.failedEmails.length : 0} emails
             </AlertDescription>
           </Alert>
         )}

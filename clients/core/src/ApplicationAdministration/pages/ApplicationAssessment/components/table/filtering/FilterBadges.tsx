@@ -1,8 +1,7 @@
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus, Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { getStatusString } from '../../../utils/getStatusBadge'
-import { Gender, getGenderString } from '@/interfaces/gender'
 import { X } from 'lucide-react'
 import { ScoreFilterBadges, ScoreFilters } from './ScoreFilterBadges'
 
@@ -12,7 +11,7 @@ interface FilterBadgesProps {
 }
 
 const getDisplayString = (id: string, value: string): string => {
-  if (id.includes('status')) {
+  if (id.includes('passStatus')) {
     return `Status: ${getStatusString(value as PassStatus)}`
   } else if (id.includes('gender')) {
     return `Gender: ${getGenderString(value as Gender)}`

@@ -13,7 +13,7 @@ import type { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import type { InterviewAnswer } from '../interfaces/InterviewAnswer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export const InterviewCard = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -22,7 +22,7 @@ export const InterviewCard = (): JSX.Element => {
 
   const { coursePhase } = useCoursePhaseStore()
   const interviewQuestions =
-    (coursePhase?.meta_data?.interview_questions as InterviewQuestion[]) ?? []
+    (coursePhase?.metaData?.interviewQuestions as InterviewQuestion[]) ?? []
 
   const [answers, setAnswers] = useState<InterviewAnswer[]>([])
   const [score, setScore] = useState<number | undefined>(undefined)
@@ -31,51 +31,51 @@ export const InterviewCard = (): JSX.Element => {
   const { mutate, isPending: isLoading } = useUpdateCoursePhaseParticipation()
   const isModified =
     answers.some((a) => {
-      const originalAnswer = participation?.meta_data?.interview_answers?.find(
-        (oa) => oa.questionId === a.questionId,
+      const originalAnswer = participation?.metaData?.interviewAnswers?.find(
+        (oa: InterviewAnswer) => oa.questionID === a.questionID,
       )
       return originalAnswer?.answer !== a.answer
     }) ||
-    score !== participation?.meta_data?.interviewScore ||
-    interviewer !== participation?.meta_data?.interviewer
+    score !== participation?.metaData?.interviewScore ||
+    interviewer !== participation?.metaData?.interviewer
 
   useEffect(() => {
     if (participation && coursePhase) {
-      const interviewAnswers = participation.meta_data?.interview_answers as InterviewAnswer[]
+      const interviewAnswers = participation.metaData?.interviewAnswers as InterviewAnswer[]
       setAnswers(interviewAnswers ?? [])
 
-      const interviewScore = participation.meta_data?.interviewScore as number | undefined
+      const interviewScore = participation.metaData?.interviewScore as number | undefined
       setScore(interviewScore)
 
-      const newInterviewer = participation.meta_data?.interviewer as string | undefined
+      const newInterviewer = participation.metaData?.interviewer as string | undefined
       setInterviewer(newInterviewer)
     }
   }, [participation, coursePhase])
 
-  const setAnswer = (questionId: number, answer: string) => {
+  const setAnswer = (questionID: number, answer: string) => {
     setAnswers((prevAnswers) => {
       const newAnswers = [...prevAnswers]
-      const answerIndex = newAnswers.findIndex((a) => a.questionId === questionId)
+      const answerIndex = newAnswers.findIndex((a) => a.questionID === questionID)
       if (answerIndex === -1) {
-        newAnswers.push({ questionId, answer })
+        newAnswers.push({ questionID, answer })
       } else {
-        newAnswers[answerIndex] = { questionId, answer }
+        newAnswers[answerIndex] = { questionID, answer }
       }
       return newAnswers
     })
   }
 
-  const saveChanges = (pass_status?: PassStatus) => {
+  const saveChanges = (passStatus?: PassStatus) => {
     if (participation && coursePhase) {
       mutate({
         id: participation.id,
-        course_phase_id: coursePhase.id,
-        course_participation_id: participation.course_participation_id,
-        meta_data: {
-          interview_answers: answers,
+        coursePhaseID: coursePhase.id,
+        courseParticipationID: participation.courseParticipationID,
+        metaData: {
+          interviewAnswers: answers,
           interviewScore: score,
         },
-        pass_status: pass_status ?? participation.pass_status,
+        passStatus: passStatus ?? participation.passStatus,
       })
     }
   }
@@ -108,7 +108,7 @@ export const InterviewCard = (): JSX.Element => {
             <div className='space-x-2'>
               <Button
                 variant='outline'
-                disabled={participation?.pass_status === PassStatus.FAILED}
+                disabled={participation?.passStatus === PassStatus.FAILED}
                 className='border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600'
                 onClick={() => saveChanges(PassStatus.FAILED)}
               >
@@ -116,7 +116,7 @@ export const InterviewCard = (): JSX.Element => {
               </Button>
               <Button
                 variant='default'
-                disabled={participation?.pass_status === PassStatus.PASSED}
+                disabled={participation?.passStatus === PassStatus.PASSED}
                 className='bg-green-500 hover:bg-green-600 text-white'
                 onClick={() => saveChanges(PassStatus.PASSED)}
               >
@@ -149,13 +149,13 @@ export const InterviewCard = (): JSX.Element => {
           </>
         )}
         {interviewQuestions
-          .sort((a, b) => a.order_num - b.order_num)
+          .sort((a, b) => a.orderNum - b.orderNum)
           .map((question, index) => (
             <div key={question.id}>
               <Label>{question.question}</Label>
               <TooltipProvider>
                 <MinimalTiptapEditor
-                  value={answers.find((a) => a.questionId === question.id)?.answer ?? ''}
+                  value={answers.find((a) => a.questionID === question.id)?.answer ?? ''}
                   onChange={(value) => {
                     setAnswer(question.id, value as string)
                   }}

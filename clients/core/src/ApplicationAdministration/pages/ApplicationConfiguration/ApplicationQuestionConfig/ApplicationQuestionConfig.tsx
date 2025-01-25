@@ -5,12 +5,13 @@ import {
 } from './FormPages/ApplicationQuestionCard'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEffect, useRef, useState } from 'react'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
+import { ApplicationQuestionText } from '../../../../interfaces/application/applicationQuestion/applicationQuestionText'
+import { ApplicationQuestionMultiSelect } from '../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { useParams } from 'react-router-dom'
 import { SaveChangesAlert } from '@/components/SaveChangesAlert'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApplicationForm, UpdateApplicationForm } from '@/interfaces/application_form'
+import { ApplicationForm } from '../../../interfaces/form/applicationForm'
+import { UpdateApplicationForm } from '../../../interfaces/form/updateApplicationForm'
 import { getApplicationForm } from '../../../../network/queries/applicationForm'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { updateApplicationForm } from '../../../../network/mutations/updateApplicationForm'
@@ -41,8 +42,8 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     queryFn: () => getApplicationForm(phaseId ?? 'undefined'),
   })
   const originalQuestions = [
-    ...(fetchedForm?.questions_multi_select ?? []),
-    ...(fetchedForm?.questions_text ?? []),
+    ...(fetchedForm?.questionsMultiSelect ?? []),
+    ...(fetchedForm?.questionsText ?? []),
   ]
   const questionsModified = computeQuestionsModified(fetchedForm, applicationQuestions)
 
@@ -64,12 +65,12 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
 
   const setQuestionsFromForm = (form: ApplicationForm) => {
     const combinedQuestions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
-      ...form.questions_multi_select,
-      ...form.questions_text,
+      ...form.questionsMultiSelect,
+      ...form.questionsText,
     ]
 
     // Sort the combined questions by ordernum
-    combinedQuestions.sort((a, b) => (a.order_num ?? 0) - (b.order_num ?? 0))
+    combinedQuestions.sort((a, b) => (a.orderNum ?? 0) - (b.orderNum ?? 0))
 
     setApplicationQuestions(combinedQuestions)
   }
@@ -99,10 +100,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
     const [reorderedItem] = newQuestions.splice(result.source.index, 1)
     newQuestions.splice(result.destination.index, 0, reorderedItem)
 
-    // Update order_num for all questions
+    // Update orderNum for all questions
     const updatedQuestions = newQuestions.map((question, index) => ({
       ...question,
-      order_num: index + 1,
+      orderNum: index + 1,
     }))
 
     setApplicationQuestions(updatedQuestions)

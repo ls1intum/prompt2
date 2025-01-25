@@ -7,7 +7,7 @@ import (
 )
 
 type UpdateCourseData struct {
-	MetaData meta.MetaData `json:"meta_data"`
+	MetaData meta.MetaData `json:"metaData"`
 }
 
 func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {

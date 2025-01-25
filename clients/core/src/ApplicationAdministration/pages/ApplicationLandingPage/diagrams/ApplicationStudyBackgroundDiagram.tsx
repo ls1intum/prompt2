@@ -1,7 +1,7 @@
 import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { useMemo } from 'react'
 import translations from '@/lib/translations.json'
 
@@ -26,8 +26,8 @@ export const ApplicationStudyBackgroundDiagram = ({
 
     const programCounts = applications.reduce(
       (acc, app) => {
-        const program = studyPrograms.includes(app.student.study_program || '')
-          ? app.student.study_program
+        const program = studyPrograms.includes(app.student.studyProgram || '')
+          ? app.student.studyProgram
           : 'Other'
         acc[program!] = (acc[program!] || 0) + 1
         return acc

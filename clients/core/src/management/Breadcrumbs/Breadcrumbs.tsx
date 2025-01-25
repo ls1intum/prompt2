@@ -50,7 +50,7 @@ export const Breadcrumbs: React.FC = () => {
             })
           } else if (pathSegments.length >= 3) {
             const phaseId = pathSegments[3]
-            const phase = course.course_phases.find((p) => p.id === phaseId)
+            const phase = course.coursePhases.find((p) => p.id === phaseId)
             if (phase) {
               breadcrumbs.push({
                 title: phase.name,

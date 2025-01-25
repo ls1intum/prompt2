@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { InterviewSlot } from '../interfaces/InterviewSlots'
 
 export interface ParticipationStore {

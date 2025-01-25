@@ -1,5 +1,5 @@
 import { useToast } from '@/hooks/use-toast'
-import { UpdateCourseData } from '@/interfaces/course'
+import { UpdateCourseData } from '@tumaet/prompt-shared-state'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { updateCourseData } from '../../network/mutations/updateCourseData'

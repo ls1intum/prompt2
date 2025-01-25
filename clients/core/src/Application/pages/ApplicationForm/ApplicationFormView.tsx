@@ -1,15 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
-import {
-  ApplicationAnswerText,
-  CreateApplicationAnswerText,
-} from '@/interfaces/application_answer_text'
-import {
-  ApplicationAnswerMultiSelect,
-  CreateApplicationAnswerMultiSelect,
-} from '@/interfaces/application_answer_multi_select'
-import { Student } from '@/interfaces/student'
+import { ApplicationQuestionMultiSelect } from '../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../interfaces/application/applicationQuestion/applicationQuestionText'
+import { ApplicationAnswerText } from '../../../interfaces/application/applicationAnswer/text/applicationAnswerText'
+import { CreateApplicationAnswerText } from '../../../interfaces/application/applicationAnswer/text/createApplicationAnswerText'
+import { ApplicationAnswerMultiSelect } from '../../../interfaces/application/applicationAnswer/multiSelect/applicationAnswerMultiSelect'
+import { CreateApplicationAnswerMultiSelect } from '../../../interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
+import { Student } from '@tumaet/prompt-shared-state'
 import { useEffect, useRef, useState } from 'react'
 import { StudentForm } from './components/StudentForm/StudentForm'
 import { ApplicationQuestionTextForm } from './components/TextForm/ApplicationQuestionTextForm'
@@ -48,7 +44,7 @@ export const ApplicationFormView = ({
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
     ...questionsText,
     ...questionsMultiSelect,
-  ].sort((a, b) => a.order_num - b.order_num)
+  ].sort((a, b) => a.orderNum - b.orderNum)
 
   const [studentData, setStudentData] = useState<Student>(student ?? ({} as Student))
   const studentRef = useRef<StudentComponentRef>(null)
@@ -158,7 +154,7 @@ export const ApplicationFormView = ({
                     question={question}
                     initialAnswers={
                       initialAnswersMultiSelect?.find(
-                        (a) => a.application_question_id === question.id,
+                        (a) => a.applicationQuestionID === question.id,
                       )?.answer ?? []
                     }
                     ref={(el) => (questionMultiSelectRefs.current[index] = el)}
@@ -168,7 +164,7 @@ export const ApplicationFormView = ({
                   <ApplicationQuestionTextForm
                     question={question}
                     initialAnswer={
-                      initialAnswersText?.find((a) => a.application_question_id === question.id)
+                      initialAnswersText?.find((a) => a.applicationQuestionID === question.id)
                         ?.answer ?? ''
                     }
                     ref={(el) => (questionTextRefs.current[index] = el)}

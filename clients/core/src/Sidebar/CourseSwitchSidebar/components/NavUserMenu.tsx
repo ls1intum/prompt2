@@ -1,9 +1,8 @@
-import { ChevronsUpDown, LogOut, Sparkles } from 'lucide-react'
+import { ChevronsUpDown, LogOut } from 'lucide-react'
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -49,13 +48,6 @@ export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
                 <NavAvatar />
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <div className='p-2'>
               <p className='text-sm text-muted-foreground mb-3'>Preferences</p>

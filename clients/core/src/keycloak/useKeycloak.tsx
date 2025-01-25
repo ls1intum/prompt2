@@ -72,8 +72,8 @@ export const useKeycloak = (): {
               lastName: decodedJwt.family_name || '',
               email: decodedJwt.email || '',
               username: decodedJwt.preferred_username || '',
-              matriculation_number: decodedJwt.matriculation_number || '',
-              university_login: decodedJwt.university_login || '',
+              matriculationNumber: decodedJwt.matriculation_number || '',
+              universityLogin: decodedJwt.university_login || '',
             })
           } else {
             clearUser()

@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { ApplicationMailingMetaData } from '@/interfaces/mailing_meta_data'
+import { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
 import { Switch } from '@/components/ui/switch'
 import { ManualMailSending } from '@/components/pages/Mailing/components/ManualMailSending'
 import { useGetMailingIsConfigured } from '../../../../hooks/useGetMailingIsConfigured'

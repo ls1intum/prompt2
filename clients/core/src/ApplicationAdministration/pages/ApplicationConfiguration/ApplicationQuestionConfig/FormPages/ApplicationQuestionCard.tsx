@@ -5,8 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown, ChevronUp, GripVertical, Trash2 } from 'lucide-react'
-import { ApplicationQuestionMultiSelect } from '@/interfaces/application_question_multi_select'
-import { ApplicationQuestionText } from '@/interfaces/application_question_text'
+import { ApplicationQuestionMultiSelect } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '../../../../../interfaces/application/applicationQuestion/applicationQuestionText'
 import {
   QuestionConfigFormData,
   QuestionConfigFormDataMultiSelect,
@@ -143,11 +143,11 @@ export const ApplicationQuestionCard = forwardRef<
           <CardContent>
             <Form {...form}>
               <form className='space-y-4'>
-                {/** For multi-select question the is_required is controlled by min-select */}
+                {/** For multi-select question the isRequired is controlled by min-select */}
                 {!isActualMultiSelect && (
                   <FormField
                     control={form.control}
-                    name='is_required'
+                    name='isRequired'
                     render={({ field }) => (
                       <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
                         <FormControl>
@@ -234,7 +234,7 @@ export const ApplicationQuestionCard = forwardRef<
                 {!isActualMultiSelect && (
                   <FormField
                     control={form.control}
-                    name='error_message'
+                    name='errorMessage'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Custom Error Message</FormLabel>
@@ -268,7 +268,7 @@ export const ApplicationQuestionCard = forwardRef<
                   <h2 className='text-lg font-semibold'>Export Settings</h2>
                   <FormField
                     control={form.control}
-                    name='accessible_for_other_phases'
+                    name='accessibleForOtherPhases'
                     render={({ field }) => (
                       <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
                         <div className='space-y-0.5'>
@@ -287,10 +287,10 @@ export const ApplicationQuestionCard = forwardRef<
                       </FormItem>
                     )}
                   />
-                  {form.watch('accessible_for_other_phases') && (
+                  {form.watch('accessibleForOtherPhases') && (
                     <FormField
                       control={form.control}
-                      name='access_key'
+                      name='accessKey'
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Access Key</FormLabel>

@@ -2,7 +2,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { updateApplicationStatus } from '../../../../network/mutations/updateApplicationStatus'
 import { useParams } from 'react-router-dom'
-import { UpdateCoursePhaseParticipationStatus } from '@/interfaces/update_course_phase_participation_status'
+import { UpdateCoursePhaseParticipationStatus } from '@tumaet/prompt-shared-state'
 
 export const useApplicationStatusUpdate = (): UseMutationResult<
   void,

@@ -3,9 +3,9 @@ package applicationDTO
 import db "github.com/niclasheun/prompt2.0/db/sqlc"
 
 type FormWithDetails struct {
-	ApplicationPhase     OpenApplication       `json:"application_phase"`
-	QuestionsText        []QuestionText        `json:"questions_text"`
-	QuestionsMultiSelect []QuestionMultiSelect `json:"questions_multi_select"`
+	ApplicationPhase     OpenApplication       `json:"applicationPhase"`
+	QuestionsText        []QuestionText        `json:"questionsText"`
+	QuestionsMultiSelect []QuestionMultiSelect `json:"questionsMultiSelect"`
 }
 
 func GetFormWithDetailsDTOFromDBModel(applicationPhase db.GetOpenApplicationPhaseRow, questionsText []db.ApplicationQuestionText, questionsMultiSelect []db.ApplicationQuestionMultiSelect) FormWithDetails {

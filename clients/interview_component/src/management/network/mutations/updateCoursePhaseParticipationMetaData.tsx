@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { UpdateCoursePhaseParticipation } from '@/interfaces/course_phase_participation'
+import { UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
 
 export const updateCoursePhaseParticipation = async (
   participation: UpdateCoursePhaseParticipation,
@@ -7,7 +7,7 @@ export const updateCoursePhaseParticipation = async (
   try {
     return (
       await axiosInstance.put(
-        `/api/course_phases/${participation.course_phase_id}/participations/${participation.id}`,
+        `/api/course_phases/${participation.coursePhaseID}/participations/${participation.id}`,
         participation,
         {
           headers: {

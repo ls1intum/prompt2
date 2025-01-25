@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseByID } from '../../network/queries/coursePhase'
-import { CoursePhaseWithMetaData } from '@/interfaces/course_phase'
+import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'
 
 export const useGetCoursePhase = () => {
   const { phaseId } = useParams<{ phaseId: string }>()

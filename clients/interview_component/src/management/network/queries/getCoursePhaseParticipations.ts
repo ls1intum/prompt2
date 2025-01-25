@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { CoursePhaseParticipationWithStudent } from '@/interfaces/course_phase_participation'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 
 export const getCoursePhaseParticipations = async (
   coursePhaseID: string,

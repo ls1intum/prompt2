@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { DeleteConfirmation } from '../components/DeleteConfirmation'
-import { CoursePhasePosition } from '@/interfaces/course_phase_with_position'
+import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 
 interface DeleteConfirmationReturn {
   deleteDialogIsOpen: boolean
@@ -13,7 +13,7 @@ interface DeleteConfirmationReturn {
 }
 
 interface UseDeleteConfirmationProps {
-  coursePhases: CoursePhasePosition[]
+  coursePhases: CoursePhaseWithPosition[]
   setIsModified: (modified: boolean) => void
 }
 
@@ -30,7 +30,7 @@ export function useDeleteConfirmation({
     async ({ nodes: toBeDeletedNodes, edges: toBeDeletedEdges }) => {
       const hasInitialPhase = toBeDeletedNodes.some(
         (node) =>
-          node.id && coursePhases.some((phase) => phase.id === node.id && phase.is_initial_phase),
+          node.id && coursePhases.some((phase) => phase.id === node.id && phase.isInitialPhase),
       )
       if (hasInitialPhase) {
         console.log('Cannot delete initial phase')

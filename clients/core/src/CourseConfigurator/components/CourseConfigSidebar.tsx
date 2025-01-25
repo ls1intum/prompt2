@@ -1,6 +1,6 @@
 import { GripVertical } from 'lucide-react'
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
-import { CoursePhaseType } from '@/interfaces/course_phase_type'
+import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
+import { CoursePhaseType } from '@tumaet/prompt-shared-state'
 
 interface CourseConfigSidebarProps {
   canEdit: boolean
@@ -8,12 +8,12 @@ interface CourseConfigSidebarProps {
 
 export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.Element => {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
-  const courseHasInitialPhase = coursePhases.map((phase) => phase.is_initial_phase).includes(true)
+  const courseHasInitialPhase = coursePhases.map((phase) => phase.isInitialPhase).includes(true)
   const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
-    if (a.initial_phase && !b.initial_phase) {
+    if (a.initialPhase && !b.initialPhase) {
       return -1
     }
-    if (!a.initial_phase && b.initial_phase) {
+    if (!a.initialPhase && b.initialPhase) {
       return 1
     }
     return 0
@@ -28,10 +28,10 @@ export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.
     if (!canEdit) {
       return false
     }
-    if (phase.initial_phase && courseHasInitialPhase) {
+    if (phase.initialPhase && courseHasInitialPhase) {
       return false
     }
-    if (!courseHasInitialPhase && !phase.initial_phase) {
+    if (!courseHasInitialPhase && !phase.initialPhase) {
       return false
     }
     return true

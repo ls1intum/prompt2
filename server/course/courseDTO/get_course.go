@@ -11,12 +11,12 @@ import (
 type Course struct {
 	ID          uuid.UUID     `json:"id"`
 	Name        string        `json:"name"`
-	StartDate   pgtype.Date   `json:"start_date"`
-	EndDate     pgtype.Date   `json:"end_date"`
-	SemesterTag pgtype.Text   `json:"semester_tag"`
+	StartDate   pgtype.Date   `json:"startDate"`
+	EndDate     pgtype.Date   `json:"endDate"`
+	SemesterTag pgtype.Text   `json:"semesterTag"`
 	Ects        pgtype.Int4   `json:"ects"`
-	CourseType  string        `json:"course_type"`
-	MetaData    meta.MetaData `json:"meta_data"`
+	CourseType  string        `json:"courseType"`
+	MetaData    meta.MetaData `json:"metaData"`
 }
 
 func GetCourseDTOFromDBModel(model db.Course) (Course, error) {

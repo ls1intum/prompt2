@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import { CoursePhaseType, MetaDataItem } from '@/interfaces/course_phase_type'
-import { CoursePhaseGraphItem } from '@/interfaces/course_phase_graph'
-import { MetaDataGraphItem } from '@/interfaces/course_meta_graph'
-import { ApplicationForm } from '@/interfaces/application_form'
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { CoursePhaseType, CoursePhaseTypeMetaDataItem } from '@tumaet/prompt-shared-state'
+import { CoursePhaseGraphItem } from '../interfaces/coursePhaseGraphItem'
+import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
+import { ApplicationForm } from '../../ApplicationAdministration/interfaces/form/applicationForm'
+import { AdditionalScore } from '../../ApplicationAdministration/interfaces/additionalScore/additionalScore'
 
 import { getAllCoursePhaseTypes } from '../../network/queries/coursePhaseTypes'
 import { getCoursePhaseGraph } from '../../network/queries/coursePhaseGraph'
@@ -15,7 +15,7 @@ import { getMetaDataGraph } from '../../network/queries/courseMetaDataGraph'
 import { getApplicationForm } from '../../network/queries/applicationForm'
 import { getAdditionalScoreNames } from '../../network/queries/additionalScoreNames'
 
-import { useCourseConfigurationState } from '@/zustand/useCourseConfigurationStore'
+import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
 import { useCourseStore } from '@/zustand/useCourseStore'
 
 export function useCourseConfiguratorDataSetup() {
@@ -71,8 +71,8 @@ export function useCourseConfiguratorDataSetup() {
   })
 
   // Get the application phase from the course phases.
-  const applicationPhase = course?.course_phases.find(
-    (phase) => phase.course_phase_type === 'Application',
+  const applicationPhase = course?.coursePhases.find(
+    (phase) => phase.coursePhaseType === 'Application',
   )
 
   const {
@@ -114,7 +114,7 @@ export function useCourseConfiguratorDataSetup() {
     if (fetchedCoursePhaseTypes) {
       setCoursePhaseTypes([]) // Clear existing state
       fetchedCoursePhaseTypes.forEach((coursePhaseType) => {
-        const additionalMetaData: MetaDataItem[] = []
+        const additionalMetaData: CoursePhaseTypeMetaDataItem[] = []
 
         if (
           coursePhaseType.name === 'Application' &&
@@ -123,22 +123,22 @@ export function useCourseConfiguratorDataSetup() {
         ) {
           const applicationAnswers: { key: string; type: string }[] = []
 
-          fetchedApplicationForm.questions_multi_select
+          fetchedApplicationForm.questionsMultiSelect
             .filter(
               (question) =>
-                question.access_key !== undefined && question.accessible_for_other_phases === true,
+                question.accessKey !== undefined && question.accessibleForOtherPhases === true,
             )
             .forEach((question) => {
-              applicationAnswers.push({ key: question.access_key ?? '', type: 'Multi-Select' })
+              applicationAnswers.push({ key: question.accessKey ?? '', type: 'Multi-Select' })
             })
 
-          fetchedApplicationForm.questions_text
+          fetchedApplicationForm.questionsText
             .filter(
               (question) =>
-                question.access_key !== undefined && question.accessible_for_other_phases === true,
+                question.accessKey !== undefined && question.accessibleForOtherPhases === true,
             )
             .forEach((question) => {
-              applicationAnswers.push({ key: question.access_key ?? '', type: 'Text' })
+              applicationAnswers.push({ key: question.accessKey ?? '', type: 'Text' })
             })
 
           if (applicationAnswers.length > 0) {
@@ -166,10 +166,10 @@ export function useCourseConfiguratorDataSetup() {
         appendCoursePhaseType({
           id: coursePhaseType.id,
           name: coursePhaseType.name,
-          initial_phase: coursePhaseType.initial_phase,
-          required_input_meta_data: [...coursePhaseType.required_input_meta_data],
-          provided_output_meta_data: [
-            ...coursePhaseType.provided_output_meta_data,
+          initialPhase: coursePhaseType.initialPhase,
+          requiredInputMetaData: [...coursePhaseType.requiredInputMetaData],
+          providedOutputMetaData: [
+            ...coursePhaseType.providedOutputMetaData,
             ...additionalMetaData,
           ],
         })
@@ -197,10 +197,10 @@ export function useCourseConfiguratorDataSetup() {
   useEffect(() => {
     if (course) {
       setCoursePhases(
-        course.course_phases.map((phase) => ({
+        course.coursePhases.map((phase) => ({
           ...phase,
           position: { x: 0, y: 0 },
-          meta_data: [],
+          metaData: [],
         })),
       )
     } else {

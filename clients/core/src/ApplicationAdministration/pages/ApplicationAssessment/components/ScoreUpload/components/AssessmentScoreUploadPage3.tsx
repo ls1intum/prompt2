@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import translations from '@/lib/translations.json'
 
 interface Page3Props {
@@ -56,11 +56,11 @@ export const AssessmentScoreUploadPage3 = ({
               <TableBody>
                 {unmatchedApplications.map((app) => (
                   <TableRow key={app.id}>
-                    <TableCell>{app.student.first_name}</TableCell>
-                    <TableCell>{app.student.last_name}</TableCell>
+                    <TableCell>{app.student.firstName}</TableCell>
+                    <TableCell>{app.student.lastName}</TableCell>
                     <TableCell>{app.student.email}</TableCell>
-                    <TableCell>{app.student.matriculation_number || 'N/A'}</TableCell>
-                    <TableCell>{app.student.university_login || 'N/A'}</TableCell>
+                    <TableCell>{app.student.matriculationNumber || 'N/A'}</TableCell>
+                    <TableCell>{app.student.universityLogin || 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

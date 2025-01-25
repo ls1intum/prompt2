@@ -3,11 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
-import { CoursePhaseWithMetaData, UpdateCoursePhase } from '@/interfaces/course_phase'
+import {
+  CoursePhaseWithMetaData,
+  UpdateCoursePhase,
+  CoursePhaseMailingConfigData,
+} from '@tumaet/prompt-shared-state'
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
 import { EmailTemplateEditor } from './components/MailingEditor'
 import { SettingsCard } from './components/SettingsCard'
-import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
 
 interface CoursePhaseMailingProps {
   coursePhase: CoursePhaseWithMetaData | undefined
@@ -46,8 +49,8 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
   )
 
   useEffect(() => {
-    if (coursePhase?.meta_data) {
-      const parsedMetaData = coursePhase.meta_data.mailingSettings as CoursePhaseMailingConfigData
+    if (coursePhase?.metaData) {
+      const parsedMetaData = coursePhase.metaData.mailingSettings as CoursePhaseMailingConfigData
       console.log(parsedMetaData)
       if (!parsedMetaData) {
         const emptyMailData = {
@@ -74,7 +77,7 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
     e.preventDefault()
     const updatedCoursePhase: UpdateCoursePhase = {
       id: coursePhase?.id ?? '',
-      meta_data: {
+      metaData: {
         mailingSettings: mailingMetaData,
       },
     }

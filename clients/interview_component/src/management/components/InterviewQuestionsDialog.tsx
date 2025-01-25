@@ -30,8 +30,8 @@ export const InterviewQuestionsDialog = () => {
   const { mutate } = useUpdateCoursePhaseMetaData()
 
   useEffect(() => {
-    if (coursePhase && coursePhase.meta_data?.interview_questions) {
-      const questions = coursePhase.meta_data.interview_questions as InterviewQuestion[]
+    if (coursePhase && coursePhase.metaData?.interviewQuestions) {
+      const questions = coursePhase.metaData.interviewQuestions as InterviewQuestion[]
       setInterviewQuestions(questions)
     }
   }, [coursePhase])
@@ -43,7 +43,7 @@ export const InterviewQuestionsDialog = () => {
         {
           id: Date.now(),
           question: newQuestion.trim(),
-          order_num: interviewQuestions.length,
+          orderNum: interviewQuestions.length,
         },
       ])
       setNewQuestion('')
@@ -71,7 +71,7 @@ export const InterviewQuestionsDialog = () => {
           newQuestions[index],
         ]
       }
-      return newQuestions.map((q, idx) => ({ ...q, order_num: idx }))
+      return newQuestions.map((q, idx) => ({ ...q, orderNum: idx }))
     })
   }
 
@@ -79,8 +79,8 @@ export const InterviewQuestionsDialog = () => {
     if (coursePhase) {
       mutate({
         id: coursePhase.id,
-        meta_data: {
-          interview_questions: interviewQuestions,
+        metaData: {
+          interviewQuestions: interviewQuestions,
         },
       })
     }

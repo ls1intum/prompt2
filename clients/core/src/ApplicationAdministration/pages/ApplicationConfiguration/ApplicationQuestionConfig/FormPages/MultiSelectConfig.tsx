@@ -26,8 +26,8 @@ export function MultiSelectConfig({
     name: 'options',
   })
 
-  const minSelect = form.watch('min_select') || 0
-  const maxSelect = form.watch('max_select') || options.length
+  const minSelect = form.watch('minSelect') || 0
+  const maxSelect = form.watch('maxSelect') || options.length
 
   return (
     <div className='space-y-4'>
@@ -84,7 +84,7 @@ export function MultiSelectConfig({
       <div className='flex space-x-4'>
         <FormField
           control={form.control}
-          name='min_select'
+          name='minSelect'
           render={({ field }) => (
             <FormItem className='flex-1'>
               <FormLabel>
@@ -110,7 +110,7 @@ export function MultiSelectConfig({
         />
         <FormField
           control={form.control}
-          name='max_select'
+          name='maxSelect'
           render={({ field }) => (
             <FormItem className='flex-1'>
               <FormLabel>

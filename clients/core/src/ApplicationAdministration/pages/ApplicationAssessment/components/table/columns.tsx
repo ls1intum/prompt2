@@ -2,11 +2,11 @@ import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from './SortableHeader'
 import { getStatusBadge } from '../../utils/getStatusBadge'
-import { getGenderString } from '@/interfaces/gender'
+import { getGenderString } from '@tumaet/prompt-shared-state'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
 import { numericRangeFilter } from '../../utils/numericRangeFilter'
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { AdditionalScore } from '../../../../interfaces/additionalScore/additionalScore'
 import { ActionMenu } from './menus/ActionMenu'
 
 export const columns = (
@@ -19,7 +19,7 @@ export const columns = (
     additionalScoreColumns = additionalScores.map((additionalScore) => {
       return {
         id: additionalScore.key,
-        accessorFn: (row) => row.meta_data?.[additionalScore.key] ?? null,
+        accessorFn: (row) => row.metaData?.[additionalScore.key] ?? null,
         header: ({ column }) => <SortableHeader column={column} title={additionalScore.name} />,
       }
     })
@@ -52,41 +52,41 @@ export const columns = (
       enableHiding: false,
     },
     {
-      id: 'first_name', // required for filter bar
-      accessorKey: 'student.first_name',
+      id: 'firstName', // required for filter bar
+      accessorKey: 'student.firstName',
       header: ({ column }) => <SortableHeader column={column} title='First Name' />,
       sortingFn: (rowA, rowB) => {
-        const valueA = rowA.original.student.first_name.toLowerCase() || ''
-        const valueB = rowB.original.student.first_name.toLowerCase() || ''
+        const valueA = rowA.original.student.firstName.toLowerCase() || ''
+        const valueB = rowB.original.student.firstName.toLowerCase() || ''
         return valueA.localeCompare(valueB)
       },
     },
     {
-      id: 'last_name',
-      accessorKey: 'student.last_name',
+      id: 'lastName',
+      accessorKey: 'student.lastName',
       header: ({ column }) => <SortableHeader column={column} title='Last Name' />,
       sortingFn: (rowA, rowB) => {
-        const valueA = rowA.original.student.last_name.toLowerCase() || ''
-        const valueB = rowB.original.student.last_name.toLowerCase() || ''
+        const valueA = rowA.original.student.lastName.toLowerCase() || ''
+        const valueB = rowB.original.student.lastName.toLowerCase() || ''
         return valueA.localeCompare(valueB)
       },
     },
     {
-      id: 'pass_status',
-      accessorKey: 'pass_status',
+      id: 'passStatus',
+      accessorKey: 'passStatus',
       header: ({ column }) => <SortableHeader column={column} title='Status' />,
       cell: ({ row }) => {
-        const passStatus = row.original.pass_status
+        const passStatus = row.original.passStatus
         return getStatusBadge(passStatus)
       },
       sortingFn: (rowA, rowB) => {
         const statusOrder = ['passed', 'not_assessed', 'failed']
-        const statusA = rowA.original.pass_status
-        const statusB = rowB.original.pass_status
+        const statusA = rowA.original.passStatus
+        const statusB = rowB.original.passStatus
         return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB)
       },
       filterFn: (row, columnId, filterValue) => {
-        return filterValue.includes(row.original.pass_status)
+        return filterValue.includes(row.original.passStatus)
       },
     },
     {
@@ -106,13 +106,13 @@ export const columns = (
       header: ({ column }) => <SortableHeader column={column} title='Email' />,
     },
     {
-      id: 'matriculation_number',
-      accessorKey: 'student.matriculation_number',
+      id: 'matriculationNumber',
+      accessorKey: 'student.matriculationNumber',
       header: ({ column }) => <SortableHeader column={column} title='Mat Number' />,
     },
     {
-      id: `university_login`,
-      accessorKey: 'student.university_login',
+      id: `universityLogin`,
+      accessorKey: 'student.universityLogin',
       header: ({ column }) => (
         <SortableHeader column={column} title={translations.university['login-name']} />
       ),

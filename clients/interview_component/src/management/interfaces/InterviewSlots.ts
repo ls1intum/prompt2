@@ -3,5 +3,5 @@ export interface InterviewSlot {
   index?: number
   startTime?: string
   endTime?: string
-  courseParticipationId?: string
+  courseParticipationID?: string
 }

@@ -11,7 +11,7 @@ import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'
 import { CourseAppearanceFormValues } from '../../validations/courseAppearance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { PostCourse } from '@/interfaces/post_course'
+import { PostCourse } from '../interfaces/postCourse'
 import { postNewCourse } from '../../network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
 import { useKeycloak } from '../../keycloak/useKeycloak'
@@ -61,13 +61,13 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   const onSubmit = (data: CourseAppearanceFormValues) => {
     const course: PostCourse = {
       name: coursePropertiesFormValues?.name || '',
-      start_date: coursePropertiesFormValues?.dateRange?.from || new Date(),
-      end_date: coursePropertiesFormValues?.dateRange?.to || new Date(),
-      course_type: coursePropertiesFormValues?.course_type || '',
+      startDate: coursePropertiesFormValues?.dateRange?.from || new Date(),
+      endDate: coursePropertiesFormValues?.dateRange?.to || new Date(),
+      courseType: coursePropertiesFormValues?.courseType || '',
       ects: coursePropertiesFormValues?.ects || 0,
-      semester_tag: coursePropertiesFormValues?.semester_tag || '',
+      semesterTag: coursePropertiesFormValues?.semesterTag || '',
       // eslint-disable-next-line prettier/prettier
-      meta_data: { icon: data.icon, 'bg-color': data.color },
+      metaData: { icon: data.icon, 'bg-color': data.color },
     }
 
     // todo API call

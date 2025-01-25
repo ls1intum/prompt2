@@ -23,9 +23,9 @@ export const InsideCourseSidebar = (): JSX.Element => {
   const { sortedPhases } = useMemo(() => {
     const activeCourse = courses.find((c) => c.id === courseId)
     const phasesSorted =
-      activeCourse?.course_phases
-        .filter((phase) => phase.sequence_order !== -1) // filter out the ones without sequence order
-        .sort((a, b) => a.sequence_order - b.sequence_order) || []
+      activeCourse?.coursePhases
+        .filter((phase) => phase.sequenceOrder !== -1) // filter out the ones without sequence order
+        .sort((a, b) => a.sequenceOrder - b.sequenceOrder) || []
     return { sortedPhases: phasesSorted }
   }, [courseId, courses])
 
@@ -44,8 +44,8 @@ export const InsideCourseSidebar = (): JSX.Element => {
           <SidebarGroupLabel>Course Phases</SidebarGroupLabel>
           <SidebarGroupContent>
             {sortedPhases.map((phase) => {
-              if (phase.course_phase_type in PhaseSidebarMapping) {
-                const PhaseComponent = PhaseSidebarMapping[phase.course_phase_type]
+              if (phase.coursePhaseType in PhaseSidebarMapping) {
+                const PhaseComponent = PhaseSidebarMapping[phase.coursePhaseType]
                 return (
                   <Suspense
                     key={phase.id}

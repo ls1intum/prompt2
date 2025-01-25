@@ -1,10 +1,10 @@
-import { MetaDataItem } from '@/interfaces/course_phase_type'
+import { CoursePhaseTypeMetaDataItem } from '@tumaet/prompt-shared-state'
 import { renderTooltipList } from './renderTooltipList'
 
 /** Helper: Renders tooltip content based on meta-data name */
 export const renderBadgeTooltipContent = (
-  item: MetaDataItem,
-  providedMetaData?: MetaDataItem[],
+  item: CoursePhaseTypeMetaDataItem,
+  providedMetaData?: CoursePhaseTypeMetaDataItem[],
   errorTooltip?: string,
 ): JSX.Element => {
   // If an error tooltip message exists, use it

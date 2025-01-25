@@ -20,13 +20,13 @@ export const PhaseRouterMapping = (): JSX.Element => {
 
   const selectedPhase = courses
     .find((c) => c.id === courseId)
-    ?.course_phases.find((p) => p.id === phaseId)
+    ?.coursePhases.find((p) => p.id === phaseId)
 
   if (!selectedPhase) {
     return <div>Phase not found</div>
   }
 
-  const PhaseComponent = PhaseRouter[selectedPhase.course_phase_type]
+  const PhaseComponent = PhaseRouter[selectedPhase.coursePhaseType]
 
   if (!PhaseComponent) {
     return <div>Phase Module not found</div>

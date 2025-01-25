@@ -1,5 +1,5 @@
-import { AdditionalScore } from '@/interfaces/additional_score'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { AdditionalScore } from '../../../interfaces/additionalScore/additionalScore'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { saveAs } from 'file-saver'
 
 export const downloadApplications = (
@@ -13,14 +13,14 @@ export const downloadApplications = (
   }
 
   const csvHeaders = [
-    'first_name',
-    'last_name',
+    'firstName',
+    'lastName',
     'email',
-    'matriculation_number',
-    'university_login',
-    'has_university_account',
+    'matriculationNumber',
+    'universityLogin',
+    'hasUniversityAccount',
     'gender',
-    'pass_status',
+    'passStatus',
     'score',
     ...additionalScores.map((score) => score.key),
   ]
@@ -33,14 +33,14 @@ export const downloadApplications = (
         if (header in student) {
           // Fetch data from the `student` object
           return JSON.stringify(student[header] ?? '')
-        } else if (header === 'pass_status') {
+        } else if (header === 'passStatus') {
           // Fetch data from the main `ApplicationParticipation` object
-          return JSON.stringify(row.pass_status ?? '')
+          return JSON.stringify(row.passStatus ?? '')
         } else if (header === 'score') {
           return JSON.stringify(row.score ?? '')
         } else if (additionalScores.map((score) => score.key).includes(header)) {
           // Fetch additional scores from the `meta_data` object
-          return JSON.stringify(row.meta_data?.[header] ?? '')
+          return JSON.stringify(row.metaData?.[header] ?? '')
         } else {
           return JSON.stringify('')
         }

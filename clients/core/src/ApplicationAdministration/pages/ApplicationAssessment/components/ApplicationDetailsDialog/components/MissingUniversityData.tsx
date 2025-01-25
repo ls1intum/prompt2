@@ -17,7 +17,7 @@ import {
   UniversityDataFormValues,
   formSchemaUniversityData,
 } from '../../../../../../validations/universityData'
-import { Student } from '@/interfaces/student'
+import { Student } from '@tumaet/prompt-shared-state'
 import { updateStudent } from '../../../../../../network/mutations/updateStudent'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import translations from '@/lib/translations.json'
@@ -48,14 +48,14 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
   const form = useForm<UniversityDataFormValues>({
     resolver: zodResolver(formSchemaUniversityData),
     defaultValues: {
-      university_login: student.university_login || '',
-      matriculation_number: student.matriculation_number || '',
+      universityLogin: student.universityLogin || '',
+      matriculationNumber: student.matriculationNumber || '',
       email: student.email || '',
     },
   })
 
   function onSubmit(values: UniversityDataFormValues) {
-    mutateStudent({ ...student, ...values, has_university_account: true })
+    mutateStudent({ ...student, ...values, hasUniversityAccount: true })
   }
 
   const handleRetry = () => {
@@ -93,7 +93,7 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='matriculation_number'
+                name='matriculationNumber'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Matriculation Number</FormLabel>
@@ -106,7 +106,7 @@ export const MissingUniversityData = ({ student }: MissingUniversityDataProps): 
               />
               <FormField
                 control={form.control}
-                name='university_login'
+                name='universityLogin'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{translations.university['login-name']}</FormLabel>

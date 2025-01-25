@@ -26,7 +26,7 @@ export const MailingConfigPage = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const currentCourse = courses.find((course) => course.id === courseId)
-  const applicationMailingMetaData = currentCourse?.meta_data.mailingSettings as MailingMetaData
+  const applicationMailingMetaData = currentCourse?.metaData.mailingSettings as MailingMetaData
   const [isModified, setIsModified] = useState(false)
 
   const { mutate: mutateMailingData } = useSaveMailingData()
@@ -72,7 +72,7 @@ export const MailingConfigPage = (): JSX.Element => {
   async function onSubmit(values: z.infer<typeof courseMailingSchema>) {
     if (currentCourse) {
       const updatedCourse = {
-        meta_data: {
+        metaData: {
           mailingSettings: values,
         },
       }

@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 
 const chartConfig = {
   applications: {
@@ -34,9 +34,9 @@ interface AssessmentDiagramProps {
 
 export const AssessmentDiagram = ({ applications }: AssessmentDiagramProps): JSX.Element => {
   const { chartData, totalApplications } = React.useMemo(() => {
-    const notAssessed = applications.filter((app) => app.pass_status === 'not_assessed').length
-    const accepted = applications.filter((app) => app.pass_status === 'passed').length
-    const rejected = applications.filter((app) => app.pass_status === 'failed').length
+    const notAssessed = applications.filter((app) => app.passStatus === 'not_assessed').length
+    const accepted = applications.filter((app) => app.passStatus === 'passed').length
+    const rejected = applications.filter((app) => app.passStatus === 'failed').length
 
     return {
       chartData: [

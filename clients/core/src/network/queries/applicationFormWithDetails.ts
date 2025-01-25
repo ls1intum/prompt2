@@ -1,4 +1,4 @@
-import { ApplicationFormWithDetails } from '@/interfaces/application_form_with_details'
+import { ApplicationFormWithDetails } from '../../interfaces/application/applicationFormWithDetails'
 import { notAuthenticatedAxiosInstance } from '@/network/configService'
 
 export const getApplicationFormWithDetails = async (

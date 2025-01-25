@@ -1,4 +1,10 @@
-import { Student } from '@/interfaces/student'
+import {
+  Student,
+  Gender,
+  getGenderString,
+  StudyDegree,
+  getStudyDegreeString,
+} from '@tumaet/prompt-shared-state'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { StudentComponentRef } from '../../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
@@ -19,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Gender, getGenderString } from '@/interfaces/gender'
 import { studentSchema, StudentFormValues } from '../../../../../validations/student'
 import translations from '@/lib/translations.json'
 
@@ -35,7 +40,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { getStudyDegreeString, StudyDegree } from '@/interfaces/study_degree'
 import { countriesArr } from '@/lib/getCountries'
 
 const studyPrograms = translations.university.studyPrograms.concat('Other')
@@ -51,35 +55,35 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
   { student, isInstructorView = false, allowEditUniversityData, onUpdate },
   ref,
 ) {
-  const hasUniversityAccount = student.has_university_account
+  const hasUniversityAccount = student.hasUniversityAccount
 
   // this ugly setting is necessary due to typescript and two different validation schema
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: hasUniversityAccount
       ? {
-          matriculation_number: student.matriculation_number || '',
-          university_login: student.university_login || '',
-          first_name: student.first_name || '',
-          last_name: student.last_name || '',
+          matriculationNumber: student.matriculationNumber || '',
+          universityLogin: student.universityLogin || '',
+          firstName: student.firstName || '',
+          lastName: student.lastName || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
           nationality: student.nationality ?? '',
-          study_degree: student.study_degree ?? undefined,
-          study_program: student.study_program ?? '',
-          current_semester: student.current_semester ?? undefined,
-          has_university_account: true,
+          studyDegree: student.studyDegree ?? undefined,
+          studyProgram: student.studyProgram ?? '',
+          currentSemester: student.currentSemester ?? undefined,
+          hasUniversityAccount: true,
         }
       : {
-          first_name: student.first_name || '',
-          last_name: student.last_name || '',
+          firstName: student.firstName || '',
+          lastName: student.lastName || '',
           email: student.email || '',
           gender: student.gender ?? undefined,
           nationality: student.nationality ?? '',
-          study_degree: student.study_degree ?? undefined,
-          study_program: student.study_program ?? '',
-          current_semester: student.current_semester ?? undefined,
-          has_university_account: false,
+          studyDegree: student.studyDegree ?? undefined,
+          studyProgram: student.studyProgram ?? '',
+          currentSemester: student.currentSemester ?? undefined,
+          hasUniversityAccount: false,
         },
 
     mode: 'onChange',
@@ -92,30 +96,30 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
     },
     rerender(updatedStudent: Student) {
       form.reset(
-        updatedStudent.has_university_account
+        updatedStudent.hasUniversityAccount
           ? {
-              matriculation_number: updatedStudent.matriculation_number || '',
-              university_login: updatedStudent.university_login || '',
-              first_name: updatedStudent.first_name || '',
-              last_name: updatedStudent.last_name || '',
+              matriculationNumber: updatedStudent.matriculationNumber || '',
+              universityLogin: updatedStudent.universityLogin || '',
+              firstName: updatedStudent.firstName || '',
+              lastName: updatedStudent.lastName || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
               nationality: updatedStudent.nationality ?? '',
-              study_degree: updatedStudent.study_degree ?? undefined,
-              study_program: updatedStudent.study_program ?? '',
-              current_semester: updatedStudent.current_semester ?? undefined,
-              has_university_account: true,
+              studyDegree: updatedStudent.studyDegree ?? undefined,
+              studyProgram: updatedStudent.studyProgram ?? '',
+              currentSemester: updatedStudent.currentSemester ?? undefined,
+              hasUniversityAccount: true,
             }
           : {
-              first_name: updatedStudent.first_name || '',
-              last_name: updatedStudent.last_name || '',
+              firstName: updatedStudent.firstName || '',
+              lastName: updatedStudent.lastName || '',
               email: updatedStudent.email || '',
               gender: updatedStudent.gender ?? undefined,
               nationality: updatedStudent.nationality ?? '',
-              study_degree: updatedStudent.study_degree ?? undefined,
-              study_program: updatedStudent.study_program ?? '',
-              current_semester: updatedStudent.current_semester ?? undefined,
-              has_university_account: false,
+              studyDegree: updatedStudent.studyDegree ?? undefined,
+              studyProgram: updatedStudent.studyProgram ?? '',
+              currentSemester: updatedStudent.currentSemester ?? undefined,
+              hasUniversityAccount: false,
             },
       )
     },
@@ -130,7 +134,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
   }, [form.watch, student, onUpdate, form])
 
   const [otherStudyProgram, setOtherStudyProgram] = useState(false)
-  const currStudyProgram = form.watch('study_program')
+  const currStudyProgram = form.watch('studyProgram')
 
   const requiredStar = <span className='text-destructive'> *</span>
 
@@ -144,7 +148,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <FormField
               control={form.control}
-              name='matriculation_number'
+              name='matriculationNumber'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -165,7 +169,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             />
             <FormField
               control={form.control}
-              name='university_login'
+              name='universityLogin'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -189,7 +193,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <FormField
             control={form.control}
-            name='first_name'
+            name='firstName'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First Name{requiredStar}</FormLabel>
@@ -208,7 +212,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           />
           <FormField
             control={form.control}
-            name='last_name'
+            name='lastName'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Last Name{requiredStar}</FormLabel>
@@ -334,7 +338,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           <FormField
             control={form.control}
-            name='study_degree'
+            name='studyDegree'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Study Degree{requiredStar}</FormLabel>
@@ -363,7 +367,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
 
           <FormField
             control={form.control}
-            name='study_program'
+            name='studyProgram'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Study Program{requiredStar}</FormLabel>
@@ -371,10 +375,10 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                   onValueChange={(value) => {
                     if (value === 'Other') {
                       setOtherStudyProgram(true)
-                      form.setValue('study_program', '')
+                      form.setValue('studyProgram', '')
                     } else {
                       setOtherStudyProgram(false)
-                      form.setValue('study_program', value)
+                      form.setValue('studyProgram', value)
                     }
                   }}
                   defaultValue={field.value}
@@ -405,7 +409,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
 
           <FormField
             control={form.control}
-            name='current_semester'
+            name='currentSemester'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Current Semester{requiredStar}</FormLabel>
@@ -433,7 +437,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
           (currStudyProgram != '' && !studyPrograms.includes(currStudyProgram))) && (
           <FormField
             control={form.control}
-            name='study_program'
+            name='studyProgram'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Specify Study Program{requiredStar}</FormLabel>

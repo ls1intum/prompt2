@@ -11,10 +11,10 @@ import {
 import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import { ActionDialog } from '../../GroupActionDialog/GroupActionDialog'
 import { RowModel } from '@tanstack/react-table'
-import { ApplicationParticipation } from '@/interfaces/application_participations'
+import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { useApplicationStatusUpdate } from '../../../hooks/useApplicationStatusUpdate'
 import { useDeleteApplications } from '../../../hooks/useDeleteApplications'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 interface GroupActionsMenuProps {
   selectedRows: RowModel<ApplicationParticipation>
@@ -102,8 +102,8 @@ export const GroupActionsMenu = ({
           onClose={closeDialog}
           onConfirm={() => {
             mutateUpdateApplicationStatus({
-              pass_status: PassStatus.PASSED,
-              course_phase_participation_ids: selectedRows.rows.map((row) => row.original.id),
+              passStatus: PassStatus.PASSED,
+              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
             })
             onClose()
           }}
@@ -119,8 +119,8 @@ export const GroupActionsMenu = ({
           onClose={closeDialog}
           onConfirm={() => {
             mutateUpdateApplicationStatus({
-              pass_status: PassStatus.FAILED,
-              course_phase_participation_ids: selectedRows.rows.map((row) => row.original.id),
+              passStatus: PassStatus.FAILED,
+              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
             })
             onClose()
           }}

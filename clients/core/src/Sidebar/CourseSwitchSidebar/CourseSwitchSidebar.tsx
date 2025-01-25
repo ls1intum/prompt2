@@ -12,7 +12,7 @@ import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
 import { AddCourseButton } from './components/AddCourseSidebarItem'
 import { useAuthStore } from '@/zustand/useAuthStore'
-import { Role } from '@/interfaces/permission_roles'
+import { Role } from '@tumaet/prompt-shared-state'
 
 interface CourseSwitchSidebarProps {
   onLogout: () => void

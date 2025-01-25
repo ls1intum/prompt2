@@ -1,5 +1,5 @@
-import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
-import { Role } from '@/interfaces/permission_roles'
+import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
+import { Role } from '@tumaet/prompt-shared-state'
 import { ApplicationLandingPage } from '../../ApplicationAdministration/pages/ApplicationLandingPage/ApplicationLandingPage'
 import { ApplicationConfiguration } from '../../ApplicationAdministration/pages/ApplicationConfiguration/ApplicationConfiguration'
 import { ExternalRoutes } from './ExternalRoutes'

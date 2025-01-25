@@ -7,13 +7,13 @@ const matriculationNumberRegex = new RegExp(translations.university.matriculatio
 
 export const formSchemaUniversityData = z.object({
   email: z.string().email('Invalid email address'),
-  matriculation_number: z
+  matriculationNumber: z
     .string()
     .regex(
       matriculationNumberRegex,
       `Matriculation number must follow the pattern ${translations.university.matriculationExample}`,
     ),
-  university_login: z
+  universityLogin: z
     .string()
     .regex(
       universityLoginRegex,
