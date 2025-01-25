@@ -10,9 +10,9 @@ import {
   Background,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { PhaseNode } from './PhaseNode/PhaseNode'
+import { PhaseNode } from './graphComponents/phaseNode/PhaseNode'
 import { CourseConfigSidebar } from './components/CourseConfigSidebar'
-import { IconEdge } from './Edges/IconEdge'
+import { IconEdge } from './graphComponents/edges/IconEdge'
 import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'

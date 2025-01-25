@@ -1,7 +1,7 @@
 import { addEdge, Connection, Edge } from '@xyflow/react'
 import { useCallback } from 'react'
-import { ParticipantEdgeProps } from '../Edges/ParticipantEdgeProps'
-import { DataEdgeProps } from '../Edges/DataEdgeProps'
+import { ParticipantEdgeProps } from '../graphComponents/edges/ParticipantEdgeProps'
+import { DataEdgeProps } from '../graphComponents/edges/DataEdgeProps'
 
 export const useConnect = (edges, nodes, setEdges, setIsModified) => {
   return useCallback(
