@@ -17,7 +17,7 @@
     "paths": {
       "@/*": ["../shared_library/*"],
       "@core/*": ["src/*"],
-      "@management/*": ["src/management/*"]
+      "@managementConsole/*": ["src/managementConsole/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "src/index.js", "tailwind.config.js"],

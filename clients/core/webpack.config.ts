@@ -81,7 +81,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       alias: {
         '@': path.resolve(__dirname, '../shared_library'),
         '@core': path.resolve(__dirname, 'src'),
-        '@management': path.resolve(__dirname, 'src/management'),
+        '@managementConsole': path.resolve(__dirname, 'src/managementConsole'),
       },
     },
     plugins: [

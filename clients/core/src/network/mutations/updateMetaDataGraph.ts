@@ -1,4 +1,4 @@
-import { MetaDataGraphItem } from '../../CourseConfigurator/interfaces/courseMetaGraphItem'
+import { MetaDataGraphItem } from '../../managementConsole/courseConfigurator/interfaces/courseMetaGraphItem'
 import { axiosInstance } from '@/network/configService'
 
 export const updateMetaDataGraph = async (

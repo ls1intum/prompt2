@@ -1,4 +1,4 @@
-import { ApplicationForm } from '../../ApplicationAdministration/interfaces/form/applicationForm'
+import { ApplicationForm } from '../../managementConsole/applicationAdministration/interfaces/form/applicationForm'
 import { axiosInstance } from '@/network/configService'
 
 export const getApplicationForm = async (coursePhaseId: string): Promise<ApplicationForm> => {
