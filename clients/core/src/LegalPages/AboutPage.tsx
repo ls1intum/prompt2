@@ -2,19 +2,36 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
+import { useEffect, useState } from 'react'
+
+import DOMPurify from 'dompurify'
 
 export default function AboutPage() {
   const navigate = useNavigate()
+  const [content, setContent] = useState('')
+
+  DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+    // set all elements owning target to target=_blank
+    if ('target' in node) {
+      node.setAttribute('target', '_blank')
+      node.setAttribute('rel', 'noopener')
+    }
+  })
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
+    fetch('/about.html')
+      .then((res) => res.text())
+      .then((res) => DOMPurify.sanitize(res))
+      .then((res) => setContent(res))
+  }, [])
 
   return (
     <div className='container mx-auto py-8 px-4'>
@@ -40,50 +57,24 @@ export default function AboutPage() {
               This page is still being built. More information will be available soon.
             </AlertDescription>
           </Alert>
+          
+          <div className='about' dangerouslySetInnerHTML={{ __html: content }} />
 
-          <h2 className='text-2xl font-bold'>What is PROMPT?</h2>
-          <p>
-            PROMPT is a tool to help you manage your projects and tasks. It is designed to be simple
-            and easy to use, while still being powerful enough to handle all your needs.
-          </p>
 
-          <h2 className='text-2xl font-bold'>Why use PROMPT?</h2>
-          <p>
-            PROMPT is built with you in mind. We want to help you get things done, without getting in
-            your way. We believe that the best tools are the ones that you don't notice, because they
-            just work.
-          </p>
-
-          <h2 className='text-2xl font-bold'>Who is behind PROMPT?</h2>
-          <p>
-            placeholder
-          </p>
-
-          <h2 className='text-2xl font-bold'>Capabilites of Prompt</h2>
-          <h3 className='text-xl font-bold'>Task Management</h3>
-          <p>
-            placeholder
-          </p>
-
-          <h3 className='text-xl font-bold'>Task Management</h3>
-          <p>
-            placeholder
-          </p>
-
-          <h3 className='text-xl font-bold'>Task Management</h3>
-          <p>
-            placeholder
-          </p>
-
-          <h2 className='text-2xl font-bold'>Upcoming Functionality</h2>
-          <Carousel>
-            <CarouselContent>
-              <CarouselItem>Grading</CarouselItem>
-              <CarouselItem>Templating</CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+          <h2 className='px-6 text-2xl font-bold'>Upcoming Functionality</h2>
+          <div className="px-10 space-y-8">
+            <Carousel>
+              <CarouselPrevious />
+              <CarouselContent>
+                <CarouselItem>
+                  <Card></Card>
+                  Grading
+                </CarouselItem>
+                <CarouselItem>Templating</CarouselItem>
+              </CarouselContent>
+              <CarouselNext />
+            </Carousel>
+          </div>
         </CardContent>
       </Card>
     </div>
