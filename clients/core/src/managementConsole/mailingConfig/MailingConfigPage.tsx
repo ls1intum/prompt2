@@ -16,8 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { useCourseStore } from '@tumaet/prompt-shared-state'
-import type { MailingMetaData } from '@/hooks/MailingMetaData'
+import { useCourseStore, CourseMailingSettings } from '@tumaet/prompt-shared-state'
 import { type CourseMailingFormValues, courseMailingSchema } from '@core/validations/courseMailing'
 import { useSaveMailingData } from './hooks/useSaveMailingData'
 import { useParams } from 'react-router-dom'
@@ -26,7 +25,8 @@ export const MailingConfigPage = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const currentCourse = courses.find((course) => course.id === courseId)
-  const applicationMailingMetaData = currentCourse?.metaData.mailingSettings as MailingMetaData
+  const applicationMailingMetaData = currentCourse?.metaData
+    .mailingSettings as CourseMailingSettings
   const [isModified, setIsModified] = useState(false)
 
   const { mutate: mutateMailingData } = useSaveMailingData()
