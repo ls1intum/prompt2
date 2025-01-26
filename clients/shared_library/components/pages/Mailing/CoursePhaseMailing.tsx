@@ -11,12 +11,17 @@ import {
 import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
 import { EmailTemplateEditor } from './components/MailingEditor'
 import { SettingsCard } from './components/SettingsCard'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
+import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { MailWarningIcon } from 'lucide-react'
+import { useParams } from 'react-router-dom'
 
 interface CoursePhaseMailingProps {
   coursePhase: CoursePhaseWithMetaData | undefined
 }
 
 export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => {
+  const { courseId } = useParams<{ courseId: string }>()
   const { toast } = useToast()
   const [initialMetaData, setInitialMetaData] = useState<CoursePhaseMailingConfigData | null>(null)
   const [mailingMetaData, setMailingMetaData] = useState<CoursePhaseMailingConfigData>({
@@ -28,9 +33,8 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
 
   const isModified = JSON.stringify(initialMetaData) !== JSON.stringify(mailingMetaData)
 
-  // TODO: re-integrate once the shared library is implemented!!
-  //   const courseMailingIsConfigured = useGetMailingIsConfigured()
-  //   const [missingConfigs, setMissingConfigs] = useState<MissingConfigItem[]>([])
+  const courseMailingIsConfigured = useGetMailingIsConfigured()
+  const [missingConfigs, setMissingConfigs] = useState<MissingConfigItem[]>([])
 
   // Updating state
   const { mutate: mutateCoursePhase } = useModifyCoursePhase(
@@ -84,23 +88,22 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
     mutateCoursePhase(updatedCoursePhase)
   }
 
-  // TODO: re-integrate once the shared library is implemented!!
-  //   useEffect(() => {
-  //     if (!courseMailingIsConfigured) {
-  //       setMissingConfigs([
-  //         {
-  //           title: 'Application Mailing',
-  //           description: 'Please configure course mailing settings',
-  //           link: `/management/course/${courseId}/mailing`,
-  //           icon: MailWarningIcon,
-  //         },
-  //       ])
-  //     }
-  //   }, [courseId, courseMailingIsConfigured])
+  useEffect(() => {
+    if (!courseMailingIsConfigured) {
+      setMissingConfigs([
+        {
+          title: 'Application Mailing',
+          description: 'Please configure course mailing settings',
+          link: `/management/course/${courseId}/mailing`,
+          icon: MailWarningIcon,
+        },
+      ])
+    }
+  }, [courseId, courseMailingIsConfigured])
 
   return (
     <div className='space-y-6'>
-      {/* <MissingConfig elements={missingConfigs} /> */}
+      <MissingConfig elements={missingConfigs} />
       <SettingsCard mailingMetaData={mailingMetaData} isModified={isModified} />
       <h2 className='text-2xl font-bold'>Mailing Templates </h2>
 

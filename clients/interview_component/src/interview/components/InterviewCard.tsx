@@ -13,12 +13,14 @@ import type { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import type { InterviewAnswer } from '../interfaces/InterviewAnswer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { PassStatus } from '@tumaet/prompt-shared-state'
+import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 
 export const InterviewCard = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)
+
+  const { user } = useAuthStore()
 
   const { coursePhase } = useCoursePhaseStore()
   const interviewQuestions =
@@ -80,6 +82,12 @@ export const InterviewCard = (): JSX.Element => {
     }
   }
 
+  const setInterviewerAsSelf = () => {
+    if (user) {
+      setInterviewer(user.firstName + ' ' + user.lastName)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -135,7 +143,12 @@ export const InterviewCard = (): JSX.Element => {
                 onChange={(e) => setInterviewer(e.target.value)}
                 placeholder='Enter interviewer name'
               />
-              <Button variant='outline' className='shrink-0' disabled={true}>
+              <Button
+                variant='outline'
+                className='shrink-0'
+                disabled={user === undefined}
+                onClick={setInterviewerAsSelf}
+              >
                 <User className='h-4 w-4 mr-2' />
                 Set as Self
               </Button>

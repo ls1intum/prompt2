@@ -12,7 +12,7 @@ import { EmailTemplateEditor } from '@/components/pages/Mailing/components/Maili
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
-import { useGetMailingIsConfigured } from '../../../shared/hooks/useGetMailingIsConfigured'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { MailWarningIcon } from 'lucide-react'
 
