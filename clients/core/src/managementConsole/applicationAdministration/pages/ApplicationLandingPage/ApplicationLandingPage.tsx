@@ -1,4 +1,4 @@
-import { CalendarX } from 'lucide-react'
+import { CalendarX, MailWarningIcon } from 'lucide-react'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { getIsApplicationConfigured } from '../../utils/getApplicationIsConfigured'
 import { useMemo, useState } from 'react'
@@ -12,6 +12,7 @@ import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySeme
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
+import { useHideMailingWarning } from './hooks/useHideMailingWarning'
 
 export const ApplicationLandingPage = (): JSX.Element => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
@@ -19,6 +20,7 @@ export const ApplicationLandingPage = (): JSX.Element => {
   const { coursePhase, participations } = useApplicationStore()
 
   useParseApplicationMetaData(coursePhase, setApplicationMetaData)
+  const { hideMailingWarning } = useHideMailingWarning()
 
   const missingConfigs: MissingConfigItem[] = useMemo(() => {
     const missingConfigItems: MissingConfigItem[] = []
@@ -29,8 +31,27 @@ export const ApplicationLandingPage = (): JSX.Element => {
         link: `${path}/configuration`,
       })
     }
+    if (
+      coursePhase?.metaData?.mailingSettings === undefined &&
+      !coursePhase?.metaData?.hideMailingWarning
+    ) {
+      missingConfigItems.push({
+        title: 'Application Mailing Settings',
+        description: `This application phase has no mailing settings configured.
+          If you do not want to send mails, you can hide this warning.`,
+        icon: MailWarningIcon,
+        link: `${path}/mailing`,
+        hide: hideMailingWarning,
+      })
+    }
     return missingConfigItems
-  }, [applicationMetaData, path])
+  }, [
+    applicationMetaData,
+    coursePhase?.metaData?.hideMailingWarning,
+    coursePhase?.metaData?.mailingSettings,
+    hideMailingWarning,
+    path,
+  ])
 
   return (
     <div>
