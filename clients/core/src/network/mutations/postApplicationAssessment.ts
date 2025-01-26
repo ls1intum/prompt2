@@ -1,4 +1,4 @@
-import { ApplicationAssessment } from '../../ApplicationAdministration/interfaces/applicationAssessment'
+import { ApplicationAssessment } from '../../managementConsole/applicationAdministration/interfaces/applicationAssessment'
 import { axiosInstance } from '@/network/configService'
 
 export const postApplicationAssessment = async (

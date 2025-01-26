@@ -1,9 +1,9 @@
-import OverviewPage from '../src/management/pages/Overview/OverviewPage'
+import OverviewPage from '../src/interview/pages/Overview/OverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
-import { InterviewDataShell } from '../src/management/pages/InterviewDataShell'
-import { ProfileDetailPage } from '../src/management/pages/ProfileDetail/ProfileDetailPage'
-import { MailingPage } from '../src/management/pages/Mailing/MailingPage'
+import { InterviewDataShell } from '../src/interview/pages/InterviewDataShell'
+import { ProfileDetailPage } from '../src/interview/pages/ProfileDetail/ProfileDetailPage'
+import { MailingPage } from '../src/interview/pages/Mailing/MailingPage'
 
 const interviewRoutes: ExtendedRouteObject[] = [
   {

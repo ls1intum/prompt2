@@ -1,4 +1,7 @@
-import { PostCourse, serializePostCourse } from '../../Course/interfaces/postCourse'
+import {
+  PostCourse,
+  serializePostCourse,
+} from '../../managementConsole/courseOverview/interfaces/postCourse'
 import { axiosInstance } from '@/network/configService'
 
 export const postNewCourse = async (course: PostCourse): Promise<string | undefined> => {

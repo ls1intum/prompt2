@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { ApplicationParticipation } from '../../ApplicationAdministration/interfaces/applicationParticipation'
+import { ApplicationParticipation } from '../../managementConsole/applicationAdministration/interfaces/applicationParticipation'
 
 export const getApplicationParticipations = async (
   coursePhaseID: string,
