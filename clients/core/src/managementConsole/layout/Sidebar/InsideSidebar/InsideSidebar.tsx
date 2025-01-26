@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar'
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useLocation, useParams } from 'react-router-dom'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
 import { InsideGeneralSidebar } from './InsideGeneralSidebar'

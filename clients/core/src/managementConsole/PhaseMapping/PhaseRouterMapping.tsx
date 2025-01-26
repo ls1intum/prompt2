@@ -1,4 +1,4 @@
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { TemplateRoutes } from './ExternalRoutes/TemplateRoutes'
 import { ApplicationRoutes } from './ExternalRoutes/ApplicationRoutes'

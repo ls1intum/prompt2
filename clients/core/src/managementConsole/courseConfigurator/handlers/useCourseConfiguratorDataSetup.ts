@@ -16,7 +16,7 @@ import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { getAdditionalScoreNames } from '@core/network/queries/additionalScoreNames'
 
 import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 
 export function useCourseConfiguratorDataSetup() {
   const { courses } = useCourseStore()

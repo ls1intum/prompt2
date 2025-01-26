@@ -1,4 +1,4 @@
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'

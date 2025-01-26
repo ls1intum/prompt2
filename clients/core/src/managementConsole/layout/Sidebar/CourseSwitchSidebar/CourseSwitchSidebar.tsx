@@ -7,11 +7,10 @@ import {
   SidebarMenu,
 } from '@/components/ui/sidebar'
 import { NavUserMenu } from './components/NavUserMenu'
-import { useCourseStore } from '@/zustand/useCourseStore'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
 import { AddCourseButton } from './components/AddCourseSidebarItem'
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import { Role } from '@tumaet/prompt-shared-state'
 
 interface CourseSwitchSidebarProps {

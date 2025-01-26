@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import type { MailingMetaData } from './interfaces/MailingMetaData'
 import { type CourseMailingFormValues, courseMailingSchema } from '@core/validations/courseMailing'
 import { useSaveMailingData } from './hooks/useSaveMailingData'
