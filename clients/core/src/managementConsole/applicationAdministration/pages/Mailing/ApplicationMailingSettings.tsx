@@ -12,7 +12,7 @@ import { EmailTemplateEditor } from '@/components/pages/Mailing/components/Maili
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
-import { useGetMailingIsConfigured } from '../../../shared/hooks/useGetMailingIsConfigured'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { MailWarningIcon } from 'lucide-react'
 
@@ -90,8 +90,9 @@ export const ApplicationMailingSettings = () => {
     if (!courseMailingIsConfigured) {
       setMissingConfigs([
         {
-          title: 'Application Mailing',
-          description: 'Please configure course mailing settings',
+          title: 'Course Sender Information',
+          description:
+            'The course has not yet any set `Reply To Email Address` set. Please make sure to configure this in the course settings.',
           link: `/management/course/${courseId}/mailing`,
           icon: MailWarningIcon,
         },

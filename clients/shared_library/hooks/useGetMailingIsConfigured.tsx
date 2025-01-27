@@ -1,13 +1,12 @@
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore, CourseMailingSettings } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { MailingMetaData } from '../../mailingConfig/interfaces/MailingMetaData'
 
 export const useGetMailingIsConfigured = (): boolean => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const activeCourse = courses.find((course) => course.id === courseId)
 
-  const mailingSettings = activeCourse?.metaData?.mailingSettings as MailingMetaData
+  const mailingSettings = activeCourse?.metaData?.mailingSettings as CourseMailingSettings
 
   if (
     mailingSettings !== undefined &&

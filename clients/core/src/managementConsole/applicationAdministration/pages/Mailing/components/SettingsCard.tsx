@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label'
 import { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
 import { Switch } from '@/components/ui/switch'
 import { ManualMailSending } from '@/components/pages/Mailing/components/ManualMailSending'
-import { useGetMailingIsConfigured } from '../../../../shared/hooks/useGetMailingIsConfigured'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 
 interface SettingsCardProps {
   applicationMailingMetaData: ApplicationMailingMetaData

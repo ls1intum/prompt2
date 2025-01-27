@@ -1,7 +1,7 @@
 import { useContext, useEffect, useCallback } from 'react'
 import Keycloak from 'keycloak-js'
 import { KeycloakContext } from './KeycloakProvider'
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { jwtDecode } from 'jwt-decode'
 // import { env } from '../env'
 

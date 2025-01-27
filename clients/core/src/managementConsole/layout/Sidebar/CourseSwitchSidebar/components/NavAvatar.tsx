@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 
 export function NavAvatar(): JSX.Element {

@@ -1,7 +1,7 @@
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { LoadingPage } from '@/components/LoadingPage'
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {

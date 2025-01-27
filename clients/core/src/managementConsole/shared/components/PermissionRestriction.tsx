@@ -1,7 +1,6 @@
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import { Role, getPermissionString } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { useCourseStore } from '@/zustand/useCourseStore'
 import UnauthorizedPage from './UnauthorizedPage'
 
 interface PermissionRestrictionProps {
