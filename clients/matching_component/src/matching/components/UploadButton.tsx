@@ -2,12 +2,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { type ReactNode, useRef, useState } from 'react'
 import { UploadCloud, Loader2 } from 'lucide-react'
+import { useUploadAndParse } from '../hooks/useUploadAndParse'
 
 interface UploadButtonProps {
   title: string
   description: string
   icon: ReactNode
-  onUpload: (file: File) => void
+  onUploadFinish: () => void
   acceptedFileTypes: string[]
 }
 
@@ -15,16 +16,30 @@ export const UploadButton = ({
   title,
   description,
   icon,
-  onUpload,
+  onUploadFinish,
   acceptedFileTypes,
 }: UploadButtonProps): JSX.Element => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragActive, setDragActive] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null) // State to store error messages
 
-  const handleUpload = (file: File) => {
-    onUpload(file)
-    setIsUploading(false)
+  const { parseFile } = useUploadAndParse()
+
+  const handleUpload = async (file: File) => {
+    setError(null) // Reset error before a new upload
+
+    try {
+      await parseFile(file)
+      // If parseFile succeeds, call your completion handler
+      onUploadFinish()
+    } catch (err: any) {
+      // If an error occurs, store it in state and log it
+      console.error('Failed to parse file:', err)
+      setError(err?.message ?? 'An unknown error occurred while parsing the file.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -42,6 +57,7 @@ export const UploadButton = ({
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setIsUploading(true)
       handleUpload(e.dataTransfer.files[0])
     }
   }
@@ -49,6 +65,7 @@ export const UploadButton = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      setIsUploading(true)
       handleUpload(file)
     }
   }
@@ -99,13 +116,12 @@ export const UploadButton = ({
         <input
           type='file'
           ref={fileInputRef}
-          onChange={(event) => {
-            setIsUploading(true)
-            handleChange(event)
-          }}
+          onChange={handleChange}
           className='hidden'
           accept={acceptedFileTypes.join(',')}
         />
+        {/* Display error message if any */}
+        {error && <p className='text-red-500 mt-4'>{error}</p>}
       </CardContent>
     </Card>
   )
