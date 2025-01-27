@@ -10220,15 +10220,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.469.0":
-  version: 0.469.0
-  resolution: "lucide-react@npm:0.469.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/0ee78d110550579b848a01446a440f733fd17e1bf1850aa01551b61f415e03e5f5ab7f26b56f1c648edc93856177f5476ff9f8f6f5d80e8fe45913d208f49961
-  languageName: node
-  linkType: hard
-
 "make-dir@npm:4.0.0":
   version: 4.0.0
   resolution: "make-dir@npm:4.0.0"
@@ -14216,7 +14207,6 @@ __metadata:
     class-variance-authority: "npm:^0.7.0"
     cmdk: "npm:1.0.0"
     date-fns: "npm:^4.1.0"
-    lucide-react: "npm:^0.469.0"
     react-day-picker: "npm:8.10.1"
     react-hook-form: "npm:^7.53.2"
     recharts: "npm:^2.15.0"
