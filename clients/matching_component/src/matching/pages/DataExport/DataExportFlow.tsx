@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMatchingStore } from '../../zustand/useMatchingStore'
-import { PreviewStep } from './components/PreviewStep'
+import { Step1PreviewData, Step1PreviewDataRef } from './components/Step1PreviewData'
 import { MatchingStep } from './components/MatchingStep'
 
 export const DataExportFlow = (): JSX.Element => {
@@ -12,32 +12,60 @@ export const DataExportFlow = (): JSX.Element => {
   const [currentStep, setCurrentStep] = useState(0)
   const [unrankedOption, setUnrankedOption] = useState<'no-rank' | 'unacceptable'>('no-rank')
 
+  const step1PreviewDataRef = useRef<Step1PreviewDataRef>(null)
+
   const steps = [
-    <PreviewStep
-      key='preview'
-      onNext={(option) => {
-        setUnrankedOption(option)
-        setCurrentStep(1)
-      }}
-    />,
+    <Step1PreviewData key='preview' />,
     <MatchingStep key='matching' unrankedOption={unrankedOption} />,
   ]
 
-  return (
-    <div className=''>
-      <div className='relative pb-4'>
-        <Button
-          onClick={() => navigate(-1)}
-          variant='ghost'
-          size='sm'
-          className='absolute top-0 left-0'
-        >
-          <ChevronLeft className='h-4 w-4' />
-          <span>Back</span>
+  const handleNext = () => {
+    if (currentStep === 0) {
+      const { selectedOption } = step1PreviewDataRef.current!.getValues()
+      setUnrankedOption(selectedOption)
+    } else {
+      navigate(-1)
+      return
+    }
+    setCurrentStep((prev) => prev + 1)
+  }
+
+  if (uploadedData?.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center h-[calc(100vh-4rem)]'>
+        <p className='text-2xl font-semibold'>No data uploaded</p>
+        <Button onClick={() => navigate(-1)} className='mt-4'>
+          <ChevronLeft />
+          Go back
         </Button>
       </div>
+    )
+  }
 
-      {uploadedData == null ? <div>No File has been uploaded!</div> : steps[currentStep]}
+  return (
+    <div className=''>
+      <div className='mb-4'>{steps[currentStep]}</div>
+      <div className='flex justify-between mt-8'>
+        {currentStep === 0 ? (
+          <Button onClick={() => navigate(-1)} className='flex items-center space-x-2'>
+            <X />
+            Cancel
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setCurrentStep((prev) => prev - 1)}
+            className='flex items-center space-x-2'
+          >
+            <ChevronLeft />
+            Back
+          </Button>
+        )}
+
+        <Button onClick={handleNext}>
+          {currentStep === 0 ? <ChevronRight /> : <Check />}
+          {currentStep === 0 ? 'Next' : 'Finish'}
+        </Button>
+      </div>
     </div>
   )
 }

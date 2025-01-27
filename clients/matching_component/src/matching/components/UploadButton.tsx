@@ -27,19 +27,21 @@ export const UploadButton = ({
   const { parseFile } = useUploadAndParse()
 
   const handleUpload = async (file: File) => {
-    setError(null) // Reset error before a new upload
+    setIsUploading(true)
+    setError(null)
 
-    try {
-      await parseFile(file)
-      // If parseFile succeeds, call your completion handler
-      onUploadFinish()
-    } catch (err: any) {
-      // If an error occurs, store it in state and log it
-      console.error('Failed to parse file:', err)
-      setError(err?.message ?? 'An unknown error occurred while parsing the file.')
-    } finally {
-      setIsUploading(false)
-    }
+    setTimeout(async () => {
+      try {
+        await parseFile(file)
+        onUploadFinish()
+      } catch (err: any) {
+        console.error('Failed to parse file:', err)
+        setError(err?.message ?? 'An unknown error occurred while parsing the file.')
+      } finally {
+        fileInputRef.current!.value = '' // Clear the file input
+        setIsUploading(false)
+      }
+    }, 0)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -105,7 +107,7 @@ export const UploadButton = ({
           >
             {isUploading ? (
               <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                <Loader2 className='mr-2 h-4 w-4 animate-spin!' />
                 Uploading...
               </>
             ) : (

@@ -21,7 +21,8 @@ export const useUploadAndParse = () => {
   const parseFile = async (file: File): Promise<UploadedStudent[]> => {
     try {
       // 1. Parse the workbook from the file
-      const workbook = XLSX.read(file, { type: 'array' })
+      const arrayBuffer = await file.arrayBuffer()
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
       const sheetName = workbook.SheetNames[0]
       if (!sheetName) {
         throw new Error('No sheets found in the Excel file.')
