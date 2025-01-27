@@ -51,7 +51,7 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
 	testMiddleware := func() gin.HandlerFunc {
-		return testutils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"}, "existingstudent@example.com", "03711111", "ab12cde")
+		return testutils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "ios24245-iPraktikum-Lecturer"}, "existingstudent@example.com", "03711111", "ab12cde")
 	}
 	setupApplicationRouter(api, testMiddleware, testMiddleware, testutils.MockPermissionMiddleware)
 	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)

@@ -50,7 +50,7 @@ func getAllCourses(c *gin.Context) {
 	allowedUsers := []string{keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent}
 	for _, course := range courses {
 		for _, role := range allowedUsers {
-			desiredRole := fmt.Sprintf("%s-%s-%s", course.Name, course.SemesterTag, role)
+			desiredRole := fmt.Sprintf("%s-%s-%s", course.SemesterTag, course.Name, role)
 			if userRoles[desiredRole] {
 				filteredCourses = append(filteredCourses, course)
 				break
