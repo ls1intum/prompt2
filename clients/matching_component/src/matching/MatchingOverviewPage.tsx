@@ -8,7 +8,6 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { useMatchingStore } from './zustand/useMatchingStore'
 import { useEffect } from 'react'
 import { ErrorPage } from '@/components/ErrorPage'
-import { useUploadAndParse } from './hooks/useUploadAndParse'
 
 export const MatchingOverviewPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -16,7 +15,6 @@ export const MatchingOverviewPage = (): JSX.Element => {
   const path = useLocation().pathname
 
   const { setParticipations } = useMatchingStore()
-  const { parseFile } = useUploadAndParse()
 
   const {
     data: coursePhaseParticipations,
@@ -33,7 +31,6 @@ export const MatchingOverviewPage = (): JSX.Element => {
       setParticipations(coursePhaseParticipations)
     }
   }, [coursePhaseParticipations, setParticipations])
-
 
   return (
     <div>

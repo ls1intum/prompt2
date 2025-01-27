@@ -4,13 +4,13 @@ import {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 } from '@/components/ui/table'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { Button } from '@/components/ui/button'
+import { useDataDownload } from '../../../hooks/useDataDownload'
 
 interface MatchingStepProps {
   unrankedOption: 'no-rank' | 'unacceptable'
@@ -32,6 +32,8 @@ export const Step2MatchingData = ({ unrankedOption }: MatchingStepProps): JSX.El
   >([])
   const [unmatchedStudents, setUnmatchedStudents] = useState<UploadedStudent[]>([])
 
+  const { generateAndDownloadFile } = useDataDownload()
+
   useEffect(() => {
     if (uploadedData?.length > 0 && participations) {
       const students: UploadedStudent[] = uploadedData
@@ -49,7 +51,7 @@ export const Step2MatchingData = ({ unrankedOption }: MatchingStepProps): JSX.El
         if (matchedApp) {
           matched.push({
             ...student,
-            rank: matchedApp.metaData.applicationScore,
+            rank: matchedApp.prevMetaData.applicationScore,
           })
         } else {
           const nameMatch = applications.find(
@@ -89,96 +91,116 @@ export const Step2MatchingData = ({ unrankedOption }: MatchingStepProps): JSX.El
     <div className='space-y-8'>
       <section>
         <h2 className='text-2xl font-bold mb-4'>Matched by Matriculation Number</h2>
+        <h3>These students have been successfully matched by matriculation number.</h3>
         <Table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Matriculation Number</th>
-              <th>Rank</th>
-            </tr>
-          </thead>
-          <tbody>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Matriculation Number</TableHead>
+              <TableHead>Rank</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {matchedByMatriculation.map((student, index) => (
-              <tr key={index}>
-                <td>{student.firstName}</td>
-                <td>{student.lastName}</td>
-                <td>{student.matriculationNumber}</td>
-                <td>{student.rank || 'N/A'}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{student.firstName}</TableCell>
+                <TableCell>{student.lastName}</TableCell>
+                <TableCell>{student.matriculationNumber}</TableCell>
+                <TableCell>
+                  {student.rank || <span className='text-destructive'>N/A</span>}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
       </section>
 
       <section>
         <h2 className='text-2xl font-bold mb-4'>Matched by Name</h2>
+        <h3>
+          These students could not been matched by matriculation number, but by first and last name.
+        </h3>
         <Table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Matriculation Number</th>
-              <th>Rank</th>
-            </tr>
-          </thead>
-          <tbody>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Matriculation Number</TableHead>
+              <TableHead>Rank</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {matchedByName.map((student, index) => (
-              <tr key={index}>
-                <td>{student.firstName}</td>
-                <td>{student.lastName}</td>
-                <td>{student.matriculationNumber}</td>
-                <td>{student.rank || 'N/A'}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{student.firstName}</TableCell>
+                <TableCell>{student.lastName}</TableCell>
+                <TableCell>{student.matriculationNumber}</TableCell>
+                <TableCell>
+                  {student.rank || <span className='text-destructive'>N/A</span>}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
       </section>
 
       <section>
-        <h2 className='text-2xl font-bold mb-4'>Unmatched Applications</h2>
+        <h2 className='text-2xl font-bold mb-4'>Umatched Accepted Application</h2>
+        <h3>
+          These students have an accepted application, but could not be matched with an entry in the
+          uploaded file.
+        </h3>
         <Table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Matriculation Number</th>
-              <th>Rank</th>
-            </tr>
-          </thead>
-          <tbody>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Matriculation Number</TableHead>
+              <TableHead>Rank</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {unmatchedApplications.map((app, index) => (
-              <tr key={index}>
-                <td>{app.student.firstName}</td>
-                <td>{app.student.lastName}</td>
-                <td>{app.student.matriculationNumber || 'N/A'}</td>
-                <td>{unrankedOption === 'unacceptable' ? 'Unacceptable (-)' : 'No Rank'}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{app.student.firstName}</TableCell>
+                <TableCell>{app.student.lastName}</TableCell>
+                <TableCell>{app.student.matriculationNumber || 'N/A'}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
       </section>
 
       <section>
-        <h2 className='text-2xl font-bold mb-4'>Students Without Applications</h2>
+        <h2 className='text-2xl font-bold mb-4'>Entires Without Applications</h2>
+        <h3>
+          These applications could not be matched to any application. They migth be students who
+          have not applied, have been rejected or have a typo in their name or matriculation number.
+        </h3>
         <Table>
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Matriculation Number</th>
-            </tr>
-          </thead>
-          <tbody>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Matriculation Number</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {unmatchedStudents.map((student, index) => (
-              <tr key={index}>
-                <td>{student.firstName}</td>
-                <td>{student.lastName}</td>
-                <td>{student.matriculationNumber}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{student.firstName}</TableCell>
+                <TableCell>{student.lastName}</TableCell>
+                <TableCell>{student.matriculationNumber}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
+        <Button
+          onClick={() => generateAndDownloadFile([...matchedByMatriculation, ...matchedByName])}
+        >
+          Download filled out Excel Sheet
+        </Button>
       </section>
     </div>
   )
