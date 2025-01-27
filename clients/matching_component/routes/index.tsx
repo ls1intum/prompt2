@@ -1,4 +1,4 @@
-import { DataExportFlow } from '../src/matching/pages/DataExport/DataExportFlow'
+import { DataExportPage } from '../src/matching/pages/DataExport/DataExportPage'
 import { MatchingOverviewPage } from '../src/matching/MatchingOverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
@@ -11,7 +11,7 @@ const routes: ExtendedRouteObject[] = [
   },
   {
     path: '/export',
-    element: <DataExportFlow />,
+    element: <DataExportPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   // Add more routes here as needed

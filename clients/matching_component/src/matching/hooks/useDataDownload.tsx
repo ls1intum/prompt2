@@ -54,19 +54,22 @@ export const useDataDownload = () => {
       const rankIndex = headerRow.indexOf('Rank')
 
       // 7. Update each row’s rank if it matches an entry in `matchedStudents`
-      dataRows.forEach((row) => {
-        // Make sure row is array-based
-        if (!Array.isArray(row)) return
+      dataRows
+        .filter((row) => Array.isArray(row) && row.length > 0) // discard empty rows
+        .forEach((row) => {
+          // Make sure row is array-based
+          if (!Array.isArray(row)) return
 
-        // Pull out the current row’s student number
-        const matricNum = String(row[studentNumberIndex] || '').trim()
+          // Pull out the current row’s student number
+          const matricNum = String(row[studentNumberIndex] || '').trim()
 
-        // Check whether we have a match
-        const match = matchedStudents.find((student) => student.matriculationNumber === matricNum)
+          // Check whether we have a match
+          const match = matchedStudents.find((student) => student.matriculationNumber === matricNum)
 
-        // If found, update the rank cell; otherwise write '-'
-        row[rankIndex] = match?.rank ? match.rank : '-'
-      })
+          // If found, update the rank cell; otherwise write '-'
+          // if student has no application score, the score will be 0
+          row[rankIndex] = match ? match.rank || '' : '-'
+        })
 
       // 8. Convert the updated rows back into a sheet
       const updatedWorksheet = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows])

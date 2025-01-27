@@ -60,29 +60,32 @@ export const useUploadAndParse = () => {
       })
 
       // 6. Parse each data row into the UploadedStudent interface
-      const parsedData: UploadedStudent[] = dataRows.map((row, rowIndex) => {
-        if (!Array.isArray(row)) {
-          throw new Error(`Row ${rowIndex + 2} is not an array of values.`)
-        }
+      const parsedData: UploadedStudent[] = dataRows
+        .filter((row) => Array.isArray(row) && row.length > 0)
+        .map((row, rowIndex) => {
+          if (!Array.isArray(row)) {
+            throw new Error(`Row ${rowIndex + 2} is not an array of values.`)
+          }
 
-        const firstNameCell = row[headerIndexMap['First name']]
-        const lastNameCell = row[headerIndexMap['Last name']]
-        const studentNumberCell = row[headerIndexMap['Student number']]
-        const rankCell = row[headerIndexMap['Rank']]
+          const firstNameCell = row[headerIndexMap['First name']]
+          const lastNameCell = row[headerIndexMap['Last name']]
+          const studentNumberCell = row[headerIndexMap['Student number']]
+          const rankCell = row[headerIndexMap['Rank']]
 
-        if (!firstNameCell || !lastNameCell || !studentNumberCell) {
-          throw new Error(
-            `Row ${rowIndex + 2} is missing required fields (First name, Last name, Student number).`,
-          )
-        }
+          if (!firstNameCell || !lastNameCell || !studentNumberCell) {
+            console.log('Row:', row)
+            throw new Error(
+              `Row ${rowIndex + 2} is missing required fields (First name, Last name, Student number).`,
+            )
+          }
 
-        return {
-          firstName: String(firstNameCell),
-          lastName: String(lastNameCell),
-          matriculationNumber: String(studentNumberCell),
-          rank: rankCell ? String(rankCell) : undefined,
-        }
-      })
+          return {
+            firstName: String(firstNameCell),
+            lastName: String(lastNameCell),
+            matriculationNumber: String(studentNumberCell),
+            rank: rankCell ? String(rankCell) : undefined,
+          }
+        })
 
       // 7. Update Zustand store with parsed data
       setUploadedData(parsedData)
