@@ -23,7 +23,7 @@ interface UploadedStudent {
   rank?: string
 }
 
-export const MatchingStep = ({ unrankedOption }: MatchingStepProps): JSX.Element => {
+export const Step2MatchingData = ({ unrankedOption }: MatchingStepProps): JSX.Element => {
   const { participations, uploadedData } = useMatchingStore()
   const [matchedByMatriculation, setMatchedByMatriculation] = useState<UploadedStudent[]>([])
   const [matchedByName, setMatchedByName] = useState<UploadedStudent[]>([])
@@ -32,56 +32,58 @@ export const MatchingStep = ({ unrankedOption }: MatchingStepProps): JSX.Element
   >([])
   const [unmatchedStudents, setUnmatchedStudents] = useState<UploadedStudent[]>([])
 
+  useEffect(() => {
+    if (uploadedData?.length > 0 && participations) {
+      const students: UploadedStudent[] = uploadedData
+      const applications: CoursePhaseParticipationWithStudent[] = participations
 
-  // useEffect(() => {
-  // if (uploadedFile && participations) {
-  // const students: UploadedStudent[] = uploadedFile.
-  // const applications: Application[] = participations
+      const matched: UploadedStudent[] = []
+      const matchedByNameTemp: UploadedStudent[] = []
+      const unmatchedApps: CoursePhaseParticipationWithStudent[] = []
+      const unmatchedStuds: UploadedStudent[] = []
 
-  // const matched: UploadedStudent[] = []
-  // const matchedByNameTemp: UploadedStudent[] = []
-  // const unmatchedApps: Application[] = []
-  // const unmatchedStuds: UploadedStudent[] = []
+      students.forEach((student) => {
+        const matchedApp = applications.find(
+          (app) => app.student.matriculationNumber === student.matriculationNumber,
+        )
+        if (matchedApp) {
+          matched.push({
+            ...student,
+            rank: matchedApp.metaData.applicationScore,
+          })
+        } else {
+          const nameMatch = applications.find(
+            (app) =>
+              app.student.firstName.toLowerCase() === student.firstName.toLowerCase() &&
+              app.student.lastName.toLowerCase() === student.lastName.toLowerCase(),
+          )
+          if (nameMatch) {
+            matchedByNameTemp.push(student)
+          } else {
+            unmatchedStuds.push(student)
+          }
+        }
+      })
 
-  //     students.forEach((student) => {
-  //       const matchedApp = applications.find(
-  //         (app) => app.matriculationNumber === student.matriculationNumber,
-  //       )
-  //       if (matchedApp) {
-  //         matched.push(student)
-  //       } else {
-  //         const nameMatch = applications.find(
-  //           (app) =>
-  //             app.firstName.toLowerCase() === student.firstName.toLowerCase() &&
-  //             app.lastName.toLowerCase() === student.lastName.toLowerCase(),
-  //         )
-  //         if (nameMatch) {
-  //           matchedByNameTemp.push(student)
-  //         } else {
-  //           unmatchedStuds.push(student)
-  //         }
-  //       }
-  //     })
+      applications.forEach((app) => {
+        if (
+          !matched.some((s) => s.matriculationNumber === app.student.matriculationNumber) &&
+          !matchedByNameTemp.some(
+            (s) =>
+              s.firstName.toLowerCase() === app.student.firstName.toLowerCase() &&
+              s.lastName.toLowerCase() === app.student.lastName.toLowerCase(),
+          )
+        ) {
+          unmatchedApps.push(app)
+        }
+      })
 
-  //     applications.forEach((app) => {
-  //       if (
-  //         !matched.some((s) => s.matriculationNumber === app.matriculationNumber) &&
-  //         !matchedByNameTemp.some(
-  //           (s) =>
-  //             s.firstName.toLowerCase() === app.firstName.toLowerCase() &&
-  //             s.lastName.toLowerCase() === app.lastName.toLowerCase(),
-  //         )
-  //       ) {
-  //         unmatchedApps.push(app)
-  //       }
-  //     })
-
-  //     setMatchedByMatriculation(matched)
-  //     setMatchedByName(matchedByNameTemp)
-  //     setUnmatchedApplications(unmatchedApps)
-  //     setUnmatchedStudents(unmatchedStuds)
-  //   }
-  // }, [uploadedFile, participations])
+      setMatchedByMatriculation(matched)
+      setMatchedByName(matchedByNameTemp)
+      setUnmatchedApplications(unmatchedApps)
+      setUnmatchedStudents(unmatchedStuds)
+    }
+  }, [uploadedData, participations])
 
   return (
     <div className='space-y-8'>
@@ -145,14 +147,14 @@ export const MatchingStep = ({ unrankedOption }: MatchingStepProps): JSX.Element
             </tr>
           </thead>
           <tbody>
-            {/* {unmatchedApplications.map((app, index) => (
+            {unmatchedApplications.map((app, index) => (
               <tr key={index}>
-                <td>{app.firstName}</td>
-                <td>{app.lastName}</td>
-                <td>{app.matriculationNumber || 'N/A'}</td>
+                <td>{app.student.firstName}</td>
+                <td>{app.student.lastName}</td>
+                <td>{app.student.matriculationNumber || 'N/A'}</td>
                 <td>{unrankedOption === 'unacceptable' ? 'Unacceptable (-)' : 'No Rank'}</td>
               </tr>
-            ))} */}
+            ))}
           </tbody>
         </Table>
       </section>

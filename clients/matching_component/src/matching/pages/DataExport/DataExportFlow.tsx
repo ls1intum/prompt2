@@ -4,7 +4,7 @@ import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMatchingStore } from '../../zustand/useMatchingStore'
 import { Step1PreviewData, Step1PreviewDataRef } from './components/Step1PreviewData'
-import { MatchingStep } from './components/MatchingStep'
+import { Step2MatchingData } from './components/Step2MatchingData'
 
 export const DataExportFlow = (): JSX.Element => {
   const navigate = useNavigate()
@@ -15,8 +15,8 @@ export const DataExportFlow = (): JSX.Element => {
   const step1PreviewDataRef = useRef<Step1PreviewDataRef>(null)
 
   const steps = [
-    <Step1PreviewData key='preview' />,
-    <MatchingStep key='matching' unrankedOption={unrankedOption} />,
+    <Step1PreviewData key='preview' ref={step1PreviewDataRef} />,
+    <Step2MatchingData key='matching' unrankedOption={unrankedOption} />,
   ]
 
   const handleNext = () => {

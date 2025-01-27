@@ -4,7 +4,7 @@ import { UploadedStudent } from '../interfaces/UploadedStudent'
 
 export interface MatchingStore {
   participations: CoursePhaseParticipationWithStudent[]
-  uploadedData: UploadedStudent[] | null
+  uploadedData: UploadedStudent[]
   setParticipations: (participations: CoursePhaseParticipationWithStudent[]) => void
   setUploadedData: (uploadedData: UploadedStudent[]) => void
 }
