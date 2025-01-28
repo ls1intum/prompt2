@@ -1,0 +1,57 @@
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { saveAs } from 'file-saver'
+
+export const downloadParticipations = (
+  data: CoursePhaseParticipationWithStudent[],
+  prevMetaDataKeys: string[],
+  metaDataKeys: string[],
+  filename = 'participation-export.csv',
+) => {
+  if (!data || data.length === 0) {
+    console.error('No data available to download.')
+    return
+  }
+
+  const csvHeaders = [
+    'firstName',
+    'lastName',
+    'email',
+    'matriculationNumber',
+    'universityLogin',
+    'hasUniversityAccount',
+    'gender',
+    'passStatus',
+    ...prevMetaDataKeys,
+    ...metaDataKeys,
+  ]
+  const csvRows = data.map((row) => {
+    // Extract student data
+    const student = row.student || {}
+    // Create a row with the required headers
+    return csvHeaders
+      .map((header) => {
+        if (header in student) {
+          // Fetch data from the `student` object
+          return JSON.stringify(student[header] ?? '')
+        } else if (header === 'passStatus') {
+          // Fetch data from the main `ApplicationParticipation` object
+          return JSON.stringify(row.passStatus ?? '')
+        } else if (prevMetaDataKeys.includes(header)) {
+          // Fetch additional scores from the `meta_data` object
+          return JSON.stringify(row.prevMetaData[header] ?? '')
+        } else if (metaDataKeys.includes(header)) {
+          // Fetch additional scores from the `meta_data` object
+          return JSON.stringify(row.metaData[header] ?? '')
+        } else {
+          return JSON.stringify('')
+        }
+      })
+      .join(';')
+  })
+
+  const stringifiedHeaders = csvHeaders.map((header) => JSON.stringify(header))
+  const csvContent = [stringifiedHeaders.join(';'), ...csvRows].join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  saveAs(blob, filename)
+}

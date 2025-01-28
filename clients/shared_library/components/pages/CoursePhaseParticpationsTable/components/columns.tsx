@@ -5,7 +5,15 @@ import { getStatusBadge } from '@/utils/getStatusBadge'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { Checkbox } from '@/components/ui/checkbox'
 
-export const columns = (): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
+interface ColumnDefProps {
+  prevMetaDataKeys: string[]
+  metaDataKeys: string[]
+}
+
+export const columns = ({
+  prevMetaDataKeys,
+  metaDataKeys,
+}: ColumnDefProps): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
   return [
     {
       id: 'select',
@@ -82,5 +90,15 @@ export const columns = (): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
         <SortableHeader column={column} title={translations.university['login-name']} />
       ),
     },
+    ...prevMetaDataKeys.map((key) => ({
+      id: key,
+      accessorKey: `prevMetaData.${key}`,
+      header: ({ column }) => <SortableHeader column={column} title={key} />,
+    })),
+    ...metaDataKeys.map((key) => ({
+      id: key,
+      accessorKey: `metaData.${key}`,
+      header: ({ column }) => <SortableHeader column={column} title={key} />,
+    })),
   ]
 }
