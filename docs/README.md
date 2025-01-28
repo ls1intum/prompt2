@@ -48,7 +48,7 @@ Please document the features that you have developed as **extensive as possible*
 git tags and branches of pull requests.
 You can switch the shown version at the bottom of the sidebar.
 The latest tag is always the _stable_ version.
-For pull requests, the documentation is available at `https://prompt--{PR_NUMBER}.org.readthedocs.build/en/{PR_NUMBER}/`.
+For pull requests, the documentation is available at `https://prompt2--{PR_NUMBER}.org.readthedocs.build/en/{PR_NUMBER}/`.
 RtD will build and deploy changes automatically.
 
 ## Installing Sphinx Locally
@@ -130,7 +130,7 @@ A list of useful tools to write documentation:
 
 
 <!-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -->
-[Prompt documentation]: https://prompt.readthedocs.io
+[Prompt documentation]: https://prompt2.readthedocs.io
 
 [Markedly Structured Text]: https://myst-parser.readthedocs.io
 [Quickstart]: https://myst-parser.readthedocs.io/en/latest/intro.html
