@@ -8,6 +8,8 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { useMatchingStore } from './zustand/useMatchingStore'
 import { useEffect } from 'react'
 import { ErrorPage } from '@/components/ErrorPage'
+import { useUploadAndParseXLSX } from './hooks/useUploadAndParseXLSX'
+import { useUploadAndParseCSV } from './hooks/useUploadAndParseCSV'
 
 export const MatchingOverviewPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -15,6 +17,8 @@ export const MatchingOverviewPage = (): JSX.Element => {
   const path = useLocation().pathname
 
   const { setParticipations } = useMatchingStore()
+  const { parseFileXLSX } = useUploadAndParseXLSX()
+  const { parseFileCSV } = useUploadAndParseCSV()
 
   const {
     data: coursePhaseParticipations,
@@ -57,6 +61,7 @@ export const MatchingOverviewPage = (): JSX.Element => {
               onUploadFinish={() => {
                 navigate(`${path}/export`)
               }}
+              onUploadFunction={parseFileXLSX}
               acceptedFileTypes={['.xlsx']}
             />
           </section>
@@ -74,7 +79,8 @@ export const MatchingOverviewPage = (): JSX.Element => {
               onUploadFinish={() => {
                 navigate(`${path}/re-import`)
               }}
-              acceptedFileTypes={['.xlsx']}
+              onUploadFunction={parseFileCSV}
+              acceptedFileTypes={['.csv']}
             />
           </section>
         </div>

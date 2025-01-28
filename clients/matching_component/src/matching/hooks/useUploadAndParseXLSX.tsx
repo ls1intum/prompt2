@@ -6,7 +6,7 @@ import { UploadedStudent } from '../interfaces/UploadedStudent'
  * This hook returns a function that, when called with a File,
  * parses the Excel and updates the Zustand store with the uploaded data.
  */
-export const useUploadAndParse = () => {
+export const useUploadAndParseXLSX = () => {
   const { setUploadedData } = useMatchingStore()
 
   /**
@@ -18,7 +18,7 @@ export const useUploadAndParse = () => {
    *  - The header row is missing or incorrect
    *  - Required data fields in rows are missing
    */
-  const parseFile = async (file: File): Promise<UploadedStudent[]> => {
+  const parseFileXLSX = async (file: File): Promise<void> => {
     try {
       // 1. Parse the workbook from the file
       const arrayBuffer = await file.arrayBuffer()
@@ -88,9 +88,6 @@ export const useUploadAndParse = () => {
 
       // 7. Update Zustand store with parsed data
       setUploadedData(parsedData)
-
-      // 8. Return the parsed data so the caller can also use it
-      return parsedData
     } catch (error) {
       // Handle any parsing or data-structure errors
       console.error('Error uploading and parsing Excel file:', error)
@@ -98,5 +95,5 @@ export const useUploadAndParse = () => {
     }
   }
 
-  return { parseFile }
+  return { parseFileXLSX }
 }
