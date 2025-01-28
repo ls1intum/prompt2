@@ -10,6 +10,7 @@ export interface MissingConfigItem {
   icon: ElementType
   description?: string
   link: string
+  hide?: () => void
 }
 
 interface MissingConfigProps {
@@ -45,6 +46,16 @@ export const MissingConfig = ({ elements }: MissingConfigProps): JSX.Element => 
                       </div>
                     </div>
                   </div>
+                  {config.hide && (
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={config.hide}
+                      className='ml-4 mt-1 whitespace-nowrap'
+                    >
+                      Hide Warning
+                    </Button>
+                  )}
                   <Button
                     variant='outline'
                     size='sm'

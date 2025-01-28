@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useCourseStore } from '@/zustand/useCourseStore'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 
 interface BreadcrumbProps {
   title: string

@@ -1,8 +1,7 @@
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-import { useAuthStore } from '@/zustand/useAuthStore'
+import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import { InsideSidebarMenuItem } from '../../layout/Sidebar/InsideSidebar/components/InsideSidebarMenuItem'
 import { getPermissionString } from '@tumaet/prompt-shared-state'
-import { useCourseStore } from '@/zustand/useCourseStore'
 import { useParams } from 'react-router-dom'
 
 interface ExternalSidebarProps {
