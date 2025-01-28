@@ -8,8 +8,9 @@ import (
 )
 
 type MetaTypeObject struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name             string   `json:"name"`
+	Type             string   `json:"type"`
+	AlternativeNames []string `json:"alternativeNames"`
 	// Add other fields as needed
 }
 

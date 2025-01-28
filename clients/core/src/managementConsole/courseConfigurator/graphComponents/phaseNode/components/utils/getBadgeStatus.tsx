@@ -34,14 +34,24 @@ const errorResponse = (tooltip: string) => ({
 export const getMetaDataStatus = (
   name: string,
   type: string,
+  alternativeNames: string[],
   providedMetaData?: { name: string; type: string }[],
 ): { color: string; icon: React.ReactNode; tooltip?: string } => {
   // If no provided metadata, default fallback
   if (!providedMetaData) return { color: 'bg-secondary', icon: null }
-
   // Filter the provided metadata for matching or wrong types
-  const matchingItems = providedMetaData.filter((meta) => meta.name === name && meta.type === type)
-  const wrongTypeItems = providedMetaData.filter((meta) => meta.name === name && meta.type !== type)
+  const matchingItems = providedMetaData.filter(
+    (meta) =>
+      (meta.name === name ||
+        alternativeNames.find((alternativeName) => alternativeName === meta.name)) &&
+      meta.type === type,
+  )
+  const wrongTypeItems = providedMetaData.filter(
+    (meta) =>
+      (meta.name === name ||
+        alternativeNames.find((alternativeName) => alternativeName === meta.name)) &&
+      meta.type !== type,
+  )
 
   if (name === 'applicationAnswers') {
     // Parse expected questions
