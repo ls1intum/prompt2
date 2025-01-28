@@ -11,7 +11,7 @@ contain the root `toctree` directive.
 :includehidden:
 :maxdepth: 2
 
-user/markdown
+user/gettingStarted
 ```
 
 ```{toctree}
@@ -22,7 +22,11 @@ user/markdown
 contributor/setup
 ```
 
-# Indices and tables
-- {ref}`genindex`
-- {ref}`modindex`
-- {ref}`search`
+```{toctree}
+:caption: Administrator Guide
+:includehidden:
+:maxdepth: 2
+
+admin/productionSetup
+```
+
