@@ -21,8 +21,6 @@ export const useSorting = (sortBy: string | undefined) => {
             (bSlot?.index || interviewSlots.length + 1)
           )
         case 'First Name':
-          console.log('a:', a.student.firstName)
-          console.log('b:', b.student.firstName)
           return a.student.firstName.localeCompare(b.student.firstName)
         case 'Last Name':
           return a.student.lastName.localeCompare(b.student.lastName)

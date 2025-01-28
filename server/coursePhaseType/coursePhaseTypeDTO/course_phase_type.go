@@ -6,11 +6,11 @@ import (
 )
 
 type CoursePhaseType struct {
-	ID                     uuid.UUID        `json:"id"`
-	Name                   string           `json:"name"`
-	RequiredInputMetaData  []MetaTypeObject `json:"requiredInputMetaData"`
-	ProvidedOutputMetaData []MetaTypeObject `json:"providedOutputMetaData"`
-	InitialPhase           bool             `json:"initialPhase"`
+	ID                     uuid.UUID         `json:"id"`
+	Name                   string            `json:"name"`
+	RequiredInputMetaData  []MetaRequirement `json:"requiredInputMetaData"`
+	ProvidedOutputMetaData []MetaRequirement `json:"providedOutputMetaData"`
+	InitialPhase           bool              `json:"initialPhase"`
 }
 
 func GetCoursePhaseTypeDTOFromDBModel(model db.CoursePhaseType) (CoursePhaseType, error) {

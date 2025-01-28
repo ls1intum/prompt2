@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useEffect } from 'react'
-import { getCoursePhaseParticipations } from '../network/queries/getCoursePhaseParticipations'
+import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
@@ -9,7 +9,7 @@ import {
   CoursePhaseWithMetaData,
   CoursePhaseParticipationWithStudent,
 } from '@tumaet/prompt-shared-state'
-import { getCoursePhase } from '../network/queries/getCoursePhase'
+import { getCoursePhase } from '@/network/queries/getCoursePhase'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { InterviewSlot } from '../interfaces/InterviewSlots'
 

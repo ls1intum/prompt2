@@ -29,7 +29,12 @@ export const MetaDataBadges = ({
               color,
               icon: statusIcon,
               tooltip: errorTooltip,
-            } = getMetaDataStatus(item.name, item.type, providedMetaData)
+            } = getMetaDataStatus(
+              item.name,
+              item.type,
+              item.alternativeNames ?? [],
+              providedMetaData,
+            )
             return (
               <TooltipProvider key={index}>
                 <Tooltip>
@@ -40,6 +45,9 @@ export const MetaDataBadges = ({
                     >
                       {statusIcon}
                       {item.name}
+                      {item.alternativeNames && item.alternativeNames.length > 0 && (
+                        <span>(or {item.alternativeNames.join(', ')})</span>
+                      )}
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent>

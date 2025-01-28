@@ -14,7 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ClipboardList, Trash2, ChevronUp, ChevronDown, Plus } from 'lucide-react'
 import { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
-import { useUpdateCoursePhaseMetaData } from '../hooks/useUpdateCoursePhaseMetaData'
+import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
 
 export const InterviewQuestionsDialog = () => {
   const { coursePhase } = useCoursePhaseStore()

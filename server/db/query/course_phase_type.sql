@@ -15,6 +15,14 @@ SELECT EXISTS (
     WHERE name = 'Interview'
 ) AS does_exist;
 
+-- name: TestMatchingPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Matching'
+) AS does_exist;
+
+
 
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, required_input_meta_data, provided_output_meta_data)
