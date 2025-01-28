@@ -1,30 +1,11 @@
 import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
 import { SortableHeader } from '@/components/table/SortableHeader'
-import { getStatusBadge } from '../../utils/getStatusBadge'
-import { getGenderString } from '@tumaet/prompt-shared-state'
+import { getStatusBadge } from '@/utils/getStatusBadge'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
-import { numericRangeFilter } from '../../utils/numericRangeFilter'
-import { AdditionalScore } from '../../../../interfaces/additionalScore/additionalScore'
-import { ActionMenu } from './menus/ActionMenu'
 
-export const columns = (
-  onViewApplication: (id: string) => void,
-  onDeleteApplication: (coursePhaseParticipationID: string) => void,
-  additionalScores: AdditionalScore[],
-): ColumnDef<ApplicationParticipation>[] => {
-  let additionalScoreColumns: ColumnDef<ApplicationParticipation>[] = []
-  if (additionalScores.length > 0) {
-    additionalScoreColumns = additionalScores.map((additionalScore) => {
-      return {
-        id: additionalScore.key,
-        accessorFn: (row) => row.metaData?.[additionalScore.key] ?? null,
-        header: ({ column }) => <SortableHeader column={column} title={additionalScore.name} />,
-      }
-    })
-  }
-
+export const columns = (): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
   return [
     {
       id: 'select',
@@ -90,22 +71,6 @@ export const columns = (
       },
     },
     {
-      id: 'score',
-      accessorKey: 'score',
-      header: ({ column }) => <SortableHeader column={column} title='Score' />,
-      filterFn: (row, columnId, filterValue) => {
-        const rowScore = row.getValue<number | null>(columnId) // row.original.score
-        if (!filterValue || typeof filterValue !== 'object') return true
-        return numericRangeFilter(rowScore, filterValue)
-      },
-    },
-    ...additionalScoreColumns,
-    {
-      id: 'email',
-      accessorKey: 'student.email',
-      header: ({ column }) => <SortableHeader column={column} title='Email' />,
-    },
-    {
       id: 'matriculationNumber',
       accessorKey: 'student.matriculationNumber',
       header: ({ column }) => <SortableHeader column={column} title='Mat Number' />,
@@ -116,29 +81,6 @@ export const columns = (
       header: ({ column }) => (
         <SortableHeader column={column} title={translations.university['login-name']} />
       ),
-    },
-    {
-      id: `gender`,
-      accessorKey: 'student.gender',
-      header: ({ column }) => <SortableHeader column={column} title='Gender' />,
-      filterFn: (row, columnId, filterValue) => {
-        return filterValue.includes(row.original.student.gender)
-      },
-      cell: ({ row }) => {
-        const gender = row.original.student.gender
-        return getGenderString(gender)
-      },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        return (
-          <ActionMenu
-            onViewApplication={() => onViewApplication(row.original.id)}
-            onDeleteApplication={() => onDeleteApplication(row.original.id)}
-          />
-        )
-      },
     },
   ]
 }
