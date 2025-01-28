@@ -73,7 +73,6 @@ export const useUploadAndParse = () => {
           const rankCell = row[headerIndexMap['Rank']]
 
           if (!firstNameCell || !lastNameCell || !studentNumberCell) {
-            console.log('Row:', row)
             throw new Error(
               `Row ${rowIndex + 2} is missing required fields (First name, Last name, Student number).`,
             )

@@ -18,9 +18,6 @@ export const MetaDataBadges = ({
   label,
   providedMetaData,
 }: MetaDataBadgesProps): JSX.Element => {
-  if (providedMetaData) {
-    console.log('MetaDataBadges: ', metaData)
-  }
   return (
     <div className='flex items-start space-x-2 mb-2'>
       <div className='mt-1'>{icon}</div>
