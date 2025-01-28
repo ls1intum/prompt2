@@ -66,7 +66,11 @@ export const DataImportPage = (): JSX.Element => {
       ) : (
         <MatchingResults matchedStudents={matchedStudents} unmatchedStudents={unmatchedStudents} />
       )}
-      <div className='flex flex-row justify-items-end justify-between mt-4'>
+      <div
+        className={`flex flex-row items-center mt-4 ${
+          isSuccess || isError ? 'justify-end' : 'justify-between'
+        }`}
+      >
         <Button
           onClick={() => navigate(path.replace('/re-import', ''))}
           variant={isSuccess ? 'default' : 'outline'}
