@@ -38,10 +38,10 @@ function MatchingResults({
       {matchedRankMissing && (
         <Alert variant='destructive'>
           <AlertTriangle className='h-4 w-4' />
-          <AlertTitle>Matched Application is missing application score</AlertTitle>
+          <AlertTitle>Matched Application is missing application/interview score</AlertTitle>
           <AlertDescription>
-            At least one application that has been matched has no application store. This will
-            result in the student being unranked. Please make sure to assign every accepted
+            At least one application that has been matched has no application/interview store. This
+            will result in the student being unranked. Please make sure to assign every accepted
             application an application score.
           </AlertDescription>
         </Alert>
