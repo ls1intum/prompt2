@@ -54,7 +54,7 @@ SET
     restricted_data = restricted_data || $3, 
     student_readable_data = student_readable_data || $4
 WHERE id = $1
-AND course_phase_id = $4
+AND course_phase_id = $5
 RETURNING id; -- important to trigger a no rows in result set error if ids mismatch
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
@@ -197,13 +197,8 @@ SELECT
           JOIN course_phase_type cpt
             ON cpt.id = dpm.course_phase_type_id
           AND cpt.name != 'Application'
-          CROSS JOIN LATERAL (
-              SELECT (key, value)
-              FROM   jsonb_each(pcpp.student_readable_data)
-              UNION
-              SELECT (key, value)
-              FROM   jsonb_each(pcpp.restricted_data)
-          ) AS each
+          -- the phase is responsible to make sure that there is no key collision
+          CROSS JOIN LATERAL jsonb_each(pcpp.restricted_data || pcpp.student_readable_data) each  
           WHERE each.key IN (
               SELECT elem->>'name'
               FROM   jsonb_array_elements(cpt.provided_output_meta_data) AS elem

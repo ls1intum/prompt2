@@ -488,12 +488,12 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	defer tx.Rollback(ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
-	if assessment.PassStatus != nil || assessment.MetaData.Length() > 0 {
+	if assessment.PassStatus != nil || assessment.RestrictedData.Length() > 0 {
 		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-			ID:            coursePhaseParticipationID,
-			PassStatus:    assessment.PassStatus,
-			MetaData:      assessment.MetaData,
-			CoursePhaseID: coursePhaseID,
+			ID:             coursePhaseParticipationID,
+			PassStatus:     assessment.PassStatus,
+			RestrictedData: assessment.RestrictedData,
+			CoursePhaseID:  coursePhaseID,
 		})
 		if err != nil {
 			log.Error(err)
@@ -587,27 +587,20 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		}
 	}
 
-	// 3.) score the score name in the course phase
-	// _, err = qtx.GetExistingAdditionalScores(ctx, coursePhaseID)
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return errors.New("could not update additional scores")
-	// }
-
 	coursePhaseDTO, err := coursePhase.GetCoursePhaseByID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
 		return errors.New("could not update additional scores")
 	}
 
-	metaDataUpdate, err := addScoreName(coursePhaseDTO.MetaData, additionalScore.Name, additionalScore.Key)
+	restrictedDataUpdate, err := addScoreName(coursePhaseDTO.RestrictedData, additionalScore.Name, additionalScore.Key)
 	if err != nil {
 		return err
 	}
 
 	err = qtx.UpdateExistingAdditionalScores(ctx, db.UpdateExistingAdditionalScoresParams{
-		ID:       coursePhaseID,
-		MetaData: metaDataUpdate,
+		ID:             coursePhaseID,
+		RestrictedData: restrictedDataUpdate,
 	})
 	if err != nil {
 		log.Error(err)
@@ -632,7 +625,7 @@ func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applic
 		return nil, errors.New("could not update additional scores")
 	}
 
-	return metaToScoresArray(coursePhaseDTO.MetaData)
+	return metaToScoresArray(coursePhaseDTO.RestrictedData)
 }
 
 func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID) error {

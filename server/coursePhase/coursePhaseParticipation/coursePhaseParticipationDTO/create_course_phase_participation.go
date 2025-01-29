@@ -11,11 +11,18 @@ type CreateCoursePhaseParticipation struct {
 	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
 	CoursePhaseID         uuid.UUID      `json:"coursePhaseID"`
 	PassStatus            *db.PassStatus `json:"passStatus"`
-	MetaData              meta.MetaData  `json:"metaData"`
+	RestrictedData        meta.MetaData  `json:"restrictedData"`
+	StudentReadableData   meta.MetaData  `json:"studentReadableData"`
 }
 
 func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateCoursePhaseParticipationParams, error) {
-	metaDataBytes, err := c.MetaData.GetDBModel()
+	restrictedDataBytes, err := c.RestrictedData.GetDBModel()
+	if err != nil {
+		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
+		return db.CreateCoursePhaseParticipationParams{}, err
+	}
+
+	studentReadableDataBytes, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
 		return db.CreateCoursePhaseParticipationParams{}, err
@@ -25,7 +32,8 @@ func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateCoursePhasePartic
 		CourseParticipationID: c.CourseParticipationID,
 		CoursePhaseID:         c.CoursePhaseID,
 		PassStatus:            GetPassStatusDBModel(c.PassStatus),
-		MetaData:              metaDataBytes,
+		RestrictedData:        restrictedDataBytes,
+		StudentReadableData:   studentReadableDataBytes,
 	}, nil
 
 }

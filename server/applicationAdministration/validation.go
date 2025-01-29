@@ -370,8 +370,8 @@ func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhasePar
 	}
 
 	// Check if the score is valid
-	if assessment.MetaData != nil {
-		for key := range assessment.MetaData {
+	if assessment.RestrictedData != nil {
+		for key := range assessment.RestrictedData {
 			if key != "comments" {
 				return errors.New("invalid meta data key - not allowed to update other meta data")
 			}

@@ -8,19 +8,27 @@ import (
 )
 
 type UpdateCoursePhase struct {
-	ID       uuid.UUID     `json:"id"`
-	Name     pgtype.Text   `json:"name"` // use pgtype to handle null values
-	MetaData meta.MetaData `json:"metaData"`
+	ID                  uuid.UUID     `json:"id"`
+	Name                pgtype.Text   `json:"name"` // use pgtype to handle null values
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }
 
 func (cp UpdateCoursePhase) GetDBModel() (db.UpdateCoursePhaseParams, error) {
-	metaData, err := cp.MetaData.GetDBModel()
+	restrictedData, err := cp.RestrictedData.GetDBModel()
 	if err != nil {
 		return db.UpdateCoursePhaseParams{}, err
 	}
+
+	studentReadableData, err := cp.StudentReadableData.GetDBModel()
+	if err != nil {
+		return db.UpdateCoursePhaseParams{}, err
+	}
+
 	return db.UpdateCoursePhaseParams{
-		ID:       cp.ID,
-		Name:     cp.Name,
-		MetaData: metaData,
+		ID:                  cp.ID,
+		Name:                cp.Name,
+		StudentReadableData: studentReadableData,
+		RestrictedData:      restrictedData,
 	}, nil
 }
