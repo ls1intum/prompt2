@@ -1,13 +1,13 @@
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
-import { updateCoursePhaseParticipation } from '../network/mutations/updateCoursePhaseParticipationMetaData'
+import { updateCoursePhase } from '@/network/mutations/updateCoursePhase'
+import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 
-export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
+export const useUpdateCoursePhaseMetaData = (): UseMutationResult<
   string | undefined,
   Error,
-  UpdateCoursePhaseParticipation,
+  UpdateCoursePhase,
   unknown
 > => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -16,20 +16,20 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
   const { toast } = useToast()
 
   const mutation = useMutation({
-    mutationFn: (coursePhaseParticipation: UpdateCoursePhaseParticipation) => {
-      return updateCoursePhaseParticipation(coursePhaseParticipation)
+    mutationFn: (coursePhase: UpdateCoursePhase) => {
+      return updateCoursePhase(coursePhase)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['course_phase', phaseId] })
       toast({
         title: 'Success',
-        description: 'Successfully updated the course participation.',
+        description: 'Successfully updated the interview questions.',
       })
     },
     onError: () => {
       toast({
         title: 'Error',
-        description: 'Failed to update the course participation.',
+        description: 'Failed to update the interview questions.',
         variant: 'destructive',
       })
     },

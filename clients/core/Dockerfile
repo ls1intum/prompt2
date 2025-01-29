@@ -14,10 +14,6 @@ COPY --from=core-base /app/core/build /usr/share/nginx/html
 COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-
-
 COPY --from=core-base /app/core/build /usr/share/nginx/html
 COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=core-base /app/core/build/env.template.js /usr/share/nginx/html/env.template.js

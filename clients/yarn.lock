@@ -3710,13 +3710,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^0.0.10":
-  version: 0.0.10
-  resolution: "@tumaet/prompt-shared-state@npm:0.0.10"
+"@tumaet/prompt-shared-state@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "@tumaet/prompt-shared-state@npm:0.0.11"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/7fbf438969d6f84f67e77c07a7ccdc88e85fbf26be19065694f937c4713a718557cf5726a48059ba56fce92a20c85217d129bc4bc4f8dd3db5bdfe0ebe5d94f3
+  checksum: 10c0/f559e4f9d90520214efb108a031868ce47bbbd825771f8ebaae8f8c3e4f4f6d27e61be0ba01af940e4abe196c15e695d1ee0a934da71b07ee1ca8689218d3aae
   languageName: node
   linkType: hard
 
@@ -10220,15 +10220,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.469.0":
-  version: 0.469.0
-  resolution: "lucide-react@npm:0.469.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/0ee78d110550579b848a01446a440f733fd17e1bf1850aa01551b61f415e03e5f5ab7f26b56f1c648edc93856177f5476ff9f8f6f5d80e8fe45913d208f49961
-  languageName: node
-  linkType: hard
-
 "make-dir@npm:4.0.0":
   version: 4.0.0
   resolution: "make-dir@npm:4.0.0"
@@ -10311,6 +10302,7 @@ __metadata:
   dependencies:
     webpack: "npm:^5.91.0"
     webpack-cli: "npm:^5.1.4"
+    xlsx: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   languageName: unknown
   linkType: soft
 
@@ -12789,7 +12781,7 @@ __metadata:
     "@tiptap/pm": "npm:^2.10.4"
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
-    "@tumaet/prompt-shared-state": "npm:^0.0.10"
+    "@tumaet/prompt-shared-state": "npm:^0.0.11"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"
@@ -14216,7 +14208,6 @@ __metadata:
     class-variance-authority: "npm:^0.7.0"
     cmdk: "npm:1.0.0"
     date-fns: "npm:^4.1.0"
-    lucide-react: "npm:^0.469.0"
     react-day-picker: "npm:8.10.1"
     react-hook-form: "npm:^7.53.2"
     recharts: "npm:^2.15.0"
@@ -16160,6 +16151,15 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/25eb33aff17edcb90721ed6b0eb250976328533ad3cd1a28a274bd263682e7296a6591ff1436d6cbc50fa67463158b062f9d1122013b361cec99a05f84680e06
+  languageName: node
+  linkType: hard
+
+"xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz":
+  version: 0.20.3
+  resolution: "xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  bin:
+    xlsx: ./bin/xlsx.njs
+  checksum: 10c0/eb20749e56ffa23ffc4a5a6fd983524e0406308e53992e24112424de9f30ec64d7dd80e8e56363e39c3853687f7b4151f97a6f5373050b23c0c2758796803b6b
   languageName: node
   linkType: hard
 

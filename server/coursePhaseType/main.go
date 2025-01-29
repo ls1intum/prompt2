@@ -13,4 +13,8 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 		queries: queries,
 		conn:    conn,
 	}
+
+	// initalize course phase types
+	initInterview(queries)
+	initMatching(queries)
 }
