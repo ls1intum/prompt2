@@ -15,7 +15,6 @@ func InitCourseModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pg
 		queries:                    queries,
 		conn:                       conn,
 		createCourseGroupsAndRoles: keycloak.CreateCourseGroupsAndRoles,
-		addUserToGroup:             keycloak.AddUserToGroup,
 	}
 
 	// possibly more setup tasks

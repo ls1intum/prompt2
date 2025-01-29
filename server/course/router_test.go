@@ -38,12 +38,7 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
-	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
-		// No-op or add assertions for test
-		return nil
-	}
-
-	mockAddUserToGroup := func(ctx context.Context, userID, groupName string) error {
+	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName, userID string) error {
 		// No-op or add assertions for test
 		return nil
 	}
@@ -53,7 +48,6 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 		queries:                    *testDB.Queries,
 		conn:                       testDB.Conn,
 		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
-		addUserToGroup:             mockAddUserToGroup,
 	}
 
 	CourseServiceSingleton = &suite.courseService

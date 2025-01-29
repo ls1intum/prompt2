@@ -8,28 +8,34 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName string) error {
+func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, userID string) error {
 	token, err := LoginClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	baseGroupName := fmt.Sprintf("%s-%s", courseName, iterationName)
-	subGroupNames := getGroupNames(baseGroupName)
-
-	baseGroupID, err := CreateGroup(ctx, token.AccessToken, baseGroupName)
+	promptGroupID, err := GetOrCreatePromptGroup(ctx, token.AccessToken)
 	if err != nil {
 		return err
 	}
 
-	for _, roleName := range subGroupNames {
+	courseGroupName := fmt.Sprintf("%s-%s", iterationName, courseName)
+	courseGroupID, err := CreateChildGroup(ctx, token.AccessToken, courseGroupName, promptGroupID)
+	if err != nil {
+		return err
+	}
+
+	subGroupNames := []string{CourseLecturer, CourseEditor}
+	for _, groupName := range subGroupNames {
+		// create role for the group
+		roleName := fmt.Sprintf("%s-%s-%s", iterationName, courseName, groupName)
 		role, err := CreateRealmRole(ctx, token.AccessToken, roleName)
 		if err != nil {
 			return err
 		}
 
-		// Create Subgroup with same name
-		subGroupID, err := CreateChildGroup(ctx, token.AccessToken, roleName, baseGroupID)
+		// Create Subgroup with courseGroup as parent
+		subGroupID, err := CreateChildGroup(ctx, token.AccessToken, groupName, courseGroupID)
 		if err != nil {
 			return err
 		}
@@ -40,14 +46,15 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName s
 			log.Error("failed to associate role with group: ", err)
 			return err
 		}
+
+		// Add the requester to the lecturer group
+		if groupName == CourseLecturer {
+			err = KeycloakSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, userID, subGroupID)
+			if err != nil {
+				log.Error("failed to add user to group: ", err)
+				return err
+			}
+		}
 	}
 	return nil
-}
-
-func getGroupNames(baseGroupName string) []string {
-	return []string{
-		fmt.Sprintf("%s-%s", baseGroupName, CourseLecturer),
-		fmt.Sprintf("%s-%s", baseGroupName, CourseEditor),
-		fmt.Sprintf("%s-%s", baseGroupName, CourseStudent),
-	}
 }
