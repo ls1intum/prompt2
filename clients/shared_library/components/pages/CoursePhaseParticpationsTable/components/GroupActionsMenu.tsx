@@ -8,16 +8,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
+import { MoreHorizontal, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import { ActionDialog } from '@/components/table/GroupActionDialog'
 import { RowModel } from '@tanstack/react-table'
-import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
-import { useApplicationStatusUpdate } from '../../../hooks/useApplicationStatusUpdate'
-import { useDeleteApplications } from '../../../hooks/useDeleteApplications'
-import { PassStatus } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
+import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
+import { UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
+import { useParams } from 'react-router-dom'
 
 interface GroupActionsMenuProps {
-  selectedRows: RowModel<ApplicationParticipation>
+  selectedRows: RowModel<CoursePhaseParticipationWithStudent>
   onClose: () => void
   onExport: () => void
 }
@@ -27,13 +27,14 @@ export const GroupActionsMenu = ({
   onClose,
   onExport,
 }: GroupActionsMenuProps): JSX.Element => {
+  const { phaseId } = useParams<{ phaseId: string }>()
   const [isOpen, setIsOpen] = useState(false)
   const [dialogState, setDialogState] = useState<{
-    type: 'delete' | 'setPassed' | 'setFailed' | null
+    type: 'setPassed' | 'setFailed' | null
     isOpen: boolean
   }>({ type: null, isOpen: false })
 
-  const openDialog = (type: 'delete' | 'setPassed' | 'setFailed') => {
+  const openDialog = (type: 'setPassed' | 'setFailed') => {
     setIsOpen(false)
     setDialogState({ type, isOpen: true })
   }
@@ -41,8 +42,7 @@ export const GroupActionsMenu = ({
   const closeDialog = () => setDialogState({ type: null, isOpen: false })
 
   // modifiers
-  const { mutate: mutateUpdateApplicationStatus } = useApplicationStatusUpdate()
-  const { mutate: mutateDeleteApplications } = useDeleteApplications()
+  const { mutate: mutateUpdateCoursePhaseParticipations } = useUpdateCoursePhaseParticipationBatch()
   const numberOfRowsSelected = selectedRows.rows.length
 
   return (
@@ -60,51 +60,38 @@ export const GroupActionsMenu = ({
 
           <DropdownMenuItem onClick={() => openDialog('setPassed')}>
             <CheckCircle className='mr-2 h-4 w-4' />
-            Set Accepted
+            Set Passed
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openDialog('setFailed')}>
             <XCircle className='mr-2 h-4 w-4' />
-            Set Rejected
+            Set Failed
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onExport}>
             <FileDown className='mr-2 h-4 w-4' />
             Export
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openDialog('delete')} className='text-destructive'>
-            <Trash2 className='mr-2 h-4 w-4' />
-            Delete
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {dialogState.isOpen && dialogState.type === 'delete' && (
-        <ActionDialog
-          title='Confirm Deletion'
-          description={`Are you sure you want to delete ${numberOfRowsSelected} applications? This action cannot be undone. 
-          The course application will be deleted for the selected students.`}
-          confirmLabel='Delete'
-          confirmVariant='destructive'
-          isOpen={dialogState.type === 'delete' && dialogState.isOpen}
-          onClose={closeDialog}
-          onConfirm={() => {
-            mutateDeleteApplications(selectedRows.rows.map((row) => row.original.id))
-            onClose()
-          }}
-        />
-      )}
-
       {dialogState.isOpen && dialogState.type === 'setPassed' && (
         <ActionDialog
           title='Confirm Set Passed'
-          description={`Are you sure you want to mark ${numberOfRowsSelected} applications as accepted?`}
-          confirmLabel='Set Accepted'
+          description={`Are you sure you want to mark ${numberOfRowsSelected} participants as passed?`}
+          confirmLabel='Set Passed'
           isOpen={dialogState.type === 'setPassed' && dialogState.isOpen}
           onClose={closeDialog}
           onConfirm={() => {
-            mutateUpdateApplicationStatus({
-              passStatus: PassStatus.PASSED,
-              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
+            const mutations = selectedRows.rows.map((row) => {
+              const update: UpdateCoursePhaseParticipation = {
+                id: row.original.id,
+                coursePhaseID: phaseId ?? '',
+                courseParticipationID: row.original.courseParticipationID,
+                passStatus: PassStatus.PASSED,
+                metaData: {},
+              }
+              return update
             })
+            mutateUpdateCoursePhaseParticipations(mutations)
             onClose()
           }}
         />
@@ -113,15 +100,22 @@ export const GroupActionsMenu = ({
       {dialogState.isOpen && dialogState.type === 'setFailed' && (
         <ActionDialog
           title='Confirm Set Failed'
-          description={`Are you sure you want to mark ${numberOfRowsSelected} applications as rejected?`}
-          confirmLabel='Set Rejected'
+          description={`Are you sure you want to mark ${numberOfRowsSelected} participants as failed?`}
+          confirmLabel='Set Failed'
           isOpen={dialogState.type === 'setFailed' && dialogState.isOpen}
           onClose={closeDialog}
           onConfirm={() => {
-            mutateUpdateApplicationStatus({
-              passStatus: PassStatus.FAILED,
-              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
+            const mutations = selectedRows.rows.map((row) => {
+              const update: UpdateCoursePhaseParticipation = {
+                id: row.original.id,
+                coursePhaseID: phaseId ?? '',
+                courseParticipationID: row.original.courseParticipationID,
+                passStatus: PassStatus.FAILED,
+                metaData: {},
+              }
+              return update
             })
+            mutateUpdateCoursePhaseParticipations(mutations)
             onClose()
           }}
         />

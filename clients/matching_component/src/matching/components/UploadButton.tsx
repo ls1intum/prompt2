@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { type ReactNode, useRef, useState } from 'react'
 import { UploadCloud, Loader2 } from 'lucide-react'
-import { useUploadAndParse } from '../hooks/useUploadAndParse'
 import { useMatchingStore } from '../zustand/useMatchingStore'
 
 interface UploadButtonProps {
@@ -10,6 +9,7 @@ interface UploadButtonProps {
   description: string
   icon: ReactNode
   onUploadFinish: () => void
+  onUploadFunction: (file: File) => Promise<void>
   acceptedFileTypes: string[]
 }
 
@@ -18,6 +18,7 @@ export const UploadButton = ({
   description,
   icon,
   onUploadFinish,
+  onUploadFunction,
   acceptedFileTypes,
 }: UploadButtonProps): JSX.Element => {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -25,7 +26,6 @@ export const UploadButton = ({
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null) // State to store error messages
 
-  const { parseFile } = useUploadAndParse()
   const { setUploadedFile } = useMatchingStore()
 
   const handleUpload = async (file: File) => {
@@ -34,7 +34,7 @@ export const UploadButton = ({
     setUploadedFile(file)
     setTimeout(async () => {
       try {
-        await parseFile(file)
+        await onUploadFunction(file)
         onUploadFinish()
       } catch (err: any) {
         console.error('Failed to parse file:', err)

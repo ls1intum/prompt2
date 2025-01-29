@@ -1,4 +1,14 @@
-import { PassStatus } from '@tumaet/prompt-shared-state'
+import { ScrollBar } from '@/components/ui/scroll-area'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { ScrollArea } from '@radix-ui/react-scroll-area'
+import { SearchIcon } from 'lucide-react'
 
 import {
   ColumnFiltersState,
@@ -8,70 +18,38 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-  VisibilityState,
 } from '@tanstack/react-table'
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { columns } from './components/table/columns'
 import { useState } from 'react'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { columns } from './components/columns'
 import { Input } from '@/components/ui/input'
-import { SearchIcon } from 'lucide-react'
-import { FilterMenu } from './components/table/filtering/FilterMenu'
-import { VisibilityMenu } from './components/table/menus/VisibilityMenu'
-import { FilterBadges } from './components/table/filtering/FilterBadges'
-import { ApplicationDetailsDialog } from './components/ApplicationDetailsDialog/ApplicationDetailsDialog'
-import { GroupActionsMenu } from './components/table/menus/GroupActionsMenu'
-import { downloadApplications } from './utils/downloadApplications'
-import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { useCustomElementWidth } from '@core/hooks/useCustomElementWidth'
-import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { useApplicationStore } from '../../zustand/useApplicationStore'
-import { useDeleteApplications } from './hooks/useDeleteApplications'
+import { FilterMenu } from './components/FilterMenu'
+import { GroupActionsMenu } from './components/GroupActionsMenu'
+import { downloadParticipations } from './utils/downloadParticipations'
 
-export const ApplicationsAssessment = (): JSX.Element => {
-  const { additionalScores, participations } = useApplicationStore()
+interface CoursePhaseParticipationsTablePageProps {
+  participants: CoursePhaseParticipationWithStudent[]
+  prevMetaDataKeys: string[] // specify which prev meta data names to display
+  metaDataKeys: string[] // specify which meta data names to display
+}
+
+export const CoursePhaseParticipationsTablePage = ({
+  participants,
+  prevMetaDataKeys,
+  metaDataKeys,
+}: CoursePhaseParticipationsTablePageProps): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
-  const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
+  const [globalFilter, setGlobalFilter] = useState<string>('')
 
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
-  const tableWidth = useCustomElementWidth('table-view')
-
-  const { mutate: mutateDeleteApplications } = useDeleteApplications()
-
-  const viewApplication = (id: string) => {
-    setSelectedApplicationID(id)
-    setDialogOpen(true)
-  }
-
-  const deleteApplication = (coursePhaseParticipationID: string) => {
-    mutateDeleteApplications([coursePhaseParticipationID])
-  }
-
-  const selectedApplication = participations?.find(
-    (participation) => participation.id === selectedApplicationID,
-  )
-
-  const tableColumns = columns(viewApplication, deleteApplication, additionalScores ?? [])
+  const tableColumns = columns({ prevMetaDataKeys, metaDataKeys })
 
   const table = useReactTable({
-    data: participations ?? [],
+    data: participants ?? [],
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, columnId, filterValue) => {
@@ -88,18 +66,16 @@ export const ApplicationsAssessment = (): JSX.Element => {
       sorting,
       globalFilter,
       columnFilters,
-      columnVisibility,
     },
   })
 
   return (
-    <div id='table-view' className='relative flex flex-col space-y-6'>
-      <ManagementPageHeader>Applications Overview</ManagementPageHeader>
+    <div>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
           <div className='relative flex-grow max-w-md w-full'>
             <Input
-              placeholder='Search applications...'
+              placeholder='Search participants...'
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
               className='pl-10 w-full'
@@ -108,17 +84,15 @@ export const ApplicationsAssessment = (): JSX.Element => {
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-            <VisibilityMenu columns={table.getAllColumns()} />
-            {participations && <AssessmentScoreUpload applications={participations} />}
-            <ApplicationManualAddingDialog existingApplications={participations ?? []} />
             {table.getSelectedRowModel().rows.length > 0 && (
               <GroupActionsMenu
                 selectedRows={table.getSelectedRowModel()}
                 onClose={() => table.resetRowSelection()}
                 onExport={() => {
-                  downloadApplications(
+                  downloadParticipations(
                     table.getSelectedRowModel().rows.map((row) => row.original),
-                    additionalScores ?? [],
+                    prevMetaDataKeys,
+                    metaDataKeys,
                   )
                   table.resetRowSelection()
                 }}
@@ -127,12 +101,11 @@ export const ApplicationsAssessment = (): JSX.Element => {
           </div>
         </div>
         <div className='flex flex-wrap gap-2'>
-          <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
+          {/* <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} /> */}
         </div>
       </div>
-
-      <div className='rounded-md border' style={{ width: `${tableWidth + 50}px` }}>
-        <ScrollArea className='h-[calc(100vh-300px)] overflow-x-scroll'>
+      <div className='rounded-md border'>
+        <ScrollArea className='h-[calc(100vh-200px)] overflow-x-scroll'>
           <Table className='table-auto min-w-full w-full relative'>
             <TableHeader className='bg-muted/100 sticky top-0 z-10'>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -152,11 +125,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={() => viewApplication(cell.row.original.id)}
-                        className='cursor-pointer whitespace-nowrap'
-                      >
+                      <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -174,17 +143,6 @@ export const ApplicationsAssessment = (): JSX.Element => {
           <ScrollBar orientation='horizontal' />
         </ScrollArea>
       </div>
-
-      {dialogOpen && (
-        <ApplicationDetailsDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          coursePhaseParticipationID={selectedApplicationID ?? ''}
-          status={selectedApplication?.passStatus ?? PassStatus.NOT_ASSESSED}
-          score={selectedApplication?.score ?? null}
-          metaData={selectedApplication?.metaData ?? {}}
-        />
-      )}
     </div>
   )
 }

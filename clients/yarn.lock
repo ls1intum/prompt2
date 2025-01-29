@@ -10300,6 +10300,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "matching_component@workspace:matching_component"
   dependencies:
+    papaparse: "npm:^5.5.2"
     webpack: "npm:^5.91.0"
     webpack-cli: "npm:^5.1.4"
     xlsx: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
@@ -11563,6 +11564,13 @@ __metadata:
   bin:
     pacote: bin/index.js
   checksum: 10c0/d80907375dd52a521255e0debca1ba9089ad8fd7acdf16c5a5db2ea2a5bb23045e2bcf08d1648b1ebc40fcc889657db86ff6187ff5f8d2fc312cd6ad1ec4c6ac
+  languageName: node
+  linkType: hard
+
+"papaparse@npm:^5.5.2":
+  version: 5.5.2
+  resolution: "papaparse@npm:5.5.2"
+  checksum: 10c0/83b8c0cf570395581a42331cd9231194dbba43bc8c608026739f5180827506575993dc788def039a9666bc103e2a96075de8732ea8a63e507b74c02aa757bcd5
   languageName: node
   linkType: hard
 
