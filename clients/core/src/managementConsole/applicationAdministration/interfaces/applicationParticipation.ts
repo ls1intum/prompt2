@@ -4,7 +4,7 @@ import { Student } from '@tumaet/prompt-shared-state'
 export interface ApplicationParticipation {
   id: string
   passStatus: PassStatus
-  metaData: { [key: string]: any }
+  restrictedData: { [key: string]: any }
   student: Student
   score: number | null
 }

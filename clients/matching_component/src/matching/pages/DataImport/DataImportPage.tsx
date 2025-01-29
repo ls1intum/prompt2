@@ -41,7 +41,8 @@ export const DataImportPage = (): JSX.Element => {
         courseParticipationID: participation.courseParticipationID,
         coursePhaseID: phaseId ?? '',
         passStatus: PassStatus.PASSED,
-        metaData: {},
+        restrictedData: {},
+        studentReadableData: {},
       }
       return participationUpdate
     })

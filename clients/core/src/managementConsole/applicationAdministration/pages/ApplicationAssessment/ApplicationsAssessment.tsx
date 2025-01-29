@@ -182,7 +182,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
           coursePhaseParticipationID={selectedApplicationID ?? ''}
           status={selectedApplication?.passStatus ?? PassStatus.NOT_ASSESSED}
           score={selectedApplication?.score ?? null}
-          metaData={selectedApplication?.metaData ?? {}}
+          restrictedData={selectedApplication?.restrictedData ?? {}}
         />
       )}
     </div>

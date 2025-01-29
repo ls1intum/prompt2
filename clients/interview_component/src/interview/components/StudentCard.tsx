@@ -18,8 +18,8 @@ interface StudentCardProps {
 }
 
 export function StudentCard({ participation, interviewSlot }: StudentCardProps) {
-  const assessmentScore = participation.prevMetaData?.applicationScore ?? 'N/A'
-  const interviewScore = participation.metaData?.interviewScore ?? 'N/A'
+  const assessmentScore = participation.prevData?.applicationScore ?? 'N/A'
+  const interviewScore = participation.restrictedData?.interviewScore ?? 'N/A'
 
   return (
     <Card className='h-full relative overflow-hidden'>

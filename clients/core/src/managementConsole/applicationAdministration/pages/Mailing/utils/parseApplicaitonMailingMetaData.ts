@@ -1,6 +1,8 @@
 import { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
 
-export const parseApplicationMailingMetaData = (metaData: any): ApplicationMailingMetaData => {
+export const parseApplicationMailingMetaData = (
+  restrictedData: any,
+): ApplicationMailingMetaData => {
   const {
     mailingSettings: {
       confirmationMailSubject = '',
@@ -13,7 +15,7 @@ export const parseApplicationMailingMetaData = (metaData: any): ApplicationMaili
       sendRejectionMail = false,
       sendAcceptanceMail = false,
     } = {},
-  } = metaData || {}
+  } = restrictedData || {}
 
   return {
     confirmationMailSubject,

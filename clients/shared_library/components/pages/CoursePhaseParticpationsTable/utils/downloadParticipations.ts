@@ -3,8 +3,9 @@ import { saveAs } from 'file-saver'
 
 export const downloadParticipations = (
   data: CoursePhaseParticipationWithStudent[],
-  prevMetaDataKeys: string[],
-  metaDataKeys: string[],
+  prevDataKeys: string[],
+  restrictedDataKeys: string[],
+  studentReadableDataKeys: string[],
   filename = 'participation-export.csv',
 ) => {
   if (!data || data.length === 0) {
@@ -21,8 +22,9 @@ export const downloadParticipations = (
     'hasUniversityAccount',
     'gender',
     'passStatus',
-    ...prevMetaDataKeys,
-    ...metaDataKeys,
+    ...prevDataKeys,
+    ...restrictedDataKeys,
+    ...studentReadableDataKeys,
   ]
   const csvRows = data.map((row) => {
     // Extract student data
@@ -36,12 +38,15 @@ export const downloadParticipations = (
         } else if (header === 'passStatus') {
           // Fetch data from the main `ApplicationParticipation` object
           return JSON.stringify(row.passStatus ?? '')
-        } else if (prevMetaDataKeys.includes(header)) {
+        } else if (prevDataKeys.includes(header)) {
           // Fetch additional scores from the `meta_data` object
-          return JSON.stringify(row.prevMetaData[header] ?? '')
-        } else if (metaDataKeys.includes(header)) {
+          return JSON.stringify(row.prevData[header] ?? '')
+        } else if (restrictedDataKeys.includes(header)) {
           // Fetch additional scores from the `meta_data` object
-          return JSON.stringify(row.metaData[header] ?? '')
+          return JSON.stringify(row.restrictedData[header] ?? '')
+        } else if (studentReadableDataKeys.includes(header)) {
+          // Fetch additional scores from the `meta_data` object
+          return JSON.stringify(row.studentReadableData[header] ?? '')
         } else {
           return JSON.stringify('')
         }

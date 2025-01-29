@@ -6,13 +6,15 @@ import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state
 import { Checkbox } from '@/components/ui/checkbox'
 
 interface ColumnDefProps {
-  prevMetaDataKeys: string[]
-  metaDataKeys: string[]
+  prevDataKeys: string[]
+  restrictedDataKeys: string[]
+  studentReadableDataKeys: string[]
 }
 
 export const columns = ({
-  prevMetaDataKeys,
-  metaDataKeys,
+  prevDataKeys,
+  restrictedDataKeys,
+  studentReadableDataKeys,
 }: ColumnDefProps): ColumnDef<CoursePhaseParticipationWithStudent>[] => {
   return [
     {
@@ -90,14 +92,19 @@ export const columns = ({
         <SortableHeader column={column} title={translations.university['login-name']} />
       ),
     },
-    ...prevMetaDataKeys.map((key) => ({
+    ...prevDataKeys.map((key) => ({
       id: key,
-      accessorKey: `prevMetaData.${key}`,
+      accessorKey: `prevData.${key}`,
       header: ({ column }) => <SortableHeader column={column} title={key} />,
     })),
-    ...metaDataKeys.map((key) => ({
+    ...restrictedDataKeys.map((key) => ({
       id: key,
-      accessorKey: `metaData.${key}`,
+      accessorKey: `restrictedData.${key}`,
+      header: ({ column }) => <SortableHeader column={column} title={key} />,
+    })),
+    ...studentReadableDataKeys.map((key) => ({
+      id: key,
+      accessorKey: `studentReadableData.${key}`,
       header: ({ column }) => <SortableHeader column={column} title={key} />,
     })),
   ]

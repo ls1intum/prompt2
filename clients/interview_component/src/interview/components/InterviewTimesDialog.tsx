@@ -38,8 +38,8 @@ export const InterviewTimesDialog = () => {
   }
 
   useEffect(() => {
-    if (coursePhase?.metaData?.interviewSlots) {
-      setInterviewSlots(coursePhase.metaData.interviewSlots)
+    if (coursePhase?.restrictedData?.interviewSlots) {
+      setInterviewSlots(coursePhase.restrictedData.interviewSlots)
     }
   }, [coursePhase])
 
@@ -96,7 +96,7 @@ export const InterviewTimesDialog = () => {
     if (coursePhase) {
       mutate({
         id: coursePhase.id,
-        metaData: {
+        restrictedData: {
           interviewSlots: interviewSlots,
         },
       })

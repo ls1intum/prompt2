@@ -56,8 +56,8 @@ export const ApplicationMailingSettings = () => {
   )
 
   useEffect(() => {
-    if (coursePhase?.metaData) {
-      const parsedMetaData = parseApplicationMailingMetaData(coursePhase.metaData)
+    if (coursePhase?.restrictedData) {
+      const parsedMetaData = parseApplicationMailingMetaData(coursePhase.restrictedData)
       setApplicationMailingMetaData(parsedMetaData)
       setInitialMetaData(parsedMetaData)
     }
@@ -79,7 +79,7 @@ export const ApplicationMailingSettings = () => {
     e.preventDefault()
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
-      metaData: {
+      restrictedData: {
         mailingSettings: applicationMailingMetaData,
       },
     }

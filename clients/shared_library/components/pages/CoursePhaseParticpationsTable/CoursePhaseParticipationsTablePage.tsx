@@ -29,20 +29,22 @@ import { downloadParticipations } from './utils/downloadParticipations'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
-  prevMetaDataKeys: string[] // specify which prev meta data names to display
-  metaDataKeys: string[] // specify which meta data names to display
+  prevDataKeys: string[] // specify which prev meta data names to display
+  restrictedDataKeys: string[] // specify which meta data names to display
+  studentReadableDataKeys: string[]
 }
 
 export const CoursePhaseParticipationsTablePage = ({
   participants,
-  prevMetaDataKeys,
-  metaDataKeys,
+  prevDataKeys,
+  restrictedDataKeys,
+  studentReadableDataKeys,
 }: CoursePhaseParticipationsTablePageProps): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
 
-  const tableColumns = columns({ prevMetaDataKeys, metaDataKeys })
+  const tableColumns = columns({ prevDataKeys, restrictedDataKeys, studentReadableDataKeys })
 
   const table = useReactTable({
     data: participants ?? [],
@@ -91,8 +93,9 @@ export const CoursePhaseParticipationsTablePage = ({
                 onExport={() => {
                   downloadParticipations(
                     table.getSelectedRowModel().rows.map((row) => row.original),
-                    prevMetaDataKeys,
-                    metaDataKeys,
+                    prevDataKeys,
+                    restrictedDataKeys,
+                    studentReadableDataKeys,
                   )
                   table.resetRowSelection()
                 }}

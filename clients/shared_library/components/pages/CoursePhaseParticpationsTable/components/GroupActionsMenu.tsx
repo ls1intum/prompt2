@@ -87,7 +87,8 @@ export const GroupActionsMenu = ({
                 coursePhaseID: phaseId ?? '',
                 courseParticipationID: row.original.courseParticipationID,
                 passStatus: PassStatus.PASSED,
-                metaData: {},
+                restrictedData: {},
+                studentReadableData: {},
               }
               return update
             })
@@ -111,7 +112,8 @@ export const GroupActionsMenu = ({
                 coursePhaseID: phaseId ?? '',
                 courseParticipationID: row.original.courseParticipationID,
                 passStatus: PassStatus.FAILED,
-                metaData: {},
+                restrictedData: {},
+                studentReadableData: {},
               }
               return update
             })

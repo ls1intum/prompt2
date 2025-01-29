@@ -11,7 +11,7 @@ import { useState } from 'react'
 
 interface AssessmentCardProps {
   score: number | null
-  metaData: { [key: string]: any }
+  restrictedData: { [key: string]: any }
   acceptanceStatus: PassStatus
   handleAcceptanceStatusChange: (status: PassStatus) => void
   onScoreSubmission: (score: number) => void
@@ -20,7 +20,7 @@ interface AssessmentCardProps {
 
 export const AssessmentCard = ({
   score,
-  metaData,
+  restrictedData,
   acceptanceStatus,
   handleAcceptanceStatusChange,
   onScoreSubmission,
@@ -28,7 +28,7 @@ export const AssessmentCard = ({
 }: AssessmentCardProps): JSX.Element => {
   const [currentScore, setCurrentScore] = useState<number | null>(score)
   const [newComment, setNewComment] = useState<string>('')
-  const comments = metaData.comments as InstructorComment[]
+  const comments = restrictedData.comments as InstructorComment[]
 
   return (
     <Card className='w-full'>

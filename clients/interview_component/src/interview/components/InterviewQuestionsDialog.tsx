@@ -30,8 +30,8 @@ export const InterviewQuestionsDialog = () => {
   const { mutate } = useUpdateCoursePhaseMetaData()
 
   useEffect(() => {
-    if (coursePhase && coursePhase.metaData?.interviewQuestions) {
-      const questions = coursePhase.metaData.interviewQuestions as InterviewQuestion[]
+    if (coursePhase && coursePhase.restrictedData?.interviewQuestions) {
+      const questions = coursePhase.restrictedData.interviewQuestions as InterviewQuestion[]
       setInterviewQuestions(questions)
     }
   }, [coursePhase])
@@ -79,7 +79,7 @@ export const InterviewQuestionsDialog = () => {
     if (coursePhase) {
       mutate({
         id: coursePhase.id,
-        metaData: {
+        restrictedData: {
           interviewQuestions: interviewQuestions,
         },
       })

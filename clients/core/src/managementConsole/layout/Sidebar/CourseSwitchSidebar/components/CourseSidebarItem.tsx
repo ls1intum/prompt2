@@ -28,8 +28,8 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const { courseId } = useParams<{ courseId: string }>()
 
   const isActive = course.id === courseId
-  const bgColor = course.metaData?.['bg-color'] || subtleColors['bg-grey-100']
-  const iconName = course.metaData?.['icon'] || 'graduation-cap'
+  const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-grey-100']
+  const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
 
   const MemoizedIcon = useMemo(() => {
     return (
