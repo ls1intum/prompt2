@@ -236,14 +236,15 @@ type ApplicationQuestionText struct {
 }
 
 type Course struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	StartDate   pgtype.Date `json:"start_date"`
-	EndDate     pgtype.Date `json:"end_date"`
-	SemesterTag pgtype.Text `json:"semester_tag"`
-	CourseType  CourseType  `json:"course_type"`
-	Ects        pgtype.Int4 `json:"ects"`
-	MetaData    []byte      `json:"meta_data"`
+	ID                  uuid.UUID   `json:"id"`
+	Name                string      `json:"name"`
+	StartDate           pgtype.Date `json:"start_date"`
+	EndDate             pgtype.Date `json:"end_date"`
+	SemesterTag         pgtype.Text `json:"semester_tag"`
+	CourseType          CourseType  `json:"course_type"`
+	Ects                pgtype.Int4 `json:"ects"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 }
 
 type CourseParticipation struct {
@@ -253,12 +254,13 @@ type CourseParticipation struct {
 }
 
 type CoursePhase struct {
-	ID                uuid.UUID   `json:"id"`
-	CourseID          uuid.UUID   `json:"course_id"`
-	Name              pgtype.Text `json:"name"`
-	MetaData          []byte      `json:"meta_data"`
-	IsInitialPhase    bool        `json:"is_initial_phase"`
-	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 }
 
 type CoursePhaseGraph struct {
@@ -270,9 +272,10 @@ type CoursePhaseParticipation struct {
 	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	MetaData              []byte           `json:"meta_data"`
+	RestrictedData        []byte           `json:"restricted_data"`
 	PassStatus            NullPassStatus   `json:"pass_status"`
 	LastModified          pgtype.Timestamp `json:"last_modified"`
+	StudentReadableData   []byte           `json:"student_readable_data"`
 }
 
 type CoursePhaseType struct {
