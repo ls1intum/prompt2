@@ -275,7 +275,14 @@ SELECT
             ON cpt.id = dpm.course_phase_type_id
           AND cpt.name != 'Application'
           -- the phase is responsible to make sure that there is no key collision
-          CROSS JOIN LATERAL jsonb_each(pcpp.restricted_data || pcpp.student_readable_data) each  
+          CROSS JOIN LATERAL (
+        -- We explicitly alias columns as (key, value) in each SELECT.
+            SELECT (jsonb_each(pcpp.student_readable_data)).key   AS key,
+                  (jsonb_each(pcpp.student_readable_data)).value AS value
+            UNION
+            SELECT (jsonb_each(pcpp.restricted_data)).key   AS key,
+                  (jsonb_each(pcpp.restricted_data)).value AS value
+            ) AS each
           WHERE each.key IN (
               SELECT elem->>'name'
               FROM   jsonb_array_elements(cpt.provided_output_meta_data) AS elem
