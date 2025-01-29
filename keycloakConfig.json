@@ -764,6 +764,40 @@
         "authenticationFlowBindingOverrides": {},
         "fullScopeAllowed": true,
         "nodeReRegistrationTimeout": -1,
+        "protocolMappers": [
+          {
+            "id": "ec2e9c16-09a5-4400-be6e-9d720d237bf6",
+            "name": "university_login",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "aggregate.attrs": "false",
+              "userinfo.token.claim": "false",
+              "multivalued": "false",
+              "user.attribute": "university_login",
+              "id.token.claim": "false",
+              "access.token.claim": "true",
+              "claim.name": "university_login"
+            }
+          },
+          {
+            "id": "b7c32ff5-1b70-41c9-818b-812bc439db4c",
+            "name": "matriculation_number",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "aggregate.attrs": "false",
+              "userinfo.token.claim": "false",
+              "multivalued": "false",
+              "user.attribute": "matriculation_number",
+              "id.token.claim": "false",
+              "access.token.claim": "true",
+              "claim.name": "matriculation_number"
+            }
+          }
+        ],
         "defaultClientScopes": [
           "web-origins",
           "acr",
