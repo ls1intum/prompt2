@@ -418,12 +418,12 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
 
 	jsonData := `{"invalid_key": "value"}`
-	var metaData meta.MetaData
-	err := json.Unmarshal([]byte(jsonData), &metaData)
+	var restrictedData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &restrictedData)
 	assert.NoError(suite.T(), err)
 
 	assessment := applicationDTO.PutAssessment{
-		MetaData: metaData,
+		RestrictedData: restrictedData,
 	}
 
 	err = validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)

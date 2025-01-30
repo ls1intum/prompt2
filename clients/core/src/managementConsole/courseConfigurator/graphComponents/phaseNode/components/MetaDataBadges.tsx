@@ -6,14 +6,14 @@ import { getMetaDataStatus } from './utils/getBadgeStatus'
 import { renderBadgeTooltipContent } from './utils/renderBadgeTooltip'
 
 interface MetaDataBadgesProps {
-  metaData: CoursePhaseTypeMetaDataItem[]
+  restrictedData: CoursePhaseTypeMetaDataItem[]
   icon: React.ReactNode
   label: string
   providedMetaData?: CoursePhaseTypeMetaDataItem[]
 }
 
 export const MetaDataBadges = ({
-  metaData,
+  restrictedData,
   icon,
   label,
   providedMetaData,
@@ -24,7 +24,7 @@ export const MetaDataBadges = ({
       <div>
         <div className='text-xs font-semibold text-secondary-foreground mb-1'>{label}</div>
         <div className='flex flex-wrap gap-1'>
-          {metaData.map((item, index) => {
+          {restrictedData.map((item, index) => {
             const {
               color,
               icon: statusIcon,

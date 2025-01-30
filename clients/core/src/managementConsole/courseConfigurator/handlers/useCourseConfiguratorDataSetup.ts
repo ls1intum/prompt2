@@ -200,7 +200,8 @@ export function useCourseConfiguratorDataSetup() {
         course.coursePhases.map((phase) => ({
           ...phase,
           position: { x: 0, y: 0 },
-          metaData: [],
+          restrictedMetaData: [],
+          studentReadableData: [],
         })),
       )
     } else {

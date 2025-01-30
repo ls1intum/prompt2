@@ -6,7 +6,8 @@ WHERE id = $1 LIMIT 1;
 SELECT
     cpp.id AS course_phase_participation_id,
     cpp.pass_status,
-    cpp.meta_data,
+    cpp.restricted_data,
+    cpp.student_readable_data,
     s.id AS student_id,
     s.first_name,
     s.last_name,
@@ -32,13 +33,14 @@ WHERE course_participation_id = $1;
 --- belong to the same course.
 -- name: CreateCoursePhaseParticipation :one
 INSERT INTO course_phase_participation
-    (id, course_participation_id, course_phase_id, pass_status, meta_data)
+    (id, course_participation_id, course_phase_id, pass_status, restricted_data, student_readable_data)
 SELECT
     $1 AS id,
     $2 AS course_participation_id,
     $3 AS course_phase_id,
     $4 AS pass_status,
-    $5 AS meta_data
+    $5 AS restricted_data,
+    $6 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
@@ -49,9 +51,10 @@ RETURNING *;
 UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
-    meta_data = meta_data || $3
+    restricted_data = restricted_data || $3, 
+    student_readable_data = student_readable_data || $4
 WHERE id = $1
-AND course_phase_id = $4
+AND course_phase_id = $5
 RETURNING id; -- important to trigger a no rows in result set error if ids mismatch
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
@@ -84,9 +87,10 @@ direct_predecessor_for_pass AS (
 -----------------------------------------------------------------------
 direct_predecessors_for_meta AS (
   SELECT 
-    from_phase_id AS phase_id,
-    cp.meta_data AS course_phase_meta_data,
-    cp.course_phase_type_id AS course_phase_type_id
+    from_phase_id             AS phase_id,
+    cp.restricted_data        AS course_phase_restricted_data,
+    cp.student_readable_data  AS course_phase_student_readable_data,
+    cp.course_phase_type_id   AS course_phase_type_id
   FROM meta_data_dependency_graph
   JOIN course_phase cp
     ON cp.id = from_phase_id
@@ -98,10 +102,11 @@ direct_predecessors_for_meta AS (
 -----------------------------------------------------------------------
 current_phase_participations AS (
     SELECT
-        cpp.id                   AS course_phase_participation_id,
-        cpp.pass_status          AS pass_status,
-        cpp.meta_data            AS meta_data,
-        s.id                     AS student_id,
+        cpp.id                         AS course_phase_participation_id,
+        cpp.pass_status                AS pass_status,
+        cpp.restricted_data            AS restricted_data,
+        cpp.student_readable_data      AS student_readable_data,
+        s.id                           AS student_id,
         s.first_name,
         s.last_name,
         s.email,
@@ -131,7 +136,8 @@ qualified_non_participants AS (
     SELECT
         NULL::uuid                   AS course_phase_participation_id,
         'not_assessed'::pass_status  AS pass_status,
-        '{}'::jsonb                  AS meta_data,
+        '{}'::jsonb                  AS restricted_data,
+        '{}'::jsonb                  AS student_readable_data,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
@@ -187,17 +193,23 @@ SELECT
           FROM direct_predecessors_for_meta dpm
           JOIN course_phase_participation pcpp
             ON pcpp.course_phase_id = dpm.phase_id
-            AND pcpp.course_participation_id = main.course_participation_id
+          AND pcpp.course_participation_id = main.course_participation_id
           JOIN course_phase_type cpt
             ON cpt.id = dpm.course_phase_type_id
-            AND cpt.name != 'Application'
-          CROSS JOIN LATERAL jsonb_each(pcpp.meta_data) each
-            WHERE 
-            -- Only keep meta_data where the JSON key matches one of the "name" attributes
-                each.key IN (
-                    SELECT elem->>'name'
-                    FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
-                ) 
+          AND cpt.name != 'Application'
+          -- the phase is responsible to make sure that there is no key collision
+          CROSS JOIN LATERAL (
+        -- We explicitly alias columns as (key, value) in each SELECT.
+            SELECT (jsonb_each(pcpp.student_readable_data)).key   AS key,
+                  (jsonb_each(pcpp.student_readable_data)).value AS value
+            UNION
+            SELECT (jsonb_each(pcpp.restricted_data)).key   AS key,
+                  (jsonb_each(pcpp.restricted_data)).value AS value
+            ) AS each
+          WHERE each.key IN (
+              SELECT elem->>'name'
+              FROM   jsonb_array_elements(cpt.provided_output_meta_data) AS elem
+          )
        ),
        '{}'
     )::jsonb ||
@@ -254,11 +266,11 @@ SELECT
                          SELECT jsonb_agg(
                              jsonb_build_object(
                                'key', question_config->>'key',
-                               'answer', pcpp.meta_data -> (question_config->>'key')
+                               'answer', pcpp.restricted_data -> (question_config->>'key')
                              )
                          )
                          FROM jsonb_array_elements(
-                                dpm.course_phase_meta_data->'additionalScores'
+                                dpm.course_phase_restricted_data->'additionalScores'
                               ) question_config
                      ),
                      ----------------------------------------------------------
@@ -306,7 +318,7 @@ SELECT
          ) appdata
        ),
        '{}'
-    )::jsonb)::jsonb AS prev_meta_data
+    )::jsonb)::jsonb AS prev_data
 
 FROM
 (

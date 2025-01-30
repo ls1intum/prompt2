@@ -19,7 +19,7 @@ export const columns = (
     additionalScoreColumns = additionalScores.map((additionalScore) => {
       return {
         id: additionalScore.key,
-        accessorFn: (row) => row.metaData?.[additionalScore.key] ?? null,
+        accessorFn: (row) => row.restrictedData?.[additionalScore.key] ?? null,
         header: ({ column }) => <SortableHeader column={column} title={additionalScore.name} />,
       }
     })

@@ -13,18 +13,19 @@ import (
 )
 
 const createCoursePhase = `-- name: CreateCoursePhase :one
-INSERT INTO course_phase (id, course_id, name, is_initial_phase, meta_data, course_phase_type_id)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, course_id, name, meta_data, is_initial_phase, course_phase_type_id
+INSERT INTO course_phase (id, course_id, name, is_initial_phase, restricted_data, student_readable_data, course_phase_type_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data
 `
 
 type CreateCoursePhaseParams struct {
-	ID                uuid.UUID   `json:"id"`
-	CourseID          uuid.UUID   `json:"course_id"`
-	Name              pgtype.Text `json:"name"`
-	IsInitialPhase    bool        `json:"is_initial_phase"`
-	MetaData          []byte      `json:"meta_data"`
-	CoursePhaseTypeID uuid.UUID   `json:"course_phase_type_id"`
+	ID                  uuid.UUID   `json:"id"`
+	CourseID            uuid.UUID   `json:"course_id"`
+	Name                pgtype.Text `json:"name"`
+	IsInitialPhase      bool        `json:"is_initial_phase"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	StudentReadableData []byte      `json:"student_readable_data"`
+	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
 }
 
 func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhaseParams) (CoursePhase, error) {
@@ -33,7 +34,8 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 		arg.CourseID,
 		arg.Name,
 		arg.IsInitialPhase,
-		arg.MetaData,
+		arg.RestrictedData,
+		arg.StudentReadableData,
 		arg.CoursePhaseTypeID,
 	)
 	var i CoursePhase
@@ -41,9 +43,10 @@ func (q *Queries) CreateCoursePhase(ctx context.Context, arg CreateCoursePhasePa
 		&i.ID,
 		&i.CourseID,
 		&i.Name,
-		&i.MetaData,
+		&i.RestrictedData,
 		&i.IsInitialPhase,
 		&i.CoursePhaseTypeID,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
@@ -59,7 +62,7 @@ func (q *Queries) DeleteCoursePhase(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllCoursePhaseForCourse = `-- name: GetAllCoursePhaseForCourse :many
-SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
+SELECT cp.id, cp.course_id, cp.name, cp.restricted_data, cp.is_initial_phase, cp.course_phase_type_id, cp.student_readable_data, cpt.name AS course_phase_type_name
 FROM course_phase cp
 INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
@@ -69,9 +72,10 @@ type GetAllCoursePhaseForCourseRow struct {
 	ID                  uuid.UUID   `json:"id"`
 	CourseID            uuid.UUID   `json:"course_id"`
 	Name                pgtype.Text `json:"name"`
-	MetaData            []byte      `json:"meta_data"`
+	RestrictedData      []byte      `json:"restricted_data"`
 	IsInitialPhase      bool        `json:"is_initial_phase"`
 	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 	CoursePhaseTypeName string      `json:"course_phase_type_name"`
 }
 
@@ -88,9 +92,10 @@ func (q *Queries) GetAllCoursePhaseForCourse(ctx context.Context, courseID uuid.
 			&i.ID,
 			&i.CourseID,
 			&i.Name,
-			&i.MetaData,
+			&i.RestrictedData,
 			&i.IsInitialPhase,
 			&i.CoursePhaseTypeID,
+			&i.StudentReadableData,
 			&i.CoursePhaseTypeName,
 		); err != nil {
 			return nil, err
@@ -118,7 +123,7 @@ func (q *Queries) GetCourseIDByCoursePhaseID(ctx context.Context, id uuid.UUID) 
 }
 
 const getCoursePhase = `-- name: GetCoursePhase :one
-SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
+SELECT cp.id, cp.course_id, cp.name, cp.restricted_data, cp.is_initial_phase, cp.course_phase_type_id, cp.student_readable_data, cpt.name AS course_phase_type_name
 FROM course_phase cp
 INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.id = $1
@@ -129,9 +134,10 @@ type GetCoursePhaseRow struct {
 	ID                  uuid.UUID   `json:"id"`
 	CourseID            uuid.UUID   `json:"course_id"`
 	Name                pgtype.Text `json:"name"`
-	MetaData            []byte      `json:"meta_data"`
+	RestrictedData      []byte      `json:"restricted_data"`
 	IsInitialPhase      bool        `json:"is_initial_phase"`
 	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 	CoursePhaseTypeName string      `json:"course_phase_type_name"`
 }
 
@@ -142,9 +148,10 @@ func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (GetCoursePh
 		&i.ID,
 		&i.CourseID,
 		&i.Name,
-		&i.MetaData,
+		&i.RestrictedData,
 		&i.IsInitialPhase,
 		&i.CoursePhaseTypeID,
+		&i.StudentReadableData,
 		&i.CoursePhaseTypeName,
 	)
 	return i, err
@@ -154,17 +161,24 @@ const updateCoursePhase = `-- name: UpdateCoursePhase :exec
 UPDATE course_phase
 SET 
     name = COALESCE($2, name), 
-    meta_data = meta_data || $3
+    restricted_data = restricted_data || $3,
+    student_readable_data = student_readable_data || $4
 WHERE id = $1
 `
 
 type UpdateCoursePhaseParams struct {
-	ID       uuid.UUID   `json:"id"`
-	Name     pgtype.Text `json:"name"`
-	MetaData []byte      `json:"meta_data"`
+	ID                  uuid.UUID   `json:"id"`
+	Name                pgtype.Text `json:"name"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 }
 
 func (q *Queries) UpdateCoursePhase(ctx context.Context, arg UpdateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhase, arg.ID, arg.Name, arg.MetaData)
+	_, err := q.db.Exec(ctx, updateCoursePhase,
+		arg.ID,
+		arg.Name,
+		arg.RestrictedData,
+		arg.StudentReadableData,
+	)
 	return err
 }

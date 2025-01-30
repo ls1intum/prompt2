@@ -135,7 +135,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
           {phaseType?.requiredInputMetaData && phaseType.requiredInputMetaData.length > 0 && (
             <MetaDataBadges
-              metaData={phaseType.requiredInputMetaData}
+              restrictedData={phaseType.requiredInputMetaData}
               icon={<FileInput className='w-5 h-5 text-green-500' />}
               label='Required Input Metadata'
               providedMetaData={incomingMetaData}
@@ -144,7 +144,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
           {phaseType?.providedOutputMetaData && phaseType.providedOutputMetaData.length > 0 && (
             <MetaDataBadges
-              metaData={phaseType.providedOutputMetaData}
+              restrictedData={phaseType.providedOutputMetaData}
               icon={<FileOutput className='w-5 h-5 text-green-500' />}
               label='Provided Output Metadata'
             />

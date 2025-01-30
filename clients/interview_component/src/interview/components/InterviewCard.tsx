@@ -24,7 +24,7 @@ export const InterviewCard = (): JSX.Element => {
 
   const { coursePhase } = useCoursePhaseStore()
   const interviewQuestions =
-    (coursePhase?.metaData?.interviewQuestions as InterviewQuestion[]) ?? []
+    (coursePhase?.restrictedData?.interviewQuestions as InterviewQuestion[]) ?? []
 
   const [answers, setAnswers] = useState<InterviewAnswer[]>([])
   const [score, setScore] = useState<number | undefined>(undefined)
@@ -33,23 +33,23 @@ export const InterviewCard = (): JSX.Element => {
   const { mutate, isPending: isLoading } = useUpdateCoursePhaseParticipation()
   const isModified =
     answers.some((a) => {
-      const originalAnswer = participation?.metaData?.interviewAnswers?.find(
+      const originalAnswer = participation?.restrictedData?.interviewAnswers?.find(
         (oa: InterviewAnswer) => oa.questionID === a.questionID,
       )
       return originalAnswer?.answer !== a.answer
     }) ||
-    score !== participation?.metaData?.interviewScore ||
-    interviewer !== participation?.metaData?.interviewer
+    score !== participation?.restrictedData?.interviewScore ||
+    interviewer !== participation?.restrictedData?.interviewer
 
   useEffect(() => {
     if (participation && coursePhase) {
-      const interviewAnswers = participation.metaData?.interviewAnswers as InterviewAnswer[]
+      const interviewAnswers = participation.restrictedData?.interviewAnswers as InterviewAnswer[]
       setAnswers(interviewAnswers ?? [])
 
-      const interviewScore = participation.metaData?.interviewScore as number | undefined
+      const interviewScore = participation.restrictedData?.interviewScore as number | undefined
       setScore(interviewScore)
 
-      const newInterviewer = participation.metaData?.interviewer as string | undefined
+      const newInterviewer = participation.restrictedData?.interviewer as string | undefined
       setInterviewer(newInterviewer)
     }
   }, [participation, coursePhase])
@@ -73,10 +73,11 @@ export const InterviewCard = (): JSX.Element => {
         id: participation.id,
         coursePhaseID: coursePhase.id,
         courseParticipationID: participation.courseParticipationID,
-        metaData: {
+        restrictedData: {
           interviewAnswers: answers,
           interviewScore: score,
         },
+        studentReadableData: {},
         passStatus: passStatus ?? participation.passStatus,
       })
     }

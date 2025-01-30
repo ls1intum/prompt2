@@ -5,7 +5,8 @@ export interface PostCourse {
   courseType: string
   ects: number
   semesterTag: string
-  metaData: { [key: string]: any }
+  restrictedMetaData: { [key: string]: any }
+  studentReadableData: { [key: string]: any }
 }
 
 // Helper function to format Date as YYYY-MM-DD

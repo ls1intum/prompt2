@@ -10,33 +10,41 @@ import (
 )
 
 type CourseWithPhases struct {
-	ID           uuid.UUID                            `json:"id"`
-	Name         string                               `json:"name"`
-	StartDate    pgtype.Date                          `json:"startDate"`
-	EndDate      pgtype.Date                          `json:"endDate"`
-	SemesterTag  string                               `json:"semesterTag"`
-	CourseType   db.CourseType                        `json:"courseType"`
-	ECTS         int                                  `json:"ects"`
-	MetaData     meta.MetaData                        `json:"metaData"`
-	CoursePhases []coursePhaseDTO.CoursePhaseSequence `json:"coursePhases"`
+	ID                  uuid.UUID                            `json:"id"`
+	Name                string                               `json:"name"`
+	StartDate           pgtype.Date                          `json:"startDate"`
+	EndDate             pgtype.Date                          `json:"endDate"`
+	SemesterTag         string                               `json:"semesterTag"`
+	CourseType          db.CourseType                        `json:"courseType"`
+	ECTS                int                                  `json:"ects"`
+	RestrictedData      meta.MetaData                        `json:"restrictedData"`
+	StudentReadableData meta.MetaData                        `json:"studentReadableData"`
+	CoursePhases        []coursePhaseDTO.CoursePhaseSequence `json:"coursePhases"`
 }
 
 func GetCourseByIDFromDBModel(course db.Course) (CourseWithPhases, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(course.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(course.RestrictedData)
+	if err != nil {
+		log.Error("failed to create Course DTO from DB model")
+		return CourseWithPhases{}, err
+	}
+
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(course.StudentReadableData)
 	if err != nil {
 		log.Error("failed to create Course DTO from DB model")
 		return CourseWithPhases{}, err
 	}
 
 	return CourseWithPhases{
-		ID:           course.ID,
-		Name:         course.Name,
-		StartDate:    course.StartDate,
-		EndDate:      course.EndDate,
-		SemesterTag:  course.SemesterTag.String,
-		CourseType:   course.CourseType,
-		ECTS:         int(course.Ects.Int32),
-		MetaData:     metaData,
-		CoursePhases: []coursePhaseDTO.CoursePhaseSequence{},
+		ID:                  course.ID,
+		Name:                course.Name,
+		StartDate:           course.StartDate,
+		EndDate:             course.EndDate,
+		SemesterTag:         course.SemesterTag.String,
+		CourseType:          course.CourseType,
+		ECTS:                int(course.Ects.Int32),
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CoursePhases:        []coursePhaseDTO.CoursePhaseSequence{},
 	}, nil
 }

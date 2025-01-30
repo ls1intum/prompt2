@@ -343,13 +343,13 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_S
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
 	jsonData := `{"comments": "Test-Comment"}`
-	var metaData meta.MetaData
-	err := json.Unmarshal([]byte(jsonData), &metaData)
+	var restrictedData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &restrictedData)
 	assert.NoError(suite.T(), err)
 
 	assessment := applicationDTO.PutAssessment{
-		MetaData: metaData,
-		Score:    pgtype.Int4{Int32: 90, Valid: true},
+		RestrictedData: restrictedData,
+		Score:          pgtype.Int4{Int32: 90, Valid: true},
 	}
 
 	err = UpdateApplicationAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
@@ -361,7 +361,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_S
 	for _, participation := range participations {
 		if participation.ID == coursePhaseParticipationID {
 			assert.Equal(suite.T(), int32(90), participation.Score.Int32)
-			assert.Equal(suite.T(), "Test-Comment", participation.MetaData["comments"])
+			assert.Equal(suite.T(), "Test-Comment", participation.RestrictedData["comments"])
 			assert.Equal(suite.T(), "passed", participation.PassStatus)
 		}
 	}
@@ -402,12 +402,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 	assert.NoError(suite.T(), err)
 	for _, participation := range participations {
 		if participation.ID == uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976") {
-			assert.Equal(suite.T(), float64(60), participation.MetaData["TestScore"])
+			assert.Equal(suite.T(), float64(60), participation.RestrictedData["TestScore"])
 			assert.Equal(suite.T(), "passed", participation.PassStatus)
 		}
 
 		if participation.ID == uuid.MustParse("f5e61de3-6b6a-494e-a0ac-a18f1f9262e1") {
-			assert.Equal(suite.T(), float64(40), participation.MetaData["TestScore"])
+			assert.Equal(suite.T(), float64(40), participation.RestrictedData["TestScore"])
 			assert.Equal(suite.T(), "failed", participation.PassStatus)
 		}
 	}

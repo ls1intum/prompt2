@@ -25,7 +25,7 @@ export const useHideMailingWarning = () => {
   const hideMailingWarning = () => {
     const updatedCoursePhase: UpdateCoursePhase = {
       id: phaseId ?? '',
-      metaData: {
+      restrictedData: {
         hideMailingWarning: true,
       },
     }

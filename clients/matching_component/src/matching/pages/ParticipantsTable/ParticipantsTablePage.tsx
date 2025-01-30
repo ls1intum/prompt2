@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 
 export const ParticipantsTablePage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const [prevMetaDataKeys, setPrevMetaDataKeys] = useState<string[]>([])
+  const [prevDataKeys, setPrevDataKeys] = useState<string[]>([])
 
   const {
     data: coursePhaseParticipations,
@@ -25,20 +25,20 @@ export const ParticipantsTablePage = (): JSX.Element => {
   useEffect(() => {
     if (coursePhaseParticipations && Array.isArray(coursePhaseParticipations)) {
       const containsInterview = coursePhaseParticipations.some((participation) => {
-        return participation?.prevMetaData?.interviewScore !== undefined
+        return participation?.prevData?.interviewScore !== undefined
       })
       const containsApplicationScore = coursePhaseParticipations.some((participation) => {
-        return participation?.prevMetaData?.applicationScore !== undefined
+        return participation?.prevData?.applicationScore !== undefined
       })
 
-      const metaDataKeys: string[] = []
+      const dataKeys: string[] = []
       if (containsInterview) {
-        metaDataKeys.push('interviewScore')
+        dataKeys.push('interviewScore')
       }
       if (containsApplicationScore) {
-        metaDataKeys.push('applicationScore')
+        dataKeys.push('applicationScore')
       }
-      setPrevMetaDataKeys(metaDataKeys)
+      setPrevDataKeys(dataKeys)
     }
   }, [coursePhaseParticipations])
 
@@ -54,8 +54,9 @@ export const ParticipantsTablePage = (): JSX.Element => {
       ) : (
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations ?? []}
-          prevMetaDataKeys={prevMetaDataKeys}
-          metaDataKeys={[]}
+          prevDataKeys={prevDataKeys}
+          restrictedDataKeys={[]}
+          studentReadableDataKeys={[]}
         />
       )}
     </div>

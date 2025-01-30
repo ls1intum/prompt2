@@ -31,7 +31,7 @@ interface ApplicationDetailsDialogProps {
   open: boolean
   status: PassStatus
   score: number | null
-  metaData: { [key: string]: any }
+  restrictedData: { [key: string]: any }
   onClose: () => void
 }
 
@@ -40,7 +40,7 @@ export const ApplicationDetailsDialog = ({
   open,
   status,
   score,
-  metaData,
+  restrictedData,
   onClose,
 }: ApplicationDetailsDialogProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -96,14 +96,14 @@ export const ApplicationDetailsDialog = ({
   }
 
   const handleCommentSubmit = (comment: string) => {
-    const comments = (metaData.comments || []) as InstructorComment[]
+    const comments = (restrictedData.comments || []) as InstructorComment[]
     comments.push({
       text: comment,
       timestamp: new Date().toISOString(),
       author: `${user?.firstName} ${user?.lastName}`,
     })
     const assessment: ApplicationAssessment = {
-      metaData: {
+      restrictedData: {
         comments,
       },
     }
@@ -170,7 +170,7 @@ export const ApplicationDetailsDialog = ({
 
             <AssessmentCard
               score={score}
-              metaData={metaData}
+              restrictedData={restrictedData}
               acceptanceStatus={status}
               handleAcceptanceStatusChange={handleAcceptanceStatusChange}
               onScoreSubmission={handleScoreSubmit}

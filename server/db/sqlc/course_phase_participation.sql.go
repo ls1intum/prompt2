@@ -14,18 +14,19 @@ import (
 
 const createCoursePhaseParticipation = `-- name: CreateCoursePhaseParticipation :one
 INSERT INTO course_phase_participation
-    (id, course_participation_id, course_phase_id, pass_status, meta_data)
+    (id, course_participation_id, course_phase_id, pass_status, restricted_data, student_readable_data)
 SELECT
     $1 AS id,
     $2 AS course_participation_id,
     $3 AS course_phase_id,
     $4 AS pass_status,
-    $5 AS meta_data
+    $5 AS restricted_data,
+    $6 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
   AND cph.id = $3
-RETURNING id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified
+RETURNING id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data
 `
 
 type CreateCoursePhaseParticipationParams struct {
@@ -33,7 +34,8 @@ type CreateCoursePhaseParticipationParams struct {
 	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
 	PassStatus            NullPassStatus `json:"pass_status"`
-	MetaData              []byte         `json:"meta_data"`
+	RestrictedData        []byte         `json:"restricted_data"`
+	StudentReadableData   []byte         `json:"student_readable_data"`
 }
 
 // - We need to ensure that the course_participation_id and course_phase_id
@@ -44,22 +46,24 @@ func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg Create
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.PassStatus,
-		arg.MetaData,
+		arg.RestrictedData,
+		arg.StudentReadableData,
 	)
 	var i CoursePhaseParticipation
 	err := row.Scan(
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.MetaData,
+		&i.RestrictedData,
 		&i.PassStatus,
 		&i.LastModified,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
 
 const getAllCoursePhaseParticipationsForCourseParticipation = `-- name: GetAllCoursePhaseParticipationsForCourseParticipation :many
-SELECT id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
 WHERE course_participation_id = $1
 `
 
@@ -76,9 +80,10 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 			&i.ID,
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
-			&i.MetaData,
+			&i.RestrictedData,
 			&i.PassStatus,
 			&i.LastModified,
+			&i.StudentReadableData,
 		); err != nil {
 			return nil, err
 		}
@@ -94,7 +99,8 @@ const getAllCoursePhaseParticipationsForCoursePhase = `-- name: GetAllCoursePhas
 SELECT
     cpp.id AS course_phase_participation_id,
     cpp.pass_status,
-    cpp.meta_data,
+    cpp.restricted_data,
+    cpp.student_readable_data,
     s.id AS student_id,
     s.first_name,
     s.last_name,
@@ -116,7 +122,8 @@ WHERE
 type GetAllCoursePhaseParticipationsForCoursePhaseRow struct {
 	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
 	PassStatus                 NullPassStatus `json:"pass_status"`
-	MetaData                   []byte         `json:"meta_data"`
+	RestrictedData             []byte         `json:"restricted_data"`
+	StudentReadableData        []byte         `json:"student_readable_data"`
 	StudentID                  uuid.UUID      `json:"student_id"`
 	FirstName                  pgtype.Text    `json:"first_name"`
 	LastName                   pgtype.Text    `json:"last_name"`
@@ -139,7 +146,8 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Cont
 		if err := rows.Scan(
 			&i.CoursePhaseParticipationID,
 			&i.PassStatus,
-			&i.MetaData,
+			&i.RestrictedData,
+			&i.StudentReadableData,
 			&i.StudentID,
 			&i.FirstName,
 			&i.LastName,
@@ -169,9 +177,10 @@ direct_predecessor_for_pass AS (
 
 direct_predecessors_for_meta AS (
   SELECT 
-    from_phase_id AS phase_id,
-    cp.meta_data AS course_phase_meta_data,
-    cp.course_phase_type_id AS course_phase_type_id
+    from_phase_id             AS phase_id,
+    cp.restricted_data        AS course_phase_restricted_data,
+    cp.student_readable_data  AS course_phase_student_readable_data,
+    cp.course_phase_type_id   AS course_phase_type_id
   FROM meta_data_dependency_graph
   JOIN course_phase cp
     ON cp.id = from_phase_id
@@ -180,10 +189,11 @@ direct_predecessors_for_meta AS (
 
 current_phase_participations AS (
     SELECT
-        cpp.id                   AS course_phase_participation_id,
-        cpp.pass_status          AS pass_status,
-        cpp.meta_data            AS meta_data,
-        s.id                     AS student_id,
+        cpp.id                         AS course_phase_participation_id,
+        cpp.pass_status                AS pass_status,
+        cpp.restricted_data            AS restricted_data,
+        cpp.student_readable_data      AS student_readable_data,
+        s.id                           AS student_id,
         s.first_name,
         s.last_name,
         s.email,
@@ -208,7 +218,8 @@ qualified_non_participants AS (
     SELECT
         NULL::uuid                   AS course_phase_participation_id,
         'not_assessed'::pass_status  AS pass_status,
-        '{}'::jsonb                  AS meta_data,
+        '{}'::jsonb                  AS restricted_data,
+        '{}'::jsonb                  AS student_readable_data,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
@@ -248,7 +259,7 @@ qualified_non_participants AS (
 )
 
 SELECT
-    main.course_phase_participation_id, main.pass_status, main.meta_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id,
+    main.course_phase_participation_id, main.pass_status, main.restricted_data, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id,
     (COALESCE(
        (
           ----------------------------------------------------------------
@@ -259,17 +270,23 @@ SELECT
           FROM direct_predecessors_for_meta dpm
           JOIN course_phase_participation pcpp
             ON pcpp.course_phase_id = dpm.phase_id
-            AND pcpp.course_participation_id = main.course_participation_id
+          AND pcpp.course_participation_id = main.course_participation_id
           JOIN course_phase_type cpt
             ON cpt.id = dpm.course_phase_type_id
-            AND cpt.name != 'Application'
-          CROSS JOIN LATERAL jsonb_each(pcpp.meta_data) each
-            WHERE 
-            -- Only keep meta_data where the JSON key matches one of the "name" attributes
-                each.key IN (
-                    SELECT elem->>'name'
-                    FROM jsonb_array_elements(cpt.provided_output_meta_data) AS elem
-                ) 
+          AND cpt.name != 'Application'
+          -- the phase is responsible to make sure that there is no key collision
+          CROSS JOIN LATERAL (
+        -- We explicitly alias columns as (key, value) in each SELECT.
+            SELECT (jsonb_each(pcpp.student_readable_data)).key   AS key,
+                  (jsonb_each(pcpp.student_readable_data)).value AS value
+            UNION
+            SELECT (jsonb_each(pcpp.restricted_data)).key   AS key,
+                  (jsonb_each(pcpp.restricted_data)).value AS value
+            ) AS each
+          WHERE each.key IN (
+              SELECT elem->>'name'
+              FROM   jsonb_array_elements(cpt.provided_output_meta_data) AS elem
+          )
        ),
        '{}'
     )::jsonb ||
@@ -326,11 +343,11 @@ SELECT
                          SELECT jsonb_agg(
                              jsonb_build_object(
                                'key', question_config->>'key',
-                               'answer', pcpp.meta_data -> (question_config->>'key')
+                               'answer', pcpp.restricted_data -> (question_config->>'key')
                              )
                          )
                          FROM jsonb_array_elements(
-                                dpm.course_phase_meta_data->'additionalScores'
+                                dpm.course_phase_restricted_data->'additionalScores'
                               ) question_config
                      ),
                      ----------------------------------------------------------
@@ -378,13 +395,13 @@ SELECT
          ) appdata
        ),
        '{}'
-    )::jsonb)::jsonb AS prev_meta_data
+    )::jsonb)::jsonb AS prev_data
 
 FROM
 (
-    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participations
+    SELECT course_phase_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participations
     UNION
-    SELECT course_phase_participation_id, pass_status, meta_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participants
+    SELECT course_phase_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participants
 ) AS main
 ORDER BY main.last_name, main.first_name
 `
@@ -392,7 +409,8 @@ ORDER BY main.last_name, main.first_name
 type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
 	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
 	PassStatus                 NullPassStatus `json:"pass_status"`
-	MetaData                   []byte         `json:"meta_data"`
+	RestrictedData             []byte         `json:"restricted_data"`
+	StudentReadableData        []byte         `json:"student_readable_data"`
 	StudentID                  uuid.UUID      `json:"student_id"`
 	FirstName                  pgtype.Text    `json:"first_name"`
 	LastName                   pgtype.Text    `json:"last_name"`
@@ -406,7 +424,7 @@ type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
 	StudyProgram               pgtype.Text    `json:"study_program"`
 	CurrentSemester            pgtype.Int4    `json:"current_semester"`
 	CourseParticipationID      uuid.UUID      `json:"course_participation_id"`
-	PrevMetaData               []byte         `json:"prev_meta_data"`
+	PrevData                   []byte         `json:"prev_data"`
 }
 
 // ---------------------------------------------------------------------
@@ -443,7 +461,8 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 		if err := rows.Scan(
 			&i.CoursePhaseParticipationID,
 			&i.PassStatus,
-			&i.MetaData,
+			&i.RestrictedData,
+			&i.StudentReadableData,
 			&i.StudentID,
 			&i.FirstName,
 			&i.LastName,
@@ -457,7 +476,7 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 			&i.StudyProgram,
 			&i.CurrentSemester,
 			&i.CourseParticipationID,
-			&i.PrevMetaData,
+			&i.PrevData,
 		); err != nil {
 			return nil, err
 		}
@@ -470,7 +489,7 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 }
 
 const getCoursePhaseParticipation = `-- name: GetCoursePhaseParticipation :one
-SELECT id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
 WHERE id = $1 LIMIT 1
 `
 
@@ -481,16 +500,17 @@ func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID)
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.MetaData,
+		&i.RestrictedData,
 		&i.PassStatus,
 		&i.LastModified,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
 
 const getCoursePhaseParticipationByCourseParticipationAndCoursePhase = `-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 
-SELECT id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified FROM course_phase_participation
+SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
 WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1
 `
 
@@ -507,9 +527,10 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
-		&i.MetaData,
+		&i.RestrictedData,
 		&i.PassStatus,
 		&i.LastModified,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
@@ -518,24 +539,27 @@ const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation 
 UPDATE course_phase_participation
 SET 
     pass_status = COALESCE($2, pass_status),   
-    meta_data = meta_data || $3
+    restricted_data = restricted_data || $3, 
+    student_readable_data = student_readable_data || $4
 WHERE id = $1
-AND course_phase_id = $4
+AND course_phase_id = $5
 RETURNING id
 `
 
 type UpdateCoursePhaseParticipationParams struct {
-	ID            uuid.UUID      `json:"id"`
-	PassStatus    NullPassStatus `json:"pass_status"`
-	MetaData      []byte         `json:"meta_data"`
-	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
+	ID                  uuid.UUID      `json:"id"`
+	PassStatus          NullPassStatus `json:"pass_status"`
+	RestrictedData      []byte         `json:"restricted_data"`
+	StudentReadableData []byte         `json:"student_readable_data"`
+	CoursePhaseID       uuid.UUID      `json:"course_phase_id"`
 }
 
 func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, updateCoursePhaseParticipation,
 		arg.ID,
 		arg.PassStatus,
-		arg.MetaData,
+		arg.RestrictedData,
+		arg.StudentReadableData,
 		arg.CoursePhaseID,
 	)
 	var id uuid.UUID
