@@ -21,3 +21,13 @@ FROM course c
 JOIN course_participation cp ON c.id = cp.course_id
 JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
 WHERE cpp.id = $1;
+
+
+
+-- name: GetStudentRoleStrings :many
+SELECT CONCAT(c.name, '-', c.semester_tag, '-Student')::text AS student_role
+FROM course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE s.matriculation_number = $1
+AND s.university_login = $2;
