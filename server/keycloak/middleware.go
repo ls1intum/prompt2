@@ -99,7 +99,6 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			userRoles[role] = true
 		}
 
-		log.Info("User roles: ", userRoles)
 		// Store the extracted roles in the context
 		c.Set("userRoles", userRoles)
 		c.Set("userID", userID)
