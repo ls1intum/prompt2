@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -20,6 +21,25 @@ type CoursePhaseParticipationService struct {
 }
 
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
+
+func GetOwnCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, matriculationNumber string, universityLogin string) (coursePhaseParticipationDTO.CoursePhaseParticipationStudent, error) {
+	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx, db.GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseParams{
+		ToCoursePhaseID:     coursePhaseID,
+		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
+		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
+	})
+
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationStudent{}, err
+	}
+
+	participationDTO, err := coursePhaseParticipationDTO.GetCoursePhaseParticipationStudent(coursePhaseParticipation)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationStudent{}, err
+	}
+
+	return participationDTO, nil
+}
 
 func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, error) {
 	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
