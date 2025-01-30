@@ -45,7 +45,7 @@ func runMigrations(databaseURL string) {
 	}
 }
 
-func initKeycloak() {
+func initKeycloak(queries db.Queries) {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "https://" + baseURL
@@ -59,7 +59,7 @@ func initKeycloak() {
 
 	log.Info("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " idOfClient: ", idOfClient, " expectedAuthorizedParty: ", expectedAuthorizedParty)
 
-	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty)
+	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
 	if err != nil {
 		log.Error("Failed to initialize keycloak: ", err)
 	}
@@ -93,7 +93,7 @@ func main() {
 
 	query := db.New(conn)
 
-	initKeycloak()
+	initKeycloak(*query)
 	permissionValidation.InitValidationService(*query, conn)
 
 	router := gin.Default()
