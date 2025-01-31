@@ -29,7 +29,10 @@ func getOwnCourseParticipation(c *gin.Context) {
 
 	if matriculationNumber == "" || universityLogin == "" {
 		// potentially users without studentIDs are using the system -> no error shall be thrown
-		c.JSON(http.StatusOK, gin.H{"no courses": "no student authentication provided"})
+		c.JSON(http.StatusOK, courseParticipationDTO.GetOwnCourseParticipation{
+			ID:                 uuid.Nil,
+			ActiveCoursePhases: []uuid.UUID{},
+		})
 		return
 	}
 

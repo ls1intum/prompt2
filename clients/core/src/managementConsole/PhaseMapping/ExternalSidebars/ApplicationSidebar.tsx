@@ -3,7 +3,15 @@ import { FileUser } from 'lucide-react'
 import { ExternalSidebarComponent } from './ExternalSidebar'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 
-export const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; title: string }) => {
+export const ApplicationSidebar = ({
+  rootPath,
+  title,
+  coursePhaseID,
+}: {
+  rootPath: string
+  title: string
+  coursePhaseID: string
+}) => {
   const applicationSidebarItems: SidebarMenuItemProps = {
     title: 'Application',
     icon: <FileUser />,
@@ -32,6 +40,7 @@ export const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; titl
       title={title}
       rootPath={rootPath}
       sidebarElement={applicationSidebarItems}
+      coursePhaseID={coursePhaseID}
     />
   )
 }
