@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import type * as z from 'zod'
@@ -69,15 +69,31 @@ export const MailingConfigPage = (): JSX.Element => {
     }
   }, [applicationMailingMetaData, form])
 
-  async function onSubmit(values: z.infer<typeof courseMailingSchema>) {
-    if (currentCourse) {
-      const updatedCourse = {
-        restrictedData: {
-          mailingSettings: values,
-        },
+  const onSubmit = useCallback(
+    (values: z.infer<typeof courseMailingSchema>) => {
+      if (currentCourse) {
+        const updatedCourse = {
+          restrictedData: {
+            mailingSettings: values,
+          },
+        }
+        mutateMailingData(updatedCourse)
+        setIsModified(false)
       }
-      mutateMailingData(updatedCourse)
-    }
+    },
+    [currentCourse, mutateMailingData],
+  )
+
+  // Handler to remove CC and submit form
+  const handleRemoveCC = (index: number) => {
+    removeCC(index)
+    form.handleSubmit(onSubmit)()
+  }
+
+  // Handler to remove BCC and submit form
+  const handleRemoveBCC = (index: number) => {
+    removeBCC(index)
+    form.handleSubmit(onSubmit)()
   }
 
   return (
@@ -170,7 +186,11 @@ export const MailingConfigPage = (): JSX.Element => {
                             </FormItem>
                           )}
                         />
-                        <Button variant='destructive' type='button' onClick={() => removeCC(index)}>
+                        <Button
+                          variant='destructive'
+                          type='button'
+                          onClick={() => handleRemoveCC(index)}
+                        >
                           <Trash2 className='h-4 w-4' />
                         </Button>
                       </div>
@@ -233,7 +253,7 @@ export const MailingConfigPage = (): JSX.Element => {
                         <Button
                           variant='destructive'
                           type='button'
-                          onClick={() => removeBCC(index)}
+                          onClick={() => handleRemoveBCC(index)}
                         >
                           <Trash2 className='h-4 w-4' />
                         </Button>
