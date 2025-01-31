@@ -12,11 +12,35 @@ import (
 func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	// incoming path should be /course/:uuid/
 	courseParticipation := router.Group("/courses/:uuid/participations", authMiddleware())
+	courseParticipation.GET("/self", permissionIDMiddleware(keycloak.CourseStudent), getOwnCourseParticipation)
 	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseParticipationsForCourse)
 	courseParticipation.POST("/enroll", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCourseParticipation)
 }
 
-// TODO: in future think about how to integrate / create "passed" students from previous phases
+func getOwnCourseParticipation(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	matriculationNumber := c.GetString("matriculationNumber")
+	universityLogin := c.GetString("universityLogin")
+
+	if matriculationNumber == "" || universityLogin == "" {
+		handleError(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	courseParticipation, err := GetOwnCourseParticipation(c, id, matriculationNumber, universityLogin)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseParticipation)
+}
+
 func getCourseParticipationsForCourse(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {

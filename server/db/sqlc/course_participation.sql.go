@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCourseParticipation = `-- name: CreateCourseParticipation :one
@@ -89,6 +90,55 @@ func (q *Queries) GetCourseParticipation(ctx context.Context, id uuid.UUID) (Cou
 	row := q.db.QueryRow(ctx, getCourseParticipation, id)
 	var i CourseParticipation
 	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
+	return i, err
+}
+
+const getCourseParticipationByCourseIDAndMatriculation = `-- name: GetCourseParticipationByCourseIDAndMatriculation :one
+SELECT 
+    cp.id, 
+    cp.course_id, 
+    cp.student_id, 
+    ARRAY_AGG(cpp.course_phase_id)::uuid[] AS active_course_phases
+FROM 
+    course_participation cp
+JOIN 
+    course_phase_participation cpp ON cpp.course_participation_id = cp.id 
+JOIN 
+    student s ON s.id = cp.student_id
+JOIN 
+    course_phase cphase ON cphase.id = cpp.course_phase_id
+WHERE 
+    cp.course_id = $1 
+    AND s.matriculation_number = $2 
+    AND s.university_login = $3
+GROUP BY 
+    cp.id, 
+    cp.course_id, 
+    cp.student_id
+`
+
+type GetCourseParticipationByCourseIDAndMatriculationParams struct {
+	CourseID            uuid.UUID   `json:"course_id"`
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+}
+
+type GetCourseParticipationByCourseIDAndMatriculationRow struct {
+	ID                 uuid.UUID   `json:"id"`
+	CourseID           uuid.UUID   `json:"course_id"`
+	StudentID          uuid.UUID   `json:"student_id"`
+	ActiveCoursePhases []uuid.UUID `json:"active_course_phases"`
+}
+
+func (q *Queries) GetCourseParticipationByCourseIDAndMatriculation(ctx context.Context, arg GetCourseParticipationByCourseIDAndMatriculationParams) (GetCourseParticipationByCourseIDAndMatriculationRow, error) {
+	row := q.db.QueryRow(ctx, getCourseParticipationByCourseIDAndMatriculation, arg.CourseID, arg.MatriculationNumber, arg.UniversityLogin)
+	var i GetCourseParticipationByCourseIDAndMatriculationRow
+	err := row.Scan(
+		&i.ID,
+		&i.CourseID,
+		&i.StudentID,
+		&i.ActiveCoursePhases,
+	)
 	return i, err
 }
 

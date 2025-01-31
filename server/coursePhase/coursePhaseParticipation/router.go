@@ -35,13 +35,13 @@ func getOwnCoursePhaseParticipation(c *gin.Context) {
 		return
 	}
 
-	courseParticipation, err := GetOwnCoursePhaseParticipation(c, id, matriculationNumber, universityLogin)
+	coursePhaseParticipation, err := GetOwnCoursePhaseParticipation(c, id, matriculationNumber, universityLogin)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, courseParticipation)
+	c.IndentedJSON(http.StatusOK, coursePhaseParticipation)
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {
