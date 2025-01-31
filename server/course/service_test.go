@@ -96,7 +96,7 @@ func (suite *CourseServiceTestSuite) TestGetAllCoursesWithStudent() {
 		assert.NotEmpty(suite.T(), course.ID, "Course ID should not be empty")
 		assert.NotEmpty(suite.T(), course.Name, "Course Name should not be empty")
 		// Ensure that restricted data is not present
-		assert.Empty(suite.T(), course.RestrictedData, "Course should have restricted data")
+		assert.Empty(suite.T(), course.RestrictedData, "Course should not have restricted data")
 	}
 }
 
