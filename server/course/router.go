@@ -31,7 +31,10 @@ func getOwnCourses(c *gin.Context) {
 	universityLogin := c.GetString("universityLogin")
 
 	if matriculationNumber == "" || universityLogin == "" {
-		handleError(c, http.StatusUnauthorized, errors.New("missing matriculation number or university login"))
+		// we need to ensure that it is still usable if you do not have a matriculation number or university login
+		// i.e. prompt admins might not have a student role
+		log.Debug("no matriculation number or university login found")
+		c.IndentedJSON(http.StatusOK, []uuid.UUID{})
 		return
 	}
 
