@@ -28,9 +28,9 @@ func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	// TODO: make distinction if admin or not admin here!!!
 	var courses []db.Course
 	var err error
+	// Get all active courses the user is allowed to see
 	if userRoles[keycloak.PromptAdmin] {
 		// get all courses
 		courses, err = CourseServiceSingleton.queries.GetAllActiveCoursesAdmin(ctxWithTimeout)
@@ -55,6 +55,7 @@ func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.
 		}
 	}
 
+	// Get all course phases for each course
 	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
 	for _, course := range courses {
 		// Get all course phases for the course
