@@ -87,6 +87,19 @@ func (suite *CourseServiceTestSuite) TestGetAllCoursesWithRestriction() {
 	}
 }
 
+func (suite *CourseServiceTestSuite) TestGetAllCoursesWithStudent() {
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{"Another TEst-ios2425-Student": true})
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 1, len(courses), "Expected to get only one course")
+
+	for _, course := range courses {
+		assert.NotEmpty(suite.T(), course.ID, "Course ID should not be empty")
+		assert.NotEmpty(suite.T(), course.Name, "Course Name should not be empty")
+		// Ensure that restricted data is not present
+		assert.Empty(suite.T(), course.RestrictedData, "Course should have restricted data")
+	}
+}
+
 func (suite *CourseServiceTestSuite) TestGetCourseByID() {
 	courseID := uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e")
 
