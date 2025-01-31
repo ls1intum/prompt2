@@ -28,7 +28,8 @@ func getOwnCourseParticipation(c *gin.Context) {
 	universityLogin := c.GetString("universityLogin")
 
 	if matriculationNumber == "" || universityLogin == "" {
-		handleError(c, http.StatusUnauthorized, err)
+		// potentially users without studentIDs are using the system -> no error shall be thrown
+		c.JSON(http.StatusOK, gin.H{"no courses": "no student authentication provided"})
 		return
 	}
 

@@ -248,6 +248,43 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 	return i, err
 }
 
+const getOwnCourses = `-- name: GetOwnCourses :many
+SELECT
+    c.id
+FROM
+    course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE
+    s.matriculation_number = $1
+AND s.university_login = $2
+`
+
+type GetOwnCoursesParams struct {
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+}
+
+func (q *Queries) GetOwnCourses(ctx context.Context, arg GetOwnCoursesParams) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getOwnCourses, arg.MatriculationNumber, arg.UniversityLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCourse = `-- name: UpdateCourse :exec
 UPDATE course
 SET 

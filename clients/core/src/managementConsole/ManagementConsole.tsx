@@ -15,6 +15,7 @@ import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useParams } from 'react-router-dom'
 import CourseNotFound from './shared/components/CourseNotFound'
 import { Breadcrumbs } from './layout/Breadcrumbs/Breadcrumbs'
+import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
@@ -22,21 +23,37 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   const courseId = useParams<{ courseId: string }>()
   const hasChildren = React.Children.count(children) > 0
 
-  const { setCourses } = useCourseStore()
+  const { setCourses, setOwnCourseIDs } = useCourseStore()
 
   // getting the courses
   const {
     data: fetchedCourses,
     error,
     isPending,
-    isError,
-    refetch,
+    isError: isCourseError,
+    refetch: refetchCourses,
   } = useQuery<Course[]>({
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
   })
 
-  const isLoading = !(keycloak && user) || isPending
+  // getting the course ids of the course a user is enrolled in
+  const {
+    data: fetchedOwnCourseIDs,
+    isPending: isOwnCourseIdPending,
+    isError: isOwnCourseIdError,
+    refetch: refetchOwnCourseIds,
+  } = useQuery<string[]>({
+    queryKey: ['own_courses'],
+    queryFn: () => getOwnCourseIDs(),
+  })
+
+  const isLoading = !(keycloak && user) || isPending || isOwnCourseIdPending
+  const isError = isCourseError || isOwnCourseIdError
+  const refetch = () => {
+    refetchOwnCourseIds()
+    refetchCourses()
+  }
 
   useEffect(() => {
     if (fetchedCourses) {
@@ -44,17 +61,25 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     }
   }, [fetchedCourses, setCourses])
 
+  useEffect(() => {
+    if (fetchedOwnCourseIDs) {
+      setOwnCourseIDs(fetchedOwnCourseIDs)
+    }
+  }, [fetchedOwnCourseIDs, setOwnCourseIDs])
+
   if (isLoading) {
     return <LoadingPage />
   }
 
   if (isError) {
-    console.error(error)
+    if (isCourseError && error.message.includes('401')) {
+      return <UnauthorizedPage />
+    }
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 
   // Check if the user has at least some Prompt rights
-  if (permissions.length === 0) {
+  if (permissions.length === 0 && fetchedCourses && fetchedCourses.length === 0) {
     return <UnauthorizedPage />
   }
 
