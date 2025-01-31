@@ -12,6 +12,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -65,9 +66,20 @@ func (suite *CourseServiceTestSuite) TearDownSuite() {
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCourses() {
-	courses, err := GetAllCourses(suite.ctx)
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{keycloak.PromptAdmin: true})
 	assert.NoError(suite.T(), err)
-	assert.Greater(suite.T(), len(courses), 0, "Expected at least one course")
+	assert.Equal(suite.T(), len(courses), 10, "Expected all courses")
+
+	for _, course := range courses {
+		assert.NotEmpty(suite.T(), course.ID, "Course ID should not be empty")
+		assert.NotEmpty(suite.T(), course.Name, "Course Name should not be empty")
+	}
+}
+
+func (suite *CourseServiceTestSuite) TestGetAllCoursesWithRestriction() {
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{"Another TEst-ios2425-Lecturer": true})
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 1, len(courses), "Expected to get only one course")
 
 	for _, course := range courses {
 		assert.NotEmpty(suite.T(), course.ID, "Course ID should not be empty")

@@ -43,15 +43,15 @@ CREATE TABLE course (
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('3f42d322-e5bf-4faa-b576-51f2cab14c2e', 'iPraktikum', '2024-10-01', '2025-01-01', 'ios24245', 'practical course', 10, '{"icon": "apple", "bg-color": "bg-orange-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('918977e1-2d27-4b55-9064-8504ff027a1a', 'New fancy course', '2024-10-01', '2025-01-01', 'ios24245', 'practical course', 10, '{}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('fe672868-3d07-4bdd-af41-121fd05e2d0d', 'iPraktikum', '2024-10-01', '2025-01-01', 'ios24245', 'lecture', 5, '{"icon": "home", "color": "green"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('0bb5c8dc-a4df-4d64-a9fd-fe8840760d6b', 'Test5', '2025-01-13', '2025-01-18', 'ios2425', 'seminar', 5, '{"icon": "smartphone", "bg-color": "bg-blue-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('55856fdc-fc2f-456a-a5a5-726d60aaae7c', 'iPraktikum3', '2025-01-07', '2025-01-24', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-green-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('64a12e61-a238-4cea-a36a-5eaf89d7a940', 'Another TEst', '2024-12-15', '2025-01-17', 'ios2425', 'seminar', 5, '{"icon": "folder", "bg-color": "bg-red-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('07d0664c-6116-4897-97c9-521c8d73dd9f', 'Further Testing', '2024-12-17', '2025-01-15', 'ios24', 'practical course', 10, '{"icon": "monitor", "bg-color": "bg-cyan-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('00f6d242-9716-487c-a8de-5e02112ea131', 'Test150', '2024-12-17', '2025-01-17', 'test', 'practical course', 10, '{"icon": "book-open-text", "bg-color": "bg-orange-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('894cb6fc-9407-4642-b4de-2e0b4e893126', 'iPraktikum-Test', '2025-03-10', '2025-08-01', 'ios2425', 'practical course', 10, '{"icon": "gamepad-2", "bg-color": "bg-green-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('3f42d322-e5bf-4faa-b576-51f2cab14c2e', 'iPraktikum', '2024-10-01', '2030-01-01', 'ios24245', 'practical course', 10, '{"icon": "apple", "bg-color": "bg-orange-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('918977e1-2d27-4b55-9064-8504ff027a1a', 'New fancy course', '2024-10-01', '2030-01-01', 'ios24245', 'practical course', 10, '{}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('fe672868-3d07-4bdd-af41-121fd05e2d0d', 'iPraktikum', '2024-10-01', '2030-01-01', 'ios24245', 'lecture', 5, '{"icon": "home", "color": "green"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('0bb5c8dc-a4df-4d64-a9fd-fe8840760d6b', 'Test5', '2025-01-13', '2030-01-18', 'ios2425', 'seminar', 5, '{"icon": "smartphone", "bg-color": "bg-blue-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('55856fdc-fc2f-456a-a5a5-726d60aaae7c', 'iPraktikum3', '2025-01-07', '2030-01-24', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-green-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('64a12e61-a238-4cea-a36a-5eaf89d7a940', 'Another TEst', '2024-12-15', '2030-01-17', 'ios2425', 'seminar', 5, '{"icon": "folder", "bg-color": "bg-red-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('07d0664c-6116-4897-97c9-521c8d73dd9f', 'Further Testing', '2024-12-17', '2030-01-15', 'ios24', 'practical course', 10, '{"icon": "monitor", "bg-color": "bg-cyan-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('00f6d242-9716-487c-a8de-5e02112ea131', 'Test150', '2024-12-17', '2030-01-17', 'test', 'practical course', 10, '{"icon": "book-open-text", "bg-color": "bg-orange-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('894cb6fc-9407-4642-b4de-2e0b4e893126', 'iPraktikum-Test', '2025-03-10', '2030-08-01', 'ios2425', 'practical course', 10, '{"icon": "gamepad-2", "bg-color": "bg-green-100"}');
 
 
 --
