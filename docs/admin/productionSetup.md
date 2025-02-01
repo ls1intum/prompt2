@@ -4,7 +4,7 @@ title: "Production Setup"
 
 # Production Setup
 
-The general setup is described in the [Development Setup Guide](#). This guide focuses on the dockerized setup process for PROMPT. The PROMPT setup process is straightforward and requires only a few environment variables to adjust.
+The general setup is described in the [Contributor Setup Guide](#contributor.setup-guide). This guide focuses on the dockerized setup process for PROMPT. The PROMPT setup process is straightforward and requires only a few environment variables to adjust.
 
 There are three crucial steps for setting up PROMPT:
 
@@ -38,7 +38,7 @@ PROMPT uses Keycloak for authentication and user rights management. In particula
     - **`<SemesterTag>-<CourseName>-Lecturer`**  
       Group: `Lecturer` (a subgroup of the course group). This role grants admin rights on the course. The course creator is automatically added to this role.
     - **`<SemesterTag>-<CourseName>-Editor`**  
-      Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](#).
+      Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](#contributor.setup-guide).
 
 There are two options for setting up Keycloak:
 
@@ -94,7 +94,7 @@ Follow these steps:
 
 ### Option 2: Use a Standalone Keycloak Instance for PROMPT
 
-For this option, refer to the [Contributor Setup Guide](#) on how to configure a standalone Keycloak instance and the `keycloakConfig.json`.
+For this option, refer to the [Contributor Setup Guide](#contributor.setup-guide) on how to configure a standalone Keycloak instance and the `keycloakConfig.json`.
 
 Keep in mind:
 - The `docker-compose.extern.yml` includes a sample setup with a Docker container for Keycloak and a database instance to persist Keycloak data.
@@ -113,12 +113,12 @@ Keep in mind:
 
 PROMPT integrates with a mail service to, for example, send confirmation emails to students or enable instructors to send emails to all accepted/declined students. The AET Chair uses a Postfix container (refer to `docker-compose.prod.yml`).
 
-You can use any SMTP server by adjusting your environment file with the corresponding SMTP settings (see the details in section [3.1 Adjust Environment Variables](#31-adjust-environment-variables)).
+You can use any SMTP server by adjusting your environment file with the corresponding SMTP settings (see the details in section [3.1 Adjust Environment Variables](#adjust-environment-variables)).
 
 ---
 
 ## 3. Container Setup
-
+(adjust-environment-variables)=
 ### 3.1 Adjust Environment Variables
 
 An `.env.template` file is provided in the repository. This file includes all the runtime variables required for deployment. Below is an explanation of the variables:
