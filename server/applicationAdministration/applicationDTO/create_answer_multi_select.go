@@ -6,7 +6,7 @@ import (
 )
 
 type CreateAnswerMultiSelect struct {
-	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
+	ApplicationQuestionID uuid.UUID `json:"applicationQuestionID"`
 	Answer                []string  `json:"answer"`
 }
 

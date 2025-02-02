@@ -874,3 +874,27 @@ ALTER TABLE ONLY meta_data_dependency_graph
 -- PostgreSQL database dump complete
 --
 
+
+-- Apply migration
+-- 1) Adjust course
+ALTER TABLE course
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+-- 2) Adjust course_phase
+ALTER TABLE course_phase
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course_phase
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+-- 3) Adjust course_phase_participation
+ALTER TABLE course_phase_participation
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course_phase_participation
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+

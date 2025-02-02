@@ -1,8 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ManualMailSending } from './ManualMailSending'
-import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
-// import { useGetMailingIsConfigured } from '../../../../hooks/useGetMailingIsConfigured'
+import { CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 
 interface SettingsCardProps {
   mailingMetaData: CoursePhaseMailingConfigData
@@ -10,13 +9,6 @@ interface SettingsCardProps {
 }
 
 export const SettingsCard = ({ mailingMetaData, isModified }: SettingsCardProps): JSX.Element => {
-  // TODO: AFTER shared library!!!
-  //   const courseMailingIsConfigured = useGetMailingIsConfigured()
-  //   const automaticConfirmationMailEnabled =
-  //     courseMailingIsConfigured &&
-  //     applicationMailingMetaData.confirmationMailContent !== '' &&
-  //     applicationMailingMetaData.confirmationMailSubject !== ''
-
   return (
     <>
       <Card className='w-full'>

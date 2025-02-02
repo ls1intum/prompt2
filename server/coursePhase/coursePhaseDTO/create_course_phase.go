@@ -8,23 +8,31 @@ import (
 )
 
 type CreateCoursePhase struct {
-	CourseID          uuid.UUID     `json:"course_id"`
-	Name              string        `json:"name"`
-	IsInitialPhase    bool          `json:"is_initial_phase"`
-	MetaData          meta.MetaData `json:"meta_data"`
-	CoursePhaseTypeID uuid.UUID     `json:"course_phase_type_id"`
+	CourseID            uuid.UUID     `json:"courseID"`
+	Name                string        `json:"name"`
+	IsInitialPhase      bool          `json:"isInitialPhase"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	CoursePhaseTypeID   uuid.UUID     `json:"coursePhaseTypeID"`
 }
 
 func (cp CreateCoursePhase) GetDBModel() (db.CreateCoursePhaseParams, error) {
-	metaData, err := cp.MetaData.GetDBModel()
+	restrictedData, err := cp.RestrictedData.GetDBModel()
 	if err != nil {
 		return db.CreateCoursePhaseParams{}, err
 	}
+
+	studentReadableData, err := cp.StudentReadableData.GetDBModel()
+	if err != nil {
+		return db.CreateCoursePhaseParams{}, err
+	}
+
 	return db.CreateCoursePhaseParams{
-		CourseID:          cp.CourseID,
-		Name:              pgtype.Text{String: cp.Name, Valid: true},
-		IsInitialPhase:    cp.IsInitialPhase,
-		MetaData:          metaData,
-		CoursePhaseTypeID: cp.CoursePhaseTypeID,
+		CourseID:            cp.CourseID,
+		Name:                pgtype.Text{String: cp.Name, Valid: true},
+		IsInitialPhase:      cp.IsInitialPhase,
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CoursePhaseTypeID:   cp.CoursePhaseTypeID,
 	}, nil
 }

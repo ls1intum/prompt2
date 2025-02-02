@@ -56,14 +56,20 @@ func (suite *CoursePhaseTestSuite) TestGetCoursePhaseByID() {
 func (suite *CoursePhaseTestSuite) TestUpdateCoursePhase() {
 	id := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
 	jsonData := `{"updated_key": "updated_value"}`
-	var metaData meta.MetaData
-	err := json.Unmarshal([]byte(jsonData), &metaData)
+	var restrictedData meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &restrictedData)
+	assert.NoError(suite.T(), err)
+
+	jsonData = `{"updated_key2": "updated_value"}`
+	var studentData meta.MetaData
+	err = json.Unmarshal([]byte(jsonData), &studentData)
 	assert.NoError(suite.T(), err)
 
 	update := coursePhaseDTO.UpdateCoursePhase{
-		ID:       id,
-		Name:     pgtype.Text{Valid: true, String: "Updated Phase"},
-		MetaData: metaData,
+		ID:                  id,
+		Name:                pgtype.Text{Valid: true, String: "Updated Phase"},
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentData,
 	}
 
 	err = UpdateCoursePhase(suite.ctx, update)
@@ -74,20 +80,27 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhase() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated Phase", updatedCoursePhase.Name, "Expected updated course phase name to match")
 	assert.False(suite.T(), updatedCoursePhase.IsInitialPhase, "Expected updated course phase to be an initial phase")
-	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value", "updated_key": "updated_value"}, updatedCoursePhase.MetaData, "Expected metadata to match updated data including the old data")
+	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value", "updated_key": "updated_value"}, updatedCoursePhase.RestrictedData, "Expected metadata to match updated data including the old data")
+	assert.Equal(suite.T(), meta.MetaData{"updated_key2": "updated_value"}, updatedCoursePhase.StudentReadableData, "Expected student readable data to match updated data")
 }
 
 func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
 	id := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
 	jsonData := `{"test-key": "test-value-new", "updated_key": "updated_value"}`
-	var metaData meta.MetaData
-	err := json.Unmarshal([]byte(jsonData), &metaData)
+	var data meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &data)
+	assert.NoError(suite.T(), err)
+
+	jsonData = `{"updated_key2": "updated_value"}`
+	var studentData meta.MetaData
+	err = json.Unmarshal([]byte(jsonData), &studentData)
 	assert.NoError(suite.T(), err)
 
 	update := coursePhaseDTO.UpdateCoursePhase{
-		ID:       id,
-		Name:     pgtype.Text{Valid: true, String: "Updated Phase"},
-		MetaData: metaData,
+		ID:                  id,
+		Name:                pgtype.Text{Valid: true, String: "Updated Phase"},
+		RestrictedData:      data,
+		StudentReadableData: studentData,
 	}
 
 	err = UpdateCoursePhase(suite.ctx, update)
@@ -97,21 +110,28 @@ func (suite *CoursePhaseTestSuite) TestUpdateCoursePhaseWithMetaDataOverride() {
 	updatedCoursePhase, err := GetCoursePhaseByID(suite.ctx, id)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated Phase", updatedCoursePhase.Name, "Expected updated course phase name to match")
-	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value-new", "updated_key": "updated_value"}, updatedCoursePhase.MetaData, "Expected metadata to match updated data including the old data")
+	assert.Equal(suite.T(), meta.MetaData{"test-key": "test-value-new", "updated_key": "updated_value"}, updatedCoursePhase.RestrictedData, "Expected metadata to match updated data including the old data")
+	assert.Equal(suite.T(), meta.MetaData{"updated_key2": "updated_value"}, updatedCoursePhase.StudentReadableData, "Expected student readable data to match updated data")
 }
 
 func (suite *CoursePhaseTestSuite) TestCreateCoursePhase() {
 	jsonData := `{"new_key": "new_value"}`
-	var metaData meta.MetaData
-	err := json.Unmarshal([]byte(jsonData), &metaData)
+	var data meta.MetaData
+	err := json.Unmarshal([]byte(jsonData), &data)
+	assert.NoError(suite.T(), err)
+
+	jsonData = `{"updated_key2": "updated_value"}`
+	var studentData meta.MetaData
+	err = json.Unmarshal([]byte(jsonData), &studentData)
 	assert.NoError(suite.T(), err)
 
 	newCoursePhase := coursePhaseDTO.CreateCoursePhase{
-		CourseID:          uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e"),
-		Name:              "New Phase",
-		IsInitialPhase:    false,
-		MetaData:          metaData,
-		CoursePhaseTypeID: uuid.MustParse("7dc1c4e8-4255-4874-80a0-0c12b958744c"),
+		CourseID:            uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e"),
+		Name:                "New Phase",
+		IsInitialPhase:      false,
+		RestrictedData:      data,
+		StudentReadableData: studentData,
+		CoursePhaseTypeID:   uuid.MustParse("7dc1c4e8-4255-4874-80a0-0c12b958744c"),
 	}
 
 	createdCoursePhase, err := CreateCoursePhase(suite.ctx, newCoursePhase)
@@ -122,7 +142,8 @@ func (suite *CoursePhaseTestSuite) TestCreateCoursePhase() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "New Phase", fetchedCoursePhase.Name, "Expected course phase name to match")
 	assert.False(suite.T(), fetchedCoursePhase.IsInitialPhase, "Expected course phase to not be an initial phase")
-	assert.Equal(suite.T(), metaData, fetchedCoursePhase.MetaData, "Expected metadata to match")
+	assert.Equal(suite.T(), data, fetchedCoursePhase.RestrictedData, "Expected metadata to match")
+	assert.Equal(suite.T(), studentData, fetchedCoursePhase.StudentReadableData, "Expected student readable data to match")
 }
 
 func TestCoursePhaseTestSuite(t *testing.T) {

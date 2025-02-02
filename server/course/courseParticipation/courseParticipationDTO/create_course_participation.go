@@ -6,8 +6,8 @@ import (
 )
 
 type CreateCourseParticipation struct {
-	CourseID  uuid.UUID `json:"course_id"`
-	StudentID uuid.UUID `json:"student_id"`
+	CourseID  uuid.UUID `json:"courseID"`
+	StudentID uuid.UUID `json:"studentID"`
 }
 
 func (c CreateCourseParticipation) GetDBModel() db.CreateCourseParticipationParams {

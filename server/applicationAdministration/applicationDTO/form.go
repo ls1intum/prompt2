@@ -3,8 +3,8 @@ package applicationDTO
 import db "github.com/niclasheun/prompt2.0/db/sqlc"
 
 type Form struct {
-	QuestionsText        []QuestionText        `json:"questions_text"`
-	QuestionsMultiSelect []QuestionMultiSelect `json:"questions_multi_select"`
+	QuestionsText        []QuestionText        `json:"questionsText"`
+	QuestionsMultiSelect []QuestionMultiSelect `json:"questionsMultiSelect"`
 }
 
 func GetFormDTOFromDBModel(questionsText []db.ApplicationQuestionText, questionsMultiSelect []db.ApplicationQuestionMultiSelect) Form {

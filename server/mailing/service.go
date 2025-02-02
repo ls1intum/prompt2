@@ -244,7 +244,7 @@ func getSenderInformation(ctx context.Context, coursePhaseID uuid.UUID) (mailing
 
 func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.CourseMailingSettings, recipient, subject string) {
 	// using this instead of map to geth a nicely formatted Mailing Header
-	message.WriteString(fmt.Sprintf("From: %s\r\n", courseMailingSettings.ReplyTo.String()))
+	message.WriteString(fmt.Sprintf("From: %s\r\n", MailingServiceSingleton.senderEmail.String()))
 	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
 	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))

@@ -9,12 +9,12 @@ type AdditionalScoreUpload struct {
 	Name            string            `json:"name"`
 	Key             string            `json:"key"`
 	Threshold       pgtype.Numeric    `json:"threshold"`
-	ThresholdActive bool              `json:"threshold_active"`
+	ThresholdActive bool              `json:"thresholdActive"`
 	Scores          []IndividualScore `json:"scores"`
 }
 
 type IndividualScore struct {
-	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
+	CoursePhaseParticipationID uuid.UUID      `json:"coursePhaseParticipationID"`
 	Score                      pgtype.Numeric `json:"score"`
 }
 

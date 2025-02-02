@@ -39,20 +39,21 @@ func (q *Queries) CheckCoursePhasesBelongToCourse(ctx context.Context, arg Check
 }
 
 const createCourse = `-- name: CreateCourse :one
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, meta_data
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data
 `
 
 type CreateCourseParams struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	StartDate   pgtype.Date `json:"start_date"`
-	EndDate     pgtype.Date `json:"end_date"`
-	SemesterTag pgtype.Text `json:"semester_tag"`
-	CourseType  CourseType  `json:"course_type"`
-	Ects        pgtype.Int4 `json:"ects"`
-	MetaData    []byte      `json:"meta_data"`
+	ID                  uuid.UUID   `json:"id"`
+	Name                string      `json:"name"`
+	StartDate           pgtype.Date `json:"start_date"`
+	EndDate             pgtype.Date `json:"end_date"`
+	SemesterTag         pgtype.Text `json:"semester_tag"`
+	CourseType          CourseType  `json:"course_type"`
+	Ects                pgtype.Int4 `json:"ects"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 }
 
 func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Course, error) {
@@ -64,7 +65,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		arg.SemesterTag,
 		arg.CourseType,
 		arg.Ects,
-		arg.MetaData,
+		arg.RestrictedData,
+		arg.StudentReadableData,
 	)
 	var i Course
 	err := row.Scan(
@@ -75,13 +77,14 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.SemesterTag,
 		&i.CourseType,
 		&i.Ects,
-		&i.MetaData,
+		&i.RestrictedData,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
 
 const getAllActiveCourses = `-- name: GetAllActiveCourses :many
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, meta_data FROM course
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data FROM course
 WHERE end_date >= NOW() - INTERVAL '1 month'
 `
 
@@ -102,7 +105,8 @@ func (q *Queries) GetAllActiveCourses(ctx context.Context) ([]Course, error) {
 			&i.SemesterTag,
 			&i.CourseType,
 			&i.Ects,
-			&i.MetaData,
+			&i.RestrictedData,
+			&i.StudentReadableData,
 		); err != nil {
 			return nil, err
 		}
@@ -115,7 +119,7 @@ func (q *Queries) GetAllActiveCourses(ctx context.Context) ([]Course, error) {
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, meta_data FROM course
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data FROM course
 WHERE id = $1 LIMIT 1
 `
 
@@ -130,7 +134,8 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 		&i.SemesterTag,
 		&i.CourseType,
 		&i.Ects,
-		&i.MetaData,
+		&i.RestrictedData,
+		&i.StudentReadableData,
 	)
 	return i, err
 }
@@ -138,16 +143,18 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 const updateCourse = `-- name: UpdateCourse :exec
 UPDATE course
 SET 
-  meta_data = meta_data || $2
+  restricted_data = restricted_data || $2,
+  student_readable_data = student_readable_data || $3
 WHERE id = $1
 `
 
 type UpdateCourseParams struct {
-	ID       uuid.UUID `json:"id"`
-	MetaData []byte    `json:"meta_data"`
+	ID                  uuid.UUID `json:"id"`
+	RestrictedData      []byte    `json:"restricted_data"`
+	StudentReadableData []byte    `json:"student_readable_data"`
 }
 
 func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) error {
-	_, err := q.db.Exec(ctx, updateCourse, arg.ID, arg.MetaData)
+	_, err := q.db.Exec(ctx, updateCourse, arg.ID, arg.RestrictedData, arg.StudentReadableData)
 	return err
 }

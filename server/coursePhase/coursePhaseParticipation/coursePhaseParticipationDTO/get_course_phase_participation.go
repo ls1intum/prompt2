@@ -9,14 +9,21 @@ import (
 
 type GetCoursePhaseParticipation struct {
 	ID                    uuid.UUID     `json:"id"`
-	CourseParticipationID uuid.UUID     `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID     `json:"course_phase_id"`
-	PassStatus            string        `json:"passed_status"`
-	MetaData              meta.MetaData `json:"meta_data"`
+	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
+	PassStatus            string        `json:"passStatus"`
+	RestrictedData        meta.MetaData `json:"restrictedData"`
+	StudentReadableData   meta.MetaData `json:"studentReadableData"`
 }
 
 func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation) (GetCoursePhaseParticipation, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(model.RestrictedData)
+	if err != nil {
+		log.Error("failed to create CoursePhaseParticipation DTO from DB model")
+		return GetCoursePhaseParticipation{}, err
+	}
+
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(model.StudentReadableData)
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DTO from DB model")
 		return GetCoursePhaseParticipation{}, err
@@ -27,6 +34,7 @@ func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation
 		CourseParticipationID: model.CourseParticipationID,
 		CoursePhaseID:         model.CoursePhaseID,
 		PassStatus:            GetPassStatusString(model.PassStatus),
-		MetaData:              metaData,
+		RestrictedData:        restrictedData,
+		StudentReadableData:   studentReadableData,
 	}, nil
 }

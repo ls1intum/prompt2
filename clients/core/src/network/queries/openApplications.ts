@@ -1,5 +1,5 @@
 import { notAuthenticatedAxiosInstance } from '@/network/configService'
-import { OpenApplicationDetails } from '@/interfaces/open_application_details'
+import { OpenApplicationDetails } from '../../interfaces/application/openApplicationDetails'
 
 export const getAllOpenApplications = async (): Promise<OpenApplicationDetails[]> => {
   try {

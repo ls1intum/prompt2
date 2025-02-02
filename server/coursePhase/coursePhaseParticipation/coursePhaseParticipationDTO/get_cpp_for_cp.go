@@ -10,21 +10,28 @@ import (
 
 type GetAllCPPsForCoursePhase struct {
 	ID                    uuid.UUID          `json:"id"`
-	PassStatus            string             `json:"pass_status"`
-	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
-	MetaData              meta.MetaData      `json:"meta_data"`
-	PrevMetaData          meta.MetaData      `json:"prev_meta_data"`
+	PassStatus            string             `json:"passStatus"`
+	CourseParticipationID uuid.UUID          `json:"courseParticipationID"`
+	RestrictedData        meta.MetaData      `json:"restrictedData"`
+	StudentReadableData   meta.MetaData      `json:"studentReadableData"`
+	PrevData              meta.MetaData      `json:"prevData"`
 	Student               studentDTO.Student `json:"student"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow) (GetAllCPPsForCoursePhase, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(model.RestrictedData)
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DTO from DB model")
 		return GetAllCPPsForCoursePhase{}, err
 	}
 
-	prevMetaData, err := meta.GetMetaDataDTOFromDBModel(model.PrevMetaData)
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(model.StudentReadableData)
+	if err != nil {
+		log.Error("failed to create CoursePhaseParticipation DTO from DB model")
+		return GetAllCPPsForCoursePhase{}, err
+	}
+
+	prevData, err := meta.GetMetaDataDTOFromDBModel(model.PrevData)
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DTO from DB model")
 		return GetAllCPPsForCoursePhase{}, err
@@ -34,8 +41,9 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 		ID:                    model.CoursePhaseParticipationID,
 		CourseParticipationID: model.CourseParticipationID,
 		PassStatus:            GetPassStatusString(model.PassStatus),
-		MetaData:              metaData,
-		PrevMetaData:          prevMetaData,
+		RestrictedData:        restrictedData,
+		StudentReadableData:   studentReadableData,
+		PrevData:              prevData,
 		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{
 			ID:                   model.StudentID,
 			FirstName:            model.FirstName,

@@ -73,13 +73,11 @@ export const AvailableMailPlaceholders = ({
   }
 
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      onClick={() => setIsOpen((prev) => !prev)}
-      className='space-y-2 border rounded-md'
-    >
-      <div className='flex items-center justify-between p-4 cursor-pointer'>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className='space-y-2 border rounded-md'>
+      <div
+        className='flex items-center justify-between p-4 cursor-pointer'
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
         <div>
           <h3 className='text-sm font-medium'>Available Placeholders</h3>
           <p className='text-xs text-muted-foreground mt-1'>

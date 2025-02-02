@@ -138,7 +138,7 @@ WITH RECURSIVE phase_sequence AS (
     INNER JOIN course_phase_graph g ON g.to_course_phase_id = cp.id
     INNER JOIN phase_sequence ps ON g.from_course_phase_id = ps.id
 )
-SELECT cp.id, cp.course_id, cp.name, cp.meta_data, cp.is_initial_phase, cp.course_phase_type_id, cpt.name AS course_phase_type_name
+SELECT cp.id, cp.course_id, cp.name, cp.restricted_data, cp.is_initial_phase, cp.course_phase_type_id, cp.student_readable_data, cpt.name AS course_phase_type_name
 FROM course_phase cp
 INNER JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
 WHERE cp.course_id = $1
@@ -150,9 +150,10 @@ type GetNotOrderedCoursePhasesRow struct {
 	ID                  uuid.UUID   `json:"id"`
 	CourseID            uuid.UUID   `json:"course_id"`
 	Name                pgtype.Text `json:"name"`
-	MetaData            []byte      `json:"meta_data"`
+	RestrictedData      []byte      `json:"restricted_data"`
 	IsInitialPhase      bool        `json:"is_initial_phase"`
 	CoursePhaseTypeID   uuid.UUID   `json:"course_phase_type_id"`
+	StudentReadableData []byte      `json:"student_readable_data"`
 	CoursePhaseTypeName string      `json:"course_phase_type_name"`
 }
 
@@ -169,9 +170,10 @@ func (q *Queries) GetNotOrderedCoursePhases(ctx context.Context, courseID uuid.U
 			&i.ID,
 			&i.CourseID,
 			&i.Name,
-			&i.MetaData,
+			&i.RestrictedData,
 			&i.IsInitialPhase,
 			&i.CoursePhaseTypeID,
+			&i.StudentReadableData,
 			&i.CoursePhaseTypeName,
 		); err != nil {
 			return nil, err

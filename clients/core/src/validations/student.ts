@@ -1,50 +1,49 @@
 import * as z from 'zod'
-import { Gender } from '@/interfaces/gender'
+import { Gender, StudyDegree } from '@tumaet/prompt-shared-state'
 import translations from '@/lib/translations.json'
-import { StudyDegree } from '@/interfaces/study_degree'
 
 const universityLoginRegex = new RegExp(translations.university.universityLoginRegex)
 const matriculationNumberRegex = new RegExp(translations.university.matriculationNumberRegex)
 
 // Define the schema for a student form
 export const studentBaseSchema = z.object({
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
   nationality: z.string().min(1, 'Please select a nationality.'),
-  study_program: z.string().min(1, 'Please select a study program.'),
-  study_degree: z.nativeEnum(StudyDegree),
-  current_semester: z
+  studyProgram: z.string().min(1, 'Please select a study program.'),
+  studyDegree: z.nativeEnum(StudyDegree),
+  currentSemester: z
     .number()
     .int('Please enter your current semester')
     .min(1, 'Please select a semester.')
     .max(20, 'Please enter a number lower than 20'),
-  has_university_account: z.literal(false), // Explicit literal for base case
+  hasUniversityAccount: z.literal(false), // Explicit literal for base case
 })
 
 // Define the schema for a university student form (extended)
 export const studentUniversitySchema = z.object({
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   gender: z.nativeEnum(Gender),
   nationality: z.string().min(1, 'Please select a nationality.'),
-  study_program: z.string().min(1, 'Please select a study program.'),
-  study_degree: z.nativeEnum(StudyDegree),
-  current_semester: z
+  studyProgram: z.string().min(1, 'Please select a study program.'),
+  studyDegree: z.nativeEnum(StudyDegree),
+  currentSemester: z
     .number()
     .int('Please enter your current semester')
     .min(1, 'Please select a semester.')
     .max(20, 'Please enter a current semester number lower than 20'),
-  has_university_account: z.literal(true), // Explicit literal for university case
-  matriculation_number: z
+  hasUniversityAccount: z.literal(true), // Explicit literal for university case
+  matriculationNumber: z
     .string()
     .regex(
       matriculationNumberRegex,
       `Matriculation number must follow the pattern ${translations.university.matriculationExample}`,
     ),
-  university_login: z
+  universityLogin: z
     .string()
     .regex(
       universityLoginRegex,
@@ -53,12 +52,12 @@ export const studentUniversitySchema = z.object({
 })
 
 // Define the discriminated union based on `hasUniversityAccount`
-export const studentSchema = z.discriminatedUnion('has_university_account', [
+export const studentSchema = z.discriminatedUnion('hasUniversityAccount', [
   studentBaseSchema,
   studentUniversitySchema,
 ])
 
-export const questionConfigSchema = z.discriminatedUnion('has_university_account', [
+export const questionConfigSchema = z.discriminatedUnion('hasUniversityAccount', [
   studentBaseSchema,
   studentUniversitySchema,
 ])

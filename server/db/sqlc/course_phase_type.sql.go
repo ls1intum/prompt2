@@ -94,3 +94,18 @@ func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error
 	err := row.Scan(&does_exist)
 	return does_exist, err
 }
+
+const testMatchingPhaseTypeExists = `-- name: TestMatchingPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Matching'
+) AS does_exist
+`
+
+func (q *Queries) TestMatchingPhaseTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testMatchingPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}

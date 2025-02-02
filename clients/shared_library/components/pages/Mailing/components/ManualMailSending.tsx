@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { Send } from 'lucide-react'
-import { PassStatus } from '@/interfaces/course_phase_participation'
+import { PassStatus, CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { ConfirmSendEmailDialog } from './ConfirmSendEmailDialog'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { CoursePhaseMailingConfigData } from '@/interfaces/coursePhaseMailingConfigData'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 
 interface ManualMailSendingProps {
   mailingMetaData: CoursePhaseMailingConfigData | null
@@ -19,8 +19,7 @@ export const ManualMailSending = ({
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const [sendEmailType, setSendEmailType] = useState<PassStatus | null>(null)
 
-  // TODO: AFTER shared library!!!
-  // const courseMailingIsConfigured = useGetMailingIsConfigured()
+  const courseMailingIsConfigured = useGetMailingIsConfigured()
 
   const isDisabled = (type: PassStatus) => {
     if (isModified) return true
@@ -30,14 +29,12 @@ export const ManualMailSending = ({
         ? mailingMetaData?.passedMailContent && mailingMetaData?.passedMailSubject
         : mailingMetaData?.failedMailContent && mailingMetaData?.failedMailSubject
 
-    return !contentCheck
-    // return !(contentCheck && courseMailingIsConfigured)
+    return !(contentCheck && courseMailingIsConfigured)
   }
 
-  const tooltipMessage = 'Configure the mail and save changes before sending.'
-  // const tooltipMessage = courseMailingIsConfigured
-  //   ? 'Configure the mailing in the course mail settings before sending.'
-  //   : 'Configure the mail and save changes before sending.'
+  const tooltipMessage = courseMailingIsConfigured
+    ? 'Configure the mailing in the course mail settings before sending.'
+    : 'Configure the mail and save changes before sending.'
 
   return (
     <>

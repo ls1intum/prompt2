@@ -11,25 +11,25 @@ import (
 )
 
 type ApplicationParticipation struct {
-	ID         uuid.UUID          `json:"id"`
-	PassStatus string             `json:"pass_status"`
-	MetaData   meta.MetaData      `json:"meta_data"`
-	Student    studentDTO.Student `json:"student"`
-	Score      pgtype.Int4        `json:"score"`
+	ID             uuid.UUID          `json:"id"`
+	PassStatus     string             `json:"passStatus"`
+	RestrictedData meta.MetaData      `json:"restrictedData"`
+	Student        studentDTO.Student `json:"student"`
+	Score          pgtype.Int4        `json:"score"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllApplicationParticipationsRow) (ApplicationParticipation, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(model.RestrictedData)
 	if err != nil {
 		log.Error("failed to create Application DTO from DB model")
 		return ApplicationParticipation{}, err
 	}
 
 	return ApplicationParticipation{
-		ID:         model.CoursePhaseParticipationID,
-		PassStatus: coursePhaseParticipationDTO.GetPassStatusString(model.PassStatus),
-		MetaData:   metaData,
-		Student:    studentDTO.GetStudentDTOFromApplicationParticipation(model),
-		Score:      model.Score,
+		ID:             model.CoursePhaseParticipationID,
+		PassStatus:     coursePhaseParticipationDTO.GetPassStatusString(model.PassStatus),
+		RestrictedData: restrictedData,
+		Student:        studentDTO.GetStudentDTOFromApplicationParticipation(model),
+		Score:          model.Score,
 	}, nil
 }

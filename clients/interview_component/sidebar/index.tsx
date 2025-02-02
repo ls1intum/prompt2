@@ -1,6 +1,6 @@
 import { Mic } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
-import { Role } from '@/interfaces/permission_roles'
+import { Role } from '@tumaet/prompt-shared-state'
 
 const interviewSidebarItems: SidebarMenuItemProps = {
   title: 'Interview',

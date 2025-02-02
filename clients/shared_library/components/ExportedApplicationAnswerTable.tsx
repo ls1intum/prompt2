@@ -1,4 +1,4 @@
-import { ExportedApplicationAnswer } from '@/interfaces/export_application_answer'
+import { ExportedApplicationAnswer } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
 import {
   Table,
@@ -20,7 +20,7 @@ export const ExportedApplicationAnswerTable = ({
 }: ExportedApplicationAnswerTableProps) => {
   const orderedAnswers = useMemo(() => {
     if (!applicationAnswers) return []
-    return applicationAnswers?.sort((a, b) => a.order_num - b.order_num)
+    return applicationAnswers?.sort((a, b) => a.orderNum - b.orderNum)
   }, [applicationAnswers])
 
   return (

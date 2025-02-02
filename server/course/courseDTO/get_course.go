@@ -9,31 +9,39 @@ import (
 )
 
 type Course struct {
-	ID          uuid.UUID     `json:"id"`
-	Name        string        `json:"name"`
-	StartDate   pgtype.Date   `json:"start_date"`
-	EndDate     pgtype.Date   `json:"end_date"`
-	SemesterTag pgtype.Text   `json:"semester_tag"`
-	Ects        pgtype.Int4   `json:"ects"`
-	CourseType  string        `json:"course_type"`
-	MetaData    meta.MetaData `json:"meta_data"`
+	ID                  uuid.UUID     `json:"id"`
+	Name                string        `json:"name"`
+	StartDate           pgtype.Date   `json:"startDate"`
+	EndDate             pgtype.Date   `json:"endDate"`
+	SemesterTag         pgtype.Text   `json:"semesterTag"`
+	Ects                pgtype.Int4   `json:"ects"`
+	CourseType          string        `json:"courseType"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }
 
 func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(model.RestrictedData)
+	if err != nil {
+		log.Error("failed to create Course DTO from DB model")
+		return Course{}, err
+	}
+
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(model.StudentReadableData)
 	if err != nil {
 		log.Error("failed to create Course DTO from DB model")
 		return Course{}, err
 	}
 
 	return Course{
-		ID:          model.ID,
-		Name:        model.Name,
-		StartDate:   model.StartDate,
-		EndDate:     model.EndDate,
-		SemesterTag: model.SemesterTag,
-		Ects:        model.Ects,
-		CourseType:  string(model.CourseType),
-		MetaData:    metaData,
+		ID:                  model.ID,
+		Name:                model.Name,
+		StartDate:           model.StartDate,
+		EndDate:             model.EndDate,
+		SemesterTag:         model.SemesterTag,
+		Ects:                model.Ects,
+		CourseType:          string(model.CourseType),
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
 	}, nil
 }

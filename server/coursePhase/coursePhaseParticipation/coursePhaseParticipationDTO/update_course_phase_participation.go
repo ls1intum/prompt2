@@ -11,29 +11,38 @@ type UpdateCoursePhaseParticipationRequest struct {
 	// for individual updates, the ID is in the url
 	// for batch updates, the ID is in the body
 	ID                    uuid.UUID      `json:"id"`
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
-	PassStatus            *db.PassStatus `json:"pass_status"`
-	MetaData              meta.MetaData  `json:"meta_data"`
+	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
+	PassStatus            *db.PassStatus `json:"passStatus"`
+	RestrictedData        meta.MetaData  `json:"restrictedData"`
+	StudentReadableData   meta.MetaData  `json:"studentReadableData"`
 }
 
 type UpdateCoursePhaseParticipation struct {
-	ID            uuid.UUID      `json:"id"`
-	PassStatus    *db.PassStatus `json:"passed"`
-	MetaData      meta.MetaData  `json:"meta_data"`
-	CoursePhaseID uuid.UUID      `json:"course_phase_id"`
+	ID                  uuid.UUID      `json:"id"`
+	PassStatus          *db.PassStatus `json:"passStatus"`
+	RestrictedData      meta.MetaData  `json:"restrictedData"`
+	StudentReadableData meta.MetaData  `json:"studentReadableData"`
+	CoursePhaseID       uuid.UUID      `json:"coursePhaseID"`
 }
 
 func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhaseParticipationParams, error) {
-	metaDataBytes, err := c.MetaData.GetDBModel()
+	restrictedData, err := c.RestrictedData.GetDBModel()
+	if err != nil {
+		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
+		return db.UpdateCoursePhaseParticipationParams{}, err
+	}
+
+	studentReadableData, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
 		return db.UpdateCoursePhaseParticipationParams{}, err
 	}
 
 	return db.UpdateCoursePhaseParticipationParams{
-		ID:            c.ID,
-		PassStatus:    GetPassStatusDBModel(c.PassStatus),
-		MetaData:      metaDataBytes,
-		CoursePhaseID: c.CoursePhaseID,
+		ID:                  c.ID,
+		PassStatus:          GetPassStatusDBModel(c.PassStatus),
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CoursePhaseID:       c.CoursePhaseID,
 	}, nil
 }

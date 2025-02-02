@@ -65,3 +65,10 @@ ALTER TABLE ONLY course_phase_type
 ALTER TABLE ONLY course_phase
     ADD CONSTRAINT fk_phase_type FOREIGN KEY (course_phase_type_id) REFERENCES public.course_phase_type(id);
 
+
+
+ALTER TABLE course_phase
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course_phase
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';

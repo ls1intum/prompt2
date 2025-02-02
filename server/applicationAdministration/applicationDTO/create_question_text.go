@@ -7,18 +7,18 @@ import (
 )
 
 type CreateQuestionText struct {
-	CoursePhaseID   uuid.UUID `json:"course_phase_id"`
+	CoursePhaseID   uuid.UUID `json:"coursePhaseID"`
 	Title           string    `json:"title"`
 	Description     string    `json:"description"`
 	Placeholder     string    `json:"placeholder"`
-	ValidationRegex string    `json:"validation_regex"`
-	ErrorMessage    string    `json:"error_message"`
-	IsRequired      bool      `json:"is_required"`
-	AllowedLength   int       `json:"allowed_length"`
-	OrderNum        int       `json:"order_num"`
+	ValidationRegex string    `json:"validationRegex"`
+	ErrorMessage    string    `json:"errorMessage"`
+	IsRequired      bool      `json:"isRequired"`
+	AllowedLength   int       `json:"allowedLength"`
+	OrderNum        int       `json:"orderNum"`
 	// using pgtype as this allows for optional values
-	AccessibleForOtherPhases pgtype.Bool `json:"accessible_for_other_phases"`
-	AccessKey                pgtype.Text `json:"access_key"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases"`
+	AccessKey                pgtype.Text `json:"accessKey"`
 }
 
 func (a CreateQuestionText) GetDBModel() db.CreateApplicationQuestionTextParams {

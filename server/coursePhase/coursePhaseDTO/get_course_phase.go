@@ -8,16 +8,22 @@ import (
 
 type CoursePhase struct {
 	ID                  uuid.UUID     `json:"id"`
-	CourseID            uuid.UUID     `json:"course_id"`
+	CourseID            uuid.UUID     `json:"courseID"`
 	Name                string        `json:"name"`
-	IsInitialPhase      bool          `json:"is_initial_phase"`
-	MetaData            meta.MetaData `json:"meta_data"`
-	CoursePhaseTypeID   uuid.UUID     `json:"course_phase_type_id"`
-	CoursePhaseTypeName string        `json:"course_phase_type_name"`
+	IsInitialPhase      bool          `json:"isInitialPhase"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	CoursePhaseTypeID   uuid.UUID     `json:"coursePhaseTypeID"`
+	CoursePhaseTypeName string        `json:"coursePhaseTypeName"`
 }
 
 func GetCoursePhaseDTOFromDBModel(model db.GetCoursePhaseRow) (CoursePhase, error) {
-	metaData, err := meta.GetMetaDataDTOFromDBModel(model.MetaData)
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(model.RestrictedData)
+	if err != nil {
+		return CoursePhase{}, err
+	}
+
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(model.StudentReadableData)
 	if err != nil {
 		return CoursePhase{}, err
 	}
@@ -27,7 +33,8 @@ func GetCoursePhaseDTOFromDBModel(model db.GetCoursePhaseRow) (CoursePhase, erro
 		CourseID:            model.CourseID,
 		Name:                model.Name.String,
 		IsInitialPhase:      model.IsInitialPhase,
-		MetaData:            metaData,
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
 		CoursePhaseTypeID:   model.CoursePhaseTypeID,
 		CoursePhaseTypeName: model.CoursePhaseTypeName,
 	}, nil

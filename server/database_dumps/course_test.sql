@@ -152,3 +152,17 @@ ALTER TABLE ONLY course_phase_graph
 ALTER TABLE ONLY course_phase_graph
     ADD CONSTRAINT fk_to_course_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE;
 
+-- Apply migration
+-- 1) Adjust course
+ALTER TABLE course
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+-- 2) Adjust course_phase
+ALTER TABLE course_phase
+RENAME COLUMN meta_data TO restricted_data;
+
+ALTER TABLE course_phase
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';

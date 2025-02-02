@@ -1,7 +1,7 @@
 import OverviewPage from 'template_component/src/OverviewPage'
 import SettingsPage from 'template_component/src/SettingsPage'
-import { ExtendedRouteObject } from '@/interfaces/extended_route_object'
-import { Role } from '@/interfaces/permission_roles'
+import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
+import { Role } from '@tumaet/prompt-shared-state'
 
 const routes: ExtendedRouteObject[] = [
   {

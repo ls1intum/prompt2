@@ -1,4 +1,4 @@
-import { AdditionalScore } from '@/interfaces/additional_score'
+import { AdditionalScore } from '../../managementConsole/applicationAdministration/interfaces/additionalScore/additionalScore'
 import { axiosInstance } from '@/network/configService'
 
 export const getAdditionalScoreNames = async (

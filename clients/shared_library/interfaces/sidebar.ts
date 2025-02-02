@@ -1,4 +1,4 @@
-import { Role } from './permission_roles'
+import { Role } from '@tumaet/prompt-shared-state'
 
 export interface SidebarMenuItemProps {
   goToPath: string

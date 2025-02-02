@@ -80,6 +80,8 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
       alias: {
         '@': path.resolve(__dirname, '../shared_library'),
+        '@core': path.resolve(__dirname, 'src'),
+        '@managementConsole': path.resolve(__dirname, 'src/managementConsole'),
       },
     },
     plugins: [
@@ -97,6 +99,10 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           '@tanstack/react-query': {
             singleton: true,
             requiredVersion: deps['@tanstack/react-query'],
+          },
+          '@tumaet/prompt-shared-state': {
+            singleton: true,
+            requiredVersion: deps['@tumaet/prompt-shared-state'],
           },
         },
       }),

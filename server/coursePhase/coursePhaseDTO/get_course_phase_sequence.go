@@ -7,12 +7,12 @@ import (
 
 type CoursePhaseSequence struct {
 	ID                uuid.UUID `json:"id"`
-	CourseID          uuid.UUID `json:"course_id"`
+	CourseID          uuid.UUID `json:"courseID"`
 	Name              string    `json:"name"`
-	IsInitialPhase    bool      `json:"is_initial_phase"`
-	SequenceOrder     int       `json:"sequence_order"`
-	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
-	CoursePhaseType   string    `json:"course_phase_type"`
+	IsInitialPhase    bool      `json:"isInitialPhase"`
+	SequenceOrder     int       `json:"sequenceOrder"`
+	CoursePhaseTypeID uuid.UUID `json:"coursePhaseTypeID"`
+	CoursePhaseType   string    `json:"coursePhaseType"`
 }
 
 func GetCoursePhaseSequenceDTOFromDBModel(model db.GetCoursePhaseSequenceRow) (CoursePhaseSequence, error) {
