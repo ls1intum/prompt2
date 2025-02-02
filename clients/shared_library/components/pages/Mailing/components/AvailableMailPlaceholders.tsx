@@ -15,61 +15,63 @@ interface AvailableMailPlaceholdersProps {
   customAdditionalPlaceholders?: { placeholder: string; description: string }[]
 }
 
+export const availablePlaceholders = [
+  {
+    placeholder: '{{firstName}}',
+    description: 'The first name of the student',
+  },
+  {
+    placeholder: '{{lastName}',
+    description: 'The last name of the student',
+  },
+  {
+    placeholder: '{{email}}',
+    description: 'The email of the student',
+  },
+  {
+    placeholder: '{{matriculationNumber}}',
+    description: 'The matriculation number of the student. Might be empty',
+  },
+  {
+    placeholder: '{{universityLogin}}',
+    description: `The ${translations.university['login-name']} of the student. Might be empty`,
+  },
+  {
+    placeholder: '{{studyDegree}}',
+    description: 'The study degree of the student',
+  },
+  {
+    placeholder: '{{currentSemester}}',
+    description: 'The current semester of the student',
+  },
+  {
+    placeholder: '{{studyProgram}}',
+    description: 'The study program of the student',
+  },
+
+  {
+    placeholder: '{{courseName}}',
+    description: 'The name of the course',
+  },
+  {
+    placeholder: '{{courseStartDate}}',
+    description: 'The start date of the course',
+  },
+  {
+    placeholder: '{{courseEndDate}}',
+    description: 'The end date of the course',
+  },
+]
+
 export const AvailableMailPlaceholders = ({
   customAdditionalPlaceholders,
 }: AvailableMailPlaceholdersProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const availablePlaceholders = [
-    {
-      placeholder: '{{firstName}}',
-      description: 'The first name of the student',
-    },
-    {
-      placeholder: '{{lastName}',
-      description: 'The last name of the student',
-    },
-    {
-      placeholder: '{{email}}',
-      description: 'The email of the student',
-    },
-    {
-      placeholder: '{{matriculationNumber}}',
-      description: 'The matriculation number of the student. Might be empty',
-    },
-    {
-      placeholder: '{{universityLogin}}',
-      description: `The ${translations.university['login-name']} of the student. Might be empty`,
-    },
-    {
-      placeholder: '{{studyDegree}}',
-      description: 'The study degree of the student',
-    },
-    {
-      placeholder: '{{currentSemester}}',
-      description: 'The current semester of the student',
-    },
-    {
-      placeholder: '{{studyProgram}}',
-      description: 'The study program of the student',
-    },
-
-    {
-      placeholder: '{{courseName}}',
-      description: 'The name of the course',
-    },
-    {
-      placeholder: '{{courseStartDate}}',
-      description: 'The start date of the course',
-    },
-    {
-      placeholder: '{{courseEndDate}}',
-      description: 'The end date of the course',
-    },
-  ]
+  const placeholders = [...availablePlaceholders]
 
   if (customAdditionalPlaceholders) {
-    availablePlaceholders.push(...customAdditionalPlaceholders)
+    placeholders.push(...customAdditionalPlaceholders)
   }
 
   return (
@@ -98,7 +100,7 @@ export const AvailableMailPlaceholders = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {availablePlaceholders.map((placeholder) => (
+                {placeholders.map((placeholder) => (
                   <TableRow key={placeholder.placeholder}>
                     <TableCell className='font-mono text-sm'>{placeholder.placeholder}</TableCell>
                     <TableCell className='text-sm'>{placeholder.description}</TableCell>
