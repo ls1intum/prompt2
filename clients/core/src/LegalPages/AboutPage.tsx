@@ -6,32 +6,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-
-import DOMPurify from 'dompurify'
 
 export default function AboutPage() {
   const navigate = useNavigate()
-  const [content, setContent] = useState('')
-
-  DOMPurify.addHook('afterSanitizeAttributes', function (node) {
-    // set all elements owning target to target=_blank
-    if ('target' in node) {
-      node.setAttribute('target', '_blank')
-      node.setAttribute('rel', 'noopener')
-    }
-  })
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
-  useEffect(() => {
-    fetch('/about.html')
-      .then((res) => res.text())
-      .then((res) => DOMPurify.sanitize(res))
-      .then((res) => setContent(res))
-  }, [])
 
   return (
     <div className='container mx-auto py-8 px-4'>
@@ -57,8 +34,63 @@ export default function AboutPage() {
               This page is still being built. More information will be available soon.
             </AlertDescription>
           </Alert>
-          
-          <div className='about' dangerouslySetInnerHTML={{ __html: content }} />
+
+          <section>
+            <h2 className="text-xl font-semibold mb-2">What is PROMPT?</h2>
+            <p>
+              PROMPT is a robust course management platform designed to seamlessly support most university project-based
+              courses with minimal adaptations, offering a simple yet powerful tool to help you manage your projects and
+              tasks.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-2">Get in Touch</h2>
+            <p>
+              placeholder
+            </p>
+            <ul className='list-disc list-inside'>
+              <li><a href='/'>Report a bug</a></li>
+              <li><a href='/'>Request a feature</a></li>
+              <li><a href='/'>Contact us</a></li>
+              <li><a href='/'>Release notes</a></li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-2">Main Features </h2>
+            <h3 className='text-xl font-bold'>Application Phase Module</h3>
+
+            <h3 className='text-xl font-bold'>Infrastructure Interface</h3>
+            <p>
+              Manage the creation of GitLab repositories for students in a certain course phase and assign groups of
+              students to a Keycloak group. This will allow students to access the GitLab repositories and the course
+              infrastructure.
+            </p>
+
+            <h3 className='text-xl font-bold'>Student Performance Tracking</h3>
+            <p>
+              Our goal is to create a comprehensive system that tracks each student's entire participation history,
+              including
+              applications and course performances. This system will streamline application assessments and provide
+              instructors
+              with a comprehensive view of each student's academic journey, facilitating more informed
+              decision-making.
+            </p>
+            <p>
+              Additionally, we plan to implement a global recommendation system that allows instructors to recommend
+              students
+              for other courses based on their performance history. This system will also enable instructors to add
+              context to
+              their recommendations, such as specific skill sets or areas of expertise.
+            </p>
+
+            <h3 className='text-xl font-bold'>Task Management</h3>
+
+            <h3 className='text-xl font-bold'>Task Management</h3>
+          </section>
+
+
 
 
           <h2 className='px-6 text-2xl font-bold'>Upcoming Functionality</h2>
