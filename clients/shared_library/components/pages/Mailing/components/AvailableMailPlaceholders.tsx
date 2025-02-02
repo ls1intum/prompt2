@@ -21,7 +21,7 @@ export const availablePlaceholders = [
     description: 'The first name of the student',
   },
   {
-    placeholder: '{{lastName}',
+    placeholder: '{{lastName}}',
     description: 'The last name of the student',
   },
   {
