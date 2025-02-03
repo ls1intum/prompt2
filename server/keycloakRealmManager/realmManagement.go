@@ -149,6 +149,34 @@ func GetOrCreateCustomGroup(ctx context.Context, accessToken, parentGroupID, gro
 	return childGroupID, err
 }
 
+func GetCustomGroupID(ctx context.Context, accessToken, customGroupName string, courseID uuid.UUID) (string, error) {
+	// 1.) Get course group name
+	courseGroupName, err := GetCourseGroupName(ctx, courseID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get course group name: %w", err)
+	}
+
+	// 2.) Get custom group top level group
+	groupPath := "/" + TOP_LEVEL_GROUP_NAME + "/" + courseGroupName + "/" + CUSTOM_GROUPS_NAME
+	group, err := KeycloakRealmSingleton.client.GetGroupByPath(ctx, accessToken, KeycloakRealmSingleton.Realm, groupPath)
+	if err == nil && *group.Name == CUSTOM_GROUPS_NAME {
+		return *group.ID, nil
+	} else if !strings.Contains(err.Error(), "404") {
+		log.Error("failed to get groups from keycloak: ", err)
+		return "", errors.New("failed to get groups")
+	}
+
+	// 3.) Check if custom group exists as child group
+	for _, subGroup := range *group.SubGroups {
+		if *subGroup.Name == customGroupName {
+			return *subGroup.ID, nil
+		}
+	}
+
+	// Case not found
+	return "", errors.New("custom group not found")
+}
+
 func GetOrCreateRealmRole(ctx context.Context, accessToken, roleName string) (*gocloak.Role, error) {
 	// Trying to get (check if exists)
 	existingRole, err := KeycloakRealmSingleton.client.GetClientRole(ctx, accessToken, KeycloakRealmSingleton.Realm, KeycloakRealmSingleton.idOfClient, roleName)
@@ -202,4 +230,44 @@ func AddRoleToGroup(ctx context.Context, accessToken, groupID string, role *gocl
 	}
 
 	return nil
+}
+
+func AddStudentIDsToKeycloakGroup(ctx context.Context, accessToken string, studentIDs []uuid.UUID, groupID string) ([]uuid.UUID, []uuid.UUID, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	students, err := KeycloakRealmSingleton.queries.GetStudentEmails(ctxWithTimeout, studentIDs)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get student emails: %w", err)
+	}
+
+	if len(students) != len(studentIDs) {
+		return nil, nil, errors.New("not all students found")
+	}
+
+	var failedStudents []uuid.UUID
+	var succeededStudents []uuid.UUID
+	for _, student := range students {
+		// Get the keycloak user to the student email
+		keycloakUser, err := KeycloakRealmSingleton.client.GetUsers(ctxWithTimeout, accessToken, KeycloakRealmSingleton.Realm, gocloak.GetUsersParams{
+			Email: &student.Email.String,
+		})
+
+		if err != nil || len(keycloakUser) != 1 {
+			log.Error("failed to get keycloak user for student: ", err)
+			failedStudents = append(failedStudents, student.ID)
+			continue
+		}
+
+		// Add user to the group
+		err = KeycloakRealmSingleton.client.AddUserToGroup(ctxWithTimeout, accessToken, KeycloakRealmSingleton.Realm, *keycloakUser[0].ID, groupID)
+		if err != nil {
+			log.Error("failed to get keycloak user for student: ", err)
+			failedStudents = append(failedStudents, student.ID)
+			continue
+		}
+		succeededStudents = append(succeededStudents, student.ID)
+	}
+
+	return succeededStudents, failedStudents, nil
 }

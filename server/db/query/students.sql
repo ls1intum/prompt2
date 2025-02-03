@@ -46,3 +46,8 @@ WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
    OR email ILIKE '%' || $1 || '%'
    OR matriculation_number ILIKE '%' || $1 || '%'
    OR university_login ILIKE '%' || $1 || '%';
+
+-- name: GetStudentEmails :many
+SELECT id, email
+FROM student
+WHERE id = ANY($1::uuid[]);

@@ -186,6 +186,37 @@ func (q *Queries) GetStudentByEmail(ctx context.Context, email pgtype.Text) (Stu
 	return i, err
 }
 
+const getStudentEmails = `-- name: GetStudentEmails :many
+SELECT id, email
+FROM student
+WHERE id = ANY($1::uuid[])
+`
+
+type GetStudentEmailsRow struct {
+	ID    uuid.UUID   `json:"id"`
+	Email pgtype.Text `json:"email"`
+}
+
+func (q *Queries) GetStudentEmails(ctx context.Context, dollar_1 []uuid.UUID) ([]GetStudentEmailsRow, error) {
+	rows, err := q.db.Query(ctx, getStudentEmails, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetStudentEmailsRow
+	for rows.Next() {
+		var i GetStudentEmailsRow
+		if err := rows.Scan(&i.ID, &i.Email); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const searchStudents = `-- name: SearchStudents :many
 SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified
 FROM student

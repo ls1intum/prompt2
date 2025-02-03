@@ -54,3 +54,26 @@ func AddCustomGroup(ctx context.Context, courseID uuid.UUID, groupName string) (
 	// 4. Add desired group to subgroup
 
 }
+
+func AddStudentsToGroup(ctx context.Context, courseID uuid.UUID, studentIDs []uuid.UUID, groupName string) ([]uuid.UUID, error) {
+	// 1. Log into keycloak
+	token, err := LoginClient(ctx)
+	if err != nil {
+		return []uuid.UUID{}, err
+	}
+
+	// 2. Get Custom Group Folder
+	customGroupID, err := GetCustomGroupID(ctx, token.AccessToken, groupName, courseID)
+	if err != nil {
+		log.Error("Failed to get custom group: ", err)
+		return []uuid.UUID{}, errors.New("failed to get custom group")
+	}
+
+	// 3. Get the keycloak userIDs of the students
+	failedStudentIDs, err := AddStudentIDsToKeycloakGroup(ctx, token.AccessToken, studentIDs, customGroupID)
+	if err != nil {
+		log.Error("Failed to add students to group: ", err)
+		return failedStudentIDs, errors.New("failed to add students to group")
+	}
+	return failedStudentIDs, nil
+}

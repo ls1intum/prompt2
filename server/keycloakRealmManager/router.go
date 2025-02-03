@@ -1,15 +1,18 @@
 package keycloakRealmManager
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager/keycloakRealmDTO"
 )
 
 func setupKeycloakRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	keycloak := router.Group("/keycloak/:courseID")
 	keycloak.PUT("", createCustomGroup)
+	keycloak.PUT("/group/:groupName/students", addStudentsToGroup)
 }
 
 func createCustomGroup(c *gin.Context) {
@@ -19,13 +22,47 @@ func createCustomGroup(c *gin.Context) {
 		return
 	}
 
-	id, err := AddCustomGroup(c, courseID, "test")
+	var newGroupName keycloakRealmDTO.CreateGroup
+	if err := c.BindJSON(&newGroupName); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	id, err := AddCustomGroup(c, courseID, newGroupName.GroupName)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"id": id})
+}
+
+func addStudentsToGroup(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("courseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	groupName := c.Param("groupName")
+	if groupName == "" {
+		handleError(c, http.StatusBadRequest, errors.New("group name is required"))
+		return
+	}
+
+	var studentIDs []uuid.UUID
+	if err := c.BindJSON(&studentIDs); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	failedStudentIDs, err = AddStudentsToGroup(c, courseID, studentIDs, groupName)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Student added to group"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
