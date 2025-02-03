@@ -5,6 +5,9 @@ on:
     branches: [main]
 
 jobs:
+  test-server:
+    uses: ./.github/workflows/go-tests.yml
+    secrets: inherit
   build-and-push-server:
     uses: ./.github/workflows/build-and-push-server.yml
     secrets: inherit
