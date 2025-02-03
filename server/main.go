@@ -16,7 +16,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
 	"github.com/niclasheun/prompt2.0/mailing"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
@@ -63,7 +63,7 @@ func initKeycloak(queries db.Queries) {
 	// first we initialize the keycloak token verfier
 	keycloakTokenVerifier.InitKeycloakTokenVerifier(context.Background(), baseURL, realm, clientID, expectedAuthorizedParty, queries)
 
-	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
+	err := keycloakRealmManager.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
 	if err != nil {
 		log.Error("Failed to initialize keycloak: ", err)
 	}

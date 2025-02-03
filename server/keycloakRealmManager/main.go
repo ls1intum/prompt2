@@ -1,4 +1,4 @@
-package keycloak
+package keycloakRealmManager
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 )
 
-type KeycloakClientManager struct {
+type KeycloakRealmService struct {
 	client                  *gocloak.GoCloak
 	BaseURL                 string
 	Realm                   string
@@ -18,12 +18,12 @@ type KeycloakClientManager struct {
 	queries                 db.Queries
 }
 
-var KeycloakSingleton *KeycloakClientManager
+var KeycloakRealmSingleton *KeycloakRealmService
 
 var TOP_LEVEL_GROUP_NAME = "Prompt"
 
 func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string, queries db.Queries) error {
-	KeycloakSingleton = &KeycloakClientManager{
+	KeycloakRealmSingleton = &KeycloakRealmService{
 		client:                  gocloak.NewClient(BaseURL),
 		BaseURL:                 BaseURL,
 		Realm:                   Realm,

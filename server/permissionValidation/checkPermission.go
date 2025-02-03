@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 )
 
 func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers ...string) (bool, error) {
@@ -28,10 +28,10 @@ func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers ...stri
 	for _, role := range allowedUsers {
 		var desiredRole string = ""
 		switch role {
-		case keycloak.PromptAdmin:
-			desiredRole = keycloak.PromptAdmin
-		case keycloak.PromptLecturer:
-			desiredRole = keycloak.PromptLecturer
+		case keycloakRealmManager.PromptAdmin:
+			desiredRole = keycloakRealmManager.PromptAdmin
+		case keycloakRealmManager.PromptLecturer:
+			desiredRole = keycloakRealmManager.PromptLecturer
 		default:
 			desiredRole = fmt.Sprintf("%s-%s", courseIdentifier, role)
 		}

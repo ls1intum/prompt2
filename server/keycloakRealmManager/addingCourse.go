@@ -1,4 +1,4 @@
-package keycloak
+package keycloakRealmManager
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 		}
 
 		// Associate role with group
-		err = KeycloakSingleton.client.AddClientRolesToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, KeycloakSingleton.idOfClient, subGroupID, []gocloak.Role{*role})
+		err = KeycloakRealmSingleton.client.AddClientRolesToGroup(ctx, token.AccessToken, KeycloakRealmSingleton.Realm, KeycloakRealmSingleton.idOfClient, subGroupID, []gocloak.Role{*role})
 		if err != nil {
 			log.Error("failed to associate role with group: ", err)
 			return err
@@ -49,7 +49,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 
 		// Add the requester to the lecturer group
 		if groupName == CourseLecturer {
-			err = KeycloakSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, userID, subGroupID)
+			err = KeycloakRealmSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakRealmSingleton.Realm, userID, subGroupID)
 			if err != nil {
 				log.Error("failed to add user to group: ", err)
 				return err

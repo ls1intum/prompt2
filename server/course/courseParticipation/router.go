@@ -6,14 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 )
 
 func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	// incoming path should be /course/:uuid/
 	courseParticipation := router.Group("/courses/:uuid/participations", authMiddleware())
-	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseParticipationsForCourse)
-	courseParticipation.POST("/enroll", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCourseParticipation)
+	courseParticipation.GET("", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer, keycloakRealmManager.CourseEditor), getCourseParticipationsForCourse)
+	courseParticipation.POST("/enroll", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), createCourseParticipation)
 }
 
 // TODO: in future think about how to integrate / create "passed" students from previous phases

@@ -1,4 +1,4 @@
-package keycloak
+package keycloakRealmManager
 
 const PromptAdmin = "PROMPT_Admin"
 const PromptLecturer = "PROMPT_Lecturer"

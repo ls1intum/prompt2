@@ -6,17 +6,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 )
 
 func setupStudentRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	student := router.Group("/students", authMiddleware())
-	student.GET("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), getAllStudents)
-	student.GET("/:uuid", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), getStudentByID)
-	student.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createStudent)
-	student.PUT("/:uuid", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), updateStudent)
-	student.GET("/search/:searchString", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), searchStudents)
+	student.GET("/", permissionRoleMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.PromptLecturer), getAllStudents)
+	student.GET("/:uuid", permissionRoleMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.PromptLecturer), getStudentByID)
+	student.POST("/", permissionRoleMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.PromptLecturer), createStudent)
+	student.PUT("/:uuid", permissionRoleMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.PromptLecturer), updateStudent)
+	student.GET("/search/:searchString", permissionRoleMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.PromptLecturer), searchStudents)
 }
 
 func getAllStudents(c *gin.Context) {

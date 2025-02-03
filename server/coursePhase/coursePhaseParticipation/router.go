@@ -6,18 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 )
 
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
-	courseParticipation.GET("/self", permissionIDMiddleware(keycloak.CourseStudent), getOwnCoursePhaseParticipation)
-	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipationsForCoursePhase)
-	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhaseParticipation)
-	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipation)
-	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseParticipation)
+	courseParticipation.GET("/self", permissionIDMiddleware(keycloakRealmManager.CourseStudent), getOwnCoursePhaseParticipation)
+	courseParticipation.GET("", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer, keycloakRealmManager.CourseEditor), getParticipationsForCoursePhase)
+	courseParticipation.POST("", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), createCoursePhaseParticipation)
+	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer, keycloakRealmManager.CourseEditor), getParticipation)
+	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), updateCoursePhaseParticipation)
 	// allow to modify multiple at once
-	courseParticipation.PUT("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateBatchCoursePhaseParticipation)
+	courseParticipation.PUT("", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), updateBatchCoursePhaseParticipation)
 }
 
 func getOwnCoursePhaseParticipation(c *gin.Context) {
