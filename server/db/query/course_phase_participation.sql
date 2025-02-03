@@ -327,3 +327,102 @@ FROM
     SELECT * FROM qualified_non_participants
 ) AS main
 ORDER BY main.last_name, main.first_name;
+
+
+-- name: GetCoursePhaseParticipationByUniversityLoginAndCoursePhase :one
+WITH 
+-----------------------------------------------------------------------
+-- A) Phases a student must have 'passed' (per course_phase_graph)
+-- Identify the single previous phase (if any) required for PASS 
+-----------------------------------------------------------------------
+direct_predecessor_for_pass AS (
+    SELECT cpg.from_course_phase_id AS phase_id
+    FROM course_phase_graph cpg
+    WHERE cpg.to_course_phase_id = $1
+),
+
+-----------------------------------------------------------------------
+-- 1) Existing participants in the current phase
+-----------------------------------------------------------------------
+current_phase_participation AS (
+    SELECT
+        cpp.id                         AS course_phase_participation_id,
+        cpp.student_readable_data      AS student_readable_data,
+        s.id                           AS student_id,
+        s.first_name,
+        s.last_name,
+        s.email,
+        s.matriculation_number,
+        s.university_login,
+        s.has_university_account,
+        s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
+        cp.id                    AS course_participation_id
+    FROM course_phase_participation cpp
+    INNER JOIN course_participation cp 
+      ON cpp.course_participation_id = cp.id
+    INNER JOIN student s 
+      ON cp.student_id = s.id
+    WHERE cpp.course_phase_id = $1
+      AND s.university_login = $2
+      AND s.matriculation_number = $3 
+),
+
+-----------------------------------------------------------------------
+-- 2) Would-be participants: 
+--    - They do NOT yet have a course_phase_participation for $1
+--    - Must have passed ALL direct_predecessors_for_pass
+-----------------------------------------------------------------------
+qualified_non_participant AS (
+    SELECT
+        NULL::uuid                   AS course_phase_participation_id,
+        '{}'::jsonb                  AS student_readable_data,
+        s.id                         AS student_id,
+        s.first_name,
+        s.last_name,
+        s.email,
+        s.matriculation_number,
+        s.university_login,
+        s.has_university_account,
+        s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
+        cp.id                        AS course_participation_id
+    FROM course_participation cp
+    JOIN student s 
+      ON cp.student_id = s.id
+
+    WHERE 
+      s.university_login = $2
+      AND s.matriculation_number = $3 
+      -- Exclude if they already have a participation in the current phase
+      AND NOT EXISTS (
+        SELECT 1
+        FROM course_phase_participation new_cpp
+        WHERE new_cpp.course_phase_id = $1
+          AND new_cpp.course_participation_id = cp.id
+      )
+    -- And ensure they have 'passed' in the previous phase 
+    -- We filter just previous, not all since phase order might change or allow for non-linear courses at some point
+    AND EXISTS (
+        SELECT 1
+        FROM direct_predecessor_for_pass dpp
+        JOIN  course_phase_participation pcpp
+          ON pcpp.course_phase_id = dpp.phase_id
+          AND pcpp.course_participation_id = cp.id
+        WHERE (pcpp.pass_status = 'passed')
+    )
+)
+SELECT main.*
+FROM
+(
+    SELECT * FROM current_phase_participation
+    UNION
+    SELECT * FROM qualified_non_participant
+) AS main
+LIMIT 1;

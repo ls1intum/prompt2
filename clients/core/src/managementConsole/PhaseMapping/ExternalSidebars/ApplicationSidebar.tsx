@@ -8,6 +8,7 @@ export const ApplicationSidebar = ({ rootPath, title }: { rootPath: string; titl
     title: 'Application',
     icon: <FileUser />,
     goToPath: '',
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     subitems: [
       {
         title: 'Applications',

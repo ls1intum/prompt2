@@ -1,12 +1,16 @@
 package keycloak
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,42 +51,6 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// manually check the audience, as the it is disabled in the verifier config (for allowing students to apply)
-		if !checkAudience(claims, KeycloakSingleton.ClientID) {
-			log.Error("Token audience mismatch")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token audience mismatch"})
-			return
-		}
-
-		resourceAccess, err := extractResourceAccess(claims)
-		if err != nil {
-			log.Error("Failed to extract resource access: ", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-			return
-		}
-
-		rolesInterface, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})["roles"]
-		if !ok {
-			log.Error("Failed to extract roles from resource access")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Failed to extract roles"})
-			return
-		}
-
-		roles, ok := rolesInterface.([]interface{})
-		if !ok {
-			log.Error("Roles are not in expected format")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid roles format"})
-			return
-		}
-
-		// Convert roles to map[string]bool for easier downstream usage
-		userRoles := make(map[string]bool)
-		for _, role := range roles {
-			if roleStr, ok := role.(string); ok {
-				userRoles[roleStr] = true
-			}
-		}
-
 		// extract user Id
 		userID, ok := claims["sub"].(string)
 		if !ok {
@@ -96,10 +64,47 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			log.Error("Failed to extract user ID (sub) from token claims")
 		}
 
+		matriculationNumber, ok := claims["matriculation_number"].(string)
+		if !ok {
+			log.Error("Failed to extract user matriculation number (sub) from token claims")
+		}
+
+		universityLogin, ok := claims["university_login"].(string)
+		if !ok {
+			log.Error("Failed to extract user university login (sub) from token claims")
+		}
+
+		// Retrieve all user's roles from the token (if any) for the audience prompt-server (clientID)
+		userRoles, err := checkKeycloakRoles(claims)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate user"})
+			return
+		}
+
+		// Retrieve all student roles from the DB
+		studentRoles, err := getStudentRoles(matriculationNumber, universityLogin)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate user"})
+			return
+		}
+
+		if len(studentRoles) == 0 && len(userRoles) == 0 {
+			log.Error("User has no roles")
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// store also the student roles in the userRoles map
+		for _, role := range studentRoles {
+			userRoles[role] = true
+		}
+
 		// Store the extracted roles in the context
 		c.Set("userRoles", userRoles)
 		c.Set("userID", userID)
 		c.Set("userEmail", userEmail)
+		c.Set("matriculationNumber", matriculationNumber)
+		c.Set("universityLogin", universityLogin)
 		c.Next()
 	}
 }
@@ -141,6 +146,41 @@ func checkAudience(claims map[string]interface{}, expectedClientID string) bool 
 	return false
 }
 
+func checkKeycloakRoles(claims map[string]interface{}) (map[string]bool, error) {
+	userRoles := make(map[string]bool)
+	if !checkAudience(claims, KeycloakSingleton.ClientID) {
+		log.Debug("No keycloak roles found for ClientID")
+		return userRoles, nil
+	}
+
+	// user has Prompt keycloak roles
+	resourceAccess, err := extractResourceAccess(claims)
+	if err != nil {
+		log.Error("Failed to extract resource access: ", err)
+		return nil, errors.New("could not authenticate user")
+	}
+
+	rolesInterface, ok := resourceAccess[KeycloakSingleton.ClientID].(map[string]interface{})["roles"]
+	if !ok {
+		log.Error("Failed to extract roles from resource access")
+		return nil, errors.New("could not authenticate user")
+	}
+
+	roles, ok := rolesInterface.([]interface{})
+	if !ok {
+		log.Error("Roles are not in expected format")
+		return nil, errors.New("could not authenticate user")
+	}
+
+	// Convert roles to map[string]bool for easier downstream usage
+	for _, role := range roles {
+		if roleStr, ok := role.(string); ok {
+			userRoles[roleStr] = true
+		}
+	}
+	return userRoles, nil
+}
+
 // extractResourceAccess retrieves the "resource_access" claim, which contains role information.
 func extractResourceAccess(claims map[string]interface{}) (map[string]interface{}, error) {
 	resourceAccess, ok := claims["resource_access"].(map[string]interface{})
@@ -156,4 +196,21 @@ func checkAuthorizedParty(claims map[string]interface{}, expectedAuthorizedParty
 		return false
 	}
 	return azp == expectedAuthorizedParty
+}
+
+func getStudentRoles(matriculationNumber, universityLogin string) ([]string, error) {
+	ctx := context.Background()
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+	// Retrieve course roles from the DB
+	studentRoles, err := KeycloakSingleton.queries.GetStudentRoleStrings(ctxWithTimeout, db.GetStudentRoleStringsParams{
+		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
+		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
+	})
+	if err != nil {
+		log.Error("Failed to retrieve student roles: ", err)
+		return nil, errors.New("could retrieve student roles")
+	}
+
+	return studentRoles, nil
 }

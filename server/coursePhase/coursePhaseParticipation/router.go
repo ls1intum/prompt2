@@ -11,12 +11,37 @@ import (
 
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
+	courseParticipation.GET("/self", permissionIDMiddleware(keycloak.CourseStudent), getOwnCoursePhaseParticipation)
 	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipationsForCoursePhase)
 	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhaseParticipation)
 	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipation)
 	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseParticipation)
 	// allow to modify multiple at once
 	courseParticipation.PUT("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateBatchCoursePhaseParticipation)
+}
+
+func getOwnCoursePhaseParticipation(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	matriculationNumber := c.GetString("matriculationNumber")
+	universityLogin := c.GetString("universityLogin")
+
+	if matriculationNumber == "" || universityLogin == "" {
+		handleError(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	courseParticipation, err := GetOwnCoursePhaseParticipation(c, id, matriculationNumber, universityLogin)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseParticipation)
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {
