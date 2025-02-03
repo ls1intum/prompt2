@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,11 +26,11 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 		return err
 	}
 
-	subGroupNames := []string{CourseLecturer, CourseEditor}
+	subGroupNames := []string{permissionValidation.CourseLecturer, permissionValidation.CourseEditor}
 	for _, groupName := range subGroupNames {
 		// create role for the group
 		roleName := fmt.Sprintf("%s-%s-%s", iterationName, courseName, groupName)
-		role, err := CreateRealmRole(ctx, token.AccessToken, roleName)
+		role, err := GetOrCreateRealmRole(ctx, token.AccessToken, roleName)
 		if err != nil {
 			return err
 		}
@@ -48,7 +49,7 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 		}
 
 		// Add the requester to the lecturer group
-		if groupName == CourseLecturer {
+		if groupName == permissionValidation.CourseLecturer {
 			err = KeycloakRealmSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakRealmSingleton.Realm, userID, subGroupID)
 			if err != nil {
 				log.Error("failed to add user to group: ", err)

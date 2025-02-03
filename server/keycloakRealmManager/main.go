@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/gin-gonic/gin"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 type KeycloakRealmService struct {
@@ -21,8 +24,9 @@ type KeycloakRealmService struct {
 var KeycloakRealmSingleton *KeycloakRealmService
 
 var TOP_LEVEL_GROUP_NAME = "Prompt"
+var CUSTOM_GROUPS_NAME = "CustomGroups"
 
-func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string, queries db.Queries) error {
+func InitKeycloak(ctx context.Context, router *gin.RouterGroup, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string, queries db.Queries) error {
 	KeycloakRealmSingleton = &KeycloakRealmService{
 		client:                  gocloak.NewClient(BaseURL),
 		BaseURL:                 BaseURL,
@@ -37,5 +41,13 @@ func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, i
 	// Test Login connection
 	_, err := LoginClient(ctx)
 
+	// setup router
+	setupKeycloakRouter(router, keycloakTokenVerifier.KeycloakMiddleware, checkAccessControlByIDWrapper)
+
 	return err
+}
+
+// initializes the handler func with CheckCoursePermissions
+func checkAccessControlByIDWrapper(allowedRoles ...string) gin.HandlerFunc {
+	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, "uuid", allowedRoles...)
 }
