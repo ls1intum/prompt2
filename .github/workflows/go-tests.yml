@@ -21,6 +21,8 @@ jobs:
       - name: Install dependencies
         run: cd ${{ matrix.directory }} && go mod download
       - name: Test with Go
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
         run:  cd ${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
       - name: Upload Go test results
         if: always()
