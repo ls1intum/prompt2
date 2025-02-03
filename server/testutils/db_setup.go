@@ -8,6 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -18,6 +20,8 @@ type TestDB struct {
 }
 
 func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), error) {
+	ryukSetting := utils.GetEnv("TESTCONTAINERS_RYUK_DISABLED", "")
+	logrus.Info("starting with ryuk setting: ", ryukSetting)
 	// Set up PostgreSQL container
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres:15",
