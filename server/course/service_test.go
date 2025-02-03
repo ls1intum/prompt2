@@ -12,8 +12,8 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -60,7 +60,7 @@ func (suite *CourseServiceTestSuite) TearDownSuite() {
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCourses() {
-	courses, err := GetAllCourses(suite.ctx, map[string]bool{keycloakRealmManager.PromptAdmin: true})
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{permissionValidation.PromptAdmin: true})
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), len(courses), 10, "Expected all courses")
 

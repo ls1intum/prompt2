@@ -46,7 +46,7 @@ func runMigrations(databaseURL string) {
 	}
 }
 
-func initKeycloak(queries db.Queries) {
+func initKeycloak(router *gin.RouterGroup, queries db.Queries) {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "https://" + baseURL
@@ -63,7 +63,7 @@ func initKeycloak(queries db.Queries) {
 	// first we initialize the keycloak token verfier
 	keycloakTokenVerifier.InitKeycloakTokenVerifier(context.Background(), baseURL, realm, clientID, expectedAuthorizedParty, queries)
 
-	err := keycloakRealmManager.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
+	err := keycloakRealmManager.InitKeycloak(context.Background(), router, baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
 	if err != nil {
 		log.Error("Failed to initialize keycloak: ", err)
 	}
@@ -97,9 +97,6 @@ func main() {
 
 	query := db.New(conn)
 
-	initKeycloak(*query)
-	permissionValidation.InitValidationService(*query, conn)
-
 	router := gin.Default()
 	router.Use(utils.CORS())
 
@@ -109,6 +106,9 @@ func main() {
 			"message": "Hello World",
 		})
 	})
+
+	initKeycloak(api, *query)
+	permissionValidation.InitValidationService(*query, conn)
 
 	// this initializes also all available course phase types
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)

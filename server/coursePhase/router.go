@@ -6,16 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware, permissionCourseIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhase := router.Group("/course_phases", authMiddleware())
-	coursePhase.GET("/:uuid", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer, keycloakRealmManager.CourseEditor), getCoursePhaseByID)
+	coursePhase.GET("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCoursePhaseByID)
 	// getting the course ID here to do correct rights management
-	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), createCoursePhase)
-	coursePhase.PUT("/:uuid", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), updateCoursePhase)
-	coursePhase.DELETE("/:uuid", permissionIDMiddleware(keycloakRealmManager.PromptAdmin, keycloakRealmManager.CourseLecturer), deleteCoursePhase)
+	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCoursePhase)
+	coursePhase.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhase)
+	coursePhase.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCoursePhase)
 }
 
 func createCoursePhase(c *gin.Context) {

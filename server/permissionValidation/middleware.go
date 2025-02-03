@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -68,15 +67,15 @@ func CheckAccessControlByRole(allowedRoles ...string) gin.HandlerFunc {
 		roleAllowed := false
 		for _, allowedRole := range allowedRoles {
 			switch allowedRole {
-			case keycloakRealmManager.PromptAdmin:
-				if userRoles[keycloakRealmManager.PromptAdmin] {
+			case PromptAdmin:
+				if userRoles[PromptAdmin] {
 					roleAllowed = true
 				}
-			case keycloakRealmManager.PromptLecturer:
-				if userRoles[keycloakRealmManager.PromptLecturer] {
+			case PromptLecturer:
+				if userRoles[PromptLecturer] {
 					roleAllowed = true
 				}
-			case keycloakRealmManager.CourseLecturer, keycloakRealmManager.CourseEditor, keycloakRealmManager.CourseStudent:
+			case CourseLecturer, CourseEditor, CourseStudent:
 				// For these roles, we check if the user has any role that ends with the allowedRole value.
 				for userRole := range userRoles {
 					if strings.HasSuffix(userRole, allowedRole) {
