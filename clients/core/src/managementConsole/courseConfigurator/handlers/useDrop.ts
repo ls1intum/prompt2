@@ -42,7 +42,8 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
           position: position,
           isInitialPhase: coursePhaseType.initialPhase,
           coursePhaseTypeID: coursePhaseType.id,
-          metaData: [], // TODO: maybe fix this to be {} instead of []
+          restrictedMetaData: [], // TODO: maybe fix this to be {} instead of []
+          studentReadableData: [], // TODO: maybe fix this to be {} instead of []
         }
 
         appendCoursePhase(coursePhase)

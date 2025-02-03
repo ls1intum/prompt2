@@ -32,8 +32,8 @@ export const ApplicationLandingPage = (): JSX.Element => {
       })
     }
     if (
-      coursePhase?.metaData?.mailingSettings === undefined &&
-      !coursePhase?.metaData?.hideMailingWarning
+      coursePhase?.restrictedData?.mailingSettings === undefined &&
+      !coursePhase?.restrictedData?.hideMailingWarning
     ) {
       missingConfigItems.push({
         title: 'Application Mailing Settings',
@@ -47,8 +47,8 @@ export const ApplicationLandingPage = (): JSX.Element => {
     return missingConfigItems
   }, [
     applicationMetaData,
-    coursePhase?.metaData?.hideMailingWarning,
-    coursePhase?.metaData?.mailingSettings,
+    coursePhase?.restrictedData?.hideMailingWarning,
+    coursePhase?.restrictedData?.mailingSettings,
     hideMailingWarning,
     path,
   ])

@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import translations from '@/lib/translations.json'
-import { SortableHeader } from './SortableHeader'
+import { SortableHeader } from '@/components/table/SortableHeader'
 import { getStatusBadge } from '../../utils/getStatusBadge'
 import { getGenderString } from '@tumaet/prompt-shared-state'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -19,7 +19,7 @@ export const columns = (
     additionalScoreColumns = additionalScores.map((additionalScore) => {
       return {
         id: additionalScore.key,
-        accessorFn: (row) => row.metaData?.[additionalScore.key] ?? null,
+        accessorFn: (row) => row.restrictedData?.[additionalScore.key] ?? null,
         header: ({ column }) => <SortableHeader column={column} title={additionalScore.name} />,
       }
     })

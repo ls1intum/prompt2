@@ -40,7 +40,7 @@ export const downloadApplications = (
           return JSON.stringify(row.score ?? '')
         } else if (additionalScores.map((score) => score.key).includes(header)) {
           // Fetch additional scores from the `meta_data` object
-          return JSON.stringify(row.metaData?.[header] ?? '')
+          return JSON.stringify(row.restrictedData?.[header] ?? '')
         } else {
           return JSON.stringify('')
         }

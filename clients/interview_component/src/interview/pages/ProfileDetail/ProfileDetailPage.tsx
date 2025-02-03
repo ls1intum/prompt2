@@ -15,7 +15,7 @@ export const ProfileDetailPage = (): JSX.Element => {
   const navigate = useNavigate()
 
   const applicationAnswers =
-    (participation?.prevMetaData?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
+    (participation?.prevData?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
 
   return (
     <div className=''>

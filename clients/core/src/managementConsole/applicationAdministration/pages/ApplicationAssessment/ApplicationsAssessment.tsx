@@ -63,9 +63,11 @@ export const ApplicationsAssessment = (): JSX.Element => {
     (participation) => participation.id === selectedApplicationID,
   )
 
+  const tableColumns = columns(viewApplication, deleteApplication, additionalScores ?? [])
+
   const table = useReactTable({
     data: participations ?? [],
-    columns: columns(viewApplication, deleteApplication, additionalScores ?? []),
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -162,7 +164,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24 text-center'>
+                  <TableCell colSpan={tableColumns.length} className='h-24 text-center'>
                     No results.
                   </TableCell>
                 </TableRow>
@@ -180,7 +182,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
           coursePhaseParticipationID={selectedApplicationID ?? ''}
           status={selectedApplication?.passStatus ?? PassStatus.NOT_ASSESSED}
           score={selectedApplication?.score ?? null}
-          metaData={selectedApplication?.metaData ?? {}}
+          restrictedData={selectedApplication?.restrictedData ?? {}}
         />
       )}
     </div>

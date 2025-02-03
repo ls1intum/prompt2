@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
-import { ActionDialog } from '../../GroupActionDialog/GroupActionDialog'
+import { ActionDialog } from '@/components/table/GroupActionDialog'
 import { RowModel } from '@tanstack/react-table'
 import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { useApplicationStatusUpdate } from '../../../hooks/useApplicationStatusUpdate'

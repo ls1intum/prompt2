@@ -59,9 +59,11 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.E
       setCoursePhase(coursePhase)
 
       const interviewSlots =
-        ((coursePhase?.metaData?.interviewSlots as InterviewSlot[]) ?? []).map((slot, index) => {
-          return { ...slot, index: index + 1 }
-        }) ?? []
+        ((coursePhase?.restrictedData?.interviewSlots as InterviewSlot[]) ?? []).map(
+          (slot, index) => {
+            return { ...slot, index: index + 1 }
+          },
+        ) ?? []
       setInterviewSlots(interviewSlots)
     }
   }, [coursePhase, setCoursePhase, setInterviewSlots])

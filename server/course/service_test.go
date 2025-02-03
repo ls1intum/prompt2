@@ -12,6 +12,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -79,13 +80,14 @@ func (suite *CourseServiceTestSuite) TestGetCourseByID() {
 
 func (suite *CourseServiceTestSuite) TestCreateCourse() {
 	newCourse := courseDTO.CreateCourse{
-		Name:        "New Course",
-		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},
-		EndDate:     pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
-		SemesterTag: pgtype.Text{String: "WS2024", Valid: true},
-		MetaData:    map[string]interface{}{"test_key": "test_value"},
-		CourseType:  db.CourseType("practical course"),
-		Ects:        pgtype.Int4{Int32: 10, Valid: true},
+		Name:                "New Course",
+		StartDate:           pgtype.Date{Valid: true, Time: time.Now()},
+		EndDate:             pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+		SemesterTag:         pgtype.Text{String: "WS2024", Valid: true},
+		RestrictedData:      meta.MetaData{"key": "value"},
+		StudentReadableData: meta.MetaData{"differentKey": "value"},
+		CourseType:          db.CourseType("practical course"),
+		Ects:                pgtype.Int4{Int32: 10, Valid: true},
 	}
 
 	createdCourse, err := CreateCourse(suite.ctx, newCourse, "test_user")

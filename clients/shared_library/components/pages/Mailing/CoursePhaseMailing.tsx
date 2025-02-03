@@ -53,8 +53,9 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
   )
 
   useEffect(() => {
-    if (coursePhase?.metaData) {
-      const parsedMetaData = coursePhase.metaData.mailingSettings as CoursePhaseMailingConfigData
+    if (coursePhase?.restrictedData) {
+      const parsedMetaData = coursePhase.restrictedData
+        .mailingSettings as CoursePhaseMailingConfigData
       console.log(parsedMetaData)
       if (!parsedMetaData) {
         const emptyMailData = {
@@ -81,7 +82,7 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
     e.preventDefault()
     const updatedCoursePhase: UpdateCoursePhase = {
       id: coursePhase?.id ?? '',
-      metaData: {
+      restrictedData: {
         mailingSettings: mailingMetaData,
       },
     }

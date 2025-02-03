@@ -7,17 +7,25 @@ import (
 )
 
 type UpdateCourseData struct {
-	MetaData meta.MetaData `json:"metaData"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }
 
 func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {
-	metaData, err := c.MetaData.GetDBModel()
+	restrictedData, err := c.RestrictedData.GetDBModel()
+	if err != nil {
+		log.Error("failed to create Course DTO from DB model")
+		return db.UpdateCourseParams{}, err
+	}
+
+	studentReadableData, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create Course DTO from DB model")
 		return db.UpdateCourseParams{}, err
 	}
 
 	return db.UpdateCourseParams{
-		MetaData: metaData,
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
 	}, nil
 }

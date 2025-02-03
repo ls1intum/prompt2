@@ -66,8 +66,9 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       courseType: coursePropertiesFormValues?.courseType || '',
       ects: coursePropertiesFormValues?.ects || 0,
       semesterTag: coursePropertiesFormValues?.semesterTag || '',
+      restrictedMetaData: {},
       // eslint-disable-next-line prettier/prettier
-      metaData: { icon: data.icon, 'bg-color': data.color },
+      studentReadableData: { icon: data.icon, 'bg-color': data.color },
     }
 
     // todo API call

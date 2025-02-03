@@ -13,27 +13,36 @@ type UpdateCoursePhaseParticipationRequest struct {
 	ID                    uuid.UUID      `json:"id"`
 	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
 	PassStatus            *db.PassStatus `json:"passStatus"`
-	MetaData              meta.MetaData  `json:"metaData"`
+	RestrictedData        meta.MetaData  `json:"restrictedData"`
+	StudentReadableData   meta.MetaData  `json:"studentReadableData"`
 }
 
 type UpdateCoursePhaseParticipation struct {
-	ID            uuid.UUID      `json:"id"`
-	PassStatus    *db.PassStatus `json:"passStatus"`
-	MetaData      meta.MetaData  `json:"metaData"`
-	CoursePhaseID uuid.UUID      `json:"coursePhaseID"`
+	ID                  uuid.UUID      `json:"id"`
+	PassStatus          *db.PassStatus `json:"passStatus"`
+	RestrictedData      meta.MetaData  `json:"restrictedData"`
+	StudentReadableData meta.MetaData  `json:"studentReadableData"`
+	CoursePhaseID       uuid.UUID      `json:"coursePhaseID"`
 }
 
 func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhaseParticipationParams, error) {
-	metaDataBytes, err := c.MetaData.GetDBModel()
+	restrictedData, err := c.RestrictedData.GetDBModel()
+	if err != nil {
+		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
+		return db.UpdateCoursePhaseParticipationParams{}, err
+	}
+
+	studentReadableData, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
 		return db.UpdateCoursePhaseParticipationParams{}, err
 	}
 
 	return db.UpdateCoursePhaseParticipationParams{
-		ID:            c.ID,
-		PassStatus:    GetPassStatusDBModel(c.PassStatus),
-		MetaData:      metaDataBytes,
-		CoursePhaseID: c.CoursePhaseID,
+		ID:                  c.ID,
+		PassStatus:          GetPassStatusDBModel(c.PassStatus),
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CoursePhaseID:       c.CoursePhaseID,
 	}, nil
 }

@@ -7,8 +7,8 @@ SELECT * FROM course
 WHERE end_date >= NOW() - INTERVAL '1 month';;
 
 -- name: CreateCourse :one
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
 RETURNING *;
 
 -- name: CheckCoursePhasesBelongToCourse :one
@@ -27,5 +27,6 @@ FROM matched_phases;
 -- name: UpdateCourse :exec
 UPDATE course
 SET 
-  meta_data = meta_data || $2
+  restricted_data = restricted_data || $2,
+  student_readable_data = student_readable_data || $3
 WHERE id = $1;

@@ -105,7 +105,8 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 			CourseParticipationID: updatedCourseParticipationRequest.CourseParticipationID,
 			CoursePhaseID:         coursePhaseId,
 			PassStatus:            updatedCourseParticipationRequest.PassStatus,
-			MetaData:              updatedCourseParticipationRequest.MetaData,
+			RestrictedData:        updatedCourseParticipationRequest.RestrictedData,
+			StudentReadableData:   updatedCourseParticipationRequest.StudentReadableData,
 		}
 
 		if err := Validate(createCourseParticipationDTO); err != nil {
@@ -122,10 +123,11 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 	} else {
 		// Case 2: update an existing course phase participation
 		err = UpdateCoursePhaseParticipation(c, nil, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-			ID:            id,
-			PassStatus:    updatedCourseParticipationRequest.PassStatus,
-			MetaData:      updatedCourseParticipationRequest.MetaData,
-			CoursePhaseID: coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
+			ID:                  id,
+			PassStatus:          updatedCourseParticipationRequest.PassStatus,
+			RestrictedData:      updatedCourseParticipationRequest.RestrictedData,
+			StudentReadableData: updatedCourseParticipationRequest.StudentReadableData,
+			CoursePhaseID:       coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
 		})
 		if err != nil {
 			handleError(c, http.StatusInternalServerError, err)
@@ -158,7 +160,8 @@ func updateBatchCoursePhaseParticipation(c *gin.Context) {
 				CourseParticipationID: update.CourseParticipationID,
 				CoursePhaseID:         coursePhaseId,
 				PassStatus:            update.PassStatus,
-				MetaData:              update.MetaData,
+				RestrictedData:        update.RestrictedData,
+				StudentReadableData:   update.StudentReadableData,
 			}
 
 			// Validate for complete new participations
@@ -169,10 +172,11 @@ func updateBatchCoursePhaseParticipation(c *gin.Context) {
 			createCourseParticipationDTOs = append(createCourseParticipationDTOs, newParticipation)
 		} else {
 			updateCourseParticipationDTOs = append(updateCourseParticipationDTOs, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-				ID:            update.ID,
-				PassStatus:    update.PassStatus,
-				MetaData:      update.MetaData,
-				CoursePhaseID: coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
+				ID:                  update.ID,
+				PassStatus:          update.PassStatus,
+				RestrictedData:      update.RestrictedData,
+				StudentReadableData: update.StudentReadableData,
+				CoursePhaseID:       coursePhaseId, // we pass the coursePhaseId to check if the participation is in the correct course phase
 			})
 		}
 	}

@@ -21,8 +21,8 @@ WITH updates AS (
 )
 UPDATE course_phase_participation
 SET    
-    meta_data = jsonb_set(
-        COALESCE(meta_data, '{}'),
+    restricted_data = jsonb_set(
+        COALESCE(restricted_data, '{}'),
         updates.path, -- Use dynamic path
         to_jsonb(ROUND(updates.score, 2)) -- Convert the float score to JSONB
     )
@@ -93,7 +93,7 @@ func (q *Queries) CheckIfCoursePhaseIsApplicationPhase(ctx context.Context, id u
 const checkIfCoursePhaseIsOpenApplicationPhase = `-- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT 
     cpt.name = 'Application' AS is_application,
-    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
+    (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available 
 FROM 
     course_phase cp
 JOIN 
@@ -102,7 +102,7 @@ ON
     cp.course_phase_type_id = cpt.id
 WHERE 
     cp.id = $1
-    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW()
 `
 
 type CheckIfCoursePhaseIsOpenApplicationPhaseRow struct {
@@ -333,7 +333,7 @@ const getAllApplicationParticipations = `-- name: GetAllApplicationParticipation
 SELECT
     cpp.id AS course_phase_participation_id,
     cpp.pass_status,
-    cpp.meta_data,
+    cpp.restricted_data,
     s.id AS student_id,
     s.first_name,
     s.last_name,
@@ -362,7 +362,7 @@ WHERE
 type GetAllApplicationParticipationsRow struct {
 	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
 	PassStatus                 NullPassStatus `json:"pass_status"`
-	MetaData                   []byte         `json:"meta_data"`
+	RestrictedData             []byte         `json:"restricted_data"`
 	StudentID                  uuid.UUID      `json:"student_id"`
 	FirstName                  pgtype.Text    `json:"first_name"`
 	LastName                   pgtype.Text    `json:"last_name"`
@@ -390,7 +390,7 @@ func (q *Queries) GetAllApplicationParticipations(ctx context.Context, coursePha
 		if err := rows.Scan(
 			&i.CoursePhaseParticipationID,
 			&i.PassStatus,
-			&i.MetaData,
+			&i.RestrictedData,
 			&i.StudentID,
 			&i.FirstName,
 			&i.LastName,
@@ -423,9 +423,9 @@ SELECT
     c.end_date,
     c.course_type, 
     c.ects,
-    (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
-    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
+    (cp.restricted_data->>'applicationEndDate')::text AS application_end_date,
+    (cp.restricted_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -437,8 +437,8 @@ JOIN
 WHERE 
     cp.is_initial_phase = true
     AND cpt.name = 'Application'
-    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
-    AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW()
+    AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.restricted_data->>'applicationStartDate')::timestamp < NOW()
 `
 
 type GetAllOpenApplicationPhasesRow struct {
@@ -680,7 +680,7 @@ func (q *Queries) GetApplicationQuestionsTextForCoursePhase(ctx context.Context,
 
 const getExistingAdditionalScores = `-- name: GetExistingAdditionalScores :one
 SELECT 
-    meta_data->>'additional_scores' AS additional_scores
+    restricted_data->>'additional_scores' AS additional_scores
 FROM
     course_phase
 WHERE
@@ -702,9 +702,9 @@ SELECT
     c.end_date,
     c.course_type, 
     c.ects,
-    (cp.meta_data->>'applicationEndDate')::text AS application_end_date,
-    (cp.meta_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
-    (cp.meta_data->>'universityLoginAvailable')::boolean AS university_login_available
+    (cp.restricted_data->>'applicationEndDate')::text AS application_end_date,
+    (cp.restricted_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
+    (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available
 FROM 
     course_phase cp
 JOIN 
@@ -717,8 +717,8 @@ WHERE
     cp.id = $1
     AND cp.is_initial_phase = true
     AND cpt.name = 'Application'
-    AND (cp.meta_data->>'applicationEndDate')::timestamp > NOW()
-    AND (cp.meta_data->>'applicationStartDate')::timestamp < NOW()
+    AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.restricted_data->>'applicationStartDate')::timestamp < NOW()
 `
 
 type GetOpenApplicationPhaseRow struct {
@@ -752,8 +752,8 @@ func (q *Queries) GetOpenApplicationPhase(ctx context.Context, id uuid.UUID) (Ge
 
 const storeApplicationAnswerUpdateTimestamp = `-- name: StoreApplicationAnswerUpdateTimestamp :exec
 UPDATE course_phase_participation
-SET meta_data = jsonb_set(
-    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+SET restricted_data = jsonb_set(
+    COALESCE(restricted_data, '{}'), -- Ensure meta_data is not NULL
     '{student_last_modified}', -- Path to the key
     to_jsonb(NOW())::jsonb     -- Value to set
 )
@@ -767,8 +767,8 @@ func (q *Queries) StoreApplicationAnswerUpdateTimestamp(ctx context.Context, id 
 
 const storeApplicationAssessmentUpdateTimestamp = `-- name: StoreApplicationAssessmentUpdateTimestamp :exec
 UPDATE course_phase_participation
-SET meta_data = jsonb_set(
-    COALESCE(meta_data, '{}'), -- Ensure meta_data is not NULL
+SET restricted_data = jsonb_set(
+    COALESCE(restricted_data, '{}'), -- Ensure meta_data is not NULL
     '{assessment_last_modified}', -- Path to the key
     to_jsonb(NOW())::jsonb     -- Value to set
 )
@@ -901,16 +901,16 @@ func (q *Queries) UpdateApplicationQuestionText(ctx context.Context, arg UpdateA
 
 const updateExistingAdditionalScores = `-- name: UpdateExistingAdditionalScores :exec
 UPDATE course_phase
-SET meta_data = meta_data || $2
+SET restricted_data = restricted_data || $2
 WHERE id = $1
 `
 
 type UpdateExistingAdditionalScoresParams struct {
-	ID       uuid.UUID `json:"id"`
-	MetaData []byte    `json:"meta_data"`
+	ID             uuid.UUID `json:"id"`
+	RestrictedData []byte    `json:"restricted_data"`
 }
 
 func (q *Queries) UpdateExistingAdditionalScores(ctx context.Context, arg UpdateExistingAdditionalScoresParams) error {
-	_, err := q.db.Exec(ctx, updateExistingAdditionalScores, arg.ID, arg.MetaData)
+	_, err := q.db.Exec(ctx, updateExistingAdditionalScores, arg.ID, arg.RestrictedData)
 	return err
 }

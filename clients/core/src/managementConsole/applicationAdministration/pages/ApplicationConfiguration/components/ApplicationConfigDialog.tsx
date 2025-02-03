@@ -92,7 +92,7 @@ export function ApplicationConfigDialog({
     e.preventDefault()
     const updatedPhase: UpdateCoursePhase = {
       id: phaseId ?? '',
-      metaData: {
+      restrictedData: {
         applicationStartDate: startDate
           ? formatISO(
               toZonedTime(

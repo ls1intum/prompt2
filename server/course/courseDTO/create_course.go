@@ -8,29 +8,37 @@ import (
 )
 
 type CreateCourse struct {
-	Name        string        `json:"name"`
-	StartDate   pgtype.Date   `json:"startDate"`
-	EndDate     pgtype.Date   `json:"endDate"`
-	SemesterTag pgtype.Text   `json:"semesterTag"`
-	MetaData    meta.MetaData `json:"metaData"`
-	CourseType  db.CourseType `json:"courseType"`
-	Ects        pgtype.Int4   `json:"ects"`
+	Name                string        `json:"name"`
+	StartDate           pgtype.Date   `json:"startDate"`
+	EndDate             pgtype.Date   `json:"endDate"`
+	SemesterTag         pgtype.Text   `json:"semesterTag"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	CourseType          db.CourseType `json:"courseType"`
+	Ects                pgtype.Int4   `json:"ects"`
 }
 
 func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {
-	metaData, err := c.MetaData.GetDBModel()
+	restrictedData, err := c.RestrictedData.GetDBModel()
+	if err != nil {
+		log.Error("failed to create Course DTO from DB model")
+		return db.CreateCourseParams{}, err
+	}
+
+	studentReadableData, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create Course DTO from DB model")
 		return db.CreateCourseParams{}, err
 	}
 
 	return db.CreateCourseParams{
-		Name:        c.Name,
-		StartDate:   c.StartDate,
-		EndDate:     c.EndDate,
-		SemesterTag: c.SemesterTag,
-		MetaData:    metaData,
-		CourseType:  c.CourseType,
-		Ects:        c.Ects,
+		Name:                c.Name,
+		StartDate:           c.StartDate,
+		EndDate:             c.EndDate,
+		SemesterTag:         c.SemesterTag,
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CourseType:          c.CourseType,
+		Ects:                c.Ects,
 	}, nil
 }

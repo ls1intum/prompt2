@@ -15,6 +15,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -100,13 +101,14 @@ func (suite *CourseRouterTestSuite) TestGetCourseByID() {
 
 func (suite *CourseRouterTestSuite) TestCreateCourse() {
 	newCourse := courseDTO.CreateCourse{
-		Name:        "Router Test Course",
-		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},
-		EndDate:     pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
-		SemesterTag: pgtype.Text{String: "WS2024", Valid: true},
-		MetaData:    map[string]interface{}{"icon": "test-icon"},
-		CourseType:  "practical course",
-		Ects:        pgtype.Int4{Int32: 10, Valid: true},
+		Name:                "Router Test Course",
+		StartDate:           pgtype.Date{Valid: true, Time: time.Now()},
+		EndDate:             pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+		SemesterTag:         pgtype.Text{String: "WS2024", Valid: true},
+		RestrictedData:      meta.MetaData{"key": "value"},
+		StudentReadableData: meta.MetaData{"icon": "test-icon"},
+		CourseType:          "practical course",
+		Ects:                pgtype.Int4{Int32: 10, Valid: true},
 	}
 	body, _ := json.Marshal(newCourse)
 	req, _ := http.NewRequest("POST", "/api/courses/", bytes.NewBuffer(body))

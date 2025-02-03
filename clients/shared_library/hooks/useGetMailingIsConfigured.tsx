@@ -6,7 +6,7 @@ export const useGetMailingIsConfigured = (): boolean => {
   const { courses } = useCourseStore()
   const activeCourse = courses.find((course) => course.id === courseId)
 
-  const mailingSettings = activeCourse?.metaData?.mailingSettings as CourseMailingSettings
+  const mailingSettings = activeCourse?.restrictedData?.mailingSettings as CourseMailingSettings
 
   if (
     mailingSettings !== undefined &&

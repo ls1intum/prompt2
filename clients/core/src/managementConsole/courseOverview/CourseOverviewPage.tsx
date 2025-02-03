@@ -14,7 +14,7 @@ export const CourseOverview = (): JSX.Element => {
     return `${date}.${month}.${year}`
   }
 
-  const bgColor = course?.metaData?.['bg-color'] || 'bg-gray-50'
+  const bgColor = course?.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
   if (!course) {
     return (
