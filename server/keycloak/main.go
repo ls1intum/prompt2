@@ -37,8 +37,5 @@ func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, i
 	// Test Login connection
 	_, err := LoginClient(ctx)
 
-	// init the middleware
-	InitKeycloakVerifier()
-
 	return err
 }

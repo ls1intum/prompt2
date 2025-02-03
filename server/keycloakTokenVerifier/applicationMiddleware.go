@@ -1,4 +1,4 @@
-package keycloak
+package keycloakTokenVerifier
 
 import (
 	"net/http"
@@ -31,7 +31,7 @@ func ApplicationMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if !checkAuthorizedParty(claims, KeycloakSingleton.expectedAuthorizedParty) {
+		if !checkAuthorizedParty(claims, KeycloakTokenVerifierSingleton.expectedAuthorizedParty) {
 			log.Error("Token authorized party mismatch")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token authorized party mismatch"})
 			return
