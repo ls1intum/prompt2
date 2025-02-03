@@ -8,6 +8,7 @@ jobs:
   test-server:
     uses: ./.github/workflows/go-tests.yml
   build-and-push-server:
+    needs: test-server
     uses: ./.github/workflows/build-and-push-server.yml
     secrets: inherit
   build-and-push-clients:
