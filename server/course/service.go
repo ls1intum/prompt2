@@ -10,6 +10,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/keycloak"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,25 +23,81 @@ type CourseService struct {
 
 var CourseServiceSingleton *CourseService
 
-func GetAllCourses(ctx context.Context) ([]courseDTO.CourseWithPhases, error) {
+func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.CourseWithPhases, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	courses, err := CourseServiceSingleton.queries.GetAllActiveCourses(ctxWithTimeout)
+	var courses []db.Course
+	var err error
+	// Get all active courses the user is allowed to see
+	if userRoles[keycloak.PromptAdmin] {
+		// get all courses
+		courses, err = CourseServiceSingleton.queries.GetAllActiveCoursesAdmin(ctxWithTimeout)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// get restricted courses
+		userRolesArray := []string{}
+		for key, value := range userRoles {
+			if value {
+				userRolesArray = append(userRolesArray, key)
+			}
+		}
+		coursesRestricted, err := CourseServiceSingleton.queries.GetAllActiveCoursesRestricted(ctxWithTimeout, userRolesArray)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, course := range coursesRestricted {
+			courses = append(courses, db.Course(course))
+		}
+	}
+
+	// Get all course phases for each course
+	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
+	for _, course := range courses {
+		// Get all course phases for the course
+		coursePhases, err := GetCoursePhasesForCourseID(ctx, course.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		courseWithPhases, err := courseDTO.GetCourseWithPhasesDTOFromDBModel(course)
+		if err != nil {
+			return nil, err
+		}
+
+		courseWithPhases.CoursePhases = coursePhases
+
+		if err != nil {
+			return nil, err
+		}
+		dtoCourses = append(dtoCourses, courseWithPhases)
+	}
+
+	return dtoCourses, nil
+}
+
+func GetCoursePhasesForCourseID(ctx context.Context, courseID uuid.UUID) ([]coursePhaseDTO.CoursePhaseSequence, error) {
+	// Get all course phases in order
+	coursePhasesOrder, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, courseID)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO rewrite this cleaner!!!
-	dtoCourses := make([]courseDTO.CourseWithPhases, 0, len(courses))
-	for _, course := range courses {
-		dtoCourse, err := GetCourseByID(ctxWithTimeout, course.ID)
-		if err != nil {
-			return nil, err
-		}
-		dtoCourses = append(dtoCourses, dtoCourse)
+	// get all coursePhases out of order
+	coursePhasesNoOrder, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, courseID)
+	if err != nil {
+		return nil, err
 	}
-	return dtoCourses, nil
+
+	coursePhaseDTO, err := coursePhaseDTO.GetCoursePhaseSequenceDTO(coursePhasesOrder, coursePhasesNoOrder)
+	if err != nil {
+		return nil, err
+
+	}
+	return coursePhaseDTO, nil
 }
 
 func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhases, error) {
@@ -69,7 +126,7 @@ func GetCourseByID(ctx context.Context, id uuid.UUID) (courseDTO.CourseWithPhase
 
 	}
 
-	CourseWithPhases, err := courseDTO.GetCourseByIDFromDBModel(course)
+	CourseWithPhases, err := courseDTO.GetCourseWithPhasesDTOFromDBModel(course)
 	if err != nil {
 		return courseDTO.CourseWithPhases{}, err
 	}

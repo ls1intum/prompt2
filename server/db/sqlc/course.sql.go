@@ -83,13 +83,19 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
-const getAllActiveCourses = `-- name: GetAllActiveCourses :many
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data FROM course
-WHERE end_date >= NOW() - INTERVAL '1 month'
+const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
+SELECT
+     c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data
+FROM
+  course c
+WHERE
+  c.end_date >= NOW() - INTERVAL '1 month'
+ORDER BY
+    c.semester_tag, c.name DESC
 `
 
-func (q *Queries) GetAllActiveCourses(ctx context.Context) ([]Course, error) {
-	rows, err := q.db.Query(ctx, getAllActiveCourses)
+func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error) {
+	rows, err := q.db.Query(ctx, getAllActiveCoursesAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +103,108 @@ func (q *Queries) GetAllActiveCourses(ctx context.Context) ([]Course, error) {
 	var items []Course
 	for rows.Next() {
 		var i Course
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.StartDate,
+			&i.EndDate,
+			&i.SemesterTag,
+			&i.CourseType,
+			&i.Ects,
+			&i.RestrictedData,
+			&i.StudentReadableData,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllActiveCoursesRestricted = `-- name: GetAllActiveCoursesRestricted :many
+WITH parsed_roles AS (
+    SELECT
+        split_part(role, '-', 1) AS course_name,
+        split_part(role, '-', 2) AS semester_tag,
+        split_part(role, '-', 3) AS user_role
+    FROM
+        unnest($1::text[]) AS role
+),
+user_course_roles AS (
+    SELECT
+        c.id,
+        c.name,
+        c.semester_tag,
+        c.start_date,
+        c.end_date,
+        c.course_type,
+        c.student_readable_data,
+        c.restricted_data,
+        c.ects,
+        pr.user_role
+    FROM
+        course c
+    INNER JOIN
+        parsed_roles pr
+        ON c.name = pr.course_name
+        AND c.semester_tag = pr.semester_tag
+    WHERE
+        c.end_date >= NOW() - INTERVAL '1 month'
+)
+SELECT
+    ucr.id,
+    ucr.name,
+    ucr.start_date,
+    ucr.end_date,
+    ucr.semester_tag,
+    ucr.course_type,
+    ucr.ects,
+    CASE 
+        WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
+        ELSE ucr.restricted_data::jsonb
+    END AS restricted_data,
+    ucr.student_readable_data
+FROM
+    user_course_roles ucr
+GROUP BY
+    ucr.id,
+    ucr.name,
+    ucr.semester_tag,
+    ucr.start_date,
+    ucr.end_date,
+    ucr.course_type,
+    ucr.student_readable_data,
+    ucr.ects,
+    ucr.restricted_data
+ORDER BY
+    ucr.semester_tag, ucr.name DESC
+`
+
+type GetAllActiveCoursesRestrictedRow struct {
+	ID                  uuid.UUID   `json:"id"`
+	Name                string      `json:"name"`
+	StartDate           pgtype.Date `json:"start_date"`
+	EndDate             pgtype.Date `json:"end_date"`
+	SemesterTag         pgtype.Text `json:"semester_tag"`
+	CourseType          CourseType  `json:"course_type"`
+	Ects                pgtype.Int4 `json:"ects"`
+	RestrictedData      []byte      `json:"restricted_data"`
+	StudentReadableData []byte      `json:"student_readable_data"`
+}
+
+// struct: Course
+func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []string) ([]GetAllActiveCoursesRestrictedRow, error) {
+	rows, err := q.db.Query(ctx, getAllActiveCoursesRestricted, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllActiveCoursesRestrictedRow
+	for rows.Next() {
+		var i GetAllActiveCoursesRestrictedRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

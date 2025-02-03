@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getPermissionStringByCourseID = `-- name: GetPermissionStringByCourseID :one
@@ -65,4 +66,38 @@ func (q *Queries) GetPermissionStringByCoursePhaseParticipationID(ctx context.Co
 	var course_identifier interface{}
 	err := row.Scan(&course_identifier)
 	return course_identifier, err
+}
+
+const getStudentRoleStrings = `-- name: GetStudentRoleStrings :many
+SELECT CONCAT(c.semester_tag, '-', c.name, '-Student')::text AS student_role
+FROM course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE s.matriculation_number = $1
+AND s.university_login = $2
+`
+
+type GetStudentRoleStringsParams struct {
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+}
+
+func (q *Queries) GetStudentRoleStrings(ctx context.Context, arg GetStudentRoleStringsParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, getStudentRoleStrings, arg.MatriculationNumber, arg.UniversityLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var student_role string
+		if err := rows.Scan(&student_role); err != nil {
+			return nil, err
+		}
+		items = append(items, student_role)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

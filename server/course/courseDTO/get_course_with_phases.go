@@ -22,7 +22,7 @@ type CourseWithPhases struct {
 	CoursePhases        []coursePhaseDTO.CoursePhaseSequence `json:"coursePhases"`
 }
 
-func GetCourseByIDFromDBModel(course db.Course) (CourseWithPhases, error) {
+func GetCourseWithPhasesDTOFromDBModel(course db.Course) (CourseWithPhases, error) {
 	restrictedData, err := meta.GetMetaDataDTOFromDBModel(course.RestrictedData)
 	if err != nil {
 		log.Error("failed to create Course DTO from DB model")

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Nerzal/gocloak/v13"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 )
 
 type KeycloakClientManager struct {
@@ -14,13 +15,14 @@ type KeycloakClientManager struct {
 	ClientSecret            string
 	idOfClient              string
 	expectedAuthorizedParty string
+	queries                 db.Queries
 }
 
 var KeycloakSingleton *KeycloakClientManager
 
 var TOP_LEVEL_GROUP_NAME = "Prompt"
 
-func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string) error {
+func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string, queries db.Queries) error {
 	KeycloakSingleton = &KeycloakClientManager{
 		client:                  gocloak.NewClient(BaseURL),
 		BaseURL:                 BaseURL,
@@ -29,6 +31,7 @@ func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, i
 		ClientSecret:            ClientSecret,
 		idOfClient:              idOfClient,
 		expectedAuthorizedParty: expectedAuthorizedParty,
+		queries:                 queries,
 	}
 
 	// Test Login connection
