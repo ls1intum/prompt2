@@ -1,8 +1,8 @@
-import MinimalTiptapEditor from '@/components/minimal-tiptap/minimal-tiptap'
 import { Label } from '@/components/ui/label'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MailingTiptapEditor from '@/components/minimal-tiptap/mailing-tiptap'
 
 interface EmailTemplateEditorProps {
   subject: string
@@ -11,6 +11,7 @@ interface EmailTemplateEditorProps {
   label: string
   subjectHTMLLabel: string
   contentHTMLLabel: string
+  placeholders: string[]
 }
 
 export const EmailTemplateEditor = ({
@@ -20,6 +21,7 @@ export const EmailTemplateEditor = ({
   label,
   subjectHTMLLabel,
   contentHTMLLabel,
+  placeholders,
 }: EmailTemplateEditorProps): JSX.Element => {
   return (
     <Card>
@@ -40,7 +42,7 @@ export const EmailTemplateEditor = ({
         <div>
           <Label htmlFor={contentHTMLLabel}>{label} E-Mail Template</Label>
           <TooltipProvider>
-            <MinimalTiptapEditor
+            <MailingTiptapEditor
               value={content}
               onChange={(newContent) =>
                 onInputChange({
@@ -54,6 +56,7 @@ export const EmailTemplateEditor = ({
               autofocus={false}
               editable={true}
               editorClassName='focus:outline-none'
+              placeholders={placeholders}
             />
           </TooltipProvider>
         </div>

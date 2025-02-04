@@ -1,7 +1,7 @@
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Button } from './ui/button'
 import { useState } from 'react'
+import { useSidebar } from './ui/sidebar'
 
 interface SaveChangesAlertProps {
   message: string
@@ -18,6 +18,7 @@ export const SaveChangesAlert = ({
 }: SaveChangesAlertProps): JSX.Element => {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { state } = useSidebar()
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -33,20 +34,28 @@ export const SaveChangesAlert = ({
   }
 
   return (
-    <Alert variant='default' className='mb-4 border-muted bg-muted/20'>
-      <div className='flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
+    <div
+      className='fixed bottom-0 right-0 bg-background border-t border-border p-4 z-50 transition-all duration-300 ease-in-out'
+      style={{
+        width:
+          state === 'expanded'
+            ? 'calc(100% - var(--sidebar-width))'
+            : 'calc(100% - var(--sidebar-width-icon))',
+        left: state === 'expanded' ? 'var(--sidebar-width)' : 'var(--sidebar-width-icon)',
+      }}
+    >
+      <div className='max-w-7xl mx-auto flex items-center justify-between'>
         <div className='flex items-center space-x-2'>
-          <AlertCircle className='h-4 w-4 text-red-500' />
-          <AlertTitle className='text-foreground'>{message}</AlertTitle>
+          <AlertCircle className='h-4 w-4 text-yellow-500' />
+          <p className='text-sm font-medium'>{message}</p>
         </div>
-        <div className='flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2'>
+        <div className='flex space-x-2'>
           <Button
             variant='outline'
             size='sm'
             onClick={handleRevert}
             disabled={isSaving}
             aria-label='Revert changes'
-            className='w-full sm:w-auto'
           >
             Revert
           </Button>
@@ -56,19 +65,16 @@ export const SaveChangesAlert = ({
             onClick={handleSave}
             disabled={isSaving}
             aria-label='Save changes'
-            className='w-full sm:w-auto'
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
-      <AlertDescription className='mt-2'>
-        {error && (
-          <p className='text-sm text-destructive' role='alert'>
-            {error}
-          </p>
-        )}
-      </AlertDescription>
-    </Alert>
+      {error && (
+        <p className='mt-2 text-sm text-destructive text-center' role='alert'>
+          {error}
+        </p>
+      )}
+    </div>
   )
 }

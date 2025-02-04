@@ -139,7 +139,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
   }
 
   return (
-    <div className='space-y-6 max-w-4xl mx-auto'>
+    <div className={`space-y-6 max-w-4xl mx-auto  ${questionsModified ? 'pb-10' : ''}`}>
       <div className='flex justify-between items-center'>
         <h2 className='text-2xl font-semibold'>Application Questions</h2>
         <ApplicationPreview
@@ -151,21 +151,6 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
           applicationQuestions={applicationQuestions}
         />
       </div>
-      {questionsModified && (
-        <SaveChangesAlert
-          message='You have unsaved changes'
-          handleRevert={handleRevertAllQuestions}
-          saveChanges={() =>
-            handleSubmitAllQuestions({
-              questionRefs,
-              fetchedForm,
-              applicationQuestions,
-              setSubmitAttempted,
-              mutateApplicationForm,
-            })
-          }
-        />
-      )}
       {applicationQuestions.length > 0 ? (
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId='questions'>
@@ -205,6 +190,22 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
             <p className='text-lg mb-4'>No questions added yet.</p>
           </CardContent>
         </Card>
+      )}
+
+      {questionsModified && (
+        <SaveChangesAlert
+          message='You have unsaved changes'
+          handleRevert={handleRevertAllQuestions}
+          saveChanges={() =>
+            handleSubmitAllQuestions({
+              questionRefs,
+              fetchedForm,
+              applicationQuestions,
+              setSubmitAttempted,
+              mutateApplicationForm,
+            })
+          }
+        />
       )}
     </div>
   )
