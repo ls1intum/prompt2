@@ -49,5 +49,5 @@ func InitKeycloak(ctx context.Context, router *gin.RouterGroup, BaseURL, Realm, 
 
 // initializes the handler func with CheckCoursePermissions
 func checkAccessControlByIDWrapper(allowedRoles ...string) gin.HandlerFunc {
-	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, "uuid", allowedRoles...)
+	return permissionValidation.CheckAccessControlByID(permissionValidation.CheckCoursePermission, "courseID", allowedRoles...)
 }

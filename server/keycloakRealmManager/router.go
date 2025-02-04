@@ -7,13 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/keycloakRealmManager/keycloakRealmDTO"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupKeycloakRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	keycloak := router.Group("/keycloak/:courseID")
-	keycloak.PUT("", createCustomGroup)
-	keycloak.GET("/group/:groupName/students", getStudentsInGroup)
-	keycloak.PUT("/group/:groupName/students", addStudentsToGroup)
+	keycloak := router.Group("/keycloak/:courseID", authMiddleware())
+	keycloak.PUT("/group", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCustomGroup)
+	keycloak.GET("/group/:groupName/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getStudentsInGroup)
+	keycloak.PUT("/group/:groupName/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), addStudentsToGroup)
 }
 
 func createCustomGroup(c *gin.Context) {

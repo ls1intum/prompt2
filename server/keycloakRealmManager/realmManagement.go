@@ -167,7 +167,6 @@ func GetCustomGroupID(ctx context.Context, accessToken, customGroupName string, 
 	// 3.) Check if custom group exists as child group
 	for _, subGroup := range *group.SubGroups {
 		if *subGroup.Name == customGroupName {
-			log.Info("found custom group: ", customGroupName)
 			return *subGroup.ID, nil
 		}
 	}
@@ -277,8 +276,6 @@ func GetGroupMembers(ctx context.Context, accessToken, groupID string) ([]*goclo
 		log.Error("failed to get group members: ", err)
 		return nil, err
 	}
-
-	log.Info("found members: ", members)
 
 	return members, nil
 }
