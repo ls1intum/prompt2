@@ -51,3 +51,7 @@ WHERE (first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
 SELECT id, email
 FROM student
 WHERE id = ANY($1::uuid[]);
+
+-- name: GetStudentsByEmail :many
+SELECT * FROM student
+WHERE email = ANY($1::text[]);

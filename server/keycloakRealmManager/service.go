@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/keycloakRealmManager/keycloakRealmDTO"
+	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -83,4 +84,78 @@ func AddStudentsToGroup(ctx context.Context, courseID uuid.UUID, studentIDs []uu
 		FailedToAddStudentIDs:    failedStudentIDs,
 	}
 	return response, nil
+}
+
+// GetStudentsInGroup retrieves the student IDs for a given course's group.
+func GetStudentsInGroup(ctx context.Context, courseID uuid.UUID, groupName string) (keycloakRealmDTO.GroupMembers, error) {
+	// 1. Log into Keycloak.
+	token, err := LoginClient(ctx)
+	if err != nil {
+		return keycloakRealmDTO.GroupMembers{}, fmt.Errorf("failed to login to keycloak: %w", err)
+	}
+
+	// 2. Get Custom Group Folder.
+	customGroupID, err := GetCustomGroupID(ctx, token.AccessToken, groupName, courseID)
+	if err != nil {
+		log.Error("Failed to get custom group", "error", err)
+		return keycloakRealmDTO.GroupMembers{}, fmt.Errorf("failed to get custom group: %w", err)
+	}
+
+	// 3. Retrieve group members from Keycloak.
+	members, err := GetGroupMembers(ctx, token.AccessToken, customGroupID)
+	if err != nil {
+		log.Error("Failed to get group members", "error", err)
+		return keycloakRealmDTO.GroupMembers{}, fmt.Errorf("failed to get group members: %w", err)
+	}
+
+	// Build a slice of emails from the group members.
+	// (Skip any members without an email.)
+	var memberEmails []string
+	for _, member := range members {
+		if member.Email == nil || *member.Email == "" {
+			log.Warn("Skipping member with missing email", "member", member)
+			continue
+		}
+		memberEmails = append(memberEmails, *member.Email)
+	}
+
+	// 4. Get students from the database using the list of emails.
+	studentsObjects, err := KeycloakRealmSingleton.queries.GetStudentsByEmail(ctx, memberEmails)
+	if err != nil {
+		log.Error("Failed to get students by email", "error", err)
+		return keycloakRealmDTO.GroupMembers{}, fmt.Errorf("failed to get students by email: %w", err)
+	}
+
+	// Convert database models to student DTOs.
+	studentDTOs := make([]studentDTO.Student, len(studentsObjects))
+	for i, student := range studentsObjects {
+		studentDTOs[i] = studentDTO.GetStudentDTOFromDBModel(student)
+	}
+
+	// Create a lookup map from email to student DTO for quick access.
+	studentByEmail := make(map[string]studentDTO.Student)
+	for _, student := range studentDTOs {
+		// Assuming that studentDTO.Student has an Email field.
+		studentByEmail[student.Email] = student
+	}
+
+	var notFoundUsers []keycloakRealmDTO.KeycloakUser
+
+	// 5. Check each group member against the student lookup.
+	for _, member := range members {
+		// Skip members with missing email.
+		if member.Email == nil || *member.Email == "" {
+			continue
+		}
+		email := *member.Email
+		if _, exists := studentByEmail[email]; !exists {
+			// Add to notFoundUsers if the member email was not found among the students.
+			notFoundUsers = append(notFoundUsers, keycloakRealmDTO.GetKeycloakUserDTO(*member))
+		}
+	}
+
+	return keycloakRealmDTO.GroupMembers{
+		Students:    studentDTOs,
+		NonStudents: notFoundUsers,
+	}, nil
 }

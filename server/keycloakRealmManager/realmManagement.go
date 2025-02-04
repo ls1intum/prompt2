@@ -270,3 +270,15 @@ func AddStudentIDsToKeycloakGroup(ctx context.Context, accessToken string, stude
 
 	return succeededStudents, failedStudents, nil
 }
+
+func GetGroupMembers(ctx context.Context, accessToken, groupID string) ([]*gocloak.User, error) {
+	members, err := KeycloakRealmSingleton.client.GetGroupMembers(ctx, accessToken, KeycloakRealmSingleton.Realm, groupID, gocloak.GetGroupsParams{})
+	if err != nil {
+		log.Error("failed to get group members: ", err)
+		return nil, err
+	}
+
+	log.Info("found members: ", members)
+
+	return members, nil
+}
