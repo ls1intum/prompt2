@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager/keycloakRealmDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,25 +56,31 @@ func AddCustomGroup(ctx context.Context, courseID uuid.UUID, groupName string) (
 
 }
 
-func AddStudentsToGroup(ctx context.Context, courseID uuid.UUID, studentIDs []uuid.UUID, groupName string) ([]uuid.UUID, error) {
+func AddStudentsToGroup(ctx context.Context, courseID uuid.UUID, studentIDs []uuid.UUID, groupName string) (keycloakRealmDTO.AddStudentsToGroupResponse, error) {
 	// 1. Log into keycloak
 	token, err := LoginClient(ctx)
 	if err != nil {
-		return []uuid.UUID{}, err
+		return keycloakRealmDTO.AddStudentsToGroupResponse{}, err
 	}
 
 	// 2. Get Custom Group Folder
 	customGroupID, err := GetCustomGroupID(ctx, token.AccessToken, groupName, courseID)
 	if err != nil {
 		log.Error("Failed to get custom group: ", err)
-		return []uuid.UUID{}, errors.New("failed to get custom group")
+		return keycloakRealmDTO.AddStudentsToGroupResponse{}, errors.New("failed to get custom group")
 	}
 
 	// 3. Get the keycloak userIDs of the students
-	failedStudentIDs, err := AddStudentIDsToKeycloakGroup(ctx, token.AccessToken, studentIDs, customGroupID)
+	succeededStudents, failedStudentIDs, err := AddStudentIDsToKeycloakGroup(ctx, token.AccessToken, studentIDs, customGroupID)
+	// some error occurred before adding students to group
 	if err != nil {
 		log.Error("Failed to add students to group: ", err)
-		return failedStudentIDs, errors.New("failed to add students to group")
+		return keycloakRealmDTO.AddStudentsToGroupResponse{}, errors.New("failed to add students to group")
 	}
-	return failedStudentIDs, nil
+
+	response := keycloakRealmDTO.AddStudentsToGroupResponse{
+		SucceededToAddStudentIDs: succeededStudents,
+		FailedToAddStudentIDs:    failedStudentIDs,
+	}
+	return response, nil
 }

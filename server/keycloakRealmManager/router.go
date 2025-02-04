@@ -50,19 +50,19 @@ func addStudentsToGroup(c *gin.Context) {
 		return
 	}
 
-	var studentIDs []uuid.UUID
-	if err := c.BindJSON(&studentIDs); err != nil {
+	var request keycloakRealmDTO.AddStudentsToGroup
+	if err := c.BindJSON(&request); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	failedStudentIDs, err = AddStudentsToGroup(c, courseID, studentIDs, groupName)
+	addingReport, err := AddStudentsToGroup(c, courseID, request.StudentsToAdd, groupName)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "Student added to group"})
+	c.IndentedJSON(http.StatusOK, addingReport)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

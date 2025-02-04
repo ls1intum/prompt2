@@ -1,6 +1,8 @@
 package keycloakRealmDTO
 
+import "github.com/google/uuid"
+
 type AddStudentsToGroupResponse struct {
-	FailedToAddStudentIDs    []string `json:"failedToAddStudentIDs"`
-	SucceededToAddStudentIDs []string `json:"succeededToAddStudentIDs"`
+	FailedToAddStudentIDs    []uuid.UUID `json:"failedToAddStudentIDs"`
+	SucceededToAddStudentIDs []uuid.UUID `json:"succeededToAddStudentIDs"`
 }

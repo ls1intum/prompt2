@@ -1,5 +1,5 @@
 package keycloakRealmDTO
 
 type CreateGroup struct {
-	GroupName string
+	GroupName string `json:"groupName"`
 }

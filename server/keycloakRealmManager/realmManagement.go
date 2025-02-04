@@ -159,9 +159,7 @@ func GetCustomGroupID(ctx context.Context, accessToken, customGroupName string, 
 	// 2.) Get custom group top level group
 	groupPath := "/" + TOP_LEVEL_GROUP_NAME + "/" + courseGroupName + "/" + CUSTOM_GROUPS_NAME
 	group, err := KeycloakRealmSingleton.client.GetGroupByPath(ctx, accessToken, KeycloakRealmSingleton.Realm, groupPath)
-	if err == nil && *group.Name == CUSTOM_GROUPS_NAME {
-		return *group.ID, nil
-	} else if !strings.Contains(err.Error(), "404") {
+	if err != nil || *group.Name != CUSTOM_GROUPS_NAME {
 		log.Error("failed to get groups from keycloak: ", err)
 		return "", errors.New("failed to get groups")
 	}
@@ -169,6 +167,7 @@ func GetCustomGroupID(ctx context.Context, accessToken, customGroupName string, 
 	// 3.) Check if custom group exists as child group
 	for _, subGroup := range *group.SubGroups {
 		if *subGroup.Name == customGroupName {
+			log.Info("found custom group: ", customGroupName)
 			return *subGroup.ID, nil
 		}
 	}
