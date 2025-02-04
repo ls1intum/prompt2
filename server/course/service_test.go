@@ -20,21 +20,20 @@ import (
 )
 
 type CourseServiceTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router        *gin.Engine
 	ctx           context.Context
-	cleanup       func()
 	courseService CourseService
 }
 
 func (suite *CourseServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/course_test.sql")
-	if err != nil {
-		suite.T().Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/course_test.sql")
+	suite.Require().NoError(err)
+
+	queries := db.New(suite.DatabaseSuite.Conn)
 
 	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
 		// No-op or add assertions for test
@@ -46,10 +45,9 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 		return nil
 	}
 
-	suite.cleanup = cleanup
 	suite.courseService = CourseService{
-		queries:                    *testDB.Queries,
-		conn:                       testDB.Conn,
+		queries:                    *queries,
+		conn:                       suite.DatabaseSuite.Conn,
 		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
 		addUserToGroup:             mockAddUserToGroup,
 	}
@@ -58,11 +56,11 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 
 	// Initialize CoursePhase module
 	suite.router = gin.Default()
-	coursePhase.InitCoursePhaseModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
+	coursePhase.InitCoursePhaseModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
 }
 
 func (suite *CourseServiceTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCourses() {

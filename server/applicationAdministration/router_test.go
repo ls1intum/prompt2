@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,26 +24,24 @@ import (
 )
 
 type ApplicationAdminRouterTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router                  *gin.Engine
 	ctx                     context.Context
-	cleanup                 func()
 	applicationAdminService ApplicationService
 }
 
 func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/application_administration.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/application_administration.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.applicationAdminService = ApplicationService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 
 	ApplicationServiceSingleton = &suite.applicationAdminService
@@ -54,14 +51,14 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 		return testutils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"}, "existingstudent@example.com", "03711111", "ab12cde")
 	}
 	setupApplicationRouter(api, testMiddleware, testMiddleware, testutils.MockPermissionMiddleware)
-	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	mailing.InitMailingModule(api, *testDB.Queries, testDB.Conn, "localhost", "25", "test@test.de", "Test-Email-Sender", "localhost")
+	student.InitStudentModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	mailing.InitMailingModule(api, *queries, suite.DatabaseSuite.Conn, "localhost", "25", "test@test.de", "Test-Email-Sender", "localhost")
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TestGetApplicationFormEndpoint_Success() {

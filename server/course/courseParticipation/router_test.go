@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,32 +11,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type RouterTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router                     *gin.Engine
 	ctx                        context.Context
-	cleanup                    func()
 	courseParticipationService CourseParticipationService
 }
 
 func (suite *RouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/course_participation_test.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../../database_dumps/course_participation_test.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.courseParticipationService = CourseParticipationService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 	CourseParticipationServiceSingleton = &suite.courseParticipationService
 
@@ -45,7 +43,7 @@ func (suite *RouterTestSuite) SetupSuite() {
 }
 
 func (suite *RouterTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func setupRouter() *gin.Engine {

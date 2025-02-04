@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -18,9 +18,14 @@ type TestDB struct {
 	Queries *db.Queries
 }
 
-func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), error) {
-	ryukSetting := utils.GetEnv("TESTCONTAINERS_RYUK_DISABLED", "")
-	logrus.Info("starting with ryuk setting: ", ryukSetting)
+type DatabaseSuite struct {
+	suite.Suite
+	container testcontainers.Container
+	Conn      *pgxpool.Pool
+}
+
+func (ds *DatabaseSuite) SetupSuite() {
+	ctx := context.Background()
 	// Set up PostgreSQL container
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres:15",
@@ -40,45 +45,41 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 		ContainerRequest: req,
 		Started:          true,
 	})
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not start container: %w", err)
-	}
+	ds.Require().NoError(err)
+
+	logrus.Info("started container")
+
+	// set test container
+	ds.container = container
 
 	// Get container's host and port
-	host, _ := container.Host(ctx)
-	port, _ := container.MappedPort(ctx, "5432/tcp")
+	host, err := container.Host(ctx)
+	ds.Require().NoError(err)
+	port, err := container.MappedPort(ctx, "5432/tcp")
+	ds.Require().NoError(err)
+
+	logrus.Info("host: ", host, " port: ", port.Port())
+
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
 	// Connect to the database
 	conn, err := pgxpool.New(ctx, dbURL)
-	if err != nil {
-		container.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to connect to the database: %w", err)
-	}
+	ds.Require().NoError(err)
 
-	// Run the SQL dump
-	if err := runSQLDump(conn, sqlDumpPath); err != nil {
-		conn.Close()
-		container.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to run SQL dump: %w", err)
-	}
+	logrus.Info("connected to database")
 
-	// Set up the queries
-	queries := db.New(conn)
-
-	// Return the TestDB and a cleanup function
-	cleanup := func() {
-		conn.Close()
-		container.Terminate(ctx)
-	}
-
-	return &TestDB{
-		Conn:    conn,
-		Queries: queries,
-	}, cleanup, nil
+	ds.Conn = conn
 }
 
-func runSQLDump(conn *pgxpool.Pool, path string) error {
+func (ds *DatabaseSuite) TearDownSuite() {
+	logrus.Info("tearing down suite")
+	ctx := context.Background()
+
+	ds.Conn.Close()
+	ds.container.Terminate(ctx)
+}
+
+func RunSQLDump(conn *pgxpool.Pool, path string) error {
 	dump, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("could not read SQL dump file: %w", err)

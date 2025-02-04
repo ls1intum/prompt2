@@ -3,7 +3,6 @@ package applicationAdministration
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"math/big"
 	"testing"
 
@@ -20,26 +19,24 @@ import (
 )
 
 type ApplicationAdminValidationTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router                  *gin.Engine
 	ctx                     context.Context
-	cleanup                 func()
 	applicationAdminService ApplicationService
 }
 
 func (suite *ApplicationAdminValidationTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/application_administration.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/application_administration.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.applicationAdminService = ApplicationService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 
 	ApplicationServiceSingleton = &suite.applicationAdminService
@@ -47,7 +44,7 @@ func (suite *ApplicationAdminValidationTestSuite) SetupSuite() {
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateForm_Success() {

@@ -15,6 +15,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -23,21 +24,20 @@ import (
 )
 
 type CourseRouterTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router        *gin.Engine
 	ctx           context.Context
-	cleanup       func()
 	courseService CourseService
 }
 
 func (suite *CourseRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/course_test.sql")
-	if err != nil {
-		suite.T().Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/course_test.sql")
+	suite.Require().NoError(err)
+
+	queries := db.New(suite.DatabaseSuite.Conn)
 
 	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
 		// No-op or add assertions for test
@@ -49,10 +49,9 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 		return nil
 	}
 
-	suite.cleanup = cleanup
 	suite.courseService = CourseService{
-		queries:                    *testDB.Queries,
-		conn:                       testDB.Conn,
+		queries:                    *queries,
+		conn:                       suite.DatabaseSuite.Conn,
 		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
 		addUserToGroup:             mockAddUserToGroup,
 	}
@@ -60,7 +59,7 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	CourseServiceSingleton = &suite.courseService
 
 	// Init the permissionValidation service
-	permissionValidation.InitValidationService(*testDB.Queries, testDB.Conn)
+	permissionValidation.InitValidationService(*queries, suite.DatabaseSuite.Conn)
 
 	// Initialize router
 	suite.router = gin.Default()
@@ -68,11 +67,11 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	setupCourseRouter(api, func() gin.HandlerFunc {
 		return testutils.MockAuthMiddleware([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"})
 	}, testutils.MockPermissionMiddleware, testutils.MockPermissionMiddleware)
-	coursePhase.InitCoursePhaseModule(api, *testDB.Queries, testDB.Conn)
+	coursePhase.InitCoursePhaseModule(api, *queries, suite.DatabaseSuite.Conn)
 }
 
 func (suite *CourseRouterTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *CourseRouterTestSuite) TestGetAllCourses() {

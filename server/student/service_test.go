@@ -6,39 +6,37 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/testutils"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type ServiceTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	ctx            context.Context
-	cleanup        func()
 	studentService StudentService
 }
 
 func (suite *ServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/student_test.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/student_test.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.studentService = StudentService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 	StudentServiceSingleton = &suite.studentService
 }
 
 func (suite *ServiceTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *ServiceTestSuite) TestGetAllStudents() {

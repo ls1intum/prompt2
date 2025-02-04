@@ -3,7 +3,6 @@ package applicationAdministration
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"math/big"
 	"testing"
 
@@ -24,39 +23,38 @@ import (
 )
 
 type ApplicationAdminServiceTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router                  *gin.Engine
 	ctx                     context.Context
-	cleanup                 func()
 	applicationAdminService ApplicationService
 }
 
 func (suite *ApplicationAdminServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/application_administration.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	suite.DatabaseSuite.SetupSuite()
 
-	suite.cleanup = cleanup
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/application_administration.sql")
+	suite.Require().NoError(err)
+
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.applicationAdminService = ApplicationService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 
 	ApplicationServiceSingleton = &suite.applicationAdminService
 	suite.router = gin.Default()
-	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	coursePhase.InitCoursePhaseModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
+	student.InitStudentModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	coursePhase.InitCoursePhaseModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *queries, suite.DatabaseSuite.Conn)
 
 }
 
 func (suite *ApplicationAdminServiceTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationForm_Success() {

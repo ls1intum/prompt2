@@ -2,7 +2,6 @@ package course
 
 import (
 	"context"
-	"log"
 	"testing"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase"
+	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -18,26 +18,24 @@ import (
 )
 
 type CourseTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router        *gin.Engine
 	ctx           context.Context
-	cleanup       func()
 	courseService CourseService
 }
 
 func (suite *CourseTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/course_test.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../database_dumps/course_test.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.courseService = CourseService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 
 	CourseServiceSingleton = &suite.courseService
@@ -45,7 +43,7 @@ func (suite *CourseTestSuite) SetupSuite() {
 }
 
 func (suite *CourseTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func (suite *CourseTestSuite) TestValidateCreateCourse() {
