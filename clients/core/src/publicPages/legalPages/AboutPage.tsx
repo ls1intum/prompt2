@@ -6,8 +6,6 @@ import {
   GitPullRequest,
   Mail,
   FileText,
-  Book,
-  GitMerge,
   UserCheck,
   Users,
   Calendar,
@@ -59,11 +57,6 @@ export default function AboutPage() {
       icon: Calendar,
       title: 'Team Phase',
       description: 'Assign students to teams and projects, and manage project work throughout the course.',
-    },
-    {
-      icon: Plus,
-      title: 'Custom Course Phase',
-      description: 'Create a custom course phase to meet specific teaching needs.',
     },
   ]
 
@@ -172,20 +165,35 @@ export default function AboutPage() {
               PROMPT allows instructors to create and manage own independent course phases, fostering a collaborative and easily extensible platform for project-based learning.
             </h4>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {dynamicPhases.map((phase, index) => (
                 <Card key={index}>
                   <CardHeader>
-                    <CardTitle className='text-lg font-semibold flex items-center'>
-                      <phase.icon className='h-5 w-5 mr-2 text-blue-600' />
+                    <CardTitle className="text-lg font-semibold flex items-center">
+                      <phase.icon className="h-5 w-5 mr-2 text-blue-600" />
                       {phase.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className='text-gray-700 text-sm'>{phase.description}</p>
+                    <p className="text-gray-700 text-sm">{phase.description}</p>
                   </CardContent>
                 </Card>
               ))}
+              <Card className="md:col-span-3 border-2 border-blue-600">
+                <CardHeader className="bg-blue-50 rounded-t-lg">
+                  <CardTitle className="text-2xl font-bold flex items-center text-blue-600">
+                    <Plus className="h-8 w-8 mr-3" />
+                    Custom Course Phase
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-lg text-gray-700">
+                    Create a custom course phase to meet specific teaching needs. This powerful feature allows you to
+                    extend PROMPT's functionality and tailor it to your unique course requirements.
+                  </p>
+                  <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700">Learn More</Button>
+                </CardContent>
+              </Card>
             </div>
           </section>
 
