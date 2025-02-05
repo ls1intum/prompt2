@@ -17,9 +17,9 @@ interface ContributorWithInfo extends Contributor {
 }
 
 const contributorMapping = {
-  niclasheun: { name: 'Niclas Heun', contribution: 'Prompt2 Father', position: 2 },
-  Mtze: { name: 'Matthias Linnhuber', contribution: 'Prompt2 Grandfather', position: 1 },
-  mathildeshagl: { name: 'Mathilde Hagel', contribution: 'Grading?', position: 4 },
+  niclasheun: { name: 'Niclas Heun', contribution: 'Lead Developer & Architect of PROMPT 2.0', position: 2 },
+  Mtze: { name: 'Matthias Linhuber', contribution: 'Project Manager', position: 1 },
+  mathildeshagl: { name: 'Mathilde Hagl', contribution: 'Templating and Task Management', position: 4 },
   airelawaleria: {
     name: 'Valeryia Andraichuk',
     contribution: 'Prompt1 - The concept on which this Prompt is based',

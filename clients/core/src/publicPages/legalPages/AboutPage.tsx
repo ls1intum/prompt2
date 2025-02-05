@@ -89,10 +89,15 @@ export default function AboutPage() {
           <section>
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
-              PROMPT is a robust course management platform designed to seamlessly support most
-              university project-based courses with minimal adaptations. It offers a simple yet
-              powerful tool to help you manage your projects and tasks, enhancing the learning
-              experience for both students and instructors.
+              PROMPT (Project-Oriented Modular Platform for Teaching) is a flexible and modular course management system designed to
+              seamlessly support a wide range of project-based university courses across diverse educational settings.
+
+              It offers a simple yet powerful tool to structure courses, automate administrative tasks, and track student progress,
+              enhancing the learning experience for both students and instructors.
+
+              Originally developed for the iPraktikum at the Technical University of Munich (TUM), PROMPT has evolved into a
+              scalable platform that allows instructors to structure and manage their courses efficiently, regardless of their specific
+              format or discipline.
             </p>
           </section>
 
@@ -136,8 +141,13 @@ export default function AboutPage() {
           <section>
             <h2 className='text-2xl font-semibold mb-6'>Main Features</h2>
 
-            <h3 className='text-xl font-semibold mt-8'>Core Features</h3>
-            <h4 className='text-l mb-4 text-secondary-foreground'>Here should be a subheading</h4>
+            <h3 className='text-xl font-semibold mt-8 mb-3'>Core Features</h3>
+            <h4 className='text-l mb-4 text-secondary-foreground'>
+              At its core, PROMPT introduces a modular approach to course management, enabling instructors to define and customize
+              course phases based on their teaching needs.
+              Through module federation, PROMPT facilitates the seamless integration of diverse course components—such as student
+              applications, team allocations, project cycles, and assessments—ensuring adaptability across various academic settings.
+            </h4>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
               {coreFeatures.map((feature, index) => (
                 <Card key={index}>
@@ -154,8 +164,21 @@ export default function AboutPage() {
               ))}
             </div>
 
-            <h3 className='text-xl font-semibold'>Dynamically Loaded Course Phases</h3>
-            <h4 className='text-l mb-4 text-secondary-foreground'>Here should be a subheading</h4>
+            <h3 className='text-xl font-semibold mb-3'>Dynamically Loaded Course Phases</h3>
+            <h4 className='text-l mb-4 text-secondary-foreground'>
+              This design enables instructors to easily extend PROMPT by adding new course phase modules, catering to a diverse range
+              of functional requirements beyond the iPraktikum. Each course phase will be implemented and loaded as independent modules.
+              Each course phase comprises three key components: it accepts students as input; the students then participate in one or
+              more activities defined by the phase; and finally, instructors evaluate the students.
+              This evaluation yields a pass/fail outcome, determining whether each student progresses to the next phase or exits the
+              course.
+
+              Furthermore, PROMPT is designed as a collaborative platform, inviting instructors to contribute their own course phases
+              and modules.
+              By sharing and integrating best practices, educators can collectively enhance the system's capabilities, fostering a
+              dynamic and continuously evolving ecosystem for project-based learning.
+            </h4>
+
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {dynamicPhases.map((phase, index) => (
                 <Card key={index}>
