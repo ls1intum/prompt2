@@ -13,7 +13,7 @@ import {
   Plus,
   Layers,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Contributors } from './components/Contributors'
 import { env } from '@/env'
 import { Separator } from '@/components/ui/separator'
@@ -186,7 +186,9 @@ export default function AboutPage() {
                   <p className="text-gray-700 text-sm">
                     Easily extend PROMPT with custom phases tailored to your course needs.
                   </p>
-                  <Button className="mt-3 bg-blue-600 text-white hover:bg-blue-700">Learn More</Button>
+                  <div className="flex justify-end mt-3">
+                    <Button variant="outline"><Link to="https://ls1intum.github.io/prompt2/" className="btn btn-outline">Learn More</Link></Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
