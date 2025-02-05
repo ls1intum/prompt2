@@ -97,3 +97,8 @@ SET
   restricted_data = restricted_data || $2,
   student_readable_data = student_readable_data || $3
 WHERE id = $1;
+
+
+-- name: DeleteCourse :exec
+DELETE FROM course
+WHERE id = $1;

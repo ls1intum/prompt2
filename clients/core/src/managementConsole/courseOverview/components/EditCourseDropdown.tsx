@@ -10,12 +10,37 @@ import { Button } from '@/components/ui/button'
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
+import { deleteCourse } from '@core/network/mutations/deleteCourse'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
 
 export const EditCourseDropdown = (): JSX.Element => {
+  const { courseId } = useParams<{ courseId: string }>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  const { mutate: mutateDeleteCourse } = useMutation({
+    mutationFn: () => deleteCourse(courseId ?? ''),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
+      navigate('/management/general')
+    },
+    onError: () => {
+      toast({
+        title: 'Failed to Delete Course',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
+    },
+  })
 
   const handleDelete = (deleteConfirmed: boolean) => {
-    console.log('Delete course')
+    if (deleteConfirmed) {
+      mutateDeleteCourse()
+    }
   }
 
   return (
