@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -26,22 +27,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
-import { z } from 'zod'
 import { useParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { useEffect } from 'react'
-
-// Define the schema for the edit form
-const editCourseSchema = z.object({
-  dateRange: z.object({
-    from: z.date(),
-    to: z.date(),
-  }),
-  courseType: z.string().min(1, 'Course type is required'),
-  ects: z.number().min(0, 'ECTS must be a positive number'),
-})
-
-type EditCourseFormValues = z.infer<typeof editCourseSchema>
+import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 
 interface CourseEditDialogProps {
   isOpen: boolean
@@ -60,7 +49,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
         from: course?.startDate ? new Date(course.startDate) : new Date(),
         to: course?.endDate ? new Date(course.endDate) : new Date(),
       },
-      courseType: (course?.courseType as CourseType) ?? CourseType.LECTURE,
+      courseType: course?.courseType,
       ects: course?.ects ?? 0,
     },
   })
@@ -81,25 +70,14 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[425px]'>
+    <Dialog open={isOpen} onOpenChange={onClose} aria-hidden='true'>
+      <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle>Edit Course</DialogTitle>
+          <DialogTitle>Edit {course?.name}</DialogTitle>
+          <DialogDescription>The course name and semester tag cannot be changed.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            <FormItem>
-              <FormLabel>Course Name</FormLabel>
-              <FormControl>
-                <div className='p-2 bg-muted rounded-md'>{course?.name}</div>
-              </FormControl>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Semester Tag</FormLabel>
-              <FormControl>
-                <div className='p-2 bg-muted rounded-md'>{course?.semesterTag}</div>
-              </FormControl>
-            </FormItem>
             <FormField
               control={form.control}
               name='dateRange'

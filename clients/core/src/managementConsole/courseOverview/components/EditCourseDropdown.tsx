@@ -47,7 +47,7 @@ export const EditCourseDropdown = (): JSX.Element => {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             <span className='sr-only'>Open menu</span>
