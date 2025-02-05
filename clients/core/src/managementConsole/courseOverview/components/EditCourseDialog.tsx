@@ -1,4 +1,3 @@
-import type React from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -26,11 +25,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
+import {
+  CourseType,
+  CourseTypeDetails,
+  UpdateCourseData,
+  useCourseStore,
+} from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { useEffect } from 'react'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
+import { useToast } from '@/hooks/use-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { updateCourseData } from '@core/network/mutations/updateCourseData'
 
 interface CourseEditDialogProps {
   isOpen: boolean
@@ -41,6 +48,8 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const form = useForm<EditCourseFormValues>({
     resolver: zodResolver(editCourseSchema),
@@ -64,8 +73,33 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
     }
   }, [selectedCourseType, form])
 
+  const { mutate: mutateCourse } = useMutation({
+    mutationFn: (courseData: UpdateCourseData) => {
+      return updateCourseData(courseId ?? 'undefined', courseData)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
+      toast({
+        title: 'Successfully Updated Course',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Failed to Store Course Details',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const onSubmit = (data: EditCourseFormValues) => {
-    console.log(data)
+    const updateData: UpdateCourseData = {
+      startDate: data.dateRange.from,
+      endDate: data.dateRange.to,
+      courseType: data.courseType,
+      ects: data.ects,
+    }
+    mutateCourse(updateData)
     onClose()
   }
 

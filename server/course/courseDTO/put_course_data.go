@@ -8,12 +8,12 @@ import (
 )
 
 type UpdateCourseData struct {
-	StartDate           pgtype.Date       `json:"startDate"`
-	EndDate             pgtype.Date       `json:"endDate"`
-	Ects                pgtype.Int4       `json:"ects"`
-	CourseType          db.NullCourseType `json:"courseType"`
-	RestrictedData      meta.MetaData     `json:"restrictedData"`
-	StudentReadableData meta.MetaData     `json:"studentReadableData"`
+	StartDate           pgtype.Date   `json:"startDate"`
+	EndDate             pgtype.Date   `json:"endDate"`
+	Ects                pgtype.Int4   `json:"ects"`
+	CourseType          pgtype.Text   `json:"courseType"`
+	RestrictedData      meta.MetaData `json:"restrictedData"`
+	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }
 
 func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {
@@ -29,12 +29,26 @@ func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {
 		return db.UpdateCourseParams{}, err
 	}
 
+	var nullCourseType db.NullCourseType
+	if c.CourseType.Valid {
+		courseType := db.CourseType(c.CourseType.String)
+
+		nullCourseType = db.NullCourseType{
+			CourseType: courseType,
+			Valid:      true,
+		}
+	} else {
+		nullCourseType = db.NullCourseType{
+			Valid: false,
+		}
+	}
+
 	return db.UpdateCourseParams{
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
 		StartDate:           c.StartDate,
 		EndDate:             c.EndDate,
 		Ects:                c.Ects,
-		CourseType:          c.CourseType,
+		CourseType:          nullCourseType,
 	}, nil
 }
