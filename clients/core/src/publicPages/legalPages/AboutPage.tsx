@@ -8,9 +8,10 @@ import {
   FileText,
   UserCheck,
   Users,
-  Calendar,
-  ImportIcon as FileImport,
+  Mic,
+  Upload,
   Plus,
+  Layers,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Contributors } from './components/Contributors'
@@ -22,7 +23,7 @@ export default function AboutPage() {
 
   const coreFeatures = [
     {
-      icon: Calendar,
+      icon: Layers,
       title: 'Course Configuration',
       description:
         'Build a course by assembling various course phases to suit your specific teaching needs.',
@@ -37,24 +38,24 @@ export default function AboutPage() {
       icon: UserCheck,
       title: 'Student Management',
       description:
-        'Manage student information and track each student\'s participation history, including applications and course performances, to facilitate informed decision-making.',
+        'Efficiently manage student information and course participation.',
     }
   ]
 
   const dynamicPhases = [
     {
-      icon: Users,
+      icon: Mic,
       title: 'Interview Phase',
       description:
         'Manage and schedule interviews with applicants as part of the selection process.',
     },
     {
-      icon: FileImport,
+      icon: Upload,
       title: 'TUM Matching Export',
       description: 'Export data in a format compatible with TUM Matching for seamless integration.',
     },
     {
-      icon: Calendar,
+      icon: Users,
       title: 'Team Phase',
       description: 'Assign students to teams and projects, and manage project work throughout the course.',
     },
@@ -83,20 +84,15 @@ export default function AboutPage() {
           <section>
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
-              PROMPT (Project-Oriented Modular Platform for Teaching) is a flexible and modular course management system designed
-              to support a wide range of project-based university courses. 
-              It aims to streamline the daily activities of both students and instructors, enhancing the overall learning experience.
+              PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool specifically designed for
+              project-based university courses.
+              By automizing organizational tasks, it reduces the administrative burden typically associated with such courses and
+              aims to streamline the daily activities of both students and instructors, enhancing the overall learning experience.
             </p>
             <p className='text-gray-700 leading-relaxed'>
-              At its core, PROMPT introduces a modular approach to course management, enabling instructors to define and customize
-              course phases based on their teaching needs. 
-              Through module federation, PROMPT ensures extensibility and allows the tool to be easily expanded to meet the 
-              organizational needs of a diverse range of project-based teaching courses.
-            </p>
-            <p className='text-gray-700 leading-relaxed'>
-              Originally developed for the iPraktikum at the Technical University of Munich (TUM), PROMPT has evolved into a
-              scalable platform that allows instructors to structure and manage their courses efficiently, regardless of their specific
-              format or discipline.
+              Originally developed for the iPraktikum at the Technical University of Munich, PROMPT has been reimagined with a
+              flexible, modular architecture. Each course is built from independent, reusable components that can be easily extended,
+              giving instructors the freedom to tailor functionality and structure to their exact teaching needs.
             </p>
           </section>
 
@@ -165,7 +161,7 @@ export default function AboutPage() {
               PROMPT allows instructors to create and manage own independent course phases, fostering a collaborative and easily extensible platform for project-based learning.
             </h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {dynamicPhases.map((phase, index) => (
                 <Card key={index}>
                   <CardHeader>
@@ -179,19 +175,18 @@ export default function AboutPage() {
                   </CardContent>
                 </Card>
               ))}
-              <Card className="md:col-span-3 border-2 border-blue-600">
-                <CardHeader className="bg-blue-50 rounded-t-lg">
-                  <CardTitle className="text-2xl font-bold flex items-center text-blue-600">
-                    <Plus className="h-8 w-8 mr-3" />
+              <Card className="border border-dashed border-blue-600">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semiold flex items-center">
+                    <Plus className="h-5 w-5 mr-2 text-blue-600" />
                     Custom Course Phase
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-lg text-gray-700">
-                    Create a custom course phase to meet specific teaching needs. This powerful feature allows you to
-                    extend PROMPT's functionality and tailor it to your unique course requirements.
+                <CardContent>
+                  <p className="text-gray-700 text-sm">
+                    Easily extend PROMPT with custom phases tailored to your course needs.
                   </p>
-                  <Button className="mt-4 bg-blue-600 text-white hover:bg-blue-700">Learn More</Button>
+                  <Button className="mt-3 bg-blue-600 text-white hover:bg-blue-700">Learn More</Button>
                 </CardContent>
               </Card>
             </div>
