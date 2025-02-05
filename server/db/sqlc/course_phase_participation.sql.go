@@ -535,6 +535,153 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 	return i, err
 }
 
+const getCoursePhaseParticipationByUniversityLoginAndCoursePhase = `-- name: GetCoursePhaseParticipationByUniversityLoginAndCoursePhase :one
+WITH 
+direct_predecessor_for_pass AS (
+    SELECT cpg.from_course_phase_id AS phase_id
+    FROM course_phase_graph cpg
+    WHERE cpg.to_course_phase_id = $1
+),
+
+current_phase_participation AS (
+    SELECT
+        cpp.id                         AS course_phase_participation_id,
+        cpp.student_readable_data      AS student_readable_data,
+        s.id                           AS student_id,
+        s.first_name,
+        s.last_name,
+        s.email,
+        s.matriculation_number,
+        s.university_login,
+        s.has_university_account,
+        s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
+        cp.id                    AS course_participation_id
+    FROM course_phase_participation cpp
+    INNER JOIN course_participation cp 
+      ON cpp.course_participation_id = cp.id
+    INNER JOIN student s 
+      ON cp.student_id = s.id
+    WHERE cpp.course_phase_id = $1
+      AND s.university_login = $2
+      AND s.matriculation_number = $3 
+),
+
+qualified_non_participant AS (
+    SELECT
+        NULL::uuid                   AS course_phase_participation_id,
+        '{}'::jsonb                  AS student_readable_data,
+        s.id                         AS student_id,
+        s.first_name,
+        s.last_name,
+        s.email,
+        s.matriculation_number,
+        s.university_login,
+        s.has_university_account,
+        s.gender,
+        s.nationality,
+        s.study_degree,
+        s.study_program,
+        s.current_semester,
+        cp.id                        AS course_participation_id
+    FROM course_participation cp
+    JOIN student s 
+      ON cp.student_id = s.id
+
+    WHERE 
+      s.university_login = $2
+      AND s.matriculation_number = $3 
+      -- Exclude if they already have a participation in the current phase
+      AND NOT EXISTS (
+        SELECT 1
+        FROM course_phase_participation new_cpp
+        WHERE new_cpp.course_phase_id = $1
+          AND new_cpp.course_participation_id = cp.id
+      )
+    -- And ensure they have 'passed' in the previous phase 
+    -- We filter just previous, not all since phase order might change or allow for non-linear courses at some point
+    AND EXISTS (
+        SELECT 1
+        FROM direct_predecessor_for_pass dpp
+        JOIN  course_phase_participation pcpp
+          ON pcpp.course_phase_id = dpp.phase_id
+          AND pcpp.course_participation_id = cp.id
+        WHERE (pcpp.pass_status = 'passed')
+    )
+)
+SELECT main.course_phase_participation_id, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id
+FROM
+(
+    SELECT course_phase_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participation
+    UNION
+    SELECT course_phase_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participant
+) AS main
+LIMIT 1
+`
+
+type GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseParams struct {
+	ToCoursePhaseID     uuid.UUID   `json:"to_course_phase_id"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+}
+
+type GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseRow struct {
+	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
+	StudentReadableData        []byte      `json:"student_readable_data"`
+	StudentID                  uuid.UUID   `json:"student_id"`
+	FirstName                  pgtype.Text `json:"first_name"`
+	LastName                   pgtype.Text `json:"last_name"`
+	Email                      pgtype.Text `json:"email"`
+	MatriculationNumber        pgtype.Text `json:"matriculation_number"`
+	UniversityLogin            pgtype.Text `json:"university_login"`
+	HasUniversityAccount       pgtype.Bool `json:"has_university_account"`
+	Gender                     Gender      `json:"gender"`
+	Nationality                pgtype.Text `json:"nationality"`
+	StudyDegree                StudyDegree `json:"study_degree"`
+	StudyProgram               pgtype.Text `json:"study_program"`
+	CurrentSemester            pgtype.Int4 `json:"current_semester"`
+	CourseParticipationID      uuid.UUID   `json:"course_participation_id"`
+}
+
+// ---------------------------------------------------------------------
+// A) Phases a student must have 'passed' (per course_phase_graph)
+// Identify the single previous phase (if any) required for PASS
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// 1) Existing participants in the current phase
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// 2) Would-be participants:
+//   - They do NOT yet have a course_phase_participation for $1
+//   - Must have passed ALL direct_predecessors_for_pass
+//
+// ---------------------------------------------------------------------
+func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx context.Context, arg GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseParams) (GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseRow, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseParticipationByUniversityLoginAndCoursePhase, arg.ToCoursePhaseID, arg.UniversityLogin, arg.MatriculationNumber)
+	var i GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseRow
+	err := row.Scan(
+		&i.CoursePhaseParticipationID,
+		&i.StudentReadableData,
+		&i.StudentID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.MatriculationNumber,
+		&i.UniversityLogin,
+		&i.HasUniversityAccount,
+		&i.Gender,
+		&i.Nationality,
+		&i.StudyDegree,
+		&i.StudyProgram,
+		&i.CurrentSemester,
+		&i.CourseParticipationID,
+	)
+	return i, err
+}
+
 const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 

@@ -2,7 +2,6 @@ package course
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,38 +26,21 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 }
 
 func getAllCourses(c *gin.Context) {
-	courses, err := GetAllCourses(c)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
 		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
 		return
 	}
+
 	userRoles := rolesVal.(map[string]bool)
-	if userRoles[keycloak.PromptAdmin] {
-		c.IndentedJSON(http.StatusOK, courses)
+
+	courses, err := GetAllCourses(c, userRoles)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	// TODO: move this to DB request
-	// Filtern Sie die Kurse basierend auf den Berechtigungen
-	filteredCourses := []courseDTO.CourseWithPhases{}
-	allowedUsers := []string{keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent}
-	for _, course := range courses {
-		for _, role := range allowedUsers {
-			desiredRole := fmt.Sprintf("%s-%s-%s", course.Name, course.SemesterTag, role)
-			if userRoles[desiredRole] {
-				filteredCourses = append(filteredCourses, course)
-				break
-			}
-		}
-	}
-
-	c.IndentedJSON(http.StatusOK, filteredCourses)
+	c.IndentedJSON(http.StatusOK, courses)
 }
 
 func getCourseByID(c *gin.Context) {

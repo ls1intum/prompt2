@@ -8,7 +8,10 @@ import {
   UpdateCoursePhase,
   CoursePhaseMailingConfigData,
 } from '@tumaet/prompt-shared-state'
-import { AvailableMailPlaceholders } from './components/AvailableMailPlaceholders'
+import {
+  AvailableMailPlaceholders,
+  availablePlaceholders,
+} from './components/AvailableMailPlaceholders'
 import { EmailTemplateEditor } from './components/MailingEditor'
 import { SettingsCard } from './components/SettingsCard'
 import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
@@ -124,6 +127,7 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
               label='Passed'
               subjectHTMLLabel='passedMailSubject'
               contentHTMLLabel='passedMailContent'
+              placeholders={availablePlaceholders.map((placeholder) => placeholder.placeholder)}
             />
           </TabsContent>
           <TabsContent value='failed'>
@@ -134,6 +138,7 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
               label='Failed'
               subjectHTMLLabel='failedMailSubject'
               contentHTMLLabel='failedMailContent'
+              placeholders={availablePlaceholders.map((placeholder) => placeholder.placeholder)}
             />
           </TabsContent>
         </Tabs>

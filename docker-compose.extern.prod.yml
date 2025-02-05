@@ -102,7 +102,6 @@ services:
     networks:
       - prompt-network
   
-  # To use keycloak you need to manually create the database keycloak once
   keycloak:
     image: quay.io/keycloak/keycloak:21.0
     container_name: prompt-keycloak
