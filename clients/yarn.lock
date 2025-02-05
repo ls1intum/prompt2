@@ -3710,13 +3710,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^0.0.12":
-  version: 0.0.12
-  resolution: "@tumaet/prompt-shared-state@npm:0.0.12"
+"@tumaet/prompt-shared-state@npm:^0.0.14":
+  version: 0.0.14
+  resolution: "@tumaet/prompt-shared-state@npm:0.0.14"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/42b65ea4ea24fe3b8e58db92f09af47717b50b70f38e5eb4f2e59c2a3a94189857bed2f71aa4252dec4f6c72cd4cbf9210b07dc9adef8beb8b3f7cbdf6cf4114
+  checksum: 10c0/7382c655a708809721feefce151e945ddaff181300c3e8b672b7a98472c8c4925f3098112f7584bcc4ac998e820482a8cb4f0696b7172c79372851ec5063c5aa
   languageName: node
   linkType: hard
 
@@ -12778,7 +12778,7 @@ __metadata:
     "@tiptap/pm": "npm:^2.10.4"
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
-    "@tumaet/prompt-shared-state": "npm:^0.0.12"
+    "@tumaet/prompt-shared-state": "npm:^0.0.14"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"
