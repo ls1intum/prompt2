@@ -22,7 +22,7 @@ const contributorMapping = {
   mathildeshagl: { name: 'Mathilde Hagl', contribution: 'Templating and Task Management', position: 4 },
   airelawaleria: {
     name: 'Valeryia Andraichuk',
-    contribution: 'Prompt1 - The concept on which this Prompt is based',
+    contribution: 'PROMPT - The concept on which this Prompt is based',
     position: 3,
   },
 }
