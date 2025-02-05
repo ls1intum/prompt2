@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { DeleteConfirmation } from '../components/DeleteConfirmation'
+import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
 import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 
 interface DeleteConfirmationReturn {
@@ -56,7 +56,7 @@ export function useDeleteConfirmation({
     <DeleteConfirmation
       isOpen={deleteDialogIsOpen}
       setOpen={setDeleteDialogOpen}
-      componentName={toBeDeletedComponent}
+      deleteMessage={`Are you sure you want to delete ${toBeDeletedComponent}?`}
       onClick={(value: boolean) => {
         if (deleteConfirmationResolver) {
           deleteConfirmationResolver(value)

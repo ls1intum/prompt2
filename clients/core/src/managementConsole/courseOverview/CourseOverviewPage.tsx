@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
+import { EditCourseDropdown } from './components/EditCourseDropdown'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
@@ -42,6 +43,7 @@ export const CourseOverview = (): JSX.Element => {
               <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
               <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
             </div>
+            <EditCourseDropdown />
           </div>
         </CardHeader>
         <CardContent className='p-6'>
