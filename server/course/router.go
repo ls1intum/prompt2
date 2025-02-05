@@ -187,6 +187,12 @@ func updateCourseData(c *gin.Context) {
 		return
 	}
 
+	err = validateUpdateCourseData(update)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	err = UpdateCourseData(c, courseID, update)
 	if err != nil {
 		log.Error(err)

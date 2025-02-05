@@ -4,7 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
 
-export const useSaveMailingData = () => {
+interface SaveMailingDataProps {
+  onSuccess?: () => void
+}
+
+export const useSaveMailingData = ({ onSuccess }: SaveMailingDataProps) => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { courseId } = useParams<{ courseId: string }>()
@@ -18,6 +22,7 @@ export const useSaveMailingData = () => {
       toast({
         title: 'Successfully Stored Mailing Settings',
       })
+      onSuccess?.()
     },
     onError: () => {
       toast({
