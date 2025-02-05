@@ -14,10 +14,12 @@ import { deleteCourse } from '@core/network/mutations/deleteCourse'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { EditCourseDialog } from './EditCourseDialog'
 
 export const EditCourseDropdown = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editCourseDialogOpen, setEditCourseDialogOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -54,7 +56,7 @@ export const EditCourseDropdown = (): JSX.Element => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setEditCourseDialogOpen(true)}>
             <Edit className='mr-2 h-4 w-4' />
             <span>Edit Course</span>
           </DropdownMenuItem>
@@ -74,6 +76,13 @@ export const EditCourseDropdown = (): JSX.Element => {
           customWarning={`This action cannot be undone. All student associations with this course will be lost. 
             If you want to keep the course data, consider archiving it instead.`}
           onClick={handleDelete}
+        />
+      )}
+
+      {editCourseDialogOpen && (
+        <EditCourseDialog
+          isOpen={editCourseDialogOpen}
+          onClose={() => setEditCourseDialogOpen(false)}
         />
       )}
     </>
