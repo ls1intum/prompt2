@@ -25,6 +25,7 @@ const contributorMapping = {
     contribution: 'Creator of PROMPT - the concept on which PROMPT 2.0 is based',
     position: 3,
   },
+  rappm: { name: 'Maximilian Rapp', contribution: 'Grading', position: 5 },
 }
 
 export const Contributors = () => {
