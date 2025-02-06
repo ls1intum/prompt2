@@ -37,9 +37,8 @@ export default function AboutPage() {
     {
       icon: UserCheck,
       title: 'Student Management',
-      description:
-        'Efficiently manage student information and course participation.',
-    }
+      description: 'Efficiently manage student information and course participation.',
+    },
   ]
 
   const dynamicPhases = [
@@ -57,10 +56,10 @@ export default function AboutPage() {
     {
       icon: Users,
       title: 'Team Phase',
-      description: 'Assign students to teams and projects, and manage project work throughout the course.',
+      description:
+        'Assign students to teams and projects, and manage project work throughout the course.',
     },
   ]
-
 
   return (
     <div className='container mx-auto py-12 px-4'>
@@ -84,15 +83,17 @@ export default function AboutPage() {
           <section>
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
-              PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool specifically designed for
-              project-based university courses.
-              By automizing organizational tasks, it reduces the administrative burden typically associated with such courses and
-              aims to streamline the daily activities of both students and instructors, enhancing the overall learning experience.
+              PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool
+              specifically designed for project-based university courses. By automizing
+              organizational tasks, it reduces the administrative burden typically associated with
+              such courses and aims to streamline the daily activities of both students and
+              instructors, enhancing the overall learning experience.
             </p>
             <p className='text-gray-700 leading-relaxed'>
-              Originally developed for the iPraktikum at the Technical University of Munich, PROMPT has been reimagined with a
-              flexible, modular architecture. Each course is built from independent, reusable components that can be easily extended,
-              giving instructors the freedom to tailor functionality and structure to their exact teaching needs.
+              Originally developed for the iPraktikum at the Technical University of Munich, PROMPT
+              has been reimagined with a flexible, modular architecture. Each course is built from
+              independent, reusable components that can be easily extended, giving instructors the
+              freedom to tailor functionality and structure to their exact teaching needs.
             </p>
           </section>
 
@@ -138,7 +139,8 @@ export default function AboutPage() {
 
             <h3 className='text-xl font-semibold mt-8 mb-3'>Core Features</h3>
             <h4 className='text-l mb-4 text-secondary-foreground'>
-              The Core offers a range of essential features designed to enhance the efficiency and effectiveness of course management.
+              The Core offers a range of essential features designed to enhance the efficiency and
+              effectiveness of course management.
             </h4>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
               {coreFeatures.map((feature, index) => (
@@ -158,36 +160,41 @@ export default function AboutPage() {
 
             <h3 className='text-xl font-semibold mb-3'>Dynamically Loaded Course Phases</h3>
             <h4 className='text-l mb-4 text-secondary-foreground'>
-              PROMPT allows instructors to create and manage own independent course phases, fostering a collaborative and easily extensible platform for project-based learning.
+              PROMPT allows instructors to create and manage own independent course phases,
+              fostering a collaborative and easily extensible platform for project-based learning.
             </h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {dynamicPhases.map((phase, index) => (
                 <Card key={index}>
                   <CardHeader>
-                    <CardTitle className="text-lg font-semibold flex items-center">
-                      <phase.icon className="h-5 w-5 mr-2 text-blue-600" />
+                    <CardTitle className='text-lg font-semibold flex items-center'>
+                      <phase.icon className='h-5 w-5 mr-2 text-blue-600' />
                       {phase.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-700 text-sm">{phase.description}</p>
+                    <p className='text-gray-700 text-sm'>{phase.description}</p>
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border border-dashed border-blue-600">
+              <Card className='border border-dashed border-blue-600'>
                 <CardHeader>
-                  <CardTitle className="text-lg font-semiold flex items-center">
-                    <Plus className="h-5 w-5 mr-2 text-blue-600" />
+                  <CardTitle className='text-lg font-semiold flex items-center'>
+                    <Plus className='h-5 w-5 mr-2 text-blue-600' />
                     Custom Course Phase
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm">
+                  <p className='text-gray-700 text-sm'>
                     Easily extend PROMPT with custom phases tailored to your course needs.
                   </p>
-                  <div className="flex justify-end mt-3">
-                    <Button variant="outline"><Link to="https://ls1intum.github.io/prompt2/" className="btn btn-outline">Learn More</Link></Button>
+                  <div className='flex justify-end mt-3'>
+                    <Button variant='outline'>
+                      <Link to='https://ls1intum.github.io/prompt2/' className='btn btn-outline'>
+                        Learn More
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
