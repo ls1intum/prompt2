@@ -22,7 +22,7 @@ const contributorMapping = {
   rappm: { name: 'Maximilian Rapp', contribution: 'Grading', position: 5 },
 }
 
-export const Contributors = () => {
+export const ContributorList = () => {
   const [contributors, setContributors] = useState<Contributor[]>([])
   const [vali, setVali] = useState<Contributor>()
 

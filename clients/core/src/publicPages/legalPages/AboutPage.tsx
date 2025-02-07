@@ -15,7 +15,7 @@ import {
   Layers,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Contributors } from './components/Contributors'
+import { ContributorList } from './components/ContributorList'
 import { env } from '@/env'
 import { Separator } from '@/components/ui/separator'
 
@@ -85,8 +85,8 @@ export default function AboutPage() {
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
               PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool
-              specifically designed for project-based university courses. By optimizing
-              organizational tasks, it reduces the administrative burden typically associated with
+              specifically designed for project-based university courses. By supporting a wide range of
+              organizational processes, it reduces the administrative burden typically associated with
               such courses and aims to streamline the daily activities of both students and
               instructors, enhancing the overall learning experience.
             </p>
@@ -211,7 +211,7 @@ export default function AboutPage() {
 
           <section>
             <h2 className='text-2xl font-semibold mb-6'>Contributors</h2>
-            <Contributors />
+            <ContributorList />
           </section>
 
           <Separator />
