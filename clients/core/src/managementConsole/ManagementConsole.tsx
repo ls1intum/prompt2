@@ -15,6 +15,7 @@ import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CourseNotFound from './shared/components/CourseNotFound'
 import { Breadcrumbs } from './layout/Breadcrumbs/Breadcrumbs'
+import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
@@ -23,8 +24,13 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   const hasChildren = React.Children.count(children) > 0
   const path = useLocation().pathname
 
-  const { setCourses, getSelectedCourseID, setSelectedCourseID, removeSelectedCourseID } =
-    useCourseStore()
+  const {
+    setCourses,
+    setOwnCourseIDs,
+    getSelectedCourseID,
+    setSelectedCourseID,
+    removeSelectedCourseID,
+  } = useCourseStore()
   const navigate = useNavigate()
 
   // getting the courses
@@ -32,14 +38,30 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     data: fetchedCourses,
     error,
     isPending,
-    isError,
-    refetch,
+    isError: isCourseError,
+    refetch: refetchCourses,
   } = useQuery<Course[]>({
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
   })
 
-  const isLoading = !(keycloak && user) || isPending
+  // getting the course ids of the course a user is enrolled in
+  const {
+    data: fetchedOwnCourseIDs,
+    isPending: isOwnCourseIdPending,
+    isError: isOwnCourseIdError,
+    refetch: refetchOwnCourseIds,
+  } = useQuery<string[]>({
+    queryKey: ['own_courses'],
+    queryFn: () => getOwnCourseIDs(),
+  })
+
+  const refetch = () => {
+    refetchOwnCourseIds()
+    refetchCourses()
+  }
+  const isLoading = !(keycloak && user) || isPending || isOwnCourseIdPending
+  const isError = isCourseError || isOwnCourseIdError
   const courseExists = fetchedCourses?.some((course) => course.id === courseId)
 
   useEffect(() => {
@@ -47,6 +69,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
       setCourses(fetchedCourses)
     }
   }, [fetchedCourses, setCourses])
+
+  useEffect(() => {
+    if (fetchedOwnCourseIDs) {
+      setOwnCourseIDs(fetchedOwnCourseIDs)
+    }
+  }, [fetchedOwnCourseIDs, setOwnCourseIDs])
 
   useEffect(() => {
     if (!fetchedCourses) return
@@ -79,12 +107,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   }
 
   if (isError) {
-    console.error(error)
+    if (isCourseError && error.message.includes('401')) {
+      return <UnauthorizedPage />
+    }
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 
   // Check if the user has at least some Prompt rights
-  if (permissions.length === 0) {
+  if (permissions.length === 0 && fetchedCourses && fetchedCourses.length === 0) {
     return <UnauthorizedPage />
   }
 

@@ -1,17 +1,20 @@
 package coursePhase
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/meta"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware, permissionCourseIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhase := router.Group("/course_phases", authMiddleware())
-	coursePhase.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseByID)
+	coursePhase.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent), getCoursePhaseByID)
 	// getting the course ID here to do correct rights management
 	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhase)
 	coursePhase.PUT("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhase)
@@ -63,6 +66,29 @@ func getCoursePhaseByID(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
+	// shadow the restricted data for students
+	courseTokenIdentifier := c.GetString("courseTokenIdentifier")
+
+	userRoles, exists := c.Get("userRoles")
+	if !exists {
+		log.Error("userRoles not found in context")
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	userRolesMap, ok := userRoles.(map[string]bool)
+	if !ok {
+		log.Error("invalid roles format in context")
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !hasRestrictedDataAccess(userRolesMap, courseTokenIdentifier) {
+		// Hide restricted data for unauthorized users.
+		coursePhase.RestrictedData = meta.MetaData{}
+	}
+
 	c.IndentedJSON(http.StatusOK, coursePhase)
 }
 
@@ -101,6 +127,12 @@ func deleteCoursePhase(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func hasRestrictedDataAccess(userRolesMap map[string]bool, courseTokenIdentifier string) bool {
+	return userRolesMap[keycloak.PromptAdmin] ||
+		userRolesMap[fmt.Sprintf("%s-%s", courseTokenIdentifier, keycloak.CourseLecturer)] ||
+		userRolesMap[fmt.Sprintf("%s-%s", courseTokenIdentifier, keycloak.CourseEditor)]
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
