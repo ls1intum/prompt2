@@ -6,6 +6,7 @@ import (
 )
 
 type GetOwnCourseParticipation struct {
+	IsStudentOfCourse  bool        `json:"isStudentOfCourse"`
 	ID                 uuid.UUID   `json:"id"`
 	CourseID           uuid.UUID   `json:"courseID"`
 	StudentID          uuid.UUID   `json:"studentID"`
@@ -14,6 +15,7 @@ type GetOwnCourseParticipation struct {
 
 func GetOwnCourseParticipationDTOFromDBModel(model db.GetCourseParticipationByCourseIDAndMatriculationRow) GetOwnCourseParticipation {
 	return GetOwnCourseParticipation{
+		IsStudentOfCourse:  model.StudentID != uuid.Nil,
 		ID:                 model.ID,
 		CourseID:           model.CourseID,
 		StudentID:          model.StudentID,

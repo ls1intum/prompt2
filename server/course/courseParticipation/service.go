@@ -89,7 +89,11 @@ func GetOwnCourseParticipation(ctx context.Context, courseId uuid.UUID, matricul
 		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
 		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
 	})
-	if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		return courseParticipationDTO.GetOwnCourseParticipation{
+			IsStudentOfCourse: false,
+		}, nil
+	} else if err != nil {
 		return courseParticipationDTO.GetOwnCourseParticipation{}, err
 	}
 

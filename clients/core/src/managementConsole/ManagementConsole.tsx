@@ -76,7 +76,6 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     }
   }, [fetchedOwnCourseIDs, setOwnCourseIDs])
 
-
   useEffect(() => {
     if (!fetchedCourses) return
     if (path === '/management') {
