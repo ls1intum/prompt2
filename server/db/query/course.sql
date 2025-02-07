@@ -106,3 +106,15 @@ WHERE id = $1;
 -- name: DeleteCourse :exec
 DELETE FROM course
 WHERE id = $1;
+
+
+-- name: GetOwnCourses :many
+SELECT
+    c.id
+FROM
+    course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE
+    s.matriculation_number = $1
+AND s.university_login = $2;
