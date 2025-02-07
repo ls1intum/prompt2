@@ -85,9 +85,9 @@ export default function AboutPage() {
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
               PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool
-              specifically designed for project-based university courses. By supporting a wide range of
-              organizational processes, it reduces the administrative burden typically associated with
-              such courses and aims to streamline the daily activities of both students and
+              specifically designed for project-based university courses. By supporting a wide range
+              of organizational processes, it reduces the administrative burden typically associated
+              with such courses and aims to streamline the daily activities of both students and
               instructors, enhancing the overall learning experience.
             </p>
             <p className='text-gray-700 leading-relaxed'>

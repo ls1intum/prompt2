@@ -1,4 +1,4 @@
-interface Contributor {
+export interface Contributor {
   login: string
   avatar_url: string
   html_url: string
@@ -6,7 +6,7 @@ interface Contributor {
   type: string
 }
 
-interface ContributorWithInfo extends Contributor {
+export interface ContributorWithInfo extends Contributor {
   name: string
   contribution: string
   position: number

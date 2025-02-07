@@ -1,26 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-const contributorMapping = {
-  niclasheun: {
-    name: 'Niclas Heun',
-    contribution: 'Lead Developer & Architect of PROMPT 2.0',
-    position: 2,
-  },
-  Mtze: { name: 'Matthias Linhuber', contribution: 'Project Manager', position: 1 },
-  mathildeshagl: {
-    name: 'Mathilde Hagl',
-    contribution: 'Templating and Task Management',
-    position: 4,
-  },
-  airelawaleria: {
-    name: 'Valeryia Andraichuk',
-    contribution: 'Creator of PROMPT - the concept on which PROMPT 2.0 is based',
-    position: 3,
-  },
-  rappm: { name: 'Maximilian Rapp', contribution: 'Grading', position: 5 },
-}
+import { Contributor, ContributorWithInfo } from '../interfaces/Contributor'
+import { contributorMapping } from './ContributorMapping'
 
 export const ContributorList = () => {
   const [contributors, setContributors] = useState<Contributor[]>([])
@@ -66,6 +48,7 @@ export const ContributorList = () => {
         ...contributorMapping[contributor?.login],
       }
     })
+    .filter((contributor): contributor is ContributorWithInfo => contributor !== undefined)
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
