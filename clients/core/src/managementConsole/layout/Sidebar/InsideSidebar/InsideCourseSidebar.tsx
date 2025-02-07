@@ -34,7 +34,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
       <SidebarGroup>
         <SidebarGroupContent>
           <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
-          <CourseConfiguratorSidebar rootPath={rootPath} title='Configure Course' />
+          <CourseConfiguratorSidebar rootPath={rootPath} title='Course Configurator' />
           <MailingConfigSidebar rootPath={rootPath} title='Mailing Settings' />
         </SidebarGroupContent>
       </SidebarGroup>

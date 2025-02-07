@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import type * as z from 'zod'
-import { Mail, Copy, EyeOff, Save, Plus, Trash2 } from 'lucide-react'
+import { Mail, Copy, EyeOff, Save, Plus, Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
@@ -29,7 +29,9 @@ export const MailingConfigPage = (): JSX.Element => {
     .mailingSettings as CourseMailingSettings
   const [isModified, setIsModified] = useState(false)
 
-  const { mutate: mutateMailingData } = useSaveMailingData()
+  const { mutate: mutateMailingData, isPending } = useSaveMailingData({
+    onSuccess: () => setIsModified(false),
+  })
 
   // Setup the form with default arrays for cc/bcc
   const form = useForm<CourseMailingFormValues>({
@@ -78,7 +80,6 @@ export const MailingConfigPage = (): JSX.Element => {
           },
         }
         mutateMailingData(updatedCourse)
-        setIsModified(false)
       }
     },
     [currentCourse, mutateMailingData],
@@ -274,9 +275,22 @@ export const MailingConfigPage = (): JSX.Element => {
               </CardContent>
 
               <CardFooter className='flex justify-end'>
-                <Button type='submit' disabled={!isModified} className='w-full sm:w-auto'>
-                  <Save className='mr-2 h-4 w-4' />
-                  Save Changes
+                <Button
+                  type='submit'
+                  disabled={!isModified || isPending}
+                  className='w-full sm:w-auto'
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className='mr-2 h-4 w-4' />
+                      Save Changes{' '}
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </form>

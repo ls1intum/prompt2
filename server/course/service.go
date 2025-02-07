@@ -311,3 +311,16 @@ func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData course
 
 	return nil
 }
+
+func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	err := CourseServiceSingleton.queries.DeleteCourse(ctxWithTimeout, courseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("failed to delete course")
+	}
+
+	return nil
+}
