@@ -2,20 +2,6 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-interface Contributor {
-  login: string
-  avatar_url: string
-  html_url: string
-  contributions: number
-  type: string
-}
-
-interface ContributorWithInfo extends Contributor {
-  name: string
-  contribution: string
-  position: number
-}
-
 const contributorMapping = {
   niclasheun: {
     name: 'Niclas Heun',
@@ -47,16 +33,21 @@ export const Contributors = () => {
       .catch((error) => console.error('Error fetching contributors:', error))
   }, [])
 
-  // Also get Vali from the old Prompt
   useEffect(() => {
-    fetch('https://api.github.com/repos/ls1intum/prompt/contributors')
+    fetch('https://api.github.com/users/airelawaleria')
       .then((response) => response.json())
       .then((data) => {
         if (data) {
-          setVali(data.find((contributor: Contributor) => contributor.login === 'airelawaleria'))
+          setVali({
+            login: data.login,
+            avatar_url: data.avatar_url,
+            html_url: data.html_url,
+            contributions: 0, // Contributions are not available from this endpoint
+            type: data.type,
+          })
         }
       })
-      .catch((error) => console.error('Error fetching contributors:', error))
+      .catch((error) => console.error('Error fetching user:', error))
   }, [])
 
   const mappedContributors: ContributorWithInfo[] = [...contributors, vali]

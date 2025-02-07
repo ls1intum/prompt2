@@ -6,6 +6,7 @@ import {
   GitPullRequest,
   Mail,
   FileText,
+  FileUser,
   UserCheck,
   Users,
   Mic,
@@ -29,7 +30,7 @@ export default function AboutPage() {
         'Build a course by assembling various course phases to suit your specific teaching needs.',
     },
     {
-      icon: FileText,
+      icon: FileUser,
       title: 'Application Phase',
       description:
         'Streamline the application process for courses, making it easier for students to apply and for instructors to manage applications.',
@@ -84,7 +85,7 @@ export default function AboutPage() {
             <h2 className='text-2xl font-semibold mb-4'>What is PROMPT?</h2>
             <p className='text-gray-700 leading-relaxed'>
               PROMPT (Project-Oriented Modular Platform for Teaching) is a course management tool
-              specifically designed for project-based university courses. By automizing
+              specifically designed for project-based university courses. By optimizing
               organizational tasks, it reduces the administrative burden typically associated with
               such courses and aims to streamline the daily activities of both students and
               instructors, enhancing the overall learning experience.
@@ -136,6 +137,11 @@ export default function AboutPage() {
 
           <section>
             <h2 className='text-2xl font-semibold mb-6'>Main Features</h2>
+            <p className='text-gray-700 leading-relaxed'>
+              The core features are built-in functionalities essential for course management, while
+              dynamically loaded phases are additional, customizable components that can be added as
+              needed.
+            </p>
 
             <h3 className='text-xl font-semibold mt-8 mb-3'>Core Features</h3>
             <h4 className='text-l mb-4 text-secondary-foreground'>
