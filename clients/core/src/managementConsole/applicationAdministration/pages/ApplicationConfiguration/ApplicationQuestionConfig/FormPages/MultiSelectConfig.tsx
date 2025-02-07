@@ -12,6 +12,8 @@ import { GripVertical, MinusIcon, PlusIcon } from 'lucide-react'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 import { QuestionConfigFormDataMultiSelect } from '@core/validations/questionConfig'
+import { motion } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
 
 export function MultiSelectConfig({
   form,
@@ -48,45 +50,60 @@ export function MultiSelectConfig({
               Options <span className='text-destructive'> *</span>
             </FormLabel>
             <FormControl>
-              <>
-                <Droppable droppableId='options'>
-                  {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps}>
-                      {options.map((option, index) => (
-                        <Draggable key={option.id} draggableId={option.id} index={index}>
-                          {(prov) => (
-                            <div
-                              ref={prov.innerRef}
-                              {...prov.draggableProps}
-                              {...prov.dragHandleProps}
-                              className='flex items-center space-x-2 mt-2 border p-2 rounded'
-                            >
-                              <GripVertical className='h-5 w-5' />
-                              <FormField
-                                control={form.control}
-                                name={`options.${index}`}
-                                render={({ field }) => (
-                                  <Input {...field} placeholder={`Option ${index + 1}`} />
-                                )}
-                              />
-                              <Button
-                                type='button'
-                                variant='outline'
-                                size='icon'
-                                onClick={() => remove(index)}
-                                disabled={options.length === 1} // Prevent removing the last option
-                              >
-                                <MinusIcon className='h-4 w-4' />
-                              </Button>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </>
+              <Droppable droppableId='options'>
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className='space-y-2'>
+                    {options.map((option, index) => (
+                      <Draggable key={option.id} draggableId={option.id} index={index}>
+                        {(prov, snapshot) => (
+                          <motion.div
+                            ref={prov.innerRef}
+                            {...prov.draggableProps}
+                            initial={{ opacity: 1 }}
+                            animate={{ opacity: snapshot.isDragging ? 0.8 : 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Card className='overflow-hidden'>
+                              <CardContent className='p-0'>
+                                <div className='flex items-center space-x-2 p-2'>
+                                  <div
+                                    {...prov.dragHandleProps}
+                                    className='cursor-move p-2 hover:bg-muted rounded transition-colors'
+                                  >
+                                    <GripVertical className='h-5 w-5 text-muted-foreground' />
+                                  </div>
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${index}`}
+                                    render={({ field }) => (
+                                      <Input
+                                        {...field}
+                                        placeholder={`Option ${index + 1}`}
+                                        className='flex-grow'
+                                      />
+                                    )}
+                                  />
+                                  <Button
+                                    type='button'
+                                    variant='ghost'
+                                    size='icon'
+                                    onClick={() => remove(index)}
+                                    disabled={options.length === 1}
+                                    className='hover:bg-destructive hover:text-destructive-foreground transition-colors'
+                                  >
+                                    <MinusIcon className='h-4 w-4' />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
             </FormControl>
             {/* Array-Level Error Message */}
             {form.formState.errors.options &&
