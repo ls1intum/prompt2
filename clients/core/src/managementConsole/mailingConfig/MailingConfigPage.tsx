@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import type * as z from 'zod'
-import { Mail, Copy, EyeOff, Save, Plus, Trash2 } from 'lucide-react'
+import { Mail, Copy, EyeOff, Save, Plus, Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
@@ -29,7 +29,9 @@ export const MailingConfigPage = (): JSX.Element => {
     .mailingSettings as CourseMailingSettings
   const [isModified, setIsModified] = useState(false)
 
-  const { mutate: mutateMailingData } = useSaveMailingData()
+  const { mutate: mutateMailingData, isPending } = useSaveMailingData({
+    onSuccess: () => setIsModified(false),
+  })
 
   // Setup the form with default arrays for cc/bcc
   const form = useForm<CourseMailingFormValues>({
@@ -69,15 +71,30 @@ export const MailingConfigPage = (): JSX.Element => {
     }
   }, [applicationMailingMetaData, form])
 
-  async function onSubmit(values: z.infer<typeof courseMailingSchema>) {
-    if (currentCourse) {
-      const updatedCourse = {
-        restrictedData: {
-          mailingSettings: values,
-        },
+  const onSubmit = useCallback(
+    (values: z.infer<typeof courseMailingSchema>) => {
+      if (currentCourse) {
+        const updatedCourse = {
+          restrictedData: {
+            mailingSettings: values,
+          },
+        }
+        mutateMailingData(updatedCourse)
       }
-      mutateMailingData(updatedCourse)
-    }
+    },
+    [currentCourse, mutateMailingData],
+  )
+
+  // Handler to remove CC and submit form
+  const handleRemoveCC = (index: number) => {
+    removeCC(index)
+    form.handleSubmit(onSubmit)()
+  }
+
+  // Handler to remove BCC and submit form
+  const handleRemoveBCC = (index: number) => {
+    removeBCC(index)
+    form.handleSubmit(onSubmit)()
   }
 
   return (
@@ -170,7 +187,11 @@ export const MailingConfigPage = (): JSX.Element => {
                             </FormItem>
                           )}
                         />
-                        <Button variant='destructive' type='button' onClick={() => removeCC(index)}>
+                        <Button
+                          variant='destructive'
+                          type='button'
+                          onClick={() => handleRemoveCC(index)}
+                        >
                           <Trash2 className='h-4 w-4' />
                         </Button>
                       </div>
@@ -233,7 +254,7 @@ export const MailingConfigPage = (): JSX.Element => {
                         <Button
                           variant='destructive'
                           type='button'
-                          onClick={() => removeBCC(index)}
+                          onClick={() => handleRemoveBCC(index)}
                         >
                           <Trash2 className='h-4 w-4' />
                         </Button>
@@ -254,9 +275,22 @@ export const MailingConfigPage = (): JSX.Element => {
               </CardContent>
 
               <CardFooter className='flex justify-end'>
-                <Button type='submit' disabled={!isModified} className='w-full sm:w-auto'>
-                  <Save className='mr-2 h-4 w-4' />
-                  Save Changes
+                <Button
+                  type='submit'
+                  disabled={!isModified || isPending}
+                  className='w-full sm:w-auto'
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className='mr-2 h-4 w-4' />
+                      Save Changes{' '}
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </form>

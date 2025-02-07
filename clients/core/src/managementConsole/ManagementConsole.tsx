@@ -12,7 +12,7 @@ import { getAllCourses } from '../network/queries/course'
 import { ErrorPage } from '@/components/ErrorPage'
 import { Separator } from '@/components/ui/separator'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
-import { useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CourseNotFound from './shared/components/CourseNotFound'
 import { Breadcrumbs } from './layout/Breadcrumbs/Breadcrumbs'
 import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
@@ -20,10 +20,18 @@ import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
-  const courseId = useParams<{ courseId: string }>()
+  const { courseId } = useParams<{ courseId: string }>()
   const hasChildren = React.Children.count(children) > 0
+  const path = useLocation().pathname
 
-  const { setCourses, setOwnCourseIDs } = useCourseStore()
+  const {
+    setCourses,
+    setOwnCourseIDs,
+    getSelectedCourseID,
+    setSelectedCourseID,
+    removeSelectedCourseID,
+  } = useCourseStore()
+  const navigate = useNavigate()
 
   // getting the courses
   const {
@@ -48,12 +56,13 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     queryFn: () => getOwnCourseIDs(),
   })
 
-  const isLoading = !(keycloak && user) || isPending || isOwnCourseIdPending
-  const isError = isCourseError || isOwnCourseIdError
   const refetch = () => {
     refetchOwnCourseIds()
     refetchCourses()
   }
+  const isLoading = !(keycloak && user) || isPending || isOwnCourseIdPending
+  const isError = isCourseError || isOwnCourseIdError
+  const courseExists = fetchedCourses?.some((course) => course.id === courseId)
 
   useEffect(() => {
     if (fetchedCourses) {
@@ -66,6 +75,33 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
       setOwnCourseIDs(fetchedOwnCourseIDs)
     }
   }, [fetchedOwnCourseIDs, setOwnCourseIDs])
+
+
+  useEffect(() => {
+    if (!fetchedCourses) return
+    if (path === '/management') {
+      const retrievedCourseID = getSelectedCourseID()
+      const selectedCourse = fetchedCourses.find((course) => course.id === retrievedCourseID)
+      if (retrievedCourseID && selectedCourse !== undefined) {
+        navigate(`/management/course/${retrievedCourseID}`)
+      } else {
+        removeSelectedCourseID()
+      }
+    } else if (path === '/management/general' || (courseId && !courseExists)) {
+      removeSelectedCourseID()
+    } else if (courseId && courseExists) {
+      setSelectedCourseID(courseId)
+    }
+  }, [
+    path,
+    fetchedCourses,
+    courseId,
+    courseExists,
+    navigate,
+    getSelectedCourseID,
+    removeSelectedCourseID,
+    setSelectedCourseID,
+  ])
 
   if (isLoading) {
     return <LoadingPage />
@@ -83,21 +119,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     return <UnauthorizedPage />
   }
 
-  // TODO: when calling /management -> check for course in local storage, else redirect to /management/general
-
-  // TODO do course id management here
-  // store latest selected course in local storage
-
-  const courseExists = fetchedCourses.some((course) => course.id === courseId.courseId)
-
   return (
     <DarkModeProvider>
       <SidebarProvider>
         <AppSidebar onLogout={() => logout()} />
         <SidebarInset>
-          {courseId.courseId && !courseExists && (
-            <CourseNotFound courseId={courseId.courseId || ''} />
-          )}
+          {courseId && !courseExists && <CourseNotFound courseId={courseId || ''} />}
           <header className='fixed w-full top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background'>
             <SidebarTrigger className='-ml-1' />
             <Separator orientation='vertical' className='mr-2 h-4' />

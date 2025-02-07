@@ -60,7 +60,8 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [useRichInput, setUseRichInput] = useState(false)
+  // if a rich text is entered -> start with rich text editor
+  const [useRichInput, setUseRichInput] = useState(question.description?.startsWith('<'))
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)

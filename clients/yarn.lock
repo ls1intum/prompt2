@@ -3710,13 +3710,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "@tumaet/prompt-shared-state@npm:0.0.13"
+"@tumaet/prompt-shared-state@npm:^0.0.15":
+  version: 0.0.15
+  resolution: "@tumaet/prompt-shared-state@npm:0.0.15"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/1862bbf98819d6dae2a9243434c4a3705b59420a6989f831cb06a7e1e5fe4ff675e9204b29968712419901c53377f67783609326838c6501e38f4e2b19ecf233
+  checksum: 10c0/89a8a0c8eaad10106b3002bf4adc776321137abb75f2225bfbc7e70b71ee6961d4f60dd062a5b53d28167c9ce8382ce88c431ecab7e7981f1f771b1a72fe9a1e
   languageName: node
   linkType: hard
 
@@ -5155,7 +5155,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.4":
+"axios@npm:^1.7.4, axios@npm:^1.7.9":
   version: 1.7.9
   resolution: "axios@npm:1.7.9"
   dependencies:
@@ -5163,17 +5163,6 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10c0/b7a41e24b59fee5f0f26c1fc844b45b17442832eb3a0fb42dd4f1430eb4abc571fe168e67913e8a1d91c993232bd1d1ab03e20e4d1fee8c6147649b576fc1b0b
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.7.7":
-  version: 1.7.7
-  resolution: "axios@npm:1.7.7"
-  dependencies:
-    follow-redirects: "npm:^1.15.6"
-    form-data: "npm:^4.0.0"
-    proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/4499efc89e86b0b49ffddc018798de05fab26e3bf57913818266be73279a6418c3ce8f9e934c7d2d707ab8c095e837fc6c90608fb7715b94d357720b5f568af7
   languageName: node
   linkType: hard
 
@@ -12789,7 +12778,7 @@ __metadata:
     "@tiptap/pm": "npm:^2.10.4"
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
-    "@tumaet/prompt-shared-state": "npm:^0.0.13"
+    "@tumaet/prompt-shared-state": "npm:^0.0.15"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"
@@ -12800,7 +12789,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.10.0"
     "@typescript-eslint/parser": "npm:^7.10.0"
     autoprefixer: "npm:^10.4.20"
-    axios: "npm:^1.7.7"
+    axios: "npm:^1.7.9"
     class-variance-authority: "npm:^0.7.0"
     clsx: "npm:^2.1.1"
     css-loader: "npm:^7.1.2"

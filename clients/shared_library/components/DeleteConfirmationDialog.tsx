@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,14 +13,16 @@ import { AlertTriangle } from 'lucide-react'
 interface DeleteConfirmationProps {
   isOpen: boolean
   setOpen: (value: boolean) => void
-  componentName: string
-  onClick: (value: boolean) => void
+  deleteMessage: string
+  customWarning?: string
+  onClick: (value: boolean) => void // returns true for delete, false for not delete
 }
 
 export const DeleteConfirmation = ({
   isOpen,
   setOpen,
-  componentName,
+  deleteMessage,
+  customWarning,
   onClick,
 }: DeleteConfirmationProps) => {
   const handleClick = (value: boolean) => {
@@ -37,13 +38,12 @@ export const DeleteConfirmation = ({
             <AlertTriangle className='h-5 w-5' />
             Confirm Deletion
           </AlertDialogTitle>
-          <AlertDialogDescription className='text-base'>
-            Are you sure you want to delete{' '}
-            <span className='font-semibold text-foreground'>{componentName}</span>?
-          </AlertDialogDescription>
+          <AlertDialogDescription className='text-base'>{deleteMessage}</AlertDialogDescription>
         </AlertDialogHeader>
         <div className='mt-4 rounded-md bg-muted p-4 text-sm text-muted-foreground'>
-          This action cannot be undone and may result in data deletion.
+          {customWarning
+            ? customWarning
+            : 'This action cannot be undone and may result in data deletion.'}
         </div>
         <AlertDialogFooter className='mt-6 flex-col-reverse sm:flex-row'>
           <AlertDialogCancel onClick={() => handleClick(false)} className='mt-3 sm:mt-0'>
@@ -53,7 +53,7 @@ export const DeleteConfirmation = ({
             onClick={() => handleClick(true)}
             className='bg-red-600 hover:bg-red-700 text-white'
           >
-            Delete Component
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
