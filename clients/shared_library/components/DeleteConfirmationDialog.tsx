@@ -53,7 +53,7 @@ export const DeleteConfirmation = ({
             onClick={() => handleClick(true)}
             className='bg-red-600 hover:bg-red-700 text-white'
           >
-            Delete Component
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
