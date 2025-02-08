@@ -95,5 +95,26 @@ FROM matched_phases;
 UPDATE course
 SET 
   restricted_data = restricted_data || $2,
-  student_readable_data = student_readable_data || $3
+  student_readable_data = student_readable_data || $3,
+  start_date            = COALESCE($4, start_date),
+  end_date              = COALESCE($5, end_date),
+  ects                  = COALESCE($6, ects),
+  course_type           = COALESCE(sqlc.narg('course_type'), course_type)
 WHERE id = $1;
+
+
+-- name: DeleteCourse :exec
+DELETE FROM course
+WHERE id = $1;
+
+
+-- name: GetOwnCourses :many
+SELECT
+    c.id
+FROM
+    course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE
+    s.matriculation_number = $1
+AND s.university_login = $2;

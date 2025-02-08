@@ -202,6 +202,13 @@ func getStudentRoles(matriculationNumber, universityLogin string) ([]string, err
 	ctx := context.Background()
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
+
+	// we do not throw an error, as i.e. admins might not have a student role
+	if matriculationNumber == "" || universityLogin == "" {
+		log.Debug("no matriculation number or university login found")
+		return []string{}, nil
+	}
+
 	// Retrieve course roles from the DB
 	studentRoles, err := KeycloakSingleton.queries.GetStudentRoleStrings(ctxWithTimeout, db.GetStudentRoleStringsParams{
 		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},

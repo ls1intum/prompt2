@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -278,7 +279,7 @@ func validateTextAnswers(textQuestions []db.ApplicationQuestionText, textAnswers
 		if question.ValidationRegex.String != "" && exists && !regexp.MustCompile(question.ValidationRegex.String).MatchString(answer) {
 			return fmt.Errorf("answer to question %s does not match validation regex", question.ID)
 		}
-		if exists && len(answer) > int(question.AllowedLength.Int32) {
+		if exists && utf8.RuneCountInString(answer) > int(question.AllowedLength.Int32) {
 			return fmt.Errorf("answer to question %s exceeds allowed length of %d", question.ID, question.AllowedLength.Int32)
 		}
 	}

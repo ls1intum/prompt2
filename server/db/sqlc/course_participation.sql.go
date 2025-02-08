@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCourseParticipation = `-- name: CreateCourseParticipation :one
@@ -89,6 +90,91 @@ func (q *Queries) GetCourseParticipation(ctx context.Context, id uuid.UUID) (Cou
 	row := q.db.QueryRow(ctx, getCourseParticipation, id)
 	var i CourseParticipation
 	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
+	return i, err
+}
+
+const getCourseParticipationByCourseIDAndMatriculation = `-- name: GetCourseParticipationByCourseIDAndMatriculation :one
+WITH existing_phases AS (
+    SELECT cpp.course_phase_id
+    FROM course_participation cp
+    JOIN course_phase_participation cpp 
+        ON cpp.course_participation_id = cp.id
+    JOIN student s 
+        ON s.id = cp.student_id
+    WHERE cp.course_id = $1 
+      AND s.matriculation_number = $2 
+      AND s.university_login = $3
+),
+passed_phases AS (
+    SELECT cpp.course_phase_id
+    FROM course_participation cp
+    JOIN course_phase_participation cpp 
+        ON cpp.course_participation_id = cp.id
+    JOIN student s 
+        ON s.id = cp.student_id
+    WHERE cp.course_id = $1 
+      AND s.matriculation_number = $2 
+      AND s.university_login = $3
+      AND cpp.pass_status = 'passed'
+),
+next_phases AS (
+    SELECT cpg.to_course_phase_id
+    FROM course_phase_graph cpg
+    JOIN passed_phases pp
+        ON cpg.from_course_phase_id = pp.course_phase_id
+    WHERE cpg.to_course_phase_id NOT IN (
+        SELECT course_phase_id FROM existing_phases
+    )
+)
+SELECT 
+    cp.id, 
+    cp.course_id, 
+    cp.student_id, 
+    ARRAY_AGG(DISTINCT cp_ph.course_phase_id)::uuid[] AS active_course_phases
+FROM 
+    course_participation cp
+JOIN 
+    student s 
+        ON s.id = cp.student_id
+LEFT JOIN (
+    -- Combine existing and eligible next phases
+    SELECT course_phase_id FROM existing_phases
+    UNION
+    SELECT to_course_phase_id AS course_phase_id FROM next_phases
+) AS cp_ph 
+    ON TRUE
+WHERE 
+    cp.course_id = $1 
+    AND s.matriculation_number = $2 
+    AND s.university_login = $3
+GROUP BY 
+    cp.id, 
+    cp.course_id, 
+    cp.student_id
+`
+
+type GetCourseParticipationByCourseIDAndMatriculationParams struct {
+	CourseID            uuid.UUID   `json:"course_id"`
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+}
+
+type GetCourseParticipationByCourseIDAndMatriculationRow struct {
+	ID                 uuid.UUID   `json:"id"`
+	CourseID           uuid.UUID   `json:"course_id"`
+	StudentID          uuid.UUID   `json:"student_id"`
+	ActiveCoursePhases []uuid.UUID `json:"active_course_phases"`
+}
+
+func (q *Queries) GetCourseParticipationByCourseIDAndMatriculation(ctx context.Context, arg GetCourseParticipationByCourseIDAndMatriculationParams) (GetCourseParticipationByCourseIDAndMatriculationRow, error) {
+	row := q.db.QueryRow(ctx, getCourseParticipationByCourseIDAndMatriculation, arg.CourseID, arg.MatriculationNumber, arg.UniversityLogin)
+	var i GetCourseParticipationByCourseIDAndMatriculationRow
+	err := row.Scan(
+		&i.ID,
+		&i.CourseID,
+		&i.StudentID,
+		&i.ActiveCoursePhases,
+	)
 	return i, err
 }
 

@@ -96,3 +96,21 @@ func validateMetaDataGraph(ctx context.Context, courseID uuid.UUID, newGraph []c
 
 	return nil
 }
+
+func validateUpdateCourseData(c courseDTO.UpdateCourseData) error {
+	if c.StartDate.Valid || c.EndDate.Valid {
+		// either update both or none
+		if !c.StartDate.Valid || !c.EndDate.Valid {
+			errorMessage := "both start and end date must be updated"
+			log.Error(errorMessage)
+			return errors.New(errorMessage)
+		}
+
+		if c.StartDate.Time.After(c.EndDate.Time) {
+			errorMessage := "start date must be before end date"
+			log.Error(errorMessage)
+			return errors.New(errorMessage)
+		}
+	}
+	return nil
+}

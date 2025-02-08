@@ -15,7 +15,7 @@ export const PermissionRestriction = ({
   children,
 }: PermissionRestrictionProps): JSX.Element => {
   const { permissions } = useAuthStore()
-  const { courses } = useCourseStore()
+  const { courses, isStudentOfCourse } = useCourseStore()
   const courseId = useParams<{ courseId: string }>().courseId
 
   // This means something /general
@@ -33,6 +33,12 @@ export const PermissionRestriction = ({
     hasPermission = requiredPermissions.some((role) => {
       return permissions.includes(getPermissionString(role, course?.name, course?.semesterTag))
     })
+
+    // We need to compare student role with ownCourseIDs -> otherwise we could not hide pages from i.e. instructors
+    // set hasPermission to true if the user is a student in the course and the page is accessible for students
+    if (requiredPermissions.includes(Role.COURSE_STUDENT) && isStudentOfCourse(courseId)) {
+      hasPermission = true
+    }
   }
 
   return <>{hasPermission ? children : <UnauthorizedPage />}</>

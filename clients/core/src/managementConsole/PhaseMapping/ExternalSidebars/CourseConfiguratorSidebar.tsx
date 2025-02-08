@@ -1,5 +1,5 @@
 import { Role } from '@tumaet/prompt-shared-state'
-import { Settings } from 'lucide-react'
+import { Route } from 'lucide-react'
 import { ExternalSidebarComponent } from './ExternalSidebar'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 
@@ -11,8 +11,8 @@ export const CourseConfiguratorSidebar = ({
   title: string
 }) => {
   const courseConfiguratorSidebarItems: SidebarMenuItemProps = {
-    title: 'Configure Course',
-    icon: <Settings />,
+    title: 'Configure Course Phases',
+    icon: <Route />,
     goToPath: '/configurator',
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   }

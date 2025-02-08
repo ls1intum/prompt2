@@ -6,18 +6,20 @@ import { ExternalSidebarComponent } from './ExternalSidebar'
 interface TemplateSidebarProps {
   rootPath: string
   title?: string
+  coursePhaseID: string
 }
 
 export const TemplateSidebar = React.lazy(() =>
   import('template_component/sidebar')
     .then((module): { default: React.FC<TemplateSidebarProps> } => ({
-      default: ({ title, rootPath }) => {
+      default: ({ title, rootPath, coursePhaseID }) => {
         const sidebarElement: SidebarMenuItemProps = module.default || {}
         return (
           <ExternalSidebarComponent
             title={title}
             rootPath={rootPath}
             sidebarElement={sidebarElement}
+            coursePhaseID={coursePhaseID}
           />
         )
       },

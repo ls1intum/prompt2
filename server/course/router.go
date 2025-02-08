@@ -15,6 +15,7 @@ import (
 // Role middleware for all without id -> possible additional filtering in subroutes required
 func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
+	course.GET("/self", getOwnCourses)
 	course.GET("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent), getAllCourses)
 	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
 	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
@@ -23,6 +24,28 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getMetaDataGraph)
 	course.PUT("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateMetaDataGraph)
 	course.PUT("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCourseData)
+	course.DELETE("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteCourse)
+}
+
+func getOwnCourses(c *gin.Context) {
+	matriculationNumber := c.GetString("matriculationNumber")
+	universityLogin := c.GetString("universityLogin")
+
+	if matriculationNumber == "" || universityLogin == "" {
+		// we need to ensure that it is still usable if you do not have a matriculation number or university login
+		// i.e. prompt admins might not have a student role
+		log.Debug("no matriculation number or university login found")
+		c.IndentedJSON(http.StatusOK, []uuid.UUID{})
+		return
+	}
+
+	courseIDs, err := GetOwnCourseIDs(c, matriculationNumber, universityLogin)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseIDs)
 }
 
 func getAllCourses(c *gin.Context) {
@@ -184,10 +207,33 @@ func updateCourseData(c *gin.Context) {
 		return
 	}
 
+	err = validateUpdateCourseData(update)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	err = UpdateCourseData(c, courseID, update)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to update course data"))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func deleteCourse(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = DeleteCourse(c, courseID)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to delete course"))
 		return
 	}
 

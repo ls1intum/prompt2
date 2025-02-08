@@ -83,6 +83,16 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 	return i, err
 }
 
+const deleteCourse = `-- name: DeleteCourse :exec
+DELETE FROM course
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCourse, id)
+	return err
+}
+
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
 SELECT
      c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data
@@ -248,21 +258,74 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 	return i, err
 }
 
+const getOwnCourses = `-- name: GetOwnCourses :many
+SELECT
+    c.id
+FROM
+    course c
+JOIN course_participation cp ON c.id = cp.course_id
+JOIN student s ON cp.student_id = s.id
+WHERE
+    s.matriculation_number = $1
+AND s.university_login = $2
+`
+
+type GetOwnCoursesParams struct {
+	MatriculationNumber pgtype.Text `json:"matriculation_number"`
+	UniversityLogin     pgtype.Text `json:"university_login"`
+}
+
+func (q *Queries) GetOwnCourses(ctx context.Context, arg GetOwnCoursesParams) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getOwnCourses, arg.MatriculationNumber, arg.UniversityLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCourse = `-- name: UpdateCourse :exec
 UPDATE course
 SET 
   restricted_data = restricted_data || $2,
-  student_readable_data = student_readable_data || $3
+  student_readable_data = student_readable_data || $3,
+  start_date            = COALESCE($4, start_date),
+  end_date              = COALESCE($5, end_date),
+  ects                  = COALESCE($6, ects),
+  course_type           = COALESCE($7, course_type)
 WHERE id = $1
 `
 
 type UpdateCourseParams struct {
-	ID                  uuid.UUID `json:"id"`
-	RestrictedData      []byte    `json:"restricted_data"`
-	StudentReadableData []byte    `json:"student_readable_data"`
+	ID                  uuid.UUID      `json:"id"`
+	RestrictedData      []byte         `json:"restricted_data"`
+	StudentReadableData []byte         `json:"student_readable_data"`
+	StartDate           pgtype.Date    `json:"start_date"`
+	EndDate             pgtype.Date    `json:"end_date"`
+	Ects                pgtype.Int4    `json:"ects"`
+	CourseType          NullCourseType `json:"course_type"`
 }
 
 func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) error {
-	_, err := q.db.Exec(ctx, updateCourse, arg.ID, arg.RestrictedData, arg.StudentReadableData)
+	_, err := q.db.Exec(ctx, updateCourse,
+		arg.ID,
+		arg.RestrictedData,
+		arg.StudentReadableData,
+		arg.StartDate,
+		arg.EndDate,
+		arg.Ects,
+		arg.CourseType,
+	)
 	return err
 }

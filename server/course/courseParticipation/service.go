@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -80,4 +81,21 @@ func CreateIfNotExistingCourseParticipation(ctx context.Context, transactionQuer
 	} else {
 		return courseParticipationDTO.GetCourseParticipation{}, err
 	}
+}
+
+func GetOwnCourseParticipation(ctx context.Context, courseId uuid.UUID, matriculationNumber, universityLogin string) (courseParticipationDTO.GetOwnCourseParticipation, error) {
+	participation, err := CourseParticipationServiceSingleton.queries.GetCourseParticipationByCourseIDAndMatriculation(ctx, db.GetCourseParticipationByCourseIDAndMatriculationParams{
+		CourseID:            courseId,
+		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
+		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return courseParticipationDTO.GetOwnCourseParticipation{
+			IsStudentOfCourse: false,
+		}, nil
+	} else if err != nil {
+		return courseParticipationDTO.GetOwnCourseParticipation{}, err
+	}
+
+	return courseParticipationDTO.GetOwnCourseParticipationDTOFromDBModel(participation), nil
 }
