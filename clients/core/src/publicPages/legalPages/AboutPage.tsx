@@ -136,7 +136,7 @@ export default function AboutPage() {
           <Separator />
 
           <section>
-            <h2 className='text-2xl font-semibold mb-6'>Main Features</h2>
+            <h2 className='text-2xl font-semibold mb-3'>Main Features</h2>
             <p className='text-gray-700 leading-relaxed'>
               The core features are built-in functionalities essential for course management, while
               dynamically loaded phases are additional, customizable components that can be added as
@@ -170,7 +170,7 @@ export default function AboutPage() {
               fostering a collaborative and easily extensible platform for project-based learning.
             </h4>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-6'>
               {dynamicPhases.map((phase, index) => (
                 <Card key={index}>
                   <CardHeader>
