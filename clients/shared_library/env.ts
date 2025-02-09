@@ -10,5 +10,8 @@ type EnvType = {
   KEYCLOAK_REALM_NAME: string
   CHAIR_NAME_LONG: string
   CHAIR_NAME_SHORT: string
+  GITHUB_SHA: string
+  GITHUB_REF: string
+  SERVER_IMAGE_TAG: string
 }
 export const env: EnvType = { ...window.env }
