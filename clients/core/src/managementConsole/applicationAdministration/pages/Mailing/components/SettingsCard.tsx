@@ -83,7 +83,7 @@ export const SettingsCard = ({
                   </TooltipTrigger>
                   {!automaticConfirmationMailEnabled && (
                     <TooltipContent>
-                      Confirmation mail and subject have to be configured or saved.
+                      Confirmation mail subject or content is missing.
                     </TooltipContent>
                   )}
                 </Tooltip>
