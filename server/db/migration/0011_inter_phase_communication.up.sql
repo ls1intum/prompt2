@@ -156,11 +156,13 @@ BEGIN
       SET base_url = 'core'
       WHERE id = phase_id;
 
-    INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
     VALUES (
       gen_random_uuid(),
       phase_id,
       'score',
+      1,
+      'core',
       '{"type": "integer"}'::jsonb
     );
   END IF;
@@ -180,6 +182,14 @@ BEGIN
     UPDATE course_phase_type
       SET base_url = 'core'
       WHERE id = phase_id;
+
+    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, specification)
+    VALUES (
+      gen_random_uuid(),
+      phase_id,
+      'score',
+      '{"type": "integer"}'::jsonb
+    );
 
     INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
     VALUES (

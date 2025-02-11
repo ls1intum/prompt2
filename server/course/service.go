@@ -83,9 +83,6 @@ func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.
 
 		courseWithPhases.CoursePhases = coursePhases
 
-		if err != nil {
-			return nil, err
-		}
 		dtoCourses = append(dtoCourses, courseWithPhases)
 	}
 

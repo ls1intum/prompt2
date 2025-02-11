@@ -26,7 +26,6 @@ func GetAllCoursePhaseTypes(ctx context.Context) ([]coursePhaseTypeDTO.CoursePha
 
 	dtoCoursePhaseTypes := make([]coursePhaseTypeDTO.CoursePhaseType, 0, len(coursePhaseTypes))
 	for _, phaseType := range coursePhaseTypes {
-
 		fetchedRequiredInputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseRequiredInputs(ctxWithTimeout, phaseType.ID)
 		if err != nil {
 			return nil, err

@@ -33,6 +33,54 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 	return err
 }
 
+const createCoursePhaseTypeProvidedOutput = `-- name: CreateCoursePhaseTypeProvidedOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES ($1, $2, $3, $4, $5, $6)
+`
+
+type CreateCoursePhaseTypeProvidedOutputParams struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	VersionNumber     int32     `json:"version_number"`
+	EndpointPath      string    `json:"endpoint_path"`
+	Specification     []byte    `json:"specification"`
+}
+
+func (q *Queries) CreateCoursePhaseTypeProvidedOutput(ctx context.Context, arg CreateCoursePhaseTypeProvidedOutputParams) error {
+	_, err := q.db.Exec(ctx, createCoursePhaseTypeProvidedOutput,
+		arg.ID,
+		arg.CoursePhaseTypeID,
+		arg.DtoName,
+		arg.VersionNumber,
+		arg.EndpointPath,
+		arg.Specification,
+	)
+	return err
+}
+
+const createCoursePhaseTypeRequiredInput = `-- name: CreateCoursePhaseTypeRequiredInput :exec
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES ($1, $2, $3, $4)
+`
+
+type CreateCoursePhaseTypeRequiredInputParams struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	Specification     []byte    `json:"specification"`
+}
+
+func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg CreateCoursePhaseTypeRequiredInputParams) error {
+	_, err := q.db.Exec(ctx, createCoursePhaseTypeRequiredInput,
+		arg.ID,
+		arg.CoursePhaseTypeID,
+		arg.DtoName,
+		arg.Specification,
+	)
+	return err
+}
+
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
 SELECT id, name, initial_phase, base_url FROM course_phase_type
 `

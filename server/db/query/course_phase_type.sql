@@ -36,4 +36,10 @@ SELECT EXISTS (
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
 VALUES ($1, $2, $3, $4);
 
--- TODO: add queries to store the required and provided output/input dto
+-- name: CreateCoursePhaseTypeRequiredInput :exec
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES ($1, $2, $3, $4);
+
+-- name: CreateCoursePhaseTypeProvidedOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES ($1, $2, $3, $4, $5, $6);
