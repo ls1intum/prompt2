@@ -21,6 +21,7 @@ type CreateMetaDataConnectionParams struct {
 	ToPhaseID   uuid.UUID `json:"to_phase_id"`
 }
 
+// TODO: adjust to new schema
 func (q *Queries) CreateMetaDataConnection(ctx context.Context, arg CreateMetaDataConnectionParams) error {
 	_, err := q.db.Exec(ctx, createMetaDataConnection, arg.FromPhaseID, arg.ToPhaseID)
 	return err
@@ -38,7 +39,7 @@ func (q *Queries) DeleteMetaDataGraphConnections(ctx context.Context, courseID u
 }
 
 const getMetaDataGraph = `-- name: GetMetaDataGraph :many
-SELECT mg.from_phase_id, mg.to_phase_id
+SELECT mg.from_phase_id, mg.to_phase_id, mg.from_course_phase_dto_id, mg.to_course_phase_dto_id
 FROM meta_data_dependency_graph mg
 JOIN course_phase cp
   ON mg.from_phase_id = cp.id
@@ -54,7 +55,12 @@ func (q *Queries) GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]M
 	var items []MetaDataDependencyGraph
 	for rows.Next() {
 		var i MetaDataDependencyGraph
-		if err := rows.Scan(&i.FromPhaseID, &i.ToPhaseID); err != nil {
+		if err := rows.Scan(
+			&i.FromPhaseID,
+			&i.ToPhaseID,
+			&i.FromCoursePhaseDtoID,
+			&i.ToCoursePhaseDtoID,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

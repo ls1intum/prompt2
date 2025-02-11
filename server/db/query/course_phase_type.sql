@@ -22,8 +22,8 @@ SELECT EXISTS (
     WHERE name = 'Matching'
 ) AS does_exist;
 
-
-
 -- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, required_input_meta_data, provided_output_meta_data)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO course_phase_type (id, name, initial_phase, base_url)
+VALUES ($1, $2, $3, $4);
+
+-- TODO: add queries to store the required and provided output/input dto

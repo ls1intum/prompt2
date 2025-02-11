@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/coursePhaseType/coursePhaseTypeDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,33 +16,33 @@ func initInterview(queries db.Queries) {
 	}
 	if !exists {
 		// create the interview module
-		requiredInputMetaData := coursePhaseTypeDTO.MetaRequirements{
-			{Name: "applicationScore", Type: "integer", AlternativeNames: []string{}},
-			{Name: "applicationAnswers", Type: "[]", AlternativeNames: []string{}},
-		}
+		// TODO: add the required input and provided output meta data
+		// requiredInputMetaData := coursePhaseTypeDTO.MetaRequirements{
+		// 	{Name: "applicationScore", Type: "integer", AlternativeNames: []string{}},
+		// 	{Name: "applicationAnswers", Type: "[]", AlternativeNames: []string{}},
+		// }
 
-		providedOutputMetaData := coursePhaseTypeDTO.MetaRequirements{
-			{Name: "interviewScore", Type: "integer", AlternativeNames: []string{}},
-		}
+		// providedOutputMetaData := coursePhaseTypeDTO.MetaRequirements{
+		// 	{Name: "interviewScore", Type: "integer", AlternativeNames: []string{}},
+		// }
 
-		requiredInputMetaDataBytes, err := requiredInputMetaData.GetDBModel()
-		if err != nil {
-			log.Error("failed to parse required input meta data")
-			return
-		}
+		// requiredInputMetaDataBytes, err := requiredInputMetaData.GetDBModel()
+		// if err != nil {
+		// 	log.Error("failed to parse required input meta data")
+		// 	return
+		// }
 
-		providedOutputMetaDataBytes, err := providedOutputMetaData.GetDBModel()
-		if err != nil {
-			log.Error("failed to parse provided output meta data")
-			return
-		}
+		// providedOutputMetaDataBytes, err := providedOutputMetaData.GetDBModel()
+		// if err != nil {
+		// 	log.Error("failed to parse provided output meta data")
+		// 	return
+		// }
 
 		newInterviewPhaseType := db.CreateCoursePhaseTypeParams{
-			ID:                     uuid.New(),
-			Name:                   "Interview",
-			InitialPhase:           false,
-			RequiredInputMetaData:  requiredInputMetaDataBytes,
-			ProvidedOutputMetaData: providedOutputMetaDataBytes,
+			ID:           uuid.New(),
+			Name:         "Interview",
+			InitialPhase: false,
+			BaseUrl:      "core",
 		}
 		err = queries.CreateCoursePhaseType(ctx, newInterviewPhaseType)
 		if err != nil {
@@ -62,30 +61,30 @@ func initMatching(queries db.Queries) {
 	}
 	if !exists {
 		// create the interview module
-		requiredInputMetaData := coursePhaseTypeDTO.MetaRequirements{
-			{Name: "applicationScore", Type: "integer", AlternativeNames: []string{"interviewScore"}},
-		}
+		// TODO: add the required input and provided output meta data
+		// requiredInputMetaData := coursePhaseTypeDTO.MetaRequirements{
+		// 	{Name: "applicationScore", Type: "integer", AlternativeNames: []string{"interviewScore"}},
+		// }
 
-		providedOutputMetaData := coursePhaseTypeDTO.MetaRequirements{}
+		// providedOutputMetaData := coursePhaseTypeDTO.MetaRequirements{}
 
-		requiredInputMetaDataBytes, err := requiredInputMetaData.GetDBModel()
-		if err != nil {
-			log.Error("failed to parse required input meta data")
-			return
-		}
+		// requiredInputMetaDataBytes, err := requiredInputMetaData.GetDBModel()
+		// if err != nil {
+		// 	log.Error("failed to parse required input meta data")
+		// 	return
+		// }
 
-		providedOutputMetaDataBytes, err := providedOutputMetaData.GetDBModel()
-		if err != nil {
-			log.Error("failed to parse provided output meta data")
-			return
-		}
+		// providedOutputMetaDataBytes, err := providedOutputMetaData.GetDBModel()
+		// if err != nil {
+		// 	log.Error("failed to parse provided output meta data")
+		// 	return
+		// }
 
 		newMatchingPhase := db.CreateCoursePhaseTypeParams{
-			ID:                     uuid.New(),
-			Name:                   "Matching",
-			InitialPhase:           false,
-			RequiredInputMetaData:  requiredInputMetaDataBytes,
-			ProvidedOutputMetaData: providedOutputMetaDataBytes,
+			ID:           uuid.New(),
+			Name:         "Matching",
+			InitialPhase: false,
+			BaseUrl:      "core",
 		}
 		err = queries.CreateCoursePhaseType(ctx, newMatchingPhase)
 		if err != nil {

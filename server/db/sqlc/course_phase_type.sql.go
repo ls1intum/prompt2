@@ -12,16 +12,15 @@ import (
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, required_input_meta_data, provided_output_meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase_type (id, name, initial_phase, base_url)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID                     uuid.UUID `json:"id"`
-	Name                   string    `json:"name"`
-	InitialPhase           bool      `json:"initial_phase"`
-	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
-	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	InitialPhase bool      `json:"initial_phase"`
+	BaseUrl      string    `json:"base_url"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
@@ -29,14 +28,13 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 		arg.ID,
 		arg.Name,
 		arg.InitialPhase,
-		arg.RequiredInputMetaData,
-		arg.ProvidedOutputMetaData,
+		arg.BaseUrl,
 	)
 	return err
 }
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
-SELECT id, name, required_input_meta_data, provided_output_meta_data, initial_phase FROM course_phase_type
+SELECT id, name, initial_phase, base_url FROM course_phase_type
 `
 
 func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType, error) {
@@ -51,9 +49,8 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.RequiredInputMetaData,
-			&i.ProvidedOutputMetaData,
 			&i.InitialPhase,
+			&i.BaseUrl,
 		); err != nil {
 			return nil, err
 		}
