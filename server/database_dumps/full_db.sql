@@ -26,6 +26,7 @@ CREATE TYPE course_type AS ENUM (
     'practical course'
 );
 
+
 --
 -- Name: gender; Type: TYPE; Schema: public; Owner: prompt-postgres
 --
@@ -49,6 +50,7 @@ CREATE TYPE pass_status AS ENUM (
     'not_assessed'
 );
 
+
 --
 -- Name: study_degree; Type: TYPE; Schema: public; Owner: prompt-postgres
 --
@@ -57,6 +59,7 @@ CREATE TYPE study_degree AS ENUM (
     'bachelor',
     'master'
 );
+
 
 
 --
@@ -71,6 +74,7 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
 
 
 SET default_tablespace = '';
@@ -165,7 +169,8 @@ CREATE TABLE course (
     semester_tag text,
     course_type course_type NOT NULL,
     ects integer,
-    meta_data jsonb,
+    restricted_data jsonb,
+    student_readable_data jsonb DEFAULT '{}'::jsonb,
     CONSTRAINT check_end_date_after_start_date CHECK ((end_date > start_date))
 );
 
@@ -189,9 +194,10 @@ CREATE TABLE course_phase (
     id uuid NOT NULL,
     course_id uuid NOT NULL,
     name text,
-    meta_data jsonb,
+    restricted_data jsonb,
     is_initial_phase boolean NOT NULL,
-    course_phase_type_id uuid NOT NULL
+    course_phase_type_id uuid NOT NULL,
+    student_readable_data jsonb DEFAULT '{}'::jsonb
 );
 
 
@@ -213,9 +219,10 @@ CREATE TABLE course_phase_participation (
     id uuid NOT NULL,
     course_participation_id uuid NOT NULL,
     course_phase_id uuid NOT NULL,
-    meta_data jsonb,
+    restricted_data jsonb,
     pass_status pass_status DEFAULT 'not_assessed'::pass_status,
-    last_modified timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    last_modified timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    student_readable_data jsonb DEFAULT '{}'::jsonb
 );
 
 
@@ -226,9 +233,33 @@ CREATE TABLE course_phase_participation (
 CREATE TABLE course_phase_type (
     id uuid NOT NULL,
     name text NOT NULL,
-    required_input_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
-    provided_output_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
-    initial_phase boolean DEFAULT false NOT NULL
+    initial_phase boolean DEFAULT false NOT NULL,
+    base_url text DEFAULT 'core'::text NOT NULL
+);
+
+
+--
+-- Name: course_phase_type_provided_output_dto; Type: TABLE; Schema: public; Owner: prompt-postgres
+--
+
+CREATE TABLE course_phase_type_provided_output_dto (
+    id uuid NOT NULL,
+    course_phase_type_id uuid NOT NULL,
+    dto_name text NOT NULL,
+    version_number integer NOT NULL,
+    endpoint_path text NOT NULL,
+    specification jsonb NOT NULL
+);
+
+--
+-- Name: course_phase_type_required_input_dto; Type: TABLE; Schema: public; Owner: prompt-postgres
+--
+
+CREATE TABLE course_phase_type_required_input_dto (
+    id uuid NOT NULL,
+    course_phase_type_id uuid NOT NULL,
+    dto_name text NOT NULL,
+    specification jsonb NOT NULL
 );
 
 
@@ -237,8 +268,10 @@ CREATE TABLE course_phase_type (
 --
 
 CREATE TABLE meta_data_dependency_graph (
-    from_phase_id uuid NOT NULL,
-    to_phase_id uuid NOT NULL
+    from_course_phase_id uuid NOT NULL,
+    to_course_phase_id uuid NOT NULL,
+    from_course_phase_dto_id uuid NOT NULL,
+    to_course_phase_dto_id uuid NOT NULL
 );
 
 
@@ -372,6 +405,7 @@ INSERT INTO application_assessment (id, course_phase_participation_id, score) VA
 INSERT INTO application_assessment (id, course_phase_participation_id, score) VALUES ('cdc3107b-0115-4b07-99c2-ca67c9a938f5', 'eb16edff-6854-4c76-917c-fcf8cb746cfb', 1);
 INSERT INTO application_assessment (id, course_phase_participation_id, score) VALUES ('a5f4a560-9ee7-44fa-8a9e-c6141c4d6b5c', 'a6567808-d20b-45fa-a24f-1a1f52e194c1', 2);
 INSERT INTO application_assessment (id, course_phase_participation_id, score) VALUES ('df02df1c-811b-42e8-9b3a-f66f5cd38f7f', 'e64843b5-ab0b-4deb-82fc-6cf763f8aa0e', 4);
+INSERT INTO application_assessment (id, course_phase_participation_id, score) VALUES ('df02df1c-811b-42e8-9b3a-f66f5cd38f7a', '70415cdb-fc1e-495e-bbfe-ddf35987cebe', 4);
 
 
 --
@@ -400,9 +434,11 @@ INSERT INTO application_question_text (id, course_phase_id, title, description, 
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('d7307be2-d3dc-496e-86f0-643bff6cc1c8', 'iPraktikum', '2024-10-13', '2024-10-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-red-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d1', 'iPraktikum-Test', '2024-12-15', '2025-03-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, meta_data) VALUES ('be780b32-a678-4b79-ae1c-80071771d254', 'TestCourse', '2024-12-19', '2025-01-24', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('d7307be2-d3dc-496e-86f0-643bff6cc1c8', 'iPraktikum', '2024-10-13', '2024-10-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-red-100"}', '{}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d1', 'iPraktikum-Test', '2024-12-15', '2025-03-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}', '{}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('be780b32-a678-4b79-ae1c-80071771d254', 'TestCourse', '2024-12-19', '2025-01-24', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}', '{}');
+
+
 --
 -- Data for Name: course_participation; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
@@ -424,14 +460,14 @@ INSERT INTO course_participation (id, course_id, student_id) VALUES ('395d3e34-6
 -- Data for Name: course_phase; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('4e736d05-c125-48f0-8fa0-848b03ca6908', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('7062236a-e290-487c-be41-29b24e0afc64', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d3', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d2', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Test LOL 5', '{}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('3a879348-6cac-4d44-b0b9-2bea94198005', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Interview', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546383');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('7ffffd38-2454-4c67-821d-5692d8086e6c', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Matching', '{}', false, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abb');
-INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, course_phase_type_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'be780b32-a678-4b79-ae1c-80071771d254', 'Dev Application', '{"exportAnswers": {"answersText": [{"key": "experience", "questionID": "fc8bda6d-280e-4a5e-9ebd-4bd8b68aab75"}], "additionalScores": [{"key": "tech", "name": "Tech-Challenge"}], "applicationScore": true, "answersMultiSelect": [{"key": "takenCourses", "questionID": "65e25b73-ce47-4536-b651-a1632347d733"}]}, "mailingSettings": {"replyToName": "Program Management Test", "replyToEmail": "niclas@heun.net", "failedMailContent": "<p class=\"text-node\">We are sorry to inform you that you were not selected for the iPraktikum!</p>", "failedMailSubject": "iPraktikum: Not Accepted", "passedMailContent": "<p class=\"text-node\">We are delighted to inform you that we accpeted you to the ipraktikum</p>", "passedMailSubject": "iPraktikum: Accepted", "sendRejectionMail": false, "sendAcceptanceMail": false, "sendConfirmationMail": true, "confirmationMailContent": "<p class=\"text-node\">Dear {{firstName}} {{lastName}},</p><p class=\"text-node\">Thank you for applying to the iPraktikum! We are pleased to confirm that we have received your application.</p><p class=\"text-node\">We’re excited to see your interest in participating as a developer in the iPraktikum program. Below are the details of your submission:</p><ul class=\"list-node\"><li><p class=\"text-node\"><strong>Name:</strong> {{firstName}} {{lastName}}</p></li><li><p class=\"text-node\"><strong>Email:</strong> {{email}}</p></li><li><p class=\"text-node\"><strong>Matriculation Number:</strong> {{matriculationNumber}}</p></li><li><p class=\"text-node\"><strong>TUM-ID:</strong> {{universityLogin}}</p></li><li><p class=\"text-node\"><strong>Study Degree:</strong> {{studyDegree}}</p></li><li><p class=\"text-node\"><strong>Current Semester:</strong> {{currentSemester}}</p></li><li><p class=\"text-node\"><strong>Study Program:</strong> {{studyProgram}}</p></li></ul><h3 class=\"heading-node\">Important Information</h3><ol class=\"list-node\"><li><p class=\"text-node\"><strong>Matching Process:</strong><br>Please remember to prioritize the iPraktikum in your TUM matching preferences to ensure your application is considered.</p></li><li><p class=\"text-node\"><strong>Availability:</strong><br>The iPraktikum will start on <strong>{{courseStartDate}}</strong>. Attendance on-campus is mandatory, so please ensure you are available from the start date.</p></li><li><p class=\"text-node\"><strong>Resubmissions:</strong></p><ul class=\"list-node\"><li><p class=\"text-node\">If you are a TUM student with a TUM-ID ({{universityLogin}}), you can update and resubmit your application until <strong>{{applicationEndDate}}</strong> via the following link:<br><a class=\"link\" href=\"https://{{applicationURL}}\" target=\"_blank\">Application Form.</a></p></li><li><p class=\"text-node\"><strong>Only your last submission will be evaluated.</strong></p></li><li><p class=\"text-node\">Unfortunately, resubmissions are not possible for external students without a TUM-ID.</p></li></ul></li><li><p class=\"text-node\"><strong>Application Feedback:</strong><br>Please note that we do not provide direct feedback on applications. The TUM matching process will determine whether you are assigned to the course.</p></li></ol><p class=\"text-node\">If you have any further questions or need assistance, feel free to reach out to us.</p><p class=\"text-node\">Best regards,<br><strong>The iPraktikum Management Team</strong></p>", "confirmationMailSubject": "Confirmation of Your iPraktikum Application"}, "additionalScores": [{"key": "Tech-Challenge", "name": "Tech-Challenge"}, {"key": "New-Test", "name": "New-Test"}, {"key": "testwithspaces", "name": "Test with spaces"}], "sendRejectionMail": true, "applicationEndDate": "2025-02-14T10:59:00+01:00", "applicationStartDate": "2024-12-09T05:06:00+01:00", "externalStudentsAllowed": true}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('4e736d05-c125-48f0-8fa0-848b03ca6908', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('7062236a-e290-487c-be41-29b24e0afc64', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d3', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Intro Course', '{}', false, '48d22f19-6cc0-417b-ac25-415fb40f2030', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d2', 'e12ffe63-448d-4469-a840-1699e9b328d1', 'Test LOL 5', '{}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('3a879348-6cac-4d44-b0b9-2bea94198005', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Team Phase', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546382', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Interview', '{}', false, '627b6fb9-2106-4fce-ba6d-b68eeb546383', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('7ffffd38-2454-4c67-821d-5692d8086e6c', 'be780b32-a678-4b79-ae1c-80071771d254', 'New Matching', '{}', false, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'be780b32-a678-4b79-ae1c-80071771d254', 'Dev Application', '{"exportAnswers": {"answersText": [{"key": "experience", "questionID": "fc8bda6d-280e-4a5e-9ebd-4bd8b68aab75"}], "additionalScores": [{"key": "tech", "name": "Tech-Challenge"}], "applicationScore": true, "answersMultiSelect": [{"key": "takenCourses", "questionID": "65e25b73-ce47-4536-b651-a1632347d733"}]}, "mailingSettings": {"replyToName": "Program Management Test", "replyToEmail": "niclas@heun.net", "failedMailContent": "<p class=\"text-node\">We are sorry to inform you that you were not selected for the iPraktikum!</p>", "failedMailSubject": "iPraktikum: Not Accepted", "passedMailContent": "<p class=\"text-node\">We are delighted to inform you that we accpeted you to the ipraktikum</p>", "passedMailSubject": "iPraktikum: Accepted", "sendRejectionMail": false, "sendAcceptanceMail": false, "sendConfirmationMail": true, "confirmationMailContent": "<p class=\"text-node\">Dear {{firstName}} {{lastName}},</p><p class=\"text-node\">Thank you for applying to the iPraktikum! We are pleased to confirm that we have received your application.</p><p class=\"text-node\">We’re excited to see your interest in participating as a developer in the iPraktikum program. Below are the details of your submission:</p><ul class=\"list-node\"><li><p class=\"text-node\"><strong>Name:</strong> {{firstName}} {{lastName}}</p></li><li><p class=\"text-node\"><strong>Email:</strong> {{email}}</p></li><li><p class=\"text-node\"><strong>Matriculation Number:</strong> {{matriculationNumber}}</p></li><li><p class=\"text-node\"><strong>TUM-ID:</strong> {{universityLogin}}</p></li><li><p class=\"text-node\"><strong>Study Degree:</strong> {{studyDegree}}</p></li><li><p class=\"text-node\"><strong>Current Semester:</strong> {{currentSemester}}</p></li><li><p class=\"text-node\"><strong>Study Program:</strong> {{studyProgram}}</p></li></ul><h3 class=\"heading-node\">Important Information</h3><ol class=\"list-node\"><li><p class=\"text-node\"><strong>Matching Process:</strong><br>Please remember to prioritize the iPraktikum in your TUM matching preferences to ensure your application is considered.</p></li><li><p class=\"text-node\"><strong>Availability:</strong><br>The iPraktikum will start on <strong>{{courseStartDate}}</strong>. Attendance on-campus is mandatory, so please ensure you are available from the start date.</p></li><li><p class=\"text-node\"><strong>Resubmissions:</strong></p><ul class=\"list-node\"><li><p class=\"text-node\">If you are a TUM student with a TUM-ID ({{universityLogin}}), you can update and resubmit your application until <strong>{{applicationEndDate}}</strong> via the following link:<br><a class=\"link\" href=\"https://{{applicationURL}}\" target=\"_blank\">Application Form.</a></p></li><li><p class=\"text-node\"><strong>Only your last submission will be evaluated.</strong></p></li><li><p class=\"text-node\">Unfortunately, resubmissions are not possible for external students without a TUM-ID.</p></li></ul></li><li><p class=\"text-node\"><strong>Application Feedback:</strong><br>Please note that we do not provide direct feedback on applications. The TUM matching process will determine whether you are assigned to the course.</p></li></ol><p class=\"text-node\">If you have any further questions or need assistance, feel free to reach out to us.</p><p class=\"text-node\">Best regards,<br><strong>The iPraktikum Management Team</strong></p>", "confirmationMailSubject": "Confirmation of Your iPraktikum Application"}, "additionalScores": [{"key": "Tech-Challenge", "name": "Tech-Challenge"}, {"key": "New-Test", "name": "New-Test"}, {"key": "testwithspaces", "name": "Test with spaces"}], "sendRejectionMail": true, "applicationEndDate": "2025-02-14T10:59:00+01:00", "applicationStartDate": "2024-12-09T05:06:00+01:00", "externalStudentsAllowed": true}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', '{}');
 
 
 --
@@ -440,47 +476,66 @@ INSERT INTO course_phase (id, course_id, name, meta_data, is_initial_phase, cour
 
 INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d2', '7062236a-e290-487c-be41-29b24e0afc64');
 INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('4e736d05-c125-48f0-8fa0-848b03ca6908', '3a879348-6cac-4d44-b0b9-2bea94198005');
-INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('3a879348-6cac-4d44-b0b9-2bea94198005', '2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1');
-INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '4e736d05-c125-48f0-8fa0-848b03ca6908');
+INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1');
 INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', '7ffffd38-2454-4c67-821d-5692d8086e6c');
+INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id) VALUES ('7ffffd38-2454-4c67-821d-5692d8086e6c', '4e736d05-c125-48f0-8fa0-848b03ca6908');
 
 
 --
 -- Data for Name: course_phase_participation; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('497847d9-17bb-42d1-adfe-2d26fab18f25', 'b276ba5f-4522-4af1-800e-e9323978c971', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-08 15:23:10.318395');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('fc1c6eda-7581-4ec4-bb4a-136eda7e8dd4', 'f6744410-cfe2-456d-96fa-e857cf989569', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"New-Test": 30.00, "comments": [{"text": "test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:20:37.633Z"}], "testwithspaces": 30.00, "student_last_modified": "2025-01-09T18:20:28.256593+01:00", "assessment_last_modified": "2025-01-14T10:20:37.6513+01:00"}', 'failed', '2025-01-14 14:56:51.967771');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('70415cdb-fc1e-495e-bbfe-ddf35987cebe', '6a49b717-a8ca-4d16-bcd0-0bb059525269', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"hasOwnMac": "true", "Tech-Challenge": 20, "testwithspaces": 90.90}', 'passed', '2025-01-14 14:56:51.967771');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('03ec52ff-7363-4306-b96a-017c40a4d1be', 'ca41772a-e06d-40eb-9c4b-ab44e06a890c', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"Tech-Challenge": 20, "assessment_last_modified": "2025-01-12T13:19:30.0747+01:00"}', 'passed', '2025-01-12 13:20:03.937483');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('83d88b1f-1435-4c36-b8ca-6741094f35e4', '6a49b717-a8ca-4d16-bcd0-0bb059525269', '4e736d05-c125-48f0-8fa0-848b03ca6908', '{"proficiency level": "test"}', 'passed', '2025-01-12 13:20:12.912591');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('6dbfd180-55a6-4397-8733-b2116c91d8f1', '2939a7f8-fc0c-4d0a-927a-4251785f97ce', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-07 18:21:19.97367');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('2f57b012-af8e-450a-b859-30371b353b0c', '6515f343-6922-45d5-b0f1-3c8188039759', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-07 18:21:19.97367');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('b0df675c-5fe7-47fd-95b1-eda41012e6b2', '395d3e34-67c0-4c0b-9921-60bd85d1b75e', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"student_last_modified": "2025-01-14T09:48:07.641231+01:00"}', 'not_assessed', '2025-01-14 09:48:07.641231');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('f8693999-4a10-4f8d-be01-416fc8cafd15', '4ac1b89e-36b2-433a-94bf-be7764fac45a', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"comments": [{"text": "Test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:30:54.475Z"}], "assessment_last_modified": "2025-01-14T10:30:54.48701+01:00"}', 'passed', '2025-01-14 10:30:54.48701');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('eb16edff-6854-4c76-917c-fcf8cb746cfb', 'ef63ff96-baa3-42de-9152-acdaa773d3ee', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"assessment_last_modified": "2025-01-14T10:51:19.995136+01:00"}', 'not_assessed', '2025-01-14 10:51:19.995136');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('a6567808-d20b-45fa-a24f-1a1f52e194c1', '17f4518a-833b-49d5-a512-8f701703852e', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"assessment_last_modified": "2025-01-14T10:51:28.292706+01:00"}', 'not_assessed', '2025-01-14 10:51:28.292706');
-INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, meta_data, pass_status, last_modified) VALUES ('e64843b5-ab0b-4deb-82fc-6cf763f8aa0e', '1378db54-4ab4-4225-ac67-68e4345f21e2', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"comments": [{"text": "test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:21:29.786Z"}], "assessment_last_modified": "2025-01-14T11:00:06.150053+01:00"}', 'not_assessed', '2025-01-14 11:00:06.150053');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('497847d9-17bb-42d1-adfe-2d26fab18f25', 'b276ba5f-4522-4af1-800e-e9323978c971', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-08 15:23:10.318395', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('fc1c6eda-7581-4ec4-bb4a-136eda7e8dd4', 'f6744410-cfe2-456d-96fa-e857cf989569', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"New-Test": 30.00, "comments": [{"text": "test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:20:37.633Z"}], "testwithspaces": 30.00, "student_last_modified": "2025-01-09T18:20:28.256593+01:00", "assessment_last_modified": "2025-01-14T10:20:37.6513+01:00"}', 'failed', '2025-01-14 14:56:51.967771', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('70415cdb-fc1e-495e-bbfe-ddf35987cebe', '6a49b717-a8ca-4d16-bcd0-0bb059525269', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"hasOwnMac": "true", "Tech-Challenge": 20, "testwithspaces": 90.90}', 'passed', '2025-01-14 14:56:51.967771', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('03ec52ff-7363-4306-b96a-017c40a4d1be', 'ca41772a-e06d-40eb-9c4b-ab44e06a890c', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"Tech-Challenge": 20, "assessment_last_modified": "2025-01-12T13:19:30.0747+01:00"}', 'passed', '2025-01-12 13:20:03.937483', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('83d88b1f-1435-4c36-b8ca-6741094f35e4', '6a49b717-a8ca-4d16-bcd0-0bb059525269', '4e736d05-c125-48f0-8fa0-848b03ca6908', '{"proficiency level": "test"}', 'passed', '2025-01-12 13:20:12.912591', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('6dbfd180-55a6-4397-8733-b2116c91d8f1', '2939a7f8-fc0c-4d0a-927a-4251785f97ce', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-07 18:21:19.97367', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('2f57b012-af8e-450a-b859-30371b353b0c', '6515f343-6922-45d5-b0f1-3c8188039759', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{}', 'not_assessed', '2025-01-07 18:21:19.97367', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('b0df675c-5fe7-47fd-95b1-eda41012e6b2', '395d3e34-67c0-4c0b-9921-60bd85d1b75e', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"student_last_modified": "2025-01-14T09:48:07.641231+01:00"}', 'not_assessed', '2025-01-14 09:48:07.641231', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('f8693999-4a10-4f8d-be01-416fc8cafd15', '4ac1b89e-36b2-433a-94bf-be7764fac45a', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"comments": [{"text": "Test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:30:54.475Z"}], "assessment_last_modified": "2025-01-14T10:30:54.48701+01:00"}', 'passed', '2025-01-14 10:30:54.48701', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('eb16edff-6854-4c76-917c-fcf8cb746cfb', 'ef63ff96-baa3-42de-9152-acdaa773d3ee', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"assessment_last_modified": "2025-01-14T10:51:19.995136+01:00"}', 'not_assessed', '2025-01-14 10:51:19.995136', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('a6567808-d20b-45fa-a24f-1a1f52e194c1', '17f4518a-833b-49d5-a512-8f701703852e', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"assessment_last_modified": "2025-01-14T10:51:28.292706+01:00"}', 'not_assessed', '2025-01-14 10:51:28.292706', '{}');
+INSERT INTO course_phase_participation (id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data) VALUES ('e64843b5-ab0b-4deb-82fc-6cf763f8aa0e', '1378db54-4ab4-4225-ac67-68e4345f21e2', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '{"comments": [{"text": "test", "author": "Niclas Heun", "timestamp": "2025-01-14T09:21:29.786Z"}], "assessment_last_modified": "2025-01-14T11:00:06.150053+01:00"}', 'not_assessed', '2025-01-14 11:00:06.150053', '{}');
 
 
 --
 -- Data for Name: course_phase_type; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', '[{"name": "hasOwnMac", "type": "boolean"}]', '[{"name": "proficiency level", "type": "string"}]', false);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', '[]', '[{"name": "hasOwnMac", "type": "boolean"}, {"name": "devices", "type": "array"}]', true);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', '[{"name": "proficiency level", "type": "string"}, {"name": "devices", "type": "array"}]', '[]', false);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546383', 'Interview', '[{"name": "proficiency level", "type": "string"}, {"name": "devices", "type": "array"}]', '[]', false);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', 'Matching', '[]', '[]', false);
+INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', false, 'core');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', false, 'core');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', true, 'core');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', 'Matching', false, 'core');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546383', 'Interview', false, 'core');
+
+
+--
+-- Data for Name: course_phase_type_provided_output_dto; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification) VALUES ('19b81ea0-a9ad-4040-ba2e-9f21081b2b30', '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'score', 1, 'core', '{"type": "integer"}');
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification) VALUES ('c36c1d63-8cf5-4f32-a5c6-8ed9794f0896', '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'applicationAnswers', 1, 'core', '{"type": "array", "items": {"oneOf": [{"type": "object", "required": ["answer", "key", "order_num", "type"], "properties": {"key": {"type": "string"}, "type": {"enum": ["text"], "type": "string"}, "answer": {"type": "string"}, "order_num": {"type": "integer"}}}, {"type": "object", "required": ["answer", "key", "order_num", "type"], "properties": {"key": {"type": "string"}, "type": {"enum": ["multiselect"], "type": "string"}, "answer": {"type": "array", "items": {"type": "string"}}, "order_num": {"type": "integer"}}}]}}');
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification) VALUES ('b3dbdb12-0a59-4b57-a15a-28d63cf701e8', '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'additionalScores', 1, 'core', '{"type": "array", "items": {"type": "object", "required": ["score", "key"], "properties": {"key": {"type": "string"}, "score": {"type": "number"}}}}');
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification) VALUES ('837794af-673a-4ae7-97b8-b91270461500', '627b6fb9-2106-4fce-ba6d-b68eeb546383', 'score', 1, 'core', '{"type": "integer"}');
+
+
+--
+-- Data for Name: course_phase_type_required_input_dto; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
+--
+
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification) VALUES ('cfb7b9ff-8a1a-4c45-b0b4-716073cf4463', '96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', 'score', '{"type": "integer"}');
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification) VALUES ('d0fe539a-f958-4516-a19a-402d30038be6', '627b6fb9-2106-4fce-ba6d-b68eeb546383', 'score', '{"type": "integer"}');
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification) VALUES ('9178c9dd-4356-4f8e-984d-02f76540d55d', '627b6fb9-2106-4fce-ba6d-b68eeb546383', 'applicationAnswers', '{"type": "array", "items": {"oneOf": [{"type": "object", "required": ["answer", "key", "order_num", "type"], "properties": {"key": {"type": "string"}, "type": {"enum": ["text"], "type": "string"}, "answer": {"type": "string"}, "order_num": {"type": "integer"}}}, {"type": "object", "required": ["answer", "key", "order_num", "type"], "properties": {"key": {"type": "string"}, "type": {"enum": ["multiselect"], "type": "string"}, "answer": {"type": "array", "items": {"type": "string"}}, "order_num": {"type": "integer"}}}]}}');
 
 
 --
 -- Data for Name: meta_data_dependency_graph; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '4e736d05-c125-48f0-8fa0-848b03ca6908');
-INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '3a879348-6cac-4d44-b0b9-2bea94198005');
-INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id) VALUES ('4e736d05-c125-48f0-8fa0-848b03ca6908', '3a879348-6cac-4d44-b0b9-2bea94198005');
+INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id, from_course_phase_dto_id, to_course_phase_dto_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', 'c36c1d63-8cf5-4f32-a5c6-8ed9794f0896', '9178c9dd-4356-4f8e-984d-02f76540d55d');
+INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id, from_course_phase_dto_id, to_course_phase_dto_id) VALUES ('2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', '7ffffd38-2454-4c67-821d-5692d8086e6c', '837794af-673a-4ae7-97b8-b91270461500', 'cfb7b9ff-8a1a-4c45-b0b4-716073cf4463');
+INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id, from_course_phase_dto_id, to_course_phase_dto_id) VALUES ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1', '19b81ea0-a9ad-4040-ba2e-9f21081b2b30', 'd0fe539a-f958-4516-a19a-402d30038be6');
 
 
 --
@@ -596,6 +651,22 @@ ALTER TABLE ONLY course_phase_type
 
 
 --
+-- Name: course_phase_type_provided_output_dto course_phase_type_provided_output_dto_pkey; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY course_phase_type_provided_output_dto
+    ADD CONSTRAINT course_phase_type_provided_output_dto_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: course_phase_type_required_input_dto course_phase_type_required_input_dto_pkey; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY course_phase_type_required_input_dto
+    ADD CONSTRAINT course_phase_type_required_input_dto_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: course course_pkey; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 
@@ -608,7 +679,7 @@ ALTER TABLE ONLY course
 --
 
 ALTER TABLE ONLY meta_data_dependency_graph
-    ADD CONSTRAINT meta_data_dependency_graph_pkey PRIMARY KEY (from_phase_id, to_phase_id);
+    ADD CONSTRAINT meta_data_dependency_graph_pkey PRIMARY KEY (to_course_phase_id, to_course_phase_dto_id);
 
 
 --
@@ -823,6 +894,22 @@ ALTER TABLE ONLY application_assessment
 
 
 --
+-- Name: course_phase_type_provided_output_dto fk_course_phase_type_provided; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY course_phase_type_provided_output_dto
+    ADD CONSTRAINT fk_course_phase_type_provided FOREIGN KEY (course_phase_type_id) REFERENCES course_phase_type(id) ON DELETE CASCADE;
+
+
+--
+-- Name: course_phase_type_required_input_dto fk_course_phase_type_required; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY course_phase_type_required_input_dto
+    ADD CONSTRAINT fk_course_phase_type_required FOREIGN KEY (course_phase_type_id) REFERENCES course_phase_type(id) ON DELETE CASCADE;
+
+
+--
 -- Name: course_phase_graph fk_from_course_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 
@@ -831,11 +918,19 @@ ALTER TABLE ONLY course_phase_graph
 
 
 --
+-- Name: meta_data_dependency_graph fk_from_dto; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY meta_data_dependency_graph
+    ADD CONSTRAINT fk_from_dto FOREIGN KEY (from_course_phase_dto_id) REFERENCES course_phase_type_provided_output_dto(id) ON DELETE CASCADE;
+
+
+--
 -- Name: meta_data_dependency_graph fk_from_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 
 ALTER TABLE ONLY meta_data_dependency_graph
-    ADD CONSTRAINT fk_from_phase FOREIGN KEY (from_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_from_phase FOREIGN KEY (from_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE;
 
 
 --
@@ -863,274 +958,22 @@ ALTER TABLE ONLY course_phase_graph
 
 
 --
+-- Name: meta_data_dependency_graph fk_to_dto; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
+--
+
+ALTER TABLE ONLY meta_data_dependency_graph
+    ADD CONSTRAINT fk_to_dto FOREIGN KEY (to_course_phase_dto_id) REFERENCES course_phase_type_required_input_dto(id) ON DELETE CASCADE;
+
+
+--
 -- Name: meta_data_dependency_graph fk_to_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 
 ALTER TABLE ONLY meta_data_dependency_graph
-    ADD CONSTRAINT fk_to_phase FOREIGN KEY (to_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_to_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE;
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-
--- Apply migration
--- 1) Adjust course
-ALTER TABLE course
-RENAME COLUMN meta_data TO restricted_data;
-
-ALTER TABLE course
-ADD COLUMN student_readable_data jsonb DEFAULT '{}';
-
--- 2) Adjust course_phase
-ALTER TABLE course_phase
-RENAME COLUMN meta_data TO restricted_data;
-
-ALTER TABLE course_phase
-ADD COLUMN student_readable_data jsonb DEFAULT '{}';
-
--- 3) Adjust course_phase_participation
-ALTER TABLE course_phase_participation
-RENAME COLUMN meta_data TO restricted_data;
-
-ALTER TABLE course_phase_participation
-ADD COLUMN student_readable_data jsonb DEFAULT '{}';
-
-
--- Run critical migration
-
-----------------------------------------------------------------------------
--- 1. Create New DTO Tables
-----------------------------------------------------------------------------
-
--- 1.1 Provided Output DTO table
-CREATE TABLE course_phase_type_provided_output_dto (
-    id                      uuid        PRIMARY KEY, 
-    course_phase_type_id    uuid        NOT NULL,
-    dto_name                 text        NOT NULL,
-    version_number          integer     NOT NULL,
-    endpoint_path            text        NOT NULL,
-    specification           jsonb       NOT NULL,
-    CONSTRAINT fk_course_phase_type_provided
-      FOREIGN KEY (course_phase_type_id)
-      REFERENCES course_phase_type(id)
-      ON DELETE CASCADE
-);
-
--- 1.2 Required Input DTO table
-CREATE TABLE course_phase_type_required_input_dto (
-    id                      uuid PRIMARY KEY,
-    course_phase_type_id    uuid NOT NULL,
-    dto_name                 text NOT NULL,
-    specification           jsonb NOT NULL,
-    CONSTRAINT fk_course_phase_type_required
-      FOREIGN KEY (course_phase_type_id)
-      REFERENCES course_phase_type(id)
-      ON DELETE CASCADE
-);
-
-----------------------------------------------------------------------------
--- 2. Alter meta_data_dependency_graph Table to Add DTO Constraints
-----------------------------------------------------------------------------
-ALTER TABLE meta_data_dependency_graph
-  ADD COLUMN from_course_phase_DTO_id       uuid,
-  ADD COLUMN to_course_phase_DTO_id         uuid,
-  ADD CONSTRAINT fk_from_dto
-    FOREIGN KEY (from_course_phase_DTO_id)
-    REFERENCES course_phase_type_provided_output_dto(id)
-    ON DELETE CASCADE,
-  ADD CONSTRAINT fk_to_dto
-    FOREIGN KEY (to_course_phase_DTO_id)
-    REFERENCES course_phase_type_required_input_dto(id)
-    ON DELETE CASCADE;
-
-----------------------------------------------------------------------------
--- 3. Alter course_phase_type Table
-----------------------------------------------------------------------------
--- 3.1 Add new column "base_url"
-ALTER TABLE course_phase_type
-  ADD COLUMN base_url text NOT NULL DEFAULT 'core',
-  DROP COLUMN required_input_meta_data,
-  DROP COLUMN provided_output_meta_data;
-
-----------------------------------------------------------------------------
--- 4. Migrate Legacy Metadata into the New DTO Tables
-----------------------------------------------------------------------------
-
-
--- 4.1 For the "Application" phase type.
---     Look up the phase by name, update its URL to 'core', and insert two provided output DTOs.
-DO $$
-DECLARE
-  phase_id uuid;
-BEGIN
-  SELECT id INTO phase_id FROM course_phase_type WHERE name = 'Application';
-  IF phase_id IS NOT NULL THEN
-    -- Set the URL to 'core'
-    UPDATE course_phase_type
-      SET base_url = 'core'
-      WHERE id = phase_id;
-      
-    -- Insert Provided Output DTO "Score" (a minimal object schema)
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'score',      -- TODO: rename 'applicationScore' to 'score' in code
-      1,
-      'core',
-      '{"type": "integer"}'::jsonb
-    );
-    
-    -- Insert Provided Output DTO "Application" using an inline JSON Schema.
-    -- This schema is defined in the style of the others:
-    -- It is an array whose items can be either a TextAnswer or a MultiSelectAnswer.
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'applicationAnswers',
-      1,
-      'core',
-      '{
-            "type": "array",
-            "items": {
-                "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "string"                    },
-                    "key"      : { "type": "string"                    },
-                    "order_num": { "type": "integer"                   },
-                    "type"     : { "type": "string" , "enum": ["text"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "array", "items": {"type": "string"} },
-                    "key"      : {"type": "string"}                              ,
-                    "order_num": {"type": "integer"}                             ,
-                    "type"     : { "type": "string", "enum": ["multiselect"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                }
-                ]
-            }
-       }'::jsonb
-    );
-
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'additionalScores',
-      1,
-      'core',
-      '{
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
-                "required": ["score", "key"]
-            }
-        }'::jsonb
-    );
-  END IF;
-END$$;
-
--- 4.2 For the "Matching" phase type.
---     Migrate legacy required_input_meta_data (an array) into required_input_dto rows.
-DO $$
-DECLARE
-  phase_id uuid;
-BEGIN
-  SELECT id INTO phase_id
-  FROM course_phase_type
-  WHERE name = 'Matching';
-  
-  IF phase_id IS NOT NULL THEN 
-    UPDATE course_phase_type
-      SET base_url = 'core'
-      WHERE id = phase_id;
-
-    INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'score',
-      '{"type": "integer"}'::jsonb
-    );
-  END IF;
-END$$;
-
--- 4.3 For the "Interview" phase type.
---     Migrate both legacy required_input_meta_data and provided_output_meta_data.
-DO $$
-DECLARE
-  phase_id uuid;
-BEGIN
-  SELECT id INTO phase_id
-  FROM course_phase_type
-  WHERE name = 'Interview';
-  
-  IF phase_id IS NOT NULL THEN 
-    UPDATE course_phase_type
-      SET base_url = 'core'
-      WHERE id = phase_id;
-
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'score',
-      1,
-      'core',
-      '{"type": "integer"}'::jsonb
-    );
-
-    INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
-    VALUES (
-      gen_random_uuid(),
-      phase_id,
-      'score',
-      '{"type": "integer"}'::jsonb
-    );
-
-    INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
-    VALUES (
-       gen_random_uuid(),
-       phase_id,
-       'applicationAnswers',    
-       '{
-            "type": "array",
-            "items": {
-                "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "string"                    },
-                    "key"      : { "type": "string"                    },
-                    "order_num": { "type": "integer"                   },
-                    "type"     : { "type": "string" , "enum": ["text"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "array", "items": {"type": "string"} },
-                    "key"      : {"type": "string"}                              ,
-                    "order_num": {"type": "integer"}                             ,
-                    "type"     : { "type": "string", "enum": ["multiselect"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                }
-                ]
-            }
-       }'::jsonb
-    );
-  END IF;
-END$$;
