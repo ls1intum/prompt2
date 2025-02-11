@@ -16,18 +16,42 @@ type CoursePhaseTypeService struct {
 var CoursePhaseTypeServiceSingleton *CoursePhaseTypeService
 
 func GetAllCoursePhaseTypes(ctx context.Context) ([]coursePhaseTypeDTO.CoursePhaseType, error) {
-	coursePhaseTypes, err := CoursePhaseTypeServiceSingleton.queries.GetAllCoursePhaseTypes(context.Background())
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	coursePhaseTypes, err := CoursePhaseTypeServiceSingleton.queries.GetAllCoursePhaseTypes(ctxWithTimeout)
 	if err != nil {
 		return nil, err
 	}
 
 	dtoCoursePhaseTypes := make([]coursePhaseTypeDTO.CoursePhaseType, 0, len(coursePhaseTypes))
 	for _, phaseType := range coursePhaseTypes {
-		dtoType, err := coursePhaseTypeDTO.GetCoursePhaseTypeDTOFromDBModel(phaseType)
+
+		fetchedRequiredInputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseRequiredInputs(ctxWithTimeout, phaseType.ID)
 		if err != nil {
 			return nil, err
 		}
-		dtoCoursePhaseTypes = append(dtoCoursePhaseTypes, dtoType)
+
+		fetchedProvidedOutputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseProvidedOutputs(ctxWithTimeout, phaseType.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		requiredInputDTOs, err := coursePhaseTypeDTO.GetRequiredInputDTOsFromDBModel(fetchedRequiredInputDTOs)
+		if err != nil {
+			return nil, err
+		}
+
+		providedOutputDTOs, err := coursePhaseTypeDTO.GetProvidedOutputDTOsFromDBModel(fetchedProvidedOutputDTOs)
+		if err != nil {
+			return nil, err
+		}
+
+		dtoCoursePhaseType, err := coursePhaseTypeDTO.GetCoursePhaseTypeDTOFromDBModel(phaseType, requiredInputDTOs, providedOutputDTOs)
+		if err != nil {
+			return nil, err
+		}
+		dtoCoursePhaseTypes = append(dtoCoursePhaseTypes, dtoCoursePhaseType)
 	}
 
 	return dtoCoursePhaseTypes, nil

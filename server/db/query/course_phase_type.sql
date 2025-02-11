@@ -1,6 +1,16 @@
 -- name: GetAllCoursePhaseTypes :many
 SELECT * FROM course_phase_type;
 
+-- name: GetCoursePhaseRequiredInputs :many
+SELECT *
+FROM course_phase_type_required_input_dto
+WHERE course_phase_type_id = $1;
+
+-- name: GetCoursePhaseProvidedOutputs :many
+SELECT *
+FROM course_phase_type_provided_output_dto
+WHERE course_phase_type_id = $1;
+
 -- name: TestApplicationPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1

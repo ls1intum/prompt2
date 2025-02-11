@@ -62,6 +62,70 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 	return items, nil
 }
 
+const getCoursePhaseProvidedOutputs = `-- name: GetCoursePhaseProvidedOutputs :many
+SELECT id, course_phase_type_id, dto_name, version_number, endpoint_path, specification
+FROM course_phase_type_provided_output_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeProvidedOutputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseProvidedOutputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypeProvidedOutputDto
+	for rows.Next() {
+		var i CoursePhaseTypeProvidedOutputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.VersionNumber,
+			&i.EndpointPath,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoursePhaseRequiredInputs = `-- name: GetCoursePhaseRequiredInputs :many
+SELECT id, course_phase_type_id, dto_name, specification
+FROM course_phase_type_required_input_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeRequiredInputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseRequiredInputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypeRequiredInputDto
+	for rows.Next() {
+		var i CoursePhaseTypeRequiredInputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1

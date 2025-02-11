@@ -6,27 +6,21 @@ import (
 )
 
 type CoursePhaseType struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	BaseUrl      string    `json:"baseUrl"`
-	InitialPhase bool      `json:"initialPhase"`
+	ID                 uuid.UUID           `json:"id"`
+	Name               string              `json:"name"`
+	BaseUrl            string              `json:"baseUrl"`
+	InitialPhase       bool                `json:"initialPhase"`
+	RequiredInputDTOs  []RequiredInputDTO  `json:"requiredInputDTOs"`
+	ProvidedOutputDTOs []ProvidedOutputDTO `json:"providedOutputDTOs"`
 }
 
-func GetCoursePhaseTypeDTOFromDBModel(model db.CoursePhaseType) (CoursePhaseType, error) {
-	// inputMetaData, err := getMetaTypeArrayDTOFromDBModel(model.RequiredInputMetaData)
-	// if err != nil {
-	// 	return CoursePhaseType{}, err
-	// }
-
-	// outputMetaData, err := getMetaTypeArrayDTOFromDBModel(model.ProvidedOutputMetaData)
-	// if err != nil {
-	// 	return CoursePhaseType{}, err
-	// }
-
+func GetCoursePhaseTypeDTOFromDBModel(model db.CoursePhaseType, requiredInputs []RequiredInputDTO, providedOutputs []ProvidedOutputDTO) (CoursePhaseType, error) {
 	return CoursePhaseType{
-		ID:           model.ID,
-		Name:         model.Name,
-		BaseUrl:      model.BaseUrl,
-		InitialPhase: model.InitialPhase,
+		ID:                 model.ID,
+		Name:               model.Name,
+		BaseUrl:            model.BaseUrl,
+		InitialPhase:       model.InitialPhase,
+		RequiredInputDTOs:  requiredInputs,
+		ProvidedOutputDTOs: providedOutputs,
 	}, nil
 }
