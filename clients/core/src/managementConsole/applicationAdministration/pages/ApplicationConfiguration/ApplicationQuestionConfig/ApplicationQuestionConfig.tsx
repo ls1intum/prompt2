@@ -162,9 +162,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
                       <div
                         ref={providedQuestionItem.innerRef}
                         {...providedQuestionItem.draggableProps}
-                        {...providedQuestionItem.dragHandleProps}
                       >
                         <ApplicationQuestionCard
+                          // Pass just the handleProps to restrict dragging to the header/icon
+                          dragHandleProps={providedQuestionItem.dragHandleProps}
                           question={question}
                           originalQuestion={originalQuestions.find((q) => q.id === question.id)}
                           index={index}
