@@ -2,7 +2,7 @@ import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { UploadButton } from './components/UploadButton'
 import { ClipboardList, FileUp, Loader2, UserRoundCheck } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { useQuery } from '@tanstack/react-query'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useMatchingStore } from './zustand/useMatchingStore'
@@ -28,14 +28,14 @@ export const MatchingOverviewPage = (): JSX.Element => {
     isPending: isCoursePhaseParticipationsPending,
     isError: isParticipationsError,
     refetch: refetchCoursePhaseParticipations,
-  } = useQuery<CoursePhaseParticipationWithStudent[]>({
+  } = useQuery<CoursePhaseParticipationsWithResolution>({
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
 
   useEffect(() => {
     if (coursePhaseParticipations) {
-      setParticipations(coursePhaseParticipations)
+      setParticipations(coursePhaseParticipations.participations)
     }
   }, [coursePhaseParticipations, setParticipations])
 

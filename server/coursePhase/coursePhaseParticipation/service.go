@@ -70,7 +70,7 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 
 	return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{
 		Participations: participationDTOs,
-		Resolution:     resolutionDTOs,
+		Resolutions:    resolutionDTOs,
 	}, nil
 }
 

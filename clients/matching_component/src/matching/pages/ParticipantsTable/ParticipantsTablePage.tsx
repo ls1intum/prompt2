@@ -3,7 +3,7 @@ import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -17,7 +17,7 @@ export const ParticipantsTablePage = (): JSX.Element => {
     isPending: isCoursePhaseParticipationsPending,
     isError: isParticipationsError,
     refetch: refetchCoursePhaseParticipations,
-  } = useQuery<CoursePhaseParticipationWithStudent[]>({
+  } = useQuery<CoursePhaseParticipationsWithResolution>({
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
@@ -53,7 +53,7 @@ export const ParticipantsTablePage = (): JSX.Element => {
         </div>
       ) : (
         <CoursePhaseParticipationsTablePage
-          participants={coursePhaseParticipations ?? []}
+          participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={prevDataKeys}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
