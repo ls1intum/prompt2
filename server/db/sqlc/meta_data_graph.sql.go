@@ -12,18 +12,18 @@ import (
 )
 
 const createMetaDataConnection = `-- name: CreateMetaDataConnection :exec
-INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id)
+INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id)
 VALUES ($1, $2)
 `
 
 type CreateMetaDataConnectionParams struct {
-	FromPhaseID uuid.UUID `json:"from_phase_id"`
-	ToPhaseID   uuid.UUID `json:"to_phase_id"`
+	FromCoursePhaseID uuid.UUID `json:"from_course_phase_id"`
+	ToCoursePhaseID   uuid.UUID `json:"to_course_phase_id"`
 }
 
 // TODO: adjust to new schema
 func (q *Queries) CreateMetaDataConnection(ctx context.Context, arg CreateMetaDataConnectionParams) error {
-	_, err := q.db.Exec(ctx, createMetaDataConnection, arg.FromPhaseID, arg.ToPhaseID)
+	_, err := q.db.Exec(ctx, createMetaDataConnection, arg.FromCoursePhaseID, arg.ToCoursePhaseID)
 	return err
 }
 
@@ -39,7 +39,7 @@ func (q *Queries) DeleteMetaDataGraphConnections(ctx context.Context, courseID u
 }
 
 const getMetaDataGraph = `-- name: GetMetaDataGraph :many
-SELECT mg.from_phase_id, mg.to_phase_id, mg.from_course_phase_dto_id, mg.to_course_phase_dto_id
+SELECT mg.from_course_phase_id, mg.to_course_phase_id, mg.from_course_phase_dto_id, mg.to_course_phase_dto_id
 FROM meta_data_dependency_graph mg
 JOIN course_phase cp
   ON mg.from_phase_id = cp.id
@@ -56,8 +56,8 @@ func (q *Queries) GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]M
 	for rows.Next() {
 		var i MetaDataDependencyGraph
 		if err := rows.Scan(
-			&i.FromPhaseID,
-			&i.ToPhaseID,
+			&i.FromCoursePhaseID,
+			&i.ToCoursePhaseID,
 			&i.FromCoursePhaseDtoID,
 			&i.ToCoursePhaseDtoID,
 		); err != nil {

@@ -302,10 +302,10 @@ type CoursePhaseTypeRequiredInputDto struct {
 }
 
 type MetaDataDependencyGraph struct {
-	FromPhaseID          uuid.UUID   `json:"from_phase_id"`
-	ToPhaseID            uuid.UUID   `json:"to_phase_id"`
-	FromCoursePhaseDtoID pgtype.UUID `json:"from_course_phase_dto_id"`
-	ToCoursePhaseDtoID   pgtype.UUID `json:"to_course_phase_dto_id"`
+	FromCoursePhaseID    uuid.UUID `json:"from_course_phase_id"`
+	ToCoursePhaseID      uuid.UUID `json:"to_course_phase_id"`
+	FromCoursePhaseDtoID uuid.UUID `json:"from_course_phase_dto_id"`
+	ToCoursePhaseDtoID   uuid.UUID `json:"to_course_phase_dto_id"`
 }
 
 type Student struct {

@@ -12,5 +12,5 @@ WHERE from_phase_id IN
 
 -- TODO: adjust to new schema 
 -- name: CreateMetaDataConnection :exec
-INSERT INTO meta_data_dependency_graph (from_phase_id, to_phase_id)
+INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id)
 VALUES ($1, $2);

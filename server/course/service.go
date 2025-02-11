@@ -260,8 +260,8 @@ func GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.Meta
 	dtoGraph := make([]courseDTO.MetaDataGraphItem, 0, len(graph))
 	for _, g := range graph {
 		dtoGraph = append(dtoGraph, courseDTO.MetaDataGraphItem{
-			FromCoursePhaseID: g.FromPhaseID,
-			ToCoursePhaseID:   g.ToPhaseID,
+			FromCoursePhaseID: g.FromCoursePhaseID,
+			ToCoursePhaseID:   g.ToCoursePhaseID,
 		})
 	}
 	return dtoGraph, nil
@@ -284,8 +284,8 @@ func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []
 	// create new connections
 	for _, graphItem := range graphUpdate {
 		err = qtx.CreateMetaDataConnection(ctx, db.CreateMetaDataConnectionParams{
-			FromPhaseID: graphItem.FromCoursePhaseID,
-			ToPhaseID:   graphItem.ToCoursePhaseID,
+			FromCoursePhaseID: graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:   graphItem.ToCoursePhaseID,
 		})
 		if err != nil {
 			log.Error("Error creating graph connection: ", err)

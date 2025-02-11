@@ -33,17 +33,27 @@ CREATE TABLE course_phase_type_required_input_dto (
 ----------------------------------------------------------------------------
 -- 2. Alter meta_data_dependency_graph Table to Add DTO Constraints
 ----------------------------------------------------------------------------
-ALTER TABLE meta_data_dependency_graph
-  ADD COLUMN from_course_phase_DTO_id       uuid,
-  ADD COLUMN to_course_phase_DTO_id         uuid,
-  ADD CONSTRAINT fk_from_dto
+-- We drop the old table
+DROP TABLE meta_data_dependency_graph;
+CREATE TABLE meta_data_dependency_graph (
+  from_course_phase_id                   uuid NOT NULL,
+  to_course_phase_id                     uuid NOT NULL,
+  from_course_phase_DTO_id        uuid NOT NULL,
+  to_course_phase_DTO_id          uuid NOT NULL,
+  PRIMARY KEY (to_course_phase_id, to_course_phase_DTO_id), -- indirect unique constraint
+  CONSTRAINT fk_from_phase
+    FOREIGN KEY (from_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE,
+  CONSTRAINT fk_to_phase
+    FOREIGN KEY (to_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE,
+  CONSTRAINT fk_from_dto
     FOREIGN KEY (from_course_phase_DTO_id)
     REFERENCES course_phase_type_provided_output_dto(id)
     ON DELETE CASCADE,
-  ADD CONSTRAINT fk_to_dto
+  CONSTRAINT fk_to_dto
     FOREIGN KEY (to_course_phase_DTO_id)
     REFERENCES course_phase_type_required_input_dto(id)
-    ON DELETE CASCADE;
+    ON DELETE CASCADE
+);
 
 ----------------------------------------------------------------------------
 -- 3. Alter course_phase_type Table
@@ -156,13 +166,11 @@ BEGIN
       SET base_url = 'core'
       WHERE id = phase_id;
 
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+    INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
     VALUES (
       gen_random_uuid(),
       phase_id,
       'score',
-      1,
-      'core',
       '{"type": "integer"}'::jsonb
     );
   END IF;
@@ -183,11 +191,13 @@ BEGIN
       SET base_url = 'core'
       WHERE id = phase_id;
 
-    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, specification)
+    INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
     VALUES (
       gen_random_uuid(),
       phase_id,
       'score',
+      1,
+      'core',
       '{"type": "integer"}'::jsonb
     );
 
