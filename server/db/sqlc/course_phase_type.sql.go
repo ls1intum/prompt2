@@ -174,6 +174,73 @@ func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseT
 	return items, nil
 }
 
+const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'additionalScores',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
+                "required": ["score", "key"]
+            }
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertCourseProvidedAdditionalScores(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertCourseProvidedAdditionalScores, coursePhaseTypeID)
+	return err
+}
+
+const insertCourseProvidedApplicationAnswers = `-- name: InsertCourseProvidedApplicationAnswers :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'applicationAnswers',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "string"                    },
+                    "key"      : { "type": "string"                    },
+                    "order_num": { "type": "integer"                   },
+                    "type"     : { "type": "string" , "enum": ["text"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "array", "items": {"type": "string"} },
+                    "key"      : {"type": "string"}                              ,
+                    "order_num": {"type": "integer"}                             ,
+                    "type"     : { "type": "string", "enum": ["multiselect"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                }
+                ]
+            }
+       }'::jsonb
+)
+`
+
+func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertCourseProvidedApplicationAnswers, coursePhaseTypeID)
+	return err
+}
+
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1

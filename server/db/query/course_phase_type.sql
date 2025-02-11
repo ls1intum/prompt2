@@ -43,3 +43,58 @@ VALUES ($1, $2, $3, $4);
 -- name: CreateCoursePhaseTypeProvidedOutput :exec
 INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6);
+
+-- name: InsertCourseProvidedApplicationAnswers :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'applicationAnswers',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "string"                    },
+                    "key"      : { "type": "string"                    },
+                    "order_num": { "type": "integer"                   },
+                    "type"     : { "type": "string" , "enum": ["text"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "array", "items": {"type": "string"} },
+                    "key"      : {"type": "string"}                              ,
+                    "order_num": {"type": "integer"}                             ,
+                    "type"     : { "type": "string", "enum": ["multiselect"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                }
+                ]
+            }
+       }'::jsonb
+);
+
+-- name: InsertCourseProvidedAdditionalScores :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'additionalScores',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
+                "required": ["score", "key"]
+            }
+        }'::jsonb
+);
