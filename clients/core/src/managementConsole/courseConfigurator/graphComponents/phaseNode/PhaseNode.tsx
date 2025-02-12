@@ -3,10 +3,10 @@ import { Handle, Position, useReactFlow } from '@xyflow/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Pen, Users } from 'lucide-react'
+import { Pen, Users, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCourseConfigurationState } from '../../zustand/useCourseConfigurationStore'
-import { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
+import type { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
 import { useParams } from 'react-router-dom'
 import { useCourseStore, useAuthStore } from '@tumaet/prompt-shared-state'
 import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
@@ -48,7 +48,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
   return (
     <Card
-      className={`w-80 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${
+      className={`w-96 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${
         selected ? 'ring-2 ring-blue-500' : ''
       }`}
       onClick={onNodeClick}
@@ -60,7 +60,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             <Input
               value={phaseData?.name}
               onChange={handleNameChange}
-              className='w-48'
+              className='w-64'
               autoFocus
               onBlur={() => setIsEditing(false)}
               onKeyUp={(e) => e.key === 'Enter' && setIsEditing(false)}
@@ -82,40 +82,34 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             </Button>
           )}
         </div>
-        <Badge variant='secondary' className='mt-2'>
+        <Badge variant='secondary' className='mt-2 mr-auto'>
           {phaseType?.name}
         </Badge>
       </CardHeader>
 
       {/* Card Content */}
       <CardContent className='p-4 relative'>
-        {/* 1. Participants Row (horizontal with left/right handles flush with the card) */}
+        {/* 1. Participants Row */}
         <div className='participants-row relative flex items-center justify-between bg-blue-100 p-2 rounded mb-4'>
           {!phaseType?.initialPhase && (
             <Handle
               type='target'
               position={Position.Left}
               id={`participants-in-${id}`}
-              style={{
-                top: '50%',
-                transform: 'translateY(-50%)',
-                left: '-32px', // flush with the left edge of the card
-              }}
-              className='!w-3 !h-3  !bg-blue-500 rounded-full'
+              style={{ left: '-28px' }}
+              className='!w-3 !h-3 !bg-blue-500 rounded-full'
             />
           )}
-          <div className='flex-grow flex justify-center'>
-            <Users className='w-6 h-6 text-blue-500' />
+          <div className='flex items-center justify-center w-full'>
+            <Users className='w-6 h-6 text-blue-500 mr-2' />
+            <span className='text-sm font-medium'>Participants</span>
+            <ArrowRight className='w-4 h-4 text-blue-500 ml-2' />
           </div>
           <Handle
             type='source'
             position={Position.Right}
             id={`participants-out-${id}`}
-            style={{
-              top: '50%',
-              transform: 'translateY(-50%)',
-              right: '-32px', // flush with the right edge of the card
-            }}
+            style={{ right: '-28px' }}
             className='!w-3 !h-3 !bg-blue-500 rounded-full'
           />
         </div>
@@ -123,17 +117,14 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         {/* 2. Meta Data Inputs (required Input DTOs) */}
         {phaseType?.requiredInputDTOs && phaseType.requiredInputDTOs.length > 0 && (
           <div className='meta-data-inputs space-y-2 mb-4'>
+            <h4 className='text-sm font-semibold mb-2'>Required Inputs:</h4>
             {phaseType.requiredInputDTOs.map((dto) => (
-              <div key={dto.id} className='flex items-center'>
+              <div key={dto.id} className='flex items-center bg-green-50 p-2 rounded relative'>
                 <Handle
                   type='target'
                   position={Position.Left}
                   id={`metadata-in-phase-${id}-dto-${dto.id}`}
-                  style={{
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    left: '-16px', // handle flush with card edge
-                  }}
+                  style={{ left: '-28px', top: '50%' }}
                   className='!w-3 !h-3 !bg-green-500 rounded-full'
                 />
                 <span className='ml-2 text-sm'>{dto.dtoName}</span>
@@ -145,18 +136,18 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         {/* 3. Meta Data Outputs (provided Output DTOs) */}
         {phaseType?.providedOutputDTOs && phaseType.providedOutputDTOs.length > 0 && (
           <div className='meta-data-outputs space-y-2'>
+            <h4 className='text-sm font-semibold mb-2'>Provided Outputs:</h4>
             {phaseType.providedOutputDTOs.map((dto) => (
-              <div key={dto.id} className='flex items-center justify-end'>
+              <div
+                key={dto.id}
+                className='flex items-center justify-end bg-green-50 p-2 rounded relative'
+              >
                 <span className='mr-2 text-sm'>{dto.dtoName}</span>
                 <Handle
                   type='source'
                   position={Position.Right}
                   id={`metadata-out-phase-${id}-dto-${dto.id}`}
-                  style={{
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    right: '-16px', // handle flush with card edge
-                  }}
+                  style={{ right: '-28px', top: '50%' }}
                   className='!w-3 !h-3 !bg-green-500 rounded-full'
                 />
               </div>
