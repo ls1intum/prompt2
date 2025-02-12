@@ -10,6 +10,8 @@ import { useParams } from 'react-router-dom'
 import { useCourseStore, useAuthStore } from '@tumaet/prompt-shared-state'
 import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
 import { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
+import { Separator } from '@/components/ui/separator'
+import { IncomingDataHandle } from './components/IncomingDataHandle'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   // Retrieve course and permission data
@@ -55,7 +57,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
   return (
     <Card
-      className={`w-96 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${
+      className={`w-80 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${
         selected ? 'ring-2 ring-blue-500' : ''
       }`}
       onClick={onNodeClick}
@@ -94,6 +96,8 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         </Badge>
       </CardHeader>
 
+      <Separator />
+
       {/* Card Content */}
       <CardContent className='p-4 relative'>
         {/* 1. Participants Row */}
@@ -123,43 +127,36 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
 
         {/* 2. Meta Data Inputs (required Input DTOs) */}
         {phaseType?.requiredInputDTOs && phaseType.requiredInputDTOs.length > 0 && (
-          <div className='meta-data-inputs space-y-2 mb-4'>
+          <div className='meta-data-inputs space-y-2 mb-4 mr-16'>
             <h4 className='text-sm font-semibold mb-2'>Required Inputs:</h4>
             {phaseType.requiredInputDTOs.map((dto) => (
-              <div key={dto.id} className='flex items-center bg-green-50 p-2 rounded relative'>
-                <Handle
-                  type='target'
-                  position={Position.Left}
-                  id={`metadata-in-phase-${id}-dto-${dto.id}`}
-                  style={{ left: '-28px', top: '50%' }}
-                  className='!w-3 !h-3 !bg-green-500 rounded-full'
-                />
-                <span className='ml-2 text-sm'>{dto.dtoName}</span>
-              </div>
+              <IncomingDataHandle key={dto.id} phaseID={id} dto={dto} />
             ))}
           </div>
         )}
 
         {/* 3. Meta Data Outputs (provided Output DTOs) */}
         {phaseType?.providedOutputDTOs && phaseType.providedOutputDTOs.length > 0 && (
-          <div className='meta-data-outputs space-y-2'>
+          <>
             <h4 className='text-sm font-semibold mb-2'>Provided Outputs:</h4>
-            {phaseType.providedOutputDTOs.map((dto) => (
-              <div
-                key={dto.id}
-                className='flex items-center justify-end bg-green-50 p-2 rounded relative'
-              >
-                <span className='mr-2 text-sm'>{dto.dtoName}</span>
-                <Handle
-                  type='source'
-                  position={Position.Right}
-                  id={`metadata-out-phase-${id}-dto-${dto.id}`}
-                  style={{ right: '-28px', top: '50%' }}
-                  className='!w-3 !h-3 !bg-green-500 rounded-full'
-                />
-              </div>
-            ))}
-          </div>
+            <div className='meta-data-outputs space-y-2 ml-16'>
+              {phaseType.providedOutputDTOs.map((dto) => (
+                <div
+                  key={dto.id}
+                  className='flex items-center justify-end bg-green-50 p-2 rounded relative'
+                >
+                  <span className='mr-2 text-sm'>{dto.dtoName}</span>
+                  <Handle
+                    type='source'
+                    position={Position.Right}
+                    id={`metadata-out-phase-${id}-dto-${dto.id}`}
+                    style={{ right: '-28px', top: '50%' }}
+                    className='!w-3 !h-3 !bg-green-500 rounded-full'
+                  />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
