@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Pen, Users, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCourseConfigurationState } from '../../zustand/useCourseConfigurationStore'
-import type { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
 import { useParams } from 'react-router-dom'
 import { useCourseStore, useAuthStore } from '@tumaet/prompt-shared-state'
 import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
+import { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
   // Retrieve course and permission data
@@ -22,11 +22,11 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
   )
 
   // Retrieve phase and phase type data
-  const { coursePhases, coursePhaseTypes } = useCourseConfigurationState()
+  const { coursePhases, coursePhaseTypes, setCoursePhases } = useCourseConfigurationState()
   const coursePhase = coursePhases.find((phase) => phase.id === id)
-  const [phaseData, setPhaseData] = useState<CoursePhaseWithPosition | undefined>(coursePhase)
+  const [nameInput, setNameInput] = useState(coursePhase?.name)
   const [isEditing, setIsEditing] = useState(false)
-  const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.coursePhaseTypeID)
+  const phaseType = coursePhaseTypes.find((type) => type.id === coursePhase?.coursePhaseTypeID)
 
   const { setNodes } = useReactFlow()
   const onNodeClick = useCallback(() => {
@@ -38,12 +38,19 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
     )
   }, [id, setNodes])
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (coursePhase) {
-      coursePhase.isModified = true
-      coursePhase.name = e.target.value
+  const handleSave = () => {
+    if (coursePhase?.name !== nameInput) {
+      setCoursePhases(
+        coursePhases.map((phase) => {
+          if (phase.id === id) {
+            return { ...phase, name: nameInput, isModified: true } as CoursePhaseWithPosition
+          }
+          return phase
+        }),
+      )
     }
-    setPhaseData((prev) => (prev ? { ...prev, name: e.target.value } : undefined))
+
+    setIsEditing(false)
   }
 
   return (
@@ -58,15 +65,15 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         <div className='flex justify-between items-center'>
           {isEditing ? (
             <Input
-              value={phaseData?.name}
-              onChange={handleNameChange}
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
               className='w-64'
               autoFocus
-              onBlur={() => setIsEditing(false)}
-              onKeyUp={(e) => e.key === 'Enter' && setIsEditing(false)}
+              onBlur={handleSave}
+              onKeyUp={(e) => e.key === 'Enter' && handleSave()}
             />
           ) : (
-            <CardTitle className='text-lg font-bold text-primary'>{phaseData?.name}</CardTitle>
+            <CardTitle className='text-lg font-bold text-primary'>{coursePhase?.name}</CardTitle>
           )}
           {canEdit && !isEditing && (
             <Button
