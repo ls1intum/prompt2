@@ -4,19 +4,21 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CoursePhaseTypeMetaDataItem } from '@tumaet/prompt-shared-state'
 import { getMetaDataStatus } from './utils/getBadgeStatus'
 import { renderBadgeTooltipContent } from './utils/renderBadgeTooltip'
+import { RequiredInputDTO } from '@core/managementConsole/courseConfigurator/interfaces/requiredInputDto'
+import { ProvidedOutputDTO } from '@core/managementConsole/courseConfigurator/interfaces/providedOutputDto'
 
 interface MetaDataBadgesProps {
-  restrictedData: CoursePhaseTypeMetaDataItem[]
+  DTOs: RequiredInputDTO[] | ProvidedOutputDTO[]
   icon: React.ReactNode
   label: string
-  providedMetaData?: CoursePhaseTypeMetaDataItem[]
+  providedDTOs?: ProvidedOutputDTO[]
 }
 
 export const MetaDataBadges = ({
-  restrictedData,
+  DTOs,
   icon,
   label,
-  providedMetaData,
+  providedDTOs,
 }: MetaDataBadgesProps): JSX.Element => {
   return (
     <div className='flex items-start space-x-2 mb-2'>
@@ -24,17 +26,12 @@ export const MetaDataBadges = ({
       <div>
         <div className='text-xs font-semibold text-secondary-foreground mb-1'>{label}</div>
         <div className='flex flex-wrap gap-1'>
-          {restrictedData.map((item, index) => {
+          {DTOs.map((item: RequiredInputDTO | ProvidedOutputDTO, index) => {
             const {
               color,
               icon: statusIcon,
               tooltip: errorTooltip,
-            } = getMetaDataStatus(
-              item.name,
-              item.type,
-              item.alternativeNames ?? [],
-              providedMetaData,
-            )
+            } = getMetaDataStatus(item.dtoName, item.specification, [])
             return (
               <TooltipProvider key={index}>
                 <Tooltip>
@@ -44,15 +41,10 @@ export const MetaDataBadges = ({
                       className={`text-xs font-normal ${color} flex items-center gap-1`}
                     >
                       {statusIcon}
-                      {item.name}
-                      {item.alternativeNames && item.alternativeNames.length > 0 && (
-                        <span>(or {item.alternativeNames.join(', ')})</span>
-                      )}
+                      {item.dtoName}
                     </Badge>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    {renderBadgeTooltipContent(item, providedMetaData, errorTooltip)}
-                  </TooltipContent>
+                  <TooltipContent>TODO: This tooltip is in progress</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )

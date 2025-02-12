@@ -37,11 +37,11 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
     id: `metadata-in-${id}`,
   })
 
-  const incomingMetaData = connections
+  const incomingDTOs = connections
     .map((conn) => coursePhases.find((phase) => phase.id === conn.source)?.coursePhaseTypeID)
-    .map((typeId) => coursePhaseTypes.find((type) => type.id === typeId)?.providedOutputMetaData)
-    .filter((meta) => meta !== undefined)
+    .map((typeId) => coursePhaseTypes.find((type) => type.id === typeId)?.providedOutputDTOs)
     .flat()
+    .filter((dto) => dto !== undefined)
 
   // type of the selected phase:
   const phaseType = coursePhaseTypes.find((type) => type.id === phaseData?.coursePhaseTypeID)
@@ -75,7 +75,10 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         }`}
         onClick={onNodeClick}
       >
-        <CardHeader className='p-4 flex flex-row items-center justify-between bg-gradient-to-r from-blue-200/50 to-secondary/10 dark:from-blue-900/30 dark:to-secondary/20'>
+        <CardHeader
+          className={`p-4 flex flex-row items-center justify-between bg-gradient-to-r from-blue-200/50 
+          to-secondary/10 dark:from-blue-900/30 dark:to-secondary/20`}
+        >
           <div className='flex flex-col'>
             {isEditing ? (
               <Input
@@ -109,47 +112,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             </Button>
           )}
         </CardHeader>
-        <CardContent className='p-4 pt-2'>
-          {phaseType?.name === 'Application' &&
-            (!phaseType?.providedOutputMetaData ||
-              phaseType?.providedOutputMetaData.length === 0) && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant='ghost' className=''>
-                      <TriangleAlert className='h-4 w-4' />
-                      Requires Configuration
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side='right' className='max-w-xs'>
-                    <p>
-                      This metadata includes the assessment score, all additional scores, and
-                      answers to exported questions. To configure what&apos;s exported, first save
-                      the application phase, then choose the questions in the Application Question
-                      Config.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-
-          {phaseType?.requiredInputMetaData && phaseType.requiredInputMetaData.length > 0 && (
-            <MetaDataBadges
-              restrictedData={phaseType.requiredInputMetaData}
-              icon={<FileInput className='w-5 h-5 text-green-500' />}
-              label='Required Input Metadata'
-              providedMetaData={incomingMetaData}
-            />
-          )}
-
-          {phaseType?.providedOutputMetaData && phaseType.providedOutputMetaData.length > 0 && (
-            <MetaDataBadges
-              restrictedData={phaseType.providedOutputMetaData}
-              icon={<FileOutput className='w-5 h-5 text-green-500' />}
-              label='Provided Output Metadata'
-            />
-          )}
-        </CardContent>
+        <CardContent className='p-4 pt-2'></CardContent>
       </Card>
       {!phaseData?.isInitialPhase && (
         <Handle
@@ -160,15 +123,20 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           className='!w-3 !h-3 !bg-blue-500 rounded-full'
         />
       )}
-      {phaseType?.requiredInputMetaData && phaseType.requiredInputMetaData.length > 0 && (
-        <Handle
-          type='target'
-          position={Position.Top}
-          id={`metadata-in-${id}`}
-          style={{ left: 130, top: -10 }}
-          className='!w-3 !h-3 !bg-green-500 rounded-full'
-        />
-      )}
+      {phaseType?.requiredInputDTOs &&
+        phaseType.requiredInputDTOs.length > 0 &&
+        phaseType.providedOutputDTOs.map((dto, index) => {
+          return (
+            <Handle
+              key={index}
+              type='target'
+              position={Position.Top}
+              id={`metadata-in-phase-${id}-dto-${dto.id}`}
+              style={{ left: 130 + index * 10, top: -10 }}
+              className='!w-3 !h-3 !bg-green-500 rounded-full'
+            />
+          )
+        })}
       <Handle
         type='source'
         position={Position.Bottom}
@@ -176,15 +144,20 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         style={{ left: 50, bottom: -10 }}
         className='!w-3 !h-3 !bg-blue-500 rounded-full'
       />
-      {phaseType?.providedOutputMetaData && phaseType.providedOutputMetaData.length > 0 && (
-        <Handle
-          type='source'
-          position={Position.Bottom}
-          id={`metadata-out-${id}`}
-          style={{ left: 130, bottom: -10 }}
-          className='!w-3 !h-3 !bg-green-500 rounded-full'
-        />
-      )}
+      {phaseType?.requiredInputDTOs &&
+        phaseType.requiredInputDTOs.length > 0 &&
+        phaseType.requiredInputDTOs.map((dto, index) => {
+          return (
+            <Handle
+              key={index}
+              type='source'
+              position={Position.Bottom}
+              id={`metadata-out-phase-${id}-dto-${dto.id}`}
+              style={{ left: 130 + index * 10, bottom: -10 }}
+              className='!w-3 !h-3 !bg-green-500 rounded-full'
+            />
+          )
+        })}
     </>
   )
 }
