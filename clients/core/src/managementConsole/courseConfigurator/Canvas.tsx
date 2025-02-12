@@ -59,7 +59,7 @@ export function CourseConfigurator() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedInitialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedInitialEdges)
-  const [isModified, setIsModified] = useState(false)
+  const [isModified, setIsModified] = useState(false) // TODO: inject this into the state -> shall be allowed to set from somewhere else (i.e. name changes)
   const phaseNameModified = coursePhases.some((phase) => phase.isModified)
 
   // ---------- Delete Confirmation ----------
