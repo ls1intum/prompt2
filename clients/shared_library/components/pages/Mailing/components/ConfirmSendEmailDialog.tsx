@@ -66,7 +66,7 @@ export const ConfirmSendEmailDialog = ({
             {!isPending &&
               !isError &&
               !data &&
-              `Are you sure you want to an email to ALL students that ${emailType === PassStatus.PASSED ? 'have been accepted' : 'have been rejected'}?`}
+              `Are you sure you want to send an Email to ALL students that ${emailType === PassStatus.PASSED ? 'have been accepted' : 'have been rejected'}?`}
           </DialogDescription>
         </DialogHeader>
 
