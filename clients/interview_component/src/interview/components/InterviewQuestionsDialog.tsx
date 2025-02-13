@@ -30,11 +30,12 @@ export const InterviewQuestionsDialog = () => {
   const { mutate } = useUpdateCoursePhaseMetaData()
 
   useEffect(() => {
-    if (coursePhase && coursePhase.restrictedData?.interviewQuestions) {
-      const questions = coursePhase.restrictedData.interviewQuestions as InterviewQuestion[]
+    if (isOpen) {
+      const questions =
+        coursePhase?.restrictedData?.interviewQuestions ?? ([] as InterviewQuestion[])
       setInterviewQuestions(questions)
     }
-  }, [coursePhase])
+  }, [isOpen, coursePhase])
 
   const addQuestion = () => {
     if (newQuestion.trim()) {
