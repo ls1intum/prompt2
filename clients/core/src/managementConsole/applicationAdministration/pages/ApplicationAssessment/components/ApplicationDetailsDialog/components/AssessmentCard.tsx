@@ -152,7 +152,7 @@ export const AssessmentCard = ({
                         </span>
                       )}
                     </p>
-                    <p className='text-foreground'>{comment.text}</p>
+                    <p className='text-foreground whitespace-pre-line'>{comment.text}</p>
                   </div>
                   {comment.author === author && (
                     <Button
