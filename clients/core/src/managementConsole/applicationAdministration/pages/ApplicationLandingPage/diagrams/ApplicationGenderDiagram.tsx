@@ -1,30 +1,8 @@
-import React, { useMemo } from 'react'
-import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
+import { useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
-import { getCornerRadius } from './utils/getCornerRadius'
-
-const chartConfig: ChartConfig = {
-  notAssessed: {
-    label: 'Not Assessed',
-    color: 'hsl(var(--muted))',
-  },
-  accepted: {
-    label: 'Accepted',
-    color: 'hsl(var(--success))',
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'hsl(var(--destructive))',
-  },
-}
+import { StackedBarChartWithPassStatus } from './StackedBarChartWithPassStatus'
 
 interface GenderDistributionCardProps {
   applications: ApplicationParticipation[]
@@ -68,8 +46,6 @@ export const ApplicationGenderDiagram = ({
     return diagramData
   }, [applications])
 
-  const [radiusAccepted, radiusRejected, radiusNotAssessed] = getCornerRadius(genderData)
-
   return (
     <Card className='flex flex-col w-full h-full'>
       <CardHeader className='items-center'>
@@ -77,47 +53,7 @@ export const ApplicationGenderDiagram = ({
         <CardDescription>Breakdown of student genders</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
-        <ChartContainer config={chartConfig} className='mx-auto w-full h-[280px]'>
-          <BarChart data={genderData} margin={{ top: 30, right: 10, bottom: 0, left: 10 }}>
-            <XAxis
-              dataKey='gender'
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12 }}
-              interval={0}
-              height={50}
-              tickFormatter={(value) => value.toLocaleString()}
-            />
-            <YAxis hide />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar
-              dataKey='accepted'
-              stackId='passStatus'
-              fill={chartConfig.accepted.color}
-              radius={radiusAccepted}
-            />
-            <Bar
-              dataKey='rejected'
-              stackId='passStatus'
-              fill={chartConfig.rejected.color}
-              radius={radiusRejected}
-            />
-            <Bar
-              dataKey='notAssessed'
-              stackId='passStatus'
-              fill={chartConfig.notAssessed.color}
-              radius={radiusNotAssessed}
-            >
-              <LabelList
-                dataKey='total'
-                position='top'
-                offset={10}
-                className='fill-foreground'
-                fontSize={12}
-              />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+        <StackedBarChartWithPassStatus data={genderData} dataKey='gender' />
       </CardContent>
     </Card>
   )

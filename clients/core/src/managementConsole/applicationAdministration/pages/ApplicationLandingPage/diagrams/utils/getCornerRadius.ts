@@ -1,7 +1,7 @@
 export type CornerRadius = [number, number, number, number]
 
 export const getCornerRadius = (
-  genderData: { gender: string }[],
+  diagramData: { accepted: number; rejected: number; notAssessed: number }[],
 ): [CornerRadius, CornerRadius, CornerRadius] => {
   const R = 4
   let acceptedTop = false,
@@ -11,7 +11,7 @@ export const getCornerRadius = (
   let notAssessedTop = false,
     notAssessedBottom = false
 
-  genderData.forEach((data) => {
+  diagramData.forEach((data) => {
     const visible = ['accepted', 'rejected', 'notAssessed'].filter((key) => data[key] > 0)
     if (visible.length) {
       const bottom = visible[0]
