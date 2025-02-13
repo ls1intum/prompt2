@@ -29,7 +29,7 @@ export const useStudentMatching = () => {
         if (matchedApp) {
           matched.push({
             ...student,
-            rank: matchedApp.prevData.applicationScore ?? matchedApp.prevData.interviewScore,
+            rank: matchedApp.prevData.score,
           })
         } else {
           const nameMatch = applications.find(
@@ -40,7 +40,7 @@ export const useStudentMatching = () => {
           if (nameMatch) {
             matchedByNameTemp.push({
               ...student,
-              rank: nameMatch.prevData.applicationScore ?? nameMatch.prevData.interviewScore,
+              rank: nameMatch.prevData.score,
             })
           } else {
             unmatchedStuds.push(student)

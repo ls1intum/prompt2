@@ -5,12 +5,10 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 export const ParticipantsTablePage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const [prevDataKeys, setPrevDataKeys] = useState<string[]>([])
 
   const {
     data: coursePhaseParticipations,
@@ -21,26 +19,6 @@ export const ParticipantsTablePage = (): JSX.Element => {
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
-
-  useEffect(() => {
-    if (coursePhaseParticipations && Array.isArray(coursePhaseParticipations)) {
-      const containsInterview = coursePhaseParticipations.some((participation) => {
-        return participation?.prevData?.interviewScore !== undefined
-      })
-      const containsApplicationScore = coursePhaseParticipations.some((participation) => {
-        return participation?.prevData?.applicationScore !== undefined
-      })
-
-      const dataKeys: string[] = []
-      if (containsInterview) {
-        dataKeys.push('interviewScore')
-      }
-      if (containsApplicationScore) {
-        dataKeys.push('applicationScore')
-      }
-      setPrevDataKeys(dataKeys)
-    }
-  }, [coursePhaseParticipations])
 
   return (
     <div>
@@ -54,7 +32,7 @@ export const ParticipantsTablePage = (): JSX.Element => {
       ) : (
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
-          prevDataKeys={prevDataKeys}
+          prevDataKeys={['score']}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
         />

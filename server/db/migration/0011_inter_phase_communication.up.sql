@@ -245,4 +245,13 @@ BEGIN
   END IF;
 END$$;
 
+-- Interview now works on score instead of interviewScore
+
+UPDATE course_phase_participation
+SET restricted_data = 
+    (restricted_data - 'interviewScore') ||
+    jsonb_build_object('score', restricted_data->'interviewScore')
+WHERE restricted_data ? 'interviewScore';
+
+
 COMMIT;
