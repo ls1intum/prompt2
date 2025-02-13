@@ -1,33 +1,18 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { Handle, Position, useReactFlow } from '@xyflow/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Pen, Users, ArrowRight } from 'lucide-react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Users, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCourseConfigurationState } from '../../zustand/useCourseConfigurationStore'
-import { useParams } from 'react-router-dom'
-import { useCourseStore, useAuthStore } from '@tumaet/prompt-shared-state'
-import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
-import { CoursePhaseWithPosition } from '../../interfaces/coursePhaseWithPosition'
 import { Separator } from '@/components/ui/separator'
 import { IncomingDataHandle } from './components/IncomingDataHandle'
+import { OutgoingDataHandle } from './components/OutgoingDataHandle'
+import { NameEditingHeader } from './components/NameEditingHeader'
 
 export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) {
-  // Retrieve course and permission data
-  const { courseId } = useParams<{ courseId: string }>()
-  const { courses } = useCourseStore()
-  const course = courses.find((c) => c.id === courseId)
-  const { permissions } = useAuthStore()
-  const canEdit = permissions.includes(
-    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
-  )
-
   // Retrieve phase and phase type data
-  const { coursePhases, coursePhaseTypes, setCoursePhases } = useCourseConfigurationState()
+  const { coursePhases, coursePhaseTypes } = useCourseConfigurationState()
   const coursePhase = coursePhases.find((phase) => phase.id === id)
-  const [nameInput, setNameInput] = useState(coursePhase?.name)
-  const [isEditing, setIsEditing] = useState(false)
   const phaseType = coursePhaseTypes.find((type) => type.id === coursePhase?.coursePhaseTypeID)
 
   const { setNodes } = useReactFlow()
@@ -40,21 +25,6 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
     )
   }, [id, setNodes])
 
-  const handleSave = () => {
-    if (coursePhase?.name !== nameInput) {
-      setCoursePhases(
-        coursePhases.map((phase) => {
-          if (phase.id === id) {
-            return { ...phase, name: nameInput, isModified: true } as CoursePhaseWithPosition
-          }
-          return phase
-        }),
-      )
-    }
-
-    setIsEditing(false)
-  }
-
   return (
     <Card
       className={`w-80 shadow-lg hover:shadow-xl transition-shadow duration-300 relative ${
@@ -64,33 +34,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
     >
       {/* Card Header */}
       <CardHeader className='p-4'>
-        <div className='flex justify-between items-center'>
-          {isEditing ? (
-            <Input
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              className='w-64'
-              autoFocus
-              onBlur={handleSave}
-              onKeyUp={(e) => e.key === 'Enter' && handleSave()}
-            />
-          ) : (
-            <CardTitle className='text-lg font-bold text-primary'>{coursePhase?.name}</CardTitle>
-          )}
-          {canEdit && !isEditing && (
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setIsEditing(true)
-              }}
-            >
-              <Pen className='h-4 w-4' />
-            </Button>
-          )}
-        </div>
+        <NameEditingHeader phaseID={id} />
         <Badge variant='secondary' className='mt-2 mr-auto'>
           {phaseType?.name}
         </Badge>
@@ -141,19 +85,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
             <h4 className='text-sm font-semibold mb-2'>Provided Outputs:</h4>
             <div className='meta-data-outputs space-y-2 ml-16'>
               {phaseType.providedOutputDTOs.map((dto) => (
-                <div
-                  key={dto.id}
-                  className='flex items-center justify-end bg-green-50 p-2 rounded relative'
-                >
-                  <span className='mr-2 text-sm'>{dto.dtoName}</span>
-                  <Handle
-                    type='source'
-                    position={Position.Right}
-                    id={`metadata-out-phase-${id}-dto-${dto.id}`}
-                    style={{ right: '-28px', top: '50%' }}
-                    className='!w-3 !h-3 !bg-green-500 rounded-full'
-                  />
-                </div>
+                <OutgoingDataHandle key={dto.id} phaseID={id} dto={dto} />
               ))}
             </div>
           </>
