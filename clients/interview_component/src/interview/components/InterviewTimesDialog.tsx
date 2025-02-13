@@ -40,6 +40,8 @@ export const InterviewTimesDialog = () => {
   useEffect(() => {
     if (coursePhase?.restrictedData?.interviewSlots) {
       setInterviewSlots(coursePhase.restrictedData.interviewSlots)
+    } else {
+      setInterviewSlots([])
     }
   }, [coursePhase])
 

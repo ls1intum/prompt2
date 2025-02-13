@@ -33,6 +33,8 @@ export const InterviewQuestionsDialog = () => {
     if (coursePhase && coursePhase.restrictedData?.interviewQuestions) {
       const questions = coursePhase.restrictedData.interviewQuestions as InterviewQuestion[]
       setInterviewQuestions(questions)
+    } else {
+      setInterviewQuestions([])
     }
   }, [coursePhase])
 
