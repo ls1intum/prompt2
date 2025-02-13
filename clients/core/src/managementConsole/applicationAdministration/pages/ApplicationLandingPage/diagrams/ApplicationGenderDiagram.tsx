@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/chart'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
+import { getCornerRadius } from './utils/getCornerRadius'
 
 const chartConfig: ChartConfig = {
   notAssessed: {
@@ -67,6 +68,8 @@ export const ApplicationGenderDiagram = ({
     return diagramData
   }, [applications])
 
+  const [radiusAccepted, radiusRejected, radiusNotAssessed] = getCornerRadius(genderData)
+
   return (
     <Card className='flex flex-col w-full h-full'>
       <CardHeader className='items-center'>
@@ -87,9 +90,24 @@ export const ApplicationGenderDiagram = ({
             />
             <YAxis hide />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey='accepted' stackId='passStatus' fill={chartConfig.accepted.color} />
-            <Bar dataKey='rejected' stackId='passStatus' fill={chartConfig.rejected.color} />
-            <Bar dataKey='notAssessed' stackId='passStatus' fill={chartConfig.notAssessed.color}>
+            <Bar
+              dataKey='accepted'
+              stackId='passStatus'
+              fill={chartConfig.accepted.color}
+              radius={radiusAccepted}
+            />
+            <Bar
+              dataKey='rejected'
+              stackId='passStatus'
+              fill={chartConfig.rejected.color}
+              radius={radiusRejected}
+            />
+            <Bar
+              dataKey='notAssessed'
+              stackId='passStatus'
+              fill={chartConfig.notAssessed.color}
+              radius={radiusNotAssessed}
+            >
               <LabelList
                 dataKey='total'
                 position='top'
