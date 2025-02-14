@@ -30,8 +30,8 @@ export const useSorting = (sortBy: string | undefined) => {
           return (statusOrder.indexOf(a.passStatus) || 0) - (statusOrder.indexOf(b.passStatus) || 0)
         case 'Interview Score':
           return (
-            (a.restrictedData.interviewScore || Number.MAX_VALUE) -
-            (b.restrictedData.interviewScore || Number.MAX_VALUE)
+            (a.restrictedData.score || Number.MAX_VALUE) -
+            (b.restrictedData.score || Number.MAX_VALUE)
           )
         default:
           return 0

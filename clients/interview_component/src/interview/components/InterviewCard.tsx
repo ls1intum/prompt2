@@ -38,7 +38,7 @@ export const InterviewCard = (): JSX.Element => {
       )
       return originalAnswer?.answer !== a.answer
     }) ||
-    score !== participation?.restrictedData?.interviewScore ||
+    score !== participation?.restrictedData?.score ||
     interviewer !== participation?.restrictedData?.interviewer
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export const InterviewCard = (): JSX.Element => {
       const interviewAnswers = participation.restrictedData?.interviewAnswers as InterviewAnswer[]
       setAnswers(interviewAnswers ?? [])
 
-      const interviewScore = participation.restrictedData?.interviewScore as number | undefined
+      const interviewScore = participation.restrictedData?.score as number | undefined
       setScore(interviewScore)
 
       const newInterviewer = participation.restrictedData?.interviewer as string | undefined
@@ -75,7 +75,7 @@ export const InterviewCard = (): JSX.Element => {
         courseParticipationID: participation.courseParticipationID,
         restrictedData: {
           interviewAnswers: answers,
-          interviewScore: score,
+          score: score,
         },
         studentReadableData: {},
         passStatus: passStatus ?? participation.passStatus,

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { CoursePhaseType } from '@tumaet/prompt-shared-state'
+import { CoursePhaseType } from '../interfaces/coursePhaseType'
 import { CoursePhaseGraphItem } from '../interfaces/coursePhaseGraphItem'
 import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
@@ -11,7 +11,7 @@ interface CourseConfigurationState {
   metaDataGraph: MetaDataGraphItem[]
   setCoursePhaseTypes: (coursePhaseTypes: CoursePhaseType[]) => void
   removeUnsavedCoursePhases: () => void
-  appendCoursePhaseType
+  appendCoursePhaseType: (coursePhaseType: CoursePhaseType) => void
   setCoursePhaseGraph: (coursePhaseGraph: CoursePhaseGraphItem[]) => void
   setCoursePhases: (coursePhases: CoursePhaseWithPosition[]) => void
   appendCoursePhase: (coursePhase: CoursePhaseWithPosition) => void

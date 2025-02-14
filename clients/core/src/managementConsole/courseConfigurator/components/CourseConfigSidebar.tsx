@@ -1,6 +1,6 @@
 import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
-import { CoursePhaseType } from '@tumaet/prompt-shared-state'
+import { CoursePhaseType } from '../interfaces/coursePhaseType'
 
 interface CourseConfigSidebarProps {
   canEdit: boolean

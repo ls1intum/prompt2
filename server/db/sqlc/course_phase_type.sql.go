@@ -12,16 +12,15 @@ import (
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, required_input_meta_data, provided_output_meta_data)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO course_phase_type (id, name, initial_phase, base_url)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID                     uuid.UUID `json:"id"`
-	Name                   string    `json:"name"`
-	InitialPhase           bool      `json:"initial_phase"`
-	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
-	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	InitialPhase bool      `json:"initial_phase"`
+	BaseUrl      string    `json:"base_url"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
@@ -29,14 +28,61 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 		arg.ID,
 		arg.Name,
 		arg.InitialPhase,
-		arg.RequiredInputMetaData,
-		arg.ProvidedOutputMetaData,
+		arg.BaseUrl,
+	)
+	return err
+}
+
+const createCoursePhaseTypeProvidedOutput = `-- name: CreateCoursePhaseTypeProvidedOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES ($1, $2, $3, $4, $5, $6)
+`
+
+type CreateCoursePhaseTypeProvidedOutputParams struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	VersionNumber     int32     `json:"version_number"`
+	EndpointPath      string    `json:"endpoint_path"`
+	Specification     []byte    `json:"specification"`
+}
+
+func (q *Queries) CreateCoursePhaseTypeProvidedOutput(ctx context.Context, arg CreateCoursePhaseTypeProvidedOutputParams) error {
+	_, err := q.db.Exec(ctx, createCoursePhaseTypeProvidedOutput,
+		arg.ID,
+		arg.CoursePhaseTypeID,
+		arg.DtoName,
+		arg.VersionNumber,
+		arg.EndpointPath,
+		arg.Specification,
+	)
+	return err
+}
+
+const createCoursePhaseTypeRequiredInput = `-- name: CreateCoursePhaseTypeRequiredInput :exec
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES ($1, $2, $3, $4)
+`
+
+type CreateCoursePhaseTypeRequiredInputParams struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	Specification     []byte    `json:"specification"`
+}
+
+func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg CreateCoursePhaseTypeRequiredInputParams) error {
+	_, err := q.db.Exec(ctx, createCoursePhaseTypeRequiredInput,
+		arg.ID,
+		arg.CoursePhaseTypeID,
+		arg.DtoName,
+		arg.Specification,
 	)
 	return err
 }
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
-SELECT id, name, required_input_meta_data, provided_output_meta_data, initial_phase FROM course_phase_type
+SELECT id, name, initial_phase, base_url FROM course_phase_type
 `
 
 func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType, error) {
@@ -51,9 +97,8 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.RequiredInputMetaData,
-			&i.ProvidedOutputMetaData,
 			&i.InitialPhase,
+			&i.BaseUrl,
 		); err != nil {
 			return nil, err
 		}
@@ -63,6 +108,137 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 		return nil, err
 	}
 	return items, nil
+}
+
+const getCoursePhaseProvidedOutputs = `-- name: GetCoursePhaseProvidedOutputs :many
+SELECT id, course_phase_type_id, dto_name, version_number, endpoint_path, specification
+FROM course_phase_type_provided_output_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeProvidedOutputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseProvidedOutputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypeProvidedOutputDto
+	for rows.Next() {
+		var i CoursePhaseTypeProvidedOutputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.VersionNumber,
+			&i.EndpointPath,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoursePhaseRequiredInputs = `-- name: GetCoursePhaseRequiredInputs :many
+SELECT id, course_phase_type_id, dto_name, specification
+FROM course_phase_type_required_input_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeRequiredInputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseRequiredInputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypeRequiredInputDto
+	for rows.Next() {
+		var i CoursePhaseTypeRequiredInputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'additionalScores',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
+                "required": ["score", "key"]
+            }
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertCourseProvidedAdditionalScores(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertCourseProvidedAdditionalScores, coursePhaseTypeID)
+	return err
+}
+
+const insertCourseProvidedApplicationAnswers = `-- name: InsertCourseProvidedApplicationAnswers :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'applicationAnswers',
+      1,
+      'core',
+      '{
+            "type": "array",
+            "items": {
+                "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "string"                    },
+                    "key"      : { "type": "string"                    },
+                    "order_num": { "type": "integer"                   },
+                    "type"     : { "type": "string" , "enum": ["text"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "array", "items": {"type": "string"} },
+                    "key"      : {"type": "string"}                              ,
+                    "order_num": {"type": "integer"}                             ,
+                    "type"     : { "type": "string", "enum": ["multiselect"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                }
+                ]
+            }
+       }'::jsonb
+)
+`
+
+func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertCourseProvidedApplicationAnswers, coursePhaseTypeID)
+	return err
 }
 
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one

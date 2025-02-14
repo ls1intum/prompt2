@@ -24,8 +24,18 @@ export const useComputeLayoutedElements = () => {
 
   const initialMetaEdges = metaDataGraph.map((item) => {
     return {
-      id: 'data-edge-' + item.fromCoursePhaseID + '-' + item.toCoursePhaseID,
+      id:
+        'data-edge-from-metadata-out-phase-' +
+        item.fromCoursePhaseID +
+        '-dto-' +
+        item.fromCoursePhaseDtoID +
+        '-to-metadata-in-phase-' +
+        item.toCoursePhaseID +
+        '-dto-' +
+        item.toCoursePhaseDtoID,
       source: item.fromCoursePhaseID,
+      sourceHandle: `metadata-out-phase-${item.fromCoursePhaseID}-dto-${item.fromCoursePhaseDtoID}`,
+      targetHandle: `metadata-in-phase-${item.toCoursePhaseID}-dto-${item.toCoursePhaseDtoID}`,
       target: item.toCoursePhaseID,
       type: 'iconEdge',
     }
@@ -55,8 +65,8 @@ export const useComputeLayoutedElements = () => {
       return {
         ...metaDataEdge,
         id: edge.id,
-        sourceHandle: `metadata-out-${edge.source}`,
-        targetHandle: `metadata-in-${edge.target}`,
+        sourceHandle: metaDataEdge.sourceHandle,
+        targetHandle: metaDataEdge.targetHandle,
       }
     })
 

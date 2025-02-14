@@ -67,10 +67,10 @@ func (suite *RouterTestSuite) TestGetParticipationsForCoursePhase() {
 	suite.router.ServeHTTP(w, req)
 
 	assert.Equal(suite.T(), http.StatusOK, w.Code)
-	var participations []coursePhaseParticipationDTO.GetCoursePhaseParticipation
-	err := json.Unmarshal(w.Body.Bytes(), &participations)
+	var response coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions
+	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(suite.T(), err)
-	assert.Greater(suite.T(), len(participations), 0, "Expected participations to be returned")
+	assert.Greater(suite.T(), len(response.Participations), 0, "Expected participations to be returned")
 }
 
 func (suite *RouterTestSuite) TestCreateCoursePhaseParticipation() {
@@ -152,13 +152,13 @@ func (suite *RouterTestSuite) TestUpdateNewCoursePhaseParticipation() {
 	assert.NoError(suite.T(), err)
 	pass := db.PassStatusPassed
 
-	toBecreatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest{
+	toBeCreatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest{
 		CourseParticipationID: uuid.MustParse("f6744410-cfe2-456d-96fa-e857cf989569"),
 		RestrictedData:        data,
 		StudentReadableData:   data,
 		PassStatus:            &pass,
 	}
-	body, _ := json.Marshal(toBecreatedParticipation)
+	body, _ := json.Marshal(toBeCreatedParticipation)
 
 	// Send the update request
 	req := httptest.NewRequest(http.MethodPut, "/api/course_phases/4e736d05-c125-48f0-8fa0-848b03ca6908/participations/00000000-0000-0000-0000-000000000000", bytes.NewReader(body))
@@ -187,8 +187,8 @@ func (suite *RouterTestSuite) TestUpdateNewCoursePhaseParticipation() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), createdParticipation.ID, uuid.MustParse(newId), "Participation ID should match")
 	assert.Equal(suite.T(), "passed", createdParticipation.PassStatus, "PassStatus should match")
-	assert.Equal(suite.T(), toBecreatedParticipation.RestrictedData["other-value"], createdParticipation.RestrictedData["other-value"], "New Meta data should match")
-	assert.Equal(suite.T(), toBecreatedParticipation.StudentReadableData["other-value"], createdParticipation.StudentReadableData["other-value"], "New Meta data should match")
+	assert.Equal(suite.T(), toBeCreatedParticipation.RestrictedData["other-value"], createdParticipation.RestrictedData["other-value"], "New Meta data should match")
+	assert.Equal(suite.T(), toBeCreatedParticipation.StudentReadableData["other-value"], createdParticipation.StudentReadableData["other-value"], "New Meta data should match")
 }
 
 func TestRouterTestSuite(t *testing.T) {

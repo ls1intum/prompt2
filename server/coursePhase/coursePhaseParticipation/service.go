@@ -41,22 +41,37 @@ func GetOwnCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID
 	return participationDTO, nil
 }
 
-func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, error) {
+func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions, error) {
 	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
 	if err != nil {
-		return nil, err
+		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 	}
 
 	participationDTOs := make([]coursePhaseParticipationDTO.GetAllCPPsForCoursePhase, 0, len(coursePhaseParticipations))
 	for _, coursePhaseParticipation := range coursePhaseParticipations {
 		dto, err := coursePhaseParticipationDTO.GetAllCPPsForCoursePhaseDTOFromDBModel(coursePhaseParticipation)
 		if err != nil {
-			return nil, err
+			return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 		}
 		participationDTOs = append(participationDTOs, dto)
 	}
 
-	return participationDTOs, nil
+	// Get required resolutions
+	resolutions, err := CoursePhaseParticipationServiceSingleton.queries.GetResolutionsForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
+	}
+
+	resolutionDTOs := make([]coursePhaseParticipationDTO.Resolution, 0, len(resolutions))
+	for _, resolution := range resolutions {
+		dto := coursePhaseParticipationDTO.GetResolutionDTOFromDBModel(resolution)
+		resolutionDTOs = append(resolutionDTOs, dto)
+	}
+
+	return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{
+		Participations: participationDTOs,
+		Resolutions:    resolutionDTOs,
+	}, nil
 }
 
 func GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {

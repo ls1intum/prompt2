@@ -52,14 +52,14 @@ export function CourseConfigurator() {
     ) || permissions.includes(Role.PROMPT_ADMIN)
 
   const queryClient = useQueryClient()
-  const { coursePhases, removeUnsavedCoursePhases } = useCourseConfigurationState()
+  const { coursePhases, removeUnsavedCoursePhases, setCoursePhases } = useCourseConfigurationState()
 
   // ---------- Layout and Flow States ----------
   const { nodes: layoutedInitialNodes, edges: layoutedInitialEdges } = useComputeLayoutedElements()
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedInitialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedInitialEdges)
-  const [isModified, setIsModified] = useState(false)
+  const [isModified, setIsModified] = useState(false) // TODO: inject this into the state -> shall be allowed to set from somewhere else (i.e. name changes)
   const phaseNameModified = coursePhases.some((phase) => phase.isModified)
 
   // ---------- Delete Confirmation ----------
@@ -103,6 +103,20 @@ export function CourseConfigurator() {
   }
 
   const handleRevert = useCallback(() => {
+    removeUnsavedCoursePhases()
+    setNodes([])
+    setEdges([])
+    // reset the course phase
+    if (course) {
+      setCoursePhases(
+        course.coursePhases.map((phase) => ({
+          ...phase,
+          position: { x: 0, y: 0 },
+          restrictedMetaData: [],
+          studentReadableData: [],
+        })),
+      )
+    }
     const filteredLayoutedNodes = layoutedInitialNodes.filter(
       (node) => node.id && !node.id.startsWith('no-valid-id'),
     )
@@ -111,9 +125,16 @@ export function CourseConfigurator() {
     )
     setNodes(filteredLayoutedNodes)
     setEdges(filteredEdges)
-    removeUnsavedCoursePhases()
     setIsModified(false)
-  }, [layoutedInitialNodes, layoutedInitialEdges, removeUnsavedCoursePhases, setEdges, setNodes])
+  }, [
+    removeUnsavedCoursePhases,
+    setNodes,
+    setEdges,
+    course,
+    layoutedInitialNodes,
+    layoutedInitialEdges,
+    setCoursePhases,
+  ])
 
   const handleRetry = useCallback(() => {
     // You could opt for a more targeted retry instead of a full reload.

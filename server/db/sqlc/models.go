@@ -279,16 +279,33 @@ type CoursePhaseParticipation struct {
 }
 
 type CoursePhaseType struct {
-	ID                     uuid.UUID `json:"id"`
-	Name                   string    `json:"name"`
-	RequiredInputMetaData  []byte    `json:"required_input_meta_data"`
-	ProvidedOutputMetaData []byte    `json:"provided_output_meta_data"`
-	InitialPhase           bool      `json:"initial_phase"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	InitialPhase bool      `json:"initial_phase"`
+	BaseUrl      string    `json:"base_url"`
+}
+
+type CoursePhaseTypeProvidedOutputDto struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	VersionNumber     int32     `json:"version_number"`
+	EndpointPath      string    `json:"endpoint_path"`
+	Specification     []byte    `json:"specification"`
+}
+
+type CoursePhaseTypeRequiredInputDto struct {
+	ID                uuid.UUID `json:"id"`
+	CoursePhaseTypeID uuid.UUID `json:"course_phase_type_id"`
+	DtoName           string    `json:"dto_name"`
+	Specification     []byte    `json:"specification"`
 }
 
 type MetaDataDependencyGraph struct {
-	FromPhaseID uuid.UUID `json:"from_phase_id"`
-	ToPhaseID   uuid.UUID `json:"to_phase_id"`
+	FromCoursePhaseID    uuid.UUID `json:"from_course_phase_id"`
+	ToCoursePhaseID      uuid.UUID `json:"to_course_phase_id"`
+	FromCoursePhaseDtoID uuid.UUID `json:"from_course_phase_dto_id"`
+	ToCoursePhaseDtoID   uuid.UUID `json:"to_course_phase_dto_id"`
 }
 
 type Student struct {

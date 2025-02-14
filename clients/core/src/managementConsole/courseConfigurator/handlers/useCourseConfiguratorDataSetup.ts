@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import { CoursePhaseType, CoursePhaseTypeMetaDataItem } from '@tumaet/prompt-shared-state'
+import { CoursePhaseType } from '../interfaces/coursePhaseType'
 import { CoursePhaseGraphItem } from '../interfaces/coursePhaseGraphItem'
 import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
 import { ApplicationForm } from '../../applicationAdministration/interfaces/form/applicationForm'
@@ -112,68 +112,8 @@ export function useCourseConfiguratorDataSetup() {
   // Set up course phase types with additional metadata for application phase.
   useEffect(() => {
     if (fetchedCoursePhaseTypes) {
-      setCoursePhaseTypes([]) // Clear existing state
-      fetchedCoursePhaseTypes.forEach((coursePhaseType) => {
-        const additionalMetaData: CoursePhaseTypeMetaDataItem[] = []
-
-        if (
-          coursePhaseType.name === 'Application' &&
-          fetchedApplicationForm &&
-          !isAdditionalScoresPending
-        ) {
-          const applicationAnswers: { key: string; type: string }[] = []
-
-          fetchedApplicationForm.questionsMultiSelect
-            .filter(
-              (question) =>
-                question.accessKey !== undefined && question.accessibleForOtherPhases === true,
-            )
-            .forEach((question) => {
-              applicationAnswers.push({ key: question.accessKey ?? '', type: 'Multi-Select' })
-            })
-
-          fetchedApplicationForm.questionsText
-            .filter(
-              (question) =>
-                question.accessKey !== undefined && question.accessibleForOtherPhases === true,
-            )
-            .forEach((question) => {
-              applicationAnswers.push({ key: question.accessKey ?? '', type: 'Text' })
-            })
-
-          if (applicationAnswers.length > 0) {
-            additionalMetaData.push({
-              name: 'applicationAnswers',
-              // Convert the object array to a properly formatted JSON string
-              type: JSON.stringify(applicationAnswers),
-            })
-          }
-
-          if (fetchedAdditionalScores) {
-            const additionScores: string[] = []
-            fetchedAdditionalScores.forEach((score) => {
-              additionScores.push(score.name)
-            })
-            additionalMetaData.push({
-              name: 'additionalScores',
-              type: JSON.stringify(additionScores),
-            })
-          }
-
-          additionalMetaData.push({ name: 'applicationScore', type: 'integer' })
-        }
-
-        appendCoursePhaseType({
-          id: coursePhaseType.id,
-          name: coursePhaseType.name,
-          initialPhase: coursePhaseType.initialPhase,
-          requiredInputMetaData: [...coursePhaseType.requiredInputMetaData],
-          providedOutputMetaData: [
-            ...coursePhaseType.providedOutputMetaData,
-            ...additionalMetaData,
-          ],
-        })
-      })
+      setCoursePhaseTypes(fetchedCoursePhaseTypes) // Clear existing state
+      // TODO: maybe re-incorporate the exported application answers
     }
   }, [
     fetchedCoursePhaseTypes,

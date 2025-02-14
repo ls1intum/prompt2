@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import {
   CoursePhaseWithMetaData,
-  CoursePhaseParticipationWithStudent,
+  CoursePhaseParticipationsWithResolution,
 } from '@tumaet/prompt-shared-state'
 import { getCoursePhase } from '@/network/queries/getCoursePhase'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
@@ -26,7 +26,7 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.E
     isPending: isCoursePhaseParticipationsPending,
     isError: isParticipationsError,
     refetch: refetchCoursePhaseParticipations,
-  } = useQuery<CoursePhaseParticipationWithStudent[]>({
+  } = useQuery<CoursePhaseParticipationsWithResolution>({
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
@@ -50,7 +50,7 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.E
 
   useEffect(() => {
     if (coursePhaseParticipations) {
-      setParticipations(coursePhaseParticipations)
+      setParticipations(coursePhaseParticipations.participations)
     }
   }, [coursePhaseParticipations, setParticipations])
 

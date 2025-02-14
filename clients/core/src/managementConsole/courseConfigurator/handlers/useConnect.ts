@@ -34,10 +34,23 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
         } else if (sourceHandle.startsWith('metadata') && targetHandle.startsWith('metadata')) {
           const sourceNode = nodes.find((node) => node.id === params.source)
           const targetNode = nodes.find((node) => node.id === params.target)
+
+          // enforce that only one incoming data edge per handle
+          const targetHasIncoming = edges.some((edge) => {
+            return edge.targetHandle === targetHandle
+          })
+
+          if (targetHasIncoming) {
+            console.log(
+              'Metadata connection not allowed: target node can only have one incoming data edge.',
+            )
+            return
+          }
+
           if (sourceNode && targetNode) {
             const newEdge = DataEdgeProps(params)
             setEdges((eds) =>
-              addEdge({ ...newEdge, id: `data-edge-${newEdge.source}-${newEdge.target}` }, eds),
+              addEdge({ ...newEdge, id: `data-edge-from-${sourceHandle}-to-${targetHandle}` }, eds),
             )
             setIsModified(true)
           } else {
