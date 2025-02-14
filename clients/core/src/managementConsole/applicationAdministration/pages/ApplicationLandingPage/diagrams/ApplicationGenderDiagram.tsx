@@ -1,33 +1,8 @@
-import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
-import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
-import { Gender } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
-
-const chartConfig = {
-  female: {
-    label: 'Female',
-    color: 'hsl(var(--primary))',
-  },
-  male: {
-    label: 'Male',
-    color: 'hsl(var(--primary))',
-  },
-  diverse: {
-    label: 'Diverse',
-    color: 'hsl(var(--primary))',
-  },
-  prefer_not_to_say: {
-    label: 'Unknown',
-    color: 'hsl(var(--primary))',
-  },
-} satisfies ChartConfig
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
+import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
+import { StackedBarChartWithPassStatus } from './StackedBarChartWithPassStatus'
 
 interface GenderDistributionCardProps {
   applications: ApplicationParticipation[]
@@ -36,23 +11,39 @@ interface GenderDistributionCardProps {
 export const ApplicationGenderDiagram = ({
   applications,
 }: GenderDistributionCardProps): JSX.Element => {
-  const { genderData } = useMemo(() => {
-    const genderCounts = applications.reduce(
-      (acc, app) => {
-        const gender = app.student.gender || 'prefer_not_to_say'
-        acc[gender] = (acc[gender] || 0) + 1
-        return acc
-      },
-      {} as Record<Gender, number>,
-    )
+  const genderData = useMemo(() => {
+    // Initialize counts for each gender
+    const initialCounts: Record<Gender, { passed: number; failed: number; not_assessed: number }> =
+      {
+        [Gender.MALE]: { passed: 0, failed: 0, not_assessed: 0 },
+        [Gender.FEMALE]: { passed: 0, failed: 0, not_assessed: 0 },
+        [Gender.DIVERSE]: { passed: 0, failed: 0, not_assessed: 0 },
+        [Gender.PREFER_NOT_TO_SAY]: { passed: 0, failed: 0, not_assessed: 0 },
+      }
 
-    const data = Object.entries(chartConfig).map(([gender, config]) => ({
-      gender: config.label,
-      Students: genderCounts[gender as Gender] || 0,
-      fill: config.color,
-    }))
+    // Aggregate counts by gender and passStatus
+    const countsByGender = applications.reduce((acc, app) => {
+      const gender: Gender = app.student.gender || Gender.PREFER_NOT_TO_SAY
+      acc[gender][app.passStatus] += 1
+      return acc
+    }, initialCounts)
 
-    return { genderData: data }
+    // Map the counts to diagram data for the chart
+    const diagramData = (Object.values(Gender) as Gender[]).map((gender) => {
+      const accepted = countsByGender[gender]?.passed ?? 0
+      const rejected = countsByGender[gender]?.failed ?? 0
+      const notAssessed = countsByGender[gender]?.not_assessed ?? 0
+
+      return {
+        gender: gender !== Gender.PREFER_NOT_TO_SAY ? getGenderString(gender) : 'Unknown',
+        accepted,
+        rejected,
+        notAssessed,
+        total: accepted + rejected + notAssessed,
+      }
+    })
+
+    return diagramData
   }, [applications])
 
   return (
@@ -62,27 +53,7 @@ export const ApplicationGenderDiagram = ({
         <CardDescription>Breakdown of student genders</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
-        <ChartContainer config={chartConfig} className='mx-auto w-full h-[280px]'>
-          <BarChart data={genderData} margin={{ top: 30, right: 10, bottom: 0, left: 10 }}>
-            <XAxis
-              dataKey='gender'
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12 }}
-              interval={0}
-              height={50}
-              tickFormatter={(value) => value.split(' ').join('\n')}
-            />
-            <YAxis hide />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey='Students' radius={[4, 4, 0, 0]}>
-              {genderData.map((entry, index) => (
-                <Bar key={`bar-${index}`} dataKey='Students' fill={entry.fill} />
-              ))}
-              <LabelList position='top' offset={10} className='fill-foreground' fontSize={12} />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+        <StackedBarChartWithPassStatus data={genderData} dataKey='gender' />
       </CardContent>
     </Card>
   )

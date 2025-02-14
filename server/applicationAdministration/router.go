@@ -9,8 +9,8 @@ import (
 	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/mailing"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,19 +18,19 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application := router.Group("/applications", authMiddleware())
 
 	// Application Form Endpoints
-	application.GET("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationForm)
-	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationForm)
-	application.GET("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), getAdditionalScores)
-	application.POST("/:coursePhaseID/score", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), uploadAdditionalScore)
-	application.PUT("/:coursePhaseID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationsStatus)
+	application.GET("/:coursePhaseID/form", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getApplicationForm)
+	application.PUT("/:coursePhaseID/form", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateApplicationForm)
+	application.GET("/:coursePhaseID/score", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getAdditionalScores)
+	application.POST("/:coursePhaseID/score", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), uploadAdditionalScore)
+	application.PUT("/:coursePhaseID/assessment", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateApplicationsStatus)
 
-	application.POST("/:coursePhaseID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), postApplicationManual)
-	application.DELETE("/:coursePhaseID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteApplications)
+	application.POST("/:coursePhaseID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), postApplicationManual)
+	application.DELETE("/:coursePhaseID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteApplications)
 
-	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getApplicationByCPPID)
-	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateApplicationAssessment)
+	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getApplicationByCPPID)
+	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateApplicationAssessment)
 
-	application.GET("/:coursePhaseID/participations", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getAllApplicationParticipations)
+	application.GET("/:coursePhaseID/participations", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getAllApplicationParticipations)
 
 	// Apply Endpoints - No Authentication needed
 	apply := router.Group("/apply")

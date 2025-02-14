@@ -12,8 +12,8 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -36,12 +36,7 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
-	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName string) error {
-		// No-op or add assertions for test
-		return nil
-	}
-
-	mockAddUserToGroup := func(ctx context.Context, userID, groupName string) error {
+	mockCreateGroupsAndRoles := func(ctx context.Context, courseName, iterationName, userID string) error {
 		// No-op or add assertions for test
 		return nil
 	}
@@ -51,7 +46,6 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 		queries:                    *testDB.Queries,
 		conn:                       testDB.Conn,
 		createCourseGroupsAndRoles: mockCreateGroupsAndRoles,
-		addUserToGroup:             mockAddUserToGroup,
 	}
 
 	CourseServiceSingleton = &suite.courseService
@@ -66,7 +60,7 @@ func (suite *CourseServiceTestSuite) TearDownSuite() {
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCourses() {
-	courses, err := GetAllCourses(suite.ctx, map[string]bool{keycloak.PromptAdmin: true})
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{permissionValidation.PromptAdmin: true})
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), len(courses), 10, "Expected all courses")
 
@@ -77,7 +71,7 @@ func (suite *CourseServiceTestSuite) TestGetAllCourses() {
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCoursesWithRestriction() {
-	courses, err := GetAllCourses(suite.ctx, map[string]bool{"Another TEst-ios2425-Lecturer": true})
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{"ios2425-Another TEst-Lecturer": true})
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 1, len(courses), "Expected to get only one course")
 
@@ -88,7 +82,7 @@ func (suite *CourseServiceTestSuite) TestGetAllCoursesWithRestriction() {
 }
 
 func (suite *CourseServiceTestSuite) TestGetAllCoursesWithStudent() {
-	courses, err := GetAllCourses(suite.ctx, map[string]bool{"Another TEst-ios2425-Student": true})
+	courses, err := GetAllCourses(suite.ctx, map[string]bool{"ios2425-Another TEst-Student": true})
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 1, len(courses), "Expected to get only one course")
 

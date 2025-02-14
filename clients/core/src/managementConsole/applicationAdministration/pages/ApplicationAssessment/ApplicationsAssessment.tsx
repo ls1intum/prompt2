@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { columns } from './components/table/columns'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/table/filtering/FilterMenu'
@@ -39,7 +39,10 @@ import { useDeleteApplications } from './hooks/useDeleteApplications'
 
 export const ApplicationsAssessment = (): JSX.Element => {
   const { additionalScores, participations } = useApplicationStore()
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'passStatus', desc: false },
+    { id: 'lastName', desc: false },
+  ])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
@@ -92,8 +95,22 @@ export const ApplicationsAssessment = (): JSX.Element => {
     },
   })
 
+  // when sorting for status, this adds sorting by last name
+  useEffect(() => {
+    if (
+      sorting.find((sort) => sort.id === 'passStatus') &&
+      !sorting.find((sort) => sort.id === 'lastName')
+    ) {
+      setSorting((prev) => {
+        return [...prev, { id: 'lastName', desc: false }]
+      })
+    }
+  }, [sorting])
+  const filteredRowsCount = table.getFilteredRowModel().rows.length
+  const totalRowsCount = participations?.length ?? 0
+
   return (
-    <div id='table-view' className='relative flex flex-col space-y-6'>
+    <div id='table-view' className='relative flex flex-col'>
       <ManagementPageHeader>Applications Overview</ManagementPageHeader>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
@@ -129,6 +146,10 @@ export const ApplicationsAssessment = (): JSX.Element => {
         <div className='flex flex-wrap gap-2'>
           <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
         </div>
+      </div>
+
+      <div className='text-sm text-muted-foreground mb-2 mt-4'>
+        Showing {filteredRowsCount} of {totalRowsCount} applications
       </div>
 
       <div className='rounded-md border' style={{ width: `${tableWidth + 50}px` }}>

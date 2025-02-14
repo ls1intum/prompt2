@@ -8,14 +8,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
 func InitApplicationAdministrationModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
-	setupApplicationRouter(routerGroup, keycloak.KeycloakMiddleware, keycloak.ApplicationMiddleware, checkAccessControlByIDWrapper)
+	setupApplicationRouter(routerGroup, keycloakTokenVerifier.KeycloakMiddleware, keycloakTokenVerifier.ApplicationMiddleware, checkAccessControlByIDWrapper)
 	ApplicationServiceSingleton = &ApplicationService{
 		queries: queries,
 		conn:    conn,

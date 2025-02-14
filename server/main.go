@@ -16,7 +16,8 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
+	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
 	"github.com/niclasheun/prompt2.0/mailing"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/student"
@@ -45,7 +46,7 @@ func runMigrations(databaseURL string) {
 	}
 }
 
-func initKeycloak(queries db.Queries) {
+func initKeycloak(router *gin.RouterGroup, queries db.Queries) {
 	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "https://" + baseURL
@@ -59,7 +60,10 @@ func initKeycloak(queries db.Queries) {
 
 	log.Info("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " idOfClient: ", idOfClient, " expectedAuthorizedParty: ", expectedAuthorizedParty)
 
-	err := keycloak.InitKeycloak(context.Background(), baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
+	// first we initialize the keycloak token verfier
+	keycloakTokenVerifier.InitKeycloakTokenVerifier(context.Background(), baseURL, realm, clientID, expectedAuthorizedParty, queries)
+
+	err := keycloakRealmManager.InitKeycloak(context.Background(), router, baseURL, realm, clientID, clientSecret, idOfClient, expectedAuthorizedParty, queries)
 	if err != nil {
 		log.Error("Failed to initialize keycloak: ", err)
 	}
@@ -93,9 +97,6 @@ func main() {
 
 	query := db.New(conn)
 
-	initKeycloak(*query)
-	permissionValidation.InitValidationService(*query, conn)
-
 	router := gin.Default()
 	router.Use(utils.CORS())
 
@@ -105,6 +106,9 @@ func main() {
 			"message": "Hello World",
 		})
 	})
+
+	initKeycloak(api, *query)
+	permissionValidation.InitValidationService(*query, conn)
 
 	// this initializes also all available course phase types
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
