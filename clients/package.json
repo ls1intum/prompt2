@@ -36,7 +36,7 @@
         "@tiptap/pm": "^2.10.4",
         "@tiptap/react": "^2.10.4",
         "@tiptap/starter-kit": "^2.10.4",
-        "@tumaet/prompt-shared-state": "^0.0.15",
+        "@tumaet/prompt-shared-state": "^0.0.20",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
         "class-variance-authority": "^0.7.0",
