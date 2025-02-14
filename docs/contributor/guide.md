@@ -21,11 +21,8 @@ Contributor Guidelines can be a lot to digest—so if you only remember one thin
    Remember, it’s the little things—the careful touches and attention to detail—that differentiates a good software from a great software.
 ---
 
-## Our Beloved Prompt: Nurturing a Healthy Codebase
-
+## Best Practices
 Think of our course management tool as our baby—it needs proper care to grow into a robust, well-rounded adult. Here’s how to help it flourish, especially when preparing PRs:
-
-### Top 10 PR Best Practices
 
 1. **Take Your Time**  
    Quality code isn’t produced in a rush. Review your work thoroughly especially when you review PRs.
@@ -36,30 +33,37 @@ Think of our course management tool as our baby—it needs proper care to grow i
 3. **Keep Files Short and Focused**  
    Each file should have a single, clear purpose. In TypeScript, try to keep files under 200 lines—let’s save the epic sagas for novels.
 
-4. **Maintain a Consistent File/Folder Structure**  
-   - **Server Side:** Every component should have the files `main`, `router`, `service`, `verification`
-   - **Client Side:** Use the folders `components`, `hooks`, `utils`, `pages`, `interfaces`, `network` and use descriptive File names. (i.e. Pages should end with `...Page.tsx` and dialogs with `...Dialog.tsx`)
-   
-   Deviate only when you have a solid reason—and don’t forget to comment on it!  
-
-5. **Avoid Copy-Pasting Code**  
+4. **Avoid Copy-Pasting Code**  
    If you’re tempted to copy code, instead abstract it into a reusable function. Reuse wisely—no one wants to chase down duplicated bugs.
 
-6. **Keep Related Functionality Together**  
+5. **Keep Related Functionality Together**  
    Place utility functions, interfaces, etc., close to where they’re needed but ensure they’re accessible to all parts of the codebase that require them.
 
-7. **Stick to camelCase for Variables**  
-   Consistency is key. Using camelCase everywhere keeps our code clean and our brains happy.
-
-8. **Comment on Deviations**  
+6. **Comment on Deviations**  
    Sometimes, the standard won’t quite fit. If you need to deviate, explain why with a comment. Future you (and your fellow developers) will thank you.
 
-9. **Eliminate Dead Code Immediately**  
+7. **Eliminate Dead Code Immediately**  
    “I might need this later” is a myth. Dead code clutters the project. Remember: Git history is your safety net if you ever need to recover something.
 
 
 **Important**
     This list isn’t exhaustive. As we learn and grow, so should our guidelines. Update and refine these rules regularly—after all, improvement is a journey, not a destination.
+
+---
+
+## Coding Guidelines
+
+Next to the general golden rules and best practices, the following defines strict guidelines that should be followed throughout the codebase. 
+
+```{toctree}
+:caption: Coding Guidelines
+:includehidden:
+:maxdepth: 2
+
+guide/client
+guide/server
+```
+
 
 ---
 
