@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Handle, Position, useReactFlow } from '@xyflow/react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Users, ArrowRight } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCourseConfigurationState } from '../../zustand/useCourseConfigurationStore'
 import { Separator } from '@/components/ui/separator'
@@ -58,7 +58,6 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           <div className='flex items-center justify-center w-full'>
             <Users className='w-6 h-6 text-blue-500 mr-2' />
             <span className='text-sm font-medium'>Participants</span>
-            <ArrowRight className='w-4 h-4 text-blue-500 ml-2' />
           </div>
           <Handle
             type='source'
