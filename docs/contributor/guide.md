@@ -1,3 +1,4 @@
+(contributor.guidelines)=
 # Contributor Guidelines
 ## The 3 Golden Rules
 Contributor Guidelines can be a lot to digest—so if you only remember one thing from this guide, let it be these three golden rules.
