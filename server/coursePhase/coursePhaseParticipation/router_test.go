@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -21,26 +20,24 @@ import (
 )
 
 type RouterTestSuite struct {
-	suite.Suite
+	testutils.DatabaseSuite
 	router                          *gin.Engine
 	ctx                             context.Context
-	cleanup                         func()
 	coursePhaseParticipationService CoursePhaseParticipationService
 }
 
 func (suite *RouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
+	suite.DatabaseSuite.SetupSuite()
 
-	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/full_db.sql")
-	if err != nil {
-		log.Fatalf("Failed to set up test database: %v", err)
-	}
+	err := testutils.RunSQLDump(suite.DatabaseSuite.Conn, "../../database_dumps/full_db.sql")
+	suite.Require().NoError(err)
 
-	suite.cleanup = cleanup
+	queries := db.New(suite.DatabaseSuite.Conn)
+
 	suite.coursePhaseParticipationService = CoursePhaseParticipationService{
-		queries: *testDB.Queries,
-		conn:    testDB.Conn,
+		queries: *queries,
+		conn:    suite.DatabaseSuite.Conn,
 	}
 	CoursePhaseParticipationServiceSingleton = &suite.coursePhaseParticipationService
 
@@ -48,7 +45,7 @@ func (suite *RouterTestSuite) SetupSuite() {
 }
 
 func (suite *RouterTestSuite) TearDownSuite() {
-	suite.cleanup()
+	suite.DatabaseSuite.TearDownSuite()
 }
 
 func setupRouter() *gin.Engine {
