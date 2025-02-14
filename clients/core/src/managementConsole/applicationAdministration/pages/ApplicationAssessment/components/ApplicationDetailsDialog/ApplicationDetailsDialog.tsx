@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { GetApplication } from '@core/interfaces/application/getApplication'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '@core/network/queries/applicationAssessment'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
@@ -18,11 +18,6 @@ import { getStatusBadge } from '../../utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 
 import { AssessmentCard } from './components/AssessmentCard'
-import { ApplicationAssessment } from '../../../../interfaces/applicationAssessment'
-import { postApplicationAssessment } from '@core/network/mutations/postApplicationAssessment'
-import { InstructorComment } from '../../../../interfaces/instructorComment'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { useToast } from '@/hooks/use-toast'
 import { StudentProfile } from '@/components/StudentProfile'
 import { ApplicationAnswersTable } from '../table/ApplicationAnswersTable'
 
@@ -44,9 +39,6 @@ export const ApplicationDetailsDialog = ({
   onClose,
 }: ApplicationDetailsDialogProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const { user } = useAuthStore()
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
 
   const {
     data: fetchedApplication,
@@ -67,55 +59,6 @@ export const ApplicationDetailsDialog = ({
     queryKey: ['application_form', phaseId],
     queryFn: () => getApplicationForm(phaseId ?? ''),
   })
-
-  const { mutate: mutateAssessment } = useMutation({
-    mutationFn: (applicationAssessment: ApplicationAssessment) => {
-      return postApplicationAssessment(
-        phaseId ?? 'undefined',
-        coursePhaseParticipationID,
-        applicationAssessment,
-      )
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['application_participations'] })
-    },
-    onError: () => {
-      toast({
-        title: 'Failed to Store Assessment',
-        description: 'Please try again later!',
-        variant: 'destructive',
-      })
-    },
-  })
-
-  const handleScoreSubmit = (newScore: number) => {
-    const assessment: ApplicationAssessment = {
-      Score: newScore,
-    }
-    mutateAssessment(assessment)
-  }
-
-  const handleCommentSubmit = (comment: string) => {
-    const comments = (restrictedData.comments || []) as InstructorComment[]
-    comments.push({
-      text: comment,
-      timestamp: new Date().toISOString(),
-      author: `${user?.firstName} ${user?.lastName}`,
-    })
-    const assessment: ApplicationAssessment = {
-      restrictedData: {
-        comments,
-      },
-    }
-    mutateAssessment(assessment)
-  }
-
-  const handleAcceptanceStatusChange = (newStatus: PassStatus) => {
-    const assessment: ApplicationAssessment = {
-      passStatus: newStatus,
-    }
-    mutateAssessment(assessment)
-  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -172,9 +115,7 @@ export const ApplicationDetailsDialog = ({
               score={score}
               restrictedData={restrictedData}
               acceptanceStatus={status}
-              handleAcceptanceStatusChange={handleAcceptanceStatusChange}
-              onScoreSubmission={handleScoreSubmit}
-              onCommentSubmission={handleCommentSubmit}
+              coursePhaseParticipationID={coursePhaseParticipationID}
             />
           </div>
         </div>
