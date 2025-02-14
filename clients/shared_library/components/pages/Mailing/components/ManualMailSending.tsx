@@ -33,8 +33,8 @@ export const ManualMailSending = ({
   }
 
   const tooltipMessage = courseMailingIsConfigured
-    ? 'Configure the mailing in the course mail settings before sending.'
-    : 'Configure the mail subject and content and save changes before sending.'
+    ? 'Configure the mail subject and content and save changes before sending.'
+    : 'Configure the mailing in the course mail settings before sending.'
 
   return (
     <>
