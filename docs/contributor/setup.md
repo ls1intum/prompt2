@@ -1,3 +1,4 @@
+(contributor.setup-guide)=
 # Setup Guide
 
 Welcome to the **Prompt** setup guide! In this document, you will learn how to configure and run the development and (optionally) a demo production environment of the **Prompt** application.

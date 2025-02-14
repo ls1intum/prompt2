@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
@@ -22,6 +23,17 @@ type CourseService struct {
 }
 
 var CourseServiceSingleton *CourseService
+
+func GetOwnCourseIDs(ctx context.Context, matriculationNumber, universityLogin string) ([]uuid.UUID, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	courses, err := CourseServiceSingleton.queries.GetOwnCourses(ctxWithTimeout, db.GetOwnCoursesParams{
+		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
+		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
+	})
+	return courses, err
+}
 
 func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.CourseWithPhases, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
@@ -299,6 +311,19 @@ func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData course
 	if err != nil {
 		log.Error(err)
 		return errors.New("failed to update course data")
+	}
+
+	return nil
+}
+
+func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	err := CourseServiceSingleton.queries.DeleteCourse(ctxWithTimeout, courseID)
+	if err != nil {
+		log.Error(err)
+		return errors.New("failed to delete course")
 	}
 
 	return nil

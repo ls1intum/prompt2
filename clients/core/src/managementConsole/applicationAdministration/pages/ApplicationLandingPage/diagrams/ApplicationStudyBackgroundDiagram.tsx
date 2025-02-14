@@ -1,18 +1,10 @@
-import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { useMemo } from 'react'
 import translations from '@/lib/translations.json'
+import { StackedBarChartWithPassStatus } from './StackedBarChartWithPassStatus'
 
 const programsWithOther = translations.university.studyPrograms.concat('Other')
-const studyProgramsConfig = programsWithOther.reduce((acc, program) => {
-  acc[program] = {
-    label: translations.university.studyProgramShortNames[program] || program,
-    color: 'hsl(var(--primary))',
-  }
-  return acc
-}, {} as ChartConfig)
 
 interface StudyBackgroundCardProps {
   applications: ApplicationParticipation[]
@@ -21,28 +13,40 @@ interface StudyBackgroundCardProps {
 export const ApplicationStudyBackgroundDiagram = ({
   applications,
 }: StudyBackgroundCardProps): JSX.Element => {
-  const { studyData } = useMemo(() => {
-    const studyPrograms = translations.university.studyPrograms
+  const studyData = useMemo(() => {
+    // Use the complete list of programs including 'Other'
+    const allPrograms = programsWithOther
 
-    const programCounts = applications.reduce(
+    // Count each pass status per program, initializing the count object when needed.
+    const countsByProgram = applications.reduce(
       (acc, app) => {
-        const program = studyPrograms.includes(app.student.studyProgram || '')
-          ? app.student.studyProgram
-          : 'Other'
-        acc[program!] = (acc[program!] || 0) + 1
+        const program = app.student.studyProgram || 'Other'
+        if (!acc[program]) {
+          acc[program] = { passed: 0, failed: 0, not_assessed: 0 }
+        }
+        acc[program][app.passStatus] = (acc[program][app.passStatus] || 0) + 1
         return acc
       },
-      {} as Record<string, number>,
+      {} as Record<string, { passed: number; failed: number; not_assessed: number }>,
     )
 
-    const data = Object.entries(studyProgramsConfig).map(([program, config]) => ({
-      program: config.label,
-      fullName: program,
-      Students: programCounts[program] || 0,
-      fill: config.color,
-    }))
+    // Map over all programs (including "Other") to create the data for the chart.
+    const data = allPrograms.map((program) => {
+      const accepted = countsByProgram[program]?.passed ?? 0
+      const rejected = countsByProgram[program]?.failed ?? 0
+      const notAssessed = countsByProgram[program]?.not_assessed ?? 0
 
-    return { studyData: data }
+      return {
+        program,
+        shortTitle: translations.university.studyProgramShortNames[program] || program,
+        accepted,
+        rejected,
+        notAssessed,
+        total: accepted + rejected + notAssessed,
+      }
+    })
+
+    return data
   }, [applications])
 
   return (
@@ -52,52 +56,8 @@ export const ApplicationStudyBackgroundDiagram = ({
         <CardDescription>Breakdown of student study programs</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
-        <ChartContainer config={studyProgramsConfig} className='mx-auto w-full h-[280px]'>
-          <BarChart data={studyData} margin={{ top: 30, right: 10, bottom: 0, left: 10 }}>
-            <XAxis
-              dataKey='program'
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12 }}
-              interval={0}
-              height={50}
-              tickFormatter={(value) => value.split(' ').join('\n')}
-            />
-            <YAxis hide />
-            <ChartTooltip cursor={false} content={<CustomTooltipContent />} />
-            <Bar dataKey='Students' radius={[4, 4, 0, 0]}>
-              {studyData.map((entry, index) => (
-                <Bar key={`bar-${index}`} dataKey='Students' fill={entry.fill} />
-              ))}
-              <LabelList position='top' offset={10} className='fill-foreground' fontSize={12} />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+        <StackedBarChartWithPassStatus data={studyData} dataKey='shortTitle' />
       </CardContent>
     </Card>
   )
-}
-
-interface CustomTooltipContentProps {
-  active?: boolean
-  payload?: Array<{
-    value: number
-    payload: {
-      fullName: string
-      Students: number
-    }
-  }>
-}
-
-const CustomTooltipContent = ({ active, payload }: CustomTooltipContentProps) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload
-    return (
-      <div className='bg-background border border-border rounded-lg shadow-md p-2'>
-        <p className='font-semibold'>{data.fullName}</p>
-        <p>Students: {data.Students}</p>
-      </div>
-    )
-  }
-  return null
 }

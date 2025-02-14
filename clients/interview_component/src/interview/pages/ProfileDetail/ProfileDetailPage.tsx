@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, FileUserIcon } from 'lucide-react'
@@ -13,6 +13,8 @@ export const ProfileDetailPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const overviewURL = pathname.replace(`/details/${studentId}`, '')
 
   const applicationAnswers =
     (participation?.prevData?.applicationAnswers as ExportedApplicationAnswer[]) ?? []
@@ -21,7 +23,7 @@ export const ProfileDetailPage = (): JSX.Element => {
     <div className=''>
       <div className='relative pb-4'>
         <Button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(overviewURL)}
           variant='ghost'
           size='sm'
           className='absolute top-0 left-0'

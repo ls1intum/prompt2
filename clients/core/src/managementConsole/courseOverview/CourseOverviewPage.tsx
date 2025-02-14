@@ -1,18 +1,30 @@
-import { useCourseStore } from '@tumaet/prompt-shared-state'
+import {
+  getPermissionString,
+  Role,
+  useAuthStore,
+  useCourseStore,
+} from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
+import { EditCourseDropdown } from './components/EditCourseDropdown'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const course = courses.find((c) => c.id === courseId)
+  const { permissions } = useAuthStore()
 
   const formatDate = (dateString: string): string => {
     const [year, month, date] = dateString.split('-')
     return `${date}.${month}.${year}`
   }
+
+  const canEdit =
+    permissions.includes(
+      getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
+    ) || permissions.includes(Role.PROMPT_ADMIN)
 
   const bgColor = course?.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
@@ -42,6 +54,7 @@ export const CourseOverview = (): JSX.Element => {
               <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
               <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
             </div>
+            {canEdit && <EditCourseDropdown />}
           </div>
         </CardHeader>
         <CardContent className='p-6'>

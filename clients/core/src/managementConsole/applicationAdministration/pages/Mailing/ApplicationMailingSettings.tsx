@@ -7,7 +7,10 @@ import { useModifyCoursePhase } from '../../hooks/useModifyCoursePhase'
 import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { CustomApplicationPlaceHolder } from './components/CustomApplicationPlaceHolder'
+import {
+  applicationMailingPlaceholders,
+  CustomApplicationPlaceHolder,
+} from './components/CustomApplicationPlaceHolder'
 import { EmailTemplateEditor } from '@/components/pages/Mailing/components/MailingEditor'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { SettingsCard } from './components/SettingsCard'
@@ -128,6 +131,9 @@ export const ApplicationMailingSettings = () => {
               label='Confirmation'
               subjectHTMLLabel='confirmationMailSubject'
               contentHTMLLabel='confirmationMailContent'
+              placeholders={applicationMailingPlaceholders.map(
+                (placeholder) => placeholder.placeholder,
+              )}
             />
           </TabsContent>
           <TabsContent value='acceptance'>
@@ -138,6 +144,9 @@ export const ApplicationMailingSettings = () => {
               label='Acceptance'
               subjectHTMLLabel='passedMailSubject'
               contentHTMLLabel='passedMailContent'
+              placeholders={applicationMailingPlaceholders.map(
+                (placeholder) => placeholder.placeholder,
+              )}
             />
           </TabsContent>
           <TabsContent value='rejection'>
@@ -148,6 +157,9 @@ export const ApplicationMailingSettings = () => {
               label='Rejection'
               subjectHTMLLabel='failedMailSubject'
               contentHTMLLabel='failedMailContent'
+              placeholders={applicationMailingPlaceholders.map(
+                (placeholder) => placeholder.placeholder,
+              )}
             />
           </TabsContent>
         </Tabs>

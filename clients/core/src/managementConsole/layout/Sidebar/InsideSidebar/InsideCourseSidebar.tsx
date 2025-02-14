@@ -34,7 +34,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
       <SidebarGroup>
         <SidebarGroupContent>
           <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
-          <CourseConfiguratorSidebar rootPath={rootPath} title='Configure Course' />
+          <CourseConfiguratorSidebar rootPath={rootPath} title='Course Configurator' />
           <MailingConfigSidebar rootPath={rootPath} title='Mailing Settings' />
         </SidebarGroupContent>
       </SidebarGroup>
@@ -51,7 +51,11 @@ export const InsideCourseSidebar = (): JSX.Element => {
                     key={phase.id}
                     fallback={<DisabledSidebarMenuItem key={phase.id} title={'Loading...'} />}
                   >
-                    <PhaseComponent rootPath={rootPath + '/' + phase.id} title={phase.name} />
+                    <PhaseComponent
+                      rootPath={rootPath + '/' + phase.id}
+                      title={phase.name}
+                      coursePhaseID={phase.id}
+                    />
                   </Suspense>
                 )
               } else {

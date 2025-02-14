@@ -14,9 +14,37 @@ func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func
 	courseParticipation := router.Group("/courses/:uuid/participations", authMiddleware())
 	courseParticipation.GET("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCourseParticipationsForCourse)
 	courseParticipation.POST("/enroll", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCourseParticipation)
+	courseParticipation.GET("/self", getOwnCourseParticipation)
 }
 
-// TODO: in future think about how to integrate / create "passed" students from previous phases
+func getOwnCourseParticipation(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	matriculationNumber := c.GetString("matriculationNumber")
+	universityLogin := c.GetString("universityLogin")
+
+	if matriculationNumber == "" || universityLogin == "" {
+		// potentially users without studentIDs are using the system -> no error shall be thrown
+		c.JSON(http.StatusOK, courseParticipationDTO.GetOwnCourseParticipation{
+			ID:                 uuid.Nil,
+			ActiveCoursePhases: []uuid.UUID{},
+		})
+		return
+	}
+
+	courseParticipation, err := GetOwnCourseParticipation(c, id, matriculationNumber, universityLogin)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseParticipation)
+}
+
 func getCourseParticipationsForCourse(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {

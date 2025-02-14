@@ -1,3 +1,5 @@
+import { UpdateCourseData } from '@tumaet/prompt-shared-state'
+
 export interface PostCourse {
   name: string
   startDate: Date
@@ -23,5 +25,13 @@ export function serializePostCourse(course: PostCourse): Record<string, any> {
     ...course,
     startDate: formatDate(course.startDate),
     endDate: formatDate(course.endDate),
+  }
+}
+
+export function serializeUpdateCourse(course: UpdateCourseData): Record<string, any> {
+  return {
+    ...course,
+    startDate: course.startDate ? formatDate(course.startDate) : undefined,
+    endDate: course.endDate ? formatDate(course.endDate) : undefined,
   }
 }

@@ -4,5 +4,8 @@ window.env = {
     KEYCLOAK_HOST: 'http://localhost:8081',
     KEYCLOAK_REALM_NAME: 'prompt',
     CHAIR_NAME_LONG: 'TUM Research Group for Applied Education Technologies',
-    CHAIR_NAME_SHORT: 'Applied Education Technologies'
+    CHAIR_NAME_SHORT: 'Applied Education Technologies',
+    GITHUB_SHA: 'GITHUB_SHA - Will be here in Production',
+    GITHUB_REF: '$GITHUB_REF - Will be here in Production',
+    SERVER_IMAGE_TAG: '$SERVER_IMAGE_TAG - Image Tag',
 }

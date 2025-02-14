@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -27,7 +26,10 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 			"POSTGRES_PASSWORD": "testpass",
 			"POSTGRES_DB":       "prompt",
 		},
-		WaitingFor: wait.ForListeningPort("5432/tcp").WithStartupTimeout(300 * time.Second),
+		WaitingFor: wait.ForAll(
+			wait.ForLog("database system is ready to accept connections"),
+			wait.ForListeningPort("5432/tcp"),
+		),
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

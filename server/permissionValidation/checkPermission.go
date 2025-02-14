@@ -8,6 +8,9 @@ import (
 )
 
 func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers ...string) (bool, error) {
+	// Inject the course identifier for later use
+	c.Set("courseTokenIdentifier", courseIdentifier)
+
 	// Extract user roles from context
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {

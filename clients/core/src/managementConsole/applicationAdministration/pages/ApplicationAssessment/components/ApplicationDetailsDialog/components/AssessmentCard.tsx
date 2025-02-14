@@ -4,31 +4,74 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { PassStatus } from '@tumaet/prompt-shared-state'
+import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 import { InstructorComment } from '../../../../../interfaces/instructorComment'
-import { Send } from 'lucide-react'
+import { Send, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useModifyAssessment } from '../hooks/mutateAssessment'
+import { ApplicationAssessment } from '@core/managementConsole/applicationAdministration/interfaces/applicationAssessment'
 
 interface AssessmentCardProps {
   score: number | null
   restrictedData: { [key: string]: any }
   acceptanceStatus: PassStatus
-  handleAcceptanceStatusChange: (status: PassStatus) => void
-  onScoreSubmission: (score: number) => void
-  onCommentSubmission: (comment: string) => void
+  coursePhaseParticipationID: string
 }
 
 export const AssessmentCard = ({
   score,
   restrictedData,
   acceptanceStatus,
-  handleAcceptanceStatusChange,
-  onScoreSubmission,
-  onCommentSubmission,
+  coursePhaseParticipationID,
 }: AssessmentCardProps): JSX.Element => {
   const [currentScore, setCurrentScore] = useState<number | null>(score)
   const [newComment, setNewComment] = useState<string>('')
-  const comments = restrictedData.comments as InstructorComment[]
+  const comments = (restrictedData.comments as InstructorComment[]) ?? []
+  const { user } = useAuthStore()
+  const author = `${user?.firstName} ${user?.lastName}`
+
+  const { mutate: mutateAssessment } = useModifyAssessment(coursePhaseParticipationID)
+
+  const handleScoreSubmit = (newScore: number) => {
+    const assessment: ApplicationAssessment = {
+      Score: newScore,
+    }
+    mutateAssessment(assessment)
+  }
+
+  const handleAcceptanceStatusChange = (newStatus: PassStatus) => {
+    const assessment: ApplicationAssessment = {
+      passStatus: newStatus,
+    }
+    mutateAssessment(assessment)
+  }
+
+  const handleCommentSubmit = (comment: string) => {
+    comments.push({
+      text: comment,
+      timestamp: new Date().toISOString(),
+      author: author,
+    })
+    const assessment: ApplicationAssessment = {
+      restrictedData: {
+        comments,
+      },
+    }
+    mutateAssessment(assessment)
+  }
+
+  const handleDeleteComment = (comment: InstructorComment) => {
+    const filteredComments = comments.filter(
+      (c) => !(c.author == comment.author && c.timestamp === comment.timestamp),
+    )
+    console.log(filteredComments)
+    const assessment: ApplicationAssessment = {
+      restrictedData: {
+        comments: filteredComments,
+      },
+    }
+    mutateAssessment(assessment)
+  }
 
   return (
     <Card className='w-full'>
@@ -55,7 +98,7 @@ export const AssessmentCard = ({
               />
               <Button
                 disabled={!currentScore || currentScore === score}
-                onClick={() => onScoreSubmission(currentScore ?? 0)}
+                onClick={() => handleScoreSubmit(currentScore ?? 0)}
                 size='sm'
               >
                 Submit
@@ -98,17 +141,29 @@ export const AssessmentCard = ({
               {comments.map((comment, index) => (
                 <div
                   key={index}
-                  className='border border-border p-3 rounded-md bg-secondary text-card-foreground'
+                  className='border border-border p-3 rounded-md bg-secondary text-card-foreground flex justify-between items-start'
                 >
-                  <p className='text-sm text-muted-foreground mb-1'>
-                    <strong className='font-medium text-foreground'>{comment.author}</strong>{' '}
-                    {comment.timestamp && (
-                      <span className='text-muted-foreground'>
-                        - {new Date(comment.timestamp).toLocaleString()}
-                      </span>
-                    )}
-                  </p>
-                  <p className='text-foreground'>{comment.text}</p>
+                  <div>
+                    <p className='text-sm text-muted-foreground mb-1'>
+                      <strong className='font-medium text-foreground'>{comment.author}</strong>{' '}
+                      {comment.timestamp && (
+                        <span className='text-muted-foreground'>
+                          - {new Date(comment.timestamp).toLocaleString()}
+                        </span>
+                      )}
+                    </p>
+                    <p className='text-foreground whitespace-pre-line'>{comment.text}</p>
+                  </div>
+                  {comment.author === author && (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleDeleteComment(comment)}
+                      className='text-red-500 hover:text-red-600 hover:bg-red-50'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -132,7 +187,7 @@ export const AssessmentCard = ({
               size='sm'
               disabled={!newComment}
               onClick={() => {
-                onCommentSubmission(newComment)
+                handleCommentSubmit(newComment)
                 setNewComment('')
               }}
             >

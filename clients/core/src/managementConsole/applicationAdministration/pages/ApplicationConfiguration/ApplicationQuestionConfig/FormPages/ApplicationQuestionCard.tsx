@@ -33,6 +33,7 @@ import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -47,20 +48,22 @@ interface ApplicationQuestionCardProps {
   onUpdate: (updatedQuestion: ApplicationQuestionMultiSelect | ApplicationQuestionText) => void
   submitAttempted: boolean
   onDelete: (id: string) => void
+  dragHandleProps?: DraggableProvidedDragHandleProps | null
 }
 
 export const ApplicationQuestionCard = forwardRef<
   ApplicationQuestionCardRef | undefined, // or null if you prefer
   ApplicationQuestionCardProps
 >(function ApplicationQuestionCard(
-  { question, index, originalQuestion, onUpdate, submitAttempted, onDelete },
+  { question, index, originalQuestion, onUpdate, submitAttempted, onDelete, dragHandleProps },
   ref,
 ) {
   const isNewQuestion = question.title === '' ? true : false
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [useRichInput, setUseRichInput] = useState(false)
+  // if a rich text is entered -> start with rich text editor
+  const [useRichInput, setUseRichInput] = useState(question.description?.startsWith('<'))
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -102,7 +105,11 @@ export const ApplicationQuestionCard = forwardRef<
       <Card
         className={`mb-4 ${submitAttempted && !form.formState.isValid ? 'border-red-500' : ''}`}
       >
-        <CardHeader className='cursor-pointer' onClick={() => setIsExpanded(!isExpanded)}>
+        <CardHeader
+          className='cursor-pointer'
+          onClick={() => setIsExpanded(!isExpanded)}
+          {...dragHandleProps} // This is the drag handle for the card
+        >
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-2'>
               <GripVertical className='cursor-move h-6 w-6 text-muted-foreground' />

@@ -15,7 +15,7 @@ export const OverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
   const path = useLocation().pathname
   const { width } = useScreenSize() // use this for more fine-grained control over the layout
-  const [sortBy, setSortBy] = useState<string | undefined>(undefined)
+  const [sortBy, setSortBy] = useState<string | undefined>('Interview Date')
   const orderedParticipations = useSorting(sortBy)
 
   return (
