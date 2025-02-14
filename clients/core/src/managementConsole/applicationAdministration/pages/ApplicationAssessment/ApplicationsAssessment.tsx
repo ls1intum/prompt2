@@ -92,8 +92,11 @@ export const ApplicationsAssessment = (): JSX.Element => {
     },
   })
 
+  const filteredRowsCount = table.getFilteredRowModel().rows.length
+  const totalRowsCount = participations?.length ?? 0
+
   return (
-    <div id='table-view' className='relative flex flex-col space-y-6'>
+    <div id='table-view' className='relative flex flex-col'>
       <ManagementPageHeader>Applications Overview</ManagementPageHeader>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
@@ -129,6 +132,10 @@ export const ApplicationsAssessment = (): JSX.Element => {
         <div className='flex flex-wrap gap-2'>
           <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} />
         </div>
+      </div>
+
+      <div className='text-sm text-muted-foreground mb-2 mt-4'>
+        Showing {filteredRowsCount} of {totalRowsCount} applications
       </div>
 
       <div className='rounded-md border' style={{ width: `${tableWidth + 50}px` }}>
