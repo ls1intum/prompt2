@@ -11,7 +11,7 @@ import (
 
 func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	mailing := router.Group("/mailing", authMiddleware())
-	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), sendStatusMailManualTrigger)
+	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer, keycloak.CourseLecturer), sendStatusMailManualTrigger)
 }
 
 func sendStatusMailManualTrigger(c *gin.Context) {
