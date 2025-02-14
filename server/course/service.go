@@ -19,8 +19,7 @@ type CourseService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
 	// use dependency injection for keycloak to allow mocking
-	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName string) error
-	addUserToGroup             func(ctx context.Context, userID, groupName string) error
+	createCourseGroupsAndRoles func(ctx context.Context, courseName, iterationName, userID string) error
 }
 
 var CourseServiceSingleton *CourseService
@@ -169,18 +168,11 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 		return courseDTO.Course{}, err
 	}
 
-	// create keycloak roles
-	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String)
+	// create keycloak roles - also add the requester to the course lecturer role
+	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
 		log.Error("Failed to create keycloak roles for course: ", err)
 		tx.Rollback(ctx)
-		return courseDTO.Course{}, err
-	}
-
-	roleString := fmt.Sprintf("%s-%s-Lecturer", createdCourse.Name, createdCourse.SemesterTag.String)
-	err = CourseServiceSingleton.addUserToGroup(ctx, requesterID, roleString)
-	if err != nil {
-		log.Error("Failed to assign requestor to lecturer roles for course: ", err)
 		return courseDTO.Course{}, err
 	}
 

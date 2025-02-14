@@ -20,6 +20,8 @@ type KeycloakClientManager struct {
 
 var KeycloakSingleton *KeycloakClientManager
 
+var TOP_LEVEL_GROUP_NAME = "Prompt"
+
 func InitKeycloak(ctx context.Context, BaseURL, Realm, ClientID, ClientSecret, idOfClient, expectedAuthorizedParty string, queries db.Queries) error {
 	KeycloakSingleton = &KeycloakClientManager{
 		client:                  gocloak.NewClient(BaseURL),

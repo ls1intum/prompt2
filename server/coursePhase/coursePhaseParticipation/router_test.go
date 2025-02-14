@@ -55,7 +55,7 @@ func setupRouter() *gin.Engine {
 	router := gin.Default()
 	api := router.Group("/api")
 	setupCoursePhaseParticipationRouter(api, func() gin.HandlerFunc {
-		return testutils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "iPraktikum-ios24245-Lecturer"}, "existingstudent@example.com", "1234567", "ab12cde")
+		return testutils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "ios24245-iPraktikum-Lecturer"}, "existingstudent@example.com", "1234567", "ab12cde")
 	}, testutils.MockPermissionMiddleware)
 	return router
 }
