@@ -137,8 +137,8 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 const getAllActiveCoursesRestricted = `-- name: GetAllActiveCoursesRestricted :many
 WITH parsed_roles AS (
     SELECT
-        split_part(role, '-', 1) AS course_name,
-        split_part(role, '-', 2) AS semester_tag,
+        split_part(role, '-', 1) AS semester_tag,
+        split_part(role, '-', 2) AS course_name,
         split_part(role, '-', 3) AS user_role
     FROM
         unnest($1::text[]) AS role
