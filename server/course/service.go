@@ -11,7 +11,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -42,7 +42,7 @@ func GetAllCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.
 	var courses []db.Course
 	var err error
 	// Get all active courses the user is allowed to see
-	if userRoles[keycloak.PromptAdmin] {
+	if userRoles[permissionValidation.PromptAdmin] {
 		// get all courses
 		courses, err = CourseServiceSingleton.queries.GetAllActiveCoursesAdmin(ctxWithTimeout)
 		if err != nil {

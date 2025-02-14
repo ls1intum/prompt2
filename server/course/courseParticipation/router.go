@@ -6,15 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	// incoming path should be /course/:uuid/
 	courseParticipation := router.Group("/courses/:uuid/participations", authMiddleware())
+	courseParticipation.GET("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCourseParticipationsForCourse)
+	courseParticipation.POST("/enroll", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCourseParticipation)
 	courseParticipation.GET("/self", getOwnCourseParticipation)
-	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseParticipationsForCourse)
-	courseParticipation.POST("/enroll", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCourseParticipation)
 }
 
 func getOwnCourseParticipation(c *gin.Context) {

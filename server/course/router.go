@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,16 +15,17 @@ import (
 // Role middleware for all without id -> possible additional filtering in subroutes required
 func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
+	course.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getAllCourses)
+	course.GET("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCourseByID)
+	course.POST("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createCourse)
+	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhaseOrder)
+	course.GET("/:uuid/phase_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCoursePhaseGraph)
+	course.GET("/:uuid/meta_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getMetaDataGraph)
+	course.PUT("/:uuid/meta_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateMetaDataGraph)
+	course.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseData)
 	course.GET("/self", getOwnCourses)
-	course.GET("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor, keycloak.CourseStudent), getAllCourses)
-	course.GET("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCourseByID)
-	course.POST("/", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer), createCourse)
-	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseOrder)
-	course.GET("/:uuid/phase_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getCoursePhaseGraph)
-	course.GET("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getMetaDataGraph)
-	course.PUT("/:uuid/meta_graph", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateMetaDataGraph)
-	course.PUT("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCourseData)
-	course.DELETE("/:uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), deleteCourse)
+
+	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
 }
 
 func getOwnCourses(c *gin.Context) {

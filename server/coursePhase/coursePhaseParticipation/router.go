@@ -6,18 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/keycloak"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
-	courseParticipation.GET("/self", permissionIDMiddleware(keycloak.CourseStudent), getOwnCoursePhaseParticipation)
-	courseParticipation.GET("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipationsForCoursePhase)
-	courseParticipation.POST("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), createCoursePhaseParticipation)
-	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer, keycloak.CourseEditor), getParticipation)
-	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateCoursePhaseParticipation)
+	courseParticipation.GET("/self", permissionIDMiddleware(permissionValidation.CourseStudent), getOwnCoursePhaseParticipation)
+	courseParticipation.GET("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getParticipationsForCoursePhase)
+	courseParticipation.POST("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCoursePhaseParticipation)
+	courseParticipation.GET("/:participation_uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getParticipation)
+	courseParticipation.PUT("/:participation_uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhaseParticipation)
 	// allow to modify multiple at once
-	courseParticipation.PUT("", permissionIDMiddleware(keycloak.PromptAdmin, keycloak.CourseLecturer), updateBatchCoursePhaseParticipation)
+	courseParticipation.PUT("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateBatchCoursePhaseParticipation)
 }
 
 func getOwnCoursePhaseParticipation(c *gin.Context) {

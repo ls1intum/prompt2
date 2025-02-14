@@ -1,10 +1,11 @@
-package keycloak
+package keycloakRealmManager
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,11 +26,11 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 		return err
 	}
 
-	subGroupNames := []string{CourseLecturer, CourseEditor}
+	subGroupNames := []string{permissionValidation.CourseLecturer, permissionValidation.CourseEditor}
 	for _, groupName := range subGroupNames {
 		// create role for the group
 		roleName := fmt.Sprintf("%s-%s-%s", iterationName, courseName, groupName)
-		role, err := CreateRealmRole(ctx, token.AccessToken, roleName)
+		role, err := GetOrCreateRealmRole(ctx, token.AccessToken, roleName)
 		if err != nil {
 			return err
 		}
@@ -41,15 +42,15 @@ func CreateCourseGroupsAndRoles(ctx context.Context, courseName, iterationName, 
 		}
 
 		// Associate role with group
-		err = KeycloakSingleton.client.AddClientRolesToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, KeycloakSingleton.idOfClient, subGroupID, []gocloak.Role{*role})
+		err = KeycloakRealmSingleton.client.AddClientRolesToGroup(ctx, token.AccessToken, KeycloakRealmSingleton.Realm, KeycloakRealmSingleton.idOfClient, subGroupID, []gocloak.Role{*role})
 		if err != nil {
 			log.Error("failed to associate role with group: ", err)
 			return err
 		}
 
 		// Add the requester to the lecturer group
-		if groupName == CourseLecturer {
-			err = KeycloakSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakSingleton.Realm, userID, subGroupID)
+		if groupName == permissionValidation.CourseLecturer {
+			err = KeycloakRealmSingleton.client.AddUserToGroup(ctx, token.AccessToken, KeycloakRealmSingleton.Realm, userID, subGroupID)
 			if err != nil {
 				log.Error("failed to add user to group: ", err)
 				return err

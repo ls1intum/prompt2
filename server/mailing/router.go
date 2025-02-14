@@ -5,13 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/keycloak"
 	"github.com/niclasheun/prompt2.0/mailing/mailingDTO"
+	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
 func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	mailing := router.Group("/mailing", authMiddleware())
-	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(keycloak.PromptAdmin, keycloak.PromptLecturer, keycloak.CourseLecturer), sendStatusMailManualTrigger)
+	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendStatusMailManualTrigger)
 }
 
 func sendStatusMailManualTrigger(c *gin.Context) {
