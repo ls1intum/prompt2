@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { MessageSquare, Save, User } from 'lucide-react'
+import { MessageSquare, User } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -21,7 +21,6 @@ export const InterviewCard = (): JSX.Element => {
   const participation = participations.find((p) => p.student.id === studentId)
 
   const { user } = useAuthStore()
-
   const { coursePhase } = useCoursePhaseStore()
   const interviewQuestions =
     (coursePhase?.restrictedData?.interviewQuestions as InterviewQuestion[]) ?? []
@@ -34,7 +33,9 @@ export const InterviewCard = (): JSX.Element => {
     participation?.restrictedData?.interviewer,
   )
 
-  const { mutate, isPending: isLoading } = useUpdateCoursePhaseParticipation()
+  const { mutate } = useUpdateCoursePhaseParticipation()
+
+  // Compare current state with original data
   const isModified =
     answers.some((a) => {
       const originalAnswer = participation?.restrictedData?.interviewAnswers?.find(
@@ -94,6 +95,13 @@ export const InterviewCard = (): JSX.Element => {
     }
   }
 
+  // When an input loses focus, save changes if any modifications exist.
+  const handleBlur = () => {
+    if (isModified) {
+      saveChanges()
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -111,6 +119,7 @@ export const InterviewCard = (): JSX.Element => {
               className='w-48'
               value={score}
               onChange={(e) => setScore(Number(e.target.value))}
+              onBlur={handleBlur}
               type='number'
               min='0'
               max='100'
@@ -147,6 +156,7 @@ export const InterviewCard = (): JSX.Element => {
                 id='interviewer'
                 value={interviewer}
                 onChange={(e) => setInterviewer(e.target.value)}
+                onBlur={handleBlur}
                 placeholder='Enter interviewer name'
               />
               <Button
@@ -178,6 +188,8 @@ export const InterviewCard = (): JSX.Element => {
                   onChange={(value) => {
                     setAnswer(question.id, value as string)
                   }}
+                  // Auto-save on blur
+                  onBlur={handleBlur}
                   className='w-full'
                   editorContentClassName='p-3'
                   output='html'
@@ -189,17 +201,7 @@ export const InterviewCard = (): JSX.Element => {
               {index < interviewQuestions.length - 1 && <Separator className='mt-3 mb-3' />}
             </div>
           ))}
-
-        <div className='mt-6 flex justify-end'>
-          <Button
-            onClick={() => saveChanges()}
-            disabled={isLoading || !isModified}
-            className='flex items-center'
-          >
-            <Save className='h-4 w-4 mr-2' />
-            {isLoading ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
+        {/* The manual save button has been removed */}
       </CardContent>
     </Card>
   )
