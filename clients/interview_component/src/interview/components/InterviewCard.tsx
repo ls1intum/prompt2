@@ -26,9 +26,13 @@ export const InterviewCard = (): JSX.Element => {
   const interviewQuestions =
     (coursePhase?.restrictedData?.interviewQuestions as InterviewQuestion[]) ?? []
 
-  const [answers, setAnswers] = useState<InterviewAnswer[]>([])
+  const [answers, setAnswers] = useState<InterviewAnswer[]>(
+    (participation?.restrictedData?.interviewAnswers as InterviewAnswer[]) ?? [],
+  )
   const [score, setScore] = useState<number | undefined>(undefined)
-  const [interviewer, setInterviewer] = useState<string | undefined>(undefined)
+  const [interviewer, setInterviewer] = useState<string | undefined>(
+    participation?.restrictedData?.interviewer,
+  )
 
   const { mutate, isPending: isLoading } = useUpdateCoursePhaseParticipation()
   const isModified =
@@ -76,6 +80,7 @@ export const InterviewCard = (): JSX.Element => {
         restrictedData: {
           interviewAnswers: answers,
           score: score,
+          interviewer: interviewer,
         },
         studentReadableData: {},
         passStatus: passStatus ?? participation.passStatus,
