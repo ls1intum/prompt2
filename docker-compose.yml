@@ -71,6 +71,24 @@ services:
     ports:
       - "5432:5432"
 
+  db-intro-course:
+    image: 'postgres:15.2-alpine'
+    container_name: prompt-intro-course-db
+    environment:
+      - POSTGRES_USER=prompt-postgres
+      - POSTGRES_PASSWORD=prompt-postgres
+      - POSTGRES_DB=prompt
+      - TZ=Europe/Berlin
+    volumes:
+      - ./intro_course_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+
   keycloak-db:
     image: "postgres:15.2-alpine"
     container_name: prompt-keycloak-db

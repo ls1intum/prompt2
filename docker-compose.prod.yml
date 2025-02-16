@@ -81,8 +81,8 @@ services:
     environment:
       - CORE_HOST
       - SERVER_ADDRESS
-      - DB_HOST
-      - DB_PORT
+      - DB_HOST_INTRO_COURSE
+      - DB_PORT_INTRO_COURSE
       - DB_NAME
       - DB_PASSWORD
       - KEYCLOAK_HOST
@@ -101,6 +101,24 @@ services:
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
+  db-intro-course:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-intro-course
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./intro_course_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
