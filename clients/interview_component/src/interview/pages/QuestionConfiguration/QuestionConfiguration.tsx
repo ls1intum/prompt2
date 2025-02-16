@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, Plus, GripVertical, Trash2 } from 'lucide-react'
@@ -13,6 +13,7 @@ export const QuestionConfiguration = () => {
   const [newQuestion, setNewQuestion] = useState('')
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const { mutate } = useUpdateCoursePhaseMetaData()
 
@@ -53,6 +54,9 @@ export const QuestionConfiguration = () => {
         },
       ])
       setNewQuestion('')
+      requestAnimationFrame(() => {
+        scrollToBottom()
+      })
     }
   }
 
@@ -68,6 +72,10 @@ export const QuestionConfiguration = () => {
     newQuestions.splice(result.destination.index, 0, reorderedItem)
 
     setInterviewQuestions(newQuestions.map((q, idx) => ({ ...q, orderNum: idx })))
+  }
+
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView(false)
   }
 
   return (
@@ -111,38 +119,44 @@ export const QuestionConfiguration = () => {
           </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId='questions'>
-              {(provided) => (
-                <ul {...provided.droppableProps} ref={provided.innerRef} className='space-y-4'>
-                  {interviewQuestions.map((question, index) => (
-                    <Draggable key={question.id} draggableId={question.id.toString()} index={index}>
-                      {(prov) => (
-                        <li
-                          ref={prov.innerRef}
-                          {...prov.draggableProps}
-                          className='flex items-center space-x-2 bg-secondary p-3 rounded-lg shadow-sm transition-colors duration-200 hover:bg-secondary/80'
-                        >
-                          <div {...prov.dragHandleProps} className='cursor-move'>
-                            <GripVertical className='h-5 w-5 text-muted-foreground' />
-                          </div>
-                          <span className='flex-grow text-sm'>{question.question}</span>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => deleteQuestion(question.id)}
-                            aria-label='Delete question'
-                            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            <div ref={scrollRef}>
+              <Droppable droppableId='questions'>
+                {(provided) => (
+                  <ul {...provided.droppableProps} ref={provided.innerRef} className='space-y-4'>
+                    {interviewQuestions.map((question, index) => (
+                      <Draggable
+                        key={question.id}
+                        draggableId={question.id.toString()}
+                        index={index}
+                      >
+                        {(prov) => (
+                          <li
+                            ref={prov.innerRef}
+                            {...prov.draggableProps}
+                            className='flex items-center space-x-2 bg-secondary p-3 rounded-lg shadow-sm transition-colors duration-200 hover:bg-secondary/80'
                           >
-                            <Trash2 className='h-4 w-4 ml-2 mr-2' />
-                          </Button>
-                        </li>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </ul>
-              )}
-            </Droppable>
+                            <div {...prov.dragHandleProps} className='cursor-move'>
+                              <GripVertical className='h-5 w-5 text-muted-foreground' />
+                            </div>
+                            <span className='flex-grow text-sm'>{question.question}</span>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => deleteQuestion(question.id)}
+                              aria-label='Delete question'
+                              className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                            >
+                              <Trash2 className='h-4 w-4 ml-2 mr-2' />
+                            </Button>
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </div>
           </DragDropContext>
         )}
       </div>
