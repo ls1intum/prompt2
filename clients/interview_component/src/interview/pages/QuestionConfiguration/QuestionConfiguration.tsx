@@ -1,0 +1,139 @@
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Trash2, GripVertical, Plus } from 'lucide-react'
+import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
+import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
+import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+
+export const QuestionConfiguration = () => {
+  const { coursePhase } = useCoursePhaseStore()
+  const [newQuestion, setNewQuestion] = useState('')
+  const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const { mutate } = useUpdateCoursePhaseMetaData()
+
+  useEffect(() => {
+    if (coursePhase) {
+      const questions = coursePhase.restrictedData?.interviewQuestions ?? []
+      setInterviewQuestions(questions)
+      setIsLoading(false)
+    }
+  }, [coursePhase])
+
+  useEffect(() => {
+    if (coursePhase && !isLoading) {
+      mutate({
+        id: coursePhase.id,
+        restrictedData: {
+          interviewQuestions: interviewQuestions,
+        },
+      })
+    }
+  }, [interviewQuestions, coursePhase, mutate, isLoading])
+
+  const addQuestion = () => {
+    if (newQuestion.trim()) {
+      setInterviewQuestions((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          question: newQuestion.trim(),
+          orderNum: prev.length,
+        },
+      ])
+      setNewQuestion('')
+    }
+  }
+
+  const deleteQuestion = (id: number) => {
+    setInterviewQuestions((prev) => prev.filter((q) => q.id !== id))
+  }
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return
+
+    const newQuestions = Array.from(interviewQuestions)
+    const [reorderedItem] = newQuestions.splice(result.source.index, 1)
+    newQuestions.splice(result.destination.index, 0, reorderedItem)
+
+    setInterviewQuestions(newQuestions.map((q, idx) => ({ ...q, orderNum: idx })))
+  }
+
+  return (
+    <div className='max-w-3xl mx-auto'>
+      <header className='mb-8'>
+        <ManagementPageHeader>Interview Question Configuration</ManagementPageHeader>
+        <p className='text-muted-foreground mt-2'>
+          These questions will be used as a template during interviews. Deleting a question will
+          make any associated notes or responses inaccessible.
+        </p>
+      </header>
+      <div className='flex flex-col space-y-2 mb-6'>
+        <div className='flex items-center space-x-2'>
+          <Input
+            id='new-question'
+            value={newQuestion}
+            placeholder='Enter new question'
+            onChange={(e) => setNewQuestion(e.target.value)}
+            className='flex-grow'
+            maxLength={200}
+          />
+          <Button onClick={addQuestion} disabled={!newQuestion.trim()} aria-label='Add question'>
+            <Plus className='h-4 w-4 mr-2' />
+            Add
+          </Button>
+        </div>
+        <p className='text-xs text-muted-foreground text-right'>
+          {newQuestion.length}/200 characters
+        </p>
+      </div>
+      {isLoading ? (
+        <div className='flex justify-center items-center h-64'>
+          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
+        </div>
+      ) : (
+        <ScrollArea className='h-[400px] pr-4'>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId='questions'>
+              {(provided) => (
+                <ul {...provided.droppableProps} ref={provided.innerRef} className='space-y-4'>
+                  {interviewQuestions.map((question, index) => (
+                    <Draggable key={question.id} draggableId={question.id.toString()} index={index}>
+                      {(prov) => (
+                        <li
+                          ref={prov.innerRef}
+                          {...prov.draggableProps}
+                          className='flex items-center space-x-2 bg-secondary p-3 rounded-lg shadow-sm transition-colors duration-200 hover:bg-secondary/80'
+                        >
+                          <div {...prov.dragHandleProps} className='cursor-move'>
+                            <GripVertical className='h-5 w-5 text-muted-foreground' />
+                          </div>
+                          <span className='flex-grow text-sm'>{question.question}</span>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => deleteQuestion(question.id)}
+                            aria-label='Delete question'
+                            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                          >
+                            <Trash2 className='h-4 w-4 ml-2 mr-2' />
+                          </Button>
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </ul>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </ScrollArea>
+      )}
+    </div>
+  )
+}
