@@ -1,34 +1,28 @@
 import path from 'path'
-import CompressionPlugin from 'compression-webpack-plugin'
-import CopyPlugin from 'copy-webpack-plugin'
 import 'webpack-dev-server'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-import { CleanWebpackPlugin } from 'clean-webpack-plugin'
-import ExternalTemplateRemotesPlugin from 'external-remotes-plugin'
 import packageJson from '../package.json' with { type: 'json' }
-import { fileURLToPath } from 'url'
-import container from 'webpack'
 import webpack from 'webpack'
+import container from 'webpack'
+import { fileURLToPath } from 'url'
+import CopyPlugin from 'copy-webpack-plugin'
 
 const { ModuleFederationPlugin } = webpack.container
+
+// ########################################
+// ### Component specific configuration ###
+// ########################################
+const COMPONENT_NAME = 'intro_course_component'
+const COMPONENT_DEV_PORT = 3004
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// TODO: specify the version for react in shared dependencies
 const config: (env: Record<string, string>) => container.Configuration = (env) => {
-  const getVariable = (name: string) => env[name] // These variables are all determined at build time
+  const getVariable = (name: string) => env[name]
 
   const IS_DEV = getVariable('NODE_ENV') !== 'production'
-  const IS_PERF = getVariable('BUNDLE_SIZE') === 'true'
   const deps = packageJson.dependencies
-
-  // Adjust this to match your deployment URL
-  const templateURL = IS_DEV ? `http://localhost:3001` : `/template`
-  const interviewURL = IS_DEV ? `http://localhost:3002` : `/interview`
-  const matchingURL = IS_DEV ? `http://localhost:3003` : `/matching`
 
   return {
     target: 'web',
@@ -42,7 +36,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       compress: true,
       hot: true,
       historyApiFallback: true,
-      port: 3000,
+      port: COMPONENT_DEV_PORT,
       client: {
         progress: true,
       },
@@ -60,8 +54,6 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           include: [
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, '../shared_library/src'),
-            path.resolve(__dirname, '../node_modules/@xyflow/react/dist/style.css'),
-            path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
           ],
           use: [
             'style-loader', // Injects styles into DOM
@@ -74,24 +66,21 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
     output: {
       filename: '[name].[contenthash].js',
       path: path.resolve(__dirname, 'build'),
-      publicPath: '/',
+      publicPath: 'auto', // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx'],
       alias: {
-        '@': path.resolve(__dirname, '../shared_library'),
-        '@core': path.resolve(__dirname, 'src'),
-        '@managementConsole': path.resolve(__dirname, 'src/managementConsole'),
+        '@': path.resolve('../shared_library'),
       },
     },
     plugins: [
       new ModuleFederationPlugin({
-        name: 'core',
-        remotes: {
-          template_component: `template_component@${templateURL}/remoteEntry.js`,
-          interview_component: `interview_component@${interviewURL}/remoteEntry.js`,
-          matching_component: `matching_component@${matchingURL}/remoteEntry.js`,
-          intro_course_component: `intro_course_component@${matchingURL}/remoteEntry.js`,
+        name: COMPONENT_NAME, // TODO: rename this to your component name
+        filename: 'remoteEntry.js',
+        exposes: {
+          './routes': './routes',
+          './sidebar': './sidebar',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
@@ -107,7 +96,9 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           },
         },
       }),
-      new ExternalTemplateRemotesPlugin(),
+      new CopyPlugin({
+        patterns: [{ from: 'public' }],
+      }),
       new HtmlWebpackPlugin({
         template: 'public/template.html',
         minify: {
@@ -123,49 +114,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           minifyURLs: true,
         },
       }),
-      new CopyPlugin({
-        patterns: [{ from: 'public' }], // Copies env.js to your output root
-      }),
-      IS_PERF && new BundleAnalyzerPlugin(),
-      new CleanWebpackPlugin(),
-      !IS_DEV &&
-        new CompressionPlugin({
-          filename: '[path][base].gz',
-          algorithm: 'gzip',
-          test: /\.(js|css|html|svg)$/,
-          threshold: 10240,
-          minRatio: 0.8,
-        }),
     ].filter(Boolean),
-    optimization: {
-      minimize: !IS_DEV,
-      runtimeChunk: {
-        name: 'runtime',
-      },
-      splitChunks: {
-        chunks: 'async',
-        minSize: 30000,
-        minChunks: 1,
-        maxAsyncRequests: 5,
-        maxInitialRequests: 3,
-        cacheGroups: {
-          default: {
-            name: 'common',
-            chunks: 'initial',
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-          },
-        },
-      },
-      minimizer: [`...`, new CssMinimizerPlugin()],
-    },
     cache: {
       type: 'filesystem',
     },
