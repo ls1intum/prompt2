@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Trash2, GripVertical, Plus } from 'lucide-react'
+import { Loader2, Plus, GripVertical, Trash2 } from 'lucide-react'
 import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
@@ -36,6 +35,13 @@ export const QuestionConfiguration = () => {
     }
   }, [interviewQuestions, coursePhase, mutate, isLoading])
 
+  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault() // Prevent form submission if wrapped in a form
+      addQuestion()
+    }
+  }
+
   const addQuestion = () => {
     if (newQuestion.trim()) {
       setInterviewQuestions((prev) => [
@@ -65,39 +71,45 @@ export const QuestionConfiguration = () => {
   }
 
   return (
-    <div className='max-w-3xl mx-auto'>
-      <header className='mb-8'>
-        <ManagementPageHeader>Interview Question Configuration</ManagementPageHeader>
-        <p className='text-muted-foreground mt-2'>
-          These questions will be used as a template during interviews. Deleting a question will
-          make any associated notes or responses inaccessible.
-        </p>
-      </header>
-      <div className='flex flex-col space-y-2 mb-6'>
-        <div className='flex items-center space-x-2'>
-          <Input
-            id='new-question'
-            value={newQuestion}
-            placeholder='Enter new question'
-            onChange={(e) => setNewQuestion(e.target.value)}
-            className='flex-grow'
-            maxLength={200}
-          />
-          <Button onClick={addQuestion} disabled={!newQuestion.trim()} aria-label='Add question'>
-            <Plus className='h-4 w-4 mr-2' />
-            Add
-          </Button>
+    <div className='flex flex-col'>
+      {/* Sticky header */}
+      <div className='sticky top-0 bg-background p-4 z-10 border-b'>
+        <header className='mb-4'>
+          <ManagementPageHeader>Interview Question Configuration</ManagementPageHeader>
+          <p className='text-muted-foreground'>
+            These questions will be used as a template during interviews. Deleting a question will
+            make any associated notes or responses inaccessible.
+          </p>
+        </header>
+        <div className='flex flex-col space-y-2'>
+          <div className='flex items-center space-x-2'>
+            <Input
+              id='new-question'
+              value={newQuestion}
+              placeholder='Enter new question'
+              onChange={(e) => setNewQuestion(e.target.value)}
+              onKeyDown={handleEnter}
+              className='flex-grow'
+              maxLength={200}
+            />
+            <Button onClick={addQuestion} disabled={!newQuestion.trim()} aria-label='Add question'>
+              <Plus className='h-4 w-4 mr-2' />
+              Add
+            </Button>
+          </div>
+          <p className='text-xs text-muted-foreground text-right'>
+            {newQuestion.length}/200 characters
+          </p>
         </div>
-        <p className='text-xs text-muted-foreground text-right'>
-          {newQuestion.length}/200 characters
-        </p>
       </div>
-      {isLoading ? (
-        <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
-        </div>
-      ) : (
-        <ScrollArea className='h-[400px] pr-4'>
+
+      {/* Scrollable content */}
+      <div className='flex-grow overflow-auto h-[calc(100vh-300px)] p-4'>
+        {isLoading ? (
+          <div className='flex justify-center items-center h-64'>
+            <Loader2 className='h-12 w-12 animate-spin text-primary' />
+          </div>
+        ) : (
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId='questions'>
               {(provided) => (
@@ -132,8 +144,8 @@ export const QuestionConfiguration = () => {
               )}
             </Droppable>
           </DragDropContext>
-        </ScrollArea>
-      )}
+        )}
+      </div>
     </div>
   )
 }
