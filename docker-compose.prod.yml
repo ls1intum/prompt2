@@ -28,7 +28,7 @@ services:
       - prompt-network
 
   server-core:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${CORE_SERVER_IMAGE_TAG}"
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_CORE_IMAGE_TAG}"
     container_name: prompt-server-core
     labels:
       - "traefik.enable=true"
@@ -65,11 +65,11 @@ services:
       - prompt-network
   
   server-intro-course:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${INTRO_COURSE_SERVER_IMAGE_TAG}"
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${SERVER_INTRO_COURSE_IMAGE_TAG}"
     container_name: prompt-server-intro-course
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server-intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`intro-course/api`)"
+      - "traefik.http.routers.server-intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course/api`)"
       - "traefik.http.services.server-intro-course.loadbalancer.server.port=8080"
       - "traefik.http.routers.server-intro-course.entrypoints=websecure"
       - "traefik.http.routers.server-intro-course.tls.certresolver=letsencrypt"
@@ -130,6 +130,27 @@ services:
     networks:
       - prompt-network
 
+  client-intro-course-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-component:${INTRO_COURSE_IMAGE_TAG}"
+    container_name: prompt-client-intro-course-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course`)"
+      - "traefik.http.routers.intro-course.entrypoints=websecure"
+      - "traefik.http.routers.intro-course.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.intro-course-strip-prefix.stripPrefix.prefixes=/intro-course"
+      - "traefik.http.routers.intro-course.middlewares=intro-course-strip-prefix,intro-course-compress"
+      - "traefik.http.middlewares.intro-course-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+      - server-intro-course
+    networks:
+      - prompt-network
+
   client-interview-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
     container_name: prompt-client-interview-component
@@ -146,7 +167,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -166,7 +187,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -186,7 +207,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -212,7 +233,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 

@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: [ 'servers' ]
+        directory: [ 'core' ]
 
     steps:
       - uses: actions/checkout@v4
@@ -19,14 +19,14 @@ jobs:
           go-version: 1.22
           cache-dependency-path: "**/*.sum"
       - name: Install dependencies
-        run: cd ${{ matrix.directory }} && go mod download
+        run: cd servers/${{ matrix.directory }} && go mod download
       - name: Test with Go
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
-        run:  cd ${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
+        run:  cd servers/${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
       - name: Upload Go test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Go-results-${{ matrix.directory }}
-          path: ./${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
+          path: ./servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
