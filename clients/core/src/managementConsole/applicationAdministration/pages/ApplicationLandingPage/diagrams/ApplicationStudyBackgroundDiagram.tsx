@@ -38,7 +38,7 @@ export const ApplicationStudyBackgroundDiagram = ({
 
       return {
         program,
-        shortTitle: translations.university.studyProgramShortNames[program] || program,
+        dataKey: translations.university.studyProgramShortNames[program] || program,
         accepted,
         rejected,
         notAssessed,
@@ -56,7 +56,7 @@ export const ApplicationStudyBackgroundDiagram = ({
         <CardDescription>Breakdown of student study programs</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
-        <StackedBarChartWithPassStatus data={studyData} dataKey='shortTitle' />
+        <StackedBarChartWithPassStatus data={studyData} />
       </CardContent>
     </Card>
   )
