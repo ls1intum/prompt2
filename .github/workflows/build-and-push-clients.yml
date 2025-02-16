@@ -18,6 +18,9 @@ on:
       matching_image_tag:
         description: "The tag of the matching component image that was built"
         value: ${{ jobs.build-and-push-clients-matching.outputs.image_tag }}
+      intro_course_image_tag:
+        description: "The tag of the intro course component image that was built"
+        value: ${{ jobs.build-and-push-clients-intro-course.outputs.image_tag }}
 
 jobs:
   build-and-push-clients-base:
@@ -85,3 +88,15 @@ jobs:
           "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
           "CORE_HOST=${{ vars.CORE_HOST }}"
       secrets: inherit
+
+  build-and-push-clients-intro-course:
+        needs: build-and-push-clients-base
+        uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+        with:
+          image-name: ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-component
+          docker-file: clients/intro_course_component/Dockerfile # Defaults to Dockerfile
+          docker-context: ./clients/intro_course_component
+          build-args: |
+            "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+            "CORE_HOST=${{ vars.CORE_HOST }}"
+        secrets: inherit

@@ -27,18 +27,18 @@ services:
     networks:
       - prompt-network
 
-  server:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_IMAGE_TAG}"
-    container_name: prompt-server
+  server-core:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${CORE_SERVER_IMAGE_TAG}"
+    container_name: prompt-server-core
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server.rule=Host(`${CORE_HOST}`) && PathPrefix(`/api`)"
-      - "traefik.http.services.server.loadbalancer.server.port=8080"
-      - "traefik.http.routers.server.entrypoints=websecure"
-      - "traefik.http.routers.server.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.server-core.rule=Host(`${CORE_HOST}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.server-core.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-core.entrypoints=websecure"
+      - "traefik.http.routers.server-core.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
-      - "traefik.http.routers.server.middlewares=api-ratelimit"
+      - "traefik.http.routers.server-core.middlewares=api-ratelimit"
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +61,33 @@ services:
       - SMTP_PORT
       - SENDER_EMAIL
       - SENDER_NAME
+    networks:
+      - prompt-network
+  
+  server-intro-course:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${INTRO_COURSE_SERVER_IMAGE_TAG}"
+    container_name: prompt-server-intro-course
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`intro-course/api`)"
+      - "traefik.http.services.server-intro-course.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-intro-course.entrypoints=websecure"
+      - "traefik.http.routers.server-intro-course.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server-intro-course.middlewares=api-ratelimit"
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_PASSWORD
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - KEYCLOAK_AUTHORIZED_PARTY
     networks:
       - prompt-network
 
