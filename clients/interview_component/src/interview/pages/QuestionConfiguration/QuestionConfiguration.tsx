@@ -6,7 +6,8 @@ import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
 
 export const QuestionConfiguration = () => {
   const { coursePhase } = useCoursePhaseStore()
@@ -14,6 +15,8 @@ export const QuestionConfiguration = () => {
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [toBeDeletedQuestionID, setToBeDeletedQuestionID] = useState<number | undefined>(undefined)
 
   const { mutate } = useUpdateCoursePhaseMetaData()
 
@@ -60,8 +63,10 @@ export const QuestionConfiguration = () => {
     }
   }
 
-  const deleteQuestion = (id: number) => {
-    setInterviewQuestions((prev) => prev.filter((q) => q.id !== id))
+  const deleteQuestion = () => {
+    if (!toBeDeletedQuestionID) return
+    setInterviewQuestions((prev) => prev.filter((q) => q.id !== toBeDeletedQuestionID))
+    setToBeDeletedQuestionID(undefined)
   }
 
   const onDragEnd = (result: any) => {
@@ -142,7 +147,10 @@ export const QuestionConfiguration = () => {
                             <Button
                               variant='ghost'
                               size='icon'
-                              onClick={() => deleteQuestion(question.id)}
+                              onClick={() => {
+                                setToBeDeletedQuestionID(question.id)
+                                setDeleteDialogOpen(true)
+                              }}
                               aria-label='Delete question'
                               className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
                             >
@@ -160,6 +168,16 @@ export const QuestionConfiguration = () => {
           </DragDropContext>
         )}
       </div>
+      {deleteDialogOpen && (
+        <DeleteConfirmation
+          isOpen={deleteDialogOpen}
+          setOpen={setDeleteDialogOpen}
+          onClick={(deleteConfirmed) =>
+            deleteConfirmed ? deleteQuestion() : setToBeDeletedQuestionID(undefined)
+          }
+          deleteMessage='Are you sure you want to delete this question? This may result in the loss of interview answers.'
+        />
+      )}
     </div>
   )
 }
