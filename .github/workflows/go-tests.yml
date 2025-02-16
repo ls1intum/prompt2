@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: [ 'server' ]
+        directory: [ 'servers/core' ]
 
     steps:
       - uses: actions/checkout@v4

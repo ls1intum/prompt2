@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-push-server:
-    uses: ./.github/workflows/build-and-push-server.yml
+    uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   build-and-push-clients:
     uses: ./.github/workflows/build-and-push-clients.yml
@@ -21,5 +21,6 @@ jobs:
       template_image_tag: ${{ needs.build-and-push-clients.outputs.template_image_tag }}
       interview_image_tag: ${{ needs.build-and-push-clients.outputs.interview_image_tag }}
       matching_image_tag: ${{ needs.build-and-push-clients.outputs.matching_image_tag }}
-      server_image_tag: ${{ needs.build-and-push-server.outputs.server_image_tag }}
+      server_core_image_tag: ${{ needs.build-and-push-server.outputs.server_image_tag }}
+      server_intro_course_image_tag: ${{ needs.build-and-push-server.outputs.server_intro_course_image_tag }}
 
