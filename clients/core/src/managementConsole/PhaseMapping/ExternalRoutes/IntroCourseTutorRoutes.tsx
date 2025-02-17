@@ -3,18 +3,19 @@ import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { ExternalRoutes } from './ExternalRoutes'
 import { LoadingError } from '../utils/LoadingError'
 
-export const MatchingRoutes = React.lazy(() =>
-  import('matching_component/routes')
+export const IntroCourseTutorRoutes = React.lazy(() =>
+  import('intro_course_tutor_component/routes')
     .then((module): { default: React.FC } => ({
       default: () => {
         const routes: ExtendedRouteObject[] = module.default || []
         return <ExternalRoutes routes={routes} />
       },
     }))
-    .catch((): { default: React.FC } => ({
+    .catch((error): { default: React.FC } => ({
       default: () => {
-        console.warn('Failed to load matching routes')
-        return <LoadingError phaseTitle={'Matching'} />
+        console.warn('Failed to load intro course tutor routes')
+        console.warn(error)
+        return <LoadingError phaseTitle={'Intro Course Tutor'} />
       },
     })),
 )
