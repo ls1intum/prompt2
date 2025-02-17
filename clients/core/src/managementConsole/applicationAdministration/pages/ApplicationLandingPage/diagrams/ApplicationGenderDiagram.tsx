@@ -35,7 +35,7 @@ export const ApplicationGenderDiagram = ({
       const notAssessed = countsByGender[gender]?.not_assessed ?? 0
 
       return {
-        gender: gender !== Gender.PREFER_NOT_TO_SAY ? getGenderString(gender) : 'Unknown',
+        dataKey: gender !== Gender.PREFER_NOT_TO_SAY ? getGenderString(gender) : 'Unknown',
         accepted,
         rejected,
         notAssessed,
@@ -53,7 +53,7 @@ export const ApplicationGenderDiagram = ({
         <CardDescription>Breakdown of student genders</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
-        <StackedBarChartWithPassStatus data={genderData} dataKey='gender' />
+        <StackedBarChartWithPassStatus data={genderData} />
       </CardContent>
     </Card>
   )
