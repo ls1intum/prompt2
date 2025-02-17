@@ -5,23 +5,25 @@ on:
     branches: [main]
 
 jobs:
-  build-and-push-servers:
+  build-servers:
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
-  build-and-push-clients:
+  build-clients:
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
   deploy-dev-container:
-    needs: [build-and-push-clients, build-and-push-servers]
+    needs: [build-clients, build-servers]
     uses: ./.github/workflows/deploy-docker.yml
     secrets: inherit
     with:
       environment: prompt-prod-vm
-      core_image_tag: ${{ needs.build-and-push-clients.outputs.core_image_tag }}
-      template_image_tag: ${{ needs.build-and-push-clients.outputs.template_image_tag }}
-      interview_image_tag: ${{ needs.build-and-push-clients.outputs.interview_image_tag }}
-      matching_image_tag: ${{ needs.build-and-push-clients.outputs.matching_image_tag }}
-      intro_course_image_tag: ${{ needs.build-and-push-clients.outputs.intro_course_image_tag }}
-      server_core_image_tag: ${{ needs.build-and-push-servers.outputs.server_core_image_tag }}
-      server_intro_course_image_tag: ${{ needs.build-and-push-servers.outputs.server_intro_course_image_tag }}
+      core_image_tag: ${{ needs.build-clients.outputs.core_image_tag }}
+      template_image_tag: ${{ needs.build-clients.outputs.template_image_tag }}
+      interview_image_tag: ${{ needs.build-clients.outputs.interview_image_tag }}
+      matching_image_tag: ${{ needs.build-clients.outputs.matching_image_tag }}
+      intro_course_developer_image_tag: ${{ needs.build-clients.outputs.intro_course_developer_image_tag }}
+      intro_course_tutor_image_tag: ${{ needs.build-clients.outputs.intro_course_tutor_image_tag }}
+      server_core_image_tag: ${{ needs.build-servers.outputs.server_core_image_tag }}
+      server_intro_course_image_tag: ${{ needs.build-servers.outputs.server_intro_course_image_tag }}
+
 

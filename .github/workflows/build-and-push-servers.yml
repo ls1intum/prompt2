@@ -5,20 +5,20 @@ on:
     outputs:
       server_core_image_tag: 
         description: "The tag of the image that was built"
-        value: ${{ jobs.build-and-push-server-core.outputs.image_tag }}
+        value: ${{ jobs.core.outputs.image_tag }}
       server_intro_course_image_tag: 
         description: "The tag of the image that was built"
-        value: ${{ jobs.build-and-push-server-intro-course.outputs.image_tag }}
+        value: ${{ jobs.intro-course.outputs.image_tag }}
 
 jobs:
-  build-and-push-server-core:
+  core:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-core # Defaults to the repository name
       docker-file: servers/Dockerfile # Defaults to Dockerfile
       docker-context: ./servers/core
     secrets: inherit
-  build-and-push-server-intro-course:
+  intro-course:
       uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course

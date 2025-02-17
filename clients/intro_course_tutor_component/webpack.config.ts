@@ -12,7 +12,7 @@ const { ModuleFederationPlugin } = webpack.container
 // ########################################
 // ### Component specific configuration ###
 // ########################################
-const COMPONENT_NAME = 'intro_course_component'
+const COMPONENT_NAME = 'intro_course_tutor_component'
 const COMPONENT_DEV_PORT = 3004
 
 const __filename = fileURLToPath(import.meta.url)

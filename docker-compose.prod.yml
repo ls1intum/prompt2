@@ -130,19 +130,40 @@ services:
     networks:
       - prompt-network
 
-  client-intro-course-component:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-component:${INTRO_COURSE_IMAGE_TAG}"
-    container_name: prompt-client-intro-course-component
+  client-intro-course-developer-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component:${INTRO_COURSE_DEVELOPER_IMAGE_TAG}"
+    container_name: prompt-client-intro-course-developer-component
     environment:
       - TZ=Europe/Berlin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course`)"
-      - "traefik.http.routers.intro-course.entrypoints=websecure"
-      - "traefik.http.routers.intro-course.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.intro-course-strip-prefix.stripPrefix.prefixes=/intro-course"
-      - "traefik.http.routers.intro-course.middlewares=intro-course-strip-prefix,intro-course-compress"
-      - "traefik.http.middlewares.intro-course-compress.compress=true"
+      - "traefik.http.routers.intro-course-developer.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course-developer`)"
+      - "traefik.http.routers.intro-course-developer.entrypoints=websecure"
+      - "traefik.http.routers.intro-course-developer.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.intro-course-developer-strip-prefix.stripPrefix.prefixes=/intro-course-developer"
+      - "traefik.http.routers.intro-course-developer.middlewares=intro-course-developer-strip-prefix,intro-course-developer-compress"
+      - "traefik.http.middlewares.intro-course-developer-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+      - server-intro-course
+    networks:
+      - prompt-network
+    
+  client-intro-course-tutor-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component:${INTRO_COURSE_TUTOR_IMAGE_TAG}"
+    container_name: prompt-client-intro-course-tutor-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intro-course-tutor.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course-tutor`)"
+      - "traefik.http.routers.intro-course-tutor.entrypoints=websecure"
+      - "traefik.http.routers.intro-course-tutor.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.intro-course-tutor-strip-prefix.stripPrefix.prefixes=/intro-course-tutor"
+      - "traefik.http.routers.intro-course-tutor.middlewares=intro-course-tutor-strip-prefix,intro-course-tutor-compress"
+      - "traefik.http.middlewares.intro-course-tutor-compress.compress=true"
     expose:
       - "80"
     depends_on:

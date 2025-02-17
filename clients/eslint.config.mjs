@@ -25,6 +25,8 @@ const getTsConfigPaths = () => {
     'shared_library',
     'interview_component',
     'matching_component',
+    'intro_course_tutor_component',
+    'intro_course_developer_component',
   ] // TODO: replace with dynamic workspace detection
   return workspaceFolders
     .map((folder) => {

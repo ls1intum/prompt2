@@ -18,7 +18,10 @@ on:
       matching_image_tag:
         required: true
         type: string
-      intro_course_image_tag:
+      intro_course_developer_image_tag:
+        required: true
+        type: string
+      intro_course_tutor_image_tag:
         required: true
         type: string
       server_core_image_tag:
@@ -151,7 +154,8 @@ jobs:
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
             echo "MATCHING_IMAGE_TAG=${{ inputs.matching_image_tag }}" >> .env.prod
-            echo "INTRO_COURSE_IMAGE_TAG=${{ inputs.intro_course_image_tag }}" >> .env.prod
+            echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=${{ inputs.intro_course_developer_image_tag }}" >> .env.prod
+            echo "INTRO_COURSE_TUTOR_IMAGE_TAG=${{ inputs.intro_course_tutor_image_tag }}" >> .env.prod
 
             echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL_ADDRESS }}" >> .env.prod
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
