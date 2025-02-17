@@ -9,6 +9,11 @@ const interviewSidebarItems: SidebarMenuItemProps = {
   requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   subitems: [
     {
+      title: 'Question Config',
+      goToPath: '/question-configuration',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
       title: 'Mailing',
       goToPath: '/mailing',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

@@ -4,6 +4,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 import { InterviewDataShell } from '../src/interview/pages/InterviewDataShell'
 import { ProfileDetailPage } from '../src/interview/pages/ProfileDetail/ProfileDetailPage'
 import { MailingPage } from '../src/interview/pages/Mailing/MailingPage'
+import { QuestionConfiguration } from '../src/interview/pages/QuestionConfiguration/QuestionConfiguration'
 
 const interviewRoutes: ExtendedRouteObject[] = [
   {
@@ -20,6 +21,15 @@ const interviewRoutes: ExtendedRouteObject[] = [
     element: (
       <InterviewDataShell>
         <ProfileDetailPage />
+      </InterviewDataShell>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/question-configuration',
+    element: (
+      <InterviewDataShell>
+        <QuestionConfiguration />
       </InterviewDataShell>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
