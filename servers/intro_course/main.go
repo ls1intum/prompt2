@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,7 +56,7 @@ func main() {
 	router.Use(utils.CORS())
 
 	api := router.Group("intro-course/api")
-	api.GET("/hello", func(c *gin.Context) {
+	api.GET("/hello/:coursePhaseID", keycloakTokenVerifier.AuthMiddleware(), func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello From Your Intro Course Backend",
 		})

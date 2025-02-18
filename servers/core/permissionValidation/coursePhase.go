@@ -9,7 +9,7 @@ import (
 )
 
 func CheckCoursePhasePermission(c *gin.Context, coursePhaseID uuid.UUID, allowedUsers ...string) (bool, error) {
-	courseIdentifier, err := courseIdentifierStringFromCoursePhaseID(c, coursePhaseID)
+	courseIdentifier, err := CourseIdentifierStringFromCoursePhaseID(c, coursePhaseID)
 	if err != nil {
 		c.IndentedJSON(500, gin.H{"error": err.Error()})
 		return false, err
@@ -18,7 +18,7 @@ func CheckCoursePhasePermission(c *gin.Context, coursePhaseID uuid.UUID, allowed
 	return checkUserRole(c, courseIdentifier, allowedUsers...)
 }
 
-func courseIdentifierStringFromCoursePhaseID(ctx context.Context, uuid uuid.UUID) (string, error) {
+func CourseIdentifierStringFromCoursePhaseID(ctx context.Context, uuid uuid.UUID) (string, error) {
 	identifier, err := ValidationServiceSingleton.queries.GetPermissionStringByCoursePhaseID(ctx, uuid)
 	if err != nil {
 		return "", err

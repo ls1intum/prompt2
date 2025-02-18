@@ -14,6 +14,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhaseAuth"
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
@@ -112,6 +113,8 @@ func main() {
 
 	// this initializes also all available course phase types
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
+	coursePhaseAuth.InitCoursePhaseAuthModule(api, *query, conn)
+
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)
