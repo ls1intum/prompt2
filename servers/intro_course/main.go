@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,6 +35,21 @@ func runMigrations(databaseURL string) {
 	}
 }
 
+func initKeycloak() {
+	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
+	if !strings.HasPrefix(baseURL, "http") {
+		baseURL = "https://" + baseURL
+	}
+
+	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
+	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
+	expectedAuthorizedParty := utils.GetEnv("KEYCLOAK_AUTHORIZED_PARTY", "prompt-client")
+
+	log.Info("Debugging: baseURL: ", baseURL, " realm: ", realm, " clientID: ", clientID, " expectedAuthorizedParty: ", expectedAuthorizedParty)
+
+	keycloakTokenVerifier.InitKeycloakTokenVerifier(context.Background(), baseURL, realm, clientID, expectedAuthorizedParty)
+}
+
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -54,8 +71,11 @@ func main() {
 	router := gin.Default()
 	router.Use(utils.CORS())
 
+	// init keycloak
+	initKeycloak()
+
 	api := router.Group("intro-course/api")
-	api.GET("/hello", func(c *gin.Context) {
+	api.GET("/hello/:coursePhaseID", keycloakTokenVerifier.AuthMiddleware(), func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello From Your Intro Course Backend",
 		})

@@ -3,4 +3,4 @@
 postgres_data/
 postfix_config/
 keycloak_postgres_data/
-intro_course_postgres_data/
+postgres_intro_course_data/
