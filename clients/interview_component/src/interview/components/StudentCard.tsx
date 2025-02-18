@@ -18,7 +18,7 @@ interface StudentCardProps {
 }
 
 export function StudentCard({ participation, interviewSlot }: StudentCardProps) {
-  const assessmentScore = participation.prevData?.applicationScore ?? 'N/A'
+  const assessmentScore = participation.prevData?.score ?? 'N/A'
   const interviewScore = participation.restrictedData?.score ?? 'N/A'
 
   return (

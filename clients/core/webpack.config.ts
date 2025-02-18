@@ -90,11 +90,12 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       new ModuleFederationPlugin({
         name: 'core',
         remotes: {
-          template_component: `template_component@${templateURL}/remoteEntry.js`,
-          interview_component: `interview_component@${interviewURL}/remoteEntry.js`,
-          matching_component: `matching_component@${matchingURL}/remoteEntry.js`,
-          intro_course_tutor_component: `intro_course_tutor_component@${introCourseTutorURL}/remoteEntry.js`,
-          intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js`,
+          // The date will be resolved at buildtime and will force a cache reload after redeployment
+          template_component: `template_component@${templateURL}/remoteEntry.js?${Date.now()}`,
+          interview_component: `interview_component@${interviewURL}/remoteEntry.js?${Date.now()}`,
+          matching_component: `matching_component@${matchingURL}/remoteEntry.js?${Date.now()}`,
+          intro_course_tutor_component: `intro_course_tutor_component@${introCourseTutorURL}/remoteEntry.js?${Date.now()}`,
+          intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

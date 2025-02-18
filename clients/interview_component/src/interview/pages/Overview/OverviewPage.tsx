@@ -6,7 +6,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useScreenSize } from '@/hooks/useScreenSize'
 import { useState } from 'react'
 import { SortDropdownMenu } from '../../components/SortDropdownMenu'
-import { InterviewQuestionsDialog } from '../../components/InterviewQuestionsDialog'
 import { InterviewTimesDialog } from '../../components/InterviewTimesDialog'
 import { useSorting } from '../../hooks/useSorting'
 
@@ -25,7 +24,6 @@ export const OverviewPage = (): JSX.Element => {
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
           <InterviewTimesDialog />
-          <InterviewQuestionsDialog />
         </div>
       </div>
       <div
