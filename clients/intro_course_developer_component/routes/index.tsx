@@ -1,4 +1,4 @@
-import OverviewPage from '../src/OverviewPage'
+import { IntroCoursePage } from '../src/introCourse/IntroCoursePage'
 import SettingsPage from '../src/SettingsPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
@@ -6,8 +6,8 @@ import { Role } from '@tumaet/prompt-shared-state'
 const routes: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <OverviewPage />,
-    requiredPermissions: [], // empty means no permissions required
+    element: <IntroCoursePage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_STUDENT], // empty means no permissions required
   },
   {
     path: '/settings',
