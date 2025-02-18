@@ -24,4 +24,14 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 	if err != nil {
 		log.Fatal("failed to init matching phase type: ", err)
 	}
+
+	initIntroCourseDeveloper()
+	if err != nil {
+		log.Fatal("failed to init matching phase type: ", err)
+	}
+
+	initIntroCourseTutor()
+	if err != nil {
+		log.Fatal("failed to init matching phase type: ", err)
+	}
 }

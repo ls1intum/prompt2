@@ -27,18 +27,18 @@ services:
     networks:
       - prompt-network
 
-  server:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_IMAGE_TAG}"
-    container_name: prompt-server
+  server-core:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_CORE_IMAGE_TAG}"
+    container_name: prompt-server-core
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server.rule=Host(`${CORE_HOST}`) && PathPrefix(`/api`)"
-      - "traefik.http.services.server.loadbalancer.server.port=8080"
-      - "traefik.http.routers.server.entrypoints=websecure"
-      - "traefik.http.routers.server.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.server-core.rule=Host(`${CORE_HOST}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.server-core.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-core.entrypoints=websecure"
+      - "traefik.http.routers.server-core.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
-      - "traefik.http.routers.server.middlewares=api-ratelimit"
+      - "traefik.http.routers.server-core.middlewares=api-ratelimit"
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +63,36 @@ services:
       - SENDER_NAME
     networks:
       - prompt-network
+  
+  server-intro-course:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${SERVER_INTRO_COURSE_IMAGE_TAG}"
+    container_name: prompt-server-intro-course
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-intro-course.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course/api`)"
+      - "traefik.http.services.server-intro-course.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-intro-course.entrypoints=websecure"
+      - "traefik.http.routers.server-intro-course.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server-intro-course.middlewares=api-ratelimit"
+    depends_on:
+      db-intro-course:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST_INTRO_COURSE
+      - DB_PORT_INTRO_COURSE
+      - DB_NAME
+      - DB_PASSWORD
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - KEYCLOAK_AUTHORIZED_PARTY
+    networks:
+      - prompt-network
 
   db:
     image: "postgres:15.2-alpine"
@@ -82,6 +112,66 @@ services:
     networks:
       - prompt-network
 
+  db-intro-course:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-intro-course
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./intro_course_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
+  client-intro-course-developer-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component:${INTRO_COURSE_DEVELOPER_IMAGE_TAG}"
+    container_name: prompt-client-intro-course-developer-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intro-course-developer.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course-developer`)"
+      - "traefik.http.routers.intro-course-developer.entrypoints=websecure"
+      - "traefik.http.routers.intro-course-developer.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.intro-course-developer-strip-prefix.stripPrefix.prefixes=/intro-course-developer"
+      - "traefik.http.routers.intro-course-developer.middlewares=intro-course-developer-strip-prefix,intro-course-developer-compress"
+      - "traefik.http.middlewares.intro-course-developer-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+      - server-intro-course
+    networks:
+      - prompt-network
+    
+  client-intro-course-tutor-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component:${INTRO_COURSE_TUTOR_IMAGE_TAG}"
+    container_name: prompt-client-intro-course-tutor-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intro-course-tutor.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course-tutor`)"
+      - "traefik.http.routers.intro-course-tutor.entrypoints=websecure"
+      - "traefik.http.routers.intro-course-tutor.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.intro-course-tutor-strip-prefix.stripPrefix.prefixes=/intro-course-tutor"
+      - "traefik.http.routers.intro-course-tutor.middlewares=intro-course-tutor-strip-prefix,intro-course-tutor-compress"
+      - "traefik.http.middlewares.intro-course-tutor-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+      - server-intro-course
+    networks:
+      - prompt-network
+
   client-interview-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
     container_name: prompt-client-interview-component
@@ -98,7 +188,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -118,7 +208,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -138,7 +228,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 
@@ -164,7 +254,7 @@ services:
     expose:
       - "80"
     depends_on:
-      - server
+      - server-core
     networks:
       - prompt-network
 

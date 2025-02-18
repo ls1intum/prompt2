@@ -1,8 +1,7 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle } from 'lucide-react'
 import React from 'react'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { ExternalRoutes } from './ExternalRoutes'
+import { LoadingError } from '../utils/LoadingError'
 
 /** We use this style with a separate loading file for better performance */
 /** It would be possible to have one loading script and pass the import path as variable */
@@ -19,16 +18,7 @@ export const TemplateRoutes = React.lazy(() =>
     .catch((): { default: React.FC } => ({
       default: () => {
         console.warn('Failed to load template routes')
-        return (
-          <Alert variant='destructive'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              We&apos;re sorry, but we couldn&apos;t load the template routes. Please try refreshing
-              or contact support if the problem persists.
-            </AlertDescription>
-          </Alert>
-        )
+        return <LoadingError phaseTitle={'Template'} />
       },
     })),
 )

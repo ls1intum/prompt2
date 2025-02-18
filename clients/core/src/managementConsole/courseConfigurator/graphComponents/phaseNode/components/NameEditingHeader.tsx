@@ -22,9 +22,10 @@ export const NameEditingHeader = ({ phaseID }: NameEditingHeaderProps): JSX.Elem
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)
   const { permissions } = useAuthStore()
-  const canEdit = permissions.includes(
-    getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
-  )
+  const canEdit =
+    permissions.includes(
+      getPermissionString(Role.COURSE_LECTURER, course?.name, course?.semesterTag),
+    ) || permissions.includes(getPermissionString(Role.PROMPT_ADMIN))
 
   const { coursePhases, setCoursePhases } = useCourseConfigurationState()
   const coursePhase = coursePhases.find((phase) => phase.id === phaseID)

@@ -5,22 +5,28 @@ on:
     outputs:
       base_image_tag: 
         description: "The tag of the base image that was built"
-        value: ${{ jobs.build-and-push-clients-base.outputs.image_tag }}
+        value: ${{ jobs.clients-base.outputs.image_tag }}
       core_image_tag: 
         description: "The tag of the core image that was built"
-        value: ${{ jobs.build-and-push-clients-core.outputs.image_tag }}
+        value: ${{ jobs.core.outputs.image_tag }}
       template_image_tag:
         description: "The tag of the template component image that was built"
-        value: ${{ jobs.build-and-push-clients-template.outputs.image_tag }}
+        value: ${{ jobs.template.outputs.image_tag }}
       interview_image_tag:
         description: "The tag of the interview component image that was built"
-        value: ${{ jobs.build-and-push-clients-interview.outputs.image_tag }}
+        value: ${{ jobs.interview.outputs.image_tag }}
       matching_image_tag:
         description: "The tag of the matching component image that was built"
-        value: ${{ jobs.build-and-push-clients-matching.outputs.image_tag }}
+        value: ${{ jobs.matching.outputs.image_tag }}
+      intro_course_developer_image_tag:
+        description: "The tag of the intro course developer component image that was built"
+        value: ${{ jobs.intro-course-developer.outputs.image_tag }}
+      intro_course_tutor_image_tag:
+        description: "The tag of the intro course tutor component image that was built"
+        value: ${{ jobs.intro-course-tutor.outputs.image_tag }}
 
 jobs:
-  build-and-push-clients-base:
+  clients-base:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
@@ -30,58 +36,82 @@ jobs:
   
   debug-job: 
     runs-on: ubuntu-latest
-    needs: build-and-push-clients-base
+    needs: clients-base
     steps:
       - name: Debug
         run: |
-          echo "base_image_tag: ${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+          echo "base_image_tag: ${{ needs.clients-base.outputs.image_tag }}"
 
-  build-and-push-clients-core:
-    needs: build-and-push-clients-base
+  core:
+    needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
-        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
     secrets: inherit
    
-  build-and-push-clients-template:
-    needs: build-and-push-clients-base
+  template:
+    needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/template_component
       build-args: |
-        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
-  build-and-push-clients-interview:
-    needs: build-and-push-clients-base
+  interview:
+    needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-interview-component
       docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/interview_component
       build-args: |
-        "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
-  build-and-push-clients-matching:
-      needs: build-and-push-clients-base
+  matching:
+      needs: clients-base
       uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-clients-matching-component
         docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
         docker-context: ./clients/matching_component
         build-args: |
-          "IMAGE_TAG=${{ needs.build-and-push-clients-base.outputs.image_tag }}"
+          "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
           "CORE_HOST=${{ vars.CORE_HOST }}"
       secrets: inherit
+
+  intro-course-developer:
+        needs: clients-base
+        uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+        with:
+          image-name: ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component
+          docker-file: clients/intro_course_developer_component/Dockerfile # Defaults to Dockerfile
+          docker-context: ./clients/intro_course_developer_component
+          build-args: |
+            "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+            "CORE_HOST=${{ vars.CORE_HOST }}"
+        secrets: inherit
+  
+  intro-course-tutor:
+          needs: clients-base
+          uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+          with:
+            image-name: ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component
+            docker-file: clients/intro_course_tutor_component/Dockerfile # Defaults to Dockerfile
+            docker-context: ./clients/intro_course_tutor_component
+            build-args: |
+              "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+              "CORE_HOST=${{ vars.CORE_HOST }}"
+          secrets: inherit

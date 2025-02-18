@@ -29,6 +29,8 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const templateURL = IS_DEV ? `http://localhost:3001` : `/template`
   const interviewURL = IS_DEV ? `http://localhost:3002` : `/interview`
   const matchingURL = IS_DEV ? `http://localhost:3003` : `/matching`
+  const introCourseTutorURL = IS_DEV ? `http://localhost:3004` : `/intro-course-tutor`
+  const introCourseDeveloperURL = IS_DEV ? `http://localhost:3005` : `/intro-course-developer`
 
   return {
     target: 'web',
@@ -92,6 +94,8 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           template_component: `template_component@${templateURL}/remoteEntry.js?${Date.now()}`,
           interview_component: `interview_component@${interviewURL}/remoteEntry.js?${Date.now()}`,
           matching_component: `matching_component@${matchingURL}/remoteEntry.js?${Date.now()}`,
+          intro_course_tutor_component: `intro_course_tutor_component@${introCourseTutorURL}/remoteEntry.js?${Date.now()}`,
+          intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
