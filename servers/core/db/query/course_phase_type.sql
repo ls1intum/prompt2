@@ -32,6 +32,22 @@ SELECT EXISTS (
     WHERE name = 'Matching'
 ) AS does_exist;
 
+-- name: TestIntroCourseDeveloperPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'IntroCourseDeveloper'
+) AS does_exist;
+
+
+-- name: TestIntroCourseTutorPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'IntroCourseTutor'
+) AS does_exist;
+
+
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
 VALUES ($1, $2, $3, $4);
@@ -96,5 +112,43 @@ VALUES (
                 "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
                 "required": ["score", "key"]
             }
+        }'::jsonb
+);
+
+
+-- name: InsertProficiencyLevelOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'proficiency',
+      1,
+      '/proficiency',
+      '{
+            "type": "string",
+            "enum": ["novice", "intermediate", "advanced", "expert"] 
+        }'::jsonb
+);
+
+
+-- name: InsertDeveloperProfileOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'developerProfile',
+      1,
+      '/developer-profile',
+      '{
+            "type": "object",
+            "properties": {
+                "appleID"           : {"type": "string"},
+                "gitLabID"          : {"type": "string"},
+                "macBookUUID"       : {"type": "string"},
+                "iphoneUUID"        : {"type": "string"},
+                "ipadUUID"          : {"type": "string"},
+                "appleWatchUUID"    : {"type": "string"}
+            },
+            "required": ["appleID", "gitLabID"]
         }'::jsonb
 );

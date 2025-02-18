@@ -241,6 +241,54 @@ func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, co
 	return err
 }
 
+const insertDeveloperProfileOutput = `-- name: InsertDeveloperProfileOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'developerProfile',
+      1,
+      '/developer-profile',
+      '{
+            "type": "object",
+            "properties": {
+                "appleID"           : {"type": "string"},
+                "gitLabID"          : {"type": "string"},
+                "macBookUUID"       : {"type": "string"},
+                "iphoneUUID"        : {"type": "string"},
+                "ipadUUID"          : {"type": "string"},
+                "appleWatchUUID"    : {"type": "string"}
+            },
+            "required": ["appleID", "gitLabID"]
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertDeveloperProfileOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertDeveloperProfileOutput, coursePhaseTypeID)
+	return err
+}
+
+const insertProficiencyLevelOutput = `-- name: InsertProficiencyLevelOutput :exec
+INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'proficiency',
+      1,
+      '/proficiency',
+      '{
+            "type": "string",
+            "enum": ["novice", "intermediate", "advanced", "expert"] 
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertProficiencyLevelOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertProficiencyLevelOutput, coursePhaseTypeID)
+	return err
+}
+
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -266,6 +314,36 @@ SELECT EXISTS (
 
 func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error) {
 	row := q.db.QueryRow(ctx, testInterviewPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
+const testIntroCourseDeveloperPhaseTypeExists = `-- name: TestIntroCourseDeveloperPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'IntroCourseDeveloper'
+) AS does_exist
+`
+
+func (q *Queries) TestIntroCourseDeveloperPhaseTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testIntroCourseDeveloperPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
+const testIntroCourseTutorPhaseTypeExists = `-- name: TestIntroCourseTutorPhaseTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'IntroCourseTutor'
+) AS does_exist
+`
+
+func (q *Queries) TestIntroCourseTutorPhaseTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testIntroCourseTutorPhaseTypeExists)
 	var does_exist bool
 	err := row.Scan(&does_exist)
 	return does_exist, err
