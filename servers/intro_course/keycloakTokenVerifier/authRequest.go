@@ -10,22 +10,23 @@ import (
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 )
 
-type StudentAuthResponse struct {
-	ID                    uuid.UUID `json:"id"`
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
+type CoreAuthResponse struct {
+	Roles                      []string  `json:"roles"`
+	CoursePhaseParticipationID uuid.UUID `json:"id"`
+	CourseParticipationID      uuid.UUID `json:"courseParticipationID"`
 }
 
 // SendStudentAuthRequest now accepts an authHeader parameter.
-func SendStudentAuthRequest(authHeader string, coursePhaseID uuid.UUID) (StudentAuthResponse, error) {
+func SendAuthRequest(authHeader string, coursePhaseID uuid.UUID) (CoreAuthResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 
-	coreURL := utils.GetEnv("CORE_HOST", "localhost:3000")
-	requestURL := "http://" + coreURL + "/api/course_phases/" + coursePhaseID.String() + "/participations/self"
+	coreURL := utils.GetCoreUrl()
+	requestURL := coreURL + "/api/auth/course_phase/" + coursePhaseID.String()
 	// Pass nil as the body for a GET request.
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		log.Println("Error creating request:", err)
-		return StudentAuthResponse{}, err
+		return CoreAuthResponse{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -35,20 +36,20 @@ func SendStudentAuthRequest(authHeader string, coursePhaseID uuid.UUID) (Student
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("Error sending request:", err)
-		return StudentAuthResponse{}, err
+		return CoreAuthResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Println("Received non-OK response:", resp.Status)
-		return StudentAuthResponse{}, nil
+		return CoreAuthResponse{}, nil
 	}
 
-	var authResponse StudentAuthResponse
+	var authResponse CoreAuthResponse
 	err = json.NewDecoder(resp.Body).Decode(&authResponse)
 	if err != nil {
 		log.Println("Error decoding response body:", err)
-		return StudentAuthResponse{}, err
+		return CoreAuthResponse{}, err
 	}
 
 	return authResponse, nil
