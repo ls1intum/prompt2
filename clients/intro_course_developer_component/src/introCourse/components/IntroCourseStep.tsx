@@ -2,7 +2,6 @@ import * as React from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { CheckCircle, ChevronDown, ChevronUp, Lock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 
@@ -12,9 +11,8 @@ interface CourseStepProps {
   description: string
   isCompleted: boolean
   isDisabled?: boolean
-  isOpen?: boolean
+  isOpen: boolean
   onToggle: () => void
-  estimatedTime?: string
   children: React.ReactNode
 }
 
@@ -24,23 +22,19 @@ export function IntroCourseStep({
   description,
   isCompleted,
   isDisabled = false,
-  isOpen = false,
+  isOpen,
   onToggle,
-  estimatedTime,
   children,
 }: CourseStepProps) {
-  const [isExpanded, setIsExpanded] = React.useState(isOpen)
-
   const handleToggle = () => {
     if (!isDisabled) {
-      setIsExpanded(!isExpanded)
       onToggle()
     }
   }
 
   return (
     <Collapsible
-      open={isExpanded}
+      open={isOpen}
       onOpenChange={handleToggle}
       className={cn('transition-all duration-300', isDisabled && 'opacity-50')}
     >
@@ -73,12 +67,7 @@ export function IntroCourseStep({
                 </div>
               </div>
               <div className='flex items-center space-x-2'>
-                {estimatedTime && (
-                  <Badge variant='outline' className='text-xs'>
-                    {estimatedTime}
-                  </Badge>
-                )}
-                {isExpanded ? (
+                {isOpen ? (
                   <ChevronUp className='w-5 h-5 text-muted-foreground' />
                 ) : (
                   <ChevronDown className='w-5 h-5 text-muted-foreground' />

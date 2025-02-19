@@ -1,7 +1,8 @@
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import { Role, getPermissionString } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import UnauthorizedPage from './UnauthorizedPage'
+import UnauthorizedPage from '@/components/UnauthorizedPage'
+import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 interface PermissionRestrictionProps {
   requiredPermissions: Role[]
@@ -17,12 +18,13 @@ export const PermissionRestriction = ({
   const { permissions } = useAuthStore()
   const { courses, isStudentOfCourse } = useCourseStore()
   const courseId = useParams<{ courseId: string }>().courseId
+  const { logout } = useKeycloak()
 
   // This means something /general
   if (!courseId) {
     // TODO: refine at later stage
     // has at least some prompt permission
-    return <>{permissions.length > 0 ? children : <UnauthorizedPage />}</>
+    return <>{permissions.length > 0 ? children : <UnauthorizedPage onLogout={logout} />}</>
   }
 
   // in ManagementRoot is verified that this exists

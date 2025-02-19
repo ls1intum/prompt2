@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { DeveloperProfile } from '../interfaces/DeveloperProfile'
+import type { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -12,23 +12,23 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { YesNoButtons } from '../components/YesNoButtons'
-import { developerFormSchema, type DeveloperFormValues } from '../validations/developerProfile'
+import { YesNoButtons } from '../../components/YesNoButtons'
+import { developerFormSchema, type DeveloperFormValues } from '../../validations/developerProfile'
 import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
 import { UUIDHelperDialog } from './components/UUIDHelperDialog'
 
-interface DeveloperProfileFormPageProps {
+interface DeveloperProfileFormProps {
   developerProfile?: DeveloperProfile
   status?: string
   onSubmit: (developerProfile: DeveloperProfile) => void
 }
 
-export const DeveloperProfileFormPage = ({
+export const DeveloperProfileForm = ({
   developerProfile,
   status,
   onSubmit,
-}: DeveloperProfileFormPageProps): JSX.Element => {
+}: DeveloperProfileFormProps): JSX.Element => {
   const form = useForm<DeveloperFormValues>({
     resolver: zodResolver(developerFormSchema),
     defaultValues: {
@@ -273,9 +273,11 @@ export const DeveloperProfileFormPage = ({
             />
           )}
 
-          <Button type='submit' className='w-full'>
-            Submit
-          </Button>
+          <div className='flex justify-end mt-3'>
+            <Button type='submit' size='lg'>
+              Submit
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
