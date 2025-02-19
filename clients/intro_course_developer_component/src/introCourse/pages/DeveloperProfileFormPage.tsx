@@ -13,7 +13,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { YesNoButtons } from '../components/YesNoButtons'
-import { developerFormSchema, DeveloperFormValues } from '../validations/developerProfile'
+import { developerFormSchema, type DeveloperFormValues } from '../validations/developerProfile'
+import { GitLabHelperDialog } from './components/GitLabHelperDialog'
+import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
+import { UUIDHelperDialog } from './components/UUIDHelperDialog'
 
 interface DeveloperProfileFormPageProps {
   developerProfile?: DeveloperProfile
@@ -31,7 +34,6 @@ export const DeveloperProfileFormPage = ({
     defaultValues: {
       appleID: developerProfile?.appleID || '',
       gitLabUsername: developerProfile?.gitLabUsername || '',
-      // Use "yes" if a UUID exists, otherwise "no"
       hasMacBook: developerProfile?.macBookUUID ? 'yes' : 'no',
       macBookUUID: developerProfile?.macBookUUID || '',
       hasIPhone: developerProfile?.iPhoneUUID ? 'yes' : 'no',
@@ -47,7 +49,6 @@ export const DeveloperProfileFormPage = ({
     const submittedProfile: DeveloperProfile = {
       appleID: values.appleID,
       gitLabUsername: values.gitLabUsername,
-      // Only include the UUID if the corresponding answer is "yes"
       macBookUUID: values.hasMacBook === 'yes' ? values.macBookUUID : undefined,
       iPhoneUUID: values.hasIPhone === 'yes' ? values.iPhoneUUID : undefined,
       iPadUUID: values.hasIPad === 'yes' ? values.iPadUUID : undefined,
@@ -72,7 +73,10 @@ export const DeveloperProfileFormPage = ({
                   ID you MUST create one.
                 </FormDescription>
                 <FormControl>
-                  <Input placeholder='example@icloud.com' {...field} />
+                  <div className='flex items-center space-x-2'>
+                    <Input placeholder='example@icloud.com' {...field} className='flex-grow' />
+                    <AppleIDHelperDialog />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -85,15 +89,22 @@ export const DeveloperProfileFormPage = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>GitLab Username</FormLabel>
-                <FormDescription>Enter your GitLab username without the @ symbol.</FormDescription>
+                <FormDescription>
+                  Enter your LRZ (!!) GitLab username. Please follow the Info Text where to find
+                  your username.
+                </FormDescription>
                 <FormControl>
-                  <Input placeholder='username' {...field} />
+                  <div className='flex items-center space-x-2'>
+                    <Input placeholder='i.e. ab12cde' {...field} className='flex-grow' />
+                    <GitLabHelperDialog />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* MacBook section */}
           <FormField
             control={form.control}
             name='hasMacBook'
@@ -124,7 +135,14 @@ export const DeveloperProfileFormPage = ({
                     Enter your MacBook&apos;s Universally Unique Identifier (UUID).
                   </FormDescription>
                   <FormControl>
-                    <Input placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' {...field} />
+                    <div className='flex items-center space-x-2'>
+                      <Input
+                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                        {...field}
+                        className='flex-grow'
+                      />
+                      <UUIDHelperDialog deviceType='mac' />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,6 +150,7 @@ export const DeveloperProfileFormPage = ({
             />
           )}
 
+          {/* iPhone section */}
           <FormField
             control={form.control}
             name='hasIPhone'
@@ -157,7 +176,14 @@ export const DeveloperProfileFormPage = ({
                     Enter your iPhone&apos;s Universally Unique Identifier (UUID).
                   </FormDescription>
                   <FormControl>
-                    <Input placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' {...field} />
+                    <div className='flex items-center space-x-2'>
+                      <Input
+                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                        {...field}
+                        className='flex-grow'
+                      />
+                      <UUIDHelperDialog deviceType='ios' />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,6 +191,7 @@ export const DeveloperProfileFormPage = ({
             />
           )}
 
+          {/* iPad section */}
           <FormField
             control={form.control}
             name='hasIPad'
@@ -190,7 +217,14 @@ export const DeveloperProfileFormPage = ({
                     Enter your iPad&apos;s Universally Unique Identifier (UUID).
                   </FormDescription>
                   <FormControl>
-                    <Input placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' {...field} />
+                    <div className='flex items-center space-x-2'>
+                      <Input
+                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                        {...field}
+                        className='flex-grow'
+                      />
+                      <UUIDHelperDialog deviceType='ios' />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -198,6 +232,7 @@ export const DeveloperProfileFormPage = ({
             />
           )}
 
+          {/* Apple Watch section */}
           <FormField
             control={form.control}
             name='hasAppleWatch'
@@ -223,7 +258,14 @@ export const DeveloperProfileFormPage = ({
                     Enter your Apple Watch&apos;s Universally Unique Identifier (UUID).
                   </FormDescription>
                   <FormControl>
-                    <Input placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' {...field} />
+                    <div className='flex items-center space-x-2'>
+                      <Input
+                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                        {...field}
+                        className='flex-grow'
+                      />
+                      <UUIDHelperDialog deviceType='ios' />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

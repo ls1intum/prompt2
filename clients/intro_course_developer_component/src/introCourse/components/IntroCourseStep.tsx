@@ -44,7 +44,7 @@ export function IntroCourseStep({
       onOpenChange={handleToggle}
       className={cn('transition-all duration-300', isDisabled && 'opacity-50')}
     >
-      <Card className={cn('overflow-hidden', isExpanded && 'ring-2 ring-primary')}>
+      <Card className='overflow-hidden'>
         <CardContent className='p-6'>
           <CollapsibleTrigger className='w-full text-left' disabled={isDisabled}>
             <div className='flex items-center justify-between'>

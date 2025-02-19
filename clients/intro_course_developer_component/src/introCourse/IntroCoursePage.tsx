@@ -55,7 +55,7 @@ export const IntroCoursePage = (): JSX.Element => {
           isDisabled={!infrastructureComplete}
           onToggle={() => setSeatAssignment(!seatAssignment)}
         >
-          Here will be the seat assignment.
+          Here will be the seat assignment. 
         </IntroCourseStep>
       </div>
     </div>
