@@ -1,6 +1,6 @@
 import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
-import UnauthorizedPage from './shared/components/UnauthorizedPage'
+import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
 import { WelcomePage } from './shared/components/WelcomePage'
@@ -108,14 +108,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   if (isError) {
     if (isCourseError && error.message.includes('401')) {
-      return <UnauthorizedPage />
+      return <UnauthorizedPage onLogout={logout} />
     }
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 
   // Check if the user has at least some Prompt rights
   if (permissions.length === 0 && fetchedCourses && fetchedCourses.length === 0) {
-    return <UnauthorizedPage />
+    return <UnauthorizedPage onLogout={logout} />
   }
 
   return (
