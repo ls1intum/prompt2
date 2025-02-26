@@ -7,12 +7,12 @@ SELECT * FROM application_question_multi_select
 WHERE course_phase_id = $1;
 
 -- name: CreateApplicationAnswerText :exec
-INSERT INTO application_answer_text (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4);
 
 -- name: CreateApplicationAnswerMultiSelect :exec
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4);
 
 -- name: GetApplicationExists :one
 SELECT EXISTS (
@@ -160,24 +160,26 @@ WHERE
 -- name: GetApplicationAnswersTextForCourseParticipationID :many
 SELECT aat.*
 FROM application_answer_text aat
-WHERE aat.course_phase_id = $1 AND aat.course_participation_id = $2;
+JOIN application_question_text aqt ON aat.application_question_id = aqt.id
+WHERE aqt.course_phase_id = $1 AND aat.course_participation_id = $2;
 
 -- name: GetApplicationAnswersMultiSelectForCourseParticipationID :many
 SELECT aams.*
 FROM application_answer_multi_select aams
-WHERE aams.course_phase_id = $1 AND aams.course_participation_id = $2;
+JOIN application_question_multi_select aqms ON aams.application_question_id = aqms.id
+WHERE aqms.course_phase_id = $1 AND aams.course_participation_id = $2;
 
 -- name: CreateOrOverwriteApplicationAnswerText :exec 
-INSERT INTO application_answer_text (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (course_phase_id, course_participation_id, application_question_id)
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer;
 
 -- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec 
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (course_phase_id, course_participation_id, application_question_id)
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer;
 

@@ -97,14 +97,13 @@ func (q *Queries) CheckIfCoursePhaseIsOpenApplicationPhase(ctx context.Context, 
 }
 
 const createApplicationAnswerMultiSelect = `-- name: CreateApplicationAnswerMultiSelect :exec
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateApplicationAnswerMultiSelectParams struct {
 	ID                    uuid.UUID `json:"id"`
 	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	Answer                []string  `json:"answer"`
 }
@@ -113,7 +112,6 @@ func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg Cr
 	_, err := q.db.Exec(ctx, createApplicationAnswerMultiSelect,
 		arg.ID,
 		arg.ApplicationQuestionID,
-		arg.CoursePhaseID,
 		arg.CourseParticipationID,
 		arg.Answer,
 	)
@@ -121,14 +119,13 @@ func (q *Queries) CreateApplicationAnswerMultiSelect(ctx context.Context, arg Cr
 }
 
 const createApplicationAnswerText = `-- name: CreateApplicationAnswerText :exec
-INSERT INTO application_answer_text (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateApplicationAnswerTextParams struct {
 	ID                    uuid.UUID   `json:"id"`
 	ApplicationQuestionID uuid.UUID   `json:"application_question_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	Answer                pgtype.Text `json:"answer"`
 }
@@ -137,7 +134,6 @@ func (q *Queries) CreateApplicationAnswerText(ctx context.Context, arg CreateApp
 	_, err := q.db.Exec(ctx, createApplicationAnswerText,
 		arg.ID,
 		arg.ApplicationQuestionID,
-		arg.CoursePhaseID,
 		arg.CourseParticipationID,
 		arg.Answer,
 	)
@@ -223,9 +219,9 @@ func (q *Queries) CreateApplicationQuestionText(ctx context.Context, arg CreateA
 }
 
 const createOrOverwriteApplicationAnswerMultiSelect = `-- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (course_phase_id, course_participation_id, application_question_id)
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer
 `
@@ -233,7 +229,6 @@ SET answer = EXCLUDED.answer
 type CreateOrOverwriteApplicationAnswerMultiSelectParams struct {
 	ID                    uuid.UUID `json:"id"`
 	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	Answer                []string  `json:"answer"`
 }
@@ -242,7 +237,6 @@ func (q *Queries) CreateOrOverwriteApplicationAnswerMultiSelect(ctx context.Cont
 	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerMultiSelect,
 		arg.ID,
 		arg.ApplicationQuestionID,
-		arg.CoursePhaseID,
 		arg.CourseParticipationID,
 		arg.Answer,
 	)
@@ -250,9 +244,9 @@ func (q *Queries) CreateOrOverwriteApplicationAnswerMultiSelect(ctx context.Cont
 }
 
 const createOrOverwriteApplicationAnswerText = `-- name: CreateOrOverwriteApplicationAnswerText :exec
-INSERT INTO application_answer_text (id, application_question_id, course_phase_id, course_participation_id, answer)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (course_phase_id, course_participation_id, application_question_id)
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer
 `
@@ -260,7 +254,6 @@ SET answer = EXCLUDED.answer
 type CreateOrOverwriteApplicationAnswerTextParams struct {
 	ID                    uuid.UUID   `json:"id"`
 	ApplicationQuestionID uuid.UUID   `json:"application_question_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	Answer                pgtype.Text `json:"answer"`
 }
@@ -269,7 +262,6 @@ func (q *Queries) CreateOrOverwriteApplicationAnswerText(ctx context.Context, ar
 	_, err := q.db.Exec(ctx, createOrOverwriteApplicationAnswerText,
 		arg.ID,
 		arg.ApplicationQuestionID,
-		arg.CoursePhaseID,
 		arg.CourseParticipationID,
 		arg.Answer,
 	)
@@ -476,7 +468,8 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 const getApplicationAnswersMultiSelectForCourseParticipationID = `-- name: GetApplicationAnswersMultiSelectForCourseParticipationID :many
 SELECT aams.id, aams.application_question_id, aams.answer, aams.course_phase_id, aams.course_participation_id
 FROM application_answer_multi_select aams
-WHERE aams.course_phase_id = $1 AND aams.course_participation_id = $2
+JOIN application_question_multi_select aqms ON aams.application_question_id = aqms.id
+WHERE aqms.course_phase_id = $1 AND aams.course_participation_id = $2
 `
 
 type GetApplicationAnswersMultiSelectForCourseParticipationIDParams struct {
@@ -511,9 +504,10 @@ func (q *Queries) GetApplicationAnswersMultiSelectForCourseParticipationID(ctx c
 }
 
 const getApplicationAnswersTextForCourseParticipationID = `-- name: GetApplicationAnswersTextForCourseParticipationID :many
-SELECT aat.id, aat.application_question_id, aat.answer, aat.course_phase_id, aat.course_participation_id
+SELECT aat.id, aat.application_question_id, aat.answer, aat.course_participation_id
 FROM application_answer_text aat
-WHERE aat.course_phase_id = $1 AND aat.course_participation_id = $2
+JOIN application_question_text aqt ON aat.application_question_id = aqt.id
+WHERE aqt.course_phase_id = $1 AND aat.course_participation_id = $2
 `
 
 type GetApplicationAnswersTextForCourseParticipationIDParams struct {
@@ -534,7 +528,6 @@ func (q *Queries) GetApplicationAnswersTextForCourseParticipationID(ctx context.
 			&i.ID,
 			&i.ApplicationQuestionID,
 			&i.Answer,
-			&i.CoursePhaseID,
 			&i.CourseParticipationID,
 		); err != nil {
 			return nil, err

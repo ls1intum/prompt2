@@ -257,7 +257,6 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
-		answerDBModel.CoursePhaseID = cPhaseParticipation.CoursePhaseID
 		err = qtx.CreateApplicationAnswerText(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
@@ -269,7 +268,6 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
-		answerDBModel.CoursePhaseID = cPhaseParticipation.CoursePhaseID
 		err = qtx.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
@@ -324,6 +322,10 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 			StudentID: studentObj.ID,
 			CourseID:  coursePhaseID,
 		})
+		if err != nil {
+			log.Error(err)
+			return applicationDTO.Application{}, errors.New("could not get course participation")
+		}
 
 		answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForCourseParticipationID(ctxWithTimeout, db.GetApplicationAnswersTextForCourseParticipationIDParams{
 			CourseParticipationID: courseParticipation.ID,
@@ -399,7 +401,6 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
-		answerDBModel.CoursePhaseID = cPhaseParticipation.CoursePhaseID
 		err = qtx.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
@@ -412,7 +413,6 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
 		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
-		answerDBModel.CoursePhaseID = cPhaseParticipation.CoursePhaseID
 		err = qtx.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
 		if err != nil {
 			log.Error(err)

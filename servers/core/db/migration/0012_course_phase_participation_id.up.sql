@@ -12,18 +12,15 @@ ALTER TABLE course_phase_participation
 -------------------------------
 -- (a) Add new columns for the composite foreign key.
 ALTER TABLE application_answer_text
-  ADD COLUMN new_course_phase_id uuid,
   ADD COLUMN new_course_participation_id uuid;
 
 -- (b) Populate the new columns using the mapping from course_phase_participation.
 UPDATE application_answer_text a
-SET new_course_phase_id = cp.course_phase_id,
-    new_course_participation_id = cp.course_participation_id
+SET new_course_participation_id = cp.course_participation_id
 FROM course_phase_participation cp
 WHERE a.course_phase_participation_id = cp.old_id;
 
 ALTER TABLE application_answer_text
-  ALTER COLUMN new_course_phase_id SET NOT NULL,
   ALTER COLUMN new_course_participation_id SET NOT NULL;
 
 -- (c) Drop the old foreign key and unique constraints.
@@ -37,22 +34,18 @@ ALTER TABLE application_answer_text
 
 -- (e) Rename the new columns to the desired names.
 ALTER TABLE application_answer_text
-  RENAME COLUMN new_course_phase_id TO course_phase_id;
-
-ALTER TABLE application_answer_text
   RENAME COLUMN new_course_participation_id TO course_participation_id;
 
 -- (f) Add a new foreign key constraint on the composite columns.
 ALTER TABLE application_answer_text
-  ADD CONSTRAINT fk_course_phase_participation
-    FOREIGN KEY (course_participation_id, course_phase_id)
-    REFERENCES course_phase_participation (course_participation_id, course_phase_id)
-    ON DELETE CASCADE;
+  ADD CONSTRAINT fk_course_participation
+    FOREIGN KEY (course_participation_id)
+    REFERENCES course_participation(id) ON DELETE CASCADE;
 
 -- (g) Recreate a unique constraint that now uses the two foreign key columns.
 ALTER TABLE application_answer_text
   ADD CONSTRAINT unique_application_answer_text
-    UNIQUE (course_participation_id, course_phase_id, application_question_id);
+    UNIQUE (course_participation_id, application_question_id);
 
 -------------------------------
 -- 3. Adjust application_answer_multi_select
@@ -91,15 +84,14 @@ ALTER TABLE application_answer_multi_select
 
 -- (f) Add the new foreign key.
 ALTER TABLE application_answer_multi_select
-  ADD CONSTRAINT fk_course_phase_participation
-    FOREIGN KEY (course_participation_id, course_phase_id)
-    REFERENCES course_phase_participation (course_participation_id, course_phase_id)
-    ON DELETE CASCADE;
+  ADD CONSTRAINT fk_course_participation
+    FOREIGN KEY (course_participation_id)
+    REFERENCES course_participation(id) ON DELETE CASCADE;
 
 -- (g) Recreate the unique constraint.
 ALTER TABLE application_answer_multi_select
   ADD CONSTRAINT unique_application_answer_multi_select
-    UNIQUE (course_participation_id, course_phase_id, application_question_id);
+    UNIQUE (course_participation_id, application_question_id);
 
 -------------------------------
 -- 4. Adjust application_assessment
