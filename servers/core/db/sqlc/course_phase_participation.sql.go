@@ -12,27 +12,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCoursePhaseParticipation = `-- name: CreateCoursePhaseParticipation :one
+const createOrUpdateCoursePhaseParticipation = `-- name: CreateOrUpdateCoursePhaseParticipation :one
 INSERT INTO course_phase_participation
-    (id, course_participation_id, course_phase_id, pass_status, restricted_data, student_readable_data)
+    (course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data)
 SELECT
-    $1 AS id,
+    $1 AS course_phase_id,
     $2 AS course_participation_id,
-    $3 AS course_phase_id,
-    $4 AS pass_status,
-    $5 AS restricted_data,
-    $6 AS student_readable_data
+    COALESCE($3, 'not_assessed') AS pass_status,
+    $4 AS restricted_data,
+    $5 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
   AND cph.id = $3
-RETURNING id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data
+ON CONFLICT (course_phase_id, course_participation_id)
+DO UPDATE SET
+  pass_status = COALESCE($3, course_phase_participation.pass_status),
+  restricted_data = course_phase_participation.restricted_data || $4,
+  student_readable_data = course_phase_participation.student_readable_data || $5
+RETURNING course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data
 `
 
-type CreateCoursePhaseParticipationParams struct {
-	ID                    uuid.UUID      `json:"id"`
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+type CreateOrUpdateCoursePhaseParticipationParams struct {
 	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
 	PassStatus            NullPassStatus `json:"pass_status"`
 	RestrictedData        []byte         `json:"restricted_data"`
 	StudentReadableData   []byte         `json:"student_readable_data"`
@@ -40,18 +43,16 @@ type CreateCoursePhaseParticipationParams struct {
 
 // - We need to ensure that the course_participation_id and course_phase_id
 // - belong to the same course.
-func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg CreateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
-	row := q.db.QueryRow(ctx, createCoursePhaseParticipation,
-		arg.ID,
-		arg.CourseParticipationID,
+func (q *Queries) CreateOrUpdateCoursePhaseParticipation(ctx context.Context, arg CreateOrUpdateCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
+	row := q.db.QueryRow(ctx, createOrUpdateCoursePhaseParticipation,
 		arg.CoursePhaseID,
+		arg.CourseParticipationID,
 		arg.PassStatus,
 		arg.RestrictedData,
 		arg.StudentReadableData,
 	)
 	var i CoursePhaseParticipation
 	err := row.Scan(
-		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
 		&i.RestrictedData,
@@ -63,7 +64,7 @@ func (q *Queries) CreateCoursePhaseParticipation(ctx context.Context, arg Create
 }
 
 const getAllCoursePhaseParticipationsForCourseParticipation = `-- name: GetAllCoursePhaseParticipationsForCourseParticipation :many
-SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
+SELECT course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
 WHERE course_participation_id = $1
 `
 
@@ -77,7 +78,6 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 	for rows.Next() {
 		var i CoursePhaseParticipation
 		if err := rows.Scan(
-			&i.ID,
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
 			&i.RestrictedData,
@@ -97,7 +97,6 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCourseParticipation(ctx cont
 
 const getAllCoursePhaseParticipationsForCoursePhase = `-- name: GetAllCoursePhaseParticipationsForCoursePhase :many
 SELECT
-    cpp.id AS course_phase_participation_id,
     cpp.pass_status,
     cpp.restricted_data,
     cpp.student_readable_data,
@@ -120,18 +119,17 @@ WHERE
 `
 
 type GetAllCoursePhaseParticipationsForCoursePhaseRow struct {
-	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
-	PassStatus                 NullPassStatus `json:"pass_status"`
-	RestrictedData             []byte         `json:"restricted_data"`
-	StudentReadableData        []byte         `json:"student_readable_data"`
-	StudentID                  uuid.UUID      `json:"student_id"`
-	FirstName                  pgtype.Text    `json:"first_name"`
-	LastName                   pgtype.Text    `json:"last_name"`
-	Email                      pgtype.Text    `json:"email"`
-	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
-	UniversityLogin            pgtype.Text    `json:"university_login"`
-	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
-	Gender                     Gender         `json:"gender"`
+	PassStatus           NullPassStatus `json:"pass_status"`
+	RestrictedData       []byte         `json:"restricted_data"`
+	StudentReadableData  []byte         `json:"student_readable_data"`
+	StudentID            uuid.UUID      `json:"student_id"`
+	FirstName            pgtype.Text    `json:"first_name"`
+	LastName             pgtype.Text    `json:"last_name"`
+	Email                pgtype.Text    `json:"email"`
+	MatriculationNumber  pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin      pgtype.Text    `json:"university_login"`
+	HasUniversityAccount pgtype.Bool    `json:"has_university_account"`
+	Gender               Gender         `json:"gender"`
 }
 
 func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllCoursePhaseParticipationsForCoursePhaseRow, error) {
@@ -144,7 +142,6 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhase(ctx context.Cont
 	for rows.Next() {
 		var i GetAllCoursePhaseParticipationsForCoursePhaseRow
 		if err := rows.Scan(
-			&i.CoursePhaseParticipationID,
 			&i.PassStatus,
 			&i.RestrictedData,
 			&i.StudentReadableData,
@@ -213,7 +210,8 @@ WITH
   -----------------------------------------------------------------------
   current_phase_participations AS (
       SELECT
-          cpp.id                         AS course_phase_participation_id,
+          cpp.course_phase_id            AS course_phase_id,
+          cpp.course_participation_id    AS course_participation_id,
           cpp.pass_status                AS pass_status,
           cpp.restricted_data            AS restricted_data,
           cpp.student_readable_data      AS student_readable_data,
@@ -228,8 +226,7 @@ WITH
           s.nationality,
           s.study_degree,
           s.study_program,
-          s.current_semester,
-          cp.id                         AS course_participation_id
+          s.current_semester
       FROM course_phase_participation cpp
       JOIN course_participation cp 
         ON cpp.course_participation_id = cp.id
@@ -245,7 +242,8 @@ WITH
   -----------------------------------------------------------------------
   qualified_non_participants AS (
       SELECT
-          NULL::uuid                   AS course_phase_participation_id,
+          $1::uuid                     AS course_phase_id,
+          cp.id                        AS course_participation_id,
           'not_assessed'::pass_status  AS pass_status,
           '{}'::jsonb                  AS restricted_data,
           '{}'::jsonb                  AS student_readable_data,
@@ -260,8 +258,7 @@ WITH
           s.nationality,
           s.study_degree,
           s.study_program,
-          s.current_semester,
-          cp.id                        AS course_participation_id
+          s.current_semester
       FROM course_participation cp
       JOIN student s 
         ON cp.student_id = s.id
@@ -285,7 +282,7 @@ WITH
   )
   
 SELECT
-    main.course_phase_participation_id, main.pass_status, main.restricted_data, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id,
+    main.course_phase_id, main.course_participation_id, main.pass_status, main.restricted_data, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester,
     (COALESCE(      
       (
             ----------------------------------------------------------------
@@ -329,7 +326,7 @@ SELECT
                          WHEN 'score' = ANY(dpm.from_dto_names) THEN 
                            (SELECT to_jsonb(aasm.score)
                             FROM application_assessment aasm
-                            WHERE aasm.course_phase_participation_id = pcpp.id)
+                            WHERE aasm.course_phase_id = pcpp.course_phase_id AND aasm.course_participation_id = pcpp.course_participation_id)
                          ELSE NULL 
                      END,
                      'additionalScores', CASE 
@@ -357,7 +354,8 @@ SELECT
                                FROM application_question_text qt
                                JOIN application_answer_text aat
                                  ON aat.application_question_id = qt.id
-                                AND aat.course_phase_participation_id = pcpp.id
+                                AND aat.course_phase_id = pcpp.course_phase_id
+                                AND aat.course_participation_id = pcpp.course_participation_id
                                WHERE qt.course_phase_id = dpm.from_course_phase_id
                                  AND qt.accessible_for_other_phases = true
                                  AND qt.access_key IS NOT NULL
@@ -373,7 +371,8 @@ SELECT
                                FROM application_question_multi_select qm
                                JOIN application_answer_multi_select aams
                                  ON aams.application_question_id = qm.id
-                                AND aams.course_phase_participation_id = pcpp.id
+                                AND aams.course_phase_id = pcpp.course_phase_id
+                                AND aams.course_participation_id = pcpp.course_participation_id
                                WHERE qm.course_phase_id = dpm.from_course_phase_id
                                  AND qm.accessible_for_other_phases = true
                                  AND qm.access_key IS NOT NULL
@@ -389,32 +388,32 @@ SELECT
       )::jsonb)::jsonb AS prev_data
 FROM
 (
-    SELECT course_phase_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participations
+    SELECT course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM current_phase_participations
     UNION
-    SELECT course_phase_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participants
+    SELECT course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM qualified_non_participants
 ) AS main
 ORDER BY main.last_name, main.first_name
 `
 
 type GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow struct {
-	CoursePhaseParticipationID uuid.UUID      `json:"course_phase_participation_id"`
-	PassStatus                 NullPassStatus `json:"pass_status"`
-	RestrictedData             []byte         `json:"restricted_data"`
-	StudentReadableData        []byte         `json:"student_readable_data"`
-	StudentID                  uuid.UUID      `json:"student_id"`
-	FirstName                  pgtype.Text    `json:"first_name"`
-	LastName                   pgtype.Text    `json:"last_name"`
-	Email                      pgtype.Text    `json:"email"`
-	MatriculationNumber        pgtype.Text    `json:"matriculation_number"`
-	UniversityLogin            pgtype.Text    `json:"university_login"`
-	HasUniversityAccount       pgtype.Bool    `json:"has_university_account"`
-	Gender                     Gender         `json:"gender"`
-	Nationality                pgtype.Text    `json:"nationality"`
-	StudyDegree                StudyDegree    `json:"study_degree"`
-	StudyProgram               pgtype.Text    `json:"study_program"`
-	CurrentSemester            pgtype.Int4    `json:"current_semester"`
-	CourseParticipationID      uuid.UUID      `json:"course_participation_id"`
-	PrevData                   []byte         `json:"prev_data"`
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	PassStatus            NullPassStatus `json:"pass_status"`
+	RestrictedData        []byte         `json:"restricted_data"`
+	StudentReadableData   []byte         `json:"student_readable_data"`
+	StudentID             uuid.UUID      `json:"student_id"`
+	FirstName             pgtype.Text    `json:"first_name"`
+	LastName              pgtype.Text    `json:"last_name"`
+	Email                 pgtype.Text    `json:"email"`
+	MatriculationNumber   pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin       pgtype.Text    `json:"university_login"`
+	HasUniversityAccount  pgtype.Bool    `json:"has_university_account"`
+	Gender                Gender         `json:"gender"`
+	Nationality           pgtype.Text    `json:"nationality"`
+	StudyDegree           StudyDegree    `json:"study_degree"`
+	StudyProgram          pgtype.Text    `json:"study_program"`
+	CurrentSemester       pgtype.Int4    `json:"current_semester"`
+	PrevData              []byte         `json:"prev_data"`
 }
 
 // ---------------------------------------------------------------------
@@ -430,7 +429,8 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 	for rows.Next() {
 		var i GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow
 		if err := rows.Scan(
-			&i.CoursePhaseParticipationID,
+			&i.CoursePhaseID,
+			&i.CourseParticipationID,
 			&i.PassStatus,
 			&i.RestrictedData,
 			&i.StudentReadableData,
@@ -446,7 +446,6 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 			&i.StudyDegree,
 			&i.StudyProgram,
 			&i.CurrentSemester,
-			&i.CourseParticipationID,
 			&i.PrevData,
 		); err != nil {
 			return nil, err
@@ -460,15 +459,21 @@ func (q *Queries) GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious
 }
 
 const getCoursePhaseParticipation = `-- name: GetCoursePhaseParticipation :one
-SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
-WHERE id = $1 LIMIT 1
+SELECT course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
+WHERE course_phase_id = $1 
+  AND course_participation_id = $2
+LIMIT 1
 `
 
-func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID) (CoursePhaseParticipation, error) {
-	row := q.db.QueryRow(ctx, getCoursePhaseParticipation, id)
+type GetCoursePhaseParticipationParams struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+}
+
+func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, arg GetCoursePhaseParticipationParams) (CoursePhaseParticipation, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseParticipation, arg.CoursePhaseID, arg.CourseParticipationID)
 	var i CoursePhaseParticipation
 	err := row.Scan(
-		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
 		&i.RestrictedData,
@@ -481,7 +486,7 @@ func (q *Queries) GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID)
 
 const getCoursePhaseParticipationByCourseParticipationAndCoursePhase = `-- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 
-SELECT id, course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
+SELECT course_participation_id, course_phase_id, restricted_data, pass_status, last_modified, student_readable_data FROM course_phase_participation
 WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1
 `
 
@@ -495,7 +500,6 @@ func (q *Queries) GetCoursePhaseParticipationByCourseParticipationAndCoursePhase
 	row := q.db.QueryRow(ctx, getCoursePhaseParticipationByCourseParticipationAndCoursePhase, arg.CourseParticipationID, arg.CoursePhaseID)
 	var i CoursePhaseParticipation
 	err := row.Scan(
-		&i.ID,
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
 		&i.RestrictedData,
@@ -516,7 +520,8 @@ direct_predecessor_for_pass AS (
 
 current_phase_participation AS (
     SELECT
-        cpp.id                         AS course_phase_participation_id,
+        cpp.course_phase_id            AS course_phase_id,
+        cpp.course_participation_id    AS course_participation_id,
         cpp.student_readable_data      AS student_readable_data,
         s.id                           AS student_id,
         s.first_name,
@@ -529,8 +534,7 @@ current_phase_participation AS (
         s.nationality,
         s.study_degree,
         s.study_program,
-        s.current_semester,
-        cp.id                    AS course_participation_id
+        s.current_semester
     FROM course_phase_participation cpp
     INNER JOIN course_participation cp 
       ON cpp.course_participation_id = cp.id
@@ -543,8 +547,8 @@ current_phase_participation AS (
 
 qualified_non_participant AS (
     SELECT
-        NULL::uuid                   AS course_phase_participation_id,
-        '{}'::jsonb                  AS student_readable_data,
+        $1::uuid                     AS course_phase_id,
+        cp.id                        AS course_participation_id,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
@@ -556,8 +560,7 @@ qualified_non_participant AS (
         s.nationality,
         s.study_degree,
         s.study_program,
-        s.current_semester,
-        cp.id                        AS course_participation_id
+        s.current_semester
     FROM course_participation cp
     JOIN student s 
       ON cp.student_id = s.id
@@ -583,12 +586,12 @@ qualified_non_participant AS (
         WHERE (pcpp.pass_status = 'passed')
     )
 )
-SELECT main.course_phase_participation_id, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester, main.course_participation_id
+SELECT main.course_phase_id, main.course_participation_id, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester
 FROM
 (
-    SELECT course_phase_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM current_phase_participation
+    SELECT course_phase_id, course_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM current_phase_participation
     UNION
-    SELECT course_phase_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester, course_participation_id FROM qualified_non_participant
+    SELECT course_phase_id, course_participation_id, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM qualified_non_participant
 ) AS main
 LIMIT 1
 `
@@ -600,21 +603,21 @@ type GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseParams struct {
 }
 
 type GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseRow struct {
-	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
-	StudentReadableData        []byte      `json:"student_readable_data"`
-	StudentID                  uuid.UUID   `json:"student_id"`
-	FirstName                  pgtype.Text `json:"first_name"`
-	LastName                   pgtype.Text `json:"last_name"`
-	Email                      pgtype.Text `json:"email"`
-	MatriculationNumber        pgtype.Text `json:"matriculation_number"`
-	UniversityLogin            pgtype.Text `json:"university_login"`
-	HasUniversityAccount       pgtype.Bool `json:"has_university_account"`
-	Gender                     Gender      `json:"gender"`
-	Nationality                pgtype.Text `json:"nationality"`
-	StudyDegree                StudyDegree `json:"study_degree"`
-	StudyProgram               pgtype.Text `json:"study_program"`
-	CurrentSemester            pgtype.Int4 `json:"current_semester"`
-	CourseParticipationID      uuid.UUID   `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	StudentReadableData   []byte      `json:"student_readable_data"`
+	StudentID             uuid.UUID   `json:"student_id"`
+	FirstName             pgtype.Text `json:"first_name"`
+	LastName              pgtype.Text `json:"last_name"`
+	Email                 pgtype.Text `json:"email"`
+	MatriculationNumber   pgtype.Text `json:"matriculation_number"`
+	UniversityLogin       pgtype.Text `json:"university_login"`
+	HasUniversityAccount  pgtype.Bool `json:"has_university_account"`
+	Gender                Gender      `json:"gender"`
+	Nationality           pgtype.Text `json:"nationality"`
+	StudyDegree           StudyDegree `json:"study_degree"`
+	StudyProgram          pgtype.Text `json:"study_program"`
+	CurrentSemester       pgtype.Int4 `json:"current_semester"`
 }
 
 // ---------------------------------------------------------------------
@@ -634,7 +637,8 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 	row := q.db.QueryRow(ctx, getCoursePhaseParticipationByUniversityLoginAndCoursePhase, arg.ToCoursePhaseID, arg.UniversityLogin, arg.MatriculationNumber)
 	var i GetCoursePhaseParticipationByUniversityLoginAndCoursePhaseRow
 	err := row.Scan(
-		&i.CoursePhaseParticipationID,
+		&i.CoursePhaseID,
+		&i.CourseParticipationID,
 		&i.StudentReadableData,
 		&i.StudentID,
 		&i.FirstName,
@@ -648,7 +652,6 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 		&i.StudyDegree,
 		&i.StudyProgram,
 		&i.CurrentSemester,
-		&i.CourseParticipationID,
 	)
 	return i, err
 }
@@ -656,33 +659,38 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 
-    pass_status = COALESCE($2, pass_status),   
-    restricted_data = restricted_data || $3, 
-    student_readable_data = student_readable_data || $4
-WHERE id = $1
-AND course_phase_id = $5
-RETURNING id
+    pass_status = COALESCE($3, pass_status),   
+    restricted_data = restricted_data || $4, 
+    student_readable_data = student_readable_data || $5
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
+RETURNING course_phase_id, course_participation_id
 `
 
 type UpdateCoursePhaseParticipationParams struct {
-	ID                  uuid.UUID      `json:"id"`
-	PassStatus          NullPassStatus `json:"pass_status"`
-	RestrictedData      []byte         `json:"restricted_data"`
-	StudentReadableData []byte         `json:"student_readable_data"`
-	CoursePhaseID       uuid.UUID      `json:"course_phase_id"`
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	PassStatus            NullPassStatus `json:"pass_status"`
+	RestrictedData        []byte         `json:"restricted_data"`
+	StudentReadableData   []byte         `json:"student_readable_data"`
 }
 
-func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (uuid.UUID, error) {
+type UpdateCoursePhaseParticipationRow struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+}
+
+func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg UpdateCoursePhaseParticipationParams) (UpdateCoursePhaseParticipationRow, error) {
 	row := q.db.QueryRow(ctx, updateCoursePhaseParticipation,
-		arg.ID,
+		arg.CoursePhaseID,
+		arg.CourseParticipationID,
 		arg.PassStatus,
 		arg.RestrictedData,
 		arg.StudentReadableData,
-		arg.CoursePhaseID,
 	)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+	var i UpdateCoursePhaseParticipationRow
+	err := row.Scan(&i.CoursePhaseID, &i.CourseParticipationID)
+	return i, err
 }
 
 const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many

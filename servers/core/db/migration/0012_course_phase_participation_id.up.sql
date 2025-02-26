@@ -7,14 +7,6 @@ BEGIN;
 ALTER TABLE course_phase_participation
   RENAME COLUMN id TO old_id;
 
--- Drop the old primary key constraint (assumed name).
-ALTER TABLE course_phase_participation
-  DROP CONSTRAINT course_phase_participation_pkey;
-
--- Add the new composite primary key.
-ALTER TABLE course_phase_participation
-  ADD PRIMARY KEY (course_participation_id, course_phase_id);
-
 -------------------------------
 -- 2. Adjust application_answer_text
 -------------------------------
@@ -29,6 +21,10 @@ SET new_course_phase_id = cp.course_phase_id,
     new_course_participation_id = cp.course_participation_id
 FROM course_phase_participation cp
 WHERE a.course_phase_participation_id = cp.old_id;
+
+ALTER TABLE application_answer_text
+  ALTER COLUMN new_course_phase_id SET NOT NULL,
+  ALTER COLUMN new_course_participation_id SET NOT NULL;
 
 -- (c) Drop the old foreign key and unique constraints.
 ALTER TABLE application_answer_text
@@ -73,6 +69,10 @@ SET new_course_phase_id = cp.course_phase_id,
 FROM course_phase_participation cp
 WHERE a.course_phase_participation_id = cp.old_id;
 
+ALTER TABLE application_answer_multi_select
+  ALTER COLUMN new_course_phase_id SET NOT NULL,
+  ALTER COLUMN new_course_participation_id SET NOT NULL;
+
 -- (c) Drop the old constraints.
 ALTER TABLE application_answer_multi_select
   DROP CONSTRAINT fk_course_phase_participation,
@@ -116,6 +116,10 @@ SET new_course_phase_id = cp.course_phase_id,
 FROM course_phase_participation cp
 WHERE a.course_phase_participation_id = cp.old_id;
 
+ALTER TABLE application_assessment
+  ALTER COLUMN new_course_phase_id SET NOT NULL,
+  ALTER COLUMN new_course_participation_id SET NOT NULL;
+
 -- (c) Drop the old foreign key constraint.
 ALTER TABLE application_assessment
   DROP CONSTRAINT fk_course_phase_participation;
@@ -143,6 +147,16 @@ ALTER TABLE application_assessment
 -------------------------------
 -- If you no longer need the old surrogate mapping in course_phase_participation,
 -- you can drop the old_id column. (Make sure all referencing tables have been updated.)
+
+-- Drop the old primary key constraint (assumed name).
+ALTER TABLE course_phase_participation
+  DROP CONSTRAINT course_phase_participation_pkey;
+
+-- Add the new composite primary key.
+ALTER TABLE course_phase_participation
+  ADD PRIMARY KEY (course_participation_id, course_phase_id);
+
+
 ALTER TABLE course_phase_participation
   DROP COLUMN old_id;
 

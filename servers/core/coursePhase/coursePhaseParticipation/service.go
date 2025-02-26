@@ -74,8 +74,11 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 	}, nil
 }
 
-func GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
-	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipation(ctx, id)
+func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
+	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipation(ctx, db.GetCoursePhaseParticipationParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	})
 	if err != nil {
 		log.Error(err)
 		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to get course phase participation")
@@ -90,31 +93,21 @@ func GetCoursePhaseParticipation(ctx context.Context, id uuid.UUID) (coursePhase
 	return participationDTO, nil
 }
 
-func CreateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, newCoursePhaseParticipation coursePhaseParticipationDTO.CreateCoursePhaseParticipation) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
+func CreateOrUpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, newCoursePhaseParticipation coursePhaseParticipationDTO.CreateCoursePhaseParticipation) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
 	queries := utils.GetQueries(transactionQueries, &CoursePhaseParticipationServiceSingleton.queries)
 	participation, err := newCoursePhaseParticipation.GetDBModel()
 	if err != nil {
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
+		log.Error(err)
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create DB model from DTO")
 	}
 
-	participation.ID = uuid.New()
-
-	if !participation.PassStatus.Valid {
-		participation.PassStatus = db.NullPassStatus{
-			Valid:      true,
-			PassStatus: "not_assessed",
-		}
-	}
-
-	createdParticipation, err := queries.CreateCoursePhaseParticipation(ctx, participation)
+	updatedParticipation, err := queries.CreateOrUpdateCoursePhaseParticipation(ctx, participation)
 	if err != nil {
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, err
-	}
-	if createdParticipation.ID == uuid.Nil {
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create course phase participation due to mismatch in CourseParticipationID and CoursePhaseID")
+		log.Error(err)
+		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create or update course phase participation")
 	}
 
-	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(createdParticipation)
+	return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(updatedParticipation)
 }
 
 func UpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, updatedCoursePhaseParticipation coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) error {
@@ -134,7 +127,7 @@ func UpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.
 	return nil
 }
 
-func UpdateBatchCoursePhaseParticipation(ctx context.Context, newCoursePhaseParticipations []coursePhaseParticipationDTO.CreateCoursePhaseParticipation, updatedCoursePhaseParticipation []coursePhaseParticipationDTO.UpdateCoursePhaseParticipation) ([]uuid.UUID, error) {
+func UpdateBatchCoursePhaseParticipation(ctx context.Context, createOrUpdateCoursePhaseParticipation []coursePhaseParticipationDTO.CreateCoursePhaseParticipation) ([]uuid.UUID, error) {
 	tx, err := CoursePhaseParticipationServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -142,25 +135,16 @@ func UpdateBatchCoursePhaseParticipation(ctx context.Context, newCoursePhasePart
 	defer tx.Rollback(ctx)
 	qtx := CoursePhaseParticipationServiceSingleton.queries.WithTx(tx)
 
-	updatedIDs := make([]uuid.UUID, 0, len(updatedCoursePhaseParticipation)+len(newCoursePhaseParticipations))
+	updatedIDs := make([]uuid.UUID, 0, len(createOrUpdateCoursePhaseParticipation))
 
 	// Replace for loop by DB batch operation in near future
-	for _, participation := range updatedCoursePhaseParticipation {
-		err := UpdateCoursePhaseParticipation(ctx, qtx, participation)
+	for _, participation := range createOrUpdateCoursePhaseParticipation {
+		updatedParticipation, err := CreateOrUpdateCoursePhaseParticipation(ctx, qtx, participation)
 		if err != nil {
 			log.Error(err)
 			return nil, errors.New("failed to update course phase participation")
 		}
-		updatedIDs = append(updatedIDs, participation.ID)
-	}
-
-	for _, participation := range newCoursePhaseParticipations {
-		newParticipation, err := CreateCoursePhaseParticipation(ctx, qtx, participation)
-		if err != nil {
-			log.Error(err)
-			return nil, errors.New("failed to create course phase participation")
-		}
-		updatedIDs = append(updatedIDs, newParticipation.ID)
+		updatedIDs = append(updatedIDs, updatedParticipation.CourseParticipationID)
 	}
 
 	// commit if all updates were successful
@@ -182,9 +166,11 @@ func CreateIfNotExistingPhaseParticipation(ctx context.Context, transactionQueri
 		return coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(participation)
 	} else if errors.Is(err, sql.ErrNoRows) {
 		// has to be created
-		return CreateCoursePhaseParticipation(ctx, &queries, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
+		passStatus := db.PassStatusNotAssessed
+		return CreateOrUpdateCoursePhaseParticipation(ctx, &queries, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{
 			CourseParticipationID: CourseParticipationID,
 			CoursePhaseID:         coursePhaseID,
+			PassStatus:            &passStatus,
 		})
 
 	} else {

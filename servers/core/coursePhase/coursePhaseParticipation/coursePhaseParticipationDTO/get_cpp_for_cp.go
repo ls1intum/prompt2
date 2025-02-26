@@ -9,7 +9,7 @@ import (
 )
 
 type GetAllCPPsForCoursePhase struct {
-	ID                    uuid.UUID          `json:"id"`
+	CoursePhaseID         uuid.UUID          `json:"coursePhaseID"`
 	PassStatus            string             `json:"passStatus"`
 	CourseParticipationID uuid.UUID          `json:"courseParticipationID"`
 	RestrictedData        meta.MetaData      `json:"restrictedData"`
@@ -38,7 +38,7 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllCoursePhaseParticipat
 	}
 
 	return GetAllCPPsForCoursePhase{
-		ID:                    model.CoursePhaseParticipationID,
+		CoursePhaseID:         model.CoursePhaseID,
 		CourseParticipationID: model.CourseParticipationID,
 		PassStatus:            GetPassStatusString(model.PassStatus),
 		RestrictedData:        restrictedData,

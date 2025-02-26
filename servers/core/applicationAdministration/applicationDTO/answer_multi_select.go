@@ -6,27 +6,30 @@ import (
 )
 
 type AnswerMultiSelect struct {
-	ID                         uuid.UUID `json:"id"`
-	ApplicationQuestionID      uuid.UUID `json:"applicationQuestionID"`
-	CoursePhaseParticipationID uuid.UUID `json:"coursePhaseParticipationID"`
-	Answer                     []string  `json:"answer"`
+	ID                    uuid.UUID `json:"id"`
+	ApplicationQuestionID uuid.UUID `json:"applicationQuestionID"`
+	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID `json:"coursePhaseID"`
+	Answer                []string  `json:"answer"`
 }
 
 func (a AnswerMultiSelect) GetDBModel() db.ApplicationAnswerMultiSelect {
 	return db.ApplicationAnswerMultiSelect{
-		ID:                         a.ID,
-		ApplicationQuestionID:      a.ApplicationQuestionID,
-		CoursePhaseParticipationID: a.CoursePhaseParticipationID,
-		Answer:                     a.Answer,
+		ID:                    a.ID,
+		ApplicationQuestionID: a.ApplicationQuestionID,
+		CoursePhaseID:         a.CoursePhaseID,
+		CourseParticipationID: a.CourseParticipationID,
+		Answer:                a.Answer,
 	}
 }
 
 func GetAnswerMultiSelectDTOFromDBModel(answer db.ApplicationAnswerMultiSelect) AnswerMultiSelect {
 	return AnswerMultiSelect{
-		ID:                         answer.ID,
-		ApplicationQuestionID:      answer.ApplicationQuestionID,
-		CoursePhaseParticipationID: answer.CoursePhaseParticipationID,
-		Answer:                     answer.Answer,
+		ID:                    answer.ID,
+		ApplicationQuestionID: answer.ApplicationQuestionID,
+		CoursePhaseID:         answer.CoursePhaseID,
+		CourseParticipationID: answer.CourseParticipationID,
+		Answer:                answer.Answer,
 	}
 }
 

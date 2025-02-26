@@ -40,13 +40,13 @@ JOIN
 JOIN 
     course c ON p.course_id = c.id
 WHERE 
-    cpp.id = $1
+    cpp.course_participation_id = $1
     AND cpp.course_phase_id = $2
 `
 
 type GetConfirmationMailingInformationParams struct {
-	ID            uuid.UUID `json:"id"`
-	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
 type GetConfirmationMailingInformationRow struct {
@@ -68,7 +68,7 @@ type GetConfirmationMailingInformationRow struct {
 }
 
 func (q *Queries) GetConfirmationMailingInformation(ctx context.Context, arg GetConfirmationMailingInformationParams) (GetConfirmationMailingInformationRow, error) {
-	row := q.db.QueryRow(ctx, getConfirmationMailingInformation, arg.ID, arg.CoursePhaseID)
+	row := q.db.QueryRow(ctx, getConfirmationMailingInformation, arg.CourseParticipationID, arg.CoursePhaseID)
 	var i GetConfirmationMailingInformationRow
 	err := row.Scan(
 		&i.FirstName,

@@ -20,7 +20,8 @@ SELECT CONCAT(c.semester_tag, '-', c.name) AS course_identifier
 FROM course c
 JOIN course_participation cp ON c.id = cp.course_id
 JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
-WHERE cpp.id = $1;
+WHERE cpp.course_phase_id = $1
+AND cpp.course_participation_id = $2;
 
 
 

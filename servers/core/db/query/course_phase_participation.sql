@@ -1,10 +1,11 @@
 -- name: GetCoursePhaseParticipation :one
 SELECT * FROM course_phase_participation
-WHERE id = $1 LIMIT 1;
+WHERE course_phase_id = $1 
+  AND course_participation_id = $2
+LIMIT 1;
 
 -- name: GetAllCoursePhaseParticipationsForCoursePhase :many
 SELECT
-    cpp.id AS course_phase_participation_id,
     cpp.pass_status,
     cpp.restricted_data,
     cpp.student_readable_data,
@@ -31,31 +32,35 @@ WHERE course_participation_id = $1;
 
 --- We need to ensure that the course_participation_id and course_phase_id 
 --- belong to the same course.
--- name: CreateCoursePhaseParticipation :one
+-- name: CreateOrUpdateCoursePhaseParticipation :one
 INSERT INTO course_phase_participation
-    (id, course_participation_id, course_phase_id, pass_status, restricted_data, student_readable_data)
+    (course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data)
 SELECT
-    $1 AS id,
+    $1 AS course_phase_id,
     $2 AS course_participation_id,
-    $3 AS course_phase_id,
-    $4 AS pass_status,
-    $5 AS restricted_data,
-    $6 AS student_readable_data
+    COALESCE($3, 'not_assessed') AS pass_status,
+    $4 AS restricted_data,
+    $5 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
   AND cph.id = $3
+ON CONFLICT (course_phase_id, course_participation_id)
+DO UPDATE SET
+  pass_status = COALESCE($3, course_phase_participation.pass_status),
+  restricted_data = course_phase_participation.restricted_data || $4,
+  student_readable_data = course_phase_participation.student_readable_data || $5
 RETURNING *;
 
 -- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 
-    pass_status = COALESCE($2, pass_status),   
-    restricted_data = restricted_data || $3, 
-    student_readable_data = student_readable_data || $4
-WHERE id = $1
-AND course_phase_id = $5
-RETURNING id; -- important to trigger a no rows in result set error if ids mismatch
+    pass_status = COALESCE($3, pass_status),   
+    restricted_data = restricted_data || $4, 
+    student_readable_data = student_readable_data || $5
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
+RETURNING course_phase_id, course_participation_id; -- important to trigger a no rows in result set error if ids mismatch
 
 -- name: GetCoursePhaseParticipationByCourseParticipationAndCoursePhase :one
 SELECT * FROM course_phase_participation
@@ -116,7 +121,8 @@ WITH
   -----------------------------------------------------------------------
   current_phase_participations AS (
       SELECT
-          cpp.id                         AS course_phase_participation_id,
+          cpp.course_phase_id            AS course_phase_id,
+          cpp.course_participation_id    AS course_participation_id,
           cpp.pass_status                AS pass_status,
           cpp.restricted_data            AS restricted_data,
           cpp.student_readable_data      AS student_readable_data,
@@ -131,8 +137,7 @@ WITH
           s.nationality,
           s.study_degree,
           s.study_program,
-          s.current_semester,
-          cp.id                         AS course_participation_id
+          s.current_semester
       FROM course_phase_participation cpp
       JOIN course_participation cp 
         ON cpp.course_participation_id = cp.id
@@ -148,7 +153,8 @@ WITH
   -----------------------------------------------------------------------
   qualified_non_participants AS (
       SELECT
-          NULL::uuid                   AS course_phase_participation_id,
+          $1::uuid                     AS course_phase_id,
+          cp.id                        AS course_participation_id,
           'not_assessed'::pass_status  AS pass_status,
           '{}'::jsonb                  AS restricted_data,
           '{}'::jsonb                  AS student_readable_data,
@@ -163,8 +169,7 @@ WITH
           s.nationality,
           s.study_degree,
           s.study_program,
-          s.current_semester,
-          cp.id                        AS course_participation_id
+          s.current_semester
       FROM course_participation cp
       JOIN student s 
         ON cp.student_id = s.id
@@ -235,7 +240,7 @@ SELECT
                          WHEN 'score' = ANY(dpm.from_dto_names) THEN 
                            (SELECT to_jsonb(aasm.score)
                             FROM application_assessment aasm
-                            WHERE aasm.course_phase_participation_id = pcpp.id)
+                            WHERE aasm.course_phase_id = pcpp.course_phase_id AND aasm.course_participation_id = pcpp.course_participation_id)
                          ELSE NULL 
                      END,
                      'additionalScores', CASE 
@@ -263,7 +268,8 @@ SELECT
                                FROM application_question_text qt
                                JOIN application_answer_text aat
                                  ON aat.application_question_id = qt.id
-                                AND aat.course_phase_participation_id = pcpp.id
+                                AND aat.course_phase_id = pcpp.course_phase_id
+                                AND aat.course_participation_id = pcpp.course_participation_id
                                WHERE qt.course_phase_id = dpm.from_course_phase_id
                                  AND qt.accessible_for_other_phases = true
                                  AND qt.access_key IS NOT NULL
@@ -279,7 +285,8 @@ SELECT
                                FROM application_question_multi_select qm
                                JOIN application_answer_multi_select aams
                                  ON aams.application_question_id = qm.id
-                                AND aams.course_phase_participation_id = pcpp.id
+                                AND aams.course_phase_id = pcpp.course_phase_id
+                                AND aams.course_participation_id = pcpp.course_participation_id
                                WHERE qm.course_phase_id = dpm.from_course_phase_id
                                  AND qm.accessible_for_other_phases = true
                                  AND qm.access_key IS NOT NULL
@@ -320,7 +327,8 @@ direct_predecessor_for_pass AS (
 -----------------------------------------------------------------------
 current_phase_participation AS (
     SELECT
-        cpp.id                         AS course_phase_participation_id,
+        cpp.course_phase_id            AS course_phase_id,
+        cpp.course_participation_id    AS course_participation_id,
         cpp.student_readable_data      AS student_readable_data,
         s.id                           AS student_id,
         s.first_name,
@@ -333,8 +341,7 @@ current_phase_participation AS (
         s.nationality,
         s.study_degree,
         s.study_program,
-        s.current_semester,
-        cp.id                    AS course_participation_id
+        s.current_semester
     FROM course_phase_participation cpp
     INNER JOIN course_participation cp 
       ON cpp.course_participation_id = cp.id
@@ -352,8 +359,8 @@ current_phase_participation AS (
 -----------------------------------------------------------------------
 qualified_non_participant AS (
     SELECT
-        NULL::uuid                   AS course_phase_participation_id,
-        '{}'::jsonb                  AS student_readable_data,
+        $1::uuid                     AS course_phase_id,
+        cp.id                        AS course_participation_id,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
@@ -365,8 +372,7 @@ qualified_non_participant AS (
         s.nationality,
         s.study_degree,
         s.study_program,
-        s.current_semester,
-        cp.id                        AS course_participation_id
+        s.current_semester
     FROM course_participation cp
     JOIN student s 
       ON cp.student_id = s.id

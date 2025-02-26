@@ -27,8 +27,8 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	application.POST("/:coursePhaseID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), postApplicationManual)
 	application.DELETE("/:coursePhaseID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteApplications)
 
-	application.GET("/:coursePhaseID/:coursePhaseParticipationID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getApplicationByCPPID)
-	application.PUT("/:coursePhaseID/:coursePhaseParticipationID/assessment", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateApplicationAssessment)
+	application.GET("/:coursePhaseID/:courseParticipationID", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getApplicationByCPID)
+	application.PUT("/:coursePhaseID/:courseParticipationID/assessment", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateApplicationAssessment)
 
 	application.GET("/:coursePhaseID/participations", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getAllApplicationParticipations)
 
@@ -291,20 +291,20 @@ func postApplicationAuthenticated(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
 }
 
-func getApplicationByCPPID(c *gin.Context) {
+func getApplicationByCPID(c *gin.Context) {
 	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	coursePhaseParticipationId, err := uuid.Parse(c.Param("coursePhaseParticipationID"))
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	application, err := GetApplicationByCPPID(c, coursePhaseId, coursePhaseParticipationId)
+	application, err := GetApplicationByCPID(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrNotFound) {
@@ -342,7 +342,7 @@ func updateApplicationAssessment(c *gin.Context) {
 		return
 	}
 
-	coursePhaseParticipationId, err := uuid.Parse(c.Param("coursePhaseParticipationID"))
+	courseParticipationId, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
@@ -354,14 +354,14 @@ func updateApplicationAssessment(c *gin.Context) {
 		return
 	}
 
-	err = validateUpdateAssessment(c, coursePhaseId, coursePhaseParticipationId, assessment)
+	err = validateUpdateAssessment(c, coursePhaseId, courseParticipationId, assessment)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = UpdateApplicationAssessment(c, coursePhaseId, coursePhaseParticipationId, assessment)
+	err = UpdateApplicationAssessment(c, coursePhaseId, courseParticipationId, assessment)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not update application assessment"))
