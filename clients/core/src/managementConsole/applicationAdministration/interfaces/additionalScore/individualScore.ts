@@ -1,4 +1,4 @@
 export interface IndividualScore {
-  coursePhaseParticipationID: string
+  courseParticipationID: string
   score: number
 }

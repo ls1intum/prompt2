@@ -10,8 +10,8 @@ import { AdditionalScore } from '../../../../interfaces/additionalScore/addition
 import { ActionMenu } from './menus/ActionMenu'
 
 export const columns = (
-  onViewApplication: (id: string) => void,
-  onDeleteApplication: (coursePhaseParticipationID: string) => void,
+  onViewApplication: (courseParticipationID: string) => void,
+  onDeleteApplication: (courseParticipationID: string) => void,
   additionalScores: AdditionalScore[],
 ): ColumnDef<ApplicationParticipation>[] => {
   let additionalScoreColumns: ColumnDef<ApplicationParticipation>[] = []
@@ -134,8 +134,8 @@ export const columns = (
       cell: ({ row }) => {
         return (
           <ActionMenu
-            onViewApplication={() => onViewApplication(row.original.id)}
-            onDeleteApplication={() => onDeleteApplication(row.original.id)}
+            onViewApplication={() => onViewApplication(row.original.courseParticipationID)}
+            onDeleteApplication={() => onDeleteApplication(row.original.courseParticipationID)}
           />
         )
       },

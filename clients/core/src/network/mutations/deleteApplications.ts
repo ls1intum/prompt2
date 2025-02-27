@@ -2,14 +2,14 @@ import { axiosInstance } from '@/network/configService'
 
 export const deleteApplications = async (
   coursePhaseID: string,
-  coursePhaseParticipationIDs: string[],
+  courseParticipationIDs: string[],
 ): Promise<void> => {
   try {
     return await axiosInstance.delete(`/api/applications/${coursePhaseID}`, {
       headers: {
         'Content-Type': 'application/json-path+json',
       },
-      data: coursePhaseParticipationIDs,
+      data: courseParticipationIDs,
     })
   } catch (err) {
     console.error(err)
