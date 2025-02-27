@@ -269,7 +269,6 @@ SELECT
                                FROM application_question_text qt
                                JOIN application_answer_text aat
                                  ON aat.application_question_id = qt.id
-                                AND aat.course_phase_id = pcpp.course_phase_id
                                 AND aat.course_participation_id = pcpp.course_participation_id
                                WHERE qt.course_phase_id = dpm.from_course_phase_id
                                  AND qt.accessible_for_other_phases = true
@@ -286,7 +285,6 @@ SELECT
                                FROM application_question_multi_select qm
                                JOIN application_answer_multi_select aams
                                  ON aams.application_question_id = qm.id
-                                AND aams.course_phase_id = pcpp.course_phase_id
                                 AND aams.course_participation_id = pcpp.course_participation_id
                                WHERE qm.course_phase_id = dpm.from_course_phase_id
                                  AND qm.accessible_for_other_phases = true

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
@@ -61,20 +62,23 @@ func getParticipationsForCoursePhase(c *gin.Context) {
 }
 
 func getParticipation(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("course_id"))
+	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
+		log.Error(err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	courseParticipationID, err := uuid.Parse(c.Param("course_participation_id"))
 	if err != nil {
+		log.Error(err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	courseParticipation, err := GetCoursePhaseParticipation(c, coursePhaseID, courseParticipationID)
 	if err != nil {
+		log.Error(err)
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -83,7 +87,7 @@ func getParticipation(c *gin.Context) {
 }
 
 func updateCoursePhaseParticipation(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("course_id"))
+	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return

@@ -87,7 +87,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 		StudentReadableData:   studentReadableData,
 	}
 
-	createdParticipation, err := CreateCoursePhaseParticipation(suite.ctx, nil, newParticipation)
+	createdParticipation, err := CreateOrUpdateCoursePhaseParticipation(suite.ctx, nil, newParticipation)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newParticipation.CoursePhaseID, createdParticipation.CoursePhaseID, "CoursePhaseID should match")
 	assert.Equal(suite.T(), newParticipation.RestrictedData, createdParticipation.RestrictedData, "Meta data should match")
@@ -96,7 +96,8 @@ func (suite *CoursePhaseParticipationTestSuite) TestCreateCoursePhaseParticipati
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipation() {
-	participationID := uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4")
+	courseParticipationID := uuid.MustParse("6a49b717-a8ca-4d16-bcd0-0bb059525269")
+	coursePhaseID := uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908")
 	jsonData := `{"other-value": "some skills"}`
 	var data meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &data)
@@ -109,18 +110,18 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 
 	updatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-		ID:                  participationID,
-		RestrictedData:      data,
-		StudentReadableData: studentReadableData,
-		PassStatus:          &pass,
-		CoursePhaseID:       uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908"),
+		CourseParticipationID: courseParticipationID,
+		RestrictedData:        data,
+		StudentReadableData:   studentReadableData,
+		PassStatus:            &pass,
+		CoursePhaseID:         coursePhaseID,
 	}
 
 	err = UpdateCoursePhaseParticipation(suite.ctx, nil, updatedParticipation)
 	assert.NoError(suite.T(), err)
-	result, err := GetCoursePhaseParticipation(suite.ctx, participationID)
+	result, err := GetCoursePhaseParticipation(suite.ctx, coursePhaseID, courseParticipationID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), updatedParticipation.ID, result.ID, "Participation ID should match")
+	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.CourseParticipationID, "Participation ID should match")
 	assert.Equal(suite.T(), "passed", result.PassStatus, "PassStatus should match")
 	assert.Equal(suite.T(), updatedParticipation.RestrictedData["other-value"], result.RestrictedData["other-value"], "New Meta data should match")
 	assert.Equal(suite.T(), updatedParticipation.StudentReadableData["other-value"], result.StudentReadableData["other-value"], "New Meta data should match")
@@ -128,7 +129,8 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipationWithMetaDataOverride() {
-	participationID := uuid.MustParse("83d88b1f-1435-4c36-b8ca-6741094f35e4")
+	courseParticipationID := uuid.MustParse("6a49b717-a8ca-4d16-bcd0-0bb059525269")
+	coursePhaseID := uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908")
 	jsonData := `{"skills": "more than none", "other-value": "some skills"}`
 	var data meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &data)
@@ -140,21 +142,21 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 
 	updatedParticipation := coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-		ID:                  participationID,
-		RestrictedData:      data,
-		StudentReadableData: studentReadableData,
-		PassStatus:          nil, // Updated to use the ENUM value
-		CoursePhaseID:       uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908"),
+		CourseParticipationID: courseParticipationID,
+		RestrictedData:        data,
+		StudentReadableData:   studentReadableData,
+		PassStatus:            nil, // Updated to use the ENUM value
+		CoursePhaseID:         uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908"),
 	}
 
-	BeforeResult, err := GetCoursePhaseParticipation(suite.ctx, participationID)
+	BeforeResult, err := GetCoursePhaseParticipation(suite.ctx, coursePhaseID, courseParticipationID)
 	assert.NoError(suite.T(), err)
 
 	err = UpdateCoursePhaseParticipation(suite.ctx, nil, updatedParticipation)
 	assert.NoError(suite.T(), err)
-	result, err := GetCoursePhaseParticipation(suite.ctx, participationID)
+	result, err := GetCoursePhaseParticipation(suite.ctx, coursePhaseID, courseParticipationID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), updatedParticipation.ID, result.ID, "Participation ID should match")
+	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.CourseParticipationID, "Participation ID should match")
 	assert.Equal(suite.T(), BeforeResult.PassStatus, result.PassStatus, "PassStatus should match")
 	for key, value := range updatedParticipation.RestrictedData {
 		assert.Equal(suite.T(), result.RestrictedData[key], value, "Updated Meta data should be stored")
@@ -184,9 +186,8 @@ func (suite *CoursePhaseParticipationTestSuite) TestNewCoursePhaseParticipation(
 		CoursePhaseID:         uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908"),
 	}
 
-	participation, err := CreateCoursePhaseParticipation(suite.ctx, nil, createParticipation)
+	participation, err := CreateOrUpdateCoursePhaseParticipation(suite.ctx, nil, createParticipation)
 	assert.NoError(suite.T(), err)
-	assert.NotEqual(suite.T(), participation.ID, uuid.Nil, "Participation ID should match")
 	assert.Equal(suite.T(), participation.PassStatus, "not_assessed", "PassStatus should be not assessed")
 	for key, value := range createParticipation.RestrictedData {
 		assert.Equal(suite.T(), participation.RestrictedData[key], value, "Updated Meta data should be stored")
@@ -216,7 +217,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestNewCoursePhaseParticipationW
 		CoursePhaseID:         uuid.MustParse("7062236a-e290-487c-be41-29b24e0afc64"), // belongs to wrong course
 	}
 
-	_, err = CreateCoursePhaseParticipation(suite.ctx, nil, createParticipation)
+	_, err = CreateOrUpdateCoursePhaseParticipation(suite.ctx, nil, createParticipation)
 	assert.Error(suite.T(), err)
 }
 
