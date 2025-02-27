@@ -418,6 +418,16 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 	assert.Contains(suite.T(), scoreNames, applicationDTO.AdditionalScore{Key: "TestScore", Name: "TestScore"})
 }
 
+func (suite *ApplicationAdminServiceTestSuite) TestDeleteApplication_Success() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
+
+	toBeDeletedUUIDs := []uuid.UUID{courseParticipationID}
+
+	err := DeleteApplications(suite.ctx, coursePhaseID, toBeDeletedUUIDs)
+	assert.NoError(suite.T(), err)
+}
+
 func TestApplicationAdminServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationAdminServiceTestSuite))
 }

@@ -167,7 +167,7 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	coursePhaseParticipationId, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	courseParticipationID, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {
@@ -179,7 +179,7 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
@@ -209,7 +209,7 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	coursePhaseParticipationId, err := PostApplicationExtern(c, coursePhaseId, application)
+	courseParticipationID, err := PostApplicationExtern(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {
@@ -224,7 +224,7 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
@@ -273,14 +273,14 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	coursePhaseParticipationId, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	courseParticipationID, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, coursePhaseParticipationId)
+	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
@@ -449,13 +449,13 @@ func deleteApplications(c *gin.Context) {
 		return
 	}
 
-	var coursePhaseParticipationIDs []uuid.UUID
-	if err := c.BindJSON(&coursePhaseParticipationIDs); err != nil {
+	var courseParticipationIDs []uuid.UUID
+	if err := c.BindJSON(&courseParticipationIDs); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = DeleteApplications(c, coursePhaseId, coursePhaseParticipationIDs)
+	err = DeleteApplications(c, coursePhaseId, courseParticipationIDs)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not delete applications"))

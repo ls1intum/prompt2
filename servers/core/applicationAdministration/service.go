@@ -664,11 +664,11 @@ func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applic
 	return metaToScoresArray(coursePhaseDTO.RestrictedData)
 }
 
-func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID) error {
+func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationIDs []uuid.UUID) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	err := ApplicationServiceSingleton.queries.DeleteApplications(ctxWithTimeout, db.DeleteApplicationsParams{CoursePhaseID: coursePhaseID, Column2: coursePhaseParticipationIDs})
+	err := ApplicationServiceSingleton.queries.DeleteApplications(ctxWithTimeout, db.DeleteApplicationsParams{CoursePhaseID: coursePhaseID, CourseParticipationIds: courseParticipationIDs})
 	if err != nil {
 		log.Error(err)
 		return errors.New("could not delete applications")

@@ -53,27 +53,6 @@ func (q *Queries) GetPermissionStringByCoursePhaseID(ctx context.Context, id uui
 	return course_identifier, err
 }
 
-const getPermissionStringByCoursePhaseParticipationID = `-- name: GetPermissionStringByCoursePhaseParticipationID :one
-SELECT CONCAT(c.semester_tag, '-', c.name) AS course_identifier
-FROM course c
-JOIN course_participation cp ON c.id = cp.course_id
-JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
-WHERE cpp.course_phase_id = $1
-AND cpp.course_participation_id = $2
-`
-
-type GetPermissionStringByCoursePhaseParticipationIDParams struct {
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-}
-
-func (q *Queries) GetPermissionStringByCoursePhaseParticipationID(ctx context.Context, arg GetPermissionStringByCoursePhaseParticipationIDParams) (interface{}, error) {
-	row := q.db.QueryRow(ctx, getPermissionStringByCoursePhaseParticipationID, arg.CoursePhaseID, arg.CourseParticipationID)
-	var course_identifier interface{}
-	err := row.Scan(&course_identifier)
-	return course_identifier, err
-}
-
 const getStudentRoleStrings = `-- name: GetStudentRoleStrings :many
 SELECT CONCAT(c.semester_tag, '-', c.name, '-Student')::text AS student_role
 FROM course c

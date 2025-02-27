@@ -263,8 +263,8 @@ DELETE FROM course_participation
 WHERE id IN (
       SELECT cpp.course_participation_id
       FROM course_phase_participation cpp
-      WHERE cpp.id = ANY($2::uuid[])
-        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+      WHERE cpp.course_participation_id = ANY(sqlc.arg(course_participation_ids)::uuid[])
+        AND cpp.course_phase_id = sqlc.arg(course_phase_id)::uuid -- ensures that only applications for the given course phase are deleted
   );
 
 -- name: StoreApplicationAnswerUpdateTimestamp :exec

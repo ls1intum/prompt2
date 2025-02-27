@@ -293,18 +293,18 @@ DELETE FROM course_participation
 WHERE id IN (
       SELECT cpp.course_participation_id
       FROM course_phase_participation cpp
-      WHERE cpp.id = ANY($2::uuid[])
-        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+      WHERE cpp.course_participation_id = ANY($1::uuid[])
+        AND cpp.course_phase_id = $2::uuid -- ensures that only applications for the given course phase are deleted
   )
 `
 
 type DeleteApplicationsParams struct {
-	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
-	Column2       []uuid.UUID `json:"column_2"`
+	CourseParticipationIds []uuid.UUID `json:"course_participation_ids"`
+	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
 }
 
 func (q *Queries) DeleteApplications(ctx context.Context, arg DeleteApplicationsParams) error {
-	_, err := q.db.Exec(ctx, deleteApplications, arg.CoursePhaseID, arg.Column2)
+	_, err := q.db.Exec(ctx, deleteApplications, arg.CourseParticipationIds, arg.CoursePhaseID)
 	return err
 }
 

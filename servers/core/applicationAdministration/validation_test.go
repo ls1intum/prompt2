@@ -405,7 +405,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_N
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_InvalidMetaDataKey() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	coursePhaseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
+	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
 
 	jsonData := `{"invalid_key": "value"}`
 	var restrictedData meta.MetaData
@@ -416,7 +416,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_I
 		RestrictedData: restrictedData,
 	}
 
-	err = validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	err = validateUpdateAssessment(suite.ctx, coursePhaseID, courseParticipationID, assessment)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "invalid meta data key - not allowed to update other meta data", err.Error())
 }
