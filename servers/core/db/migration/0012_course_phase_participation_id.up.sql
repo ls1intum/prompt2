@@ -142,6 +142,10 @@ ALTER TABLE application_assessment
     REFERENCES course_phase_participation (course_participation_id, course_phase_id)
     ON DELETE CASCADE;
 
+ALTER TABLE application_assessment
+  ADD CONSTRAINT unique_course_phase_participation_assessment
+  UNIQUE (course_phase_id, course_participation_id);
+
 ALTER TABLE course_phase_participation
   DROP COLUMN old_id;
 

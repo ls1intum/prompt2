@@ -37,7 +37,6 @@ export const DataImportPage = (): JSX.Element => {
   const handleImport = () => {
     const updateData = matchedStudents.map((participation) => {
       const participationUpdate: UpdateCoursePhaseParticipation = {
-        id: participation.id,
         courseParticipationID: participation.courseParticipationID,
         coursePhaseID: phaseId ?? '',
         passStatus: PassStatus.PASSED,

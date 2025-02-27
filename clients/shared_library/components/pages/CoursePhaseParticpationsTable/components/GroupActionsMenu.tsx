@@ -83,7 +83,6 @@ export const GroupActionsMenu = ({
           onConfirm={() => {
             const mutations = selectedRows.rows.map((row) => {
               const update: UpdateCoursePhaseParticipation = {
-                id: row.original.id,
                 coursePhaseID: phaseId ?? '',
                 courseParticipationID: row.original.courseParticipationID,
                 passStatus: PassStatus.PASSED,
@@ -108,7 +107,6 @@ export const GroupActionsMenu = ({
           onConfirm={() => {
             const mutations = selectedRows.rows.map((row) => {
               const update: UpdateCoursePhaseParticipation = {
-                id: row.original.id,
                 coursePhaseID: phaseId ?? '',
                 courseParticipationID: row.original.courseParticipationID,
                 passStatus: PassStatus.FAILED,
