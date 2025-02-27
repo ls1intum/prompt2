@@ -17,7 +17,6 @@ func (a AnswerMultiSelect) GetDBModel() db.ApplicationAnswerMultiSelect {
 	return db.ApplicationAnswerMultiSelect{
 		ID:                    a.ID,
 		ApplicationQuestionID: a.ApplicationQuestionID,
-		CoursePhaseID:         a.CoursePhaseID,
 		CourseParticipationID: a.CourseParticipationID,
 		Answer:                a.Answer,
 	}
@@ -27,7 +26,6 @@ func GetAnswerMultiSelectDTOFromDBModel(answer db.ApplicationAnswerMultiSelect) 
 	return AnswerMultiSelect{
 		ID:                    answer.ID,
 		ApplicationQuestionID: answer.ApplicationQuestionID,
-		CoursePhaseID:         answer.CoursePhaseID,
 		CourseParticipationID: answer.CourseParticipationID,
 		Answer:                answer.Answer,
 	}

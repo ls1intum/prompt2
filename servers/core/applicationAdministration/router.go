@@ -431,7 +431,7 @@ func updateApplicationsStatus(c *gin.Context) {
 		return
 	}
 
-	participationIDs, err := coursePhaseParticipation.BatchUpdatePassStatus(c, coursePhaseId, status.CoursePhaseParticipationIDs, status.PassStatus)
+	participationIDs, err := coursePhaseParticipation.BatchUpdatePassStatus(c, coursePhaseId, status.CourseParticipationIDs, status.PassStatus)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not update application status"))

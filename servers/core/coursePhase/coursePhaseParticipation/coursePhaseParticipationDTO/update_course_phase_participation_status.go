@@ -6,6 +6,6 @@ import (
 )
 
 type UpdateCoursePhaseParticipationStatus struct {
-	PassStatus                  db.PassStatus `json:"passStatus"`
-	CoursePhaseParticipationIDs []uuid.UUID   `json:"coursePhaseParticipationIDs"`
+	PassStatus             db.PassStatus `json:"passStatus"`
+	CourseParticipationIDs []uuid.UUID   `json:"courseParticipationIDs"`
 }

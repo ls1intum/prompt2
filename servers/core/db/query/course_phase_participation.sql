@@ -38,13 +38,13 @@ INSERT INTO course_phase_participation
 SELECT
     $1 AS course_phase_id,
     $2 AS course_participation_id,
-    COALESCE($3, 'not_assessed') AS pass_status,
+    COALESCE($3, 'not_assessed'::pass_status) AS pass_status,
     $4 AS restricted_data,
     $5 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
-  AND cph.id = $3
+  AND cph.id = $1
 ON CONFLICT (course_phase_id, course_participation_id)
 DO UPDATE SET
   pass_status = COALESCE($3, course_phase_participation.pass_status),
@@ -68,10 +68,11 @@ WHERE course_participation_id = $1 AND course_phase_id = $2 LIMIT 1;
 
 -- name: UpdateCoursePhasePassStatus :many
 UPDATE course_phase_participation
-SET pass_status = $3::pass_status
-WHERE id = ANY($1::uuid[])
-  AND course_phase_id = $2::uuid
-  AND pass_status != $3::pass_status
+SET pass_status = sqlc.arg(pass_status)::pass_status
+WHERE 
+  course_participation_id = ANY(sqlc.arg(course_participation_id)::uuid[])
+  AND course_phase_id = sqlc.arg(course_phase_id)::uuid
+  AND pass_status != sqlc.arg(pass_status)::pass_status
 RETURNING course_participation_id;
 
 

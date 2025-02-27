@@ -383,39 +383,29 @@ func TestValidateMultiSelectAnswers_InvalidQuestionID(t *testing.T) {
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
 	passStatus := db.PassStatusFailed
 	assessment := applicationDTO.PutAssessment{
 		PassStatus: &passStatus,
 	}
 
-	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	err := validateUpdateAssessment(suite.ctx, coursePhaseID, courseParticipationID, assessment)
 	assert.NoError(suite.T(), err)
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_NotAssessmentPhase() {
 	coursePhaseID := uuid.MustParse("7062236a-e290-487c-be41-29b24e0afc64")
-	coursePhaseParticipationID := uuid.MustParse("3a774200-39a7-4656-bafb-92b7210a93c1")
+	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
 	assessment := applicationDTO.PutAssessment{}
 
-	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	err := validateUpdateAssessment(suite.ctx, coursePhaseID, courseParticipationID, assessment)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "course phase is not an assessment phase", err.Error())
 }
 
-func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_InvalidParticipation() {
-	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	coursePhaseParticipationID := uuid.New() // Non-existent participation
-	assessment := applicationDTO.PutAssessment{}
-
-	err := validateUpdateAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
-	assert.Error(suite.T(), err)
-	assert.Equal(suite.T(), "course phase participation does not belong to this course phase", err.Error())
-}
-
 func (suite *ApplicationAdminValidationTestSuite) TestValidateUpdateAssessment_InvalidMetaDataKey() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+	coursePhaseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
 
 	jsonData := `{"invalid_key": "value"}`
 	var restrictedData meta.MetaData
@@ -437,14 +427,14 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Su
 		Key:  "valid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(10),
 					Valid: true,
 				},
 			},
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(10),
 					Valid: true,
@@ -463,7 +453,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Em
 		Key:  "invalid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(10),
 					Valid: true,
@@ -483,7 +473,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Ne
 		Key:  "negative_score",
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(-10),
 					Valid: true,
@@ -503,7 +493,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_In
 		Key:  "invalid_key",
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Valid: false, // Invalid value
 				},
@@ -522,14 +512,14 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Mi
 		Key:  "mixed_scores",
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(10),
 					Valid: true,
 				},
 			},
 			{
-				CoursePhaseParticipationID: uuid.New(),
+				CourseParticipationID: uuid.New(),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(-10),
 					Valid: true,

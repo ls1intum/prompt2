@@ -188,7 +188,6 @@ type ApplicationAnswerMultiSelect struct {
 	ID                    uuid.UUID `json:"id"`
 	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
 	Answer                []string  `json:"answer"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 }
 

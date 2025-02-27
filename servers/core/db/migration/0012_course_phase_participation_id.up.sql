@@ -52,18 +52,15 @@ ALTER TABLE application_answer_text
 -------------------------------
 -- (a) Add new columns.
 ALTER TABLE application_answer_multi_select
-  ADD COLUMN new_course_phase_id uuid,
   ADD COLUMN new_course_participation_id uuid;
 
 -- (b) Populate the new columns.
 UPDATE application_answer_multi_select a
-SET new_course_phase_id = cp.course_phase_id,
-    new_course_participation_id = cp.course_participation_id
+SET new_course_participation_id = cp.course_participation_id
 FROM course_phase_participation cp
 WHERE a.course_phase_participation_id = cp.old_id;
 
 ALTER TABLE application_answer_multi_select
-  ALTER COLUMN new_course_phase_id SET NOT NULL,
   ALTER COLUMN new_course_participation_id SET NOT NULL;
 
 -- (c) Drop the old constraints.
@@ -76,9 +73,6 @@ ALTER TABLE application_answer_multi_select
   DROP COLUMN course_phase_participation_id;
 
 -- (e) Rename new columns.
-ALTER TABLE application_answer_multi_select
-  RENAME COLUMN new_course_phase_id TO course_phase_id;
-
 ALTER TABLE application_answer_multi_select
   RENAME COLUMN new_course_participation_id TO course_participation_id;
 
@@ -127,13 +121,6 @@ ALTER TABLE application_assessment
 ALTER TABLE application_assessment
   RENAME COLUMN new_course_participation_id TO course_participation_id;
 
--- (f) Add the new foreign key constraint.
-ALTER TABLE application_assessment
-  ADD CONSTRAINT fk_course_phase_participation
-    FOREIGN KEY (course_participation_id, course_phase_id)
-    REFERENCES course_phase_participation (course_participation_id, course_phase_id)
-    ON DELETE CASCADE;
-
 -------------------------------
 -- 5. Final Cleanup
 -------------------------------
@@ -147,6 +134,17 @@ ALTER TABLE course_phase_participation
 -- Add the new composite primary key.
 ALTER TABLE course_phase_participation
   ADD PRIMARY KEY (course_participation_id, course_phase_id);
+
+-- (f) Add the new foreign key constraint.
+ALTER TABLE application_assessment
+  ADD CONSTRAINT fk_course_phase_participation
+    FOREIGN KEY (course_participation_id, course_phase_id)
+    REFERENCES course_phase_participation (course_participation_id, course_phase_id)
+    ON DELETE CASCADE;
+
+ALTER TABLE application_assessment
+ADD CONSTRAINT unique_course_phase_participation
+UNIQUE (course_phase_id, course_participation_id);
 
 
 ALTER TABLE course_phase_participation

@@ -178,12 +178,12 @@ func CreateIfNotExistingPhaseParticipation(ctx context.Context, transactionQueri
 	}
 }
 
-func BatchUpdatePassStatus(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID, passStatus db.PassStatus) ([]uuid.UUID, error) {
+func BatchUpdatePassStatus(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationIDs []uuid.UUID, passStatus db.PassStatus) ([]uuid.UUID, error) {
 	// passing the coursePhaseID to query ensures that only the coursePhases that are in the course are updated
 	changedParticipations, err := CoursePhaseParticipationServiceSingleton.queries.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
-		Column1: coursePhaseParticipationIDs,
-		Column2: coursePhaseID,
-		Column3: passStatus,
+		CourseParticipationID: courseParticipationIDs,
+		CoursePhaseID:         coursePhaseID,
+		PassStatus:            passStatus,
 	})
 	if err != nil {
 		log.Error(err)

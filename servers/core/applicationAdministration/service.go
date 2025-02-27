@@ -570,21 +570,21 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 
 	// generate batch of scores
 	batchScores := make([]pgtype.Numeric, 0, len(additionalScore.Scores))
-	coursePhaseIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
+	courseParticipationIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
 
 	for _, score := range additionalScore.Scores {
 		batchScores = append(batchScores, score.Score)
-		coursePhaseIDs = append(coursePhaseIDs, score.CoursePhaseParticipationID)
+		courseParticipationIDs = append(courseParticipationIDs, score.CourseParticipationID)
 	}
 	scoreNameArray := make([]string, 0, 1)
 	scoreNameArray = append(scoreNameArray, additionalScore.Key)
 
 	// 1.) Store the new score for each participation
 	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
-		Column1:       coursePhaseIDs,
-		Column2:       batchScores,
-		Column3:       scoreNameArray,
-		CoursePhaseID: coursePhaseID,
+		CoursePhaseID:          coursePhaseID,
+		CourseParticipationIds: courseParticipationIDs,
+		Scores:                 batchScores,
+		ScoreName:              scoreNameArray,
 	})
 	if err != nil {
 		log.Error(err)
@@ -607,15 +607,15 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 				return errors.New("could not update additional scores")
 			}
 			if scoreValue.Float64 < thresholdValue.Float64 {
-				batchSetFailed = append(batchSetFailed, score.CoursePhaseParticipationID)
+				batchSetFailed = append(batchSetFailed, score.CourseParticipationID)
 			}
 		}
 
 		// TODO MAIL: use the changed participations for mailing!
 		_, err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
-			Column1: batchSetFailed,
-			Column2: coursePhaseID,
-			Column3: db.PassStatusFailed,
+			CourseParticipationID: batchSetFailed,
+			CoursePhaseID:         coursePhaseID,
+			PassStatus:            db.PassStatusFailed,
 		})
 		if err != nil {
 			log.Error(err)

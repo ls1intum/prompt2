@@ -18,13 +18,13 @@ INSERT INTO course_phase_participation
 SELECT
     $1 AS course_phase_id,
     $2 AS course_participation_id,
-    COALESCE($3, 'not_assessed') AS pass_status,
+    COALESCE($3, 'not_assessed'::pass_status) AS pass_status,
     $4 AS restricted_data,
     $5 AS student_readable_data
 FROM course_participation cp
 JOIN course_phase cph ON cp.course_id = cph.course_id
 WHERE cp.id = $2
-  AND cph.id = $3
+  AND cph.id = $1
 ON CONFLICT (course_phase_id, course_participation_id)
 DO UPDATE SET
   pass_status = COALESCE($3, course_phase_participation.pass_status),
@@ -695,21 +695,22 @@ func (q *Queries) UpdateCoursePhaseParticipation(ctx context.Context, arg Update
 
 const updateCoursePhasePassStatus = `-- name: UpdateCoursePhasePassStatus :many
 UPDATE course_phase_participation
-SET pass_status = $3::pass_status
-WHERE id = ANY($1::uuid[])
-  AND course_phase_id = $2::uuid
-  AND pass_status != $3::pass_status
+SET pass_status = $1::pass_status
+WHERE 
+  course_participation_id = ANY($2::uuid[])
+  AND course_phase_id = $3::uuid
+  AND pass_status != $1::pass_status
 RETURNING course_participation_id
 `
 
 type UpdateCoursePhasePassStatusParams struct {
-	Column1 []uuid.UUID `json:"column_1"`
-	Column2 uuid.UUID   `json:"column_2"`
-	Column3 PassStatus  `json:"column_3"`
+	PassStatus            PassStatus  `json:"pass_status"`
+	CourseParticipationID []uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 }
 
 func (q *Queries) UpdateCoursePhasePassStatus(ctx context.Context, arg UpdateCoursePhasePassStatusParams) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, updateCoursePhasePassStatus, arg.Column1, arg.Column2, arg.Column3)
+	rows, err := q.db.Query(ctx, updateCoursePhasePassStatus, arg.PassStatus, arg.CourseParticipationID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}

@@ -341,7 +341,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 
 func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	coursePhaseParticipationID := uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976")
+	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
 	jsonData := `{"comments": "Test-Comment"}`
 	var restrictedData meta.MetaData
 	err := json.Unmarshal([]byte(jsonData), &restrictedData)
@@ -352,14 +352,14 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationAssessment_S
 		Score:          pgtype.Int4{Int32: 90, Valid: true},
 	}
 
-	err = UpdateApplicationAssessment(suite.ctx, coursePhaseID, coursePhaseParticipationID, assessment)
+	err = UpdateApplicationAssessment(suite.ctx, coursePhaseID, courseParticipationID, assessment)
 	assert.NoError(suite.T(), err)
 
 	// Verify that the assessment was updated
 	participations, err := GetAllApplicationParticipations(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	for _, participation := range participations {
-		if participation.ID == coursePhaseParticipationID {
+		if participation.CourseParticipationID == courseParticipationID {
 			assert.Equal(suite.T(), int32(90), participation.Score.Int32)
 			assert.Equal(suite.T(), "Test-Comment", participation.RestrictedData["comments"])
 			assert.Equal(suite.T(), "passed", participation.PassStatus)
@@ -379,14 +379,14 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 		ThresholdActive: true,
 		Scores: []applicationDTO.IndividualScore{
 			{
-				CoursePhaseParticipationID: uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976"),
+				CourseParticipationID: uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25"),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(60),
 					Valid: true,
 				},
 			},
 			{
-				CoursePhaseParticipationID: uuid.MustParse("f5e61de3-6b6a-494e-a0ac-a18f1f9262e1"),
+				CourseParticipationID: uuid.MustParse("32aa070e-67c3-4a69-852a-ba3b5e849a4d"),
 				Score: pgtype.Numeric{
 					Int:   big.NewInt(40),
 					Valid: true,
@@ -401,12 +401,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 	participations, err := GetAllApplicationParticipations(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	for _, participation := range participations {
-		if participation.ID == uuid.MustParse("0c58232d-1a67-44e6-b4dc-69e95373b976") {
+		if participation.CourseParticipationID == uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25") {
 			assert.Equal(suite.T(), float64(60), participation.RestrictedData["TestScore"])
 			assert.Equal(suite.T(), "passed", participation.PassStatus)
 		}
 
-		if participation.ID == uuid.MustParse("f5e61de3-6b6a-494e-a0ac-a18f1f9262e1") {
+		if participation.CourseParticipationID == uuid.MustParse("32aa070e-67c3-4a69-852a-ba3b5e849a4d") {
 			assert.Equal(suite.T(), float64(40), participation.RestrictedData["TestScore"])
 			assert.Equal(suite.T(), "failed", participation.PassStatus)
 		}

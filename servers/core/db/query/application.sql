@@ -228,9 +228,9 @@ SET score = EXCLUDED.score;
 -- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 
-    UNNEST($1::uuid[]) AS id,
-    UNNEST($2::numeric[]) AS score,
-    $3::text[] AS path -- Use $3 as a JSON path array
+    UNNEST(sqlc.arg(course_participation_ids)::uuid[]) AS course_participation_id,
+    UNNEST(sqlc.arg(scores)::numeric[]) AS score,
+    sqlc.arg(score_name)::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
 SET    
@@ -241,8 +241,8 @@ SET
     )
 FROM updates
 WHERE 
-    course_phase_participation.id = updates.id
-    AND course_phase_participation.course_phase_id = $4;
+    course_phase_participation.course_participation_id = updates.course_participation_id
+    AND course_phase_participation.course_phase_id = sqlc.arg(course_phase_id)::uuid;
 
 
 -- name: GetExistingAdditionalScores :one

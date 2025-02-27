@@ -15,9 +15,9 @@ import (
 const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 
-    UNNEST($1::uuid[]) AS id,
-    UNNEST($2::numeric[]) AS score,
-    $3::text[] AS path -- Use $3 as a JSON path array
+    UNNEST($2::uuid[]) AS course_participation_id,
+    UNNEST($3::numeric[]) AS score,
+    $4::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
 SET    
@@ -28,23 +28,23 @@ SET
     )
 FROM updates
 WHERE 
-    course_phase_participation.id = updates.id
-    AND course_phase_participation.course_phase_id = $4
+    course_phase_participation.course_participation_id = updates.course_participation_id
+    AND course_phase_participation.course_phase_id = $1::uuid
 `
 
 type BatchUpdateAdditionalScoresParams struct {
-	Column1       []uuid.UUID      `json:"column_1"`
-	Column2       []pgtype.Numeric `json:"column_2"`
-	Column3       []string         `json:"column_3"`
-	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
+	CoursePhaseID          uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationIds []uuid.UUID      `json:"course_participation_ids"`
+	Scores                 []pgtype.Numeric `json:"scores"`
+	ScoreName              []string         `json:"score_name"`
 }
 
 func (q *Queries) BatchUpdateAdditionalScores(ctx context.Context, arg BatchUpdateAdditionalScoresParams) error {
 	_, err := q.db.Exec(ctx, batchUpdateAdditionalScores,
-		arg.Column1,
-		arg.Column2,
-		arg.Column3,
 		arg.CoursePhaseID,
+		arg.CourseParticipationIds,
+		arg.Scores,
+		arg.ScoreName,
 	)
 	return err
 }
@@ -466,7 +466,7 @@ func (q *Queries) GetAllOpenApplicationPhases(ctx context.Context) ([]GetAllOpen
 }
 
 const getApplicationAnswersMultiSelectForCourseParticipationID = `-- name: GetApplicationAnswersMultiSelectForCourseParticipationID :many
-SELECT aams.id, aams.application_question_id, aams.answer, aams.course_phase_id, aams.course_participation_id
+SELECT aams.id, aams.application_question_id, aams.answer, aams.course_participation_id
 FROM application_answer_multi_select aams
 JOIN application_question_multi_select aqms ON aams.application_question_id = aqms.id
 WHERE aqms.course_phase_id = $1 AND aams.course_participation_id = $2
@@ -490,7 +490,6 @@ func (q *Queries) GetApplicationAnswersMultiSelectForCourseParticipationID(ctx c
 			&i.ID,
 			&i.ApplicationQuestionID,
 			&i.Answer,
-			&i.CoursePhaseID,
 			&i.CourseParticipationID,
 		); err != nil {
 			return nil, err
