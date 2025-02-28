@@ -484,7 +484,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Ne
 
 	err := validateAdditionalScore(invalidScore)
 	assert.Error(suite.T(), err)
-	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
+	assert.Equal(suite.T(), "scores must be positive", err.Error())
 }
 
 func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_InvalidScoreValue() {
@@ -530,7 +530,7 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Mi
 
 	err := validateAdditionalScore(invalidScore)
 	assert.Error(suite.T(), err)
-	assert.Equal(suite.T(), "scores must be greater than 0", err.Error())
+	assert.Equal(suite.T(), "scores must be positive", err.Error())
 }
 
 func TestValidateUpdateFormSuite(t *testing.T) {
