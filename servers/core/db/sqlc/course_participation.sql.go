@@ -194,3 +194,26 @@ func (q *Queries) GetCourseParticipationByStudentAndCourseID(ctx context.Context
 	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
 	return i, err
 }
+
+const getCourseParticipationByStudentAndCoursePhaseID = `-- name: GetCourseParticipationByStudentAndCoursePhaseID :one
+SELECT course_participation.id, course_participation.course_id, course_participation.student_id 
+FROM course_participation
+JOIN course_phase cp 
+    ON cp.course_id = course_participation.course_id
+WHERE 
+  course_participation.student_id = $1 
+  AND cp.id = $2::uuid 
+LIMIT 1
+`
+
+type GetCourseParticipationByStudentAndCoursePhaseIDParams struct {
+	StudentID     uuid.UUID `json:"student_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetCourseParticipationByStudentAndCoursePhaseID(ctx context.Context, arg GetCourseParticipationByStudentAndCoursePhaseIDParams) (CourseParticipation, error) {
+	row := q.db.QueryRow(ctx, getCourseParticipationByStudentAndCoursePhaseID, arg.StudentID, arg.CoursePhaseID)
+	var i CourseParticipation
+	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
+	return i, err
+}

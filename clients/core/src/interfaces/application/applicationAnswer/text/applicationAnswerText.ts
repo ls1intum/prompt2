@@ -1,6 +1,6 @@
 export interface ApplicationAnswerText {
   id: string
   applicationQuestionID: string
-  coursePhaseParticipationID: string
+  courseParticipationID: string
   answer: string
 }

@@ -8,7 +8,6 @@ import (
 )
 
 type GetCoursePhaseParticipation struct {
-	ID                    uuid.UUID     `json:"id"`
 	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
 	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
 	PassStatus            string        `json:"passStatus"`
@@ -30,7 +29,6 @@ func GetCoursePhaseParticipationDTOFromDBModel(model db.CoursePhaseParticipation
 	}
 
 	return GetCoursePhaseParticipation{
-		ID:                    model.ID,
 		CourseParticipationID: model.CourseParticipationID,
 		CoursePhaseID:         model.CoursePhaseID,
 		PassStatus:            GetPassStatusString(model.PassStatus),

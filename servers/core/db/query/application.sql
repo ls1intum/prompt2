@@ -7,12 +7,21 @@ SELECT * FROM application_question_multi_select
 WHERE course_phase_id = $1;
 
 -- name: CreateApplicationAnswerText :exec
-INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
 VALUES ($1, $2, $3, $4);
 
 -- name: CreateApplicationAnswerMultiSelect :exec
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
 VALUES ($1, $2, $3, $4);
+
+-- name: GetApplicationExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_participation cpp
+    WHERE cpp.course_phase_id = $1
+    AND cpp.course_participation_id = $2
+);
+
 
 -- name: CreateApplicationQuestionText :exec
 INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num, accessible_for_other_phases, access_key)
@@ -148,45 +157,36 @@ WHERE
     cp.id = $1
     AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW();
 
--- name: GetApplicationAnswersTextForStudent :many
+-- name: GetApplicationAnswersTextForCourseParticipationID :many
 SELECT aat.*
 FROM application_answer_text aat
-INNER JOIN course_phase_participation cpp ON aat.course_phase_participation_id = cpp.id
-INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
-WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+JOIN application_question_text aqt ON aat.application_question_id = aqt.id
+WHERE aqt.course_phase_id = $1 AND aat.course_participation_id = $2;
 
--- name: GetApplicationAnswersMultiSelectForStudent :many
+-- name: GetApplicationAnswersMultiSelectForCourseParticipationID :many
 SELECT aams.*
 FROM application_answer_multi_select aams
-INNER JOIN course_phase_participation cpp ON aams.course_phase_participation_id = cpp.id
-INNER JOIN course_participation cp ON cpp.course_participation_id = cp.id
-WHERE cp.student_id = $1 AND cpp.course_phase_id = $2;
+JOIN application_question_multi_select aqms ON aams.application_question_id = aqms.id
+WHERE aqms.course_phase_id = $1 AND aams.course_participation_id = $2;
 
 -- name: CreateOrOverwriteApplicationAnswerText :exec 
-INSERT INTO application_answer_text (id, application_question_id, course_phase_participation_id, answer)
+INSERT INTO application_answer_text (id, application_question_id, course_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-ON CONFLICT (course_phase_participation_id, application_question_id)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer;
 
 -- name: CreateOrOverwriteApplicationAnswerMultiSelect :exec 
-INSERT INTO application_answer_multi_select (id, application_question_id, course_phase_participation_id, answer)
+INSERT INTO application_answer_multi_select (id, application_question_id, course_participation_id, answer)
 VALUES ($1, $2, $3, $4)
-ON CONFLICT (course_phase_participation_id, application_question_id)
+ON CONFLICT (course_participation_id, application_question_id)
 DO UPDATE
 SET answer = EXCLUDED.answer;
 
--- name: GetApplicationExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_participation cpp
-    WHERE cpp.course_phase_id = $1
-    AND cpp.id = $2
-);
-
 -- name: GetAllApplicationParticipations :many
 SELECT
-    cpp.id AS course_phase_participation_id,
+    cpp.course_phase_id,
+    cpp.course_participation_id,
     cpp.pass_status,
     cpp.restricted_data,
     s.id AS student_id,
@@ -209,36 +209,28 @@ JOIN
 JOIN
     student s ON cp.student_id = s.id
 LEFT JOIN
-    application_assessment a on cpp.id = a.course_phase_participation_id
+    application_assessment a ON cpp.course_participation_id = a.course_participation_id AND cpp.course_phase_id = a.course_phase_id
 WHERE
     cpp.course_phase_id = $1;
 
 -- name: UpdateApplicationAssessment :exec
-INSERT INTO application_assessment (id, course_phase_participation_id, score)
+INSERT INTO application_assessment (id, course_phase_id, course_participation_id, score)
 VALUES (
     gen_random_uuid(),    
     $1,                   
-    $2             
+    $2, 
+    $3             
 )
-ON CONFLICT (course_phase_participation_id) 
+ON CONFLICT (course_phase_id, course_participation_id) 
 DO UPDATE 
 SET score = EXCLUDED.score; 
-
--- name: CheckCoursePhaseParticipationPair :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_participation cpp
-    WHERE cpp.id = $1
-      AND cpp.course_phase_id = $2
-);
-
 
 -- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 
-    UNNEST($1::uuid[]) AS id,
-    UNNEST($2::numeric[]) AS score,
-    $3::text[] AS path -- Use $3 as a JSON path array
+    UNNEST(sqlc.arg(course_participation_ids)::uuid[]) AS course_participation_id,
+    UNNEST(sqlc.arg(scores)::numeric[]) AS score,
+    sqlc.arg(score_name)::text[] AS path -- Use $3 as a JSON path array
 )
 UPDATE course_phase_participation
 SET    
@@ -249,8 +241,8 @@ SET
     )
 FROM updates
 WHERE 
-    course_phase_participation.id = updates.id
-    AND course_phase_participation.course_phase_id = $4;
+    course_phase_participation.course_participation_id = updates.course_participation_id
+    AND course_phase_participation.course_phase_id = sqlc.arg(course_phase_id)::uuid;
 
 
 -- name: GetExistingAdditionalScores :one
@@ -271,8 +263,8 @@ DELETE FROM course_participation
 WHERE id IN (
       SELECT cpp.course_participation_id
       FROM course_phase_participation cpp
-      WHERE cpp.id = ANY($2::uuid[])
-        AND cpp.course_phase_id = $1 -- ensures that only applications for the given course phase are deleted
+      WHERE cpp.course_participation_id = ANY(sqlc.arg(course_participation_ids)::uuid[])
+        AND cpp.course_phase_id = sqlc.arg(course_phase_id)::uuid -- ensures that only applications for the given course phase are deleted
   );
 
 -- name: StoreApplicationAnswerUpdateTimestamp :exec
@@ -282,7 +274,9 @@ SET restricted_data = jsonb_set(
     '{student_last_modified}', -- Path to the key
     to_jsonb(NOW())::jsonb     -- Value to set
 )
-WHERE id = $1;
+WHERE 
+ course_phase_id = $1
+ AND course_participation_id = $2;
 
 -- name: StoreApplicationAssessmentUpdateTimestamp :exec
 UPDATE course_phase_participation
@@ -291,4 +285,5 @@ SET restricted_data = jsonb_set(
     '{assessment_last_modified}', -- Path to the key
     to_jsonb(NOW())::jsonb     -- Value to set
 )
-WHERE id = $1;
+WHERE course_phase_id = $1
+ AND course_participation_id = $2;

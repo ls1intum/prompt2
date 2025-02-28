@@ -44,7 +44,7 @@ export const matchStudents = (
       const score = parseFloat(commaSeparatedScores)
       if (!isNaN(score)) {
         matchedApplications.push({
-          coursePhaseParticipationID: app.id,
+          courseParticipationID: app.courseParticipationID,
           score,
         })
         if (threshold !== null && score < threshold) {

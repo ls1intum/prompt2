@@ -3,12 +3,12 @@ import { axiosInstance } from '@/network/configService'
 
 export const postApplicationAssessment = async (
   phaseId: string,
-  coursePhaseParticipationID: string,
+  courseParticipationID: string,
   assessment: ApplicationAssessment,
 ): Promise<void> => {
   try {
     return await axiosInstance.put(
-      `/api/applications/${phaseId}/${coursePhaseParticipationID}/assessment`,
+      `/api/applications/${phaseId}/${courseParticipationID}/assessment`,
       assessment,
       {
         headers: {

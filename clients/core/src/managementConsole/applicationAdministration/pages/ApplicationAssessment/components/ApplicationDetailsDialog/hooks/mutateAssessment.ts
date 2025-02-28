@@ -4,7 +4,7 @@ import { postApplicationAssessment } from '@core/network/mutations/postApplicati
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 
-export const useModifyAssessment = (coursePhaseParticipationID: string) => {
+export const useModifyAssessment = (courseParticipationID: string) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const { toast } = useToast()
@@ -13,7 +13,7 @@ export const useModifyAssessment = (coursePhaseParticipationID: string) => {
     mutationFn: (applicationAssessment: ApplicationAssessment) => {
       return postApplicationAssessment(
         phaseId ?? 'undefined',
-        coursePhaseParticipationID,
+        courseParticipationID,
         applicationAssessment,
       )
     },

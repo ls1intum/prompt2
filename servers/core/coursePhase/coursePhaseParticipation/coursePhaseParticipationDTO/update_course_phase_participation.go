@@ -8,9 +8,9 @@ import (
 )
 
 type UpdateCoursePhaseParticipationRequest struct {
-	// for individual updates, the ID is in the url
+	// for individual updates, the courseParticipation is in the url
 	// for batch updates, the ID is in the body
-	ID                    uuid.UUID      `json:"id"`
+	CoursePhaseID         uuid.UUID      `json:"coursePhaseID"`
 	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
 	PassStatus            *db.PassStatus `json:"passStatus"`
 	RestrictedData        meta.MetaData  `json:"restrictedData"`
@@ -18,11 +18,11 @@ type UpdateCoursePhaseParticipationRequest struct {
 }
 
 type UpdateCoursePhaseParticipation struct {
-	ID                  uuid.UUID      `json:"id"`
-	PassStatus          *db.PassStatus `json:"passStatus"`
-	RestrictedData      meta.MetaData  `json:"restrictedData"`
-	StudentReadableData meta.MetaData  `json:"studentReadableData"`
-	CoursePhaseID       uuid.UUID      `json:"coursePhaseID"`
+	CoursePhaseID         uuid.UUID      `json:"coursePhaseID"`
+	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
+	PassStatus            *db.PassStatus `json:"passStatus"`
+	RestrictedData        meta.MetaData  `json:"restrictedData"`
+	StudentReadableData   meta.MetaData  `json:"studentReadableData"`
 }
 
 func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhaseParticipationParams, error) {
@@ -39,10 +39,10 @@ func (c UpdateCoursePhaseParticipation) GetDBModel() (db.UpdateCoursePhasePartic
 	}
 
 	return db.UpdateCoursePhaseParticipationParams{
-		ID:                  c.ID,
-		PassStatus:          GetPassStatusDBModel(c.PassStatus),
-		RestrictedData:      restrictedData,
-		StudentReadableData: studentReadableData,
-		CoursePhaseID:       c.CoursePhaseID,
+		CourseParticipationID: c.CourseParticipationID,
+		PassStatus:            GetPassStatusDBModel(c.PassStatus),
+		RestrictedData:        restrictedData,
+		StudentReadableData:   studentReadableData,
+		CoursePhaseID:         c.CoursePhaseID,
 	}, nil
 }

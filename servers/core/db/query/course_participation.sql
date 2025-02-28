@@ -19,6 +19,16 @@ RETURNING *;
 SELECT * FROM course_participation
 WHERE student_id = $1 AND course_id = $2 LIMIT 1;
 
+-- name: GetCourseParticipationByStudentAndCoursePhaseID :one
+SELECT course_participation.* 
+FROM course_participation
+JOIN course_phase cp 
+    ON cp.course_id = course_participation.course_id
+WHERE 
+  course_participation.student_id = $1 
+  AND cp.id = sqlc.arg(course_phase_id)::uuid 
+LIMIT 1;
+
 -- name: GetCourseParticipationByCourseIDAndMatriculation :one
 WITH existing_phases AS (
     SELECT cpp.course_phase_id

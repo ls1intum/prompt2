@@ -14,8 +14,8 @@ type AdditionalScoreUpload struct {
 }
 
 type IndividualScore struct {
-	CoursePhaseParticipationID uuid.UUID      `json:"coursePhaseParticipationID"`
-	Score                      pgtype.Numeric `json:"score"`
+	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
+	Score                 pgtype.Numeric `json:"score"`
 }
 
 // used to store the additional score objects in the meta data

@@ -11,11 +11,12 @@ import (
 )
 
 type ApplicationParticipation struct {
-	ID             uuid.UUID          `json:"id"`
-	PassStatus     string             `json:"passStatus"`
-	RestrictedData meta.MetaData      `json:"restrictedData"`
-	Student        studentDTO.Student `json:"student"`
-	Score          pgtype.Int4        `json:"score"`
+	CoursePhaseID         uuid.UUID          `json:"coursePhaseID"`
+	CourseParticipationID uuid.UUID          `json:"courseParticipationID"`
+	PassStatus            string             `json:"passStatus"`
+	RestrictedData        meta.MetaData      `json:"restrictedData"`
+	Student               studentDTO.Student `json:"student"`
+	Score                 pgtype.Int4        `json:"score"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllApplicationParticipationsRow) (ApplicationParticipation, error) {
@@ -26,10 +27,11 @@ func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllApplicationParticipat
 	}
 
 	return ApplicationParticipation{
-		ID:             model.CoursePhaseParticipationID,
-		PassStatus:     coursePhaseParticipationDTO.GetPassStatusString(model.PassStatus),
-		RestrictedData: restrictedData,
-		Student:        studentDTO.GetStudentDTOFromApplicationParticipation(model),
-		Score:          model.Score,
+		CoursePhaseID:         model.CoursePhaseID,
+		CourseParticipationID: model.CourseParticipationID,
+		PassStatus:            coursePhaseParticipationDTO.GetPassStatusString(model.PassStatus),
+		RestrictedData:        restrictedData,
+		Student:               studentDTO.GetStudentDTOFromApplicationParticipation(model),
+		Score:                 model.Score,
 	}, nil
 }
