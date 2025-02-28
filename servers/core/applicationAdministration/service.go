@@ -318,9 +318,9 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 
 	if exists {
 		// Get courseParticipation
-		courseParticipation, err := ApplicationServiceSingleton.queries.GetCourseParticipationByStudentAndCourseID(ctxWithTimeout, db.GetCourseParticipationByStudentAndCourseIDParams{
-			StudentID: studentObj.ID,
-			CourseID:  coursePhaseID,
+		courseParticipation, err := ApplicationServiceSingleton.queries.GetCourseParticipationByStudentAndCoursePhaseID(ctxWithTimeout, db.GetCourseParticipationByStudentAndCoursePhaseIDParams{
+			StudentID:     studentObj.ID,
+			CoursePhaseID: coursePhaseID,
 		})
 		if err != nil {
 			log.Error(err)
