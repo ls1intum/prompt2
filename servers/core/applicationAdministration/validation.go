@@ -397,8 +397,8 @@ func validateAdditionalScore(score applicationDTO.AdditionalScoreUpload) error {
 		if err != nil {
 			return errors.New("failed to parse score for entry")
 		}
-		if scoreValue.Float64 <= 0 {
-			return errors.New("scores must be greater than 0")
+		if scoreValue.Float64 < 0 {
+			return errors.New("scores must be positive")
 		}
 	}
 
