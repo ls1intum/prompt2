@@ -30,7 +30,7 @@ export const RankingOptions = ({
         >
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='score'>Use Score as Rank</TabsTrigger>
-            <TabsTrigger value='same'>Same Rank for All</TabsTrigger>
+            <TabsTrigger value='same'>Same Rank for All Students</TabsTrigger>
           </TabsList>
           <TabsContent value='score' className='mt-4'>
             <div className='rounded-md border p-4 bg-muted/20'>
