@@ -46,6 +46,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
+  const [rowSelection, setRowSelection] = useState({})
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCourseParticipationID, setSelectedCourseParticipationID] = useState<
@@ -94,8 +95,26 @@ export const ApplicationsAssessment = (): JSX.Element => {
       globalFilter,
       columnFilters,
       columnVisibility,
+      rowSelection,
     },
+    onRowSelectionChange: setRowSelection,
   })
+
+  // When the filters change, update the row selection so that only visible rows remain selected
+  useEffect(() => {
+    // Get the ids of rows that are visible after filtering
+    const visibleRowIDs = new Set(table.getFilteredRowModel().rows.map((row) => row.id))
+    // Update rowSelection to only keep selections for visible rows
+    setRowSelection((prevSelection) => {
+      const newSelection = { ...prevSelection }
+      Object.keys(newSelection).forEach((id) => {
+        if (!visibleRowIDs.has(id)) {
+          delete newSelection[id]
+        }
+      })
+      return newSelection
+    })
+  }, [columnFilters, globalFilter, table])
 
   // when sorting for status, this adds sorting by last name
   useEffect(() => {
