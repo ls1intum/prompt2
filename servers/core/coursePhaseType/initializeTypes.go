@@ -59,6 +59,12 @@ func initInterview() error {
 			return err
 		}
 
+		err = qtx.CreateInterviewRequiredApplicationAnswers(ctx, newInterviewPhase.ID)
+		if err != nil {
+			log.Error("failed to create required application answers: ", err)
+			return err
+		}
+
 		// 3.) Specify the provided output meta data
 		newProvidedOutput := db.CreateCoursePhaseTypeProvidedOutputParams{
 			ID:                uuid.New(),

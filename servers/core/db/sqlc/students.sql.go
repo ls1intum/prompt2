@@ -131,16 +131,15 @@ func (q *Queries) GetStudent(ctx context.Context, id uuid.UUID) (Student, error)
 	return i, err
 }
 
-const getStudentByCoursePhaseParticipationID = `-- name: GetStudentByCoursePhaseParticipationID :one
+const getStudentByCourseParticipationID = `-- name: GetStudentByCourseParticipationID :one
 SELECT s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender, s.nationality, s.study_program, s.study_degree, s.current_semester, s.last_modified
 FROM student s
 INNER JOIN course_participation cp ON s.id = cp.student_id
-INNER JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
-WHERE cpp.id = $1
+WHERE cp.id = $1
 `
 
-func (q *Queries) GetStudentByCoursePhaseParticipationID(ctx context.Context, id uuid.UUID) (Student, error) {
-	row := q.db.QueryRow(ctx, getStudentByCoursePhaseParticipationID, id)
+func (q *Queries) GetStudentByCourseParticipationID(ctx context.Context, id uuid.UUID) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByCourseParticipationID, id)
 	var i Student
 	err := row.Scan(
 		&i.ID,

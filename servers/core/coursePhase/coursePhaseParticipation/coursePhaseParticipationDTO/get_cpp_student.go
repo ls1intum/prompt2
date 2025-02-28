@@ -11,7 +11,7 @@ import (
 // this version does not contain any restricted data
 // and student should also not see the pass status
 type CoursePhaseParticipationStudent struct {
-	ID                    uuid.UUID          `json:"id"`
+	CoursePhaseID         uuid.UUID          `json:"coursePhaseID"`
 	CourseParticipationID uuid.UUID          `json:"courseParticipationID"`
 	StudentReadableData   meta.MetaData      `json:"studentReadableData"`
 	Student               studentDTO.Student `json:"student"`
@@ -25,7 +25,7 @@ func GetCoursePhaseParticipationStudent(model db.GetCoursePhaseParticipationByUn
 	}
 
 	return CoursePhaseParticipationStudent{
-		ID:                    model.CoursePhaseParticipationID,
+		CoursePhaseID:         model.CoursePhaseID,
 		CourseParticipationID: model.CourseParticipationID,
 		StudentReadableData:   studentReadableData,
 		Student: studentDTO.GetStudentDTOFromDBModel(db.Student{

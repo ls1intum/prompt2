@@ -26,7 +26,7 @@ JOIN
 JOIN 
     course c ON p.course_id = c.id
 WHERE 
-    cpp.id = $1
+    cpp.course_participation_id = $1
     AND cpp.course_phase_id = $2;
 
 -- name: GetFailedMailingInformation :one

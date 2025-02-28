@@ -185,23 +185,24 @@ func (ns NullStudyDegree) Value() (driver.Value, error) {
 }
 
 type ApplicationAnswerMultiSelect struct {
-	ID                         uuid.UUID `json:"id"`
-	ApplicationQuestionID      uuid.UUID `json:"application_question_id"`
-	CoursePhaseParticipationID uuid.UUID `json:"course_phase_participation_id"`
-	Answer                     []string  `json:"answer"`
+	ID                    uuid.UUID `json:"id"`
+	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
+	Answer                []string  `json:"answer"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 }
 
 type ApplicationAnswerText struct {
-	ID                         uuid.UUID   `json:"id"`
-	ApplicationQuestionID      uuid.UUID   `json:"application_question_id"`
-	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
-	Answer                     pgtype.Text `json:"answer"`
+	ID                    uuid.UUID   `json:"id"`
+	ApplicationQuestionID uuid.UUID   `json:"application_question_id"`
+	Answer                pgtype.Text `json:"answer"`
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 }
 
 type ApplicationAssessment struct {
-	ID                         uuid.UUID   `json:"id"`
-	CoursePhaseParticipationID uuid.UUID   `json:"course_phase_participation_id"`
-	Score                      pgtype.Int4 `json:"score"`
+	ID                    uuid.UUID   `json:"id"`
+	Score                 pgtype.Int4 `json:"score"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 }
 
 type ApplicationQuestionMultiSelect struct {
@@ -269,7 +270,6 @@ type CoursePhaseGraph struct {
 }
 
 type CoursePhaseParticipation struct {
-	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	RestrictedData        []byte           `json:"restricted_data"`

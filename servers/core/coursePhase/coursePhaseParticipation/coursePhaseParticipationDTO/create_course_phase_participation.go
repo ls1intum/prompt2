@@ -15,20 +15,20 @@ type CreateCoursePhaseParticipation struct {
 	StudentReadableData   meta.MetaData  `json:"studentReadableData"`
 }
 
-func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateCoursePhaseParticipationParams, error) {
+func (c CreateCoursePhaseParticipation) GetDBModel() (db.CreateOrUpdateCoursePhaseParticipationParams, error) {
 	restrictedDataBytes, err := c.RestrictedData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
-		return db.CreateCoursePhaseParticipationParams{}, err
+		return db.CreateOrUpdateCoursePhaseParticipationParams{}, err
 	}
 
 	studentReadableDataBytes, err := c.StudentReadableData.GetDBModel()
 	if err != nil {
 		log.Error("failed to create CoursePhaseParticipation DB model from DTO")
-		return db.CreateCoursePhaseParticipationParams{}, err
+		return db.CreateOrUpdateCoursePhaseParticipationParams{}, err
 	}
 
-	return db.CreateCoursePhaseParticipationParams{
+	return db.CreateOrUpdateCoursePhaseParticipationParams{
 		CourseParticipationID: c.CourseParticipationID,
 		CoursePhaseID:         c.CoursePhaseID,
 		PassStatus:            GetPassStatusDBModel(c.PassStatus),

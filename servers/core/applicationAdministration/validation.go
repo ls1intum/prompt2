@@ -344,7 +344,8 @@ func contains(options []string, selection string) bool {
 	return false
 }
 
-func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhaseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
+// TODO: update
+func validateUpdateAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
@@ -358,16 +359,11 @@ func validateUpdateAssessment(ctx context.Context, coursePhaseID, coursePhasePar
 		return errors.New("course phase is not an assessment phase")
 	}
 
-	isCorrectParticipation, err := ApplicationServiceSingleton.queries.CheckCoursePhaseParticipationPair(ctxWithTimeout, db.CheckCoursePhaseParticipationPairParams{
-		ID:            coursePhaseParticipationID,
-		CoursePhaseID: coursePhaseID,
-	})
-	if err != nil {
+	// Check if the course participation is valid
+	courseParticipation, err := ApplicationServiceSingleton.queries.GetCourseParticipation(ctxWithTimeout, courseParticipationID)
+	if err != nil || courseParticipation.ID != courseParticipationID {
 		log.Error("could not validate assessment: ", err)
 		return errors.New("could not validate the assessment")
-	}
-	if !isCorrectParticipation {
-		return errors.New("course phase participation does not belong to this course phase")
 	}
 
 	// Check if the score is valid

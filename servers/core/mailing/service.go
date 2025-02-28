@@ -26,7 +26,7 @@ type MailingService struct {
 
 var MailingServiceSingleton *MailingService
 
-func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, coursePhaseParticipationID uuid.UUID) error {
+func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) error {
 	isApplicationPhase, err := MailingServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseID)
 	if err != nil {
 		return err
@@ -36,9 +36,10 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	}
 
 	mailingInfo, err := MailingServiceSingleton.queries.GetConfirmationMailingInformation(ctx, db.GetConfirmationMailingInformationParams{
-		ID:            coursePhaseParticipationID,
-		CoursePhaseID: coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
 	})
+
 	if err != nil {
 		log.Error("failed to get mailing information: ", err)
 		return errors.New("failed to send mail")

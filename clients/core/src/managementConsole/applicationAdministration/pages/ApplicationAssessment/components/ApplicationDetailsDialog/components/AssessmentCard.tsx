@@ -15,14 +15,14 @@ interface AssessmentCardProps {
   score: number | null
   restrictedData: { [key: string]: any }
   acceptanceStatus: PassStatus
-  coursePhaseParticipationID: string
+  courseParticipationID: string
 }
 
 export const AssessmentCard = ({
   score,
   restrictedData,
   acceptanceStatus,
-  coursePhaseParticipationID,
+  courseParticipationID,
 }: AssessmentCardProps): JSX.Element => {
   const [currentScore, setCurrentScore] = useState<number | null>(score)
   const [newComment, setNewComment] = useState<string>('')
@@ -30,7 +30,7 @@ export const AssessmentCard = ({
   const { user } = useAuthStore()
   const author = `${user?.firstName} ${user?.lastName}`
 
-  const { mutate: mutateAssessment } = useModifyAssessment(coursePhaseParticipationID)
+  const { mutate: mutateAssessment } = useModifyAssessment(courseParticipationID)
 
   const handleScoreSubmit = (newScore: number) => {
     const assessment: ApplicationAssessment = {

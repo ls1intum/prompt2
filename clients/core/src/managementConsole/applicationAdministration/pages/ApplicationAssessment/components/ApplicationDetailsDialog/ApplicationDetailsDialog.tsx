@@ -22,7 +22,7 @@ import { StudentProfile } from '@/components/StudentProfile'
 import { ApplicationAnswersTable } from '../table/ApplicationAnswersTable'
 
 interface ApplicationDetailsDialogProps {
-  coursePhaseParticipationID: string
+  courseParticipationID: string
   open: boolean
   status: PassStatus
   score: number | null
@@ -31,7 +31,7 @@ interface ApplicationDetailsDialogProps {
 }
 
 export const ApplicationDetailsDialog = ({
-  coursePhaseParticipationID,
+  courseParticipationID,
   open,
   status,
   score,
@@ -46,8 +46,8 @@ export const ApplicationDetailsDialog = ({
     isError: isApplicationError,
     refetch: refetchApplication,
   } = useQuery<GetApplication>({
-    queryKey: ['application', coursePhaseParticipationID],
-    queryFn: () => getApplicationAssessment(phaseId ?? '', coursePhaseParticipationID),
+    queryKey: ['application', courseParticipationID],
+    queryFn: () => getApplicationAssessment(phaseId ?? '', courseParticipationID),
   })
 
   const {
@@ -115,7 +115,7 @@ export const ApplicationDetailsDialog = ({
               score={score}
               restrictedData={restrictedData}
               acceptanceStatus={status}
-              coursePhaseParticipationID={coursePhaseParticipationID}
+              courseParticipationID={courseParticipationID}
             />
           </div>
         </div>
