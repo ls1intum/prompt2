@@ -81,6 +81,47 @@ func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg Cr
 	return err
 }
 
+const createInterviewRequiredApplicationAnswers = `-- name: CreateInterviewRequiredApplicationAnswers :exec
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+       gen_random_uuid(),
+       $1,
+       'applicationAnswers',    
+       '{
+            "type": "array",
+            "items": {
+                "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "string"                    },
+                    "key"      : { "type": "string"                    },
+                    "order_num": { "type": "integer"                   },
+                    "type"     : { "type": "string" , "enum": ["text"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "array", "items": {"type": "string"} },
+                    "key"      : {"type": "string"}                              ,
+                    "order_num": {"type": "integer"}                             ,
+                    "type"     : { "type": "string", "enum": ["multiselect"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                }
+                ]
+            }
+       }'::jsonb
+)
+`
+
+func (q *Queries) CreateInterviewRequiredApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, createInterviewRequiredApplicationAnswers, coursePhaseTypeID)
+	return err
+}
+
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
 SELECT id, name, initial_phase, base_url FROM course_phase_type
 `
