@@ -15,7 +15,7 @@ Contributor Guidelines can be a lot to digest—so if you only remember one thin
    Let’s be honest—you’re unlikely to come back and clean it up later. Aim for quality from the start, and spare yourself (and your fellow developers) a later headache.
 
 3. **🤓 Take Pride in Your Work: Write Code That’s a Joy to Read and Pay Attention to the Detail**  
-  ![cleanCode](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExeWp3bzg3bHNpY2dibHFqczhlM3p1NjFva3g3cXU4OWxxdGxnaDByeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Cz1it5S65QGuA/giphy.gif){.bg-warning h=100px}
+  ![cleanCode](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHRneGZ5eXU0NHNtNWF3dDNvaTcwbjZiZ2JkMmxiemsyOGlqMjZiYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fdyZ3qI0GVZC0/giphy.gif){.bg-warning h=100px}
 
    Be proud of every line you write. Craft code that’s not only functional but also a delight to read and review.
    Our project thrives on the passion and dedication of its contributors—your enthusiasm makes all the difference.
