@@ -69,10 +69,10 @@ export const useUploadAndParseXLSX = () => {
 
           const firstNameCell = row[headerIndexMap['First name']]
           const lastNameCell = row[headerIndexMap['Last name']]
-          const studentNumberCell = row[headerIndexMap['Student number']]
+          const studentNumberCell = row[headerIndexMap['Student number']] ?? ''
           const rankCell = row[headerIndexMap['Rank']]
 
-          if (!firstNameCell || !lastNameCell || !studentNumberCell) {
+          if (!firstNameCell || !lastNameCell) {
             throw new Error(
               `Row ${rowIndex + 2} is missing required fields (First name, Last name, Student number).`,
             )
