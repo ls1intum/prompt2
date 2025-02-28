@@ -66,7 +66,7 @@ export const MatchingOverviewPage = (): JSX.Element => {
                   navigate(`${path}/export`)
                 }}
                 onUploadFunction={parseFileXLSX}
-                acceptedFileTypes={['.xlsx']}
+                acceptedFileTypes={['.xlsx', '.xls']}
               />
             </section>
             <section className='space-y-4'>
