@@ -19,7 +19,7 @@ export const RankingOptions = ({
   return (
     <Card className='mb-6'>
       <CardHeader>
-        <CardTitle className='text-lg'>Ranking Options</CardTitle>
+        <CardTitle>Ranking Options</CardTitle>
         <CardDescription>Select how you want to rank students in the exported data</CardDescription>
       </CardHeader>
       <CardContent>
