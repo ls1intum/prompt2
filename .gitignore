@@ -1,5 +1,5 @@
 **.env
-
+.vscode/
 postgres_data/
 postfix_config/
 keycloak_postgres_data/
