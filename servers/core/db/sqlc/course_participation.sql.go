@@ -217,3 +217,53 @@ func (q *Queries) GetCourseParticipationByStudentAndCoursePhaseID(ctx context.Co
 	err := row.Scan(&i.ID, &i.CourseID, &i.StudentID)
 	return i, err
 }
+
+const isStudentInCoursePhase = `-- name: IsStudentInCoursePhase :one
+SELECT 
+  cp.id AS course_participation_id,
+  CASE 
+    WHEN EXISTS (
+      SELECT 1
+      FROM course_phase_participation cpp
+      WHERE cpp.course_participation_id = cp.id
+        AND cpp.course_phase_id = $1::uuid
+    )
+    OR EXISTS (
+      SELECT 1
+      FROM course_phase_graph cpg
+      JOIN course_phase_participation cpp_prev 
+        ON cpp_prev.course_phase_id = cpg.from_course_phase_id
+      WHERE cpg.to_course_phase_id = $1::uuid
+        AND cpp_prev.course_participation_id = cp.id
+        AND cpp_prev.pass_status = 'passed'
+    )
+    THEN true
+    ELSE false
+  END AS is_in_phase
+FROM student s
+JOIN course_participation cp 
+  ON cp.student_id = s.id
+JOIN course_phase cphase
+  ON cphase.course_id = cp.course_id
+WHERE cphase.id = $1::uuid
+  AND s.matriculation_number = $2::text
+  AND s.university_login = $3::text
+`
+
+type IsStudentInCoursePhaseParams struct {
+	CoursePhaseID       uuid.UUID `json:"course_phase_id"`
+	MatriculationNumber string    `json:"matriculation_number"`
+	UniversityLogin     string    `json:"university_login"`
+}
+
+type IsStudentInCoursePhaseRow struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	IsInPhase             bool      `json:"is_in_phase"`
+}
+
+func (q *Queries) IsStudentInCoursePhase(ctx context.Context, arg IsStudentInCoursePhaseParams) (IsStudentInCoursePhaseRow, error) {
+	row := q.db.QueryRow(ctx, isStudentInCoursePhase, arg.CoursePhaseID, arg.MatriculationNumber, arg.UniversityLogin)
+	var i IsStudentInCoursePhaseRow
+	err := row.Scan(&i.CourseParticipationID, &i.IsInPhase)
+	return i, err
+}
