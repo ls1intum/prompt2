@@ -5,6 +5,8 @@ import { useMatchingStore } from '../../zustand/useMatchingStore'
 import { useStudentMatching } from './hooks/useStudentMatching'
 import MatchingResults from './components/MatchingResults'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { useState } from 'react'
+import { RankingOptions } from './components/RankingOptions'
 
 export const DataExportPage = (): JSX.Element => {
   const path = useLocation().pathname
@@ -12,6 +14,12 @@ export const DataExportPage = (): JSX.Element => {
   const { uploadedData } = useMatchingStore()
   const { matchedByMatriculation, matchedByName, unmatchedApplications, unmatchedStudents } =
     useStudentMatching()
+
+  const [useScoreAsRank, setUseScoreAsRank] = useState<boolean>(true)
+
+  const handleRankingChange = (useScore: boolean) => {
+    setUseScoreAsRank(useScore)
+  }
 
   if (uploadedData?.length === 0) {
     return (
@@ -28,11 +36,14 @@ export const DataExportPage = (): JSX.Element => {
   return (
     <div>
       <ManagementPageHeader>Data Export</ManagementPageHeader>
+      <RankingOptions onRankingChange={handleRankingChange} useScoreAsRank={true} />
+
       <MatchingResults
         matchedByMatriculation={matchedByMatriculation}
         matchedByName={matchedByName}
         unmatchedApplications={unmatchedApplications}
         unmatchedStudents={unmatchedStudents}
+        useScoreAsRank={useScoreAsRank}
       />
       <Button onClick={() => navigate(-1)} className='mt-4'>
         <X />

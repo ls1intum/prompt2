@@ -14,12 +14,14 @@ import { UploadedStudent } from '../../../interfaces/UploadedStudent'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { AlertTriangle, Download } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 
 interface MatchingResultsProps {
   matchedByMatriculation: UploadedStudent[]
   matchedByName: UploadedStudent[]
   unmatchedApplications: CoursePhaseParticipationWithStudent[]
   unmatchedStudents: UploadedStudent[]
+  useScoreAsRank: boolean
 }
 
 function MatchingResults({
@@ -27,6 +29,7 @@ function MatchingResults({
   matchedByName,
   unmatchedApplications,
   unmatchedStudents,
+  useScoreAsRank,
 }: MatchingResultsProps): JSX.Element {
   const { generateAndDownloadFile } = useDataDownload()
 
@@ -79,6 +82,12 @@ function MatchingResults({
           <CardHeader>
             <CardTitle>{section.title}</CardTitle>
             <CardDescription className='text-gray-600 mb-4'>{section.description}</CardDescription>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm text-gray-700'>Number of Students:</span>
+              <Badge variant='secondary' className='text-xs'>
+                {section.data.length}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <ScrollArea className='h-[300px] rounded-md border'>
@@ -115,10 +124,14 @@ function MatchingResults({
                         </TableCell>
                         {section.showRank && (
                           <TableCell>
-                            {'rank' in item && item.rank ? (
-                              item.rank
+                            {useScoreAsRank ? (
+                              'rank' in item && item.rank ? (
+                                item.rank
+                              ) : (
+                                <span className='text-destructive'>{'No Rank'}</span>
+                              )
                             ) : (
-                              <span className='text-destructive'>{'No Rank'}</span>
+                              1
                             )}
                           </TableCell>
                         )}
@@ -134,7 +147,9 @@ function MatchingResults({
 
       <div className='mt-8'>
         <Button
-          onClick={() => generateAndDownloadFile([...matchedByMatriculation, ...matchedByName])}
+          onClick={() =>
+            generateAndDownloadFile([...matchedByMatriculation, ...matchedByName], useScoreAsRank)
+          }
           className='w-full'
         >
           <Download />

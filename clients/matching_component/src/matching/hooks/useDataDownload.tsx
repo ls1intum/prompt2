@@ -11,7 +11,10 @@ export const useDataDownload = () => {
    * `matchedStudents`, writes the `Rank` value from `matchedStudents`. Otherwise writes `-`.
    * Finally triggers a download of the modified file.
    */
-  const generateAndDownloadFile = async (matchedStudents: UploadedStudent[]) => {
+  const generateAndDownloadFile = async (
+    matchedStudents: UploadedStudent[],
+    useScoreAsRank: boolean,
+  ) => {
     if (!file) {
       throw new Error('No file uploaded.')
     }
@@ -68,7 +71,7 @@ export const useDataDownload = () => {
 
           // If found, update the rank cell; otherwise write '-'
           // if student has no application score, the score will be 0
-          row[rankIndex] = match ? match.rank || '' : '-'
+          row[rankIndex] = match ? (useScoreAsRank ? match.rank : 1) || '' : '-'
         })
 
       // 8. Convert the updated rows back into a sheet
