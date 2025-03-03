@@ -12,6 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getCoursePhaseAuthRoleMapping = `-- name: GetCoursePhaseAuthRoleMapping :one
+SELECT CONCAT(c.semester_tag, '-', c.name, '-Lecturer')::text AS lecturer_role, CONCAT(c.semester_tag, '-', c.name, '-Editor')::text AS editor_role, CONCAT(c.semester_tag, '-', c.name, '-cg-')::text AS custom_group_prefix
+FROM course c
+JOIN course_phase cp ON c.id = cp.course_id
+WHERE cp.id = $1
+`
+
+type GetCoursePhaseAuthRoleMappingRow struct {
+	LecturerRole      string `json:"lecturer_role"`
+	EditorRole        string `json:"editor_role"`
+	CustomGroupPrefix string `json:"custom_group_prefix"`
+}
+
+func (q *Queries) GetCoursePhaseAuthRoleMapping(ctx context.Context, id uuid.UUID) (GetCoursePhaseAuthRoleMappingRow, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseAuthRoleMapping, id)
+	var i GetCoursePhaseAuthRoleMappingRow
+	err := row.Scan(&i.LecturerRole, &i.EditorRole, &i.CustomGroupPrefix)
+	return i, err
+}
+
 const getPermissionStringByCourseID = `-- name: GetPermissionStringByCourseID :one
 SELECT CONCAT(semester_tag, '-', name) AS course_identifier
 FROM course
