@@ -15,8 +15,8 @@ func IsStudentOfCoursePhaseMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 		if err != nil {
-			log.Error("Error parsing coursePhaseID:", err)
-			c.AbortWithError(http.StatusBadRequest, err)
+			log.Error("Error parsing coursePhaseID: ", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -43,7 +43,5 @@ func IsStudentOfCoursePhaseMiddleware() gin.HandlerFunc {
 			c.Set("isStudentOfCoursePhase", isStudentResponse.IsStudentOfCoursePhase)
 			c.Set("courseParticipationID", isStudentResponse.CourseParticipationID)
 		}
-
-		c.Next()
 	}
 }

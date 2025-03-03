@@ -78,7 +78,6 @@ func KeycloakMiddleware() gin.HandlerFunc {
 		c.Set("userEmail", userEmail)
 		c.Set("matriculationNumber", matriculationNumber)
 		c.Set("universityLogin", universityLogin)
-		c.Next()
 	}
 }
 

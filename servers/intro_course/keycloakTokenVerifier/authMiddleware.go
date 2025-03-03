@@ -1,6 +1,7 @@
 package keycloakTokenVerifier
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 
@@ -17,87 +18,54 @@ import (
 //   - If allowedRoles contains "Student", then it calls IsStudentOfCoursePhaseMiddleware.
 func AuthenticationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Always call Keycloak middleware first.
+		// Always run Keycloak middleware first.
 		KeycloakMiddleware()(c)
 		if c.IsAborted() {
 			return
 		}
 
-		// 0.) Transform allowedRoles to string map
-		allowedRolesMap := make(map[string]bool)
-		for _, role := range allowedRoles {
-			allowedRolesMap[role] = true
-		}
+		allowedSet := buildAllowedRolesSet(allowedRoles)
 
-		// get the user roles
-		rolesVal, exists := c.Get("userRoles")
-		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user roles not found"})
+		userRoles, err := getUserRoles(c)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
-		userRoles, ok := rolesVal.(map[string]bool)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user roles not found"})
-			return
-		}
-
-		// 1.) Check for PROMPT_Admin and PROMPT_Lecturer roles.
-		if allowedRolesMap["PROMPT_Admin"] && userRoles["PROMPT_Admin"] {
-			// Access granted for Admin.
+		// 1.) Directly grant access for PROMPT_Admin or PROMPT_Lecturer.
+		if checkDirectRole("PROMPT_Admin", allowedSet, userRoles) ||
+			checkDirectRole("PROMPT_Lecturer", allowedSet, userRoles) {
 			c.Next()
 			return
 		}
 
-		if allowedRolesMap["PROMPT_Lecturer"] && userRoles["PROMPT_Lecturer"] {
-			// Access granted for Lecturer.
-			c.Next()
-			return
-		}
-
-		// 2.) Check for Lecturer, Editor, Custom Groups
-		containsCustomGroupRights := containsCustomGroupName(allowedRoles...)
-		if containsCustomGroupRights || allowedRolesMap[CourseLecturer] || allowedRolesMap[CourseEditor] {
+		// 2.) Check for Lecturer, Editor, or custom group roles.
+		if requiresLecturerOrCustom(allowedSet, allowedRoles) {
 			GetLecturerAndEditorRole()(c)
 			if c.IsAborted() {
 				return
 			}
 
-			if allowedRolesMap[CourseLecturer] {
-				isLecturer, ok := c.Get("isLecturer")
-				if ok && isLecturer.(bool) {
-					// Access granted for Lecturer.
-					c.Next()
-					return
-				}
+			if _, allowed := allowedSet[CourseLecturer]; allowed && isFlagTrue(c, "isLecturer") {
+				c.Next()
+				return
 			}
 
-			if allowedRolesMap[CourseEditor] {
-				isEditor, ok := c.Get("isEditor")
-				if ok && isEditor.(bool) {
-					// Access granted for Editor.
-					c.Next()
-					return
-				}
+			if _, allowed := allowedSet[CourseEditor]; allowed && isFlagTrue(c, "isEditor") {
+				c.Next()
+				return
 			}
 
-			if containsCustomGroupRights {
-				customGroupPrefix, ok := c.Get("customGroupPrefix")
-				if !ok {
-					log.Error("customGroupPrefix not found")
-					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate"})
-					return
-				}
-				customGroupPrefixStr, ok := customGroupPrefix.(string)
-				if !ok {
-					log.Error("customGroupPrefix not a string")
+			if containsCustomGroupName(allowedRoles...) {
+				prefix, err := getCustomGroupPrefix(c)
+				if err != nil {
+					log.Error(err)
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate"})
 					return
 				}
 
 				for _, role := range allowedRoles {
-					if userRoles[customGroupPrefixStr+role] {
-						// Access granted for custom role.
+					if userRoles[prefix+role] {
 						c.Next()
 						return
 					}
@@ -105,16 +73,14 @@ func AuthenticationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			}
 		}
 
-		// 3.) Check for Student
-		if allowedRolesMap[CourseStudent] {
+		// 3.) Check for Student.
+		if _, allowed := allowedSet[CourseStudent]; allowed {
 			IsStudentOfCoursePhaseMiddleware()(c)
 			if c.IsAborted() {
 				return
 			}
 
-			isStudent, ok := c.Get("isStudentOfCoursePhase")
-			if ok && isStudent.(bool) {
-				// Access granted for Student.
+			if isFlagTrue(c, "isStudentOfCoursePhase") {
 				c.Next()
 				return
 			}
@@ -123,6 +89,67 @@ func AuthenticationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		// Access denied.
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate"})
 	}
+}
+
+// buildAllowedRolesSet creates a lookup set from a slice of roles.
+func buildAllowedRolesSet(roles []string) map[string]struct{} {
+	set := make(map[string]struct{}, len(roles))
+	for _, role := range roles {
+		set[role] = struct{}{}
+	}
+	return set
+}
+
+// getUserRoles retrieves the user roles from the gin.Context.
+func getUserRoles(c *gin.Context) (map[string]bool, error) {
+	val, exists := c.Get("userRoles")
+	if !exists {
+		return nil, fmt.Errorf("user roles not found")
+	}
+	roles, ok := val.(map[string]bool)
+	if !ok {
+		return nil, fmt.Errorf("user roles invalid type")
+	}
+	return roles, nil
+}
+
+// checkDirectRole returns true if a specific role is both allowed and present in the user roles.
+func checkDirectRole(role string, allowedSet map[string]struct{}, userRoles map[string]bool) bool {
+	if _, allowed := allowedSet[role]; allowed && userRoles[role] {
+		return true
+	}
+	return false
+}
+
+// isFlagTrue checks whether a boolean flag stored in the gin.Context is true.
+func isFlagTrue(c *gin.Context, key string) bool {
+	if val, exists := c.Get(key); exists {
+		if flag, ok := val.(bool); ok && flag {
+			return true
+		}
+	}
+	return false
+}
+
+// getCustomGroupPrefix retrieves the customGroupPrefix from the gin.Context.
+func getCustomGroupPrefix(c *gin.Context) (string, error) {
+	val, exists := c.Get("customGroupPrefix")
+	if !exists {
+		return "", fmt.Errorf("customGroupPrefix not found")
+	}
+	prefix, ok := val.(string)
+	if !ok {
+		return "", fmt.Errorf("customGroupPrefix invalid type")
+	}
+	return prefix, nil
+}
+
+// requiresLecturerOrCustom determines if additional checks for lecturer, editor,
+// or custom roles are needed based on the allowed roles.
+func requiresLecturerOrCustom(allowedSet map[string]struct{}, roles []string) bool {
+	_, hasLecturer := allowedSet[CourseLecturer]
+	_, hasEditor := allowedSet[CourseEditor]
+	return hasLecturer || hasEditor || containsCustomGroupName(roles...)
 }
 
 func containsCustomGroupName(allowedRoles ...string) bool {
