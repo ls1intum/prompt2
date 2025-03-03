@@ -75,7 +75,6 @@ export const InterviewCard = (): JSX.Element => {
   const saveChanges = (passStatus?: PassStatus) => {
     if (participation && coursePhase) {
       mutate({
-        id: participation.id,
         coursePhaseID: coursePhase.id,
         courseParticipationID: participation.courseParticipationID,
         restrictedData: {

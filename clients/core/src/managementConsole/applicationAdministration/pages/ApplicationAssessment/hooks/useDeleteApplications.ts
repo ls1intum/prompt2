@@ -9,8 +9,8 @@ export const useDeleteApplications = (): UseMutationResult<void, Error, string[]
   const { toast } = useToast()
 
   const mutation = useMutation({
-    mutationFn: (coursePhaseParticipationIDs: string[]) => {
-      return deleteApplications(phaseId ?? 'undefined', coursePhaseParticipationIDs)
+    mutationFn: (courseParticipationIDs: string[]) => {
+      return deleteApplications(phaseId ?? 'undefined', courseParticipationIDs)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

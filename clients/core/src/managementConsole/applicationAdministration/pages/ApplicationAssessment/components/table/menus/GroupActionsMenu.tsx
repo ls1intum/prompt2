@@ -87,7 +87,7 @@ export const GroupActionsMenu = ({
           isOpen={dialogState.type === 'delete' && dialogState.isOpen}
           onClose={closeDialog}
           onConfirm={() => {
-            mutateDeleteApplications(selectedRows.rows.map((row) => row.original.id))
+            mutateDeleteApplications(selectedRows.rows.map((row) => row.original.courseParticipationID))
             onClose()
           }}
         />
@@ -103,7 +103,7 @@ export const GroupActionsMenu = ({
           onConfirm={() => {
             mutateUpdateApplicationStatus({
               passStatus: PassStatus.PASSED,
-              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
+              courseParticipationIDs: selectedRows.rows.map((row) => row.original.courseParticipationID),
             })
             onClose()
           }}
@@ -120,7 +120,7 @@ export const GroupActionsMenu = ({
           onConfirm={() => {
             mutateUpdateApplicationStatus({
               passStatus: PassStatus.FAILED,
-              coursePhaseParticipationIDs: selectedRows.rows.map((row) => row.original.id),
+              courseParticipationIDs: selectedRows.rows.map((row) => row.original.courseParticipationID),
             })
             onClose()
           }}

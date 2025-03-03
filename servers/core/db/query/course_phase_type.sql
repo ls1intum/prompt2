@@ -60,6 +60,41 @@ VALUES ($1, $2, $3, $4);
 INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6);
 
+-- name: CreateInterviewRequiredApplicationAnswers :exec
+INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+       gen_random_uuid(),
+       $1,
+       'applicationAnswers',    
+       '{
+            "type": "array",
+            "items": {
+                "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "string"                    },
+                    "key"      : { "type": "string"                    },
+                    "order_num": { "type": "integer"                   },
+                    "type"     : { "type": "string" , "enum": ["text"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                    "answer"   : { "type": "array", "items": {"type": "string"} },
+                    "key"      : {"type": "string"}                              ,
+                    "order_num": {"type": "integer"}                             ,
+                    "type"     : { "type": "string", "enum": ["multiselect"] }
+                    },
+                    "required": ["answer", "key", "order_num", "type"]
+                }
+                ]
+            }
+       }'::jsonb
+);
+
 -- name: InsertCourseProvidedApplicationAnswers :exec
 INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (

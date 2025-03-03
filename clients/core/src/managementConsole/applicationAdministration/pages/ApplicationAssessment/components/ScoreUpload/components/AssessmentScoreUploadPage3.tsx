@@ -55,7 +55,7 @@ export const AssessmentScoreUploadPage3 = ({
               </TableHeader>
               <TableBody>
                 {unmatchedApplications.map((app) => (
-                  <TableRow key={app.id}>
+                  <TableRow key={app.courseParticipationID}>
                     <TableCell>{app.student.firstName}</TableCell>
                     <TableCell>{app.student.lastName}</TableCell>
                     <TableCell>{app.student.email}</TableCell>

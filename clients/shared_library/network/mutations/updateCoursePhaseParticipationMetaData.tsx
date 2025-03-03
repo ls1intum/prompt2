@@ -7,7 +7,7 @@ export const updateCoursePhaseParticipation = async (
   try {
     return (
       await axiosInstance.put(
-        `/api/course_phases/${participation.coursePhaseID}/participations/${participation.id}`,
+        `/api/course_phases/${participation.coursePhaseID}/participations/${participation.courseParticipationID}`,
         participation,
         {
           headers: {

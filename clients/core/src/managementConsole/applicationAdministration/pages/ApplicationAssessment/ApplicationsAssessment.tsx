@@ -46,24 +46,27 @@ export const ApplicationsAssessment = (): JSX.Element => {
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
+  const [rowSelection, setRowSelection] = useState({})
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedApplicationID, setSelectedApplicationID] = useState<string | null>(null)
+  const [selectedCourseParticipationID, setSelectedCourseParticipationID] = useState<
+    string | undefined
+  >(undefined)
   const tableWidth = useCustomElementWidth('table-view')
 
   const { mutate: mutateDeleteApplications } = useDeleteApplications()
 
-  const viewApplication = (id: string) => {
-    setSelectedApplicationID(id)
+  const viewApplication = (courseParticipationID: string) => {
+    setSelectedCourseParticipationID(courseParticipationID)
     setDialogOpen(true)
   }
 
-  const deleteApplication = (coursePhaseParticipationID: string) => {
-    mutateDeleteApplications([coursePhaseParticipationID])
+  const deleteApplication = (courseParticipationID: string) => {
+    mutateDeleteApplications([courseParticipationID])
   }
 
   const selectedApplication = participations?.find(
-    (participation) => participation.id === selectedApplicationID,
+    (participation) => participation.courseParticipationID === selectedCourseParticipationID,
   )
 
   const tableColumns = columns(viewApplication, deleteApplication, additionalScores ?? [])
@@ -92,8 +95,26 @@ export const ApplicationsAssessment = (): JSX.Element => {
       globalFilter,
       columnFilters,
       columnVisibility,
+      rowSelection,
     },
+    onRowSelectionChange: setRowSelection,
   })
+
+  // When the filters change, update the row selection so that only visible rows remain selected
+  useEffect(() => {
+    // Get the ids of rows that are visible after filtering
+    const visibleRowIDs = new Set(table.getFilteredRowModel().rows.map((row) => row.id))
+    // Update rowSelection to only keep selections for visible rows
+    setRowSelection((prevSelection) => {
+      const newSelection = { ...prevSelection }
+      Object.keys(newSelection).forEach((id) => {
+        if (!visibleRowIDs.has(id)) {
+          delete newSelection[id]
+        }
+      })
+      return newSelection
+    })
+  }, [columnFilters, globalFilter, table])
 
   // when sorting for status, this adds sorting by last name
   useEffect(() => {
@@ -175,7 +196,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        onClick={() => viewApplication(cell.row.original.id)}
+                        onClick={() => viewApplication(cell.row.original.courseParticipationID)}
                         className='cursor-pointer whitespace-nowrap'
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -200,7 +221,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
         <ApplicationDetailsDialog
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
-          coursePhaseParticipationID={selectedApplicationID ?? ''}
+          courseParticipationID={selectedCourseParticipationID ?? ''}
           status={selectedApplication?.passStatus ?? PassStatus.NOT_ASSESSED}
           score={selectedApplication?.score ?? null}
           restrictedData={selectedApplication?.restrictedData ?? {}}

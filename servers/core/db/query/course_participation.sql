@@ -19,6 +19,47 @@ RETURNING *;
 SELECT * FROM course_participation
 WHERE student_id = $1 AND course_id = $2 LIMIT 1;
 
+-- name: GetCourseParticipationByStudentAndCoursePhaseID :one
+SELECT course_participation.* 
+FROM course_participation
+JOIN course_phase cp 
+    ON cp.course_id = course_participation.course_id
+WHERE 
+  course_participation.student_id = $1 
+  AND cp.id = sqlc.arg(course_phase_id)::uuid 
+LIMIT 1;
+
+-- name: IsStudentInCoursePhase :one
+SELECT 
+  cp.id AS course_participation_id,
+  CASE 
+    WHEN EXISTS (
+      SELECT 1
+      FROM course_phase_participation cpp
+      WHERE cpp.course_participation_id = cp.id
+        AND cpp.course_phase_id = sqlc.arg(course_phase_id)::uuid
+    )
+    OR EXISTS (
+      SELECT 1
+      FROM course_phase_graph cpg
+      JOIN course_phase_participation cpp_prev 
+        ON cpp_prev.course_phase_id = cpg.from_course_phase_id
+      WHERE cpg.to_course_phase_id = sqlc.arg(course_phase_id)::uuid
+        AND cpp_prev.course_participation_id = cp.id
+        AND cpp_prev.pass_status = 'passed'
+    )
+    THEN true
+    ELSE false
+  END AS is_in_phase
+FROM student s
+JOIN course_participation cp 
+  ON cp.student_id = s.id
+JOIN course_phase cphase
+  ON cphase.course_id = cp.course_id
+WHERE cphase.id = sqlc.arg(course_phase_id)::uuid
+  AND s.matriculation_number = sqlc.arg(matriculation_number)::text
+  AND s.university_login = sqlc.arg(university_login)::text;
+
 -- name: GetCourseParticipationByCourseIDAndMatriculation :one
 WITH existing_phases AS (
     SELECT cpp.course_phase_id

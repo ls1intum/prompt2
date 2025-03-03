@@ -12,6 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getCoursePhaseAuthRoleMapping = `-- name: GetCoursePhaseAuthRoleMapping :one
+SELECT CONCAT(c.semester_tag, '-', c.name, '-Lecturer')::text AS lecturer_role, CONCAT(c.semester_tag, '-', c.name, '-Editor')::text AS editor_role, CONCAT(c.semester_tag, '-', c.name, '-cg-')::text AS custom_group_prefix
+FROM course c
+JOIN course_phase cp ON c.id = cp.course_id
+WHERE cp.id = $1
+`
+
+type GetCoursePhaseAuthRoleMappingRow struct {
+	LecturerRole      string `json:"lecturer_role"`
+	EditorRole        string `json:"editor_role"`
+	CustomGroupPrefix string `json:"custom_group_prefix"`
+}
+
+func (q *Queries) GetCoursePhaseAuthRoleMapping(ctx context.Context, id uuid.UUID) (GetCoursePhaseAuthRoleMappingRow, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseAuthRoleMapping, id)
+	var i GetCoursePhaseAuthRoleMappingRow
+	err := row.Scan(&i.LecturerRole, &i.EditorRole, &i.CustomGroupPrefix)
+	return i, err
+}
+
 const getPermissionStringByCourseID = `-- name: GetPermissionStringByCourseID :one
 SELECT CONCAT(semester_tag, '-', name) AS course_identifier
 FROM course
@@ -48,21 +68,6 @@ WHERE cp.id = $1
 
 func (q *Queries) GetPermissionStringByCoursePhaseID(ctx context.Context, id uuid.UUID) (interface{}, error) {
 	row := q.db.QueryRow(ctx, getPermissionStringByCoursePhaseID, id)
-	var course_identifier interface{}
-	err := row.Scan(&course_identifier)
-	return course_identifier, err
-}
-
-const getPermissionStringByCoursePhaseParticipationID = `-- name: GetPermissionStringByCoursePhaseParticipationID :one
-SELECT CONCAT(c.semester_tag, '-', c.name) AS course_identifier
-FROM course c
-JOIN course_participation cp ON c.id = cp.course_id
-JOIN course_phase_participation cpp ON cp.id = cpp.course_participation_id
-WHERE cpp.id = $1
-`
-
-func (q *Queries) GetPermissionStringByCoursePhaseParticipationID(ctx context.Context, id uuid.UUID) (interface{}, error) {
-	row := q.db.QueryRow(ctx, getPermissionStringByCoursePhaseParticipationID, id)
 	var course_identifier interface{}
 	err := row.Scan(&course_identifier)
 	return course_identifier, err

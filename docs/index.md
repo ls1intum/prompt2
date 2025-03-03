@@ -19,6 +19,7 @@ user/gettingStarted
 :includehidden:
 :maxdepth: 2
 
+contributor/guide
 contributor/setup
 ```
 

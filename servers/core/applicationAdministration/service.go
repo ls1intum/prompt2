@@ -246,7 +246,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		return uuid.Nil, errors.New("could not create course participation")
 	}
 
-	cPhaseParticipation, err := coursePhaseParticipation.CreateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
+	cPhaseParticipation, err := coursePhaseParticipation.CreateOrUpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.CreateCoursePhaseParticipation{CourseParticipationID: cParticipation.ID, CoursePhaseID: coursePhaseID})
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not create course phase participation")
@@ -256,7 +256,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	for _, answer := range application.AnswersText {
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
-		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
 		err = qtx.CreateApplicationAnswerText(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
@@ -267,7 +267,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	for _, answer := range application.AnswersMultiSelect {
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
-		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
 		err = qtx.CreateApplicationAnswerMultiSelect(ctx, answerDBModel)
 		if err != nil {
 			log.Error(err)
@@ -275,7 +275,10 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 	}
 
-	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, cPhaseParticipation.ID)
+	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, db.StoreApplicationAnswerUpdateTimestampParams{
+		CoursePhaseID:         cPhaseParticipation.CoursePhaseID,
+		CourseParticipationID: cPhaseParticipation.CourseParticipationID,
+	})
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not save the application answers")
@@ -286,7 +289,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return cPhaseParticipation.ID, nil
+	return cPhaseParticipation.CourseParticipationID, nil
 }
 
 func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, coursePhaseID uuid.UUID) (applicationDTO.Application, error) {
@@ -314,13 +317,29 @@ func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, cours
 	}
 
 	if exists {
-		answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForStudent(ctxWithTimeout, db.GetApplicationAnswersTextForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+		// Get courseParticipation
+		courseParticipation, err := ApplicationServiceSingleton.queries.GetCourseParticipationByStudentAndCoursePhaseID(ctxWithTimeout, db.GetCourseParticipationByStudentAndCoursePhaseIDParams{
+			StudentID:     studentObj.ID,
+			CoursePhaseID: coursePhaseID,
+		})
+		if err != nil {
+			log.Error(err)
+			return applicationDTO.Application{}, errors.New("could not get course participation")
+		}
+
+		answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForCourseParticipationID(ctxWithTimeout, db.GetApplicationAnswersTextForCourseParticipationIDParams{
+			CourseParticipationID: courseParticipation.ID,
+			CoursePhaseID:         coursePhaseID,
+		})
 		if err != nil {
 			log.Error(err)
 			return applicationDTO.Application{}, errors.New("could not get application answers")
 		}
 
-		answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForStudent(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+		answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForCourseParticipationID(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForCourseParticipationIDParams{
+			CourseParticipationID: courseParticipation.ID,
+			CoursePhaseID:         coursePhaseID,
+		})
 		if err != nil {
 			log.Error(err)
 			return applicationDTO.Application{}, errors.New("could not get application answers")
@@ -381,7 +400,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	for _, answer := range application.AnswersText {
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
-		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
 		err = qtx.CreateOrOverwriteApplicationAnswerText(ctx, db.CreateOrOverwriteApplicationAnswerTextParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
@@ -393,7 +412,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	for _, answer := range application.AnswersMultiSelect {
 		answerDBModel := answer.GetDBModel()
 		answerDBModel.ID = uuid.New()
-		answerDBModel.CoursePhaseParticipationID = cPhaseParticipation.ID
+		answerDBModel.CourseParticipationID = cPhaseParticipation.CourseParticipationID
 		err = qtx.CreateOrOverwriteApplicationAnswerMultiSelect(ctx, db.CreateOrOverwriteApplicationAnswerMultiSelectParams(answerDBModel))
 		if err != nil {
 			log.Error(err)
@@ -402,7 +421,10 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 
 	}
 
-	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, cPhaseParticipation.ID)
+	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, db.StoreApplicationAnswerUpdateTimestampParams{
+		CoursePhaseID:         cPhaseParticipation.CoursePhaseID,
+		CourseParticipationID: cPhaseParticipation.CourseParticipationID,
+	})
 	if err != nil {
 		log.Error(err)
 		return uuid.Nil, errors.New("could not save the application answers")
@@ -413,15 +435,16 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return cPhaseParticipation.ID, nil
+	return cPhaseParticipation.CourseParticipationID, nil
 
 }
 
-func GetApplicationByCPPID(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationID uuid.UUID) (applicationDTO.Application, error) {
+// TODO update
+func GetApplicationByCPID(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (applicationDTO.Application, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	applicationExists, err := ApplicationServiceSingleton.queries.GetApplicationExists(ctxWithTimeout, db.GetApplicationExistsParams{CoursePhaseID: coursePhaseID, ID: coursePhaseParticipationID})
+	applicationExists, err := ApplicationServiceSingleton.queries.GetApplicationExists(ctxWithTimeout, db.GetApplicationExistsParams{CoursePhaseID: coursePhaseID, CourseParticipationID: courseParticipationID})
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.Application{}, errors.New("could not get application")
@@ -431,19 +454,25 @@ func GetApplicationByCPPID(ctx context.Context, coursePhaseID uuid.UUID, courseP
 		return applicationDTO.Application{}, ErrNotFound
 	}
 
-	studentObj, err := student.GetStudentByCoursePhaseParticipationID(ctxWithTimeout, coursePhaseParticipationID)
+	studentObj, err := student.GetStudentByCourseParticipationID(ctxWithTimeout, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.Application{}, errors.New("could not get student")
 	}
 
-	answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForStudent(ctxWithTimeout, db.GetApplicationAnswersTextForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+	answersText, err := ApplicationServiceSingleton.queries.GetApplicationAnswersTextForCourseParticipationID(ctxWithTimeout, db.GetApplicationAnswersTextForCourseParticipationIDParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.Application{}, errors.New("could not get application answers")
 	}
 
-	answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForStudent(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForStudentParams{StudentID: studentObj.ID, CoursePhaseID: coursePhaseID})
+	answersMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationAnswersMultiSelectForCourseParticipationID(ctxWithTimeout, db.GetApplicationAnswersMultiSelectForCourseParticipationIDParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error(err)
 		return applicationDTO.Application{}, errors.New("could not get application answers")
@@ -480,7 +509,7 @@ func GetAllApplicationParticipations(ctx context.Context, coursePhaseID uuid.UUI
 	return applicationParticipationsDTO, nil
 }
 
-func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
+func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID, assessment applicationDTO.PutAssessment) error {
 	tx, err := ApplicationServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -490,10 +519,10 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 
 	if assessment.PassStatus != nil || assessment.RestrictedData.Length() > 0 {
 		err := coursePhaseParticipation.UpdateCoursePhaseParticipation(ctx, qtx, coursePhaseParticipationDTO.UpdateCoursePhaseParticipation{
-			ID:             coursePhaseParticipationID,
-			PassStatus:     assessment.PassStatus,
-			RestrictedData: assessment.RestrictedData,
-			CoursePhaseID:  coursePhaseID,
+			CourseParticipationID: courseParticipationID,
+			PassStatus:            assessment.PassStatus,
+			RestrictedData:        assessment.RestrictedData,
+			CoursePhaseID:         coursePhaseID,
 		})
 		if err != nil {
 			log.Error(err)
@@ -502,14 +531,21 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	}
 
 	if assessment.Score.Valid {
-		err := qtx.UpdateApplicationAssessment(ctx, db.UpdateApplicationAssessmentParams{CoursePhaseParticipationID: coursePhaseParticipationID, Score: assessment.Score})
+		err := qtx.UpdateApplicationAssessment(ctx, db.UpdateApplicationAssessmentParams{
+			CoursePhaseID:         coursePhaseID,
+			CourseParticipationID: courseParticipationID,
+			Score:                 assessment.Score,
+		})
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not update application assessment")
 		}
 	}
 
-	err = qtx.StoreApplicationAssessmentUpdateTimestamp(ctx, coursePhaseParticipationID)
+	err = qtx.StoreApplicationAssessmentUpdateTimestamp(ctx, db.StoreApplicationAssessmentUpdateTimestampParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	})
 	if err != nil {
 		log.Error(err)
 		return errors.New("could not save the assessment")
@@ -534,21 +570,21 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 
 	// generate batch of scores
 	batchScores := make([]pgtype.Numeric, 0, len(additionalScore.Scores))
-	coursePhaseIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
+	courseParticipationIDs := make([]uuid.UUID, 0, len(additionalScore.Scores))
 
 	for _, score := range additionalScore.Scores {
 		batchScores = append(batchScores, score.Score)
-		coursePhaseIDs = append(coursePhaseIDs, score.CoursePhaseParticipationID)
+		courseParticipationIDs = append(courseParticipationIDs, score.CourseParticipationID)
 	}
 	scoreNameArray := make([]string, 0, 1)
 	scoreNameArray = append(scoreNameArray, additionalScore.Key)
 
 	// 1.) Store the new score for each participation
 	err = qtx.BatchUpdateAdditionalScores(ctx, db.BatchUpdateAdditionalScoresParams{
-		Column1:       coursePhaseIDs,
-		Column2:       batchScores,
-		Column3:       scoreNameArray,
-		CoursePhaseID: coursePhaseID,
+		CoursePhaseID:          coursePhaseID,
+		CourseParticipationIds: courseParticipationIDs,
+		Scores:                 batchScores,
+		ScoreName:              scoreNameArray,
 	})
 	if err != nil {
 		log.Error(err)
@@ -571,15 +607,15 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 				return errors.New("could not update additional scores")
 			}
 			if scoreValue.Float64 < thresholdValue.Float64 {
-				batchSetFailed = append(batchSetFailed, score.CoursePhaseParticipationID)
+				batchSetFailed = append(batchSetFailed, score.CourseParticipationID)
 			}
 		}
 
 		// TODO MAIL: use the changed participations for mailing!
 		_, err = qtx.UpdateCoursePhasePassStatus(ctx, db.UpdateCoursePhasePassStatusParams{
-			Column1: batchSetFailed,
-			Column2: coursePhaseID,
-			Column3: db.PassStatusFailed,
+			CourseParticipationID: batchSetFailed,
+			CoursePhaseID:         coursePhaseID,
+			PassStatus:            db.PassStatusFailed,
 		})
 		if err != nil {
 			log.Error(err)
@@ -628,11 +664,11 @@ func GetAdditionalScores(ctx context.Context, coursePhaseID uuid.UUID) ([]applic
 	return metaToScoresArray(coursePhaseDTO.RestrictedData)
 }
 
-func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, coursePhaseParticipationIDs []uuid.UUID) error {
+func DeleteApplications(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationIDs []uuid.UUID) error {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	err := ApplicationServiceSingleton.queries.DeleteApplications(ctxWithTimeout, db.DeleteApplicationsParams{CoursePhaseID: coursePhaseID, Column2: coursePhaseParticipationIDs})
+	err := ApplicationServiceSingleton.queries.DeleteApplications(ctxWithTimeout, db.DeleteApplicationsParams{CoursePhaseID: coursePhaseID, CourseParticipationIds: courseParticipationIDs})
 	if err != nil {
 		log.Error(err)
 		return errors.New("could not delete applications")
