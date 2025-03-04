@@ -16,7 +16,7 @@ import { YesNoButtons } from '../../components/YesNoButtons'
 import { developerFormSchema, type DeveloperFormValues } from '../../validations/developerProfile'
 import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
-import { UUIDHelperDialog } from './components/UUIDHelperDialog'
+import IOSUUIDDialog from './components/IOSUUIDDialog'
 
 interface DeveloperProfileFormProps {
   developerProfile?: DeveloperProfile
@@ -141,7 +141,6 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
-                      <UUIDHelperDialog deviceType='mac' />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -182,7 +181,7 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
-                      <UUIDHelperDialog deviceType='ios' />
+                      <IOSUUIDDialog />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -223,7 +222,6 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
-                      <UUIDHelperDialog deviceType='ios' />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -264,7 +262,6 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
-                      <UUIDHelperDialog deviceType='ios' />
                     </div>
                   </FormControl>
                   <FormMessage />
