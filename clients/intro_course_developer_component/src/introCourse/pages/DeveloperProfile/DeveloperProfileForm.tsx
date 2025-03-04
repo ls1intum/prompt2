@@ -153,13 +153,12 @@ export const DeveloperProfileForm = ({
               />
             </div>
             {form.watch('hasIPhone') && (
-              <div className='col-span-3'>
+              <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
                   name='iPhoneUUID'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>iPhone UUID</FormLabel>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
@@ -196,13 +195,12 @@ export const DeveloperProfileForm = ({
               />
             </div>
             {form.watch('hasIPad') && (
-              <div className='col-span-3'>
+              <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
                   name='iPadUUID'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>iPad UUID</FormLabel>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
@@ -239,13 +237,12 @@ export const DeveloperProfileForm = ({
               />
             </div>
             {form.watch('hasAppleWatch') && (
-              <div className='col-span-3'>
+              <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
                   name='appleWatchUUID'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Apple Watch UUID</FormLabel>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
