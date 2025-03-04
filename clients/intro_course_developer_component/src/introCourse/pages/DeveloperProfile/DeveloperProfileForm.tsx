@@ -34,13 +34,19 @@ export const DeveloperProfileForm = ({
     defaultValues: {
       appleID: developerProfile?.appleID || '',
       gitLabUsername: developerProfile?.gitLabUsername || '',
-      hasMacBook: developerProfile?.macBookUUID ? 'yes' : 'no',
-      macBookUUID: developerProfile?.macBookUUID || '',
-      hasIPhone: developerProfile?.iPhoneUUID ? 'yes' : 'no',
+      hasMacBook: developerProfile?.hasMacBook,
+      hasIPhone:
+        developerProfile?.iPhoneUUID === undefined
+          ? undefined
+          : developerProfile?.iPhoneUUID !== '',
       iPhoneUUID: developerProfile?.iPhoneUUID || '',
-      hasIPad: developerProfile?.iPadUUID ? 'yes' : 'no',
+      hasIPad:
+        developerProfile?.iPadUUID === undefined ? undefined : developerProfile?.iPadUUID !== '',
       iPadUUID: developerProfile?.iPadUUID || '',
-      hasAppleWatch: developerProfile?.appleWatchUUID ? 'yes' : 'no',
+      hasAppleWatch:
+        developerProfile?.appleWatchUUID === undefined
+          ? undefined
+          : developerProfile?.appleWatchUUID !== '',
       appleWatchUUID: developerProfile?.appleWatchUUID || '',
     },
   })
@@ -49,10 +55,10 @@ export const DeveloperProfileForm = ({
     const submittedProfile: DeveloperProfile = {
       appleID: values.appleID,
       gitLabUsername: values.gitLabUsername,
-      macBookUUID: values.hasMacBook === 'yes' ? values.macBookUUID : undefined,
-      iPhoneUUID: values.hasIPhone === 'yes' ? values.iPhoneUUID : undefined,
-      iPadUUID: values.hasIPad === 'yes' ? values.iPadUUID : undefined,
-      appleWatchUUID: values.hasAppleWatch === 'yes' ? values.appleWatchUUID : undefined,
+      hasMacBook: values.hasMacBook,
+      iPhoneUUID: values.hasIPhone ? values.iPhoneUUID : undefined,
+      iPadUUID: values.hasIPad ? values.iPadUUID : undefined,
+      appleWatchUUID: values.hasAppleWatch ? values.appleWatchUUID : undefined,
     }
     onSubmit(submittedProfile)
   }
@@ -124,31 +130,6 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {form.watch('hasMacBook') === 'yes' && (
-            <FormField
-              control={form.control}
-              name='macBookUUID'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>MacBook UUID</FormLabel>
-                  <FormDescription>
-                    Enter your MacBook&apos;s Universally Unique Identifier (UUID).
-                  </FormDescription>
-                  <FormControl>
-                    <div className='flex items-center space-x-2'>
-                      <Input
-                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-                        {...field}
-                        className='flex-grow'
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
           {/* iPhone section */}
           <FormField
             control={form.control}
@@ -164,7 +145,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {form.watch('hasIPhone') === 'yes' && (
+          {form.watch('hasIPhone') && (
             <FormField
               control={form.control}
               name='iPhoneUUID'
@@ -205,7 +186,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {form.watch('hasIPad') === 'yes' && (
+          {form.watch('hasIPad') && (
             <FormField
               control={form.control}
               name='iPadUUID'
@@ -246,7 +227,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {form.watch('hasAppleWatch') === 'yes' && (
+          {form.watch('hasAppleWatch') && (
             <FormField
               control={form.control}
               name='appleWatchUUID'

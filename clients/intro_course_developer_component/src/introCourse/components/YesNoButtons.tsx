@@ -4,21 +4,17 @@ export const YesNoButtons = ({
   value,
   onChange,
 }: {
-  value: string
-  onChange: (value: string) => void
+  value?: boolean
+  onChange: (value: boolean) => void
 }) => (
   <div className='flex space-x-4'>
-    <Button
-      type='button'
-      variant={value === 'yes' ? 'default' : 'outline'}
-      onClick={() => onChange('yes')}
-    >
+    <Button type='button' variant={value ? 'default' : 'outline'} onClick={() => onChange(true)}>
       Yes
     </Button>
     <Button
       type='button'
-      variant={value === 'no' ? 'default' : 'outline'}
-      onClick={() => onChange('no')}
+      variant={value === false ? 'default' : 'outline'}
+      onClick={() => onChange(false)}
     >
       No
     </Button>
