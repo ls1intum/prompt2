@@ -124,8 +124,8 @@ jobs:
           script: |
             touch .env.prod 
             echo "ENVIRONMENT=production" > .env.prod
-          
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
+            echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "CHAIR_NAME_SHORT=${{ vars.CHAIR_NAME_SHORT }}" >> .env.prod
             echo "CHAIR_NAME_LONG=${{ vars.CHAIR_NAME_LONG }}" >> .env.prod
 

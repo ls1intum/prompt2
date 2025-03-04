@@ -83,6 +83,7 @@ services:
       - "8080"
     environment:
       - CORE_HOST
+      - CORE_SERVER_HOST
       - SERVER_ADDRESS
       - DB_HOST_INTRO_COURSE
       - DB_PORT_INTRO_COURSE
@@ -91,6 +92,7 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - KEYCLOAK_AUTHORIZED_PARTY
+      - KEYCLOAK_CLIENT_ID
     networks:
       - prompt-network
 

@@ -24,7 +24,7 @@ WHERE s.matriculation_number = $1
 AND s.university_login = $2;
 
 -- name: GetCoursePhaseAuthRoleMapping :one
-SELECT CONCAT(c.semester_tag, '-', c.name, '-Lecturer')::text AS lecturer_role, CONCAT(c.semester_tag, '-', c.name, '-Editor')::text AS editor_role, CONCAT(c.semester_tag, '-', c.name, '-cg-')::text AS custom_group_prefix
+SELECT CONCAT(c.semester_tag, '-', c.name, '-Lecturer')::text AS lecturer_role, CONCAT(c.semester_tag, '-', c.name, '-Editor')::text AS editor_role, CONCAT(c.semester_tag, '-', c.name, '-cg-')::text AS custom_role_prefix
 FROM course c
 JOIN course_phase cp ON c.id = cp.course_id
 WHERE cp.id = $1;

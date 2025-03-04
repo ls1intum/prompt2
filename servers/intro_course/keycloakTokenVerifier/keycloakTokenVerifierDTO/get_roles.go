@@ -1,4 +1,4 @@
-package coursePhaseAuthDTO
+package keycloakTokenVerifierDTO
 
 type GetCourseRoles struct {
 	CourseLecturerRole string `json:"courseLecturerRole"`

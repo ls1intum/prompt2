@@ -77,7 +77,7 @@ func (suite *CourseRouterTestSuite) TestGetCoursePhaseAuthRoles() {
 	// Check that the expected keys exist.
 	suite.Contains(response, "courseLecturerRole")
 	suite.Contains(response, "courseEditorRole")
-	suite.Contains(response, "customGroupPrefix")
+	suite.Contains(response, "customRolePrefix")
 }
 
 func (suite *CourseRouterTestSuite) TestGetCoursePhaseAuthRoles_InvalidUUID() {
@@ -97,30 +97,6 @@ func (suite *CourseRouterTestSuite) TestGetCoursePhaseAuthRoles_InvalidUUID() {
 	suite.Require().NoError(err)
 	suite.Equal("invalid course phase ID", response["error"])
 }
-
-// func (suite *CourseRouterTestSuite) TestGetCoursePhaseParticipation_MissingCredentials() {
-// 	// If matriculation number or university login are missing in the context, we expect a 400.
-// 	// Here we simulate this by setting empty strings in the request context.
-// 	coursePhaseID := "4e736d05-c125-48f0-8fa0-848b03ca6908"
-// 	url := "/api/auth/course_phase/" + coursePhaseID + "/is_student"
-// 	req, err := http.NewRequest("GET", url, nil)
-// 	suite.Require().NoError(err)
-
-// 	// Manually override context values to empty (simulate missing credentials).
-// 	req = req.WithContext(gin.ContextWithKeys(req.Context(), map[string]interface{}{
-// 		"matriculationNumber": "",
-// 		"universityLogin":     "",
-// 	}))
-
-// 	w := httptest.NewRecorder()
-// 	suite.router.ServeHTTP(w, req)
-
-// 	suite.Equal(http.StatusBadRequest, w.Code)
-// 	var response map[string]interface{}
-// 	err = json.Unmarshal(w.Body.Bytes(), &response)
-// 	suite.Require().NoError(err)
-// 	suite.Equal("missing matriculation number or university login", response["error"])
-// }
 
 func (suite *CourseRouterTestSuite) TestGetCoursePhaseParticipation_Success() {
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
