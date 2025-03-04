@@ -64,11 +64,11 @@ func (suite *CoursePhaseAuthTestSuite) TestGetCourseRoles() {
 	// Adjust expected values according to your test database contents.
 	expectedLecturerRole := "ios2425-TestCourse-Lecturer"
 	expectedEditorRole := "ios2425-TestCourse-Editor"
-	expectedCustomGroupPrefix := "ios2425-TestCourse-cg-"
+	expectedCustomRolePrefix := "ios2425-TestCourse-cg-"
 
 	suite.Equal(expectedLecturerRole, result.CourseLecturerRole, "Unexpected lecturer role")
 	suite.Equal(expectedEditorRole, result.CourseEditorRole, "Unexpected editor role")
-	suite.Equal(expectedCustomGroupPrefix, result.CustomGroupPrefix, "Unexpected custom group prefix")
+	suite.Equal(expectedCustomRolePrefix, result.CustomRolePrefix, "Unexpected custom role prefix")
 }
 
 func TestCoursePhaseAuthTestSuite(t *testing.T) {

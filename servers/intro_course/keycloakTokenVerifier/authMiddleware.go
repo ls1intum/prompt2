@@ -14,7 +14,7 @@ import (
 // middlewares based on the allowed roles:
 //   - If allowedRoles contains "Lecturer", "Editor" or a custom role name
 //     (any value other than "Admin" or "Student"), then it calls GetLecturerAndEditorRole.
-//     For custom roles the middleware checks if the user's roles include customGroupPrefix+customRole.
+//     For custom roles the middleware checks if the user's roles include customRolePrefix+customRole.
 //   - If allowedRoles contains "Student", then it calls IsStudentOfCoursePhaseMiddleware.
 func AuthenticationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -56,8 +56,8 @@ func AuthenticationMiddleware(allowedRoles ...string) gin.HandlerFunc {
 				return
 			}
 
-			if containsCustomGroupName(allowedRoles...) {
-				prefix, err := getCustomGroupPrefix(c)
+			if containsCustomRoleName(allowedRoles...) {
+				prefix, err := getCustomRolePrefix(c)
 				if err != nil {
 					log.Error(err)
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not authenticate"})
@@ -131,15 +131,15 @@ func isFlagTrue(c *gin.Context, key string) bool {
 	return false
 }
 
-// getCustomGroupPrefix retrieves the customGroupPrefix from the gin.Context.
-func getCustomGroupPrefix(c *gin.Context) (string, error) {
-	val, exists := c.Get("customGroupPrefix")
+// getCustomRolePrefix retrieves the customRolePrefix from the gin.Context.
+func getCustomRolePrefix(c *gin.Context) (string, error) {
+	val, exists := c.Get("customRolePrefix")
 	if !exists {
-		return "", fmt.Errorf("customGroupPrefix not found")
+		return "", fmt.Errorf("customRolePrefix not found")
 	}
 	prefix, ok := val.(string)
 	if !ok {
-		return "", fmt.Errorf("customGroupPrefix invalid type")
+		return "", fmt.Errorf("customRolePrefix invalid type")
 	}
 	return prefix, nil
 }
@@ -149,14 +149,14 @@ func getCustomGroupPrefix(c *gin.Context) (string, error) {
 func requiresLecturerOrCustom(allowedSet map[string]struct{}, roles []string) bool {
 	_, hasLecturer := allowedSet[CourseLecturer]
 	_, hasEditor := allowedSet[CourseEditor]
-	return hasLecturer || hasEditor || containsCustomGroupName(roles...)
+	return hasLecturer || hasEditor || containsCustomRoleName(roles...)
 }
 
-func containsCustomGroupName(allowedRoles ...string) bool {
-	nonCustomGroupRoles := []string{PromptAdmin, PromptLecturer, CourseLecturer, CourseEditor, CourseStudent}
+func containsCustomRoleName(allowedRoles ...string) bool {
+	nonCustomRoles := []string{PromptAdmin, PromptLecturer, CourseLecturer, CourseEditor, CourseStudent}
 
 	for _, role := range allowedRoles {
-		if !slices.Contains(nonCustomGroupRoles, role) {
+		if !slices.Contains(nonCustomRoles, role) {
 			return true
 		}
 	}

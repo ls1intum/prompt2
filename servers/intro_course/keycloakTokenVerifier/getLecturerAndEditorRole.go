@@ -56,6 +56,6 @@ func GetLecturerAndEditorRole() gin.HandlerFunc {
 
 		c.Set("isLecturer", isLecturer)
 		c.Set("isTutor", isTutor)
-		c.Set("customGroupPrefix", tokenMapping.CustomGroupPrefix)
+		c.Set("customRolePrefix", tokenMapping.CustomRolePrefix)
 	}
 }

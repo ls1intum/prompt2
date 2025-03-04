@@ -31,7 +31,7 @@ func GetCourseRoles(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseAu
 	return coursePhaseAuthDTO.GetCourseRoles{
 		CourseLecturerRole: courseRoles.LecturerRole,
 		CourseEditorRole:   courseRoles.EditorRole,
-		CustomGroupPrefix:  courseRoles.CustomGroupPrefix,
+		CustomRolePrefix:   courseRoles.CustomRolePrefix,
 	}, nil
 }
 
