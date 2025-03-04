@@ -1,6 +1,7 @@
 package coursePhaseParticipation
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 
@@ -32,12 +33,16 @@ func getOwnCoursePhaseParticipation(c *gin.Context) {
 	universityLogin := c.GetString("universityLogin")
 
 	if matriculationNumber == "" || universityLogin == "" {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, http.StatusUnauthorized, errors.New("missing matriculation number or university login"))
 		return
 	}
 
 	coursePhaseParticipation, err := GetOwnCoursePhaseParticipation(c, id, matriculationNumber, universityLogin)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			handleError(c, http.StatusNotFound, errors.New("course phase participation not found"))
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}

@@ -547,6 +547,7 @@ qualified_non_participant AS (
     SELECT
         $1::uuid                     AS course_phase_id,
         cp.id                        AS course_participation_id,
+        '{}'::jsonb                  AS student_readable_data,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
@@ -589,7 +590,7 @@ FROM
 (
     SELECT course_phase_id, course_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM current_phase_participation
     UNION
-    SELECT course_phase_id, course_participation_id, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM qualified_non_participant
+    SELECT course_phase_id, course_participation_id, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM qualified_non_participant
 ) AS main
 LIMIT 1
 `
