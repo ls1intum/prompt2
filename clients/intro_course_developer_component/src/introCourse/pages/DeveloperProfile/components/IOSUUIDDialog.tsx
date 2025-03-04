@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { ChevronRight, Smartphone, Laptop } from 'lucide-react'
+import { Smartphone, Laptop } from 'lucide-react'
 
 export default function IOSUUIDDialog() {
   const [open, setOpen] = useState(false)
@@ -44,8 +44,8 @@ export default function IOSUUIDDialog() {
         },
         {
           title: 'View device details',
-          description:
-            'Select your device and click the label below the device name in the info pane. This displays details like the serial number, UDID, and model. Additional clicks cycle through other details (e.g. storage, IMEI/MEID). LALALALALALALALALALALALALAL ALALLALALALALALALALALA LALALALALALALLALALALA LALALALA LALALA LALALALALLAL ALALALALA LALA LALALA LALALALALLALALALA LALALAL ALALALALALALAL ALLALALALALALA LALALALALALALA LALALLALALALALA LALALALALALA LALA LALALLALAL  ALALALALA LALALA  LALALA LALAL LALALALALA LALALALAL ALALALA LALALLALAL ALALALA LALALALALA  LALALALALLALA  LALALALALALALAL ALAL ALALALALLALALALA  ALALALA LAL  ALALALALALA LLAL ALALALAL ALALALALA  LALALA LALAL LAL  ALALALALALA LA LALALALALA LALAL',
+          description: `Select your device and click the label below the device name in the info pane. 
+            This displays details like the serial number, UDID, and model. Additional clicks cycle through other details (e.g. storage, IMEI/MEID).`,
         },
         {
           title: 'Copy device ID',
@@ -74,63 +74,67 @@ export default function IOSUUIDDialog() {
   ]
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant='outline'>How to Get iOS Device UUID</Button>
-      </DialogTrigger>
-      <DialogContent className='max-h-[90vh] max-w-2xl overflow-auto'>
-        <DialogHeader>
-          <DialogTitle>Getting iOS Device UUID</DialogTitle>
-          <DialogDescription>
-            Follow these steps to obtain the UUID (Unique Device Identifier) of your iOS device
-          </DialogDescription>
-        </DialogHeader>
-        <div className='overflow-y-auto'>
-          <div className='mt-6 space-y-6'>
-            {instructions.map((instruction, index) => (
-              <div key={index} className='space-y-4'>
-                <div className='flex items-start gap-3'>
-                  {index === 0 ? (
-                    <Smartphone className='h-5 w-5 text-primary mt-0.5' />
-                  ) : (
-                    <Laptop className='h-5 w-5 text-primary mt-0.5' />
-                  )}
-                  <div>
-                    <h3 className='text-lg font-semibold'>{instruction.title}</h3>
-                    {instruction.description && (
-                      <p className='text-sm text-muted-foreground mt-1'>
-                        {instruction.description}
-                      </p>
+    <div className='flex flex-col items-center justify-center p-4'>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant='outline'>How to Get the UUID</Button>
+        </DialogTrigger>
+        <DialogContent className='max-w-2xl flex flex-col max-h-[90vh]'>
+          <DialogHeader className='border-b pb-4'>
+            <DialogTitle>Getting iOS Device UUID</DialogTitle>
+            <DialogDescription>
+              Follow these steps to obtain the UUID (Unique Device Identifier) of your iOS device
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='overflow-y-auto flex-1 py-4'>
+            <div className='space-y-6'>
+              {instructions.map((instruction, index) => (
+                <div key={index} className='space-y-4'>
+                  <div className='flex gap-3'>
+                    {index === 0 ? (
+                      <Smartphone className='h-5 w-5 text-primary flex-shrink-0 mt-1 mr-1' />
+                    ) : (
+                      <Laptop className='h-5 w-5 text-primary flex-shrink-0 mt-1 mr-1' />
                     )}
+                    <div>
+                      <h3 className='text-lg font-semibold'>{instruction.title}</h3>
+                      {instruction.description && (
+                        <p className='text-sm text-muted-foreground mt-1'>
+                          {instruction.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
+
+                  {instruction.substeps && (
+                    <div className='ml-11 border-l border-border space-y-4'>
+                      {instruction.substeps.map((substep, subIndex) => (
+                        <div key={subIndex} className='space-y-1 ml-4'>
+                          <div className='flex items-start gap-2'>
+                            <h4 className='font-medium'>
+                              {subIndex + 1}. {substep.title}
+                            </h4>
+                          </div>
+                          <div className='ml-7 text-sm text-muted-foreground'>
+                            {substep.description}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {index < instructions.length - 1 && <Separator className='my-2' />}
                 </div>
-
-                {instruction.substeps && (
-                  <div className='ml-8 pl-4 border-l border-border space-y-4'>
-                    {instruction.substeps.map((substep, subIndex) => (
-                      <div key={subIndex} className='space-y-1'>
-                        <div className='flex items-start gap-2'>
-                          <ChevronRight className='h-4 w-4 text-primary mt-0.5' />
-                          <h4 className='font-medium'>{substep.title}</h4>
-                        </div>
-                        <div className='ml-6 text-sm text-muted-foreground'>
-                          {substep.description}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {index < instructions.length - 1 && <Separator className='my-2' />}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <DialogFooter className='mt-6'>
-          <Button onClick={() => setOpen(false)}>Close</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className='mt-auto pt-4 border-t'>
+            <Button onClick={() => setOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

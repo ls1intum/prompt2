@@ -222,6 +222,7 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
+                      <IOSUUIDDialog />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -262,6 +263,7 @@ export const DeveloperProfileForm = ({
                         {...field}
                         className='flex-grow'
                       />
+                      <IOSUUIDDialog />
                     </div>
                   </FormControl>
                   <FormMessage />

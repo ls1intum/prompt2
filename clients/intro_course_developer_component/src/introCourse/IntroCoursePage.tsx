@@ -9,6 +9,7 @@ export const IntroCoursePage = (): JSX.Element => {
   const { developerProfile } = useIntroCourseStore()
   const [stepsOpen, setStepsOpen] = useState([true, false, false])
 
+  // These will be replaced by actual data fetching
   const [infrastructureComplete, setInfrastructureComplete] = useState(false)
   const [seatAssignment, setSeatAssignment] = useState(false)
 
