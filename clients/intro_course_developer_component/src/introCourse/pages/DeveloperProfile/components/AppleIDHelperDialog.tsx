@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ExternalLink, Info } from 'lucide-react'
+import { ExternalLink, HelpCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,8 +19,8 @@ export const AppleIDHelperDialog = (): JSX.Element => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='sm'>
-          <Info className='h-4 w-4 mr-1' />
+        <Button variant='outline'>
+          <HelpCircle className='h-4 w-4 mr-1' />
           Help
         </Button>
       </DialogTrigger>

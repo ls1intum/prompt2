@@ -17,6 +17,7 @@ import { developerFormSchema, type DeveloperFormValues } from '../../validations
 import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
 import IOSUUIDDialog from './components/IOSUUIDDialog'
+import { useScreenSize } from '@/hooks/useScreenSize'
 
 interface DeveloperProfileFormProps {
   developerProfile?: DeveloperProfile
@@ -29,6 +30,8 @@ export const DeveloperProfileForm = ({
   status,
   onSubmit,
 }: DeveloperProfileFormProps): JSX.Element => {
+  const { width } = useScreenSize()
+
   const form = useForm<DeveloperFormValues>({
     resolver: zodResolver(developerFormSchema),
     defaultValues: {
@@ -68,6 +71,7 @@ export const DeveloperProfileForm = ({
       {status && <p className='text-muted-foreground mb-4'>{status}</p>}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-8'>
+          {/* Apple ID Field */}
           <FormField
             control={form.control}
             name='appleID'
@@ -89,6 +93,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
+          {/* GitLab Username Field */}
           <FormField
             control={form.control}
             name='gitLabUsername'
@@ -110,7 +115,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {/* MacBook section */}
+          {/* MacBook Section */}
           <FormField
             control={form.control}
             name='hasMacBook'
@@ -130,128 +135,134 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {/* iPhone section */}
-          <FormField
-            control={form.control}
-            name='hasIPhone'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Do you have an iPhone?</FormLabel>
-                <FormControl>
-                  <YesNoButtons value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* iPhone Section: Yes/No + UUID Input */}
+          <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
+            <div>
+              <FormField
+                control={form.control}
+                name='hasIPhone'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Do you have an iPhone?</FormLabel>
+                    <FormControl>
+                      <YesNoButtons value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {form.watch('hasIPhone') && (
+              <div className='col-span-3'>
+                <FormField
+                  control={form.control}
+                  name='iPhoneUUID'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>iPhone UUID</FormLabel>
+                      <FormControl>
+                        <div className='flex items-center space-x-2'>
+                          <Input
+                            placeholder="Enter your iPhone's UUID."
+                            {...field}
+                            className='w-full'
+                          />
+                          <IOSUUIDDialog />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
-          />
+          </div>
 
-          {form.watch('hasIPhone') && (
-            <FormField
-              control={form.control}
-              name='iPhoneUUID'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>iPhone UUID</FormLabel>
-                  <FormDescription>
-                    Enter your iPhone&apos;s Universally Unique Identifier (UUID).
-                  </FormDescription>
-                  <FormControl>
-                    <div className='flex items-center space-x-2'>
-                      <Input
-                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-                        {...field}
-                        className='flex-grow'
-                      />
-                      <IOSUUIDDialog />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* iPad section */}
-          <FormField
-            control={form.control}
-            name='hasIPad'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Do you have an iPad?</FormLabel>
-                <FormControl>
-                  <YesNoButtons value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* iPad Section: Yes/No + UUID Input */}
+          <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
+            <div>
+              <FormField
+                control={form.control}
+                name='hasIPad'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Do you have an iPad?</FormLabel>
+                    <FormControl>
+                      <YesNoButtons value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {form.watch('hasIPad') && (
+              <div className='col-span-3'>
+                <FormField
+                  control={form.control}
+                  name='iPadUUID'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>iPad UUID</FormLabel>
+                      <FormControl>
+                        <div className='flex items-center space-x-2'>
+                          <Input
+                            placeholder="Enter your iPad's UUID."
+                            {...field}
+                            className='w-full'
+                          />
+                          <IOSUUIDDialog />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
-          />
+          </div>
 
-          {form.watch('hasIPad') && (
-            <FormField
-              control={form.control}
-              name='iPadUUID'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>iPad UUID</FormLabel>
-                  <FormDescription>
-                    Enter your iPad&apos;s Universally Unique Identifier (UUID).
-                  </FormDescription>
-                  <FormControl>
-                    <div className='flex items-center space-x-2'>
-                      <Input
-                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-                        {...field}
-                        className='flex-grow'
-                      />
-                      <IOSUUIDDialog />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {/* Apple Watch section */}
-          <FormField
-            control={form.control}
-            name='hasAppleWatch'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Do you have an Apple Watch?</FormLabel>
-                <FormControl>
-                  <YesNoButtons value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* Apple Watch Section: Yes/No + UUID Input */}
+          <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
+            <div>
+              <FormField
+                control={form.control}
+                name='hasAppleWatch'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Do you have an Apple Watch?</FormLabel>
+                    <FormControl>
+                      <YesNoButtons value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {form.watch('hasAppleWatch') && (
+              <div className='col-span-3'>
+                <FormField
+                  control={form.control}
+                  name='appleWatchUUID'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Apple Watch UUID</FormLabel>
+                      <FormControl>
+                        <div className='flex items-center space-x-2'>
+                          <Input
+                            placeholder="Enter your Apple Watch's UUID."
+                            {...field}
+                            className='w-full'
+                          />
+                          <IOSUUIDDialog />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
-          />
-
-          {form.watch('hasAppleWatch') && (
-            <FormField
-              control={form.control}
-              name='appleWatchUUID'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Apple Watch UUID</FormLabel>
-                  <FormDescription>
-                    Enter your Apple Watch&apos;s Universally Unique Identifier (UUID).
-                  </FormDescription>
-                  <FormControl>
-                    <div className='flex items-center space-x-2'>
-                      <Input
-                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-                        {...field}
-                        className='flex-grow'
-                      />
-                      <IOSUUIDDialog />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          </div>
 
           <div className='flex justify-end mt-3'>
             <Button type='submit' size='lg'>

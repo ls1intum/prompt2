@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { Smartphone, Laptop } from 'lucide-react'
+import { Smartphone, Laptop, HelpCircle } from 'lucide-react'
 
 export default function IOSUUIDDialog() {
   const [open, setOpen] = useState(false)
@@ -49,7 +49,8 @@ export default function IOSUUIDDialog() {
         },
         {
           title: 'Copy device ID',
-          description: 'Control-click the label (UDID) to copy your device ID.',
+          description:
+            'Control-click the label (UUID) to copy your device ID. The UUID is of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".',
         },
       ],
     },
@@ -67,17 +68,21 @@ export default function IOSUUIDDialog() {
         },
         {
           title: 'Copy device ID',
-          description: 'Highlight the device ID (labeled as Identifier) to copy it.',
+          description:
+            'Highlight the device ID (labeled as Identifier) to copy it. The UUID is of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".',
         },
       ],
     },
   ]
 
   return (
-    <div className='flex flex-col items-center justify-center p-4'>
+    <div className='flex flex-col items-center justify-center'>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant='outline'>How to Get the UUID</Button>
+          <Button variant='outline'>
+            <HelpCircle className='h-4 w-4 mr-1' />
+            Help
+          </Button>
         </DialogTrigger>
         <DialogContent className='max-w-2xl flex flex-col max-h-[90vh]'>
           <DialogHeader className='border-b pb-4'>
