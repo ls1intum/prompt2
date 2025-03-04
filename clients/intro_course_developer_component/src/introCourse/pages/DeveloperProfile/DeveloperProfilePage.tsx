@@ -1,4 +1,4 @@
-import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
+import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { DeveloperProfileForm } from './DeveloperProfileForm'
 import { useIntroCourseStore } from '../../zustand/useIntroCourseStore'
 import { useState } from 'react'
