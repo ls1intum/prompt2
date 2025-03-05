@@ -1,12 +1,18 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { useKeycloak } from '@core/keycloak/useKeycloak'
 import { AlertTriangle, ArrowLeft, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-export default function UnauthorizedPage() {
-  const { logout } = useKeycloak()
+interface UnauthorizedPageProps {
+  onLogout?: () => void
+  backUrl?: string
+}
+
+export default function UnauthorizedPage({
+  onLogout,
+  backUrl,
+}: UnauthorizedPageProps): JSX.Element {
   const navigate = useNavigate()
 
   return (
@@ -28,14 +34,22 @@ export default function UnauthorizedPage() {
           </Alert>
         </CardContent>
         <CardFooter className='flex justify-center space-x-4'>
-          <Button variant='outline' onClick={() => navigate(-1)} className='w-full sm:w-auto'>
+          <Button
+            variant='outline'
+            onClick={() => {
+              backUrl ? navigate(backUrl) : navigate(-1)
+            }}
+            className='w-full sm:w-auto'
+          >
             <ArrowLeft className='mr-2 h-4 w-4' />
             Go Back
           </Button>
-          <Button variant='destructive' onClick={() => logout()} className='w-full sm:w-auto'>
-            <LogOut className='mr-2 h-4 w-4' />
-            Logout
-          </Button>
+          {onLogout && (
+            <Button variant='destructive' onClick={() => onLogout()} className='w-full sm:w-auto'>
+              <LogOut className='mr-2 h-4 w-4' />
+              Logout
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

@@ -360,6 +360,7 @@ qualified_non_participant AS (
     SELECT
         $1::uuid                     AS course_phase_id,
         cp.id                        AS course_participation_id,
+        '{}'::jsonb                  AS student_readable_data,
         s.id                         AS student_id,
         s.first_name,
         s.last_name,
