@@ -6,8 +6,14 @@ package db
 
 import (
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Test struct {
-	ID uuid.UUID `json:"id"`
+type DeveloperProfile struct {
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	HasMacbook            bool        `json:"has_macbook"`
+	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
+	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
+	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
 }
