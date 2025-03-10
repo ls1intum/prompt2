@@ -12,6 +12,8 @@ import (
 type DeveloperProfile struct {
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	GitlabUsername        string      `json:"gitlab_username"`
+	AppleID               string      `json:"apple_id"`
 	HasMacbook            bool        `json:"has_macbook"`
 	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
 	IpadUuid              pgtype.UUID `json:"ipad_uuid"`

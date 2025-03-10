@@ -7,6 +7,8 @@ import (
 )
 
 type PostDeveloperProfile struct {
+	AppleID        string      `json:"appleID"`
+	GitLabUsername string      `json:"gitLabUsername"`
 	HasMacBook     bool        `json:"hasMacbook"`
 	IPhoneUUID     pgtype.UUID `json:"iPhoneUUID"`
 	IPadUUID       pgtype.UUID `json:"iPadUUID"`
@@ -17,6 +19,8 @@ func GetDeveloperProfileDTOFromPostRequest(request PostDeveloperProfile, courseP
 	return db.CreateDeveloperProfileParams{
 		CoursePhaseID:         coursePhaseID,
 		CourseParticipationID: courseParticipationID,
+		AppleID:               request.AppleID,
+		GitlabUsername:        request.GitLabUsername,
 		HasMacbook:            request.HasMacBook,
 		IphoneUuid:            request.IPhoneUUID,
 		IpadUuid:              request.IPadUUID,

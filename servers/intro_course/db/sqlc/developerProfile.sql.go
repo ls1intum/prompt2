@@ -13,13 +13,15 @@ import (
 )
 
 const createDeveloperProfile = `-- name: CreateDeveloperProfile :exec
-INSERT INTO developer_profile (course_participation_id, course_phase_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO developer_profile (course_participation_id, course_phase_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
 type CreateDeveloperProfileParams struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	GitlabUsername        string      `json:"gitlab_username"`
+	AppleID               string      `json:"apple_id"`
 	HasMacbook            bool        `json:"has_macbook"`
 	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
 	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
@@ -30,6 +32,8 @@ func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDevelope
 	_, err := q.db.Exec(ctx, createDeveloperProfile,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
+		arg.GitlabUsername,
+		arg.AppleID,
 		arg.HasMacbook,
 		arg.IphoneUuid,
 		arg.IpadUuid,
@@ -39,7 +43,7 @@ func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDevelope
 }
 
 const getAllDeveloperProfiles = `-- name: GetAllDeveloperProfiles :many
-SELECT course_phase_id, course_participation_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid 
+SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid 
 FROM developer_profile
 WHERE course_phase_id = $1
 `
@@ -56,6 +60,8 @@ func (q *Queries) GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uui
 		if err := rows.Scan(
 			&i.CoursePhaseID,
 			&i.CourseParticipationID,
+			&i.GitlabUsername,
+			&i.AppleID,
 			&i.HasMacbook,
 			&i.IphoneUuid,
 			&i.IpadUuid,
@@ -72,7 +78,7 @@ func (q *Queries) GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uui
 }
 
 const getDeveloperProfileByCourseParticipationID = `-- name: GetDeveloperProfileByCourseParticipationID :one
-SELECT course_phase_id, course_participation_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid
+SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid
 FROM developer_profile
 WHERE course_participation_id = $1 
 AND course_phase_id = $2
@@ -89,6 +95,8 @@ func (q *Queries) GetDeveloperProfileByCourseParticipationID(ctx context.Context
 	err := row.Scan(
 		&i.CoursePhaseID,
 		&i.CourseParticipationID,
+		&i.GitlabUsername,
+		&i.AppleID,
 		&i.HasMacbook,
 		&i.IphoneUuid,
 		&i.IpadUuid,

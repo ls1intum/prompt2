@@ -9,6 +9,8 @@ import (
 type DeveloperProfile struct {
 	CoursePhaseID         uuid.UUID   `json:"coursePhaseID"`
 	CourseParticipationID uuid.UUID   `json:"courseParticipationID"`
+	AppleID               string      `json:"appleID"`
+	GitLabUsername        string      `json:"gitLabUsername"`
 	HasMacBook            bool        `json:"hasMacbook"`
 	IPhoneUUID            pgtype.UUID `json:"iPhoneUUID"`
 	IPadUUID              pgtype.UUID `json:"iPadUUID"`
@@ -19,6 +21,8 @@ func GetDeveloperProfileDTOFromDBModel(model db.DeveloperProfile) DeveloperProfi
 	return DeveloperProfile{
 		CoursePhaseID:         model.CoursePhaseID,
 		CourseParticipationID: model.CourseParticipationID,
+		AppleID:               model.AppleID,
+		GitLabUsername:        model.GitlabUsername,
 		HasMacBook:            model.HasMacbook,
 		IPhoneUUID:            model.IphoneUuid,
 		IPadUUID:              model.IphoneUuid,
