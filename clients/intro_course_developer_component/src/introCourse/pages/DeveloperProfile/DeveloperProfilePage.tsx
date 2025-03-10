@@ -4,22 +4,37 @@ import { useIntroCourseStore } from '../../zustand/useIntroCourseStore'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, CheckCircle } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { postDeveloperProfile } from '../../network/mutations/postDeveloperProfile'
+import { useParams } from 'react-router-dom'
 
 interface DeveloperProfilePageProps {
   onContinue: () => void
 }
 
 export const DeveloperProfilePage = ({ onContinue }: DeveloperProfilePageProps): JSX.Element => {
-  const { developerProfile, setDeveloperProfile } = useIntroCourseStore()
+  const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
+  const { developerProfile } = useIntroCourseStore()
   const [currState, setCurrState] = useState<'input' | 'success' | 'error'>(
     developerProfile === undefined ? 'input' : 'success',
   )
 
+  const mutation = useMutation({
+    mutationFn: (devProfile: DeveloperProfile) => {
+      return postDeveloperProfile(phaseId ?? '', devProfile)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['developer_profile'] })
+      setCurrState('success')
+    },
+    onError: () => {
+      setCurrState('error')
+    },
+  })
+
   const submitDeveloperProfile = (newDevProfile: DeveloperProfile) => {
-    // TODO: actually submit once the API is done
-    console.log(newDevProfile)
-    setDeveloperProfile(newDevProfile)
-    setCurrState('success')
+    mutation.mutate(newDevProfile)
   }
 
   return (

@@ -8,7 +8,7 @@ interface IntroCourseStoreState {
 }
 
 interface IntroCourseStoreAction {
-  setDeveloperProfile: (developerProfile: DeveloperProfile) => void
+  setDeveloperProfile: (developerProfile?: DeveloperProfile) => void
   setCoursePhaseParticipation: (
     coursePhaseParticipation: CoursePhaseParticipationWithStudent,
   ) => void

@@ -123,7 +123,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - TZ=Europe/Berlin
     volumes:
-      - ./intro_course_postgres_data:/var/lib/postgresql/data
+      - ./postgres_intro_course_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -247,6 +247,7 @@ services:
       - GITHUB_SHA
       - GITHUB_REF
       - SERVER_IMAGE_TAG
+      - INTRO_COURSE_HOST
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
