@@ -38,20 +38,14 @@ func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDevelope
 	return err
 }
 
-const getDeveloperForm = `-- name: GetDeveloperForm :many
+const getAllDeveloperProfiles = `-- name: GetAllDeveloperProfiles :many
 SELECT course_phase_id, course_participation_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid 
 FROM developer_profile
-WHERE course_participation_id = $1
-AND course_phase_id = $2
+WHERE course_phase_id = $1
 `
 
-type GetDeveloperFormParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) GetDeveloperForm(ctx context.Context, arg GetDeveloperFormParams) ([]DeveloperProfile, error) {
-	rows, err := q.db.Query(ctx, getDeveloperForm, arg.CourseParticipationID, arg.CoursePhaseID)
+func (q *Queries) GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uuid.UUID) ([]DeveloperProfile, error) {
+	rows, err := q.db.Query(ctx, getAllDeveloperProfiles, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,4 +69,30 @@ func (q *Queries) GetDeveloperForm(ctx context.Context, arg GetDeveloperFormPara
 		return nil, err
 	}
 	return items, nil
+}
+
+const getDeveloperProfileByCourseParticipationID = `-- name: GetDeveloperProfileByCourseParticipationID :one
+SELECT course_phase_id, course_participation_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid
+FROM developer_profile
+WHERE course_participation_id = $1 
+AND course_phase_id = $2
+`
+
+type GetDeveloperProfileByCourseParticipationIDParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetDeveloperProfileByCourseParticipationID(ctx context.Context, arg GetDeveloperProfileByCourseParticipationIDParams) (DeveloperProfile, error) {
+	row := q.db.QueryRow(ctx, getDeveloperProfileByCourseParticipationID, arg.CourseParticipationID, arg.CoursePhaseID)
+	var i DeveloperProfile
+	err := row.Scan(
+		&i.CoursePhaseID,
+		&i.CourseParticipationID,
+		&i.HasMacbook,
+		&i.IphoneUuid,
+		&i.IpadUuid,
+		&i.AppleWatchUuid,
+	)
+	return i, err
 }

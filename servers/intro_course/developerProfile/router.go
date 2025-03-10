@@ -7,18 +7,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile/developerProfileDTO"
 	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupDeveloperProfileRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	developerProfile := router.Group("/developer_profile")
 	developerProfile.POST("", authMiddleware(keycloakTokenVerifier.CourseStudent), createDeveloperProfile)
+	developerProfile.GET("/self", authMiddleware(keycloakTokenVerifier.CourseStudent), getOwnDeveloperProfile)
+	// Getting all developer profiles is only allowed for lecturers
+	developerProfile.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getAllDeveloperProfiles)
 }
 
 func createDeveloperProfile(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		logrus.Error("Error parsing coursePhaseID: ", err)
+		log.Error("Error parsing coursePhaseID: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -26,7 +29,7 @@ func createDeveloperProfile(c *gin.Context) {
 	// ger course participation id from context
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
-		logrus.Error("Error getting courseParticipationID from context")
+		log.Error("Error getting courseParticipationID from context")
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -37,13 +40,51 @@ func createDeveloperProfile(c *gin.Context) {
 		return
 	}
 
-	logrus.Info("Creating developer profile")
 	err = CreateDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID), request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.Status(http.StatusCreated)
+}
+
+func getOwnDeveloperProfile(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	developerProfile, err := GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, developerProfile)
+}
+
+func getAllDeveloperProfiles(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	developerProfiles, err := GetAllDeveloperProfiles(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, developerProfiles)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

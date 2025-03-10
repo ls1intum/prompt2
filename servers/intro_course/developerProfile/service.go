@@ -2,6 +2,7 @@ package developerProfile
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/google/uuid"
@@ -34,4 +35,45 @@ func CreateDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID, course
 	}
 	return nil
 
+}
+
+func GetOwnDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (developerProfileDTO.DeveloperProfile, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	params := db.GetDeveloperProfileByCourseParticipationIDParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	}
+	developerProfile, err := DeveloperProfileServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(ctxWithTimeout, params)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// return empty developer profile if no profile exists
+		return developerProfileDTO.DeveloperProfile{}, nil
+	} else if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID":         coursePhaseID,
+			"courseParticipationID": courseParticipationID,
+			"error":                 err,
+		}).Error("Failed to get developer profile")
+		return developerProfileDTO.DeveloperProfile{}, errors.New("failed to get developer profile")
+	}
+
+	return developerProfileDTO.GetDeveloperProfileDTOFromDBModel(developerProfile), nil
+}
+
+func GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uuid.UUID) ([]developerProfileDTO.DeveloperProfile, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	developerProfiles, err := DeveloperProfileServiceSingleton.queries.GetAllDeveloperProfiles(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"error":         err,
+		}).Error("Failed to get developer profiles")
+		return nil, err
+	}
+
+	developerProfileDTOs := developerProfileDTO.GetDeveloperProfileDTOsFromDBModels(developerProfiles)
+	return developerProfileDTOs, nil
 }

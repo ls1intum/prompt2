@@ -1,7 +1,12 @@
--- name: GetDeveloperForm :many
+-- name: GetAllDeveloperProfiles :many
 SELECT * 
 FROM developer_profile
-WHERE course_participation_id = $1
+WHERE course_phase_id = $1;
+
+-- name: GetDeveloperProfileByCourseParticipationID :one
+SELECT *
+FROM developer_profile
+WHERE course_participation_id = $1 
 AND course_phase_id = $2;
 
 -- name: CreateDeveloperProfile :exec

@@ -25,3 +25,11 @@ func GetDeveloperProfileDTOFromDBModel(model db.DeveloperProfile) DeveloperProfi
 		AppleWatchUUID:        model.AppleWatchUuid,
 	}
 }
+
+func GetDeveloperProfileDTOsFromDBModels(models []db.DeveloperProfile) []DeveloperProfile {
+	developerProfiles := make([]DeveloperProfile, 0, len(models))
+	for _, model := range models {
+		developerProfiles = append(developerProfiles, GetDeveloperProfileDTOFromDBModel(model))
+	}
+	return developerProfiles
+}
