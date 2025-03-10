@@ -1,33 +1,33 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
-import { useGetCoursePhase } from '@/hooks/useGetCoursePhase'
-import { ErrorPage } from '@/components/ErrorPage'
-import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
-import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
 import { createCustomKeycloakGroup } from '../../../network/mutations/createCustomKeycloakGroup'
 import { CreateKeycloakGroup } from '../../../interfaces/CreateKeycloakGroup'
+import { CoursePhaseWithMetaData, UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 
 const KEYCLOAK_GROUP_NAME = 'introCourseTutors'
 
-export function KeycloakGroupCreation() {
+interface KeycloakGroupCreationProps {
+  coursePhase: CoursePhaseWithMetaData
+}
+
+export function KeycloakGroupCreation({ coursePhase }: KeycloakGroupCreationProps): JSX.Element {
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const [groupExists, setGroupExists] = useState<boolean | undefined>(undefined)
   const [isCreating, setIsCreating] = useState(false)
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<string | undefined>()
 
-  // get current course phase
-  const {
-    data: fetchedCoursePhase,
-    isPending: isCoursePhasePending,
-    isError: isCoursePhaseError,
-    refetch: refetchCoursePhase,
-  } = useGetCoursePhase()
+  useEffect(() => {
+    if (coursePhase) {
+      setGroupExists(!!coursePhase.restrictedData?.keycloakGroup)
+    }
+  }, [coursePhase])
 
-  const { mutate: mutateCoursePhase } = useModifyCoursePhase(
+  const { mutate: modifyCoursePhase } = useModifyCoursePhase(
     () => {
       setIsCreating(false)
       setGroupExists(true)
@@ -38,18 +38,12 @@ export function KeycloakGroupCreation() {
     },
   )
 
-  const { mutate: mutateCreateGroup } = useMutation({
-    mutationFn: (group: CreateKeycloakGroup) => {
-      return createCustomKeycloakGroup(courseId ?? '', group)
-    },
+  const { mutate: createGroup } = useMutation({
+    mutationFn: (group: CreateKeycloakGroup) => createCustomKeycloakGroup(courseId ?? '', group),
     onSuccess: () => {
-      // on success, store the group in the core
-      // store the name in the core
-      mutateCoursePhase({
+      modifyCoursePhase({
         id: phaseId,
-        restrictedData: {
-          keycloakGroup: KEYCLOAK_GROUP_NAME,
-        },
+        restrictedData: { keycloakGroup: KEYCLOAK_GROUP_NAME },
       } as UpdateCoursePhase)
     },
     onError: () => {
@@ -58,60 +52,37 @@ export function KeycloakGroupCreation() {
     },
   })
 
-  useEffect(() => {
-    if (fetchedCoursePhase) {
-      if (fetchedCoursePhase.restrictedData?.keycloakGroup) {
-        setGroupExists(true)
-      } else {
-        setGroupExists(false)
-      }
-    }
-  }, [fetchedCoursePhase])
-
-  if (isCoursePhasePending) {
-    return (
-      <div className='flex justify-center items-center flex-grow'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-      </div>
-    )
-  }
-
-  if (isCoursePhaseError) {
-    return <ErrorPage onRetry={refetchCoursePhase} />
-  }
-
-  const handleCreateGroup = async () => {
+  const handleCreateGroup = () => {
     setIsCreating(true)
     setError(undefined)
-
-    // create the keycloak Group
-    mutateCreateGroup({
-      GroupName: KEYCLOAK_GROUP_NAME,
-    })
+    createGroup({ GroupName: KEYCLOAK_GROUP_NAME })
   }
+
+  const statusIcon =
+    groupExists === undefined ? (
+      <div className='h-6 w-6 rounded-full bg-muted' />
+    ) : groupExists ? (
+      <CheckCircle2 className='h-6 w-6 mr-2 text-green-500' />
+    ) : (
+      <AlertCircle className='h-6 w-6 mr-2 text-amber-500' />
+    )
+
+  const statusText =
+    groupExists === undefined
+      ? 'Checking Keycloak group status...'
+      : groupExists
+        ? 'Keycloak group has been created'
+        : 'Keycloak group does not exist'
 
   return (
     <Card>
       <CardContent className='pt-6'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            {groupExists === null ? (
-              <div className='h-6 w-6 rounded-full bg-muted' />
-            ) : groupExists ? (
-              <CheckCircle2 className='h-6 w-6 ml-2 text-green-500' />
-            ) : (
-              <AlertCircle className='h-6 w-6 ml-2 text-amber-500' />
-            )}
-
+            {statusIcon}
             <div>
-              <h3 className='font-medium'>
-                {groupExists === null
-                  ? 'Checking Keycloak group status...'
-                  : groupExists
-                    ? 'Keycloak group exists'
-                    : 'Keycloak group does not exist'}
-              </h3>
-              {!groupExists && groupExists !== null && (
+              <h3 className='font-medium'>{statusText}</h3>
+              {groupExists === false && (
                 <p className='text-sm text-muted-foreground'>
                   Create a Keycloak group to manage tutor permissions
                 </p>
@@ -119,8 +90,7 @@ export function KeycloakGroupCreation() {
               {error && <p className='text-sm text-destructive mt-1'>{error}</p>}
             </div>
           </div>
-
-          {!groupExists && groupExists !== null && (
+          {groupExists === false && (
             <Button onClick={handleCreateGroup} disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create Keycloak Group'}
             </Button>
