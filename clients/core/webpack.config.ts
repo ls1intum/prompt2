@@ -97,7 +97,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           matching_component: `matching_component@${matchingURL}/remoteEntry.js?${Date.now()}`,
           intro_course_tutor_component: `intro_course_tutor_component@${introCourseTutorURL}/remoteEntry.js?${Date.now()}`,
           intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js?${Date.now()}`,
-          challenge_component: `challenge_component@${challengeURL}/remoteEntry.js?${Date.now()}`,
+          devops_challenge_component: `devops_challenge_component@${challengeURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
