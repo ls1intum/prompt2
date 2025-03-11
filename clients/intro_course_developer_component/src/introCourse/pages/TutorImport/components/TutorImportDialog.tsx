@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,38 +27,49 @@ import { importTutors } from '../../../network/mutations/importTutors'
 import { useParams } from 'react-router-dom'
 
 export function TutorImportDialog() {
+  // Destination course/phase come from URL parameters.
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
-  // Get the courses from the store
   const { courses } = useCourseStore()
   const queryClient = useQueryClient()
 
-  // Local state management
+  // Local state for dialog open, selections, loading & error states.
   const [open, setOpen] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
-  const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
+  const [selectedSourceCourse, setSelectedSourceCourse] = useState<string | null>(null)
+  const [selectedSourcePhase, setSelectedSourcePhase] = useState<string | null>(null)
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
   const [isImporting, setIsImporting] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
 
-  // Handlers for course and phase changes
+  // Reset error and selections when the dialog closes.
+  useEffect(() => {
+    if (!open) {
+      setImportError(null)
+      setSelectedSourceCourse(null)
+      setSelectedSourcePhase(null)
+      setSelectedStudents([])
+    }
+  }, [open])
+
+  // Handle course and phase changes.
   const handleCourseChange = (courseID: string) => {
-    setSelectedCourse(courseID)
-    setSelectedPhase(null)
+    setSelectedSourceCourse(courseID)
+    setSelectedSourcePhase(null)
     setSelectedStudents([])
   }
 
   const handlePhaseChange = (phaseID: string) => {
-    setSelectedPhase(phaseID)
+    setSelectedSourcePhase(phaseID)
     setSelectedStudents([])
   }
 
-  // Handler for toggling individual student selection
+  // Toggle individual student selection.
   const handleStudentToggle = (studentId: string) => {
     setSelectedStudents((prev) =>
       prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId],
     )
   }
 
-  // Handler for (de)selecting all students
+  // (De)select all students.
   const handleSelectAll = (students: Student[]) => {
     if (selectedStudents.length === students.length) {
       setSelectedStudents([])
@@ -67,40 +78,41 @@ export function TutorImportDialog() {
     }
   }
 
-  // Fetch students using React Query when a course and phase are selected
+  // Fetch students based on the selected source course and phase.
   const {
     data: students,
     isLoading: isStudentsLoading,
     isError: isStudentsError,
   } = useQuery<Student[]>({
-    queryKey: ['students', selectedPhase],
+    queryKey: ['students', selectedSourcePhase],
     queryFn: () => {
-      if (selectedCourse && selectedPhase) {
-        return getStudentsOfCoursePhase(selectedPhase)
+      if (selectedSourceCourse && selectedSourcePhase) {
+        return getStudentsOfCoursePhase(selectedSourcePhase)
       }
       return Promise.resolve([])
     },
-    enabled: !!selectedCourse && !!selectedPhase,
+    enabled: !!selectedSourceCourse && !!selectedSourcePhase,
   })
 
+  // Mutation for importing tutors into the destination course/phase.
   const { mutate: mutateImportTutors } = useMutation({
     mutationFn: (tutors: Student[]) => importTutors(phaseId ?? '', courseId ?? '', tutors),
     onSuccess: () => {
       setOpen(false)
-      setSelectedCourse(null)
-      setSelectedPhase(null)
-      setSelectedStudents([])
       setIsImporting(false)
+      setImportError(null)
       queryClient.invalidateQueries({ queryKey: ['tutors', phaseId] })
     },
-    onError: () => {
+    onError: (error: unknown) => {
+      console.error('Error importing tutors:', error)
       setIsImporting(false)
-      // TODO: Show error message
+      setImportError('Failed to import tutors. Please try again.')
     },
   })
 
-  const handleImport = async () => {
-    if (!selectedCourse || !selectedPhase || selectedStudents.length === 0) return
+  // Handle the import action.
+  const handleImport = () => {
+    if (!selectedSourceCourse || !selectedSourcePhase || selectedStudents.length === 0) return
 
     setIsImporting(true)
     const selectedStudentData = (students || []).filter(
@@ -109,7 +121,10 @@ export function TutorImportDialog() {
     mutateImportTutors(selectedStudentData)
   }
 
-  const currentCourse = selectedCourse ? courses.find((c) => c.id === selectedCourse) : null
+  // Get the selected source course details to list its phases.
+  const currentSourceCourse = selectedSourceCourse
+    ? courses.find((c) => c.id === selectedSourceCourse)
+    : null
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -123,15 +138,15 @@ export function TutorImportDialog() {
         <DialogHeader>
           <DialogTitle>Import Tutors</DialogTitle>
           <DialogDescription>
-            Select students from other courses to import as tutors.
+            Select students from another course to import as tutors.
           </DialogDescription>
         </DialogHeader>
 
         <div className='grid gap-4 py-4'>
           {/* Course Selection */}
           <div className='grid gap-2'>
-            <Label htmlFor='course'>Select Course</Label>
-            <Select value={selectedCourse || ''} onValueChange={handleCourseChange}>
+            <Label htmlFor='course'>Select Source Course</Label>
+            <Select value={selectedSourceCourse || ''} onValueChange={handleCourseChange}>
               <SelectTrigger id='course'>
                 <SelectValue placeholder='Select a course' />
               </SelectTrigger>
@@ -146,15 +161,15 @@ export function TutorImportDialog() {
           </div>
 
           {/* Phase Selection */}
-          {selectedCourse && (
+          {selectedSourceCourse && (
             <div className='grid gap-2'>
-              <Label htmlFor='phase'>Select Course Phase</Label>
-              <Select value={selectedPhase || ''} onValueChange={handlePhaseChange}>
+              <Label htmlFor='phase'>Select Source Course Phase</Label>
+              <Select value={selectedSourcePhase || ''} onValueChange={handlePhaseChange}>
                 <SelectTrigger id='phase'>
                   <SelectValue placeholder='Select a phase' />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentCourse?.coursePhases.map((phase) => (
+                  {currentSourceCourse?.coursePhases.map((phase) => (
                     <SelectItem key={phase.id} value={phase.id}>
                       {phase.name}
                     </SelectItem>
@@ -165,10 +180,12 @@ export function TutorImportDialog() {
           )}
 
           {/* Student Selection */}
-          {selectedPhase && (
+          {selectedSourcePhase && (
             <div className='grid gap-2'>
               {isStudentsLoading && <div>Loading students...</div>}
-              {isStudentsError && <div>Error loading students.</div>}
+              {isStudentsError && (
+                <div className='text-red-500'>Error loading students. Please try again.</div>
+              )}
               {students && (
                 <StudentSelection
                   students={students}
@@ -179,6 +196,9 @@ export function TutorImportDialog() {
               )}
             </div>
           )}
+
+          {/* Display any import error */}
+          {importError && <div className='text-red-500 text-sm'>{importError}</div>}
         </div>
 
         <DialogFooter>
@@ -186,7 +206,10 @@ export function TutorImportDialog() {
             type='submit'
             onClick={handleImport}
             disabled={
-              !selectedCourse || !selectedPhase || selectedStudents.length === 0 || isImporting
+              !selectedSourceCourse ||
+              !selectedSourcePhase ||
+              selectedStudents.length === 0 ||
+              isImporting
             }
           >
             {isImporting ? (
