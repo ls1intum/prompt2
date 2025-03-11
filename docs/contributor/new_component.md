@@ -16,7 +16,7 @@ This guide explains how to add a new microfrontend component (ending with `_comp
    - **Reason**: The TypeScript declarations in `core/src/declaration.d.ts` recognize names ending in `*_component`. Using any other naming convention will cause type errors.
 
 2. **Duplicate the Template**  
-   - Copy the entire `TemplateComponent` folder.  
+   - Copy the entire `template_component` folder.  
    - Rename it to your new component’s name, ensuring you include the `_component` suffix.
 
 3. **Update `webpack.config.ts`**  
@@ -66,11 +66,11 @@ This guide explains how to add a new microfrontend component (ending with `_comp
 ### 2.2. Set Up External Routes and Sidebars
 IMPORTANT: Make sure to exactly follow and copy the files such that the permission control is correctly applied. 
 1. **Routes**  
-   - Copy `TemplateRoutes.tsx` (located in `core/src/ExternalRoutes`) and rename it for your component.  
+   - Copy `TemplateRoutes.tsx` (located in `core/src/managementConsole/PhaseMapping/ExternalRoutes`) and rename it for your component.  
    - Update its import paths to point to your new component.
 
 2. **Sidebar**  
-   - Copy `TemplateSidebar.tsx` (located in `core/src/ExternalSidebars`) and rename it for your component.  
+   - Copy `TemplateSidebar.tsx` (located in `core/src/managementConsole/PhaseMapping/ExternalSidebars`) and rename it for your component.  
    - Update its import paths accordingly.
 
 3. **Why Static Imports? Why Copying the import logic**  
@@ -85,10 +85,10 @@ We assume that every component is associated to one course phase type.
 The course phase types are stored in the DB. We assume here that you already have a course phase type to which you want to map your component.
 
 1. **Sidebar Mapping**  
-   - In `core/PhaseSidebarMapping`, map the course phase type name to your new `<YourName>Sidebar.tsx`.
+   - In `core/src/managementConsole/PhaseMapping/PhaseSidebarMapping.tsx`, map the course phase type name to your new `<YourName>Sidebar`.
 
 2. **Router Mapping**  
-   - In `core/PhaseRouterMapping`, map the same course phase type name to your new `<YourName>Router.tsx`.
+   - In `core/src/managementConsole/PhaseMapping/PhaseRouterMapping.tsx`, map the same course phase type name to your new `<YourName>Routes`.
 
 ---
 
