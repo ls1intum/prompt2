@@ -48,6 +48,7 @@ export function ApplicationConfigDialog({
   const [endTime, setEndTime] = useState('23:59')
   const [externalStudentsAllowed, setExternalStudentsAllowed] = useState(false)
   const [universityLoginAvailable, setUniversityLoginAvailable] = useState(false)
+  const [autoAccept, setAutoAccept] = useState(false)
   const [dateError, setDateError] = useState<string | null>(null)
 
   const timeZone = 'Europe/Berlin'
@@ -71,6 +72,7 @@ export function ApplicationConfigDialog({
           ? getTimeString(new Date(initialData.applicationEndDate))
           : '23:59',
       )
+      setAutoAccept(initialData?.autoAccept ?? false)
       setExternalStudentsAllowed(initialData?.externalStudentsAllowed ?? false)
       setUniversityLoginAvailable(initialData?.universityLoginAvailable ?? false)
       setDateError(null)
@@ -130,6 +132,7 @@ export function ApplicationConfigDialog({
         applicationEndDate: endDateTime ? formatISO(toZonedTime(endDateTime, timeZone)) : undefined,
         externalStudentsAllowed,
         universityLoginAvailable,
+        autoAccept,
       },
     }
 
@@ -249,6 +252,20 @@ export function ApplicationConfigDialog({
                     <p className='text-sm text-muted-foreground'>
                       This option is to allow external students to apply without login and
                       matriculation number.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Auto Accept */}
+                <div className='grid grid-cols-4 items-start gap-4'>
+                  <Label htmlFor='autoAccept' className='text-right pt-2'>
+                    Auto Accept
+                  </Label>
+                  <div className='col-span-3 flex flex-col gap-2'>
+                    <Switch id='autoAccept' checked={autoAccept} onCheckedChange={setAutoAccept} />
+                    <p className='text-sm text-muted-foreground'>
+                      This option will automatically accept all applications without any manual
+                      review.
                     </p>
                   </div>
                 </div>
