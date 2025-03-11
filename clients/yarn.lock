@@ -5499,6 +5499,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"challenge_component@workspace:challenge_component":
+  version: 0.0.0-use.local
+  resolution: "challenge_component@workspace:challenge_component"
+  dependencies:
+    webpack: "npm:^5.91.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
+
 "chardet@npm:^0.7.0":
   version: 0.7.0
   resolution: "chardet@npm:0.7.0"
