@@ -2,11 +2,14 @@ package tutor
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor/tutorDTO"
+	log "github.com/sirupsen/logrus"
 )
 
 type TutorService struct {
@@ -15,6 +18,16 @@ type TutorService struct {
 }
 
 var TutorServiceSingleton *TutorService
+
+func GetTutors(ctx context.Context, coursePhaseID uuid.UUID) ([]tutorDTO.Tutor, error) {
+	tutors, err := TutorServiceSingleton.queries.GetAllTutors(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("Error getting tutors: ", err)
+		return nil, errors.New("error getting tutors")
+	}
+
+	return tutorDTO.GetTutorDTOsFromModels(tutors), nil
+}
 
 func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []tutorDTO.Tutor) error {
 	// add students to the keycloak group
@@ -40,5 +53,11 @@ func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []tutorDT
 			return err
 		}
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }

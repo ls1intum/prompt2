@@ -44,7 +44,7 @@ export const TutorImportPage = () => {
       {groupExists ? (
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
-            <h2 className='text-xl font-semibold'>Current Tutors</h2>
+            <h2 className='text-xl font-semibold'>Imported Tutors</h2>
             <TutorImportDialog />
           </div>
           <TutorTable />

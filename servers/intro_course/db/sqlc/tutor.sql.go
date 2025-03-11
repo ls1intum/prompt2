@@ -38,3 +38,37 @@ func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) error 
 	)
 	return err
 }
+
+const getAllTutors = `-- name: GetAllTutors :many
+SELECT course_phase_id, id, first_name, last_name, email, matriculation_number, university_login 
+FROM tutor
+WHERE course_phase_id = $1
+`
+
+func (q *Queries) GetAllTutors(ctx context.Context, coursePhaseID uuid.UUID) ([]Tutor, error) {
+	rows, err := q.db.Query(ctx, getAllTutors, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tutor
+	for rows.Next() {
+		var i Tutor
+		if err := rows.Scan(
+			&i.CoursePhaseID,
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

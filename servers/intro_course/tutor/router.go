@@ -14,9 +14,26 @@ import (
 
 func setupTutorRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	tutorRouter := router.Group("/tutor")
-
+	tutorRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getTutors)
 	// we need the courseID to add students to keycloak groups
 	tutorRouter.POST("/course/:courseID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), importTutors)
+}
+
+func getTutors(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tutors, err := GetTutors(c, coursePhaseID)
+	if err != nil {
+		log.Error("Error getting tutors: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, tutors)
 }
 
 func importTutors(c *gin.Context) {

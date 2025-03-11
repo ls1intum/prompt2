@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getStudentsOfCoursePhase } from '../../../network/queries/getStudentsOfCoursePhase'
 import { StudentSelection } from './StudentSelection'
 import { Student } from '@tumaet/prompt-shared-state'
@@ -30,6 +30,7 @@ export function TutorImportDialog() {
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   // Get the courses from the store
   const { courses } = useCourseStore()
+  const queryClient = useQueryClient()
 
   // Local state management
   const [open, setOpen] = useState(false)
@@ -90,6 +91,7 @@ export function TutorImportDialog() {
       setSelectedPhase(null)
       setSelectedStudents([])
       setIsImporting(false)
+      queryClient.invalidateQueries({ queryKey: ['tutors', phaseId] })
     },
     onError: () => {
       setIsImporting(false)
