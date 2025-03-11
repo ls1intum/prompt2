@@ -9,6 +9,11 @@ const sidebarItems: SidebarMenuItemProps = {
   requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_STUDENT],
   subitems: [
     {
+      title: 'Developer Profiles',
+      goToPath: '/developer-profiles',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
       title: 'Settings',
       goToPath: '/settings',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

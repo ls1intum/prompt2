@@ -9,7 +9,7 @@ import (
 type PostDeveloperProfile struct {
 	AppleID        string      `json:"appleID"`
 	GitLabUsername string      `json:"gitLabUsername"`
-	HasMacBook     bool        `json:"hasMacbook"`
+	HasMacBook     bool        `json:"hasMacBook"`
 	IPhoneUUID     pgtype.UUID `json:"iPhoneUUID"`
 	IPadUUID       pgtype.UUID `json:"iPadUUID"`
 	AppleWatchUUID pgtype.UUID `json:"appleWatchUUID"`
