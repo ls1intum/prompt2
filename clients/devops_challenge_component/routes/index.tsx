@@ -19,7 +19,7 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '/github',
     element: <GitHubPage />,
-    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    requiredPermissions: [],
   },
 ]
 

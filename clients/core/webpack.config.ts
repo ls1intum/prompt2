@@ -31,7 +31,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const matchingURL = IS_DEV ? `http://localhost:3003` : `/matching`
   const introCourseTutorURL = IS_DEV ? `http://localhost:3004` : `/intro-course-tutor`
   const introCourseDeveloperURL = IS_DEV ? `http://localhost:3005` : `/intro-course-developer`
-  const challengeURL = IS_DEV ? `http://localhost:3006` : `/challenge`
+  const devopsChallengURL = IS_DEV ? `http://localhost:3006` : `/devops-challenge`
 
   return {
     target: 'web',
@@ -97,7 +97,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           matching_component: `matching_component@${matchingURL}/remoteEntry.js?${Date.now()}`,
           intro_course_tutor_component: `intro_course_tutor_component@${introCourseTutorURL}/remoteEntry.js?${Date.now()}`,
           intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js?${Date.now()}`,
-          devops_challenge_component: `devops_challenge_component@${challengeURL}/remoteEntry.js?${Date.now()}`,
+          devops_challenge_component: `devops_challenge_component@${devopsChallengURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

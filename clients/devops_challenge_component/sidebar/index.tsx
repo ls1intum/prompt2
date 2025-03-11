@@ -1,10 +1,10 @@
-import { Construction } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@tumaet/prompt-shared-state'
+import { GitBranch } from 'lucide-react'
 
 const sidebarItems: SidebarMenuItemProps = {
   title: 'DevOps Challenge',
-  icon: <Construction />,
+  icon: <GitBranch />,
   goToPath: '',
   subitems: [
     {
@@ -15,7 +15,7 @@ const sidebarItems: SidebarMenuItemProps = {
     {
       title: 'GitHub',
       goToPath: '/github',
-      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+      requiredPermissions: [],
     },
   ],
 }
