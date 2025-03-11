@@ -1,8 +1,8 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import GitHubPage from '../src/devops_challenge/pages/GitHub/GitHubPage'
-import OverviewPage from 'src/devops_challenge/pages/Overview/OverviewPage'
-import SettingsPage from 'src/devops_challenge/pages/SettingsPage/SettingsPage'
+import OverviewPage from '../src/devops_challenge/pages/Overview/OverviewPage'
+import SettingsPage from '../src/devops_challenge/pages/SettingsPage/SettingsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
