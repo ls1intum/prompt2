@@ -287,3 +287,14 @@ SET restricted_data = jsonb_set(
 )
 WHERE course_phase_id = $1
  AND course_participation_id = $2;
+
+-- name: AcceptApplicationIfAutoAccept :exec
+UPDATE course_phase_participation
+SET pass_status = 'passed'
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
+  AND (
+    SELECT (restricted_data->>'autoAccept')::boolean
+    FROM course_phase
+    WHERE id = $1
+  ) = true;
