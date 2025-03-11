@@ -16,6 +16,8 @@ func setupDeveloperProfileRouter(router *gin.RouterGroup, authMiddleware func(al
 	developerProfile.GET("/self", authMiddleware(keycloakTokenVerifier.CourseStudent), getOwnDeveloperProfile)
 	// Getting all developer profiles is only allowed for lecturers
 	developerProfile.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getAllDeveloperProfiles)
+	developerProfile.PUT("/:courseParticipationID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateDeveloperProfile)
+
 }
 
 func createDeveloperProfile(c *gin.Context) {
@@ -85,6 +87,35 @@ func getAllDeveloperProfiles(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, developerProfiles)
+}
+
+func updateDeveloperProfile(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var devProfile developerProfileDTO.DeveloperProfile
+	if err := c.BindJSON(&devProfile); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = CreateOrUpdateDeveloperProfile(c, coursePhaseID, courseParticipationID, devProfile)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

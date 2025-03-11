@@ -27,3 +27,16 @@ func GetDeveloperProfileDTOFromPostRequest(request PostDeveloperProfile, courseP
 		AppleWatchUuid:        request.AppleWatchUUID,
 	}
 }
+
+func GetDeveloperProfileDTOFromCreateRequest(request DeveloperProfile, coursePhaseID, courseParticipationID uuid.UUID) db.CreateOrUpdateDeveloperProfileParams {
+	return db.CreateOrUpdateDeveloperProfileParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+		AppleID:               request.AppleID,
+		GitlabUsername:        request.GitLabUsername,
+		HasMacbook:            request.HasMacBook,
+		IphoneUuid:            request.IPhoneUUID,
+		IpadUuid:              request.IPadUUID,
+		AppleWatchUuid:        request.AppleWatchUUID,
+	}
+}
