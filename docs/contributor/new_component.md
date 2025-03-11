@@ -85,10 +85,10 @@ We assume that every component is associated to one course phase type.
 The course phase types are stored in the DB. We assume here that you already have a course phase type to which you want to map your component.
 
 1. **Sidebar Mapping**  
-   - In `core/PhaseSidebarMapping`, map the course phase type name to your new `<YourName>Sidebar.tsx`.
+   - In `core/src/managementConsole/PhaseMapping/PhaseSidebarMapping.tsx`, map the course phase type name to your new `<YourName>Sidebar`.
 
 2. **Router Mapping**  
-   - In `core/PhaseRouterMapping`, map the same course phase type name to your new `<YourName>Router.tsx`.
+   - In `core/src/managementConsole/PhaseMapping/PhaseRouterMapping.tsx`, map the same course phase type name to your new `<YourName>Routes`.
 
 ---
 
