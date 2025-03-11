@@ -5121,6 +5121,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"assessment_component@workspace:assessment_component":
+  version: 0.0.0-use.local
+  resolution: "assessment_component@workspace:assessment_component"
+  dependencies:
+    webpack: "npm:^5.91.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
+
 "async@npm:^3.2.3":
   version: 3.2.6
   resolution: "async@npm:3.2.6"

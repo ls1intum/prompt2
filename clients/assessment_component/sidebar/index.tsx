@@ -3,7 +3,7 @@ import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@tumaet/prompt-shared-state'
 
 const sidebarItems: SidebarMenuItemProps = {
-  title: 'TemplateComponent',
+  title: 'Assessment Component',
   icon: <Construction />,
   goToPath: '',
   subitems: [
