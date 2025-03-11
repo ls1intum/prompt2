@@ -124,7 +124,7 @@ jobs:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-devops-challenge
-      docker-file: clients/devops_challenge/Dockerfile # Defaults to Dockerfile
+      docker-file: clients/devops_challenge_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/devops_challenge_component
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
