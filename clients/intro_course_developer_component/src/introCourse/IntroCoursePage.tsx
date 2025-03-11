@@ -7,7 +7,10 @@ import { DeveloperProfilePage } from './pages/DeveloperProfile/DeveloperProfileP
 export const IntroCoursePage = (): JSX.Element => {
   // TODO: replace with actual state management
   const { developerProfile } = useIntroCourseStore()
-  const [stepsOpen, setStepsOpen] = useState([true, false, false])
+  const [stepsOpen, setStepsOpen] = useState(() => {
+    if (developerProfile === undefined) return [true, false, false]
+    return [false, true, false]
+  })
 
   // These will be replaced by actual data fetching
   const [infrastructureComplete, setInfrastructureComplete] = useState(false)

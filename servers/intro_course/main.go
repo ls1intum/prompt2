@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
@@ -73,14 +74,9 @@ func main() {
 	router := gin.Default()
 	router.Use(utils.CORS())
 
-	api := router.Group("intro-course/api")
+	api := router.Group("intro-course/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
-
-	api.GET("/hello/:coursePhaseID", keycloakTokenVerifier.AuthenticationMiddleware("testGroup"), func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello From Your Intro Course Backend",
-		})
-	})
+	developerProfile.InitDeveloperProfileModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	router.Run(serverAddress)
