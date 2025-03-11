@@ -251,3 +251,34 @@ func initIntroCourseTutor() error {
 
 	return nil
 }
+
+func initDevOpsChallenge() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestDevOpsChallengeTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if dev ops challenge phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		// 1.) Create the phase
+		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "DevOpsChallenge",
+			InitialPhase: false,
+			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
+		}
+		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newIntroCourseTutor)
+		if err != nil {
+			log.Error("failed to create intro course developer module: ", err)
+			return err
+		}
+
+		// No requires inputs and no provided outputs
+
+	} else {
+		log.Debug("dev ops challenge module already exists")
+	}
+
+	return nil
+}

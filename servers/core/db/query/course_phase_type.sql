@@ -47,6 +47,13 @@ SELECT EXISTS (
     WHERE name = 'IntroCourseTutor'
 ) AS does_exist;
 
+-- name: TestDevOpsChallengeTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'DevOpsChallenge'
+) AS does_exist;
+
 
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
