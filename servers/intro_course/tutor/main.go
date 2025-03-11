@@ -1,4 +1,4 @@
-package tutors
+package tutor
 
 import (
 	"github.com/gin-gonic/gin"

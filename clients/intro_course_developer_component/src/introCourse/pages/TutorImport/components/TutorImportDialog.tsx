@@ -18,13 +18,16 @@ import {
 } from '@/components/ui/select'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { getStudentsOfCoursePhase } from '../../../network/queries/getStudentsOfCoursePhase'
 import { StudentSelection } from './StudentSelection'
 import { Student } from '@tumaet/prompt-shared-state'
 import { Label } from '@/components/ui/label'
+import { importTutors } from '../../../network/mutations/importTutors'
+import { useParams } from 'react-router-dom'
 
 export function TutorImportDialog() {
+  const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   // Get the courses from the store
   const { courses } = useCourseStore()
 
@@ -36,14 +39,14 @@ export function TutorImportDialog() {
   const [isImporting, setIsImporting] = useState(false)
 
   // Handlers for course and phase changes
-  const handleCourseChange = (courseId: string) => {
-    setSelectedCourse(courseId)
+  const handleCourseChange = (courseID: string) => {
+    setSelectedCourse(courseID)
     setSelectedPhase(null)
     setSelectedStudents([])
   }
 
-  const handlePhaseChange = (phaseId: string) => {
-    setSelectedPhase(phaseId)
+  const handlePhaseChange = (phaseID: string) => {
+    setSelectedPhase(phaseID)
     setSelectedStudents([])
   }
 
@@ -79,27 +82,29 @@ export function TutorImportDialog() {
     enabled: !!selectedCourse && !!selectedPhase,
   })
 
-  const handleImport = async () => {
-    if (!selectedCourse || !selectedPhase || selectedStudents.length === 0) return
-
-    setIsImporting(true)
-
-    try {
-      // Get the selected student data from the fetched list
-      const selectedStudentData = (students || []).filter(
-        (s) => s.id && selectedStudents.includes(s.id),
-      )
-
-      // TODO: Import request to intro course server
-
-      // Reset state and close the dialog
+  const { mutate: mutateImportTutors } = useMutation({
+    mutationFn: (tutors: Student[]) => importTutors(phaseId ?? '', courseId ?? '', tutors),
+    onSuccess: () => {
       setOpen(false)
       setSelectedCourse(null)
       setSelectedPhase(null)
       setSelectedStudents([])
-    } finally {
       setIsImporting(false)
-    }
+    },
+    onError: () => {
+      setIsImporting(false)
+      // TODO: Show error message
+    },
+  })
+
+  const handleImport = async () => {
+    if (!selectedCourse || !selectedPhase || selectedStudents.length === 0) return
+
+    setIsImporting(true)
+    const selectedStudentData = (students || []).filter(
+      (s) => s.id && selectedStudents.includes(s.id),
+    )
+    mutateImportTutors(selectedStudentData)
   }
 
   const currentCourse = selectedCourse ? courses.find((c) => c.id === selectedCourse) : null

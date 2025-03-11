@@ -1,6 +1,7 @@
-package tutors
+package tutor
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,19 +9,27 @@ import (
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
 	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor/tutorDTO"
-	"github.com/opentracing/opentracing-go/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupTutorRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	tutorRouter := router.Group("/tutor")
 
-	tutorRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), importTutors)
+	// we need the courseID to add students to keycloak groups
+	tutorRouter.POST("/course/:courseID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), importTutors)
 }
 
 func importTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseID, err := uuid.Parse(c.Param("courseID"))
+	if err != nil {
+		log.Error("Error parsing courseID: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -37,7 +46,18 @@ func importTutors(c *gin.Context) {
 	for i, tutor := range tutors {
 		tutorIDs[i] = tutor.ID
 	}
-	coreRequests.SendAddStudentsToKeycloakGroup(c.GetHeader("Authorization"), courseID, tutorIDs, KEYCLOAK_GROUP_NAME)
+	err = coreRequests.SendAddStudentsToKeycloakGroup(c.GetHeader("Authorization"), courseID, tutorIDs, KEYCLOAK_GROUP_NAME)
+	if err != nil {
+		log.Error("Error adding tutors to custom keycloak group: ", err)
+		handleError(c, http.StatusInternalServerError, errors.New("error adding tutors to custom keycloak group"))
+		return
+	}
+	err = coreRequests.SendAddStudentsToKeycloakGroup(c.GetHeader("Authorization"), courseID, tutorIDs, "editor")
+	if err != nil {
+		log.Error("Error adding tutors to editor keycloak group: ", err)
+		handleError(c, http.StatusInternalServerError, errors.New("error adding tutors to editor keycloak group"))
+		return
+	}
 
 	if err := ImportTutors(c, coursePhaseID, tutors); err != nil {
 		log.Error("Error importing tutors: ", err)
