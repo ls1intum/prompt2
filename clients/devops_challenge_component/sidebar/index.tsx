@@ -3,13 +3,18 @@ import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@tumaet/prompt-shared-state'
 
 const sidebarItems: SidebarMenuItemProps = {
-  title: 'TemplateComponent',
+  title: 'DevOps Challenge',
   icon: <Construction />,
   goToPath: '',
   subitems: [
     {
       title: 'Settings',
       goToPath: '/settings',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
+      title: 'GitHub',
+      goToPath: '/github',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
   ],
