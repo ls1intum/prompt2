@@ -63,7 +63,7 @@ services:
       - SENDER_NAME
     networks:
       - prompt-network
-  
+
   server-intro-course:
     image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${SERVER_INTRO_COURSE_IMAGE_TAG}"
     container_name: prompt-server-intro-course
@@ -132,6 +132,26 @@ services:
     networks:
       - prompt-network
 
+  client-devops-challenge-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-devops-challenge-component:${DEVOPS_CHALLENGE_IMAGE_TAG}"
+    container_name: prompt-client-devops-challenge-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.devops-challenge.rule=Host(`${CORE_HOST}`) && PathPrefix(`/devops-challenge`)"
+      - "traefik.http.routers.devops-challenge.entrypoints=websecure"
+      - "traefik.http.routers.devops-challenge.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.devops-challenge-strip-prefix.stripPrefix.prefixes=/devops-challenge"
+      - "traefik.http.routers.devops-challenge.middlewares=devops-challenge-strip-prefix,devops-challenge-compress"
+      - "traefik.http.middlewares.devops-challenge-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+    networks:
+      - prompt-network
+
   client-intro-course-developer-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component:${INTRO_COURSE_DEVELOPER_IMAGE_TAG}"
     container_name: prompt-client-intro-course-developer-component
@@ -152,7 +172,7 @@ services:
       - server-intro-course
     networks:
       - prompt-network
-    
+
   client-intro-course-tutor-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component:${INTRO_COURSE_TUTOR_IMAGE_TAG}"
     container_name: prompt-client-intro-course-tutor-component
