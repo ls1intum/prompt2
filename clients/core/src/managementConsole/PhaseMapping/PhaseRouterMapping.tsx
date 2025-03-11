@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import { MatchingRoutes } from './ExternalRoutes/MatchingRoutes'
 import { IntroCourseDeveloperRoutes } from './ExternalRoutes/IntroCourseDeveloperRoutes'
 import { IntroCourseTutorRoutes } from './ExternalRoutes/IntroCourseTutorRoutes'
+import { AssessmentRoutes } from './ExternalRoutes/AssessmentRoutes'
 
 const PhaseRouter: { [key: string]: React.FC } = {
   template_component: TemplateRoutes,
@@ -15,6 +16,7 @@ const PhaseRouter: { [key: string]: React.FC } = {
   Matching: MatchingRoutes,
   IntroCourseDeveloper: IntroCourseDeveloperRoutes,
   IntroCourseTutor: IntroCourseTutorRoutes,
+  Assessment: AssessmentRoutes,
 }
 
 export const PhaseRouterMapping = (): JSX.Element => {

@@ -6,7 +6,7 @@ on:
       environment:
         required: true
         type: string
-      core_image_tag: 
+      core_image_tag:
         required: true
         type: string
       template_image_tag:
@@ -30,17 +30,20 @@ on:
       server_intro_course_image_tag:
         required: true
         type: string
-      
+      assessment_image_tag:
+        required: true
+        type: string
+
     secrets:
       VM_SSH_PRIVATE_KEY:
-        required: true      
+        required: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: ${{ inputs.environment }}
-      url: 'https://${{ vars.CORE_HOST }}'
+      url: "https://${{ vars.CORE_HOST }}"
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
@@ -59,7 +62,7 @@ jobs:
 
       - name: checkout
         uses: actions/checkout@v4
-        
+
       - name: Copy file to VM Host
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -75,11 +78,11 @@ jobs:
           source: "./docker-compose.prod.yml"
           target: /home/${{ vars.VM_USERNAME }}
 
-      - name: 'Create main.cf and master.cf file'
+      - name: "Create main.cf and master.cf file"
         run: |
           echo "${{ vars.POSTFIX_MAIN_CF }}" > main.cf
           echo "${{ vars.POSTFIX_MASTER_CF }}" > master.cf
-      
+
       - name: Copy main.cf to VM Host
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -94,7 +97,7 @@ jobs:
           #####################
           source: "main.cf"
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
-  
+
       - name: Copy master.cf to VM Host
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -109,7 +112,7 @@ jobs:
           #####################
           source: "master.cf"
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
-      
+
       - name: SSH to VM and create .env.prod file
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -157,12 +160,13 @@ jobs:
             echo "MATCHING_IMAGE_TAG=${{ inputs.matching_image_tag }}" >> .env.prod
             echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=${{ inputs.intro_course_developer_image_tag }}" >> .env.prod
             echo "INTRO_COURSE_TUTOR_IMAGE_TAG=${{ inputs.intro_course_tutor_image_tag }}" >> .env.prod
+            echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
 
             echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL_ADDRESS }}" >> .env.prod
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
             echo "SMTP_HOST=${{ vars.SMTP_HOST }}" >> .env.prod
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
-            
+
       - name: SSH to VM and Execute Docker-Compose Up
         uses: appleboy/ssh-action@v1.0.3
         with:

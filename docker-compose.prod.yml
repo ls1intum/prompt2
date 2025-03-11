@@ -63,7 +63,7 @@ services:
       - SENDER_NAME
     networks:
       - prompt-network
-  
+
   server-intro-course:
     image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:${SERVER_INTRO_COURSE_IMAGE_TAG}"
     container_name: prompt-server-intro-course
@@ -114,6 +114,26 @@ services:
     networks:
       - prompt-network
 
+  client-assessment-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-assessment-component:${ASSESSMENT_IMAGE_TAG}"
+    container_name: prompt-client-assessment-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.assessment.rule=Host(`${CORE_HOST}`) && PathPrefix(`/assessment`)"
+      - "traefik.http.routers.assessment.entrypoints=websecure"
+      - "traefik.http.routers.assessment.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.assessment-strip-prefix.stripPrefix.prefixes=/assessment"
+      - "traefik.http.routers.assessment.middlewares=assessment-strip-prefix,assessment-compress"
+      - "traefik.http.middlewares.assessment-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+    networks:
+      - prompt-network
+
   db-intro-course:
     image: "postgres:15.2-alpine"
     container_name: prompt-db-intro-course
@@ -152,7 +172,7 @@ services:
       - server-intro-course
     networks:
       - prompt-network
-    
+
   client-intro-course-tutor-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component:${INTRO_COURSE_TUTOR_IMAGE_TAG}"
     container_name: prompt-client-intro-course-tutor-component
