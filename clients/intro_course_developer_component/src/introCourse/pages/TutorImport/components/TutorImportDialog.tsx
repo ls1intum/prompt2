@@ -69,10 +69,10 @@ export function TutorImportDialog() {
     isLoading: isStudentsLoading,
     isError: isStudentsError,
   } = useQuery<Student[]>({
-    queryKey: ['students', selectedCourse, selectedPhase],
+    queryKey: ['students', selectedPhase],
     queryFn: () => {
       if (selectedCourse && selectedPhase) {
-        return getStudentsOfCoursePhase(selectedCourse, selectedPhase)
+        return getStudentsOfCoursePhase(selectedPhase)
       }
       return Promise.resolve([])
     },

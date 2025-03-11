@@ -34,7 +34,7 @@ export const StudentSelection = ({
             />
             <Label htmlFor={`student-${student.id}`} className='flex-1 cursor-pointer'>
               <div>
-                `${student.firstName} ${student.lastName}`
+                {student.firstName} {student.lastName}
               </div>
               <div className='text-sm text-muted-foreground'>{student.email}</div>
             </Label>

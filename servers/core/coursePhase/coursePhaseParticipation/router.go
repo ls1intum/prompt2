@@ -20,6 +20,9 @@ func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddl
 	courseParticipation.PUT("/:course_participation_id", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhaseParticipation)
 	// allow to modify multiple at once
 	courseParticipation.PUT("", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateBatchCoursePhaseParticipation)
+
+	// get the students data of the participations
+	courseParticipation.GET("/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getStudentsOfCoursePhase)
 }
 
 func getOwnCoursePhaseParticipation(c *gin.Context) {
@@ -170,6 +173,22 @@ func updateBatchCoursePhaseParticipation(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, ids)
+}
+
+func getStudentsOfCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	students, err := GetStudentsOfCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, students)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
