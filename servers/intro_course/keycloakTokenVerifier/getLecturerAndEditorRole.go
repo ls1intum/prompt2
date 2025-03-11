@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier/coreRequests"
+	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier/keycloakCoreRequests"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,7 +28,7 @@ func GetLecturerAndEditorRole() gin.HandlerFunc {
 
 		// TODO: Wrap this around a caching component
 		// retrieve the relevant roles from the core
-		tokenMapping, err := coreRequests.SendCoursePhaseRoleMappingRequest(c.GetHeader("Authorization"), coursePhaseID)
+		tokenMapping, err := keycloakCoreRequests.SendCoursePhaseRoleMappingRequest(c.GetHeader("Authorization"), coursePhaseID)
 		if err != nil {
 			log.Error("Error getting course roles:", err)
 			c.AbortWithError(http.StatusInternalServerError, err)
