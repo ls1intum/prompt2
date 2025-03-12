@@ -57,7 +57,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           onClick={(e) => {
             e.preventDefault()
             setFilters((prevFilters) => ({
-              ...filters,
+              ...prevFilters,
               devices: {
                 ...prevFilters.devices,
                 noDevices: false,
@@ -74,7 +74,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           onClick={(e) => {
             e.preventDefault()
             setFilters((prevFilters) => ({
-              ...filters,
+              ...prevFilters,
               devices: {
                 ...prevFilters.devices,
                 noDevices: false,
@@ -91,7 +91,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           onClick={(e) => {
             e.preventDefault()
             setFilters((prevFilters) => ({
-              ...filters,
+              ...prevFilters,
               devices: {
                 ...prevFilters.devices,
                 noDevices: false,
@@ -108,7 +108,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           onClick={(e) => {
             e.preventDefault()
             setFilters((prevFilters) => ({
-              ...filters,
+              ...prevFilters,
               devices: {
                 ...prevFilters.devices,
                 noDevices: false,
@@ -125,7 +125,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           onClick={(e) => {
             e.preventDefault()
             setFilters((prevFilters) => ({
-              ...filters,
+              ...prevFilters,
               devices: {
                 noDevices: !prevFilters.devices.noDevices,
                 macBook: false,

@@ -28,7 +28,7 @@ func createDeveloperProfile(c *gin.Context) {
 		return
 	}
 
-	// ger course participation id from context
+	// get course participation id from context
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")

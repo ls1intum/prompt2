@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useQuery } from '@tanstack/react-query'
-import type { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import type {
+  CoursePhaseParticipationsWithResolution,
+  CoursePhaseParticipationWithStudent,
+} from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
@@ -40,7 +43,7 @@ export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
   const [selectedParticipant, setSelectedParticipant] = useState<
     | {
-        participation: any
+        participation: CoursePhaseParticipationWithStudent
         profile: DeveloperProfile | undefined
       }
     | undefined
@@ -70,7 +73,7 @@ export const DeveloperProfilesLecturerPage = () => {
     },
   })
 
-  // Get the developer profile and course phase paricipations
+  // Get the developer profile and course phase participations
   const { phaseId } = useParams<{ phaseId: string }>()
   const {
     data: coursePhaseParticipations,

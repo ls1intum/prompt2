@@ -11,6 +11,7 @@ const sidebarItems: SidebarMenuItemProps = {
     {
       title: 'Developer Profiles',
       goToPath: '/developer-profiles',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
       title: 'Tutor Import',
