@@ -1,8 +1,6 @@
-import type React from 'react'
-
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import type { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
+import type { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 import {
   Dialog,
   DialogContent,
@@ -18,24 +16,24 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Laptop, Smartphone, Tablet, Watch } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { updateDeveloperProfile } from '../../../network/mutations/updateDeveloperProfile'
-import { PostDeveloperProfile } from 'src/introCourse/interfaces/PostDeveloperProfile'
+import { PostDeveloperProfile } from '../../../interfaces/PostDeveloperProfile'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 
 interface ProfileDetailsDialogProps {
   participant: CoursePhaseParticipationWithStudent
-  profile: DeveloperProfile | null
+  profile: DeveloperProfile | undefined
   phaseId: string
   onClose: () => void
   onSaved: () => void
 }
 
-export const ProfileDetailsDialog = ({
+export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
   participant,
   profile,
   phaseId,
   onClose,
   onSaved,
-}: ProfileDetailsDialogProps) => {
+}) => {
   // Initialize form state with existing profile or default values
   const [formData, setFormData] = useState<DeveloperProfile>({
     coursePhaseID: phaseId,
@@ -48,18 +46,24 @@ export const ProfileDetailsDialog = ({
     appleWatchUUID: profile?.appleWatchUUID || '',
   })
 
-  const saveMutation = useMutation({
-    mutationFn: (devProfile: PostDeveloperProfile) => {
-      return updateDeveloperProfile(phaseId ?? '', participant.courseParticipationID, devProfile)
-    },
+  // State for error messages
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (devProfile: PostDeveloperProfile) =>
+      updateDeveloperProfile(phaseId, participant.courseParticipationID, devProfile),
     onSuccess: () => {
-      // TODO
+      setErrorMessage(undefined)
       onSaved()
       onClose()
     },
-    onError: (error) => {
-      // TODO
+    onError: (error: unknown) => {
       console.error('Error saving profile:', error)
+      let message = 'An error occurred while saving the profile.'
+      if (error instanceof Error) {
+        message = error.message
+      }
+      setErrorMessage(message)
     },
   })
 
@@ -82,11 +86,11 @@ export const ProfileDetailsDialog = ({
       appleWatchUUID: formData.appleWatchUUID === '' ? undefined : formData.appleWatchUUID,
     }
 
-    saveMutation.mutate(devProfile)
+    mutate(devProfile)
   }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>
@@ -98,6 +102,10 @@ export const ProfileDetailsDialog = ({
           </DialogDescription>
         </DialogHeader>
 
+        {errorMessage && (
+          <div className='mb-4 rounded bg-red-100 p-2 text-red-700'>{errorMessage}</div>
+        )}
+
         <form onSubmit={handleSubmit} className='space-y-6 py-4'>
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
@@ -108,6 +116,7 @@ export const ProfileDetailsDialog = ({
                 value={formData.appleID}
                 onChange={handleChange}
                 placeholder='example@icloud.com'
+                disabled={isPending}
               />
             </div>
             <div className='space-y-2'>
@@ -118,6 +127,7 @@ export const ProfileDetailsDialog = ({
                 value={formData.gitLabUsername}
                 onChange={handleChange}
                 placeholder='username'
+                disabled={isPending}
               />
             </div>
           </div>
@@ -135,6 +145,7 @@ export const ProfileDetailsDialog = ({
                 onCheckedChange={(checked) =>
                   setFormData((prev) => ({ ...prev, hasMacBook: checked === true }))
                 }
+                disabled={isPending}
               />
               <Label htmlFor='hasMacBook' className='flex items-center gap-2'>
                 <Laptop className='h-5 w-5' /> MacBook
@@ -149,9 +160,10 @@ export const ProfileDetailsDialog = ({
               <Input
                 id='iPhoneUUID'
                 name='iPhoneUUID'
-                value={formData.iPhoneUUID || ''}
+                value={formData.iPhoneUUID}
                 onChange={handleChange}
                 placeholder='iPhone UUID (optional)'
+                disabled={isPending}
               />
             </div>
 
@@ -163,9 +175,10 @@ export const ProfileDetailsDialog = ({
               <Input
                 id='iPadUUID'
                 name='iPadUUID'
-                value={formData.iPadUUID || ''}
+                value={formData.iPadUUID}
                 onChange={handleChange}
                 placeholder='iPad UUID (optional)'
+                disabled={isPending}
               />
             </div>
 
@@ -177,24 +190,20 @@ export const ProfileDetailsDialog = ({
               <Input
                 id='appleWatchUUID'
                 name='appleWatchUUID'
-                value={formData.appleWatchUUID || ''}
+                value={formData.appleWatchUUID}
                 onChange={handleChange}
                 placeholder='Apple Watch UUID (optional)'
+                disabled={isPending}
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={onClose}
-              disabled={saveMutation.isPending}
-            >
+            <Button type='button' variant='outline' onClick={onClose} disabled={isPending}>
               Cancel
             </Button>
-            <Button type='submit' disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
+            <Button type='submit' disabled={isPending}>
+              {isPending ? 'Saving...' : 'Save Profile'}
             </Button>
           </DialogFooter>
         </form>

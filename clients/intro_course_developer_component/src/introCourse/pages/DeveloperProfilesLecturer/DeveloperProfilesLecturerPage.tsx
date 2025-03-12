@@ -30,19 +30,27 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ProfileDetailsDialog } from './components/ProfileDetailsDialog'
+import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
+import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
-  const [selectedParticipant, setSelectedParticipant] = useState<{
-    participation: any
-    profile: DeveloperProfile | null
-  } | null>(null)
+  const [selectedParticipant, setSelectedParticipant] = useState<
+    | {
+        participation: any
+        profile: DeveloperProfile | undefined
+      }
+    | undefined
+  >(undefined)
 
   // Add state for sorting after the selectedParticipant state
-  const [sortConfig, setSortConfig] = useState<{
-    key: string
-    direction: 'ascending' | 'descending'
-  } | null>(null)
+  const [sortConfig, setSortConfig] = useState<
+    | {
+        key: string
+        direction: 'ascending' | 'descending'
+      }
+    | undefined
+  >(undefined)
 
   // Get the developer profile and course phase paricipations
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -74,6 +82,15 @@ export const DeveloperProfilesLecturerPage = () => {
     refetchDeveloperProfiles()
   }
 
+  // Match participants with their developer profiles
+  const participantsWithProfiles = useGetParticipationsWithProfiles(
+    coursePhaseParticipations?.participations || [],
+    developerProfiles || [],
+  )
+
+  // Add this sorting function before the return statement
+  const sortedParticipants = useGetSortedParticipations(sortConfig, participantsWithProfiles)
+
   if (isError) {
     return <ErrorPage onRetry={handleRefresh} />
   }
@@ -85,47 +102,6 @@ export const DeveloperProfilesLecturerPage = () => {
       </div>
     )
   }
-
-  // Match participants with their developer profiles
-  const participantsWithProfiles =
-    coursePhaseParticipations?.participations.map((participation) => {
-      const profile =
-        developerProfiles?.find(
-          (devProfile) => devProfile.courseParticipationID === participation.courseParticipationID,
-        ) || null
-
-      return {
-        participation,
-        profile,
-      }
-    }) || []
-
-  // Add this sorting function before the return statement
-  const sortedParticipants = [...participantsWithProfiles].sort((a, b) => {
-    if (!sortConfig) return 0
-
-    let aValue, bValue
-
-    if (sortConfig.key === 'name') {
-      aValue =
-        `${a.participation.student.firstName} ${a.participation.student.lastName}`.toLowerCase()
-      bValue =
-        `${b.participation.student.firstName} ${b.participation.student.lastName}`.toLowerCase()
-    } else if (sortConfig.key === 'profileStatus') {
-      aValue = a.profile ? 1 : 0
-      bValue = b.profile ? 1 : 0
-    } else {
-      return 0
-    }
-
-    if (aValue < bValue) {
-      return sortConfig.direction === 'ascending' ? -1 : 1
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === 'ascending' ? 1 : -1
-    }
-    return 0
-  })
 
   // Add this function to handle sorting
   const requestSort = (key: string) => {
@@ -255,7 +231,7 @@ export const DeveloperProfilesLecturerPage = () => {
           participant={selectedParticipant.participation}
           profile={selectedParticipant.profile}
           phaseId={phaseId || ''}
-          onClose={() => setSelectedParticipant(null)}
+          onClose={() => setSelectedParticipant(undefined)}
           onSaved={handleRefresh}
         />
       )}
