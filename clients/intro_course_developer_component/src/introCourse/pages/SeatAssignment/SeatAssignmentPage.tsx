@@ -9,10 +9,19 @@ import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
 import { Tutor } from 'src/introCourse/interfaces/Tutor'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { getAllTutors } from '../../network/queries/getAllTutors'
+import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
+import { useState } from 'react'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  // State management
+  const [currentStep, setCurrentStep] = useState(1)
+  const [seats, setSeats] = useState<Seat[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [tutors, setTutors] = useState<Tutor[]>([])
 
+
+  // Data fetching
   const {
     data: tutors,
     isPending: isPendingTutors,
@@ -46,6 +55,11 @@ export const SeatAssignmentPage = (): JSX.Element => {
   const isPending =
     isCoursePhaseParticipationsPending || isDeveloperProfilesPending || isPendingTutors
   const isError = isParticipationsError || isDeveloperProfileError || isTutorsLoadingError
+
+  const developerWithProfiles = useGetParticipationsWithProfiles(
+    coursePhaseParticipations?.participations || [],
+    developerProfiles || [],
+  )
 
   if (isPending) {
     return (
