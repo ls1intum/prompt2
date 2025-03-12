@@ -19,6 +19,7 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '/developer-profiles',
     element: <DeveloperProfilesLecturerPage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/tutors',
