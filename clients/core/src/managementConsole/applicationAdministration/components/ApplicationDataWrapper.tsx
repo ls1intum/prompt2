@@ -3,7 +3,7 @@ import { getAdditionalScoreNames } from '@core/network/queries/additionalScoreNa
 import { useGetApplicationParticipations } from '../hooks/useGetApplicationParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { useGetCoursePhase } from '../hooks/useGetCoursePhase'
+import { useGetCoursePhase } from '@/hooks/useGetCoursePhase'
 import { useApplicationStore } from '../zustand/useApplicationStore'
 import { useEffect } from 'react'
 import { ErrorPage } from '@/components/ErrorPage'
