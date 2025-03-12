@@ -14,6 +14,9 @@ func setupKeycloakRouter(router *gin.RouterGroup, authMiddleware func() gin.Hand
 	keycloak := router.Group("/keycloak/:courseID", authMiddleware())
 	keycloak.PUT("/group", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCustomGroup)
 	keycloak.GET("/group/:groupName/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getStudentsInGroup)
+	// Adding Students to the editor role of a course
+	keycloak.PUT("/group/editor/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), addStudentsToEditorGroup)
+	// Adding Students to a custom group
 	keycloak.PUT("/group/:groupName/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), addStudentsToGroup)
 }
 
@@ -59,6 +62,28 @@ func addStudentsToGroup(c *gin.Context) {
 	}
 
 	addingReport, err := AddStudentsToGroup(c, courseID, request.StudentsToAdd, groupName)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, addingReport)
+}
+
+func addStudentsToEditorGroup(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("courseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var request keycloakRealmDTO.AddStudentsToGroup
+	if err := c.BindJSON(&request); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	addingReport, err := AddStudentsToEditorGroup(c, courseID, request.StudentsToAdd)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

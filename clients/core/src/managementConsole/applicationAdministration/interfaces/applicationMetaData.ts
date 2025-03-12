@@ -3,4 +3,5 @@ export type ApplicationMetaData = {
   applicationEndDate?: Date
   externalStudentsAllowed?: boolean
   universityLoginAvailable?: boolean
+  autoAccept?: boolean
 }
