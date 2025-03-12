@@ -1,10 +1,10 @@
-import { Construction } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
 import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@tumaet/prompt-shared-state'
 
 const sidebarItems: SidebarMenuItemProps = {
   title: 'Assessment Component',
-  icon: <Construction />,
+  icon: <ClipboardList />,
   goToPath: '',
   subitems: [
     {
