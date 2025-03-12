@@ -1,7 +1,7 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { DevProfileFilter } from '../interfaces/devProfileFilter'
 import { useMemo } from 'react'
-import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
+import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 
 export const useGetFilteredParticipations = (
   participants: {

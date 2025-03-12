@@ -1,6 +1,6 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
-import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
+import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 
 export const useGetSortedParticipations = (
   sortConfig:
