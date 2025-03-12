@@ -225,7 +225,6 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 	} else {
 		// create student
-		// FIX THIS!!!!
 		studentObj, err = student.CreateStudent(ctx, qtx, application.Student)
 		if err != nil {
 			log.Error(err)
@@ -273,6 +272,16 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 			log.Error(err)
 			return uuid.Nil, errors.New("could save the application answers")
 		}
+	}
+
+	// Set Application To Passed if feature is turned on
+	err = qtx.AcceptApplicationIfAutoAccept(ctx, db.AcceptApplicationIfAutoAcceptParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: cPhaseParticipation.CourseParticipationID,
+	})
+	if err != nil {
+		log.Error(err)
+		return uuid.Nil, errors.New("could not save the application answers")
 	}
 
 	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, db.StoreApplicationAnswerUpdateTimestampParams{
@@ -419,6 +428,16 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 			return uuid.Nil, errors.New("could not save the application answers")
 		}
 
+	}
+
+	// 4. Set Application To Passed if feature is turned on
+	err = qtx.AcceptApplicationIfAutoAccept(ctx, db.AcceptApplicationIfAutoAcceptParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: cPhaseParticipation.CourseParticipationID,
+	})
+	if err != nil {
+		log.Error(err)
+		return uuid.Nil, errors.New("could not save the application answers")
 	}
 
 	err = qtx.StoreApplicationAnswerUpdateTimestamp(ctx, db.StoreApplicationAnswerUpdateTimestampParams{
