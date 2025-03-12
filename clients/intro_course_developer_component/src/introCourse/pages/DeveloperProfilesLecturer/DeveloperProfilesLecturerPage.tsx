@@ -32,6 +32,9 @@ import {
 import { ProfileDetailsDialog } from './components/ProfileDetailsDialog'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
+import { FilterMenu } from './components/FilterMenu'
+import { DevProfileFilter } from './interfaces/devProfileFilter'
+import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
@@ -51,6 +54,21 @@ export const DeveloperProfilesLecturerPage = () => {
       }
     | undefined
   >(undefined)
+
+  // Add filter state
+  const [filters, setFilters] = useState<DevProfileFilter>({
+    surveyStatus: {
+      completed: false,
+      notCompleted: false,
+    },
+    devices: {
+      macBook: false,
+      iPhone: false,
+      iPad: false,
+      appleWatch: false,
+      noDevices: false,
+    },
+  })
 
   // Get the developer profile and course phase paricipations
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -91,6 +109,9 @@ export const DeveloperProfilesLecturerPage = () => {
   // Add this sorting function before the return statement
   const sortedParticipants = useGetSortedParticipations(sortConfig, participantsWithProfiles)
 
+  // Filter participants based on the current filter settings
+  const filteredParticipants = useGetFilteredParticipations(sortedParticipants, filters)
+
   if (isError) {
     return <ErrorPage onRetry={handleRefresh} />
   }
@@ -115,8 +136,14 @@ export const DeveloperProfilesLecturerPage = () => {
   }
 
   return (
-    <div className='container mx-auto py-6 space-y-6'>
+    <div className='space-y-6'>
       <ManagementPageHeader>Developer Profile Management</ManagementPageHeader>
+      <div className='flex justify-between items-end'>
+        <div className='text-sm text-muted-foreground'>
+          Showing {filteredParticipants.length} of {sortedParticipants.length} participants
+        </div>
+        <FilterMenu filters={filters} setFilters={setFilters} />
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -160,7 +187,7 @@ export const DeveloperProfilesLecturerPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedParticipants.map(({ participation, profile }) => (
+          {filteredParticipants.map(({ participation, profile }) => (
             <TableRow
               key={participation.courseParticipationID}
               className='cursor-pointer hover:bg-muted/50'
