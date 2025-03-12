@@ -1,4 +1,3 @@
-import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { DeveloperProfileForm } from './DeveloperProfileForm'
 import { useIntroCourseStore } from '../../zustand/useIntroCourseStore'
 import { useState } from 'react'
@@ -7,6 +6,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postDeveloperProfile } from '../../network/mutations/postDeveloperProfile'
 import { useParams } from 'react-router-dom'
+import { PostDeveloperProfile } from '../../interfaces/PostDeveloperProfile'
 
 interface DeveloperProfilePageProps {
   onContinue: () => void
@@ -21,7 +21,7 @@ export const DeveloperProfilePage = ({ onContinue }: DeveloperProfilePageProps):
   )
 
   const mutation = useMutation({
-    mutationFn: (devProfile: DeveloperProfile) => {
+    mutationFn: (devProfile: PostDeveloperProfile) => {
       return postDeveloperProfile(phaseId ?? '', devProfile)
     },
     onSuccess: () => {
@@ -33,17 +33,13 @@ export const DeveloperProfilePage = ({ onContinue }: DeveloperProfilePageProps):
     },
   })
 
-  const submitDeveloperProfile = (newDevProfile: DeveloperProfile) => {
-    mutation.mutate(newDevProfile)
-  }
-
   return (
     <div>
       {currState === 'input' && (
         <DeveloperProfileForm
           developerProfile={developerProfile}
           onSubmit={(profile) => {
-            submitDeveloperProfile(profile)
+            mutation.mutate(profile)
           }}
         />
       )}
