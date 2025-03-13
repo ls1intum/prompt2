@@ -345,6 +345,21 @@ func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, err
 	return does_exist, err
 }
 
+const testAssessmentTypeExists = `-- name: TestAssessmentTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Assessment'
+) AS does_exist
+`
+
+func (q *Queries) TestAssessmentTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testAssessmentTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
 const testDevOpsChallengeTypeExists = `-- name: TestDevOpsChallengeTypeExists :one
 SELECT EXISTS (
     SELECT 1

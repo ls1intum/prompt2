@@ -19,3 +19,13 @@ type DeveloperProfile struct {
 	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
 	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
 }
+
+type Tutor struct {
+	CoursePhaseID       uuid.UUID `json:"course_phase_id"`
+	ID                  uuid.UUID `json:"id"`
+	FirstName           string    `json:"first_name"`
+	LastName            string    `json:"last_name"`
+	Email               string    `json:"email"`
+	MatriculationNumber string    `json:"matriculation_number"`
+	UniversityLogin     string    `json:"university_login"`
+}

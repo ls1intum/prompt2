@@ -1,3 +1,5 @@
+import { DeveloperProfilesLecturerPage } from '../src/introCourse/pages/DeveloperProfilesLecturer/DeveloperProfilesLecturerPage'
+import { TutorImportPage } from '../src/introCourse/pages/TutorImport/TutorImportPage'
 import { IntroCourseDataShell } from '../src/introCourse/IntroCourseDataShell'
 import { IntroCoursePage } from '../src/introCourse/IntroCoursePage'
 import SettingsPage from '../src/SettingsPage'
@@ -13,6 +15,16 @@ const routes: ExtendedRouteObject[] = [
       </IntroCourseDataShell>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_STUDENT], // empty means no permissions required
+  },
+  {
+    path: '/developer-profiles',
+    element: <DeveloperProfilesLecturerPage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/tutors',
+    element: <TutorImportPage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/settings',

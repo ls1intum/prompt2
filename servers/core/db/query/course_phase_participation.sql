@@ -406,3 +406,72 @@ FROM
     SELECT * FROM qualified_non_participant
 ) AS main
 LIMIT 1;
+
+
+-- name: GetStudentsOfCoursePhase :many
+WITH 
+  -----------------------------------------------------------------------
+  -- A) Phases a student must have passed (per course_phase_graph)
+  -----------------------------------------------------------------------
+  direct_predecessor_for_pass AS (
+      SELECT cpg.from_course_phase_id AS phase_id
+      FROM course_phase_graph cpg
+      WHERE cpg.to_course_phase_id = $1
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 1) Existing participants in the current phase
+  -----------------------------------------------------------------------
+  current_phase_students AS (
+      SELECT
+          s.*
+      FROM course_phase_participation cpp
+      JOIN course_participation cp 
+        ON cpp.course_participation_id = cp.id
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE cpp.course_phase_id = $1
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 2) Qualified non-participants:
+  --    They do NOT yet have a participation in $1 and
+  --    must have passed ALL direct_predecessors_for_pass.
+  -----------------------------------------------------------------------
+  qualified_students AS (
+      SELECT
+          s.*
+      FROM course_participation cp
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE 
+          -- Exclude if they already have a participation in the current phase
+          NOT EXISTS (
+            SELECT 1
+            FROM course_phase_participation new_cpp
+            WHERE new_cpp.course_phase_id = $1
+              AND new_cpp.course_participation_id = cp.id
+          )
+          -- And ensure they have 'passed' the direct predecessor (if any)
+          AND EXISTS (
+              SELECT 1
+              FROM direct_predecessor_for_pass dpp
+              JOIN course_phase_participation pcpp
+                ON pcpp.course_phase_id = dpp.phase_id
+                AND pcpp.course_participation_id = cp.id
+              WHERE pcpp.pass_status = 'passed'
+          )
+  )
+  
+-----------------------------------------------------------------------
+-- 3) Final SELECT: Merge the participants and meta data from all predecessors
+-----------------------------------------------------------------------
+SELECT
+    main.*
+FROM
+(
+    SELECT * FROM current_phase_students
+    UNION
+    SELECT * FROM qualified_students
+) AS main
+ORDER BY main.last_name, main.first_name;

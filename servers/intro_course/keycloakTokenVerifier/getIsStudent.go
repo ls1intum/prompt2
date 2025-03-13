@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier/coreRequests"
+	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier/keycloakCoreRequests"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,7 +28,7 @@ func IsStudentOfCoursePhaseMiddleware() gin.HandlerFunc {
 
 		// TODO: Wrap this around a caching component
 		// request from the core if the user is a student of the course phase
-		isStudentResponse, err := coreRequests.SendIsStudentRequest(c.GetHeader("Authorization"), coursePhaseID)
+		isStudentResponse, err := keycloakCoreRequests.SendIsStudentRequest(c.GetHeader("Authorization"), coursePhaseID)
 		if err != nil {
 			if err.Error() == "not student of course" {
 				c.Set("isStudentOfCourse", false)

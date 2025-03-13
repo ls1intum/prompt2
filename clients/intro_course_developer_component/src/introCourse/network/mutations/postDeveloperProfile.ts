@@ -1,9 +1,9 @@
-import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
+import { PostDeveloperProfile } from '../../interfaces/PostDeveloperProfile'
 import { introCourseAxiosInstance } from '../introCourseServerConfig'
 
 export const postDeveloperProfile = async (
   coursePhaseID: string,
-  developerProfile: DeveloperProfile,
+  developerProfile: PostDeveloperProfile,
 ): Promise<void> => {
   try {
     return await introCourseAxiosInstance.post(

@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -191,4 +192,20 @@ func BatchUpdatePassStatus(ctx context.Context, coursePhaseID uuid.UUID, courseP
 	}
 
 	return changedParticipations, nil
+}
+
+func GetStudentsOfCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]studentDTO.Student, error) {
+	students, err := CoursePhaseParticipationServiceSingleton.queries.GetStudentsOfCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return nil, errors.New("failed to get participations")
+	}
+
+	studentDTOs := make([]studentDTO.Student, 0, len(students))
+	for _, student := range students {
+		dto := studentDTO.GetStudentDTOFromCourseParticipation(student)
+		studentDTOs = append(studentDTOs, dto)
+	}
+
+	return studentDTOs, nil
 }

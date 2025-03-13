@@ -1,4 +1,4 @@
-package coreRequests
+package keycloakCoreRequests
 
 import (
 	"encoding/json"
