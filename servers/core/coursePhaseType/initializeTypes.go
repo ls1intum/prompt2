@@ -251,3 +251,34 @@ func initIntroCourseTutor() error {
 
 	return nil
 }
+
+func initAssessmentChallenge() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestAssessmentTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if assessment phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		// 1.) Create the phase
+		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "Assessment",
+			InitialPhase: false,
+			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
+		}
+		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newIntroCourseTutor)
+		if err != nil {
+			log.Error("failed to create assessment module: ", err)
+			return err
+		}
+
+		// No requires inputs and no provided outputs
+
+	} else {
+		log.Debug("assessment module already exists")
+	}
+
+	return nil
+}
