@@ -2,7 +2,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
@@ -11,15 +11,15 @@ import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperPr
 import { getAllTutors } from '../../network/queries/getAllTutors'
 import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
 import { useState } from 'react'
+import { getSeatPlan } from '../../network/queries/getSeatPlan'
+import { Seat } from '../../interfaces/Seat'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   // State management
   const [currentStep, setCurrentStep] = useState(1)
-  const [seats, setSeats] = useState<Seat[]>([])
+  // const [seats, setSeats] = useState<Seat[]>([])
   const [students, setStudents] = useState<Student[]>([])
-  const [tutors, setTutors] = useState<Tutor[]>([])
-
 
   // Data fetching
   const {
@@ -52,9 +52,23 @@ export const SeatAssignmentPage = (): JSX.Element => {
     queryFn: () => getAllDeveloperProfiles(phaseId ?? ''),
   })
 
+  const {
+    data: seats,
+    isPending: isSeatPlanLoading,
+    isError: isSeatPlanError,
+    refetch: refetchSeatPlan,
+  } = useQuery<Seat[]>({
+    queryKey: ['seatPlan', phaseId],
+    queryFn: () => getSeatPlan(phaseId ?? ''),
+  })
+
   const isPending =
-    isCoursePhaseParticipationsPending || isDeveloperProfilesPending || isPendingTutors
-  const isError = isParticipationsError || isDeveloperProfileError || isTutorsLoadingError
+    isCoursePhaseParticipationsPending ||
+    isDeveloperProfilesPending ||
+    isPendingTutors ||
+    isSeatPlanLoading
+  const isError =
+    isParticipationsError || isDeveloperProfileError || isTutorsLoadingError || isSeatPlanError
 
   const developerWithProfiles = useGetParticipationsWithProfiles(
     coursePhaseParticipations?.participations || [],
@@ -84,6 +98,8 @@ export const SeatAssignmentPage = (): JSX.Element => {
   return (
     <div>
       <ManagementPageHeader>Seat Assignment</ManagementPageHeader>
+
+      
     </div>
   )
 }

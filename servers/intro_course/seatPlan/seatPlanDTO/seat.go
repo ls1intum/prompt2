@@ -6,11 +6,11 @@ import (
 )
 
 type Seat struct {
-	SeatName        string      `json:"seat_name"`
-	HasMac          bool        `json:"has_mac"`
-	DeviceID        pgtype.Text `json:"device_id"`
-	AssignedStudent pgtype.UUID `json:"assigned_student"` // using pgtype bc. it might be empty
-	AssignedTutor   pgtype.UUID `json:"assigned_tutor"`
+	SeatName        string      `json:"seatName"`
+	HasMac          bool        `json:"hasMac"`
+	DeviceID        pgtype.Text `json:"deviceID"`
+	AssignedStudent pgtype.UUID `json:"assignedStudent"` // using pgtype bc. it might be empty
+	AssignedTutor   pgtype.UUID `json:"assignedTutor"`
 }
 
 func GetSeatDTOFromDBModel(seat db.Seat) Seat {

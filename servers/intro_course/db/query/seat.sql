@@ -17,3 +17,7 @@ SET has_mac = $3,
     assigned_tutor = $6
 WHERE course_phase_id = $1
   AND seat_name = $2;
+
+-- name: DeleteSeatPlan :exec
+DELETE FROM seat
+WHERE course_phase_id = $1;

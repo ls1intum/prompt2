@@ -16,6 +16,7 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 
 	// Post initial seat plan with seat names
 	seatPlanRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), createSeatPlan)
+	seatPlanRouter.DELETE("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), deleteSeatPlan)
 
 	// Update seat plan (assigned tutor, assigned student, hasMac, deviceID)
 	seatPlanRouter.PUT("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), updateSeatPlan)
@@ -86,6 +87,23 @@ func updateSeatPlan(c *gin.Context) {
 	}
 
 	err = UpdateSeatPlan(c, coursePhaseID, seats)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func deleteSeatPlan(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = DeleteSeatPlan(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

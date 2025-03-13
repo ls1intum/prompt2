@@ -28,6 +28,16 @@ func (q *Queries) CreateSeatPlan(ctx context.Context, arg CreateSeatPlanParams) 
 	return err
 }
 
+const deleteSeatPlan = `-- name: DeleteSeatPlan :exec
+DELETE FROM seat
+WHERE course_phase_id = $1
+`
+
+func (q *Queries) DeleteSeatPlan(ctx context.Context, coursePhaseID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSeatPlan, coursePhaseID)
+	return err
+}
+
 const getSeatPlan = `-- name: GetSeatPlan :many
 SELECT course_phase_id, seat_name, has_mac, device_id, assigned_student, assigned_tutor
 FROM seat
