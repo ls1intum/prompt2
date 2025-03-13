@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { getSeatPlan } from '../../network/queries/getSeatPlan'
 import { Seat } from '../../interfaces/Seat'
 import { SeatUploader } from './components/SeatUploader'
+import { SeatMacAssigner } from './components/SeatMacAssigner'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -98,9 +99,10 @@ export const SeatAssignmentPage = (): JSX.Element => {
   }
 
   return (
-    <div>
+    <div className='space-y-6'>
       <ManagementPageHeader>Seat Assignment</ManagementPageHeader>
       <SeatUploader existingSeats={seats || []} />
+      {seats.length > 0 && <SeatMacAssigner existingSeats={seats} />}
     </div>
   )
 }

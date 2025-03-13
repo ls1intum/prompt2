@@ -1,7 +1,7 @@
 export type Seat = {
   seatName: string
   hasMac: boolean
-  deviceID: string
-  assignedStudent: string
-  assignedTutor: string
+  deviceID: string | null
+  assignedStudent?: string
+  assignedTutor?: string
 }
