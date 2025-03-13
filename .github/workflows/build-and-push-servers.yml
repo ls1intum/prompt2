@@ -12,14 +12,14 @@ on:
 
 jobs:
   core:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@feat/compare-local-runner 
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-core # Defaults to the repository name
       docker-file: servers/Dockerfile # Defaults to Dockerfile
       docker-context: ./servers/core
     secrets: inherit
   intro-course:
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@feat/compare-local-runner 
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
         docker-file: servers/Dockerfile 
