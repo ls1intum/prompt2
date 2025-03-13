@@ -11,6 +11,7 @@
             "intro_course_tutor_component",
             "intro_course_developer_component",
             "shared_library",
+            "assessment_component",
             "devops_challenge_component"
         ]
     },
