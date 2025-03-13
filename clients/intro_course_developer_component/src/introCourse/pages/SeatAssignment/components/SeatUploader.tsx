@@ -90,6 +90,13 @@ export const SeatUploader = ({ existingSeats }: SeatUploaderProps): JSX.Element 
           setIsUploading(false)
           return
         }
+        // Check for duplicate seat names
+        const uniqueCount = new Set(seatNames).size
+        if (uniqueCount !== seatNames.length) {
+          setError('Duplicate seat names detected. Please ensure all seat names are unique.')
+          setIsUploading(false)
+          return
+        }
         mutation.mutate(seatNames)
       } catch (err: any) {
         setError(err.message || 'An error occurred while uploading the file.')
