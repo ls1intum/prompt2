@@ -89,3 +89,18 @@ func UpdateSeatPlan(ctx context.Context, coursePhaseID uuid.UUID, seatDTOs []sea
 
 	return nil
 }
+
+func DeleteSeatPlan(ctx context.Context, coursePhaseID uuid.UUID) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	err := SeatPlanServiceSingleton.queries.DeleteSeatPlan(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"error":         err,
+		}).Error("Failed to delete seat plan")
+		return errors.New("failed to delete seat plan")
+	}
+	return nil
+}

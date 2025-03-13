@@ -5,14 +5,15 @@ import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { DeveloperProfile } from 'src/introCourse/interfaces/DeveloperProfile'
-import { Tutor } from 'src/introCourse/interfaces/Tutor'
+import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
+import { Tutor } from '../../interfaces/Tutor'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { getAllTutors } from '../../network/queries/getAllTutors'
 import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
 import { useState } from 'react'
 import { getSeatPlan } from '../../network/queries/getSeatPlan'
 import { Seat } from '../../interfaces/Seat'
+import { SeatUploader } from './components/SeatUploader'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -90,6 +91,7 @@ export const SeatAssignmentPage = (): JSX.Element => {
           refetchCoursePhaseParticipations()
           refetchDeveloperProfiles()
           refetchTutors()
+          refetchSeatPlan()
         }}
       />
     )
@@ -98,8 +100,7 @@ export const SeatAssignmentPage = (): JSX.Element => {
   return (
     <div>
       <ManagementPageHeader>Seat Assignment</ManagementPageHeader>
-
-      
+      <SeatUploader existingSeats={seats || []} />
     </div>
   )
 }

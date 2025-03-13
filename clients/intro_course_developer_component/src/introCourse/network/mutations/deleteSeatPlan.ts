@@ -2,7 +2,7 @@ import { introCourseAxiosInstance } from '../introCourseServerConfig'
 
 export const deleteSeatPlan = async (coursePhaseID: string): Promise<void> => {
   try {
-    await introCourseAxiosInstance.post(
+    await introCourseAxiosInstance.delete(
       `intro-course/api/course_phase/${coursePhaseID}/seat_plan`,
       {
         headers: {
