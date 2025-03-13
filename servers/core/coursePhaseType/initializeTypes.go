@@ -262,13 +262,13 @@ func initDevOpsChallenge() error {
 	}
 	if !exists {
 		// 1.) Create the phase
-		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
+		newDevOps := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "DevOpsChallenge",
 			InitialPhase: false,
 			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
 		}
-		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newIntroCourseTutor)
+		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newDevOps)
 		if err != nil {
 			log.Error("failed to create intro course developer module: ", err)
 			return err
@@ -292,13 +292,13 @@ func initAssessmentChallenge() error {
 	}
 	if !exists {
 		// 1.) Create the phase
-		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
+		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Assessment",
 			InitialPhase: false,
 			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
 		}
-		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newIntroCourseTutor)
+		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
 			log.Error("failed to create assessment module: ", err)
 			return err
