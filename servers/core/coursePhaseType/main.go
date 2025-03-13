@@ -20,27 +20,28 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 	if err != nil {
 		log.Fatal("failed to init interview phase type: ", err)
 	}
-	initMatching()
+
+	err = initMatching()
 	if err != nil {
 		log.Fatal("failed to init matching phase type: ", err)
 	}
 
-	initIntroCourseDeveloper()
+	err = initIntroCourseDeveloper()
 	if err != nil {
 		log.Fatal("failed to init intro course developer phase type: ", err)
 	}
 
-	initIntroCourseTutor()
+	err = initIntroCourseTutor()
 	if err != nil {
 		log.Fatal("failed to init intro course tutor phase type: ", err)
 	}
 
-	initDevOpsChallenge()
+	err = initDevOpsChallenge()
 	if err != nil {
 		log.Fatal("failed to init dev ops challenge phase type: ", err)
 	}
 
-	initAssessmentChallenge()
+	err = initAssessmentChallenge()
 	if err != nil {
 		log.Fatal("failed to init assessment phase type: ", err)
 	}
