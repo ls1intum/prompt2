@@ -1,6 +1,4 @@
-export type DeveloperProfile = {
-  coursePhaseID: string
-  courseParticipationID: string
+export type PostDeveloperProfile = {
   appleID: string
   gitLabUsername: string
   hasMacBook: boolean
