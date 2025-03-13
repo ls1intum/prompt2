@@ -9,6 +9,7 @@
     "intro_course_developer_component",
     "intro_course_tutor_component",
     "shared_library",
-    "assessment_component"
+    "assessment_component",
+    "devops_challenge_component"
   ]
 }

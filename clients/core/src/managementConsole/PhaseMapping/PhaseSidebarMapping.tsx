@@ -5,6 +5,7 @@ import { MatchingSidebar } from './ExternalSidebars/MatchingSidebar'
 import { IntroCourseDeveloperSidebar } from './ExternalSidebars/IntroCourseDeveloperSidebar'
 import { IntroCourseTutorSidebar } from './ExternalSidebars/IntroCourseTutorSidebar'
 import { AssessmentSidebar } from './ExternalSidebars/AssessmentSidebar'
+import { DevOpsChallengeSidebar } from './ExternalSidebars/DevOpsChallengeSidebar'
 
 export const PhaseSidebarMapping: {
   [key: string]: React.FC<{ rootPath: string; title: string; coursePhaseID: string }>
@@ -16,4 +17,5 @@ export const PhaseSidebarMapping: {
   IntroCourseDeveloper: IntroCourseDeveloperSidebar,
   IntroCourseTutor: IntroCourseTutorSidebar,
   Assessment: AssessmentSidebar,
+  DevOpsChallenge: DevOpsChallengeSidebar,
 }
