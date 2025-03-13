@@ -12,4 +12,15 @@ CREATE TABLE developer_profile (
   PRIMARY KEY (course_participation_id, course_phase_id)
 );
 
+CREATE TABLE tutor (
+  course_phase_id uuid NOT NULL,
+  id uuid NOT NULL,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  email text NOT NULL,
+  matriculation_number text NOT NULL,
+  university_login text NOT NULL,
+  PRIMARY KEY (course_phase_id, id)
+);
+
 COMMIT;

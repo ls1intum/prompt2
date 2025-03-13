@@ -12,6 +12,28 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const acceptApplicationIfAutoAccept = `-- name: AcceptApplicationIfAutoAccept :exec
+UPDATE course_phase_participation
+SET pass_status = 'passed'
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
+  AND (
+    SELECT (restricted_data->>'autoAccept')::boolean
+    FROM course_phase
+    WHERE id = $1
+  ) = true
+`
+
+type AcceptApplicationIfAutoAcceptParams struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+}
+
+func (q *Queries) AcceptApplicationIfAutoAccept(ctx context.Context, arg AcceptApplicationIfAutoAcceptParams) error {
+	_, err := q.db.Exec(ctx, acceptApplicationIfAutoAccept, arg.CoursePhaseID, arg.CourseParticipationID)
+	return err
+}
+
 const batchUpdateAdditionalScores = `-- name: BatchUpdateAdditionalScores :exec
 WITH updates AS (
   SELECT 

@@ -55,6 +55,24 @@ func GetStudentDTOFromApplicationParticipation(model db.GetAllApplicationPartici
 	}
 }
 
+func GetStudentDTOFromCourseParticipation(model db.GetStudentsOfCoursePhaseRow) Student {
+	return Student{
+		ID:                   model.ID,
+		FirstName:            model.FirstName.String,
+		LastName:             model.LastName.String,
+		Email:                model.Email.String,
+		MatriculationNumber:  model.MatriculationNumber.String,
+		UniversityLogin:      model.UniversityLogin.String,
+		HasUniversityAccount: model.HasUniversityAccount.Bool,
+		Gender:               model.Gender,
+		Nationality:          model.Nationality.String,
+		StudyDegree:          model.StudyDegree,
+		StudyProgram:         model.StudyProgram.String,
+		CurrentSemester:      model.CurrentSemester,
+	}
+
+}
+
 func (s Student) GetDBModel() db.Student {
 	return db.Student{
 		ID:                   s.ID,

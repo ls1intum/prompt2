@@ -42,6 +42,53 @@ func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDevelope
 	return err
 }
 
+const createOrUpdateDeveloperProfile = `-- name: CreateOrUpdateDeveloperProfile :exec
+INSERT INTO developer_profile (
+  course_participation_id,
+  course_phase_id,
+  gitlab_username,
+  apple_id,
+  has_macbook,
+  iphone_uuid,
+  ipad_uuid,
+  apple_watch_uuid
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (course_phase_id, course_participation_id)
+DO UPDATE SET 
+  gitlab_username   = EXCLUDED.gitlab_username,
+  apple_id          = EXCLUDED.apple_id,
+  has_macbook       = EXCLUDED.has_macbook,
+  iphone_uuid       = EXCLUDED.iphone_uuid,
+  ipad_uuid         = EXCLUDED.ipad_uuid,
+  apple_watch_uuid  = EXCLUDED.apple_watch_uuid
+`
+
+type CreateOrUpdateDeveloperProfileParams struct {
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	GitlabUsername        string      `json:"gitlab_username"`
+	AppleID               string      `json:"apple_id"`
+	HasMacbook            bool        `json:"has_macbook"`
+	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
+	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
+	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
+}
+
+func (q *Queries) CreateOrUpdateDeveloperProfile(ctx context.Context, arg CreateOrUpdateDeveloperProfileParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateDeveloperProfile,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
+		arg.GitlabUsername,
+		arg.AppleID,
+		arg.HasMacbook,
+		arg.IphoneUuid,
+		arg.IpadUuid,
+		arg.AppleWatchUuid,
+	)
+	return err
+}
+
 const getAllDeveloperProfiles = `-- name: GetAllDeveloperProfiles :many
 SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid 
 FROM developer_profile

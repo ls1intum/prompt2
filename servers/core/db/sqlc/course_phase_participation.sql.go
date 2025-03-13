@@ -655,6 +655,125 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 	return i, err
 }
 
+const getStudentsOfCoursePhase = `-- name: GetStudentsOfCoursePhase :many
+WITH 
+  -----------------------------------------------------------------------
+  -- A) Phases a student must have passed (per course_phase_graph)
+  -----------------------------------------------------------------------
+  direct_predecessor_for_pass AS (
+      SELECT cpg.from_course_phase_id AS phase_id
+      FROM course_phase_graph cpg
+      WHERE cpg.to_course_phase_id = $1
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 1) Existing participants in the current phase
+  -----------------------------------------------------------------------
+  current_phase_students AS (
+      SELECT
+          s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender, s.nationality, s.study_program, s.study_degree, s.current_semester, s.last_modified
+      FROM course_phase_participation cpp
+      JOIN course_participation cp 
+        ON cpp.course_participation_id = cp.id
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE cpp.course_phase_id = $1
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 2) Qualified non-participants:
+  --    They do NOT yet have a participation in $1 and
+  --    must have passed ALL direct_predecessors_for_pass.
+  -----------------------------------------------------------------------
+  qualified_students AS (
+      SELECT
+          s.id, s.first_name, s.last_name, s.email, s.matriculation_number, s.university_login, s.has_university_account, s.gender, s.nationality, s.study_program, s.study_degree, s.current_semester, s.last_modified
+      FROM course_participation cp
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE 
+          -- Exclude if they already have a participation in the current phase
+          NOT EXISTS (
+            SELECT 1
+            FROM course_phase_participation new_cpp
+            WHERE new_cpp.course_phase_id = $1
+              AND new_cpp.course_participation_id = cp.id
+          )
+          -- And ensure they have 'passed' the direct predecessor (if any)
+          AND EXISTS (
+              SELECT 1
+              FROM direct_predecessor_for_pass dpp
+              JOIN course_phase_participation pcpp
+                ON pcpp.course_phase_id = dpp.phase_id
+                AND pcpp.course_participation_id = cp.id
+              WHERE pcpp.pass_status = 'passed'
+          )
+  )
+  
+SELECT
+    main.id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_program, main.study_degree, main.current_semester, main.last_modified
+FROM
+(
+    SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified FROM current_phase_students
+    UNION
+    SELECT id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_program, study_degree, current_semester, last_modified FROM qualified_students
+) AS main
+ORDER BY main.last_name, main.first_name
+`
+
+type GetStudentsOfCoursePhaseRow struct {
+	ID                   uuid.UUID        `json:"id"`
+	FirstName            pgtype.Text      `json:"first_name"`
+	LastName             pgtype.Text      `json:"last_name"`
+	Email                pgtype.Text      `json:"email"`
+	MatriculationNumber  pgtype.Text      `json:"matriculation_number"`
+	UniversityLogin      pgtype.Text      `json:"university_login"`
+	HasUniversityAccount pgtype.Bool      `json:"has_university_account"`
+	Gender               Gender           `json:"gender"`
+	Nationality          pgtype.Text      `json:"nationality"`
+	StudyProgram         pgtype.Text      `json:"study_program"`
+	StudyDegree          StudyDegree      `json:"study_degree"`
+	CurrentSemester      pgtype.Int4      `json:"current_semester"`
+	LastModified         pgtype.Timestamp `json:"last_modified"`
+}
+
+// ---------------------------------------------------------------------
+// 3) Final SELECT: Merge the participants and meta data from all predecessors
+// ---------------------------------------------------------------------
+func (q *Queries) GetStudentsOfCoursePhase(ctx context.Context, toCoursePhaseID uuid.UUID) ([]GetStudentsOfCoursePhaseRow, error) {
+	rows, err := q.db.Query(ctx, getStudentsOfCoursePhase, toCoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetStudentsOfCoursePhaseRow
+	for rows.Next() {
+		var i GetStudentsOfCoursePhaseRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.MatriculationNumber,
+			&i.UniversityLogin,
+			&i.HasUniversityAccount,
+			&i.Gender,
+			&i.Nationality,
+			&i.StudyProgram,
+			&i.StudyDegree,
+			&i.CurrentSemester,
+			&i.LastModified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCoursePhaseParticipation = `-- name: UpdateCoursePhaseParticipation :one
 UPDATE course_phase_participation
 SET 

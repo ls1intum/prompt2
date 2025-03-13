@@ -77,3 +77,20 @@ func GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uuid.UUID) ([]de
 	developerProfileDTOs := developerProfileDTO.GetDeveloperProfileDTOsFromDBModels(developerProfiles)
 	return developerProfileDTOs, nil
 }
+
+func CreateOrUpdateDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID, request developerProfileDTO.DeveloperProfile) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	params := developerProfileDTO.GetDeveloperProfileDTOFromCreateRequest(request, coursePhaseID, courseParticipationID)
+	err := DeveloperProfileServiceSingleton.queries.CreateOrUpdateDeveloperProfile(ctxWithTimeout, params)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID":         coursePhaseID,
+			"courseParticipationID": courseParticipationID,
+			"error":                 err,
+		}).Error("Failed to create or update developer profile")
+		return errors.New("failed to create or update developer profile")
+	}
+	return nil
+}

@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { DeveloperProfile } from '../../interfaces/DeveloperProfile'
+import type { PostDeveloperProfile } from '../../interfaces/PostDeveloperProfile'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -18,11 +18,12 @@ import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
 import IOSUUIDDialog from './components/IOSUUIDDialog'
 import { useScreenSize } from '@/hooks/useScreenSize'
+import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 
 interface DeveloperProfileFormProps {
   developerProfile?: DeveloperProfile
   status?: string
-  onSubmit: (developerProfile: DeveloperProfile) => void
+  onSubmit: (developerProfile: PostDeveloperProfile) => void
 }
 
 export const DeveloperProfileForm = ({
@@ -55,7 +56,7 @@ export const DeveloperProfileForm = ({
   })
 
   const handleSubmit = (values: DeveloperFormValues) => {
-    const submittedProfile: DeveloperProfile = {
+    const submittedProfile: PostDeveloperProfile = {
       appleID: values.appleID,
       gitLabUsername: values.gitLabUsername,
       hasMacBook: values.hasMacBook,
