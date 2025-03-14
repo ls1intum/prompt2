@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import type { Seat } from '../../../interfaces/Seat'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -14,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Save, AlertCircle, Laptop, ChevronUp, ChevronDown, SearchIcon } from 'lucide-react'
+import { AlertCircle, Laptop, ChevronUp, ChevronDown, SearchIcon } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -24,6 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { updateSeatPlan } from '../../../network/mutations/updateSeatPlan'
+import { Button } from '@/components/ui/button'
 
 interface SeatMacAssignerProps {
   existingSeats: Seat[]
@@ -36,17 +36,16 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMac, setFilterMac] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isCollapsed, setIsCollapsed] = useState(existingSeats.some((seat) => seat.hasMac)) // State for collapse
+  // Collapse the card initially if any seat already has a Mac assigned.
+  const [isCollapsed, setIsCollapsed] = useState(existingSeats.some((seat) => seat.hasMac))
 
-  // Initialize seats from props
+  // Initialize seats and baseline from props
   useEffect(() => {
     setSeats(existingSeats)
   }, [existingSeats])
 
   const mutation = useMutation({
-    mutationFn: (updatedSeats: Seat[]) => {
-      return updateSeatPlan(phaseId ?? '', updatedSeats)
-    },
+    mutationFn: (updatedSeats: Seat[]) => updateSeatPlan(phaseId ?? '', updatedSeats),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['seatPlan', phaseId] })
       setError(null)
@@ -76,10 +75,6 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
     setSeats(updatedSeats)
   }
 
-  const handleSave = () => {
-    mutation.mutate(seats)
-  }
-
   // Filter seats based on search term and filterMac toggle
   const filteredSeats = seats.filter((seat) => {
     const matchesSearch =
@@ -91,12 +86,22 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
   // Count seats with Macs
   const macCount = seats.filter((seat) => seat.hasMac).length
 
-  // Disable save button if no changes have been made
+  // Determine if there are unsaved changes by comparing the current seats with the saved baseline.
   const hasChanges = seats.some(
     (seat, index) =>
       seat.hasMac !== existingSeats[index].hasMac ||
       seat.deviceID !== existingSeats[index].deviceID,
   )
+
+  // Auto-save changes after 1 second of inactivity if there are unsaved changes.
+  useEffect(() => {
+    if (hasChanges && !mutation.isPending) {
+      const timer = setTimeout(() => {
+        mutation.mutate(seats)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [seats, hasChanges, mutation, mutation.isPending])
 
   return (
     <Card>
@@ -124,7 +129,6 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <div className='space-y-4'>
               <div className='flex gap-2'>
                 <div className='relative flex-grow max-w-md w-full'>
@@ -145,7 +149,6 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
                   {filterMac ? 'Showing Only Macs' : 'Show Only Macs'}
                 </Button>
               </div>
-
               <div className='border rounded-md max-h-[40vh] overflow-y-auto'>
                 <Table>
                   <TableHeader className='z-10'>
@@ -200,10 +203,6 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
             <p className='text-xs text-muted-foreground'>
               {macCount} of {seats.length} seats have Macs assigned
             </p>
-            <Button onClick={handleSave} disabled={mutation.isPending || !hasChanges}>
-              <Save className='mr-2 h-4 w-4' />
-              {mutation.isPending ? 'Saving...' : 'Save Mac Assignments'}
-            </Button>
           </CardFooter>
         </>
       )}
