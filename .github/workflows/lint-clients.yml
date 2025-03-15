@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
-      - run: yarn eslint "./core/**/*.{js,jsx,ts,tsx}"
+      - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}"
 
   lint-assessment:
     runs-on: ubuntu-latest
