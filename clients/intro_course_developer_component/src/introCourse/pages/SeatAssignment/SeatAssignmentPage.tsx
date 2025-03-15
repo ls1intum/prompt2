@@ -12,9 +12,10 @@ import { getAllTutors } from '../../network/queries/getAllTutors'
 import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
 import { getSeatPlan } from '../../network/queries/getSeatPlan'
 import { Seat } from '../../interfaces/Seat'
-import { SeatUploader } from './components/SeatUploader'
+import { SeatUploader } from './components/SeatUploader/SeatUploader'
 import { SeatMacAssigner } from './components/SeatMacAssigner'
 import { SeatTutorAssigner } from './components/SeatTutorAssigner/SeatTutorAssigner'
+import { SeatStudentAssigner } from './components/SeatStudentAssigner/SeatStudentAssigner'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -105,6 +106,9 @@ export const SeatAssignmentPage = (): JSX.Element => {
           tutors={tutors || []}
           numberOfStudents={developerWithProfiles.length}
         />
+      )}
+      {seats.length > 0 && (
+        <SeatStudentAssigner existingSeats={seats} developerWithProfiles={developerWithProfiles} />
       )}
     </div>
   )

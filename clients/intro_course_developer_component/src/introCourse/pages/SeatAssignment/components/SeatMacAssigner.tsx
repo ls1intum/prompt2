@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
 import type { Seat } from '../../../interfaces/Seat'
 import {
   Card,
@@ -22,16 +20,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { updateSeatPlan } from '../../../network/mutations/updateSeatPlan'
 import { Button } from '@/components/ui/button'
+import { useUpdateSeats } from '../hooks/useUpdateSeats'
 
 interface SeatMacAssignerProps {
   existingSeats: Seat[]
 }
 
 export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
-  const { phaseId } = useParams<{ phaseId: string }>()
-  const queryClient = useQueryClient()
   const [seats, setSeats] = useState<Seat[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMac, setFilterMac] = useState(false)
@@ -44,16 +40,7 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
     setSeats(existingSeats)
   }, [existingSeats])
 
-  const mutation = useMutation({
-    mutationFn: (updatedSeats: Seat[]) => updateSeatPlan(phaseId ?? '', updatedSeats),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['seatPlan', phaseId] })
-      setError(null)
-    },
-    onError: () => {
-      setError('Failed to update Mac assignments. Please try again.')
-    },
-  })
+  const mutation = useUpdateSeats(setError)
 
   const handleToggleMac = (seatIndex: number, hasMac: boolean) => {
     const updatedSeats = [...seats]

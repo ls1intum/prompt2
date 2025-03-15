@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Seat } from 'src/introCourse/interfaces/Seat'
-import type { Tutor } from 'src/introCourse/interfaces/Tutor'
+import type { Seat } from '../../../../interfaces/Seat'
+import type { Tutor } from '../../../../interfaces/Tutor'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Select,
@@ -17,9 +15,9 @@ import { AlertCircle, UserCheck, X, CheckSquare, ChevronDown, ChevronUp } from '
 
 import { Badge } from '@/components/ui/badge'
 import type { JSX } from 'react/jsx-runtime'
-import { updateSeatPlan } from '../../../../network/mutations/updateSeatPlan'
 import { SeatTutorTable } from './SeatTutorTable'
 import { Button } from '@/components/ui/button'
+import { useUpdateSeats } from '../../hooks/useUpdateSeats'
 
 interface SeatTutorAssignerProps {
   seats: Seat[]
@@ -32,22 +30,11 @@ export const SeatTutorAssigner = ({
   tutors,
   numberOfStudents,
 }: SeatTutorAssignerProps): JSX.Element => {
-  const { phaseId } = useParams<{ phaseId: string }>()
-  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [selectedSeatNames, setSelectedSeatNames] = useState<string[]>([])
   const [isCollapsed, setIsCollapsed] = useState(seats.some((seat) => seat.assignedTutor))
 
-  const mutation = useMutation({
-    mutationFn: (updatedSeats: Seat[]) => updateSeatPlan(phaseId ?? '', updatedSeats),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['seat_plan', phaseId] })
-      setError(null)
-    },
-    onError: () => {
-      setError('Failed to update tutor assignments. Please try again.')
-    },
-  })
+  const mutation = useUpdateSeats(setError)
 
   const handleTutorAssignment = (seatName: string, tutorId: string | null) => {
     const updatedSeat = seats.find((seat) => seat.seatName === seatName)

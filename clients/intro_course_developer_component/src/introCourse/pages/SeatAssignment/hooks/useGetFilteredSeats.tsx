@@ -1,4 +1,4 @@
-import { Tutor } from 'src/introCourse/interfaces/Tutor'
+import { Tutor } from '../../../interfaces/Tutor'
 import { Seat } from '../../../interfaces/Seat'
 import { TutorAssignmentFilterOptions } from '../interfaces/TutorAssignmentFilterOptions'
 import { getTutorName } from '../utils/getTutorName'

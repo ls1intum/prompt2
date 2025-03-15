@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Eye } from 'lucide-react'
 import { useState } from 'react'
-import { Seat } from 'src/introCourse/interfaces/Seat'
+import { Seat } from '../../../../interfaces/Seat'
 
 interface SeatPlanDialogProps {
   seatPlan: Seat[]

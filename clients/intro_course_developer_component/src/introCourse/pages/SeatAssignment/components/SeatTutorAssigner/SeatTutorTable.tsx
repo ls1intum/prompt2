@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Seat } from 'src/introCourse/interfaces/Seat'
-import { Tutor } from 'src/introCourse/interfaces/Tutor'
+import { Seat } from '../../../../interfaces/Seat'
+import { Tutor } from '../../../../interfaces/Tutor'
 import { useEffect, useState } from 'react'
 import { SearchIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
