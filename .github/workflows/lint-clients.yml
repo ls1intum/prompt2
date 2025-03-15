@@ -35,3 +35,4 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "clients/lint-results/*.json"
+          only-pr-files: false
