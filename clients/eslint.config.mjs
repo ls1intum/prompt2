@@ -27,6 +27,8 @@ const getTsConfigPaths = () => {
     'matching_component',
     'intro_course_tutor_component',
     'intro_course_developer_component',
+    'assessment_component',
+    'devops_challenge_component',
   ] // TODO: replace with dynamic workspace detection
   return workspaceFolders
     .map((folder) => {

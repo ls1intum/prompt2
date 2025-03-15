@@ -1,6 +1,6 @@
 {
     "name": "prompt-module-federation",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "private": true,
     "workspaces": {
         "packages": [
@@ -10,7 +10,9 @@
             "template_component",
             "intro_course_tutor_component",
             "intro_course_developer_component",
-            "shared_library"
+            "shared_library",
+            "assessment_component",
+            "devops_challenge_component"
         ]
     },
     "scripts": {
@@ -41,7 +43,7 @@
         "@tiptap/starter-kit": "^2.10.4",
         "@tumaet/prompt-shared-state": "^0.0.21",
         "autoprefixer": "^10.4.20",
-        "axios": "^1.7.9",
+        "axios": "^1.8.2",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "css-loader": "^7.1.2",
