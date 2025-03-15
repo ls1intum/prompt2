@@ -1,7 +1,7 @@
 name: Go Test
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: [ 'core' ]
+        directory: ["core"]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
       - name: Test with Go
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
-        run:  cd servers/${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
+        run: cd servers/${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
       - name: Upload Go test results
         if: always()
         uses: actions/upload-artifact@v4
