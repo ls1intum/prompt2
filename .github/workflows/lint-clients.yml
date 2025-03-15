@@ -9,28 +9,26 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./clients
+
 jobs:
   lint-core:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/core
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
+      - run: yarn eslint "./core/**/*.{js,jsx,ts,tsx}"
 
   lint-assessment:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/assessment_component
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
       - run: yarn install
-      - run: yarn lint
+      - run: yarn lint assessment_component
 
   lint-devops-challenge:
     runs-on: ubuntu-latest
