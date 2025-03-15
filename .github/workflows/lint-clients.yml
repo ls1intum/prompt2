@@ -16,16 +16,12 @@ jobs:
       run:
         working-directory: ./clients
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
-
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
         shell: bash
-
       - name: Run ESLint
-        run: yarn lint --format json --output-file eslint-report.json || true
+        run: yarn lint
