@@ -1,0 +1,28 @@
+name: Lint Clients
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-clients:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./clients
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - run: yarn install
+      - name: Lint components in clients/
+        run: |
+          for dir in */; do
+            yarn eslint "$dir" --config "$dir/eslint.config.mjs" --format json --output-file "lint-results/$(basename $dir)-lint-results.json" || true
+          done
+        continue-on-error: true
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          report-json: "clients/lint-results/*.json"
+          only-pr-files: false
