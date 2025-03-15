@@ -1,16 +1,15 @@
----
-name: Lint Clients
+name: Lint Core
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+    paths:
+      - "clients/core/**"
 
 jobs:
-  lint-core:
+  lint:
     runs-on: ubuntu-latest
     defaults:
       run:
