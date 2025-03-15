@@ -22,6 +22,7 @@ jobs:
           node-version: "18"
           cache: "yarn"
       - run: yarn install
+        working-directory: ./clients
         shell: bash
       - name: Run ESLint
         run: yarn lint
