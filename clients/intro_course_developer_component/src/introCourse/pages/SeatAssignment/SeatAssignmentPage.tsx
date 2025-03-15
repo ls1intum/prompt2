@@ -2,7 +2,7 @@ import { ErrorPage } from '@/components/ErrorPage'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
@@ -10,18 +10,14 @@ import { Tutor } from '../../interfaces/Tutor'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { getAllTutors } from '../../network/queries/getAllTutors'
 import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
-import { useState } from 'react'
 import { getSeatPlan } from '../../network/queries/getSeatPlan'
 import { Seat } from '../../interfaces/Seat'
 import { SeatUploader } from './components/SeatUploader'
 import { SeatMacAssigner } from './components/SeatMacAssigner'
+import { SeatTutorAssigner } from './components/SeatTutorAssigner/SeatTutorAssigner'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  // State management
-  const [currentStep, setCurrentStep] = useState(1)
-  // const [seats, setSeats] = useState<Seat[]>([])
-  const [students, setStudents] = useState<Student[]>([])
 
   // Data fetching
   const {
@@ -103,6 +99,13 @@ export const SeatAssignmentPage = (): JSX.Element => {
       <ManagementPageHeader>Seat Assignment</ManagementPageHeader>
       <SeatUploader existingSeats={seats || []} />
       {seats.length > 0 && <SeatMacAssigner existingSeats={seats} />}
+      {seats.length > 0 && (
+        <SeatTutorAssigner
+          seats={seats}
+          tutors={tutors || []}
+          numberOfStudents={developerWithProfiles.length}
+        />
+      )}
     </div>
   )
 }
