@@ -17,14 +17,8 @@ jobs:
         working-directory: ./clients
     steps:
       - uses: actions/checkout@v4
-      - run: corepack enable
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-          cache: "yarn"
-          cache-dependency-path: ./clients/yarn.lock
-      - run: yarn install
-        working-directory: ./clients
-        shell: bash
+      - uses: ./.github/actions/setup-lint
+      - name: Install dependencies
+        run: yarn install
       - name: Run ESLint
         run: yarn lint

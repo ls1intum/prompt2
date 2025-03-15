@@ -1,0 +1,13 @@
+name: Setup Lint
+description: Setups the repo for a linting run
+
+runs:
+  using: "composite"
+  steps:
+    - run: corepack enable
+      shell: bash
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "18"
+        cache: "yarn"
+        cache-dependency-path: ./clients/yarn.lock
