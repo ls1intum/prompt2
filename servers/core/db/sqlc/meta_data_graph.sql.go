@@ -12,7 +12,7 @@ import (
 )
 
 const createMetaDataConnection = `-- name: CreateMetaDataConnection :exec
-INSERT INTO meta_data_dependency_graph (from_course_phase_id, to_course_phase_id, from_course_phase_DTO_id, to_course_phase_DTO_id)
+INSERT INTO participation_data_dependency_graph (from_course_phase_id, to_course_phase_id, from_course_phase_DTO_id, to_course_phase_DTO_id)
 VALUES ($1, $2, $3, $4)
 `
 
@@ -35,7 +35,7 @@ func (q *Queries) CreateMetaDataConnection(ctx context.Context, arg CreateMetaDa
 }
 
 const deleteMetaDataGraphConnections = `-- name: DeleteMetaDataGraphConnections :exec
-DELETE FROM meta_data_dependency_graph
+DELETE FROM participation_data_dependency_graph
 WHERE from_course_phase_id IN 
     (SELECT id FROM course_phase WHERE course_id = $1)
 `
@@ -47,21 +47,21 @@ func (q *Queries) DeleteMetaDataGraphConnections(ctx context.Context, courseID u
 
 const getMetaDataGraph = `-- name: GetMetaDataGraph :many
 SELECT mg.from_course_phase_id, mg.to_course_phase_id, mg.from_course_phase_dto_id, mg.to_course_phase_dto_id
-FROM meta_data_dependency_graph mg
+FROM participation_data_dependency_graph mg
 JOIN course_phase cp
   ON mg.from_course_phase_id = cp.id
 WHERE cp.course_id = $1
 `
 
-func (q *Queries) GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]MetaDataDependencyGraph, error) {
+func (q *Queries) GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]ParticipationDataDependencyGraph, error) {
 	rows, err := q.db.Query(ctx, getMetaDataGraph, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MetaDataDependencyGraph
+	var items []ParticipationDataDependencyGraph
 	for rows.Next() {
-		var i MetaDataDependencyGraph
+		var i ParticipationDataDependencyGraph
 		if err := rows.Scan(
 			&i.FromCoursePhaseID,
 			&i.ToCoursePhaseID,

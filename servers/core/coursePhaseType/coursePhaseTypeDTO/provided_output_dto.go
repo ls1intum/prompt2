@@ -16,7 +16,7 @@ type ProvidedOutputDTO struct {
 	EndpointPath      string        `json:"endpointPath"`
 }
 
-func GetProvidedOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypeProvidedOutputDto) ([]ProvidedOutputDTO, error) {
+func GetProvidedOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypeParticipationProvidedOutputDto) ([]ProvidedOutputDTO, error) {
 	var DTOs []ProvidedOutputDTO
 
 	for _, dbModel := range dbModel {
@@ -31,7 +31,7 @@ func GetProvidedOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypeProvidedOutput
 	return DTOs, nil
 }
 
-func GetProvidedOutputDTOFromDBModel(dbModel db.CoursePhaseTypeProvidedOutputDto) (ProvidedOutputDTO, error) {
+func GetProvidedOutputDTOFromDBModel(dbModel db.CoursePhaseTypeParticipationProvidedOutputDto) (ProvidedOutputDTO, error) {
 	specification, err := meta.GetMetaDataDTOFromDBModel(dbModel.Specification)
 	if err != nil {
 		return ProvidedOutputDTO{}, err

@@ -34,7 +34,7 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 }
 
 const createCoursePhaseTypeProvidedOutput = `-- name: CreateCoursePhaseTypeProvidedOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6)
 `
 
@@ -60,7 +60,7 @@ func (q *Queries) CreateCoursePhaseTypeProvidedOutput(ctx context.Context, arg C
 }
 
 const createCoursePhaseTypeRequiredInput = `-- name: CreateCoursePhaseTypeRequiredInput :exec
-INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES ($1, $2, $3, $4)
 `
 
@@ -82,7 +82,7 @@ func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg Cr
 }
 
 const createInterviewRequiredApplicationAnswers = `-- name: CreateInterviewRequiredApplicationAnswers :exec
-INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
        gen_random_uuid(),
        $1,
@@ -153,19 +153,19 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 
 const getCoursePhaseProvidedOutputs = `-- name: GetCoursePhaseProvidedOutputs :many
 SELECT id, course_phase_type_id, dto_name, version_number, endpoint_path, specification
-FROM course_phase_type_provided_output_dto
+FROM course_phase_type_participation_provided_output_dto
 WHERE course_phase_type_id = $1
 `
 
-func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeProvidedOutputDto, error) {
+func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationProvidedOutputDto, error) {
 	rows, err := q.db.Query(ctx, getCoursePhaseProvidedOutputs, coursePhaseTypeID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhaseTypeProvidedOutputDto
+	var items []CoursePhaseTypeParticipationProvidedOutputDto
 	for rows.Next() {
-		var i CoursePhaseTypeProvidedOutputDto
+		var i CoursePhaseTypeParticipationProvidedOutputDto
 		if err := rows.Scan(
 			&i.ID,
 			&i.CoursePhaseTypeID,
@@ -186,19 +186,19 @@ func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhase
 
 const getCoursePhaseRequiredInputs = `-- name: GetCoursePhaseRequiredInputs :many
 SELECT id, course_phase_type_id, dto_name, specification
-FROM course_phase_type_required_input_dto
+FROM course_phase_type_participation_required_input_dto
 WHERE course_phase_type_id = $1
 `
 
-func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeRequiredInputDto, error) {
+func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationRequiredInputDto, error) {
 	rows, err := q.db.Query(ctx, getCoursePhaseRequiredInputs, coursePhaseTypeID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoursePhaseTypeRequiredInputDto
+	var items []CoursePhaseTypeParticipationRequiredInputDto
 	for rows.Next() {
-		var i CoursePhaseTypeRequiredInputDto
+		var i CoursePhaseTypeParticipationRequiredInputDto
 		if err := rows.Scan(
 			&i.ID,
 			&i.CoursePhaseTypeID,
@@ -216,7 +216,7 @@ func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseT
 }
 
 const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -240,7 +240,7 @@ func (q *Queries) InsertCourseProvidedAdditionalScores(ctx context.Context, cour
 }
 
 const insertCourseProvidedApplicationAnswers = `-- name: InsertCourseProvidedApplicationAnswers :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -283,7 +283,7 @@ func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, co
 }
 
 const insertDeveloperProfileOutput = `-- name: InsertDeveloperProfileOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -311,7 +311,7 @@ func (q *Queries) InsertDeveloperProfileOutput(ctx context.Context, coursePhaseT
 }
 
 const insertProficiencyLevelOutput = `-- name: InsertProficiencyLevelOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,

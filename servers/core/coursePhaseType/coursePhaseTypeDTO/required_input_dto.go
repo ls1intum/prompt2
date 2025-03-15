@@ -13,7 +13,7 @@ type RequiredInputDTO struct {
 	Specification     meta.MetaData `json:"specification"` // the specification follows the same structure as the meta.MetaData
 }
 
-func GetRequiredInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeRequiredInputDto) ([]RequiredInputDTO, error) {
+func GetRequiredInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeParticipationRequiredInputDto) ([]RequiredInputDTO, error) {
 	var DTOs []RequiredInputDTO
 
 	for _, dbModel := range dbModel {
@@ -27,7 +27,7 @@ func GetRequiredInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeRequiredInputDt
 	return DTOs, nil
 }
 
-func GetRequiredInputDTOFromDBModel(dbModel db.CoursePhaseTypeRequiredInputDto) (RequiredInputDTO, error) {
+func GetRequiredInputDTOFromDBModel(dbModel db.CoursePhaseTypeParticipationRequiredInputDto) (RequiredInputDTO, error) {
 	specification, err := meta.GetMetaDataDTOFromDBModel(dbModel.Specification)
 	if err != nil {
 		return RequiredInputDTO{}, err
