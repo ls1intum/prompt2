@@ -21,7 +21,7 @@ jobs:
       - run: yarn install
       - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}" --format=json --output-file eslint_report_core.json
       - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@1.0.4
+        uses: ataylorme/eslint-annotate-action@3.0.0
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           report-json: "eslint_report_core.json"
