@@ -1,5 +1,5 @@
 ---
-name: Lint Clients
+name: Lint
 
 on:
   push:
@@ -9,78 +9,13 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    shell: bash
-    working-directory: ./clients
-
 jobs:
   lint-core:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./clients
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
       - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}"
-
-  lint-assessment:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint assessment_component
-
-  lint-devops-challenge:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/devops_challenge_component
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
-
-  lint-interview:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/interview_component
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
-
-  lint-intro-course-developer:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/intro_course_developer_component
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
-
-  lint-intro-course-tutor:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/intro_course_tutor_component
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
-
-  lint-matching:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clients/matching_component
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-lint
-      - run: yarn install
-      - run: yarn lint
