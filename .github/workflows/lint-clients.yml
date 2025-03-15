@@ -1,0 +1,25 @@
+name: Lint Clients
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-core:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./clients
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - run: yarn install
+      - name: Lint components in clients/
+        run: |
+          for dir in */; do
+            yarn eslint "$dir" --config "$dir/eslint.config.mjs"
+          done

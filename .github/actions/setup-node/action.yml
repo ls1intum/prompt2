@@ -1,5 +1,5 @@
-name: Setup Lint
-description: Setups the repo for a linting run
+name: Setup Node
+description: Setup the node environment
 
 runs:
   using: "composite"
