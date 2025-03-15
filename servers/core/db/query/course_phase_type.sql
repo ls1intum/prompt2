@@ -1,14 +1,24 @@
 -- name: GetAllCoursePhaseTypes :many
 SELECT * FROM course_phase_type;
 
--- name: GetCoursePhaseRequiredInputs :many
+-- name: GetCoursePhaseRequiredParticipationInputs :many
 SELECT *
 FROM course_phase_type_participation_required_input_dto
 WHERE course_phase_type_id = $1;
 
--- name: GetCoursePhaseProvidedOutputs :many
+-- name: GetCoursePhaseProvidedParticipationOutputs :many
 SELECT *
 FROM course_phase_type_participation_provided_output_dto
+WHERE course_phase_type_id = $1;
+
+-- name: GetCoursePhaseRequiredPhaseInputs :many
+SELECT *
+FROM course_phase_type_phase_required_input_dto
+WHERE course_phase_type_id = $1;
+
+-- name: GetCoursePhaseProvidedPhaseOutputs :many
+SELECT *
+FROM course_phase_type_phase_provided_output_dto
 WHERE course_phase_type_id = $1;
 
 -- name: TestApplicationPhaseTypeExists :one

@@ -243,8 +243,8 @@ func GetCoursePhaseGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.C
 	return dtoGraph, nil
 }
 
-func GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.MetaDataGraphItem, error) {
-	graph, err := CourseServiceSingleton.queries.GetMetaDataGraph(ctx, courseID)
+func GetParticipationDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.MetaDataGraphItem, error) {
+	graph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(ctx, courseID)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,25 @@ func GetMetaDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.Meta
 	return dtoGraph, nil
 }
 
-func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+func GetPhaseDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.MetaDataGraphItem, error) {
+	graph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(ctx, courseID)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoGraph := make([]courseDTO.MetaDataGraphItem, 0, len(graph))
+	for _, g := range graph {
+		dtoGraph = append(dtoGraph, courseDTO.MetaDataGraphItem{
+			FromCoursePhaseID:    g.FromCoursePhaseID,
+			ToCoursePhaseID:      g.ToCoursePhaseID,
+			FromCoursePhaseDtoID: g.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   g.ToCoursePhaseDtoID,
+		})
+	}
+	return dtoGraph, nil
+}
+
+func UpdateParticipationDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
 	tx, err := CourseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -270,14 +288,49 @@ func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
-	err = qtx.DeleteMetaDataGraphConnections(ctx, courseID)
+	err = qtx.DeleteParticipationDataGraphConnections(ctx, courseID)
 	if err != nil {
 		return err
 	}
 
 	// create new connections
 	for _, graphItem := range graphUpdate {
-		err = qtx.CreateMetaDataConnection(ctx, db.CreateMetaDataConnectionParams{
+		err = qtx.CreateParticipationDataConnection(ctx, db.CreateParticipationDataConnectionParams{
+			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
+			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   graphItem.ToCoursePhaseDtoID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+
+}
+
+func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	tx, err := CourseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	qtx := CourseServiceSingleton.queries.WithTx(tx)
+
+	// delete all previous connections
+	err = qtx.DeletePhaseDataGraphConnections(ctx, courseID)
+	if err != nil {
+		return err
+	}
+
+	// create new connections
+	for _, graphItem := range graphUpdate {
+		err = qtx.CreatePhaseDataConnection(ctx, db.CreatePhaseDataConnectionParams{
 			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
 			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
 			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,

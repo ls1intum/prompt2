@@ -151,14 +151,14 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 	return items, nil
 }
 
-const getCoursePhaseProvidedOutputs = `-- name: GetCoursePhaseProvidedOutputs :many
+const getCoursePhaseProvidedParticipationOutputs = `-- name: GetCoursePhaseProvidedParticipationOutputs :many
 SELECT id, course_phase_type_id, dto_name, version_number, endpoint_path, specification
 FROM course_phase_type_participation_provided_output_dto
 WHERE course_phase_type_id = $1
 `
 
-func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationProvidedOutputDto, error) {
-	rows, err := q.db.Query(ctx, getCoursePhaseProvidedOutputs, coursePhaseTypeID)
+func (q *Queries) GetCoursePhaseProvidedParticipationOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationProvidedOutputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseProvidedParticipationOutputs, coursePhaseTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -184,14 +184,47 @@ func (q *Queries) GetCoursePhaseProvidedOutputs(ctx context.Context, coursePhase
 	return items, nil
 }
 
-const getCoursePhaseRequiredInputs = `-- name: GetCoursePhaseRequiredInputs :many
+const getCoursePhaseProvidedPhaseOutputs = `-- name: GetCoursePhaseProvidedPhaseOutputs :many
+SELECT id, course_phase_type_id, dto_name, version_number, endpoint_path, specification
+FROM course_phase_type_phase_provided_output_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseProvidedPhaseOutputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypePhaseProvidedOutputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseProvidedPhaseOutputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypePhaseProvidedOutputDto
+	for rows.Next() {
+		var i CoursePhaseTypePhaseProvidedOutputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.VersionNumber,
+			&i.EndpointPath,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoursePhaseRequiredParticipationInputs = `-- name: GetCoursePhaseRequiredParticipationInputs :many
 SELECT id, course_phase_type_id, dto_name, specification
 FROM course_phase_type_participation_required_input_dto
 WHERE course_phase_type_id = $1
 `
 
-func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationRequiredInputDto, error) {
-	rows, err := q.db.Query(ctx, getCoursePhaseRequiredInputs, coursePhaseTypeID)
+func (q *Queries) GetCoursePhaseRequiredParticipationInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypeParticipationRequiredInputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseRequiredParticipationInputs, coursePhaseTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -199,6 +232,37 @@ func (q *Queries) GetCoursePhaseRequiredInputs(ctx context.Context, coursePhaseT
 	var items []CoursePhaseTypeParticipationRequiredInputDto
 	for rows.Next() {
 		var i CoursePhaseTypeParticipationRequiredInputDto
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseTypeID,
+			&i.DtoName,
+			&i.Specification,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoursePhaseRequiredPhaseInputs = `-- name: GetCoursePhaseRequiredPhaseInputs :many
+SELECT id, course_phase_type_id, dto_name, specification
+FROM course_phase_type_phase_required_input_dto
+WHERE course_phase_type_id = $1
+`
+
+func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, coursePhaseTypeID uuid.UUID) ([]CoursePhaseTypePhaseRequiredInputDto, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseRequiredPhaseInputs, coursePhaseTypeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CoursePhaseTypePhaseRequiredInputDto
+	for rows.Next() {
+		var i CoursePhaseTypePhaseRequiredInputDto
 		if err := rows.Scan(
 			&i.ID,
 			&i.CoursePhaseTypeID,
