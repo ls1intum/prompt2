@@ -25,3 +25,8 @@ jobs:
         with:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           report-json: "eslint_report_core.json"
+      - name: Upload ESLint Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-report-core
+          path: eslint_report_core.json
