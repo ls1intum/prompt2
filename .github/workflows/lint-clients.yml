@@ -17,12 +17,12 @@ jobs:
         working-directory: ./clients
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
           cache-dependency-path: ./clients/yarn.lock
-      - run: corepack enable
       - run: yarn install
         working-directory: ./clients
         shell: bash
