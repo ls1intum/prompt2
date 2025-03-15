@@ -21,5 +21,10 @@ jobs:
       - name: Lint components in clients/
         run: |
           for dir in */; do
-            yarn eslint "$dir" --config "$dir/eslint.config.mjs"
+            yarn eslint "$dir" --config "$dir/eslint.config.mjs" > "lint-results/$dir-lint-results.txt" || true
           done
+      - name: Upload lint results as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-results
+          path: clients/lint-results/
