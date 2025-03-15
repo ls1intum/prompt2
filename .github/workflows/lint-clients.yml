@@ -24,12 +24,6 @@ jobs:
             yarn eslint "$dir" --config "$dir/eslint.config.mjs" --format json --output-file "lint-results/$(basename $dir)-lint-results.json" || true
           done
         continue-on-error: true
-      - name: Upload lint results as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: lint-results
-          path: clients/lint-results/
-          retention-days: 1
       - name: Annotate Code Linting Results
         uses: ataylorme/eslint-annotate-action@v3
         with:
