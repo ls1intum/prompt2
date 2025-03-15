@@ -11,3 +11,5 @@ runs:
         node-version: "18"
         cache: "yarn"
         cache-dependency-path: ./clients/yarn.lock
+    - run: yarn install
+      shell: bash
