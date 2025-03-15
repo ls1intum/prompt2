@@ -108,7 +108,11 @@ export const SeatAssignmentPage = (): JSX.Element => {
         />
       )}
       {seats.length > 0 && (
-        <SeatStudentAssigner existingSeats={seats} developerWithProfiles={developerWithProfiles} />
+        <SeatStudentAssigner
+          seats={seats}
+          developerWithProfiles={developerWithProfiles}
+          tutors={tutors}
+        />
       )}
     </div>
   )
