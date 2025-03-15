@@ -1,5 +1,5 @@
 ---
-name: Lint
+name: Lint Clients
 
 on:
   push:
@@ -20,6 +20,7 @@ jobs:
       - uses: ./.github/actions/setup-lint
       - run: yarn install
       - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}" --format=json --output-file eslint_report_core.json
+        continue-on-error: true
       - name: Annotate Code Linting Results
         uses: ataylorme/eslint-annotate-action@3.0.0
         with:
