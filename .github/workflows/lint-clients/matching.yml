@@ -1,4 +1,4 @@
-name: Lint Core
+name: Lint Matching Component
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     paths:
-      - "clients/core/**"
+      - "clients/matching_component/**"
 
 jobs:
   lint-core:
@@ -18,4 +18,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
       - run: yarn install
-      - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}"
+      - run: yarn eslint "matching_component/**/*.{js,jsx,ts,tsx}"
