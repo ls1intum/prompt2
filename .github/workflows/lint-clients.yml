@@ -18,4 +18,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-lint
+      - run: yarn install
       - run: yarn eslint "core/**/*.{js,jsx,ts,tsx}"
