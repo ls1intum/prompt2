@@ -12,9 +12,13 @@ export const useGetFilteredSeats = (
   return seats.filter((seat) => {
     // Search filter
     const matchesSearch =
-      seat?.seatName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (seat.assignedTutor !== null &&
-        getTutorName(seat.assignedTutor, tutors).toLowerCase().includes(searchTerm.toLowerCase()))
+      seat?.seatName?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      false ||
+      (seat?.assignedTutor !== null &&
+        getTutorName(seat.assignedTutor, tutors)
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase())) ||
+      false
 
     // Assignment filter
     const matchesAssignmentFilter =

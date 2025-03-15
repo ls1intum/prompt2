@@ -9,6 +9,17 @@ export const useDownloadAssignment = (
   developerWithProfiles: DeveloperWithProfile[],
   tutors: Tutor[],
 ) => {
+  function escapeCsvField(field) {
+    // If the field contains commas, quotes, or newlines, wrap it in quotes
+    // and escape any quotes by doubling them.
+    if (typeof field !== 'string') return field
+
+    if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+      return `"${field.replace(/"/g, '""')}"`
+    }
+    return field
+  }
+
   return useCallback(() => {
     const getStudentName = (studentId: string | null) => {
       if (!studentId) return 'Unassigned'
@@ -26,11 +37,11 @@ export const useDownloadAssignment = (
         .filter((seat) => seat.assignedStudent || seat.assignedTutor || seat.hasMac)
         .map((seat) =>
           [
-            seat.seatName,
+            escapeCsvField(seat.seatName),
             seat.hasMac ? 'Yes' : 'No',
-            seat.deviceID || '',
-            getStudentName(seat.assignedStudent),
-            getTutorName(seat.assignedTutor, tutors),
+            escapeCsvField(seat.deviceID || ''),
+            escapeCsvField(getStudentName(seat.assignedStudent)),
+            escapeCsvField(getTutorName(seat.assignedTutor, tutors)),
           ].join(','),
         ),
     ].join('\n')
