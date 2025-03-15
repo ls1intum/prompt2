@@ -9,7 +9,7 @@ on:
       - "clients/assessment_component/**"
 
 jobs:
-  lint-core:
+  lint-assessment:
     runs-on: ubuntu-latest
     defaults:
       run:

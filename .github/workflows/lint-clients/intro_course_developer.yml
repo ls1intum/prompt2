@@ -9,7 +9,7 @@ on:
       - "clients/intro_course_developer_component/**"
 
 jobs:
-  lint-core:
+  lint-intro-course-developer:
     runs-on: ubuntu-latest
     defaults:
       run:

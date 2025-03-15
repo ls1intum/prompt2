@@ -9,7 +9,7 @@ on:
       - "clients/devops_challenge_component/**"
 
 jobs:
-  lint-core:
+  lint-devops-challenge:
     runs-on: ubuntu-latest
     defaults:
       run:

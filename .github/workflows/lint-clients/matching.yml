@@ -9,7 +9,7 @@ on:
       - "clients/matching_component/**"
 
 jobs:
-  lint-core:
+  lint-matching:
     runs-on: ubuntu-latest
     defaults:
       run:
