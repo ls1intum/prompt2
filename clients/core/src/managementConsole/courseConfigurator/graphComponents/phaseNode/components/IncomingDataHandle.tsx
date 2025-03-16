@@ -16,7 +16,7 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
   const [matches, setMatches] = useState(false)
   const incomingEdge = useHandleConnections({
     type: 'target',
-    id: `metadata-in-phase-${phaseID}-dto-${dto.id}`,
+    id: `participation-data-in-phase-${phaseID}-dto-${dto.id}`,
   })
 
   const incomingDTOs = incomingEdge
@@ -30,7 +30,7 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
     })
     .map((dtoID) =>
       coursePhaseTypes
-        .flatMap((phase) => phase.providedOutputDTOs)
+        .flatMap((phase) => phase.providedParticipationOutputDTOs)
         .filter((reqDTO) => reqDTO !== null)
         .find((reqDTO) => reqDTO.id === dtoID),
     )
@@ -83,7 +83,7 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
             <Handle
               type='target'
               position={Position.Left}
-              id={`metadata-in-phase-${phaseID}-dto-${dto.id}`}
+              id={`participation-data-in-phase-${phaseID}-dto-${dto.id}`}
               style={{ left: '-28px', top: '50%' }}
               className='!w-3 !h-3 !bg-green-500 rounded-full'
             />

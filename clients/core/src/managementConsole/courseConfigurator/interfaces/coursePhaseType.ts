@@ -4,7 +4,9 @@ import { RequiredInputDTO } from './requiredInputDto'
 export interface CoursePhaseType {
   id: string
   name: string
-  requiredInputDTOs: RequiredInputDTO[]
-  providedOutputDTOs: ProvidedOutputDTO[]
+  requiredParticipationInputDTOs: RequiredInputDTO[]
+  providedParticipationOutputDTOs: ProvidedOutputDTO[]
+  requiredPhaseInputDTOs: RequiredInputDTO[]
+  providedPhaseOutputDTOs: ProvidedOutputDTO[]
   initialPhase: boolean
 }

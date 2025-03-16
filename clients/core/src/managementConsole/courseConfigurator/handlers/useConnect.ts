@@ -1,7 +1,7 @@
 import { addEdge, Connection, Edge } from '@xyflow/react'
 import { useCallback } from 'react'
 import { ParticipantEdgeProps } from '../graphComponents/edges/ParticipantEdgeProps'
-import { DataEdgeProps } from '../graphComponents/edges/DataEdgeProps'
+import { ParticipationDataEdgeProps } from '../graphComponents/edges/ParticipationDataEdgeProps'
 
 export const useConnect = (edges, nodes, setEdges, setIsModified) => {
   return useCallback(
@@ -31,7 +31,10 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
               'Participants connection not allowed: nodes can have at most one incoming and one outgoing participants edge.',
             )
           }
-        } else if (sourceHandle.startsWith('metadata') && targetHandle.startsWith('metadata')) {
+        } else if (
+          sourceHandle.startsWith('participation-data') &&
+          targetHandle.startsWith('participation-data')
+        ) {
           const sourceNode = nodes.find((node) => node.id === params.source)
           const targetNode = nodes.find((node) => node.id === params.target)
 
@@ -48,7 +51,7 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
           }
 
           if (sourceNode && targetNode) {
-            const newEdge = DataEdgeProps(params)
+            const newEdge = ParticipationDataEdgeProps(params)
             setEdges((eds) =>
               addEdge({ ...newEdge, id: `data-edge-from-${sourceHandle}-to-${targetHandle}` }, eds),
             )

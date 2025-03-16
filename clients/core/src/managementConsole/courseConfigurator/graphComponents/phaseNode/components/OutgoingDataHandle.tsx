@@ -15,7 +15,7 @@ export const OutgoingDataHandle = ({ phaseID, dto }: OutgoingDataHandleProps): J
       <Handle
         type='source'
         position={Position.Right}
-        id={`metadata-out-phase-${phaseID}-dto-${dto.id}`}
+        id={`participation-data-out-phase-${phaseID}-dto-${dto.id}`}
         style={{ right: '-28px', top: '50%' }}
         className='!w-3 !h-3 !bg-green-500 rounded-full'
       />

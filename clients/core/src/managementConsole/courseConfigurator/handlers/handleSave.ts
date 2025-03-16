@@ -14,7 +14,8 @@ interface HandleSaveProps {
   mutateAsyncPhases: (coursePhase: CreateCoursePhase) => Promise<string | undefined>
   mutateRenamePhase: UseMutateFunction<string | undefined, Error, UpdateCoursePhase, unknown>
   mutateCoursePhaseGraph: UseMutateFunction<void, Error, CoursePhaseGraphUpdate, unknown>
-  mutateMetaDataGraph: UseMutateFunction<void, Error, MetaDataGraphItem[], unknown>
+  mutateParticipationDataGraph: UseMutateFunction<void, Error, MetaDataGraphItem[], unknown>
+  mutatePhaseDataGraph: UseMutateFunction<void, Error, MetaDataGraphItem[], unknown>
   queryClient: any
   setIsModified: (val: boolean) => void
 }
@@ -28,7 +29,8 @@ export async function handleSave({
   mutateAsyncPhases,
   mutateRenamePhase,
   mutateCoursePhaseGraph,
-  mutateMetaDataGraph,
+  mutateParticipationDataGraph,
+  mutatePhaseDataGraph,
   queryClient,
   setIsModified,
 }: HandleSaveProps) {
@@ -122,7 +124,7 @@ export async function handleSave({
   // 4.) Update the graph with the new edges
   const updatedMetaDataEdges = edges
     .filter((edge) => {
-      return edge.id.startsWith('data-edge-')
+      return edge.id.startsWith('data-edge-from-participation')
     })
     .map((edge) => {
       const newSource = idReplacementMap[edge.source] || edge.source
@@ -137,10 +139,17 @@ export async function handleSave({
     toCoursePhaseDtoID: edge.targetHandle?.split('dto-')[1] ?? '', // the dto ID is at the end of the target handle
   }))
 
+  // TODO include the phase data graph
+
   try {
-    await mutateMetaDataGraph(metaDataGraph)
+    await mutateParticipationDataGraph(metaDataGraph)
     queryClient.invalidateQueries({
-      queryKey: ['courses', 'meta_phase_graph', 'course_phase_types', 'course_phase_graph'],
+      queryKey: [
+        'courses',
+        'participation_data_phase_graph',
+        'course_phase_types',
+        'course_phase_graph',
+      ],
     })
     setIsModified(false)
     // Optionally reload if needed
