@@ -2,6 +2,7 @@ import { addEdge, Connection, Edge } from '@xyflow/react'
 import { useCallback } from 'react'
 import { ParticipantEdgeProps } from '../graphComponents/edges/ParticipantEdgeProps'
 import { ParticipationDataEdgeProps } from '../graphComponents/edges/ParticipationDataEdgeProps'
+import { PhaseDataEdgeProps } from '../graphComponents/edges/PhaseDataEdgeProps'
 
 export const useConnect = (edges, nodes, setEdges, setIsModified) => {
   return useCallback(
@@ -32,8 +33,9 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
             )
           }
         } else if (
-          sourceHandle.startsWith('participation-data') &&
-          targetHandle.startsWith('participation-data')
+          (sourceHandle.startsWith('participation-data') &&
+            targetHandle.startsWith('participation-data')) ||
+          (sourceHandle.startsWith('phase-data') && targetHandle.startsWith('phase-data'))
         ) {
           const sourceNode = nodes.find((node) => node.id === params.source)
           const targetNode = nodes.find((node) => node.id === params.target)
@@ -51,7 +53,9 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
           }
 
           if (sourceNode && targetNode) {
-            const newEdge = ParticipationDataEdgeProps(params)
+            const newEdge = sourceHandle.startsWith('participation-data')
+              ? ParticipationDataEdgeProps(params)
+              : PhaseDataEdgeProps(params)
             setEdges((eds) =>
               addEdge({ ...newEdge, id: `data-edge-from-${sourceHandle}-to-${targetHandle}` }, eds),
             )
@@ -61,6 +65,7 @@ export const useConnect = (edges, nodes, setEdges, setIsModified) => {
           }
         }
       }
+      // TODO for phase data nodes
     },
     [edges, nodes, setEdges, setIsModified],
   )

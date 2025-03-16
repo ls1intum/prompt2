@@ -5,6 +5,7 @@ import { CoursePhaseGraphUpdate } from '../interfaces/coursePhaseGraphUpdate'
 import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
 import { UseMutateFunction } from '@tanstack/react-query'
+import { getMetaDataGraphFromEdges } from '../utils/getMetaDataGraphFromEdges'
 
 interface HandleSaveProps {
   nodes: Node[]
@@ -121,8 +122,29 @@ export async function handleSave({
     return err
   }
 
-  // 4.) Update the graph with the new edges
-  const updatedMetaDataEdges = edges
+  // 4.) Update the phase data graph with the new edges
+  const updatedPhaseDataEdges = edges
+    .filter((edge) => {
+      return edge.id.startsWith('data-edge-from-phase')
+    })
+    .map((edge) => {
+      const newSource = idReplacementMap[edge.source] || edge.source
+      const newTarget = idReplacementMap[edge.target] || edge.target
+      return { ...edge, source: newSource, target: newTarget }
+    })
+
+  console.log('Updated Phase Data Edges', updatedPhaseDataEdges)
+  console.log('Edges', edges)
+  const phaseDataGraph: MetaDataGraphItem[] = getMetaDataGraphFromEdges(updatedPhaseDataEdges)
+  try {
+    await mutatePhaseDataGraph(phaseDataGraph)
+  } catch (err) {
+    console.error('Error saving phase data graph', err)
+    return err
+  }
+
+  // 5.) Update the participation graph with the new edges
+  const updatedParticipationDataEdges = edges
     .filter((edge) => {
       return edge.id.startsWith('data-edge-from-participation')
     })
@@ -132,21 +154,18 @@ export async function handleSave({
       return { ...edge, source: newSource, target: newTarget }
     })
 
-  const metaDataGraph: MetaDataGraphItem[] = updatedMetaDataEdges.map((edge) => ({
-    fromCoursePhaseID: edge.source,
-    toCoursePhaseID: edge.target,
-    fromCoursePhaseDtoID: edge.sourceHandle?.split('dto-')[1] ?? '',
-    toCoursePhaseDtoID: edge.targetHandle?.split('dto-')[1] ?? '', // the dto ID is at the end of the target handle
-  }))
-
+  const participationDataGraph: MetaDataGraphItem[] = getMetaDataGraphFromEdges(
+    updatedParticipationDataEdges,
+  )
   // TODO include the phase data graph
 
   try {
-    await mutateParticipationDataGraph(metaDataGraph)
+    await mutateParticipationDataGraph(participationDataGraph)
     queryClient.invalidateQueries({
       queryKey: [
         'courses',
         'participation_data_phase_graph',
+        'phase_data_phase_graph',
         'course_phase_types',
         'course_phase_graph',
       ],

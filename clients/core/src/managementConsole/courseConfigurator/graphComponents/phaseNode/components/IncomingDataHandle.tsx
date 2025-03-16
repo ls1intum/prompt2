@@ -9,14 +9,24 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 interface IncomingDataHandleProps {
   phaseID: string
   dto: RequiredInputDTO
+  type: 'participation-data' | 'phase-data'
 }
 
-export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): JSX.Element => {
+export const IncomingDataHandle = ({
+  phaseID,
+  dto,
+  type,
+}: IncomingDataHandleProps): JSX.Element => {
+  const handleName =
+    type === 'participation-data'
+      ? `participation-data-in-phase-${phaseID}-dto-${dto.id}`
+      : `phase-data-in-phase-${phaseID}-dto-${dto.id}`
+
   const { coursePhaseTypes } = useCourseConfigurationState()
   const [matches, setMatches] = useState(false)
   const incomingEdge = useHandleConnections({
     type: 'target',
-    id: `participation-data-in-phase-${phaseID}-dto-${dto.id}`,
+    id: handleName,
   })
 
   const incomingDTOs = incomingEdge
@@ -30,7 +40,11 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
     })
     .map((dtoID) =>
       coursePhaseTypes
-        .flatMap((phase) => phase.providedParticipationOutputDTOs)
+        .flatMap((phase) =>
+          type === 'participation-data'
+            ? phase.providedParticipationOutputDTOs
+            : phase.providedPhaseOutputDTOs,
+        )
         .filter((reqDTO) => reqDTO !== null)
         .find((reqDTO) => reqDTO.id === dtoID),
     )
@@ -83,7 +97,7 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
             <Handle
               type='target'
               position={Position.Left}
-              id={`participation-data-in-phase-${phaseID}-dto-${dto.id}`}
+              id={handleName}
               style={{ left: '-28px', top: '50%' }}
               className='!w-3 !h-3 !bg-green-500 rounded-full'
             />

@@ -262,7 +262,7 @@ func GetParticipationDataGraph(ctx context.Context, courseID uuid.UUID) ([]cours
 }
 
 func GetPhaseDataGraph(ctx context.Context, courseID uuid.UUID) ([]courseDTO.MetaDataGraphItem, error) {
-	graph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(ctx, courseID)
+	graph, err := CourseServiceSingleton.queries.GetPhaseDataGraph(ctx, courseID)
 	if err != nil {
 		return nil, err
 	}

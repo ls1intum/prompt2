@@ -4,9 +4,18 @@ import { Handle, Position } from '@xyflow/react'
 interface OutgoingDataHandleProps {
   phaseID: string
   dto: ProvidedOutputDTO
+  type: 'participation-data' | 'phase-data'
 }
 
-export const OutgoingDataHandle = ({ phaseID, dto }: OutgoingDataHandleProps): JSX.Element => {
+export const OutgoingDataHandle = ({
+  phaseID,
+  dto,
+  type,
+}: OutgoingDataHandleProps): JSX.Element => {
+  const handleName =
+    type === 'participation-data'
+      ? `participation-data-out-phase-${phaseID}-dto-${dto.id}`
+      : `phase-data-out-phase-${phaseID}-dto-${dto.id}`
   return (
     <div
       className={`flex items-center justify-end p-2 rounded-md bg-green-50 text-green-700 relative shadow-sm transition-all duration-200`}
@@ -15,7 +24,7 @@ export const OutgoingDataHandle = ({ phaseID, dto }: OutgoingDataHandleProps): J
       <Handle
         type='source'
         position={Position.Right}
-        id={`participation-data-out-phase-${phaseID}-dto-${dto.id}`}
+        id={handleName}
         style={{ right: '-28px', top: '50%' }}
         className='!w-3 !h-3 !bg-green-500 rounded-full'
       />
