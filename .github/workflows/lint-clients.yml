@@ -18,10 +18,8 @@ jobs:
           done
         continue-on-error: true
         working-directory: ./clients
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@v3
+      - name: Upload Lint Results
+        uses: actions/upload-artifact@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          report-json: "./clients/lint-results/*.json"
-          markdown-report-on-step-summary: true
-          only-pr-files: false
+          name: lint-results
+          path: clients/lint-results/*.json
