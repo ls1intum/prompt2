@@ -8,6 +8,7 @@ jobs:
   build-servers:
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
+
   lint-clients:
     uses: ./.github/workflows/lint-clients.yml
     secrets: inherit
@@ -15,13 +16,10 @@ jobs:
     needs: lint-clients
     runs-on: ubuntu-latest
     steps:
-      - name: Download Lint Results
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: lint-results
           path: clients/lint-results
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@v3
+      - uses: ataylorme/eslint-annotate-action@v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "./clients/lint-results/*.json"
@@ -30,6 +28,7 @@ jobs:
     needs: annotate-lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
+
   deploy-dev:
     needs: [build-clients, build-servers]
     uses: ./.github/workflows/deploy-docker.yml
