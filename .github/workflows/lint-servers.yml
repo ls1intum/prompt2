@@ -1,51 +1,39 @@
 name: Lint Go Code
 
 on:
-  workflow_call:
+  pull_request:
+    branches: [main]
 
-permissions:
-  contents: read
-  pull-requests: read
-  checks: write
+env:
+  GO_VERSION: stable
+  GOLANGCI_LINT_VERSION: v1.64
 
 jobs:
-  golangci-lint:
-    name: Run GolangCI-Lint
+  detect-modules:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module: [servers/core, servers/intro_course]
-
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: stable
-          cache-dependency-path: "servers/core/*.sum"
+          go-version: ${{ env.GO_VERSION }}
+      - id: set-modules
+        run: echo "modules=$(go list -m -json | jq -s '.' | jq -c '[.[].Dir]')" >> $GITHUB_OUTPUT
+
+  golangci-lint:
+    needs: detect-modules
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        modules: ${{ fromJSON(needs.detect-modules.outputs.modules) }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: stable
-          cache-dependency-path: "servers/intro_course/*.sum"
-      - name: Run GolangCI-Lint
+          go-version: ${{ env.GO_VERSION }}
+      - name: golangci-lint ${{ matrix.modules }}
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          working-directory: ${{ matrix.module }}
-          args: --out-format checkstyle --out-file=${{ matrix.module }}/golangci-lint-report.xml
-      - name: Annotate Lint Results in PR
-        if: always()
-        run: |
-          if [ -f ${{ matrix.module }}/golangci-lint-report.xml ]; then
-            echo "Lint report found for ${{ matrix.module }}"
-            curl -X POST https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -d '{"body":"Lint results for '${{ matrix.module }}': See the attached report."}'
-          else
-            echo "No lint report generated for ${{ matrix.module }}"
-          fi
-      - name: Upload Lint Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: golangci-lint-${{ matrix.module }}
-          path: ${{ matrix.module }}/golangci-lint-report.xml
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: ${{ matrix.modules }}
