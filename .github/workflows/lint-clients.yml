@@ -14,7 +14,7 @@ jobs:
       - name: Lint components in clients/
         run: |
           for dir in */; do
-            yarn eslint "$dir" --config "$dir/eslint.config.mjs" --ignore-pattern "$dir/.eslintignore" --format json --output-file "lint-results/$(basename $dir)-lint-results.json" || true
+            yarn eslint "$dir" --config "$dir/eslint.config.mjs" --format json --output-file "lint-results/$(basename $dir)-lint-results.json" || true
           done
         continue-on-error: true
         working-directory: ./clients
