@@ -11,6 +11,16 @@ jobs:
   lint-clients:
     uses: ./.github/workflows/lint-clients.yml
     secrets: inherit
+  annotate-lint-clients:
+    needs: lint-clients
+    runs-on: ubuntu-latest
+    steps:
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          report-json: "./clients/lint-results/*.json"
+          only-pr-files: false
   build-clients:
     needs: lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml
