@@ -27,7 +27,7 @@ CREATE TABLE course_phase_type_phase_provided_output_dto (
     specification           jsonb       NOT NULL,
     CONSTRAINT fk_course_phase_type_phase_provided
       FOREIGN KEY (course_phase_type_id)
-      REFERENCES course_phase_type_phase(id)  -- adjust if needed
+      REFERENCES course_phase_type(id)  -- adjust if needed
       ON DELETE CASCADE
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE course_phase_type_phase_required_input_dto (
     specification           jsonb NOT NULL,
     CONSTRAINT fk_course_phase_type_phase_required
       FOREIGN KEY (course_phase_type_id)
-      REFERENCES course_phase_type_phase(id)  -- adjust if needed
+      REFERENCES course_phase_type(id)  -- adjust if needed
       ON DELETE CASCADE
 );
 

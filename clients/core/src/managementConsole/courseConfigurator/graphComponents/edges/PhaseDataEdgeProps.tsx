@@ -1,7 +1,7 @@
 import { Connection, Edge, MarkerType } from '@xyflow/react'
 import { Database } from 'lucide-react'
 
-export const ParticipationDataEdgeProps = (params: Edge | Connection) => ({
+export const PhaseDataEdgeProps = (params: Edge | Connection) => ({
   ...params,
   animated: false,
   style: { stroke: '#22c55e', strokeWidth: 2, strokeDasharray: '5,5' },
