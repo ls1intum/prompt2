@@ -8,7 +8,11 @@ jobs:
   build-servers:
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
+  lint-clients:
+    uses: ./.github/workflows/lint-clients.yml
+    secrets: inherit
   build-clients:
+    needs: lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
   deploy-dev:

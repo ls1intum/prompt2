@@ -1,8 +1,7 @@
 name: Lint Clients
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 jobs:
   lint-clients:
