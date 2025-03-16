@@ -8,9 +8,6 @@ export default [
     rules: {},
   },
   {
-    ignores: [
-      '**/components/ui/*',
-      '**/components/minimal-tiptap/*',
-    ]
-  }
+    ignores: ['**/components/ui/*', '**/components/minimal-tiptap/*'],
+  },
 ]
