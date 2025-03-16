@@ -31,7 +31,7 @@ jobs:
         with:
           version: latest
           working-directory: ${{ matrix.module }}
-          args: --out-format checkstyle
+          args: --out-format checkstyle --out-file=${{ matrix.module }}/golangci-lint-report.xml
       - name: Annotate Lint Results in PR
         if: always()
         run: |
