@@ -1,11 +1,15 @@
 name: Build and Deploy to Dev
 
 on:
-  push:
+  pull_request:
     branches: [main]
 
 jobs:
+  lint-servers:
+    uses: ./.github/workflows/lint-servers.yml
+    secrets: inherit
   build-servers:
+    needs: lint-servers
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   build-clients:
