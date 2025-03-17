@@ -25,11 +25,7 @@ export const ResetSeatAssignmentDialog = ({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          className='text-red-600 border-red-200 hover:bg-red-50'
-          disabled={disabled}
-        >
+        <Button variant='outline' className='text-red-600 border-red-20' disabled={disabled}>
           <RefreshCw className='mr-2 h-4 w-4' />
           Reset Assignments
         </Button>
