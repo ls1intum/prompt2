@@ -116,7 +116,7 @@ export const SeatStudentAssigner = ({
                   </Badge>
                 )}
                 {assignmentStatus === 'complete' && (
-                  <Badge variant='outline' className='bg-green-50 text-green-600'>
+                  <Badge variant='outline' className='bg-green-500 text-green-600'>
                     Fully Assigned ({assignedStudents}/{totalStudents})
                   </Badge>
                 )}
