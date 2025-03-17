@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Seat } from '../../../interfaces/Seat'
 import { DeveloperWithProfile } from '../interfaces/DeveloperWithProfile'
-import { Tutor } from 'src/introCourse/interfaces/Tutor'
+import { Tutor } from '../../../interfaces/Tutor'
 import { getTutorName } from '../utils/getTutorName'
 
 export const useDownloadAssignment = (

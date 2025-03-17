@@ -134,9 +134,12 @@ export const SeatUploader = ({ existingSeats }: SeatUploaderProps): JSX.Element 
 
         {hasSeatPlan ? (
           <div className='space-y-4'>
-            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 bg-green-50 border border-green-100 rounded-md'>
+            <div
+              className={`flex flex-col sm:flex-row sm:items-center sm:justify-between 
+              gap-2 p-4 border border-green-100 rounded-md`}
+            >
               <div className='flex items-center'>
-                <CheckCircle2 className='h-5 w-5 text-green-600 mr-2' />
+                <CheckCircle2 className='h-5 w-5 text-green-500 mr-2' />
                 <p className='text-sm'>
                   A seat plan with <span className='font-medium'>{existingSeats.length} seats</span>{' '}
                   is ready for student and tutor assignment.
