@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,25 @@ export const EmailTemplateEditor = ({
   contentHTMLLabel,
   placeholders,
 }: EmailTemplateEditorProps): JSX.Element => {
+  // Local state to hold warning message
+  const [subjectWarning, setSubjectWarning] = useState('')
+
+  // Regular expression to allow only ASCII characters
+  const asciiOnlyRegex = /^[\x20-\x7F]*$/
+
+  // Custom onChange handler for subject input
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (!asciiOnlyRegex.test(value)) {
+      // Set a warning message and do not propagate the change
+      setSubjectWarning('Warning: Only ASCII characters are allowed.')
+      return
+    }
+    // Clear any warning and propagate the valid change
+    setSubjectWarning('')
+    onInputChange(e)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -35,9 +55,10 @@ export const EmailTemplateEditor = ({
             type='text'
             name={subjectHTMLLabel}
             value={subject}
-            onChange={(e) => onInputChange(e)}
+            onChange={handleSubjectChange}
             className='w-full mt-1'
           />
+          {subjectWarning && <p className='text-red-500 text-sm mt-1'>{subjectWarning}</p>}
         </div>
         <div>
           <Label htmlFor={contentHTMLLabel}>{label} E-Mail Template</Label>
@@ -52,7 +73,7 @@ export const EmailTemplateEditor = ({
               className='w-full mt-1'
               editorContentClassName='p-4'
               output='html'
-              placeholder={`Type your email here...`}
+              placeholder='Type your email here...'
               autofocus={false}
               editable={true}
               editorClassName='focus:outline-none'
