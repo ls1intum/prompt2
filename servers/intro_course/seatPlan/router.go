@@ -15,13 +15,13 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 	seatPlanRouter := router.Group("/seat_plan")
 
 	// Post initial seat plan with seat names
-	seatPlanRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), createSeatPlan)
-	seatPlanRouter.DELETE("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), deleteSeatPlan)
+	seatPlanRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createSeatPlan)
+	seatPlanRouter.DELETE("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), deleteSeatPlan)
 
 	// Update seat plan (assigned tutor, assigned student, hasMac, deviceID)
-	seatPlanRouter.PUT("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), updateSeatPlan)
+	seatPlanRouter.PUT("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateSeatPlan)
 
-	seatPlanRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.PromptLecturer), getSeatPlan)
+	seatPlanRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getSeatPlan)
 
 }
 
