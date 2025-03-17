@@ -28,7 +28,7 @@ export const EmailTemplateEditor = ({
   const [subjectWarning, setSubjectWarning] = useState('')
 
   // Regular expression to allow only ASCII characters
-  const asciiOnlyRegex = /^[\x00-\x7F]*$/
+  const asciiOnlyRegex = /^[\x20-\x7F]*$/
 
   // Custom onChange handler for subject input
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
