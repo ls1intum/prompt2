@@ -13,13 +13,6 @@ import { useDarkMode } from '@/contexts/DarkModeProvider'
 export function ThemeToggle() {
   const { theme, setTheme } = useDarkMode()
 
-  const handleThemeChange = (value: string) => {
-    if (value) {
-      setTheme(value as 'system' | 'light' | 'dark')
-      // Add your theme change logic here
-    }
-  }
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
