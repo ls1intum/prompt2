@@ -9,10 +9,8 @@ import (
 
 // TODO move to shared library
 func DeferRollback(tx pgx.Tx, ctx context.Context) {
-	defer func() {
-		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Error("Error rolling back transaction: ", err)
-		}
-	}()
+	err := tx.Rollback(ctx)
+	if err != nil {
+		log.Error("Error rolling back transaction: ", err)
+	}
 }

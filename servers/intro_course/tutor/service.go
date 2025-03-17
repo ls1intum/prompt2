@@ -36,7 +36,7 @@ func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []tutorDT
 	if err != nil {
 		return err
 	}
-	utils.DeferRollback(tx, ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := TutorServiceSingleton.queries.WithTx(tx)
 
 	for _, tutor := range tutors {
