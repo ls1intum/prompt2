@@ -81,7 +81,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         {/* 3. Phase Data Outputs (provided Output DTOs) */}
         {phaseType?.providedPhaseOutputDTOs && phaseType.providedPhaseOutputDTOs.length > 0 && (
           <>
-            <h4 className='text-sm font-semibold mb-2'>Provided Participation Outputs:</h4>
+            <h4 className='text-sm font-semibold mb-2'>Provided Phase Outputs:</h4>
             <div className='meta-data-outputs space-y-2 ml-16'>
               {phaseType.providedPhaseOutputDTOs.map((dto) => (
                 <OutgoingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
