@@ -170,7 +170,6 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
 		log.Error("Failed to create keycloak roles for course: ", err)
-		defer utils.DeferRollback(tx, ctx)
 		return courseDTO.Course{}, err
 	}
 
