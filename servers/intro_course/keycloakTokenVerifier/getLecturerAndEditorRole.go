@@ -16,13 +16,13 @@ func GetLecturerAndEditorRole() gin.HandlerFunc {
 		coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 		if err != nil {
 			log.Error("Error parsing coursePhaseID:", err)
-			c.AbortWithError(http.StatusBadRequest, err)
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
 		if coursePhaseID == uuid.Nil {
 			log.Error("Invalid coursePhaseID")
-			c.AbortWithError(http.StatusBadRequest, errors.New("coursePhaseID missing"))
+			_ = c.AbortWithError(http.StatusBadRequest, errors.New("coursePhaseID missing"))
 			return
 		}
 
@@ -31,7 +31,7 @@ func GetLecturerAndEditorRole() gin.HandlerFunc {
 		tokenMapping, err := keycloakCoreRequests.SendCoursePhaseRoleMappingRequest(c.GetHeader("Authorization"), coursePhaseID)
 		if err != nil {
 			log.Error("Error getting course roles:", err)
-			c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 

@@ -22,7 +22,7 @@ func IsStudentOfCoursePhaseMiddleware() gin.HandlerFunc {
 
 		if coursePhaseID == uuid.Nil {
 			log.Error("Invalid coursePhaseID")
-			c.AbortWithError(http.StatusBadRequest, errors.New("coursePhaseID missing"))
+			_ = c.AbortWithError(http.StatusBadRequest, errors.New("coursePhaseID missing"))
 			return
 		}
 
@@ -35,7 +35,7 @@ func IsStudentOfCoursePhaseMiddleware() gin.HandlerFunc {
 				c.Set("isStudentOfCoursePhase", false)
 			} else {
 				log.Error("Error getting course roles:", err)
-				c.AbortWithError(http.StatusInternalServerError, err)
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
 				return
 			}
 		} else {

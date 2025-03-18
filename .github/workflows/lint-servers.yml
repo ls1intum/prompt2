@@ -1,0 +1,25 @@
+name: Lint Go Code
+
+on:
+  workflow_call:
+
+jobs:
+  golangci-lint:
+    name: Run GolangCI-Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [servers/core, servers/intro_course]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: "${{ matrix.module }}/*.sum"
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64
+          working-directory: ${{ matrix.module }}
+          args: --timeout 5m

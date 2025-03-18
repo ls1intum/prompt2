@@ -12,6 +12,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -151,7 +152,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
@@ -169,7 +170,6 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
 		log.Error("Failed to create keycloak roles for course: ", err)
-		tx.Rollback(ctx)
 		return courseDTO.Course{}, err
 	}
 
@@ -184,7 +184,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -266,7 +266,7 @@ func UpdateMetaDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate []
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
