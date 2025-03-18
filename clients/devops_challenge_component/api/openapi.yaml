@@ -1,137 +1,267 @@
 openapi: 3.1.0
-
 info:
-  title: Devops Challenge Server API
+  title: Challenge API
+  description: API for handling challenge submissions, student repositories, and testing.
   version: 1.0.0
-  description: API for interacting with student repositories and test attempts for the Devops Challenge.
-
 paths:
-  /repo/{githubHandle}:
-    post:
-      summary: Create a repository for the student
-      description: This endpoint creates a repository for the student with the given GitHub Handle.
-      parameters:
-        - in: path
-          name: githubHandle
-          required: true
-          schema:
-            type: string
-          description: The unique identifier of the student.
-      responses:
-        '201':
-          description: Repository created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  repoLink:
-                    type: string
-                    description: The repository URL of the created repository.
-        '400':
-          description: Invalid GitHub Handle or other request error
-        '409':
-          description: Repository already exists for the student
-        '500':
-          description: Internal server error
-
+  /{coursePhaseID}/demo-student:
     get:
-      summary: Fetch the repository link by GitHub Handle
-      description: This endpoint fetches the repository URL for a given GitHub Handle.
+      summary: "Demo endpoint for students"
+      description: "A demo endpoint for students to test access control."
       parameters:
-        - in: path
-          name: githubHandle
+        - name: coursePhaseID
+          in: path
           required: true
           schema:
             type: string
-          description: The unique identifier of the student.
+            format: uuid
       responses:
         '200':
-          description: Repository link fetched successfully
+          description: "Hello, student"
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  repoLink:
+                  message:
                     type: string
-                    description: The repository URL of the student.
-        '404':
-          description: GitHub Handle not found
-        '500':
-          description: Internal server error
-
-  /assess/{githubHandle}:
-    post:
-      summary: Trigger DevOps assessment for the student's pipeline
-      description: This endpoint triggers the DevOps assessment for the student's pipeline with the given GitHub Handle.
-      parameters:
-        - in: path
-          name: githubHandle
-          required: true
-          schema:
-            type: string
-          description: The unique identifier of the student.
-      responses:
-        '200':
-          description: Tests triggered successfully, remaining attempts returned
+                    example: "Hello, student"
+        '400':
+          description: "Bad request"
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  remainingAttempts:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/demo-lecturer:
+    get:
+      summary: "Demo endpoint for lecturers"
+      description: "A demo endpoint for lecturers to test access control."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "Hello, lecturer"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hello, lecturer"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/info:
+    get:
+      summary: "Get student information"
+      description: "Fetch information about a student's challenge progress."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "Student info retrieved"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositoryUrl:
+                    type: string
+                  attempts:
                     type: integer
-                    description: The number of remaining test attempts for the student.
-                  lastAssessment:
+                  maxAttempts:
+                    type: integer
+                  hasPassed:
+                    type: boolean
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
                     type: string
-                    format: date-time
-                    example: 2025-01-31T12:00:00Z
-                    description: The last assessment result of the student.
-                  status:
+                    example: "Invalid coursePhaseID"
+        '404':
+          description: "Student not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
                     type: string
-                    enum: [pending, success, failed]
-                    description: The status of the assessment.
-                  feedback:
+                    example: "student not found"
+  
+  /{coursePhaseID}/students:
+    get:
+      summary: "Get all students"
+      description: "Fetch a list of all students in a course phase."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "List of students retrieved"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  students:
                     type: array
                     items:
                       type: object
                       properties:
-                        test:
+                        studentId:
                           type: string
-                          description: The test name.
-                        status:
-                          type: string
-                          enum: [success, failed] # TODO Warnings?
-                          description: The status of the test.
-                        message:
-                          type: string
-                          description: The message of the test result.
-                    description: The feedback of the assessment.
         '400':
-          description: Invalid GitHub Handle or other request error
-        '404':
-          description: GitHub Handle not found
-        '500':
-          description: Internal server error
-
-  /submit/{githubHandle}:
-    patch:
-      summary: Mark the submission as final
-      description: This endpoint marks the student's submission as final.
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/repository:
+    post:
+      summary: "Create student repository"
+      description: "Creates a GitHub repository for a student for a given course phase."
       parameters:
-        - in: path
-          name: githubHandle
+        - name: coursePhaseID
+          in: path
           required: true
           schema:
             type: string
-          description: The unique identifier of the student.
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                githubUsername:
+                  type: string
       responses:
         '200':
-          description: Submission marked as final successfully
+          description: "Repository created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Repository created"
+                  repositoryUrl:
+                    type: string
+                    example: "https://github.com/example/repository"
         '400':
-          description: Invalid GitHub Handle or other request error
-        '404':
-          description: GitHub Handle not found
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid GitHub username"
+        '409':
+          description: "Student already exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "student already exists"
+  
+  /{coursePhaseID}/studentTest:
+    post:
+      summary: "Test student repository"
+      description: "Test a student's repository and container for correctness."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                githubUsername:
+                  type: string
+      responses:
+        '200':
+          description: "Student passed challenge"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Student passed challenge"
+        '400':
+          description: "Invalid repository or container"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No repository found"
         '500':
-          description: Internal server error
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error pulling image"
