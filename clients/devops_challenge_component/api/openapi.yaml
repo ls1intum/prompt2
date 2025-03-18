@@ -1,0 +1,137 @@
+openapi: 3.0.0
+
+info:
+  title: Devops Challenge Server API
+  version: 1.0.0
+  description: API for interacting with student repositories and test attempts for the Devops Challenge.
+
+paths:
+  /repo/{studentId}:
+    post:
+      summary: Create a repository for the student
+      description: This endpoint creates a repository for the student with the given student ID.
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the student.
+      responses:
+        '201':
+          description: Repository created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repoLink:
+                    type: string
+                    description: The repository URL of the created repository.
+        '400':
+          description: Invalid student ID or other request error
+        '409':
+          description: Repository already exists for the student
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Fetch the repository link by student ID
+      description: This endpoint fetches the repository URL for a given student ID.
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the student.
+      responses:
+        '200':
+          description: Repository link fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repoLink:
+                    type: string
+                    description: The repository URL of the student.
+        '404':
+          description: Student ID not found
+        '500':
+          description: Internal server error
+
+  /assess/{studentId}:
+    post:
+      summary: Trigger DevOps assessment for the student's pipeline
+      description: This endpoint triggers the DevOps assessment for the student's pipeline with the given student ID.
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the student.
+      responses:
+        '200':
+          description: Tests triggered successfully, remaining attempts returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remainingAttempts:
+                    type: integer
+                    description: The number of remaining test attempts for the student.
+                  lastAssessment:
+                    type: string
+                    format: date-time
+                    example: 2025-01-31T12:00:00Z
+                    description: The last assessment result of the student.
+                  status:
+                    type: string
+                    enum: [pending, success, failed]
+                    description: The status of the assessment.
+                  feedback:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        test:
+                          type: string
+                          description: The test name.
+                        status:
+                          type: string
+                          enum: [success, failed] # TODO Warnings?
+                          description: The status of the test.
+                        message:
+                          type: string
+                          description: The message of the test result.
+                    description: The feedback of the assessment.
+        '400':
+          description: Invalid student ID or other request error
+        '404':
+          description: Student ID not found
+        '500':
+          description: Internal server error
+
+  /submit/{studentId}:
+    patch:
+      summary: Mark the submission as final
+      description: This endpoint marks the student's submission as final.
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the student.
+      responses:
+        '200':
+          description: Submission marked as final successfully
+        '400':
+          description: Invalid student ID or other request error
+        '404':
+          description: Student ID not found
+        '500':
+          description: Internal server error
