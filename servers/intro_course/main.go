@@ -12,6 +12,7 @@ import (
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
+	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
@@ -79,7 +80,11 @@ func main() {
 	initKeycloak(*query)
 	developerProfile.InitDeveloperProfileModule(api, *query, conn)
 	tutor.InitTutorModule(api, *query, conn)
+	seatPlan.InitSeatPlanModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
-	router.Run(serverAddress)
+	err = router.Run(serverAddress)
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

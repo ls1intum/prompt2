@@ -1122,3 +1122,14 @@ ALTER TABLE application_assessment
 
 ALTER TABLE course_phase_participation
   DROP COLUMN old_id;
+
+-- Rename existing DTO tables to use the "participation" prefix
+ALTER TABLE course_phase_type_provided_output_dto 
+    RENAME TO course_phase_type_participation_provided_output_dto;
+
+ALTER TABLE course_phase_type_required_input_dto 
+    RENAME TO course_phase_type_participation_required_input_dto;
+
+-- Rename the dependency graph table to "participation_data_dependency_graph"
+ALTER TABLE meta_data_dependency_graph 
+    RENAME TO participation_data_dependency_graph;

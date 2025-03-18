@@ -48,14 +48,14 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	// Connect to the database
 	conn, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
 	// Run the SQL dump
 	if err := runSQLDump(conn, sqlDumpPath); err != nil {
 		conn.Close()
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to run SQL dump: %w", err)
 	}
 
@@ -65,7 +65,7 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	// Return the TestDB and a cleanup function
 	cleanup := func() {
 		conn.Close()
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 	}
 
 	return &TestDB{

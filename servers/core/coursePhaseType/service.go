@@ -26,27 +26,47 @@ func GetAllCoursePhaseTypes(ctx context.Context) ([]coursePhaseTypeDTO.CoursePha
 
 	dtoCoursePhaseTypes := make([]coursePhaseTypeDTO.CoursePhaseType, 0, len(coursePhaseTypes))
 	for _, phaseType := range coursePhaseTypes {
-		fetchedRequiredInputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseRequiredInputs(ctxWithTimeout, phaseType.ID)
+		// Participation Graph
+		fetchedParticipationInputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseRequiredParticipationInputs(ctxWithTimeout, phaseType.ID)
+		if err != nil {
+			return nil, err
+		}
+		fetchedParticipationOutputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseProvidedParticipationOutputs(ctxWithTimeout, phaseType.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		fetchedProvidedOutputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseProvidedOutputs(ctxWithTimeout, phaseType.ID)
+		// Phase Data Graph
+		fetchedPhaseInputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseRequiredPhaseInputs(ctxWithTimeout, phaseType.ID)
+		if err != nil {
+			return nil, err
+		}
+		fetchedPhaseOutputDTOs, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseProvidedPhaseOutputs(ctxWithTimeout, phaseType.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		requiredInputDTOs, err := coursePhaseTypeDTO.GetRequiredInputDTOsFromDBModel(fetchedRequiredInputDTOs)
+		participationInputDTOs, err := coursePhaseTypeDTO.GetParticipationInputDTOsFromDBModel(fetchedParticipationInputDTOs)
 		if err != nil {
 			return nil, err
 		}
 
-		providedOutputDTOs, err := coursePhaseTypeDTO.GetProvidedOutputDTOsFromDBModel(fetchedProvidedOutputDTOs)
+		participationOutputDTOs, err := coursePhaseTypeDTO.GetParticipationOutputDTOsFromDBModel(fetchedParticipationOutputDTOs)
 		if err != nil {
 			return nil, err
 		}
 
-		dtoCoursePhaseType, err := coursePhaseTypeDTO.GetCoursePhaseTypeDTOFromDBModel(phaseType, requiredInputDTOs, providedOutputDTOs)
+		phaseInputDTOs, err := coursePhaseTypeDTO.GetPhaseInputDTOsFromDBModel(fetchedPhaseInputDTOs)
+		if err != nil {
+			return nil, err
+		}
+
+		phaseOutputDTOs, err := coursePhaseTypeDTO.GetPhaseOutputDTOsFromDBModel(fetchedPhaseOutputDTOs)
+		if err != nil {
+			return nil, err
+		}
+
+		dtoCoursePhaseType, err := coursePhaseTypeDTO.GetCoursePhaseTypeDTOFromDBModel(phaseType, participationInputDTOs, participationOutputDTOs, phaseInputDTOs, phaseOutputDTOs)
 		if err != nil {
 			return nil, err
 		}
