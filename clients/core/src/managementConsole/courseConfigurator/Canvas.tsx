@@ -72,7 +72,8 @@ export function CourseConfigurator() {
   const {
     mutateAsyncPhases,
     mutateCoursePhaseGraph,
-    mutateMetaDataGraph,
+    mutateParticipationDataGraph,
+    mutatePhaseDataGraph,
     mutateDeletePhase,
     mutateRenamePhase,
     isMutationError,
@@ -96,7 +97,8 @@ export function CourseConfigurator() {
       mutateAsyncPhases,
       mutateRenamePhase,
       mutateCoursePhaseGraph,
-      mutateMetaDataGraph,
+      mutateParticipationDataGraph,
+      mutatePhaseDataGraph,
       queryClient,
       setIsModified,
     })

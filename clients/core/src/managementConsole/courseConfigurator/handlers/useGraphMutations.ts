@@ -1,13 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
 import { postNewCoursePhase } from '@core/network/mutations/postNewCoursePhase'
 import { updatePhaseGraph } from '@core/network/mutations/updatePhaseGraph'
-import { updateMetaDataGraph } from '@core/network/mutations/updateMetaDataGraph'
+import { updateParticipationDataGraph } from '@core/network/mutations/updateParticipationDataGraph'
 import { deleteCoursePhase } from '@core/network/mutations/deleteCoursePhase'
 import { updateCoursePhase } from '@core/network/mutations/updateCoursePhase'
 import { CreateCoursePhase, UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { CoursePhaseGraphUpdate } from '../interfaces/coursePhaseGraphUpdate'
 import { MetaDataGraphItem } from '../interfaces/courseMetaGraphItem'
 import { useParams } from 'react-router-dom'
+import { updatePhaseDataGraph } from '@core/network/mutations/updatePhaseDataGraph'
 
 export function useMutations() {
   const { courseId } = useParams<{ courseId: string }>()
@@ -27,22 +28,34 @@ export function useMutations() {
     mutationFn: (coursePhase: UpdateCoursePhase) => updateCoursePhase(coursePhase),
   })
 
-  const { mutate: mutateMetaDataGraph, isError: isMetaDataGraphError } = useMutation({
+  const { mutate: mutatePhaseDataGraph, isError: isPhaseDataGraphError } = useMutation({
     mutationFn: (updatedGraph: MetaDataGraphItem[]) =>
-      updateMetaDataGraph(courseId ?? '', updatedGraph),
-    onSuccess: () => {
-      // this is the last executed mutation and on this we want to reload!
-      window.location.reload()
-    },
+      updatePhaseDataGraph(courseId ?? '', updatedGraph),
   })
 
+  const { mutate: mutateParticipationDataGraph, isError: isParticipationDataGraphError } =
+    useMutation({
+      mutationFn: (updatedGraph: MetaDataGraphItem[]) =>
+        updateParticipationDataGraph(courseId ?? '', updatedGraph),
+      onSuccess: () => {
+        // this is the last executed mutation and on this we want to reload!
+        window.location.reload()
+      },
+    })
+
   const isMutationError =
-    isPhaseError || isGraphError || isMetaDataGraphError || isDeleteError || isRenameError
+    isPhaseError ||
+    isGraphError ||
+    isPhaseDataGraphError ||
+    isParticipationDataGraphError ||
+    isDeleteError ||
+    isRenameError
 
   return {
     mutateAsyncPhases,
     mutateCoursePhaseGraph,
-    mutateMetaDataGraph,
+    mutateParticipationDataGraph,
+    mutatePhaseDataGraph,
     mutateDeletePhase,
     mutateRenamePhase,
     isMutationError,

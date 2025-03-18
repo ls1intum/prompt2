@@ -133,7 +133,7 @@ func UpdateBatchCoursePhaseParticipation(ctx context.Context, createOrUpdateCour
 	if err != nil {
 		return nil, err
 	}
-	utils.DeferRollback(tx, ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := CoursePhaseParticipationServiceSingleton.queries.WithTx(tx)
 
 	updatedIDs := make([]uuid.UUID, 0, len(createOrUpdateCoursePhaseParticipation))

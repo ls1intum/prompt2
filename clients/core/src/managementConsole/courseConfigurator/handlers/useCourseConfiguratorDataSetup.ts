@@ -11,7 +11,8 @@ import { AdditionalScore } from '../../applicationAdministration/interfaces/addi
 
 import { getAllCoursePhaseTypes } from '@core/network/queries/coursePhaseTypes'
 import { getCoursePhaseGraph } from '@core/network/queries/coursePhaseGraph'
-import { getMetaDataGraph } from '@core/network/queries/courseMetaDataGraph'
+import { getParticipationDataGraph } from '@core/network/queries/courseParticipationDataGraph'
+import { getPhaseDataGraph } from '@core/network/queries/coursePhaseDataGraph'
 import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { getAdditionalScoreNames } from '@core/network/queries/additionalScoreNames'
 
@@ -27,7 +28,8 @@ export function useCourseConfiguratorDataSetup() {
     appendCoursePhaseType,
     setCoursePhaseGraph,
     setCoursePhases,
-    setMetaDataGraph,
+    setParticipationDataGraph,
+    setPhaseDataGraph,
   } = useCourseConfigurationState()
 
   // Flags to delay canvas load until everything is ready
@@ -59,14 +61,26 @@ export function useCourseConfiguratorDataSetup() {
   })
 
   const {
-    data: fetchedMetaDataGraph,
-    isPending: isMetaGraphPending,
-    error: metaGraphError,
-    isError: isMetaGraphError,
-    refetch: refetchMetaGraph,
+    data: fetchedParticipationDataGraph,
+    isPending: isParticipationGraphPending,
+    error: participationGraphError,
+    isError: isParticipationGraphError,
+    refetch: refetchParticipationGraph,
   } = useQuery<MetaDataGraphItem[]>({
-    queryKey: ['course_phases', 'meta_phase_graph', courseId],
-    queryFn: () => getMetaDataGraph(courseId),
+    queryKey: ['course_phases', 'participation_phase_graph', courseId],
+    queryFn: () => getParticipationDataGraph(courseId),
+    enabled: !!courseId,
+  })
+
+  const {
+    data: fetchedPhaseDataGraph,
+    isPending: isPhaseGraphPending,
+    error: phaseGraphError,
+    isError: isPhaseGraphError,
+    refetch: refetchPhaseGraph,
+  } = useQuery<MetaDataGraphItem[]>({
+    queryKey: ['course_phases', 'phase_phase_graph', courseId],
+    queryFn: () => getPhaseDataGraph(courseId),
     enabled: !!courseId,
   })
 
@@ -99,14 +113,16 @@ export function useCourseConfiguratorDataSetup() {
   const isError =
     isCoursePhaseTypesError ||
     isGraphError ||
-    isMetaGraphError ||
+    isParticipationGraphError ||
+    isPhaseGraphError ||
     isApplicationFormError ||
     isAdditionalScoresError
 
   const isPending =
     isCoursePhaseTypesPending ||
     isGraphPending ||
-    isMetaGraphPending ||
+    isParticipationGraphPending ||
+    isPhaseGraphPending ||
     (!!applicationPhase?.id && (isFetchingApplicationForm || isAdditionalScoresPending))
 
   // Set up course phase types with additional metadata for application phase.
@@ -126,12 +142,21 @@ export function useCourseConfiguratorDataSetup() {
 
   // Set up the course graph and metadata graph.
   useEffect(() => {
-    if (fetchedCourseGraph && fetchedMetaDataGraph) {
+    if (fetchedCourseGraph && fetchedParticipationDataGraph && fetchedPhaseDataGraph) {
       setCoursePhaseGraph([...fetchedCourseGraph])
-      setMetaDataGraph([...fetchedMetaDataGraph])
+      setParticipationDataGraph([...fetchedParticipationDataGraph])
+      setPhaseDataGraph([...fetchedPhaseDataGraph])
       setFinishedGraphSetup(courseId)
     }
-  }, [fetchedCourseGraph, fetchedMetaDataGraph, setCoursePhaseGraph, setMetaDataGraph, courseId])
+  }, [
+    fetchedCourseGraph,
+    fetchedParticipationDataGraph,
+    setCoursePhaseGraph,
+    courseId,
+    setParticipationDataGraph,
+    setPhaseDataGraph,
+    fetchedPhaseDataGraph,
+  ])
 
   // Set up the course phases.
   useEffect(() => {
@@ -157,14 +182,15 @@ export function useCourseConfiguratorDataSetup() {
   const refetchAll = () => {
     refetchCoursePhaseTypes()
     refetchGraph()
-    refetchMetaGraph()
+    refetchParticipationGraph()
+    refetchPhaseGraph()
   }
 
   return {
     courseId,
     isError,
     isPending,
-    error: error || graphError || metaGraphError,
+    error: error || graphError || participationGraphError || phaseGraphError,
     finishedSetup,
     refetchAll,
   }

@@ -36,8 +36,8 @@ LIMIT 1;
 
 -- name: GetResolutionsForCoursePhase :many
 SELECT po.dto_name, cpt.base_url, po.endpoint_path, mdg.from_course_phase_id
-FROM meta_data_dependency_graph mdg
-JOIN course_phase_type_provided_output_dto po 
+FROM participation_data_dependency_graph mdg
+JOIN course_phase_type_participation_provided_output_dto po 
   ON po.id = mdg.from_course_phase_DTO_id
 JOIN course_phase_type cpt
   ON cpt.id = po.course_phase_type_id

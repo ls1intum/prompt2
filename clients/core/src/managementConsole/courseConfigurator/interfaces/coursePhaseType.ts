@@ -1,11 +1,12 @@
 import { ProvidedOutputDTO } from './providedOutputDto'
 import { RequiredInputDTO } from './requiredInputDto'
 
-// TODO: move in shared library
 export interface CoursePhaseType {
   id: string
   name: string
-  requiredInputDTOs: RequiredInputDTO[]
-  providedOutputDTOs: ProvidedOutputDTO[]
+  requiredParticipationInputDTOs: RequiredInputDTO[]
+  providedParticipationOutputDTOs: ProvidedOutputDTO[]
+  requiredPhaseInputDTOs: RequiredInputDTO[]
+  providedPhaseOutputDTOs: ProvidedOutputDTO[]
   initialPhase: boolean
 }

@@ -524,3 +524,6 @@ ALTER TABLE application_assessment
 ALTER TABLE course_phase_participation
   DROP COLUMN old_id;
 
+-- Rename the dependency graph table to "participation_data_dependency_graph"
+ALTER TABLE meta_data_dependency_graph 
+    RENAME TO participation_data_dependency_graph;

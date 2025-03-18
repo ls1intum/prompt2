@@ -11,6 +11,7 @@ import (
 	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,7 +48,7 @@ func initializeApplicationCoursePhaseType() error {
 		if err != nil {
 			return err
 		}
-		defer tx.Rollback(ctx)
+		defer utils.DeferRollback(tx, ctx)
 		qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 		// 2.) create the application module
