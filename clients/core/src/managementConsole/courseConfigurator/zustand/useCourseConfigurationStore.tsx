@@ -8,21 +8,24 @@ interface CourseConfigurationState {
   coursePhaseTypes: CoursePhaseType[]
   coursePhaseGraph: CoursePhaseGraphItem[]
   coursePhases: CoursePhaseWithPosition[]
-  metaDataGraph: MetaDataGraphItem[]
+  participationDataGraph: MetaDataGraphItem[]
+  phaseDataGraph: MetaDataGraphItem[]
   setCoursePhaseTypes: (coursePhaseTypes: CoursePhaseType[]) => void
   removeUnsavedCoursePhases: () => void
   appendCoursePhaseType: (coursePhaseType: CoursePhaseType) => void
   setCoursePhaseGraph: (coursePhaseGraph: CoursePhaseGraphItem[]) => void
   setCoursePhases: (coursePhases: CoursePhaseWithPosition[]) => void
   appendCoursePhase: (coursePhase: CoursePhaseWithPosition) => void
-  setMetaDataGraph: (metaDataGraph: MetaDataGraphItem[]) => void
+  setParticipationDataGraph: (participationDataGraph: MetaDataGraphItem[]) => void
+  setPhaseDataGraph: (phaseDataGraph: MetaDataGraphItem[]) => void
 }
 
 export const useCourseConfigurationState = create<CourseConfigurationState>((set) => ({
   coursePhaseTypes: [],
   coursePhaseGraph: [],
   coursePhases: [],
-  metaDataGraph: [],
+  participationDataGraph: [],
+  phaseDataGraph: [],
   setCoursePhaseTypes: (coursePhaseTypes) => set({ coursePhaseTypes }),
   removeUnsavedCoursePhases: () =>
     set((state) => ({
@@ -38,5 +41,6 @@ export const useCourseConfigurationState = create<CourseConfigurationState>((set
   setCoursePhases: (coursePhases) => set({ coursePhases }),
   appendCoursePhase: (coursePhase) =>
     set((state) => ({ coursePhases: state.coursePhases.concat(coursePhase) })),
-  setMetaDataGraph: (metaDataGraph) => set({ metaDataGraph }),
+  setParticipationDataGraph: (participationDataGraph) => set({ participationDataGraph }),
+  setPhaseDataGraph: (phaseDataGraph) => set({ phaseDataGraph }),
 }))

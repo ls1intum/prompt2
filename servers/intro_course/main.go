@@ -83,5 +83,8 @@ func main() {
 	seatPlan.InitSeatPlanModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
-	router.Run(serverAddress)
+	err = router.Run(serverAddress)
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

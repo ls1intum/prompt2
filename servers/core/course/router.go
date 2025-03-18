@@ -20,8 +20,11 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.POST("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createCourse)
 	course.PUT("/:uuid/phase_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhaseOrder)
 	course.GET("/:uuid/phase_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCoursePhaseGraph)
-	course.GET("/:uuid/meta_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getMetaDataGraph)
-	course.PUT("/:uuid/meta_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateMetaDataGraph)
+	course.GET("/:uuid/participation_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getParticipationDataGraph)
+	course.PUT("/:uuid/participation_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateParticipationDataGraph)
+	course.GET("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getPhaseDataGraph)
+	course.PUT("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updatePhaseDataGraph)
+
 	course.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseData)
 	course.GET("/self", getOwnCourses)
 
@@ -123,14 +126,30 @@ func getCoursePhaseGraph(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, graph)
 }
 
-func getMetaDataGraph(c *gin.Context) {
+func getParticipationDataGraph(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	graph, err := GetMetaDataGraph(c, courseID)
+	graph, err := GetParticipationDataGraph(c, courseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, graph)
+}
+
+func getPhaseDataGraph(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	graph, err := GetPhaseDataGraph(c, courseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -167,25 +186,14 @@ func updateCoursePhaseOrder(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func updateMetaDataGraph(c *gin.Context) {
-	courseID, err := uuid.Parse(c.Param("uuid"))
+func updateParticipationDataGraph(c *gin.Context) {
+	newGraph, courseID, err := parseAndValidateMetaDataGraph(c)
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	var newGraph []courseDTO.MetaDataGraphItem
-	if err := c.BindJSON(&newGraph); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := validateMetaDataGraph(c, courseID, newGraph); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	err = UpdateMetaDataGraph(c, courseID, newGraph)
+	err = UpdateParticipationDataGraph(c, courseID, newGraph)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to update meta data order"))
@@ -193,6 +201,41 @@ func updateMetaDataGraph(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func updatePhaseDataGraph(c *gin.Context) {
+	newGraph, courseID, err := parseAndValidateMetaDataGraph(c)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdatePhaseDataGraph(c, courseID, newGraph)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update meta data order"))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func parseAndValidateMetaDataGraph(c *gin.Context) ([]courseDTO.MetaDataGraphItem, uuid.UUID, error) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		return nil, uuid.UUID{}, err
+	}
+
+	var newGraph []courseDTO.MetaDataGraphItem
+	if err := c.BindJSON(&newGraph); err != nil {
+		return nil, uuid.UUID{}, err
+	}
+
+	if err := validateMetaDataGraph(c, courseID, newGraph); err != nil {
+		return nil, uuid.UUID{}, err
+	}
+
+	return newGraph, courseID, nil
 }
 
 func updateCourseData(c *gin.Context) {

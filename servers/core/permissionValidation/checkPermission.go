@@ -28,7 +28,7 @@ func checkUserRole(c *gin.Context, courseIdentifier string, allowedUsers ...stri
 
 	// Generate the desired role keys based on input
 	for _, role := range allowedUsers {
-		var desiredRole string = ""
+		var desiredRole string
 		switch role {
 		case PromptAdmin:
 			desiredRole = PromptAdmin

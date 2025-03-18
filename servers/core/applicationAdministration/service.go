@@ -17,6 +17,7 @@ import (
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student"
+	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,7 +65,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// Check if course phase is application phase
@@ -197,7 +198,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	if err != nil {
 		return uuid.Nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// 1. Check if studentObj with this email already exists
@@ -376,7 +377,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	if err != nil {
 		return uuid.Nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// 1. Update student details
@@ -533,7 +534,7 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	if assessment.PassStatus != nil || assessment.RestrictedData.Length() > 0 {
@@ -584,7 +585,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		return err
 	}
 
-	defer tx.Rollback(ctx)
+	defer utils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// generate batch of scores

@@ -15,7 +15,7 @@ func replacePlaceholders(template string, values map[string]string) string {
 	// Regular expression to find placeholders in the format {{placeholderName}}
 	re := regexp.MustCompile(`{{\s*([^{}]+)\s*}}`)
 	replacedHTML := re.ReplaceAllStringFunc(template, func(placeholder string) string {
-		key := strings.TrimSpace(strings.Trim(placeholder, "{{}}"))
+		key := strings.TrimSpace(strings.Trim(placeholder, "{}"))
 		if val, ok := values[key]; ok {
 			return val
 		}
