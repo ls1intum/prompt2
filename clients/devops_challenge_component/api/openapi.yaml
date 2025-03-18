@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 
 info:
   title: Devops Challenge Server API
@@ -6,13 +6,13 @@ info:
   description: API for interacting with student repositories and test attempts for the Devops Challenge.
 
 paths:
-  /repo/{studentId}:
+  /repo/{githubHandle}:
     post:
       summary: Create a repository for the student
-      description: This endpoint creates a repository for the student with the given student ID.
+      description: This endpoint creates a repository for the student with the given GitHub Handle.
       parameters:
         - in: path
-          name: studentId
+          name: githubHandle
           required: true
           schema:
             type: string
@@ -29,18 +29,18 @@ paths:
                     type: string
                     description: The repository URL of the created repository.
         '400':
-          description: Invalid student ID or other request error
+          description: Invalid GitHub Handle or other request error
         '409':
           description: Repository already exists for the student
         '500':
           description: Internal server error
 
     get:
-      summary: Fetch the repository link by student ID
-      description: This endpoint fetches the repository URL for a given student ID.
+      summary: Fetch the repository link by GitHub Handle
+      description: This endpoint fetches the repository URL for a given GitHub Handle.
       parameters:
         - in: path
-          name: studentId
+          name: githubHandle
           required: true
           schema:
             type: string
@@ -57,17 +57,17 @@ paths:
                     type: string
                     description: The repository URL of the student.
         '404':
-          description: Student ID not found
+          description: GitHub Handle not found
         '500':
           description: Internal server error
 
-  /assess/{studentId}:
+  /assess/{githubHandle}:
     post:
       summary: Trigger DevOps assessment for the student's pipeline
-      description: This endpoint triggers the DevOps assessment for the student's pipeline with the given student ID.
+      description: This endpoint triggers the DevOps assessment for the student's pipeline with the given GitHub Handle.
       parameters:
         - in: path
-          name: studentId
+          name: githubHandle
           required: true
           schema:
             type: string
@@ -109,19 +109,19 @@ paths:
                           description: The message of the test result.
                     description: The feedback of the assessment.
         '400':
-          description: Invalid student ID or other request error
+          description: Invalid GitHub Handle or other request error
         '404':
-          description: Student ID not found
+          description: GitHub Handle not found
         '500':
           description: Internal server error
 
-  /submit/{studentId}:
+  /submit/{githubHandle}:
     patch:
       summary: Mark the submission as final
       description: This endpoint marks the student's submission as final.
       parameters:
         - in: path
-          name: studentId
+          name: githubHandle
           required: true
           schema:
             type: string
@@ -130,8 +130,8 @@ paths:
         '200':
           description: Submission marked as final successfully
         '400':
-          description: Invalid student ID or other request error
+          description: Invalid GitHub Handle or other request error
         '404':
-          description: Student ID not found
+          description: GitHub Handle not found
         '500':
           description: Internal server error
