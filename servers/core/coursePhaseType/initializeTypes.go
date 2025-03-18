@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ func initInterview() error {
 		if err != nil {
 			return err
 		}
-		defer tx.Rollback(ctx)
+		defer utils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -103,7 +104,7 @@ func initMatching() error {
 		if err != nil {
 			return err
 		}
-		defer tx.Rollback(ctx)
+		defer utils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -165,7 +166,7 @@ func initIntroCourseDeveloper() error {
 		if err != nil {
 			return err
 		}
-		defer tx.Rollback(ctx)
+		defer utils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -222,7 +223,7 @@ func initIntroCourseTutor() error {
 		if err != nil {
 			return err
 		}
-		defer tx.Rollback(ctx)
+		defer utils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase

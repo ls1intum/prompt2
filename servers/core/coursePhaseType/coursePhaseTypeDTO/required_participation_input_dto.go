@@ -6,18 +6,18 @@ import (
 	"github.com/niclasheun/prompt2.0/meta"
 )
 
-type RequiredInputDTO struct {
+type ParticipationInputDTO struct {
 	ID                uuid.UUID     `json:"id"`
 	CoursePhaseTypeID uuid.UUID     `json:"coursePhaseTypeID"`
 	DtoName           string        `json:"dtoName"`
 	Specification     meta.MetaData `json:"specification"` // the specification follows the same structure as the meta.MetaData
 }
 
-func GetRequiredInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeRequiredInputDto) ([]RequiredInputDTO, error) {
-	var DTOs []RequiredInputDTO
+func GetParticipationInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeParticipationRequiredInputDto) ([]ParticipationInputDTO, error) {
+	var DTOs []ParticipationInputDTO
 
 	for _, dbModel := range dbModel {
-		dto, err := GetRequiredInputDTOFromDBModel(dbModel)
+		dto, err := GetParticipationInputDTOFromDBModel(dbModel)
 		if err != nil {
 			return nil, err
 		}
@@ -27,13 +27,13 @@ func GetRequiredInputDTOsFromDBModel(dbModel []db.CoursePhaseTypeRequiredInputDt
 	return DTOs, nil
 }
 
-func GetRequiredInputDTOFromDBModel(dbModel db.CoursePhaseTypeRequiredInputDto) (RequiredInputDTO, error) {
+func GetParticipationInputDTOFromDBModel(dbModel db.CoursePhaseTypeParticipationRequiredInputDto) (ParticipationInputDTO, error) {
 	specification, err := meta.GetMetaDataDTOFromDBModel(dbModel.Specification)
 	if err != nil {
-		return RequiredInputDTO{}, err
+		return ParticipationInputDTO{}, err
 	}
 
-	return RequiredInputDTO{
+	return ParticipationInputDTO{
 		ID:                dbModel.ID,
 		CoursePhaseTypeID: dbModel.CoursePhaseTypeID,
 		DtoName:           dbModel.DtoName,

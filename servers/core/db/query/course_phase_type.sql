@@ -1,14 +1,24 @@
 -- name: GetAllCoursePhaseTypes :many
 SELECT * FROM course_phase_type;
 
--- name: GetCoursePhaseRequiredInputs :many
+-- name: GetCoursePhaseRequiredParticipationInputs :many
 SELECT *
-FROM course_phase_type_required_input_dto
+FROM course_phase_type_participation_required_input_dto
 WHERE course_phase_type_id = $1;
 
--- name: GetCoursePhaseProvidedOutputs :many
+-- name: GetCoursePhaseProvidedParticipationOutputs :many
 SELECT *
-FROM course_phase_type_provided_output_dto
+FROM course_phase_type_participation_provided_output_dto
+WHERE course_phase_type_id = $1;
+
+-- name: GetCoursePhaseRequiredPhaseInputs :many
+SELECT *
+FROM course_phase_type_phase_required_input_dto
+WHERE course_phase_type_id = $1;
+
+-- name: GetCoursePhaseProvidedPhaseOutputs :many
+SELECT *
+FROM course_phase_type_phase_provided_output_dto
 WHERE course_phase_type_id = $1;
 
 -- name: TestApplicationPhaseTypeExists :one
@@ -68,15 +78,15 @@ INSERT INTO course_phase_type (id, name, initial_phase, base_url)
 VALUES ($1, $2, $3, $4);
 
 -- name: CreateCoursePhaseTypeRequiredInput :exec
-INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES ($1, $2, $3, $4);
 
 -- name: CreateCoursePhaseTypeProvidedOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6);
 
 -- name: CreateInterviewRequiredApplicationAnswers :exec
-INSERT INTO course_phase_type_required_input_dto (id, course_phase_type_id, dto_name, specification)
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
        gen_random_uuid(),
        $1,
@@ -111,7 +121,7 @@ VALUES (
 );
 
 -- name: InsertCourseProvidedApplicationAnswers :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -148,7 +158,7 @@ VALUES (
 );
 
 -- name: InsertCourseProvidedAdditionalScores :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -167,7 +177,7 @@ VALUES (
 
 
 -- name: InsertProficiencyLevelOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
@@ -182,7 +192,7 @@ VALUES (
 
 
 -- name: InsertDeveloperProfileOutput :exec
-INSERT INTO course_phase_type_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
