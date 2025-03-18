@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { CreateKeycloakGroup } from 'src/introCourse/interfaces/CreateKeycloakGroup'
+import { CreateKeycloakGroup } from '../../interfaces/CreateKeycloakGroup'
 
 export const createCustomKeycloakGroup = async (
   courseID: string,
