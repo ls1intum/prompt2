@@ -13,9 +13,10 @@ func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allo
 	infrastructureRouter := router.Group("/infrastructure")
 
 	// Post initial seat plan with seat names
+	// TODO: Add authentication middleware
 	infrastructureRouter.POST("/course-setup", createCourseSetup)
 
-	// infrastructureRouter.POST("/gitlab/student/:studentID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createGithubRepository)
+	infrastructureRouter.POST("/student-setup/:courseParticipationID", setupStudentInfrastructure)
 }
 
 func createCourseSetup(c *gin.Context) {
@@ -40,6 +41,38 @@ func createCourseSetup(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+func setupStudentInfrastructure(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// get semester tag (= top level group name)
+	var infrastructureRequest infrastructureDTO.CreateStudentRepo
+	if err := c.BindJSON(&infrastructureRequest); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.TumID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusCreated)
+
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

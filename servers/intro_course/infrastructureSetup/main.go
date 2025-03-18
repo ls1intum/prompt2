@@ -9,4 +9,8 @@ import (
 
 func InitInfrastructureModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
 	setupInfrastructureRouter(routerGroup, keycloakTokenVerifier.AuthenticationMiddleware)
+	InfrastructureServiceSingleton = &InfrastructureService{
+		queries: queries,
+		conn:    conn,
+	}
 }

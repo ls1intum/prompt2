@@ -29,6 +29,14 @@ type Seat struct {
 	AssignedTutor   pgtype.UUID `json:"assigned_tutor"`
 }
 
+type StudentGitlabProcess struct {
+	CoursePhaseID int32            `json:"course_phase_id"`
+	StudentID     int32            `json:"student_id"`
+	GitlabSuccess bool             `json:"gitlab_success"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+}
+
 type Tutor struct {
 	CoursePhaseID       uuid.UUID   `json:"course_phase_id"`
 	ID                  uuid.UUID   `json:"id"`

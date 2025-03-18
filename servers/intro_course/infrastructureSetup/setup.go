@@ -8,7 +8,6 @@ import (
 )
 
 const CI_CD_PROJECT_ID = 190739
-const TOP_LEVEL_GROUP_NAME = "ipraktikumTest"
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client
@@ -124,7 +123,7 @@ func grantGroupAccessToCICDProject(groupID int) error {
 func getUserID(username string) (*gitlab.User, error) {
 	git, err := getClient()
 	if err != nil {
-		log.Error("failed to get user id: ", err)
+		log.Error("failed to get client: ", err)
 		return nil, err
 	}
 
@@ -134,26 +133,27 @@ func getUserID(username string) (*gitlab.User, error) {
 
 	users, _, err := git.Users.ListUsers(userOpts)
 	if err != nil {
-		log.Error("failed to get user id: ", err)
+		log.Error("failed to get user with username : ", username, ", error: ", err)
 		return nil, err
 	}
 
-	if len(users) != 1 {
+	if len(users) != 1 || users[0] == nil {
 		log.Error("failed to get user id: user not found")
-		return nil, err
+		return nil, errors.New("user not found")
 	}
 	return users[0], nil
 }
 
-func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) {
+func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) error {
 	git, err := getClient()
 	if err != nil {
-		log.Error("failed to grant group access to CICD project: ", err)
-		return
+		log.Error("failed to get client: ", err)
+		return errors.New("failed create student project")
 	}
 
 	p := &gitlab.CreateProjectOptions{
 		Name:                             gitlab.Ptr(devTumID),
+		NamespaceID:                      gitlab.Ptr(devGroupID),
 		SharedRunnersEnabled:             gitlab.Ptr(true),
 		OnlyAllowMergeIfPipelineSucceeds: gitlab.Ptr(true),
 		BuildsAccessLevel:                gitlab.Ptr(gitlab.PrivateAccessControl),
@@ -172,7 +172,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) 
 	project, _, err := git.Projects.CreateProject(p)
 	if err != nil {
 		log.Error("failed to create project: ", err)
-		return
+		return errors.New("failed create student project")
 	}
 
 	// Add student to the project
@@ -182,7 +182,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) 
 	})
 	if err != nil {
 		log.Error("failed to add student to project: ", err)
-		return
+		return errors.New("failed add student to project")
 	}
 
 	// Add student to the developer group
@@ -192,7 +192,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) 
 	})
 	if err != nil {
 		log.Error("failed to add student to developer group: ", err)
-		return
+		return errors.New("failed add student to developer group")
 	}
 
 	// Add tutor to the project
@@ -202,7 +202,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) 
 	})
 	if err != nil {
 		log.Error("failed to add tutor to project: ", err)
-		return
+		return errors.New("failed add tutor to project")
 	}
 
 	// Add MR approval rule
@@ -213,35 +213,53 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID *int) 
 	})
 	if err != nil {
 		log.Error("failed to add MR approval rule: ", err)
-		return
+		return errors.New("failed add MR approval rule")
 	}
 
 	// Add custom README
-	git.RepositoryFiles.CreateFile(project.ID, "README.md", &gitlab.CreateFileOptions{
+	_, _, err = git.RepositoryFiles.CreateFile(project.ID, "README.md", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(`{{ lookup('template', 'README_template.md') }}`),
 		CommitMessage: gitlab.Ptr("Add custom README"),
 	})
+	if err != nil {
+		log.Error("failed to add custom README: ", err)
+		return errors.New("failed add custom README")
+	}
 
 	// Add custom swiftlint
-	git.RepositoryFiles.CreateFile(project.ID, ".swiftlint.yml", &gitlab.CreateFileOptions{
+	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".swiftlint.yml", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(`{{ lookup('template', '.swiftlint_template.yml') }}`),
 		CommitMessage: gitlab.Ptr("Add custom .swiftlint.yml"),
 	})
+	if err != nil {
+		log.Error("failed to add custom .swiftlint.yml: ", err)
+		return errors.New("failed add custom .swiftlint.yml")
+	}
 
 	// Add custom gitignore
-	git.RepositoryFiles.CreateFile(project.ID, ".gitignore", &gitlab.CreateFileOptions{
+	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".gitignore", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(`{{ lookup('template', '.gitignore_template') }}`),
 		CommitMessage: gitlab.Ptr("Add custom .gitignore"),
 	})
+	if err != nil {
+		log.Error("failed to add custom .gitignore: ", err)
+		return errors.New("failed add custom .gitignore")
+	}
 
 	// Add branch protection
-	git.Branches.ProtectBranch(project.ID, "main", &gitlab.ProtectBranchOptions{
+	_, _, err = git.Branches.ProtectBranch(project.ID, "main", &gitlab.ProtectBranchOptions{
 		DevelopersCanPush:  gitlab.Ptr(false),
 		DevelopersCanMerge: gitlab.Ptr(true),
 	})
+	if err != nil {
+		log.Error("failed to add branch protect rules: ", err)
+		return errors.New("failed add branch protect rules")
+	}
+
+	return nil
 }
 
 func getGroup(groupName string) (*gitlab.Group, error) {

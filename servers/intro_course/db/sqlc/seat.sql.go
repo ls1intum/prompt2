@@ -38,6 +38,31 @@ func (q *Queries) DeleteSeatPlan(ctx context.Context, coursePhaseID uuid.UUID) e
 	return err
 }
 
+const getAssignedTutor = `-- name: GetAssignedTutor :one
+SELECT s.assigned_tutor, t.gitlab_username
+FROM seat s
+JOIN tutor t ON s.assigned_tutor = t.id AND s.course_phase_id = t.course_phase_id
+WHERE s.course_phase_id = $1
+  AND s.assigned_student = $2
+`
+
+type GetAssignedTutorParams struct {
+	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
+	AssignedStudent pgtype.UUID `json:"assigned_student"`
+}
+
+type GetAssignedTutorRow struct {
+	AssignedTutor  pgtype.UUID `json:"assigned_tutor"`
+	GitlabUsername pgtype.Text `json:"gitlab_username"`
+}
+
+func (q *Queries) GetAssignedTutor(ctx context.Context, arg GetAssignedTutorParams) (GetAssignedTutorRow, error) {
+	row := q.db.QueryRow(ctx, getAssignedTutor, arg.CoursePhaseID, arg.AssignedStudent)
+	var i GetAssignedTutorRow
+	err := row.Scan(&i.AssignedTutor, &i.GitlabUsername)
+	return i, err
+}
+
 const getSeatPlan = `-- name: GetSeatPlan :many
 SELECT course_phase_id, seat_name, has_mac, device_id, assigned_student, assigned_tutor
 FROM seat
