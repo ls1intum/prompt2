@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useChallengeStore } from '../zustand/useChallengeStore'
 import { createRepository } from '../network/mutations/createRepository'
 import { getStudentInfo } from '../network/queries/getStudentInfo'
@@ -22,6 +22,22 @@ export default function StudentRepoForm() {
 
     const [githubUsername, setGithubUsername] = useState('')
     const [loading, setLoading] = useState(false)
+    const [assessmentStatus, setAssessmentStatus] = useState<string | null>(null)
+
+    // Fetch current assessment status when the GitHub username is available
+    useEffect(() => {
+        if (githubUsername && phaseId) {
+            const fetchStudentInfo = async () => {
+                try {
+                    const data = await getStudentInfo(phaseId)
+                    setAssessmentStatus(data.assessmentStatus) // Assuming the response includes assessmentStatus
+                } catch (error) {
+                    toast({ title: 'Error', description: 'Failed to load assessment status', variant: 'destructive' })
+                }
+            }
+            fetchStudentInfo()
+        }
+    }, [githubUsername, phaseId, toast])
 
     const handleCreateRepo = async () => {
         if (!githubUsername) {
@@ -75,13 +91,17 @@ export default function StudentRepoForm() {
                     ) : (
                         <>
                             <p>Repository: <a href={repoUrl} className="text-blue-500 underline" target="_blank">{repoUrl}</a></p>
-                            <Button onClick={handleTriggerAssessment} disabled={loading || (attempts !== undefined && attempts >= (maxAttempts ?? 0))}>
+                            <Button
+                                onClick={handleTriggerAssessment}
+                                disabled={loading || (attempts !== undefined && attempts >= (maxAttempts ?? 0)) || assessmentStatus === 'passed'}
+                            >
                                 Start Assessment
                             </Button>
                             {attempts !== undefined && maxAttempts !== undefined && (
                                 <p>Remaining attempts: {maxAttempts - attempts}</p>
                             )}
                             {feedback && <p className="text-gray-700">{feedback}</p>}
+                            {assessmentStatus && <p className="text-green-500">Assessment status: {assessmentStatus}</p>}
                         </>
                     )}
                 </CardContent>
