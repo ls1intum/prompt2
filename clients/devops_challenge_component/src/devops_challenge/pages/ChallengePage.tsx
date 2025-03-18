@@ -14,7 +14,7 @@ const dummyRepositoryData: RepositoryData = {
   lastAssessment: null,
 }
 
-export default function OverviewPage() {
+export default function ChallengePage() {
   const { toast } = useToast()
   const [repositoryData, setRepositoryData] = useState(dummyRepositoryData)
   const [isAssessing, setIsAssessing] = useState(false)
@@ -46,9 +46,9 @@ export default function OverviewPage() {
           feedback: success
             ? [{ type: "success", message: "All tests passed successfully!" }]
             : [
-                { type: "error", message: "Missing required file: README.md" },
-                { type: "error", message: "Test suite failed: 3/10 tests passing" },
-              ],
+              { type: "error", message: "Missing required file: README.md" },
+              { type: "error", message: "Test suite failed: 3/10 tests passing" },
+            ],
         },
       })
 
