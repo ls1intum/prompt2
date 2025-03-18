@@ -9,14 +9,24 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 interface IncomingDataHandleProps {
   phaseID: string
   dto: RequiredInputDTO
+  type: 'participation-data' | 'phase-data'
 }
 
-export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): JSX.Element => {
+export const IncomingDataHandle = ({
+  phaseID,
+  dto,
+  type,
+}: IncomingDataHandleProps): JSX.Element => {
+  const isParticipationEdge = type === 'participation-data'
+  const handleName = isParticipationEdge
+    ? `participation-data-in-phase-${phaseID}-dto-${dto.id}`
+    : `phase-data-in-phase-${phaseID}-dto-${dto.id}`
+
   const { coursePhaseTypes } = useCourseConfigurationState()
   const [matches, setMatches] = useState(false)
   const incomingEdge = useHandleConnections({
     type: 'target',
-    id: `metadata-in-phase-${phaseID}-dto-${dto.id}`,
+    id: handleName,
   })
 
   const incomingDTOs = incomingEdge
@@ -30,7 +40,11 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
     })
     .map((dtoID) =>
       coursePhaseTypes
-        .flatMap((phase) => phase.providedOutputDTOs)
+        .flatMap((phase) =>
+          type === 'participation-data'
+            ? phase.providedParticipationOutputDTOs
+            : phase.providedPhaseOutputDTOs,
+        )
         .filter((reqDTO) => reqDTO !== null)
         .find((reqDTO) => reqDTO.id === dtoID),
     )
@@ -52,9 +66,13 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
 
   const statusConfig = {
     success: {
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      icon: <CircleCheckBig className='w-5 h-5 text-green-500' />,
+      bgColor: isParticipationEdge ? 'bg-green-50' : 'bg-purple-50',
+      textColor: isParticipationEdge ? 'text-green-700' : 'text-purple-700',
+      icon: (
+        <CircleCheckBig
+          className={`w-5 h-5 ${isParticipationEdge ? ' text-green-500' : 'text-purple-500'}`}
+        />
+      ),
       tooltipText: 'Incoming Data Object Matches',
     },
     warning: {
@@ -83,9 +101,9 @@ export const IncomingDataHandle = ({ phaseID, dto }: IncomingDataHandleProps): J
             <Handle
               type='target'
               position={Position.Left}
-              id={`metadata-in-phase-${phaseID}-dto-${dto.id}`}
+              id={handleName}
               style={{ left: '-28px', top: '50%' }}
-              className='!w-3 !h-3 !bg-green-500 rounded-full'
+              className={`!w-3 !h-3 ${isParticipationEdge ? '!bg-green-500' : '!bg-purple-500'} rounded-full`}
             />
             <div className='flex items-center space-x-2'>
               {icon}

@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ProvidedOutputDTO struct {
+type PhaseOutputDTO struct {
 	ID                uuid.UUID     `json:"id"`
 	CoursePhaseTypeID uuid.UUID     `json:"coursePhaseTypeID"`
 	DtoName           string        `json:"dtoName"`
@@ -16,11 +16,11 @@ type ProvidedOutputDTO struct {
 	EndpointPath      string        `json:"endpointPath"`
 }
 
-func GetProvidedOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypeProvidedOutputDto) ([]ProvidedOutputDTO, error) {
-	var DTOs []ProvidedOutputDTO
+func GetPhaseOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypePhaseProvidedOutputDto) ([]PhaseOutputDTO, error) {
+	var DTOs []PhaseOutputDTO
 
 	for _, dbModel := range dbModel {
-		dto, err := GetProvidedOutputDTOFromDBModel(dbModel)
+		dto, err := GetPhaseOutputDTOFromDBModel(dbModel)
 		if err != nil {
 			log.Error("Failed to get ProvidedOutputDTO from DB model")
 			return nil, err
@@ -31,13 +31,13 @@ func GetProvidedOutputDTOsFromDBModel(dbModel []db.CoursePhaseTypeProvidedOutput
 	return DTOs, nil
 }
 
-func GetProvidedOutputDTOFromDBModel(dbModel db.CoursePhaseTypeProvidedOutputDto) (ProvidedOutputDTO, error) {
+func GetPhaseOutputDTOFromDBModel(dbModel db.CoursePhaseTypePhaseProvidedOutputDto) (PhaseOutputDTO, error) {
 	specification, err := meta.GetMetaDataDTOFromDBModel(dbModel.Specification)
 	if err != nil {
-		return ProvidedOutputDTO{}, err
+		return PhaseOutputDTO{}, err
 	}
 
-	return ProvidedOutputDTO{
+	return PhaseOutputDTO{
 		ID:                dbModel.ID,
 		CoursePhaseTypeID: dbModel.CoursePhaseTypeID,
 		DtoName:           dbModel.DtoName,

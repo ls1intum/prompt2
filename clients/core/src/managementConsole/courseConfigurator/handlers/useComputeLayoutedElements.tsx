@@ -1,10 +1,12 @@
 import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
 import { getLayoutedElements } from '../utils/getLayoutedElements'
 import { ParticipantEdgeProps } from '../graphComponents/edges/ParticipantEdgeProps'
-import { DataEdgeProps } from '../graphComponents/edges/DataEdgeProps'
+import { ParticipationDataEdgeProps } from '../graphComponents/edges/ParticipationDataEdgeProps'
+import { PhaseDataEdgeProps } from '../graphComponents/edges/PhaseDataEdgeProps'
 
 export const useComputeLayoutedElements = () => {
-  const { coursePhases, coursePhaseGraph, metaDataGraph } = useCourseConfigurationState()
+  const { coursePhases, coursePhaseGraph, participationDataGraph, phaseDataGraph } =
+    useCourseConfigurationState()
 
   const initialNodes = coursePhases.map((phase) => ({
     id: phase.id || `no-valid-id-${Date.now()}`,
@@ -22,20 +24,39 @@ export const useComputeLayoutedElements = () => {
     }
   })
 
-  const initialMetaEdges = metaDataGraph.map((item) => {
+  const initialParticipationDataEdges = participationDataGraph.map((item) => {
     return {
       id:
-        'data-edge-from-metadata-out-phase-' +
+        'data-edge-from-participation-data-out-phase-' +
         item.fromCoursePhaseID +
         '-dto-' +
         item.fromCoursePhaseDtoID +
-        '-to-metadata-in-phase-' +
+        '-to-participation-data-in-phase-' +
         item.toCoursePhaseID +
         '-dto-' +
         item.toCoursePhaseDtoID,
       source: item.fromCoursePhaseID,
-      sourceHandle: `metadata-out-phase-${item.fromCoursePhaseID}-dto-${item.fromCoursePhaseDtoID}`,
-      targetHandle: `metadata-in-phase-${item.toCoursePhaseID}-dto-${item.toCoursePhaseDtoID}`,
+      sourceHandle: `participation-data-out-phase-${item.fromCoursePhaseID}-dto-${item.fromCoursePhaseDtoID}`,
+      targetHandle: `participation-data-in-phase-${item.toCoursePhaseID}-dto-${item.toCoursePhaseDtoID}`,
+      target: item.toCoursePhaseID,
+      type: 'iconEdge',
+    }
+  })
+
+  const initialPhaseDataEdges = phaseDataGraph.map((item) => {
+    return {
+      id:
+        'data-edge-from-phase-data-out-phase-' +
+        item.fromCoursePhaseID +
+        '-dto-' +
+        item.fromCoursePhaseDtoID +
+        '-to-phase-data-in-phase-' +
+        item.toCoursePhaseID +
+        '-dto-' +
+        item.toCoursePhaseDtoID,
+      source: item.fromCoursePhaseID,
+      sourceHandle: `phase-data-out-phase-${item.fromCoursePhaseID}-dto-${item.fromCoursePhaseDtoID}`,
+      targetHandle: `phase-data-in-phase-${item.toCoursePhaseID}-dto-${item.toCoursePhaseDtoID}`,
       target: item.toCoursePhaseID,
       type: 'iconEdge',
     }
@@ -43,7 +64,7 @@ export const useComputeLayoutedElements = () => {
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements({
     nodes: initialNodes,
-    edges: [...initialPersonEdges, ...initialMetaEdges],
+    edges: [...initialPersonEdges, ...initialParticipationDataEdges, ...initialPhaseDataEdges],
   })
 
   const designedPersonEdges = layoutedEdges
@@ -61,7 +82,9 @@ export const useComputeLayoutedElements = () => {
   const designedMetaDataEdges = layoutedEdges
     .filter((edge) => edge.id.startsWith('data-edge'))
     .map((edge) => {
-      const metaDataEdge = DataEdgeProps(edge)
+      const metaDataEdge = edge.id.startsWith('data-edge-from-participation-data')
+        ? ParticipationDataEdgeProps(edge)
+        : PhaseDataEdgeProps(edge)
       return {
         ...metaDataEdge,
         id: edge.id,

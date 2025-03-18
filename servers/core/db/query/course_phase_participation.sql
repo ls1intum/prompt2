@@ -88,7 +88,7 @@ WITH
   ),
   
   -----------------------------------------------------------------------
-  -- B) Predecessor phases from which we pull meta data via meta_data_dependency_graph.
+  -- B) Predecessor phases from which we pull meta data via participation_data_dependency_graph.
   -- Only include those whose course_phase_type has url = 'core'
   -- Copy the meta data from the predecessor to the current phase.
   -----------------------------------------------------------------------
@@ -99,14 +99,14 @@ WITH
       mdg.from_course_phase_id      AS from_course_phase_id,
       cp.restricted_data            AS course_phase_restricted_data,
       array_agg(po.dto_name)        AS from_dto_names -- all exported DTOs from this one phase from the core
-    FROM meta_data_dependency_graph mdg
+    FROM participation_data_dependency_graph mdg
     JOIN course_phase cp 
         ON cp.id = mdg.from_course_phase_id
     JOIN course_phase_type cpt
         ON cpt.id = cp.course_phase_type_id
-    JOIN course_phase_type_provided_output_dto po 
+    JOIN course_phase_type_participation_provided_output_dto po 
       ON po.id = mdg.from_course_phase_DTO_id
-    JOIN course_phase_type_required_input_dto ri
+    JOIN course_phase_type_participation_required_input_dto ri
       ON ri.id = mdg.to_course_phase_DTO_id
     WHERE mdg.to_course_phase_id = $1
       AND po.endpoint_path = 'core'
