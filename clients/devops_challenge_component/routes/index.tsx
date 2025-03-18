@@ -1,12 +1,12 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
-import OverviewPage from '../src/devops_challenge/pages/Overview/OverviewPage'
+import ChallengePage from '../src/devops_challenge/pages/ChallengePage'
 import SettingsPage from '../src/devops_challenge/pages/SettingsPage/SettingsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <OverviewPage />,
+    element: <ChallengePage />,
     requiredPermissions: [], // empty means no permissions required
   },
   {

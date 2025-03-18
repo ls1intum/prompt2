@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, Github, GitPullRequest, RefreshCw } from "luc
 import { useToast } from "@/hooks/use-toast"
 import { RepositoryInfo } from "../components/RepositoryInfo"
 import { AssessmentFeedback } from "../components/AssessmentFeedback"
-import { RepositoryData } from "../../interfaces/RepositoryData"
+import { RepositoryData } from "../interfaces/RepositoryData"
 
 const dummyRepositoryData: RepositoryData = {
   repositoryUrl: "https://example.com",

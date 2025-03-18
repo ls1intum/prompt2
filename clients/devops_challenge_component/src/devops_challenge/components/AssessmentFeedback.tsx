@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react"
-import { FeedbackItem } from "../../interfaces/FeedbackItem"
+import { FeedbackItem } from "../interfaces/FeedbackItem"
 
 interface AssessmentFeedbackProps {
   feedback: FeedbackItem[]
