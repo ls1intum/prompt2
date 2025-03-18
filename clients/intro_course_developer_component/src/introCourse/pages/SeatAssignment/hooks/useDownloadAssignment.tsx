@@ -32,7 +32,7 @@ export const useDownloadAssignment = (
     }
 
     const csvContent = [
-      ['Seat', 'Has Mac', 'Device ID', 'Assigned Student', 'Assigned Tutor'].join(','),
+      ['Seat', 'Seat Mac', 'Device ID', 'Assigned Student', 'Assigned Tutor'].join(','),
       ...seats
         .filter((seat) => seat.assignedStudent || seat.assignedTutor || seat.hasMac)
         .map((seat) =>

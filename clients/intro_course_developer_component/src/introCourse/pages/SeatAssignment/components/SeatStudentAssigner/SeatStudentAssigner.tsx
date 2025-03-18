@@ -185,13 +185,13 @@ export const SeatStudentAssigner = ({
                           </TableCell>
                           <TableCell>
                             {student?.profile?.hasMacBook === true && (
-                              <Badge variant='outline' className='bg-green-50 text-green-600'>
+                              <Badge variant='outline' className='bg-green-500'>
                                 <Laptop className='h-3 w-3 mr-1' />
                                 Yes
                               </Badge>
                             )}
                             {student?.profile?.hasMacBook === false && (
-                              <Badge variant='outline' className='bg-red-50 text-red-600'>
+                              <Badge variant='outline' className='bg-red-500'>
                                 No
                               </Badge>
                             )}
