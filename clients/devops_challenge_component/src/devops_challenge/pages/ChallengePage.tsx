@@ -1,122 +1,85 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { AlertCircle, CheckCircle, Github, GitPullRequest, RefreshCw } from "lucide-react"
+"use client"
+
+import { useState, useEffect } from "react"
+import { useChallengeStore } from "../zustand/useChallengeStore"
+import { getStudentInfo } from "../network/queries/getStudentInfo"
 import { useToast } from "@/hooks/use-toast"
+import { useParams } from "react-router-dom"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
+import { GitHubHandleInput } from "../components/GitHubHandleInput"
 import { RepositoryInfo } from "../components/RepositoryInfo"
-import { AssessmentFeedback } from "../components/AssessmentFeedback"
-import { RepositoryData } from "../interfaces/RepositoryData"
+import { AssessmentPanel } from "../components/AssessmentPanel"
 
-const dummyRepositoryData: RepositoryData = {
-  repositoryUrl: "https://example.com",
-  remainingAttempts: 3,
-  lastAssessment: null,
-}
-
-export default function ChallengePage() {
-  const { toast } = useToast()
-  const [repositoryData, setRepositoryData] = useState(dummyRepositoryData)
-  const [isAssessing, setIsAssessing] = useState(false)
-
-  // Simulate triggering an assessment
-  const triggerAssessment = async () => {
-    if (repositoryData.remainingAttempts <= 0) {
-      toast({
-        title: "No attempts remaining",
-        description: "You have used all your assessment attempts.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsAssessing(true)
-
-    // Simulate API call to challenge server
-    setTimeout(() => {
-      // Randomly succeed or fail for demo purposes
-      const success = Math.random() > 0.5
-
-      setRepositoryData({
-        ...repositoryData,
-        remainingAttempts: repositoryData.remainingAttempts - 1,
-        lastAssessment: {
-          status: success ? "success" : "failed",
-          timestamp: new Date().toISOString(),
-          feedback: success
-            ? [{ type: "success", message: "All tests passed successfully!" }]
-            : [
-              { type: "error", message: "Missing required file: README.md" },
-              { type: "error", message: "Test suite failed: 3/10 tests passing" },
-            ],
-        },
-      })
-
-      toast({
-        title: success ? "Assessment Successful" : "Assessment Failed",
-        description: success
-          ? "Your repository passed all checks!"
-          : "Your repository failed some checks. See feedback for details.",
-        variant: success ? "default" : "destructive",
-      })
-
-      setIsAssessing(false)
-    }, 2000)
+export default function StudentRepoForm() {
+  const { phaseId } = useParams<{ phaseId: string }>()
+  if (!phaseId) {
+    throw new Error("Phase ID is required")
   }
 
+  const { toast } = useToast()
+  const { repoUrl, setRepoUrl, setAttempts, setMaxAttempts, setHasPassed, setFeedback } = useChallengeStore()
+
+  const [loading, setLoading] = useState(true)
+  const [githubUsername, setGithubUsername] = useState("")
+
+  useEffect(() => {
+    // Fetch student info when the component mounts
+    const fetchStudentInfo = async () => {
+      try {
+        const studentInfo = await getStudentInfo(phaseId)
+        setRepoUrl(studentInfo.repositoryUrl)
+        setAttempts(studentInfo.attempts)
+        setMaxAttempts(studentInfo.maxAttempts)
+        setHasPassed(studentInfo.hasPassed)
+        if (studentInfo.message) {
+          setFeedback(studentInfo.message)
+        }
+      } catch (error) {
+        // Only show error if it's not a "not found" error
+        if (!(error instanceof Error && error.message.includes("not found"))) {
+          toast({
+            title: "Error loading data",
+            description: error instanceof Error ? error.message : "Unknown error",
+            variant: "destructive",
+          })
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStudentInfo()
+  }, [phaseId, setRepoUrl, setAttempts, setMaxAttempts, setHasPassed, setFeedback, toast])
+
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">DevOps Technical Challenge</h1>
-        </div>
+    <div className="max-w-xl mx-auto p-4">
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">DevOps Challenge</CardTitle>
+          <CardDescription>Complete the tasks to demonstrate your DevOps skills</CardDescription>
+        </CardHeader>
 
-        <div className="grid gap-6 mt-4">
-          <RepositoryInfo repositoryData={repositoryData} />
-
-          <Card className="p-6">
-            <div className="flex flex-col space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Assessment</h2>
-                <div className="flex items-center space-x-4">
-                  <Badge variant="outline" className="text-sm bg-gray-100 text-gray-800">
-                    Remaining Attempts: {repositoryData.remainingAttempts}
-                  </Badge>
-                  <Button
-                    onClick={triggerAssessment}
-                    disabled={isAssessing || repositoryData.remainingAttempts <= 0}
-                    className="flex items-center"
-                  >
-                    {isAssessing ? (
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <GitPullRequest className="mr-2 h-4 w-4" />
-                    )}
-                    <span>{isAssessing ? "Assessing..." : "Trigger Assessment"}</span>
-                  </Button>
-                </div>
-              </div>
-
-              {repositoryData.lastAssessment && (
-                <div className="mt-4">
-                  <div className="flex items-center mb-2">
-                    <h3 className="text-lg font-medium">Last Assessment Result</h3>
-                    <span className="ml-2">
-                      {repositoryData.lastAssessment.status === "success" ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-red-500" />
-                      )}
-                    </span>
-                  </div>
-
-                  <AssessmentFeedback feedback={repositoryData.lastAssessment.feedback} />
-                </div>
-              )}
+        <CardContent className="space-y-6">
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          </Card>
-        </div>
-      </div>
+          ) : !repoUrl ? (
+            <GitHubHandleInput
+              githubUsername={githubUsername}
+              setGithubUsername={setGithubUsername}
+              phaseId={phaseId}
+            />
+          ) : (
+            <div className="space-y-6">
+              <RepositoryInfo repoUrl={repoUrl} />
+              <AssessmentPanel phaseId={phaseId} githubUsername={githubUsername} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
+
