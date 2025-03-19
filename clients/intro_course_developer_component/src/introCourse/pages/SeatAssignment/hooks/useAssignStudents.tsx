@@ -71,7 +71,8 @@ export const useAssignStudents = (
         const seatName = shuffledSeatsWithMacs[index].seatName
         const seatIndex = updatedSeats.findIndex((s) => s.seatName === seatName)
         if (seatIndex !== -1) {
-          updatedSeats[seatIndex].assignedStudent = student.participation.student.id ?? null
+          updatedSeats[seatIndex].assignedStudent =
+            student.participation.courseParticipationID ?? null
         }
       }
     })
@@ -86,7 +87,8 @@ export const useAssignStudents = (
         const seatName = allRemainingSeats[index].seatName
         const seatIndex = updatedSeats.findIndex((s) => s.seatName === seatName)
         if (seatIndex !== -1) {
-          updatedSeats[seatIndex].assignedStudent = student.participation.student.id ?? null
+          updatedSeats[seatIndex].assignedStudent =
+            student.participation.courseParticipationID ?? null
         }
       }
     })

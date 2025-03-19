@@ -3,18 +3,16 @@ import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { IntroCourseStep } from './components/IntroCourseStep'
 import { useIntroCourseStore } from './zustand/useIntroCourseStore'
 import { DeveloperProfilePage } from './pages/DeveloperProfile/DeveloperProfilePage'
+import { StudentSeatAssignmentDisplay } from './pages/StudentSeatAssignmentDisplay/StudentSeatAssignmentDisplay'
 
 export const IntroCoursePage = (): JSX.Element => {
   // TODO: replace with actual state management
-  const { developerProfile } = useIntroCourseStore()
+  const { developerProfile, seatAssignment } = useIntroCourseStore()
   const [stepsOpen, setStepsOpen] = useState(() => {
-    if (developerProfile === undefined) return [true, false, false]
-    return [false, true, false]
+    if (developerProfile === undefined) return [true, false]
+    if (developerProfile !== undefined && seatAssignment !== undefined) return [false, true]
+    return [false, false]
   })
-
-  // These will be replaced by actual data fetching
-  const [infrastructureComplete, setInfrastructureComplete] = useState(false)
-  const [seatAssignment, setSeatAssignment] = useState(false)
 
   return (
     <div>
@@ -32,31 +30,19 @@ export const IntroCoursePage = (): JSX.Element => {
           isOpen={stepsOpen[0]}
           onToggle={() => setStepsOpen((prev) => [!prev[0], prev[1], prev[2]])}
         >
-          <DeveloperProfilePage onContinue={() => setStepsOpen((prev) => [false, true, prev[2]])} />
+          <DeveloperProfilePage onContinue={() => setStepsOpen((prev) => [false, prev[1]])} />
         </IntroCourseStep>
 
         <IntroCourseStep
           number={2}
-          title='Pre-Intro Course Infrastructure Setup'
-          description='Make sure to complete this checklist before the start of the intro course.'
-          isCompleted={infrastructureComplete}
-          isDisabled={developerProfile === undefined}
-          isOpen={stepsOpen[1]}
-          onToggle={() => setStepsOpen((prev) => [prev[0], !prev[1], prev[2]])}
-        >
-          Here will the be infrastructure setup list.
-        </IntroCourseStep>
-
-        <IntroCourseStep
-          number={3}
           title={`Seat Assignment ${seatAssignment ? '' : '(Available Soon)'}`}
           description='Below you will find the seat assignment for the intro course.'
-          isCompleted={seatAssignment}
-          isDisabled={!infrastructureComplete}
-          isOpen={stepsOpen[2]}
-          onToggle={() => setStepsOpen((prev) => [prev[0], prev[1], !prev[2]])}
+          isCompleted={false}
+          isDisabled={seatAssignment === undefined}
+          isOpen={stepsOpen[1]}
+          onToggle={() => setStepsOpen((prev) => [prev[0], !prev[1]])}
         >
-          Here will be the seat assignment.
+          <StudentSeatAssignmentDisplay />
         </IntroCourseStep>
       </div>
     </div>
