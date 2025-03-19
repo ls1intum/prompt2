@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { useChallengeStore } from "../zustand/useChallengeStore"
 import { triggerAssessment } from "../network/queries/triggerAssessment"

@@ -1,5 +1,3 @@
-"use client"
-
 import { CheckCircle } from "lucide-react"
 
 interface RepositoryInfoProps {

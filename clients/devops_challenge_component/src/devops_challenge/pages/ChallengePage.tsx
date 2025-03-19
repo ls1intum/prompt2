@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useChallengeStore } from "../zustand/useChallengeStore"
 import { getStudentInfo } from "../network/queries/getStudentInfo"

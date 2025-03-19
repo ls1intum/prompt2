@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { createRepository } from "../network/mutations/createRepository"
 import { useChallengeStore } from "../zustand/useChallengeStore"
