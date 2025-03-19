@@ -1,22 +1,20 @@
 import { useState } from "react"
+import { useParams } from "react-router-dom"
 import { createRepository } from "../network/mutations/createRepository"
-import { useChallengeStore } from "../zustand/useChallengeStore"
+import { getDeveloperProfile } from "../network/queries/getDeveloperProfile"
+import { useDevOpsChallengeStore } from "../zustand/useDevOpsChallengeStore"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Github, Loader2, AlertCircle } from "lucide-react"
 
-interface GitHubHandleInputProps {
-  githubHandle: string
-  setGithubHandle: (username: string) => void
-  phaseId: string
-}
-
-export function GitHubHandleInput({ githubHandle, setGithubHandle, phaseId }: GitHubHandleInputProps) {
+export const GitHubHandleInput = (): JSX.Element => {
+  const { phaseId } = useParams<{ phaseId: string }>()
   const { toast } = useToast()
-  const { setRepoUrl } = useChallengeStore()
+  const { setDeveloperProfile } = useDevOpsChallengeStore()
   const [loading, setLoading] = useState(false)
+  const [githubHandle, setGithubHandle] = useState("")
 
   const handleCreateRepo = async () => {
     if (!githubHandle) {
@@ -30,8 +28,9 @@ export function GitHubHandleInput({ githubHandle, setGithubHandle, phaseId }: Gi
 
     setLoading(true)
     try {
-      const url = await createRepository(githubHandle, phaseId)
-      setRepoUrl(url)
+      const url = await createRepository(githubHandle, phaseId ?? '')
+      const studentInfo = await getDeveloperProfile(phaseId ?? '')
+      setDeveloperProfile(studentInfo)
       toast({
         title: "Repository created",
         description: "Your challenge repository has been successfully created!",

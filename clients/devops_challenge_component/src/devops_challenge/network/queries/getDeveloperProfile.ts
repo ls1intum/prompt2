@@ -1,13 +1,13 @@
 import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { devOpsChallengeAxiosInstance } from '../devOpsChallengeServerConfig'
 
-export const triggerAssessment = async (
+export const getDeveloperProfile = async (
     coursePhaseID: string
-): Promise<string> => {
+): Promise<DeveloperProfile> => {
     try {
         return (
             await devOpsChallengeAxiosInstance.get(
-                `${coursePhaseID}/studentTest`,
+                `${coursePhaseID}/info`,
             )
         ).data
     } catch (err) {

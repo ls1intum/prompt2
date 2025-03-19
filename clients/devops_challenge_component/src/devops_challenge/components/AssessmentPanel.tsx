@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { useChallengeStore } from "../zustand/useChallengeStore"
+import { useParams } from "react-router-dom"
+import { useDevOpsChallengeStore } from "../zustand/useDevOpsChallengeStore"
 import { triggerAssessment } from "../network/queries/triggerAssessment"
-import { getStudentInfo } from "../network/queries/getStudentInfo"
+import { getDeveloperProfile } from "../network/queries/getDeveloperProfile"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -9,34 +10,23 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, RefreshCw, CheckCircle2 } from "lucide-react"
 
-interface AssessmentPanelProps {
-  phaseId: string
-  githubHandle: string
-}
+export const AssessmentPanel = (): JSX.Element => {
+  const { phaseId } = useParams<{ phaseId: string }>()
 
-export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps) {
   const { toast } = useToast()
-  const { attempts, maxAttempts, feedback, hasPassed, setAttempts, setMaxAttempts, setFeedback, setHasPassed } =
-    useChallengeStore()
+  const { developerProfile, setDeveloperProfile } = useDevOpsChallengeStore()
+  const [feedback, setFeedback] = useState('')
 
   const [loading, setLoading] = useState(false)
 
   const handleTriggerAssessment = async () => {
     setLoading(true)
     try {
-      // First trigger the assessment
-      const result = await triggerAssessment(phaseId, githubHandle)
-      setAttempts(result.attempts)
-      setMaxAttempts(result.maxAttempts)
-      setFeedback(result.message)
+      const feedback = await triggerAssessment(phaseId ?? '')
+      setFeedback(feedback)
 
-      // Then get updated student info to check if they passed
-      const updatedInfo = await getStudentInfo(phaseId)
-      setHasPassed(updatedInfo.hasPassed)
-      if (updatedInfo.message) {
-        setFeedback(updatedInfo.message)
-      }
-      setAttempts(updatedInfo.attempts)
+      const updatedInfo = await getDeveloperProfile(phaseId ?? '')
+      setDeveloperProfile(updatedInfo)
 
       toast({
         title: "Assessment completed",
@@ -54,16 +44,18 @@ export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps)
     }
   }
 
-  const attemptsRemaining = maxAttempts !== undefined && attempts !== undefined ? maxAttempts - attempts : undefined
+  const attemptsRemaining = developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined 
+  ? developerProfile.maxAttempts - developerProfile.attempts : undefined
 
   const attemptsUsedPercentage =
-    maxAttempts !== undefined && attempts !== undefined ? (attempts / maxAttempts) * 100 : 0
+    developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined 
+    ? (developerProfile.attempts / developerProfile.maxAttempts) * 100 : 0
 
-  const isAssessmentDisabled = loading || (attemptsRemaining !== undefined && attemptsRemaining <= 0) || hasPassed
+  const isAssessmentDisabled = loading || (attemptsRemaining !== undefined && attemptsRemaining <= 0) || (developerProfile && developerProfile.hasPassed)
 
   return (
     <div className="space-y-6">
-      {hasPassed ? (
+      {developerProfile && developerProfile.hasPassed ? (
         <Alert className="border-green-500 bg-green-50 dark:bg-green-950/20">
           <CheckCircle2 className="h-4 w-4 text-green-500" />
           <AlertTitle>Challenge Completed</AlertTitle>
@@ -83,11 +75,11 @@ export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps)
             )}
           </div>
 
-          {maxAttempts !== undefined && attempts !== undefined && (
+          {developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined && (
             <div className="space-y-2">
               <Progress value={attemptsUsedPercentage} className="h-2" />
               <div className="text-xs text-muted-foreground text-right">
-                {attempts} of {maxAttempts} attempts used
+                {developerProfile.attempts} of {developerProfile.maxAttempts} attempts used
               </div>
             </div>
           )}
@@ -98,7 +90,7 @@ export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps)
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Evaluating your code...
               </>
-            ) : hasPassed ? (
+            ) : developerProfile && developerProfile.hasPassed ? (
               <>
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Assessment Passed
@@ -113,7 +105,7 @@ export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps)
         </div>
       )}
 
-      {feedback && !hasPassed && (
+      {feedback && developerProfile && !developerProfile.hasPassed && (
         <Alert className="border-amber-500 bg-amber-50/50 dark:bg-amber-950/20">
           <AlertTitle>Assessment Feedback</AlertTitle>
           <AlertDescription className="whitespace-pre-line">{feedback}</AlertDescription>

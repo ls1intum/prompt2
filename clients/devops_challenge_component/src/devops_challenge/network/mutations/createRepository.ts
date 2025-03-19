@@ -1,19 +1,28 @@
+import { devOpsChallengeAxiosInstance } from '../devOpsChallengeServerConfig';
+
 export const createRepository = async (
-    githubUsername: string,
+    gitHubHandle: string,
     coursePhaseID: string
-) => {
-    const response = await fetch(`http://devops-challenge.aet.cit.tum.de/${coursePhaseID}/repository`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ githubUsername }),
-    });
+): Promise<string> => {
+    try {
+        interface RepositoryResponse {
+            message: string
+            repositoryUrl: string;
+        }
 
-    if (!response.ok) {
-        throw new Error('Failed to create repository');
+        const response = await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
+            `${coursePhaseID}/repository`,
+            gitHubHandle,
+            {
+                headers: {
+                    'Content-Type': 'application/json-path+json',
+                },
+            },
+        );
+
+        return response.data.repositoryUrl;
+    } catch (err) {
+        console.error(err);
+        throw err;
     }
-
-    const data = await response.json();
-    return data.repositoryUrl;
-};
+}
