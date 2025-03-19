@@ -7,4 +7,7 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
     rules: {},
   },
+  {
+    ignores: ['**/components/ui/*', '**/components/minimal-tiptap/*'],
+  },
 ]
