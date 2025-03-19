@@ -1,0 +1,15 @@
+name: Setup Node
+description: Setup the node environment
+
+runs:
+  using: "composite"
+  steps:
+    - run: corepack enable
+      shell: bash
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "18"
+        cache: "yarn"
+        cache-dependency-path: ./clients/yarn.lock
+    - run: yarn install
+      shell: bash

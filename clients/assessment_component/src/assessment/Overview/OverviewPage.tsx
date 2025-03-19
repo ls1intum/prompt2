@@ -15,7 +15,7 @@ export const OverviewPage = (): JSX.Element => {
             <CardTitle className='text-2xl'>Assessment Component</CardTitle>
           </div>
           <Badge variant='secondary' className='bg-yellow-200 text-yellow-800'>
-            In Development
+            Currently in Development
           </Badge>
         </div>
         <CardDescription>This component is currently under development</CardDescription>
