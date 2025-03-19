@@ -29,8 +29,8 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "./clients/lint-results/*.json"
-          only-pr-files: false
-          check-name: "Lint Client Report"
+          fail-on-warning: false
+          check-name: "Client Linting Report"
   build-clients:
     needs: annotate-lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml
