@@ -19,7 +19,7 @@ export default function StudentRepoForm() {
   const { repoUrl, setRepoUrl, setAttempts, setMaxAttempts, setHasPassed, setFeedback } = useChallengeStore()
 
   const [loading, setLoading] = useState(true)
-  const [githubUsername, setGithubUsername] = useState("")
+  const [githubHandle, setGithubHandle] = useState("")
 
   useEffect(() => {
     // Fetch student info when the component mounts
@@ -65,14 +65,14 @@ export default function StudentRepoForm() {
             </div>
           ) : !repoUrl ? (
             <GitHubHandleInput
-              githubUsername={githubUsername}
-              setGithubUsername={setGithubUsername}
+              githubHandle={githubHandle}
+              setGithubHandle={setGithubHandle}
               phaseId={phaseId}
             />
           ) : (
             <div className="space-y-6">
               <RepositoryInfo repoUrl={repoUrl} />
-              <AssessmentPanel phaseId={phaseId} githubUsername={githubUsername} />
+              <AssessmentPanel phaseId={phaseId} githubHandle={githubHandle} />
             </div>
           )}
         </CardContent>

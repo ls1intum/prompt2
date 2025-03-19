@@ -8,18 +8,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Github, Loader2, AlertCircle } from "lucide-react"
 
 interface GitHubHandleInputProps {
-  githubUsername: string
-  setGithubUsername: (username: string) => void
+  githubHandle: string
+  setGithubHandle: (username: string) => void
   phaseId: string
 }
 
-export function GitHubHandleInput({ githubUsername, setGithubUsername, phaseId }: GitHubHandleInputProps) {
+export function GitHubHandleInput({ githubHandle, setGithubHandle, phaseId }: GitHubHandleInputProps) {
   const { toast } = useToast()
   const { setRepoUrl } = useChallengeStore()
   const [loading, setLoading] = useState(false)
 
   const handleCreateRepo = async () => {
-    if (!githubUsername) {
+    if (!githubHandle) {
       toast({
         title: "GitHub username required",
         description: "Please enter your GitHub username to continue",
@@ -30,7 +30,7 @@ export function GitHubHandleInput({ githubUsername, setGithubUsername, phaseId }
 
     setLoading(true)
     try {
-      const url = await createRepository(githubUsername, phaseId)
+      const url = await createRepository(githubHandle, phaseId)
       setRepoUrl(url)
       toast({
         title: "Repository created",
@@ -61,13 +61,13 @@ export function GitHubHandleInput({ githubUsername, setGithubUsername, phaseId }
         <div className="relative flex-1">
           <Input
             placeholder="GitHub username"
-            value={githubUsername}
-            onChange={(e) => setGithubUsername(e.target.value)}
+            value={githubHandle}
+            onChange={(e) => setGithubHandle(e.target.value)}
             className="pl-9"
             disabled={loading}
           />
         </div>
-        <Button onClick={handleCreateRepo} disabled={loading || !githubUsername} className="min-w-[120px]">
+        <Button onClick={handleCreateRepo} disabled={loading || !githubHandle} className="min-w-[120px]">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -11,10 +11,10 @@ import { Loader2, RefreshCw, CheckCircle2 } from "lucide-react"
 
 interface AssessmentPanelProps {
   phaseId: string
-  githubUsername: string
+  githubHandle: string
 }
 
-export function AssessmentPanel({ phaseId, githubUsername }: AssessmentPanelProps) {
+export function AssessmentPanel({ phaseId, githubHandle }: AssessmentPanelProps) {
   const { toast } = useToast()
   const { attempts, maxAttempts, feedback, hasPassed, setAttempts, setMaxAttempts, setFeedback, setHasPassed } =
     useChallengeStore()
@@ -25,7 +25,7 @@ export function AssessmentPanel({ phaseId, githubUsername }: AssessmentPanelProp
     setLoading(true)
     try {
       // First trigger the assessment
-      const result = await triggerAssessment(phaseId, githubUsername)
+      const result = await triggerAssessment(phaseId, githubHandle)
       setAttempts(result.attempts)
       setMaxAttempts(result.maxAttempts)
       setFeedback(result.message)
