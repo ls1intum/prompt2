@@ -146,6 +146,33 @@ func (suite *CoursePhaseTestSuite) TestCreateCoursePhase() {
 	assert.Equal(suite.T(), studentData, fetchedCoursePhase.StudentReadableData, "Expected student readable data to match")
 }
 
+func (suite *CoursePhaseTestSuite) TestGetPrevPhaseDataByCoursePhaseID() {
+	// Define UUIDs matching the ones in the dump.
+	targetPhaseID := uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	predecessorPhaseID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	// Call the function under test.
+	prevData, err := GetPrevPhaseDataByCoursePhaseID(suite.ctx, targetPhaseID)
+	suite.NoError(err)
+
+	// Verify that the core data (from the provided output DTO with endpoint 'core') is merged correctly.
+	// Expecting: {"TestDTO": "restricted-test-value"} (since the predecessor phase's restricted_data contains that key)
+	jsonData := `{"TestDTO": "restricted-test-value"}`
+	var expectedCoreJSON meta.MetaData
+	err = json.Unmarshal([]byte(jsonData), &expectedCoreJSON)
+	assert.NoError(suite.T(), err)
+	suite.Equal(expectedCoreJSON, prevData.PrevData)
+
+	// Verify that resolution data (for non-core endpoint) is returned.
+	// The resolution query should return one row with the non-core DTO.
+	suite.Len(prevData.Resolutions, 1)
+	resolution := prevData.Resolutions[0]
+	suite.Equal("ResolutionDTO", resolution.DtoName)
+	suite.Equal("non-core", resolution.EndpointPath)
+	suite.Equal("http://example.com", resolution.BaseURL)
+	suite.Equal(predecessorPhaseID.String(), resolution.CoursePhaseID.String())
+}
+
 func TestCoursePhaseTestSuite(t *testing.T) {
 	suite.Run(t, new(CoursePhaseTestSuite))
 }
