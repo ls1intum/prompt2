@@ -74,6 +74,7 @@
         "zustand": "^5.0.1"
     },
     "resolutions": {
+        "@babel/runtime": "^7.26.10",
         "nanoid": "^3.3.8"
     },
     "devDependencies": {
