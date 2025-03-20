@@ -51,10 +51,11 @@ export const DevOpsChallengeDataShell = ({ children }: DevOpsChallengeDataShellP
     } = useQuery<DeveloperProfile>({
         queryKey: ["developer_profile"],
         queryFn: () => getDeveloperProfile(phaseId ?? ''),
+        enabled: githubHandle !== "",
     })
 
     const isPending =
-        isParticipationPending || isProfilePending || !devProfileSet || !participationSet
+        isParticipationPending || !participationSet
     const isError = isParticipationError || isProfileError
 
     useEffect(() => {

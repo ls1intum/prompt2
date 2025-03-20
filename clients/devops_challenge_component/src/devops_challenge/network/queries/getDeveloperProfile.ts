@@ -7,7 +7,7 @@ export const getDeveloperProfile = async (
     try {
         return (
             await devOpsChallengeAxiosInstance.get(
-                `${coursePhaseID}/info`,
+                `/${coursePhaseID}/info`,
             )
         ).data
     } catch (err) {
