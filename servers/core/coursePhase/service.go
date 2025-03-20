@@ -83,7 +83,9 @@ func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUI
 
 	prevCoursePhaseDataDTO, err := coursePhaseDTO.GetPrevCoursePhaseDataDTO(dataFromCore, resolutions)
 	if err != nil {
-		log.Error("failed to create DTO: ", err)
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+		}).Error("failed to create previous course phase data DTO: ", err)
 		return coursePhaseDTO.PrevCoursePhaseData{}, err
 	}
 

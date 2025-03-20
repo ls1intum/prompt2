@@ -16,7 +16,7 @@ func GetPrevCoursePhaseDataDTO(prevCoreData []byte, resolutions []db.GetPrevCour
 		return PrevCoursePhaseData{}, err
 	}
 
-	resolutionDTOs := []CoursePhaseResolution{}
+	resolutionDTOs := make([]CoursePhaseResolution, 0, len(resolutions))
 	for _, resolution := range resolutions {
 		resolutionDTOs = append(resolutionDTOs, GetResolutionDTOFromDBModel(resolution))
 	}
