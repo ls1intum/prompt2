@@ -30,11 +30,11 @@ type Seat struct {
 }
 
 type StudentGitlabProcess struct {
-	CoursePhaseID int32            `json:"course_phase_id"`
-	StudentID     int32            `json:"student_id"`
-	GitlabSuccess bool             `json:"gitlab_success"`
-	CreatedAt     pgtype.Timestamp `json:"created_at"`
-	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	GitlabSuccess         bool             `json:"gitlab_success"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
 }
 
 type Tutor struct {

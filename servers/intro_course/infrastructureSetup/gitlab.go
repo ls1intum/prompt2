@@ -3,11 +3,14 @@ package infrastructureSetup
 import (
 	"errors"
 
+	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup/data"
 	log "github.com/sirupsen/logrus"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 const CI_CD_PROJECT_ID = 190739
+const IN_PROGRESS_LABEL_ID = 73741
+const IN_REVIEW_LABEL_ID = 73742
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client
@@ -144,7 +147,7 @@ func getUserID(username string) (*gitlab.User, error) {
 	return users[0], nil
 }
 
-func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) error {
+func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, submissionDeadline string) error {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get client: ", err)
@@ -158,15 +161,20 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) e
 		OnlyAllowMergeIfPipelineSucceeds: gitlab.Ptr(true),
 		BuildsAccessLevel:                gitlab.Ptr(gitlab.PrivateAccessControl),
 		ContainerRegistryAccessLevel:     gitlab.Ptr(gitlab.DisabledAccessControl),
-		EnvironmentsAccessLevel:          gitlab.Ptr(gitlab.DisabledAccessControl),
-		FeatureFlagsAccessLevel:          gitlab.Ptr(gitlab.DisabledAccessControl),
-		ForkingAccessLevel:               gitlab.Ptr(gitlab.DisabledAccessControl),
-		InfrastructureAccessLevel:        gitlab.Ptr(gitlab.DisabledAccessControl),
-		PackagesEnabled:                  gitlab.Ptr(false),
-		ReleasesAccessLevel:              gitlab.Ptr(gitlab.DisabledAccessControl),
-		SecurityAndComplianceAccessLevel: gitlab.Ptr(gitlab.DisabledAccessControl),
-		SnippetsAccessLevel:              gitlab.Ptr(gitlab.DisabledAccessControl),
-		WikiAccessLevel:                  gitlab.Ptr(gitlab.DisabledAccessControl),
+		EnvironmentsAccessLevel:          gitlab.Ptr(gitlab.DisabledAccessControl), // disable environments
+		FeatureFlagsAccessLevel:          gitlab.Ptr(gitlab.DisabledAccessControl), // disable feature flags
+		ForkingAccessLevel:               gitlab.Ptr(gitlab.DisabledAccessControl), // disable forking
+		InfrastructureAccessLevel:        gitlab.Ptr(gitlab.DisabledAccessControl), // disable infrastructure
+		PackagesEnabled:                  gitlab.Ptr(false),                        // disable packages
+		ReleasesAccessLevel:              gitlab.Ptr(gitlab.DisabledAccessControl), // disable releases
+		SecurityAndComplianceAccessLevel: gitlab.Ptr(gitlab.DisabledAccessControl), // disable security & compliance
+		SnippetsAccessLevel:              gitlab.Ptr(gitlab.DisabledAccessControl), // disable snippets
+		WikiAccessLevel:                  gitlab.Ptr(gitlab.DisabledAccessControl), // disable wiki
+		RequirementsAccessLevel:          gitlab.Ptr(gitlab.DisabledAccessControl), // disable requirements
+		ModelExperimentsAccessLevel:      gitlab.Ptr(gitlab.DisabledAccessControl), // disable model experiments
+		ModelRegistryAccessLevel:         gitlab.Ptr(gitlab.DisabledAccessControl), // disable model registry
+		PagesAccessLevel:                 gitlab.Ptr(gitlab.DisabledAccessControl), // disable pages
+		MonitorAccessLevel:               gitlab.Ptr(gitlab.DisabledAccessControl), // disable monitor
 	}
 
 	project, _, err := git.Projects.CreateProject(p)
@@ -219,7 +227,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) e
 	// Add custom README
 	_, _, err = git.RepositoryFiles.CreateFile(project.ID, "README.md", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(`{{ lookup('template', 'README_template.md') }}`),
+		Content:       gitlab.Ptr(data.GetReadme(submissionDeadline)),
 		CommitMessage: gitlab.Ptr("Add custom README"),
 	})
 	if err != nil {
@@ -230,7 +238,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) e
 	// Add custom swiftlint
 	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".swiftlint.yml", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(`{{ lookup('template', '.swiftlint_template.yml') }}`),
+		Content:       gitlab.Ptr(`insert swiftlint.yml content here`),
 		CommitMessage: gitlab.Ptr("Add custom .swiftlint.yml"),
 	})
 	if err != nil {
@@ -241,7 +249,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) e
 	// Add custom gitignore
 	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".gitignore", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(`{{ lookup('template', '.gitignore_template') }}`),
+		Content:       gitlab.Ptr(`insert gitignore content here`),
 		CommitMessage: gitlab.Ptr("Add custom .gitignore"),
 	})
 	if err != nil {
@@ -258,6 +266,37 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int) e
 		log.Error("failed to add branch protect rules: ", err)
 		return errors.New("failed add branch protect rules")
 	}
+
+	// Setup issue board
+	issueBoard, _, err := git.Boards.CreateIssueBoard(project.ID, &gitlab.CreateIssueBoardOptions{
+		Name: gitlab.Ptr("Issue Board"),
+	})
+	if err != nil {
+		log.Error("failed to create issue board: ", err)
+		return errors.New("failed create issue board")
+	}
+
+	// Add issue board lists
+	_, _, err = git.Boards.CreateIssueBoardList(project.ID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
+		LabelID: gitlab.Ptr(IN_PROGRESS_LABEL_ID),
+	})
+	if err != nil {
+		log.Error("failed to create issue board list: ", err)
+		return errors.New("failed create issue board list")
+	}
+
+	_, _, err = git.Boards.CreateIssueBoardList(project.ID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
+		LabelID: gitlab.Ptr(IN_REVIEW_LABEL_ID),
+	})
+	if err != nil {
+		log.Error("failed to create issue board list: ", err)
+		return errors.New("failed create issue board list")
+	}
+
+	// Add issue board labels
+	_, _, err = git.Tags.CreateTag(project.ID, &gitlab.CreateTagOptions{
+		TagName: gitlab.Ptr("bug"),
+	})
 
 	return nil
 }

@@ -14,9 +14,9 @@ func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allo
 
 	// Post initial seat plan with seat names
 	// TODO: Add authentication middleware
-	infrastructureRouter.POST("/course-setup", createCourseSetup)
+	infrastructureRouter.POST("/gitlab/course-setup", createCourseSetup)
 
-	infrastructureRouter.POST("/student-setup/:courseParticipationID", setupStudentInfrastructure)
+	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", setupStudentInfrastructure)
 }
 
 func createCourseSetup(c *gin.Context) {
@@ -65,7 +65,7 @@ func setupStudentInfrastructure(c *gin.Context) {
 		return
 	}
 
-	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.TumID)
+	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.TumID, infrastructureRequest.SubmissionDeadline)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

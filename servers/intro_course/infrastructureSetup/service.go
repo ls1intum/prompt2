@@ -74,7 +74,7 @@ func CreateCourseInfrastructure(c *gin.Context, coursePhaseID uuid.UUID, semeste
 	return nil
 }
 
-func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, tumID string) error {
+func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, tumID, submissionDeadline string) error {
 	// 1.) get the student developer profile
 	devProfile, err := InfrastructureServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(c, db.GetDeveloperProfileByCourseParticipationIDParams{
 		CourseParticipationID: courseParticipationID,
@@ -116,7 +116,6 @@ func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipat
 		return errors.New("failed to get tutor gitlab id")
 	}
 
-	// // 1.) Get Top Level Group
 	ipraktikumGroup, err := getiPraktikumGroup()
 	if err != nil {
 		return err
@@ -135,12 +134,21 @@ func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipat
 	}
 
 	// 2.) Create the student group
-	err = CreateStudentProject(tumID, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID)
+	err = CreateStudentProject(tumID, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, submissionDeadline)
 	if err != nil {
 		log.Error("Failed to create student project: ", err)
 		return err
 	}
-	// TODO: store successful creation of student project in database
+
+	err = InfrastructureServiceSingleton.queries.AddGitlabStatus(c, db.AddGitlabStatusParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+
+	if err != nil {
+		log.Error("Failed to update gitlab status in db: ", err)
+	}
+
 	return nil
 }
 
