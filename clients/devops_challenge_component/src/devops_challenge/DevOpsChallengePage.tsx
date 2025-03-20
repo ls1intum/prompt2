@@ -18,13 +18,14 @@ import { useQuery } from '@tanstack/react-query'
 
 export const DevOpsChallengePage = (): JSX.Element => {
   const { developerProfile } = useDevOpsChallengeStore()
+  const { githubHandle } = useDevOpsChallengeStore()
 
   const renderChallengeContent = () => {
-    if (!developerProfile) {
-      return <div>Loading...</div>
-    }
-    else if (!developerProfile.repositoryURL) {
+    if (!githubHandle) {
       return <GitHubHandleInput />
+    }
+    else if (!developerProfile) {
+      return <LoadingPage />
     }
     else if (!developerProfile.hasPassed) {
       return <AssessmentPanel />
@@ -33,7 +34,7 @@ export const DevOpsChallengePage = (): JSX.Element => {
       return <div>Challenge completed</div>
     }
   }
-
+  
   return (
     <div className="max-w-xl mx-auto p-4">
       <Card className="shadow-md">

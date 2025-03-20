@@ -6,6 +6,14 @@ import { useDevOpsChallengeStore } from "../zustand/useDevOpsChallengeStore"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Github, Loader2, AlertCircle } from "lucide-react"
 
@@ -14,10 +22,12 @@ export const GitHubHandleInput = (): JSX.Element => {
   const { toast } = useToast()
   const { setDeveloperProfile } = useDevOpsChallengeStore()
   const [loading, setLoading] = useState(false)
-  const [githubHandle, setGithubHandle] = useState("")
+  const [handle, setHandle] = useState("")
+  const { githubHandle, setGithubHandle } = useDevOpsChallengeStore()
+  const { studentId } = useParams<{ studentId: string }>()
 
   const handleCreateRepo = async () => {
-    if (!githubHandle) {
+    if (!handle) {
       toast({
         title: "GitHub username required",
         description: "Please enter your GitHub username to continue",
@@ -26,9 +36,11 @@ export const GitHubHandleInput = (): JSX.Element => {
       return
     }
 
+    setGithubHandle(handle)
+
     setLoading(true)
     try {
-      const url = await createRepository(githubHandle, phaseId ?? '')
+      const url = await createRepository(handle, phaseId ?? '', studentId ?? '')
       const studentInfo = await getDeveloperProfile(phaseId ?? '')
       setDeveloperProfile(studentInfo)
       toast({
@@ -60,13 +72,13 @@ export const GitHubHandleInput = (): JSX.Element => {
         <div className="relative flex-1">
           <Input
             placeholder="GitHub username"
-            value={githubHandle}
-            onChange={(e) => setGithubHandle(e.target.value)}
+            value={handle}
+            onChange={(e) => setHandle(e.target.value)}
             className="pl-9"
             disabled={loading}
           />
         </div>
-        <Button onClick={handleCreateRepo} disabled={loading || !githubHandle} className="min-w-[120px]">
+        <Button onClick={handleCreateRepo} disabled={loading || !handle} className="min-w-[120px]">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -44,12 +44,12 @@ export const AssessmentPanel = (): JSX.Element => {
     }
   }
 
-  const attemptsRemaining = developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined 
-  ? developerProfile.maxAttempts - developerProfile.attempts : undefined
+  const attemptsRemaining = developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined
+    ? developerProfile.maxAttempts - developerProfile.attempts : undefined
 
   const attemptsUsedPercentage =
-    developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined 
-    ? (developerProfile.attempts / developerProfile.maxAttempts) * 100 : 0
+    developerProfile && developerProfile.maxAttempts !== undefined && developerProfile.attempts !== undefined
+      ? (developerProfile.attempts / developerProfile.maxAttempts) * 100 : 0
 
   const isAssessmentDisabled = loading || (attemptsRemaining !== undefined && attemptsRemaining <= 0) || (developerProfile && developerProfile.hasPassed)
 

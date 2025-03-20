@@ -2,7 +2,7 @@ import axios from 'axios'
 import { env } from '@/env'
 import { parseURL } from '@/utils/parseURL'
 
-const devOpsChallengeServer = 'localhost:9000'
+const devOpsChallengeServer = 'http://localhost:9000'
 
 const serverBaseUrl = parseURL(devOpsChallengeServer)
 
