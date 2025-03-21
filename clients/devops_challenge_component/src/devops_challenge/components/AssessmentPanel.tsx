@@ -9,20 +9,24 @@ import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, RefreshCw, CheckCircle2 } from "lucide-react"
+import { set } from "react-hook-form"
 
 export const AssessmentPanel = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { toast } = useToast()
-  const { developerProfile, setDeveloperProfile } = useDevOpsChallengeStore()
-  const [feedback, setFeedback] = useState('')
 
+  const { developerProfile, setDeveloperProfile } = useDevOpsChallengeStore()
+  const { githubHandle } = useDevOpsChallengeStore()
+  const {feedback, setFeedback} = useDevOpsChallengeStore()
+
+  // const [feedback, setFeedback] =  useState('')
   const [loading, setLoading] = useState(false)
 
   const handleTriggerAssessment = async () => {
     setLoading(true)
     try {
-      const feedback = await triggerAssessment(phaseId ?? '')
+      const feedback = await triggerAssessment(githubHandle ?? 'mathildeshagl', phaseId ?? '', 'ge63sir')
       setFeedback(feedback)
 
       const updatedInfo = await getDeveloperProfile(phaseId ?? '')
@@ -33,12 +37,9 @@ export const AssessmentPanel = (): JSX.Element => {
         description: "Your code has been evaluated. Check the results below.",
         variant: "default",
       })
-    } catch (error) {
-      toast({
-        title: "Assessment failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred."
+      setFeedback(errorMessage)
     } finally {
       setLoading(false)
     }

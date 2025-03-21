@@ -19,12 +19,15 @@ import { Github, Loader2, AlertCircle } from "lucide-react"
 
 export const GitHubHandleInput = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const { studentId } = useParams<{ studentId: string }>()
+  //const { studentId } = useParams<{ studentId: string }>()
+
   const { toast } = useToast()
+
   const { setDeveloperProfile } = useDevOpsChallengeStore()
+  const { githubHandle, setGithubHandle } = useDevOpsChallengeStore()
+
   const [loading, setLoading] = useState(false)
   const [handle, setHandle] = useState("")
-  const { githubHandle, setGithubHandle } = useDevOpsChallengeStore()
 
   const handleCreateRepo = async () => {
     if (!handle) {
@@ -40,7 +43,7 @@ export const GitHubHandleInput = (): JSX.Element => {
 
     setLoading(true)
     try {
-      const url = await createRepository(handle, phaseId ?? '', studentId ?? '')
+      const url = await createRepository(handle, phaseId ?? '', 'ab12cdd')
       const studentInfo = await getDeveloperProfile(phaseId ?? '')
       setDeveloperProfile(studentInfo)
       toast({
