@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { GitHubHandleInput } from './components/GitHubHandleInput'
 import { AssessmentPanel } from './components/AssessmentPanel'

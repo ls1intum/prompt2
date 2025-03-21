@@ -4,7 +4,6 @@ import { createRepository } from '../../network/mutations/createRepository'
 
 export const useCreateRepository = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (gitHubHandle?: string) => createRepository(gitHubHandle ?? '', phaseId ?? ''),
