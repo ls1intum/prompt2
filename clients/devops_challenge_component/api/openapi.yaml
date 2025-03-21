@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: Challenge API
+  description: API for handling challenge submissions, student repositories, and testing.
+  version: 1.0.0
+paths:
+  /{coursePhaseID}/demo-student:
+    get:
+      summary: "Demo endpoint for students"
+      description: "A demo endpoint for students to test access control."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "Hello, student"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hello, student"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/demo-lecturer:
+    get:
+      summary: "Demo endpoint for lecturers"
+      description: "A demo endpoint for lecturers to test access control."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "Hello, lecturer"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hello, lecturer"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/info:
+    get:
+      summary: "Get student information"
+      description: "Fetch information about a student's challenge progress."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "Student info retrieved"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositoryUrl:
+                    type: string
+                  attempts:
+                    type: integer
+                  maxAttempts:
+                    type: integer
+                  hasPassed:
+                    type: boolean
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+        '404':
+          description: "Student not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "student not found"
+  
+  /{coursePhaseID}/students:
+    get:
+      summary: "Get all students"
+      description: "Fetch a list of all students in a course phase."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "List of students retrieved"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  students:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        studentId:
+                          type: string
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid coursePhaseID"
+  
+  /{coursePhaseID}/repository:
+    post:
+      summary: "Create student repository"
+      description: "Creates a GitHub repository for a student for a given course phase."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                githubUsername:
+                  type: string
+      responses:
+        '200':
+          description: "Repository created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Repository created"
+                  repositoryUrl:
+                    type: string
+                    example: "https://github.com/example/repository"
+        '400':
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid GitHub username"
+        '409':
+          description: "Student already exists"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "student already exists"
+  
+  /{coursePhaseID}/studentTest:
+    post:
+      summary: "Test student repository"
+      description: "Test a student's repository and container for correctness."
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                githubUsername:
+                  type: string
+      responses:
+        '200':
+          description: "Student passed challenge"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Student passed challenge"
+        '400':
+          description: "Invalid repository or container"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No repository found"
+        '500':
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error pulling image"
