@@ -25,7 +25,6 @@ export const DevOpsChallengeDataShell = ({
 
   const { setCoursePhaseParticipation, setDeveloperProfile } = useDevOpsChallengeStore()
 
-  const [setDevProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
 
   const [githubHandle] = useState('')
