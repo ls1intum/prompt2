@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup/infrastructureDTO"
+	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,9 +15,10 @@ func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allo
 
 	// Post initial seat plan with seat names
 	// TODO: Add authentication middleware
-	infrastructureRouter.POST("/gitlab/course-setup", createCourseSetup)
+	infrastructureRouter.POST("/gitlab/course-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createCourseSetup)
+	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), setupStudentInfrastructure)
 
-	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", setupStudentInfrastructure)
+	infrastructureRouter.GET("/gitlab/student-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getStudentInfrastructureStatus)
 }
 
 func createCourseSetup(c *gin.Context) {
@@ -73,6 +75,23 @@ func setupStudentInfrastructure(c *gin.Context) {
 
 	c.Status(http.StatusCreated)
 
+}
+
+func getAllStudentInfrastructureStatus(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	studentInfrastructureStatus, err := GetAllStudentInfrastructureStatus(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, studentInfrastructureStatus)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

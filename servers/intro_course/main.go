@@ -82,7 +82,10 @@ func main() {
 	developerProfile.InitDeveloperProfileModule(api, *query, conn)
 	tutor.InitTutorModule(api, *query, conn)
 	seatPlan.InitSeatPlanModule(api, *query, conn)
-	infrastructureSetup.InitInfrastructureModule(api, *query, conn)
+
+	// Infrastructure Setup
+	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")
+	infrastructureSetup.InitInfrastructureModule(api, *query, conn, gitlabAccessToken)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	err = router.Run(serverAddress)

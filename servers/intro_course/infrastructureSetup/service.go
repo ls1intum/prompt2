@@ -1,9 +1,9 @@
 package infrastructureSetup
 
 import (
+	"context"
 	"errors"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -13,16 +13,17 @@ import (
 )
 
 type InfrastructureService struct {
-	queries db.Queries
-	conn    *pgxpool.Pool
+	queries           db.Queries
+	conn              *pgxpool.Pool
+	gitlabAccessToken string
 }
 
 var InfrastructureServiceSingleton *InfrastructureService
 
-const TOP_LEVEL_GROUP_NAME = "ipraktikumTest"
-const I_PRAKTIKUM_GROUP_NAME = "ipraktikum"
+const TOP_LEVEL_GROUP_NAME = "ASE"
+const I_PRAKTIKUM_GROUP_NAME = "iPraktikum"
 
-func CreateCourseInfrastructure(c *gin.Context, coursePhaseID uuid.UUID, semesterTag string) error {
+func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) error {
 	// 1.) Get Top Level Group
 	ipraktikumGroup, err := getiPraktikumGroup()
 	if err != nil {
@@ -59,24 +60,12 @@ func CreateCourseInfrastructure(c *gin.Context, coursePhaseID uuid.UUID, semeste
 		log.Error("Failed to create introCourse group: ", err)
 	}
 
-	// // 6.) Grant dev group access to ci/cd project
-	// err = grantGroupAccessToCICDProject(developerGroup.ID)
-	// if err != nil {
-	// 	log.Error("Failed to grant access to project: ", err)
-	// }
-
-	// // 7.) Grant tutor group access to ci/cd project
-	// err = grantGroupAccessToCICDProject(tutorGroup.ID)
-	// if err != nil {
-	// 	log.Error("Failed to grant access to project: ", err)
-	// }
-
 	return nil
 }
 
-func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, tumID, submissionDeadline string) error {
+func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, tumID, submissionDeadline string) error {
 	// 1.) get the student developer profile
-	devProfile, err := InfrastructureServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(c, db.GetDeveloperProfileByCourseParticipationIDParams{
+	devProfile, err := InfrastructureServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(ctx, db.GetDeveloperProfileByCourseParticipationIDParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
@@ -89,7 +78,7 @@ func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipat
 	}
 
 	// 2.) Get the assigned tutor
-	tutor, err := InfrastructureServiceSingleton.queries.GetAssignedTutor(c, db.GetAssignedTutorParams{
+	tutor, err := InfrastructureServiceSingleton.queries.GetAssignedTutor(ctx, db.GetAssignedTutorParams{
 		AssignedStudent: pgtype.UUID{Bytes: courseParticipationID, Valid: true},
 		CoursePhaseID:   coursePhaseID,
 	})
@@ -140,7 +129,7 @@ func CreateStudentInfrastructure(c *gin.Context, coursePhaseID, courseParticipat
 		return err
 	}
 
-	err = InfrastructureServiceSingleton.queries.AddGitlabStatus(c, db.AddGitlabStatusParams{
+	err = InfrastructureServiceSingleton.queries.AddGitlabStatus(ctx, db.AddGitlabStatusParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
@@ -167,5 +156,9 @@ func getiPraktikumGroup() (*gitlab.Group, error) {
 	}
 
 	return ipraktikumGroup, nil
+
+}
+
+func GetAllStudentInfrastructureStatus(c c.Context, coursePhaseID string) {
 
 }

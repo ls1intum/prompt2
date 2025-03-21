@@ -7,10 +7,11 @@ import (
 	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 )
 
-func InitInfrastructureModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
+func InitInfrastructureModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, gitlabAccessToken string) {
 	setupInfrastructureRouter(routerGroup, keycloakTokenVerifier.AuthenticationMiddleware)
 	InfrastructureServiceSingleton = &InfrastructureService{
-		queries: queries,
-		conn:    conn,
+		queries:           queries,
+		conn:              conn,
+		gitlabAccessToken: gitlabAccessToken,
 	}
 }

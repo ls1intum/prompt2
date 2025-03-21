@@ -8,13 +8,12 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
-const CI_CD_PROJECT_ID = 190739
-const IN_PROGRESS_LABEL_ID = 73741
-const IN_REVIEW_LABEL_ID = 73742
+const IN_PROGRESS_LABEL_ID = 53319
+const IN_REVIEW_LABEL_ID = 53320
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client
-	git, err := gitlab.NewClient("glpat-1k2ETvya-4bTREUvXA5G", gitlab.WithBaseURL("https://gitlab.lrz.de/api/v4"))
+	git, err := gitlab.NewClient(InfrastructureServiceSingleton.gitlabAccessToken, gitlab.WithBaseURL("https://gitlab.lrz.de/api/v4"))
 	if err != nil {
 		log.Error("Failed to create client: ", err)
 		return nil, err
@@ -99,28 +98,6 @@ func createGitlabGroup(parentGroupID int, groupName string, projectCreationLevel
 	}
 
 	return group, nil
-}
-
-func grantGroupAccessToCICDProject(groupID int) error {
-	// TODO get ci-cd project id dynamically
-	git, err := getClient()
-	if err != nil {
-		log.Error("failed to grant group access to CICD project: ", err)
-		return err
-	}
-
-	opt := &gitlab.ShareWithGroupOptions{
-		GroupID:     gitlab.Ptr(groupID),
-		GroupAccess: gitlab.Ptr(gitlab.ReporterPermissions),
-	}
-
-	// Grant group access to CICD project
-	_, err = git.Projects.ShareProjectWithGroup(CI_CD_PROJECT_ID, opt)
-	if err != nil {
-		log.Error("failed to grant group access to CICD project: ", err)
-		return err
-	}
-	return nil
 }
 
 func getUserID(username string) (*gitlab.User, error) {
