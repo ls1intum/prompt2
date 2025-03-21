@@ -21,10 +21,10 @@ export const useDownloadAssignment = (
   }
 
   return useCallback(() => {
-    const getStudentName = (studentId: string | null) => {
-      if (!studentId) return 'Unassigned'
+    const getStudentName = (courseParticipationID: string | null) => {
+      if (!courseParticipationID) return 'Unassigned'
       const student = developerWithProfiles.find(
-        (dev) => dev.participation.student.id === studentId,
+        (dev) => dev.participation.courseParticipationID === courseParticipationID,
       )
       return student
         ? `${student.participation.student.firstName} ${student.participation.student.lastName}`
