@@ -125,7 +125,7 @@ func getOwnSeatAssignment(c *gin.Context) {
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, http.StatusInternalServerError, errors.New("error getting courseParticipationID from context"))
 		return
 	}
 
