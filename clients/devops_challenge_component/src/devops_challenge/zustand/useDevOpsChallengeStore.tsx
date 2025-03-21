@@ -18,14 +18,14 @@ interface DevOpsChallengeStoreActions {
   ) => void
 }
 
-export const useDevOpsChallengeStore = create<DevOpsChallengeStoreState & DevOpsChallengeStoreActions>(
-  (set) => ({
-    developerProfile: undefined,
-    githubHandle: undefined,
-    feedback: undefined,
-    setDeveloperProfile: (developerProfile) => set({ developerProfile }),
-    setGithubHandle: (githubHandle) => set({ githubHandle }),
-    setFeedback: (feedback) => set({ feedback }),
-    setCoursePhaseParticipation: (coursePhaseParticipation) => set({ coursePhaseParticipation }),
-  })
-)
+export const useDevOpsChallengeStore = create<
+  DevOpsChallengeStoreState & DevOpsChallengeStoreActions
+>((set) => ({
+  developerProfile: undefined,
+  githubHandle: undefined,
+  feedback: undefined,
+  setDeveloperProfile: (developerProfile) => set({ developerProfile }),
+  setGithubHandle: (githubHandle) => set({ githubHandle }),
+  setFeedback: (feedback) => set({ feedback }),
+  setCoursePhaseParticipation: (coursePhaseParticipation) => set({ coursePhaseParticipation }),
+}))

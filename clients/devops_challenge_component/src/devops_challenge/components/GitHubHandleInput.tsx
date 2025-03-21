@@ -1,98 +1,64 @@
-import { useState } from "react"
-import { useParams } from "react-router-dom"
-import { createRepository } from "../network/mutations/createRepository"
-import { getDeveloperProfile } from "../network/queries/getDeveloperProfile"
-import { useDevOpsChallengeStore } from "../zustand/useDevOpsChallengeStore"
-import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Github, Loader2, AlertCircle } from "lucide-react"
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Loader2, AlertCircle } from 'lucide-react'
+import { useCreateRepository } from '../pages/hooks/useCreateRepository'
 
 export const GitHubHandleInput = (): JSX.Element => {
-  const { phaseId } = useParams<{ phaseId: string }>()
-  //const { studentId } = useParams<{ studentId: string }>()
+  const [error, setError] = useState<string | null>(null)
 
-  const { toast } = useToast()
-
-  const { setDeveloperProfile } = useDevOpsChallengeStore()
-  const { githubHandle, setGithubHandle } = useDevOpsChallengeStore()
-
-  const [loading, setLoading] = useState(false)
-  const [handle, setHandle] = useState("")
-
-  const handleCreateRepo = async () => {
-    if (!handle) {
-      toast({
-        title: "GitHub username required",
-        description: "Please enter your GitHub username to continue",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setGithubHandle(handle)
-
-    setLoading(true)
-    try {
-      const url = await createRepository(handle, phaseId ?? '', 'ab12cdd')
-      const studentInfo = await getDeveloperProfile(phaseId ?? '')
-      setDeveloperProfile(studentInfo)
-      toast({
-        title: "Repository created",
-        description: "Your challenge repository has been successfully created!",
-        variant: "default",
-      })
-    } catch (error) {
-      const errorMessage = (error as Error).message || "Unknown error occurred"
-      toast({
-        title: "Repository creation failed",
-        description: errorMessage,
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const repositoryMutation = useCreateRepository(setError)
+  const [handle, setHandle] = useState('')
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       <Alert>
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className='h-4 w-4' />
         <AlertTitle>Getting Started</AlertTitle>
-        <AlertDescription>Enter your GitHub username to create a repository for this challenge.</AlertDescription>
+        <AlertDescription>
+          Enter your GitHub username to create a repository for this challenge.
+        </AlertDescription>
       </Alert>
 
-      <div className="flex space-x-2">
-        <div className="relative flex-1">
+      <div className='flex space-x-2'>
+        <div className='relative flex-1'>
           <Input
-            placeholder="GitHub username"
+            placeholder='GitHub username'
             value={handle}
             onChange={(e) => setHandle(e.target.value)}
-            className="pl-9"
-            disabled={loading}
+            className='pl-9'
           />
         </div>
-        <Button onClick={handleCreateRepo} disabled={loading || !handle} className="min-w-[120px]">
-          {loading ? (
+        <Button
+          onClick={() => repositoryMutation.mutate(handle)}
+          disabled={!handle}
+          className='min-w-[120px]'
+        >
+          {repositoryMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Creating
             </>
+          ) : repositoryMutation.isError ? (
+            <>
+              <AlertCircle className='mr-2 h-4 w-4' />
+              {error ?? 'An unexpected error occurred'}
+            </>
           ) : (
-            "Create Repo"
+            'Create'
           )}
         </Button>
       </div>
+      {repositoryMutation.isSuccess && (
+        <Alert>
+          <AlertCircle className='h-4 w-4' />
+          <AlertTitle>Repository Created</AlertTitle>
+          <AlertDescription>
+            Your repository has been created. You can now start the challenge.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }
-
