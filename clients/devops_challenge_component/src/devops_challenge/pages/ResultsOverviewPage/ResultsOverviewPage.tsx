@@ -1,15 +1,4 @@
-import {
-  Laptop,
-  Loader2,
-  Smartphone,
-  Tablet,
-  Watch,
-  Check,
-  X,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-} from 'lucide-react'
+import { Loader2, Check, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 
 import { useState } from 'react'
 
