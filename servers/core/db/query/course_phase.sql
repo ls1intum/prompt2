@@ -43,3 +43,30 @@ JOIN course_phase_type cpt
   ON cpt.id = po.course_phase_type_id
 WHERE mdg.to_course_phase_id = $1
     AND po.endpoint_path <> 'core';
+
+
+
+-- name: GetPrevCoursePhaseDataFromCore :one
+SELECT jsonb_object_agg(sub.dto_name, sub.dto_value) AS incoming_dto_objects
+FROM (
+  SELECT pod.dto_name,
+         COALESCE(cp.student_readable_data -> pod.dto_name,
+                  cp.restricted_data -> pod.dto_name) AS dto_value
+  FROM phase_data_dependency_graph pdg
+  JOIN course_phase cp
+    ON cp.id = pdg.from_course_phase_id
+  JOIN course_phase_type_phase_provided_output_dto pod
+    ON pod.id = pdg.from_course_phase_DTO_id
+  WHERE pdg.to_course_phase_id = $1
+    AND pod.endpoint_path = 'core'
+) sub;
+
+-- name: GetPrevCoursePhaseDataResolution :many
+SELECT po.dto_name, cpt.base_url, po.endpoint_path, dg.from_course_phase_id
+FROM phase_data_dependency_graph dg
+JOIN course_phase_type_phase_provided_output_dto po
+  ON po.id = dg.from_course_phase_DTO_id
+JOIN course_phase_type cpt
+  ON cpt.id = po.course_phase_type_id
+WHERE dg.to_course_phase_id = $1
+    AND po.endpoint_path <> 'core';

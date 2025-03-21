@@ -69,3 +69,25 @@ func CheckCoursePhasesBelongToCourse(ctx context.Context, courseId uuid.UUID, co
 
 	return ok, nil
 }
+
+func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseDTO.PrevCoursePhaseData, error) {
+	dataFromCore, err := CoursePhaseServiceSingleton.queries.GetPrevCoursePhaseDataFromCore(ctx, coursePhaseID)
+	if err != nil {
+		return coursePhaseDTO.PrevCoursePhaseData{}, err
+	}
+
+	resolutions, err := CoursePhaseServiceSingleton.queries.GetPrevCoursePhaseDataResolution(ctx, coursePhaseID)
+	if err != nil {
+		return coursePhaseDTO.PrevCoursePhaseData{}, err
+	}
+
+	prevCoursePhaseDataDTO, err := coursePhaseDTO.GetPrevCoursePhaseDataDTO(dataFromCore, resolutions)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+		}).Error("failed to create previous course phase data DTO: ", err)
+		return coursePhaseDTO.PrevCoursePhaseData{}, err
+	}
+
+	return prevCoursePhaseDataDTO, nil
+}
