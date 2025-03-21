@@ -55,9 +55,9 @@ export const AssessmentPanel = (): JSX.Element => {
           {assessmentMutation.isPending ? (
             <Loader2 className='ml-2 h-4 w-4 animate-spin' />
           ) : developerQuery.data?.hasPassed ? (
-            <CheckCircle2 className='ml-2 h-4 w-4 text-green-600' />
+            <CheckCircle2 className='ml-2 h-4 w-4' />
           ) : (
-            <CircleAlert className='ml-2 h-4 w-4 text-yellow-600' />
+            <CircleAlert className='ml-2 h-4 w-4' />
           )}
           Trigger Assessment
         </Button>
