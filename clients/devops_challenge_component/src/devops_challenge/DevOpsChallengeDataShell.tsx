@@ -25,11 +25,10 @@ export const DevOpsChallengeDataShell = ({
 
   const { setCoursePhaseParticipation, setDeveloperProfile } = useDevOpsChallengeStore()
 
-  const [devProfileSet, setDevProfileSet] = useState(false)
+  const [setDevProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
 
-  const [loading, setLoading] = useState(true)
-  const [githubHandle, setGithubHandle] = useState('')
+  const [githubHandle] = useState('')
 
   // getting the course phase participation
   const {
@@ -46,7 +45,6 @@ export const DevOpsChallengeDataShell = ({
   // trying to get the developerProfile
   const {
     data: fetchedProfile,
-    isPending: isProfilePending,
     isError: isProfileError,
     refetch: refetchProfile,
   } = useQuery<DeveloperProfile>({
@@ -68,7 +66,6 @@ export const DevOpsChallengeDataShell = ({
   useEffect(() => {
     if (fetchedProfile) {
       setDeveloperProfile(fetchedProfile)
-      setDevProfileSet(true)
     }
   }, [fetchedProfile, setDeveloperProfile])
 
