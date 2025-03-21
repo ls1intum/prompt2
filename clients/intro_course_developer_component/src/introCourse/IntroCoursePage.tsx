@@ -13,7 +13,9 @@ export const IntroCoursePage = (): JSX.Element => {
   })
 
   // These will be replaced by actual data fetching
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [infrastructureComplete, setInfrastructureComplete] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [seatAssignment, setSeatAssignment] = useState(false)
 
   return (

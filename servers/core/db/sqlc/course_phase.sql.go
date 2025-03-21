@@ -157,6 +157,72 @@ func (q *Queries) GetCoursePhase(ctx context.Context, id uuid.UUID) (GetCoursePh
 	return i, err
 }
 
+const getPrevCoursePhaseDataFromCore = `-- name: GetPrevCoursePhaseDataFromCore :one
+SELECT jsonb_object_agg(sub.dto_name, sub.dto_value) AS incoming_dto_objects
+FROM (
+  SELECT pod.dto_name,
+         COALESCE(cp.student_readable_data -> pod.dto_name,
+                  cp.restricted_data -> pod.dto_name) AS dto_value
+  FROM phase_data_dependency_graph pdg
+  JOIN course_phase cp
+    ON cp.id = pdg.from_course_phase_id
+  JOIN course_phase_type_phase_provided_output_dto pod
+    ON pod.id = pdg.from_course_phase_DTO_id
+  WHERE pdg.to_course_phase_id = $1
+    AND pod.endpoint_path = 'core'
+) sub
+`
+
+func (q *Queries) GetPrevCoursePhaseDataFromCore(ctx context.Context, toCoursePhaseID uuid.UUID) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getPrevCoursePhaseDataFromCore, toCoursePhaseID)
+	var incoming_dto_objects []byte
+	err := row.Scan(&incoming_dto_objects)
+	return incoming_dto_objects, err
+}
+
+const getPrevCoursePhaseDataResolution = `-- name: GetPrevCoursePhaseDataResolution :many
+SELECT po.dto_name, cpt.base_url, po.endpoint_path, dg.from_course_phase_id
+FROM phase_data_dependency_graph dg
+JOIN course_phase_type_phase_provided_output_dto po
+  ON po.id = dg.from_course_phase_DTO_id
+JOIN course_phase_type cpt
+  ON cpt.id = po.course_phase_type_id
+WHERE dg.to_course_phase_id = $1
+    AND po.endpoint_path <> 'core'
+`
+
+type GetPrevCoursePhaseDataResolutionRow struct {
+	DtoName           string    `json:"dto_name"`
+	BaseUrl           string    `json:"base_url"`
+	EndpointPath      string    `json:"endpoint_path"`
+	FromCoursePhaseID uuid.UUID `json:"from_course_phase_id"`
+}
+
+func (q *Queries) GetPrevCoursePhaseDataResolution(ctx context.Context, toCoursePhaseID uuid.UUID) ([]GetPrevCoursePhaseDataResolutionRow, error) {
+	rows, err := q.db.Query(ctx, getPrevCoursePhaseDataResolution, toCoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPrevCoursePhaseDataResolutionRow
+	for rows.Next() {
+		var i GetPrevCoursePhaseDataResolutionRow
+		if err := rows.Scan(
+			&i.DtoName,
+			&i.BaseUrl,
+			&i.EndpointPath,
+			&i.FromCoursePhaseID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getResolutionsForCoursePhase = `-- name: GetResolutionsForCoursePhase :many
 SELECT po.dto_name, cpt.base_url, po.endpoint_path, mdg.from_course_phase_id
 FROM participation_data_dependency_graph mdg

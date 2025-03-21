@@ -15,6 +15,8 @@ import (
 func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware, permissionCourseIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhase := router.Group("/course_phases", authMiddleware())
 	coursePhase.GET("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getCoursePhaseByID)
+	coursePhase.GET("/:uuid/course_phase_data", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getPrevPhaseDataByCoursePhaseID)
+
 	// getting the course ID here to do correct rights management
 	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCoursePhase)
 	coursePhase.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCoursePhase)
@@ -127,6 +129,22 @@ func deleteCoursePhase(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func getPrevPhaseDataByCoursePhaseID(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	coursePhaseData, err := GetPrevPhaseDataByCoursePhaseID(c, id)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, coursePhaseData)
 }
 
 func hasRestrictedDataAccess(userRolesMap map[string]bool, courseTokenIdentifier string) bool {
