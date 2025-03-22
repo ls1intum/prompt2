@@ -8,14 +8,14 @@ const sidebarItems: SidebarMenuItemProps = {
   goToPath: '',
   subitems: [
     {
-      title: 'Settings',
-      goToPath: '/settings',
+      title: 'Results Overview',
+      goToPath: '/results-overview',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
-      title: 'GitHub',
-      goToPath: '/github',
-      requiredPermissions: [],
+      title: 'Settings',
+      goToPath: '/settings',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
   ],
 }
