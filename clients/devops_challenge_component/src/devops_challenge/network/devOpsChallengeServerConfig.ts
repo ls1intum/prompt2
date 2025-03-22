@@ -1,8 +1,7 @@
 import axios from 'axios'
-import { env } from '@/env'
 import { parseURL } from '@/utils/parseURL'
 
-const devOpsChallengeServer = 'http://localhost:9000' //'http://devops-challenge.aet.cit.tum.de:8080'
+const devOpsChallengeServer = 'http://localhost:9000'
 
 const serverBaseUrl = parseURL(devOpsChallengeServer)
 
