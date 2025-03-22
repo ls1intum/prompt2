@@ -270,11 +270,6 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 		return errors.New("failed create issue board list")
 	}
 
-	// Add issue board labels
-	_, _, err = git.Tags.CreateTag(project.ID, &gitlab.CreateTagOptions{
-		TagName: gitlab.Ptr("bug"),
-	})
-
 	return nil
 }
 

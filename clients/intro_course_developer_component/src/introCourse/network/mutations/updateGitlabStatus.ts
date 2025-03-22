@@ -7,9 +7,10 @@ export const updateGitLabStatusCreated = async (
   try {
     return await introCourseAxiosInstance.put(
       `intro-course/api/course_phase/${coursePhaseID}/infrastructure/gitlab/student-setup/${courseParticipationID}/manual`,
+      {},
       {
         headers: {
-          'Content-Type': 'application/json-path+json',
+          'Content-Type': 'application/json',
         },
       },
     )

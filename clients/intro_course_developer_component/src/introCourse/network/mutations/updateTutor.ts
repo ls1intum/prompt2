@@ -12,7 +12,7 @@ export const updateTutorGitLabUsername = async (
       updateTutorDTO,
       {
         headers: {
-          'Content-Type': 'application/json-path+json',
+          'Content-Type': 'application/json-patch+json',
         },
       },
     )
