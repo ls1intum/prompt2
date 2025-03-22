@@ -40,6 +40,7 @@ import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
 import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import { CreateGitlabReposDialog } from './components/CreateGitlabReposDialog'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
@@ -158,7 +159,10 @@ export const DeveloperProfilesLecturerPage = () => {
         <div className='text-sm text-muted-foreground'>
           Showing {filteredParticipants.length} of {sortedParticipants.length} participants
         </div>
-        <FilterMenu filters={filters} setFilters={setFilters} />
+        <div className='flex gap-2'>
+          <CreateGitlabReposDialog participantsWithDevProfiles={participantsWithProfiles} />
+          <FilterMenu filters={filters} setFilters={setFilters} />
+        </div>
       </div>
       <Table>
         <TableHeader>
