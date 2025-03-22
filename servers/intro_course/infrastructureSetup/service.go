@@ -86,7 +86,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 	if err != nil {
 		log.Error("Failed to get assigned tutor: ", err)
 		return errors.New("failed to get assigned tutor")
-	} else if tutor.GitlabUsername.Valid == false || tutor.GitlabUsername.String == "" {
+	} else if !tutor.GitlabUsername.Valid || tutor.GitlabUsername.String == "" {
 		log.Error("cannot create student repo due to missing tutor gitlab username")
 		return errors.New("cannot create student repo due to missing tutor gitlab username")
 	}
