@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan/seatPlanDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -15,13 +15,13 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 	seatPlanRouter := router.Group("/seat_plan")
 
 	// Post initial seat plan with seat names
-	seatPlanRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createSeatPlan)
-	seatPlanRouter.DELETE("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), deleteSeatPlan)
+	seatPlanRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createSeatPlan)
+	seatPlanRouter.DELETE("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteSeatPlan)
 
 	// Update seat plan (assigned tutor, assigned student, hasMac, deviceID)
-	seatPlanRouter.PUT("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateSeatPlan)
+	seatPlanRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateSeatPlan)
 
-	seatPlanRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getSeatPlan)
+	seatPlanRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSeatPlan)
 
 }
 
