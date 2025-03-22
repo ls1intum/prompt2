@@ -72,3 +72,87 @@ RENAME COLUMN meta_data TO restricted_data;
 
 ALTER TABLE course_phase
 ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+CREATE TABLE course_phase_type_phase_provided_output_dto (
+    id                      uuid PRIMARY KEY, 
+    course_phase_type_id    uuid        NOT NULL,
+    dto_name                text        NOT NULL,
+    version_number          integer     NOT NULL,
+    endpoint_path           text        NOT NULL,
+    specification           jsonb       NOT NULL,
+    CONSTRAINT fk_course_phase_type_phase_provided
+      FOREIGN KEY (course_phase_type_id)
+      REFERENCES course_phase_type(id)  -- adjust if needed
+      ON DELETE CASCADE
+);
+
+-- Required Input DTO table for phases
+CREATE TABLE course_phase_type_phase_required_input_dto (
+    id                      uuid PRIMARY KEY,
+    course_phase_type_id    uuid NOT NULL,
+    dto_name                text NOT NULL,
+    specification           jsonb NOT NULL,
+    CONSTRAINT fk_course_phase_type_phase_required
+      FOREIGN KEY (course_phase_type_id)
+      REFERENCES course_phase_type(id)  -- adjust if needed
+      ON DELETE CASCADE
+);
+
+-- Dependency graph table for phases
+CREATE TABLE phase_data_dependency_graph (
+  from_course_phase_id         uuid NOT NULL,
+  to_course_phase_id           uuid NOT NULL,
+  from_course_phase_DTO_id     uuid NOT NULL,
+  to_course_phase_DTO_id       uuid NOT NULL,
+  PRIMARY KEY (to_course_phase_id, to_course_phase_DTO_id),
+  CONSTRAINT fk_from_phase_phase
+    FOREIGN KEY (from_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE,
+  CONSTRAINT fk_to_phase_phase
+    FOREIGN KEY (to_course_phase_id) REFERENCES course_phase(id) ON DELETE CASCADE,
+  CONSTRAINT fk_from_dto_phase
+    FOREIGN KEY (from_course_phase_DTO_id)
+    REFERENCES course_phase_type_phase_provided_output_dto(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_to_dto_phase
+    FOREIGN KEY (to_course_phase_DTO_id)
+    REFERENCES course_phase_type_phase_required_input_dto(id)
+    ON DELETE CASCADE
+);
+
+-- Add base_url column to course_phase_type (if not already present)
+ALTER TABLE course_phase_type ADD COLUMN IF NOT EXISTS base_url text;
+UPDATE course_phase_type SET base_url = 'http://example.com' WHERE id = '7dc1c4e8-4255-4874-80a0-0c12b958744b';
+
+-- Insert a predecessor phase and a target phase for testing
+INSERT INTO course_phase (id, course_id, name, restricted_data, student_readable_data, is_initial_phase, course_phase_type_id)
+VALUES 
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '3f42d322-e5bf-4faa-b576-51f2cab14c2e', 'Predecessor Phase', '{"TestDTO": "restricted-test-value"}', '{}', false, '7dc1c4e8-4255-4874-80a0-0c12b958744b'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '3f42d322-e5bf-4faa-b576-51f2cab14c2e', 'Target Phase', '{}', '{}', false, '7dc1c4e8-4255-4874-80a0-0c12b958744b');
+
+-- Insert provided output DTO rows for the predecessor phase
+-- Core DTO (for GetPrevCoursePhaseDataFromCore)
+INSERT INTO course_phase_type_phase_provided_output_dto 
+  (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES 
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '7dc1c4e8-4255-4874-80a0-0c12b958744b', 'TestDTO', 1, 'core', '{}');
+
+-- Non-core DTO (for resolution)
+INSERT INTO course_phase_type_phase_provided_output_dto 
+  (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES 
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', '7dc1c4e8-4255-4874-80a0-0c12b958744b', 'ResolutionDTO', 1, 'non-core', '{}');
+
+-- Insert required input DTO rows for dependency graph links
+INSERT INTO course_phase_type_phase_required_input_dto 
+  (id, course_phase_type_id, dto_name, specification)
+VALUES 
+  ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '7dc1c4e8-4255-4874-80a0-0c12b958744b', 'TestDTO', '{}'),
+  ('ffffffff-ffff-ffff-ffff-ffffffffffff', '7dc1c4e8-4255-4874-80a0-0c12b958744b', 'ResolutionDTO', '{}');
+
+-- Insert dependency graph rows linking the predecessor phase to the target phase.
+-- This creates two connections: one for the core DTO and one for the resolution DTO.
+INSERT INTO phase_data_dependency_graph 
+  (from_course_phase_id, to_course_phase_id, from_course_phase_DTO_id, to_course_phase_DTO_id)
+VALUES 
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'ffffffff-ffff-ffff-ffff-ffffffffffff');
