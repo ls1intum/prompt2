@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup/infrastructureDTO"
 	log "github.com/sirupsen/logrus"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
@@ -126,6 +127,12 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 	err = CreateStudentProject(tumID, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, submissionDeadline)
 	if err != nil {
 		log.Error("Failed to create student project: ", err)
+		// store error in the db
+		_ = InfrastructureServiceSingleton.queries.AddGitlabError(ctx, db.AddGitlabErrorParams{
+			CourseParticipationID: courseParticipationID,
+			CoursePhaseID:         coursePhaseID,
+			ErrorMessage:          pgtype.Text{String: err.Error(), Valid: true},
+		})
 		return err
 	}
 
@@ -159,6 +166,26 @@ func getiPraktikumGroup() (*gitlab.Group, error) {
 
 }
 
-func GetAllStudentInfrastructureStatus(c c.Context, coursePhaseID string) {
+func GetAllStudentGitlabStatus(c context.Context, coursePhaseID uuid.UUID) ([]infrastructureDTO.GitlabStatus, error) {
+	// 1.) Get all gitlab status
+	gitlabStatuses, err := InfrastructureServiceSingleton.queries.GetAllGitlabStatus(c, coursePhaseID)
+	if err != nil {
+		log.Error("Failed to get gitlab statuses: ", err)
+		return nil, err
+	}
 
+	return infrastructureDTO.GetGitlabStatusDTOsFromModels(gitlabStatuses), nil
+
+}
+
+func ManuallyOverwriteStudentGitlabStatus(c context.Context, coursePhaseID, courseParticipationID uuid.UUID) error {
+	err := InfrastructureServiceSingleton.queries.AddGitlabStatus(c, db.AddGitlabStatusParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("Failed to update gitlab status in db: ", err)
+		return err
+	}
+	return nil
 }

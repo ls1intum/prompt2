@@ -13,12 +13,15 @@ import (
 func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	infrastructureRouter := router.Group("/infrastructure")
 
-	// Post initial seat plan with seat names
-	// TODO: Add authentication middleware
+	// Infrastructure setup routes
 	infrastructureRouter.POST("/gitlab/course-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createCourseSetup)
 	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), setupStudentInfrastructure)
 
-	infrastructureRouter.GET("/gitlab/student-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getStudentInfrastructureStatus)
+	// Infrastructure status routes
+	infrastructureRouter.GET("/gitlab/student-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getAllStudentGitlabStatus)
+
+	// Route for manually overwriting the status (i.e. if instructor manually created or fixed the repo)
+	infrastructureRouter.PUT("/gitlab/student-setup/:courseParticipationID/manual", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), manuallyOverwriteStudentGitlabStatus)
 }
 
 func createCourseSetup(c *gin.Context) {
@@ -36,7 +39,7 @@ func createCourseSetup(c *gin.Context) {
 		return
 	}
 
-	err = CreateCourseInfrastructure(c, coursePhaseID, infrastructureRequest.SemesterTag)
+	err = CreateCourseInfrastructure(coursePhaseID, infrastructureRequest.SemesterTag)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -77,7 +80,7 @@ func setupStudentInfrastructure(c *gin.Context) {
 
 }
 
-func getAllStudentInfrastructureStatus(c *gin.Context) {
+func getAllStudentGitlabStatus(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
@@ -85,13 +88,36 @@ func getAllStudentInfrastructureStatus(c *gin.Context) {
 		return
 	}
 
-	studentInfrastructureStatus, err := GetAllStudentInfrastructureStatus(c, coursePhaseID)
+	studentInfrastructureStatus, err := GetAllStudentGitlabStatus(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, studentInfrastructureStatus)
+}
+
+func manuallyOverwriteStudentGitlabStatus(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = ManuallyOverwriteStudentGitlabStatus(c, coursePhaseID, courseParticipationID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully overwritten student gitlab status"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

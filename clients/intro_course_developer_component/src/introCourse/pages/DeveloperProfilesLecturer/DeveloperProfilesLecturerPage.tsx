@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useQuery } from '@tanstack/react-query'
-import type {
-  CoursePhaseParticipationsWithResolution,
-  CoursePhaseParticipationWithStudent,
-} from '@tumaet/prompt-shared-state'
+import type { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
@@ -21,8 +18,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  TriangleAlert,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 import {
   Table,
@@ -38,15 +35,16 @@ import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
 import { FilterMenu } from './components/FilterMenu'
 import { DevProfileFilter } from './interfaces/devProfileFilter'
 import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
+import { GitlabStatus } from '../../interfaces/GitlabStatus'
+import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
+import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
   const [selectedParticipant, setSelectedParticipant] = useState<
-    | {
-        participation: CoursePhaseParticipationWithStudent
-        profile: DeveloperProfile | undefined
-      }
-    | undefined
+    ParticipationWithDevProfiles | undefined
   >(undefined)
 
   // Add state for sorting after the selectedParticipant state
@@ -71,6 +69,7 @@ export const DeveloperProfilesLecturerPage = () => {
       appleWatch: false,
       noDevices: false,
     },
+    gitlabNotCreated: false,
   })
 
   // Get the developer profile and course phase participations
@@ -95,18 +94,32 @@ export const DeveloperProfilesLecturerPage = () => {
     queryFn: () => getAllDeveloperProfiles(phaseId ?? ''),
   })
 
-  const isError = isParticipationsError || isDeveloperProfileError
-  const isPending = isCoursePhaseParticipationsPending || isDeveloperProfilesPending
+  // getting the Gitlab Statuses
+  const {
+    data: gitlabStatuses,
+    isPending: isGitlabStatusesPending,
+    isError: isGitlabStatusesError,
+    refetch: refetchGitlabStatuses,
+  } = useQuery<GitlabStatus[]>({
+    queryKey: ['gitlab_statuses', phaseId],
+    queryFn: () => getGitlabStatuses(phaseId ?? ''),
+  })
+
+  const isError = isParticipationsError || isDeveloperProfileError || isGitlabStatusesError
+  const isPending =
+    isCoursePhaseParticipationsPending || isDeveloperProfilesPending || isGitlabStatusesPending
 
   const handleRefresh = () => {
     refetchCoursePhaseParticipations()
     refetchDeveloperProfiles()
+    refetchGitlabStatuses()
   }
 
   // Match participants with their developer profiles
   const participantsWithProfiles = useGetParticipationsWithProfiles(
     coursePhaseParticipations?.participations || [],
     developerProfiles || [],
+    gitlabStatuses || [],
   )
 
   // Add this sorting function before the return statement
@@ -186,22 +199,23 @@ export const DeveloperProfilesLecturerPage = () => {
             <TableHead>Devices</TableHead>
             <TableHead>GitLab Username</TableHead>
             <TableHead>Apple ID</TableHead>
+            <TableHead>Gitlab Status</TableHead>
             <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredParticipants.map(({ participation, profile }) => (
+          {filteredParticipants.map(({ participation, devProfile, gitlabStatus }) => (
             <TableRow
               key={participation.courseParticipationID}
               className='cursor-pointer hover:bg-muted/50'
-              onClick={() => setSelectedParticipant({ participation, profile })}
+              onClick={() => setSelectedParticipant({ participation, devProfile, gitlabStatus })}
             >
               <TableCell className='font-medium'>
                 {participation.student.firstName} {participation.student.lastName}
               </TableCell>
               <TableCell>{participation.student.email}</TableCell>
               <TableCell>
-                {profile ? (
+                {devProfile ? (
                   <div className='flex items-center'>
                     <div className='bg-green-100 text-green-700 p-1 rounded-full'>
                       <Check className='h-4 w-4' />
@@ -217,26 +231,67 @@ export const DeveloperProfilesLecturerPage = () => {
               </TableCell>
               <TableCell>
                 <div className='flex gap-2'>
-                  {profile?.hasMacBook && <Laptop className='h-5 w-5 text-slate-600' />}
-                  {profile?.iPhoneUUID && <Smartphone className='h-5 w-5 text-slate-600' />}
-                  {profile?.iPadUUID && <Tablet className='h-5 w-5 text-slate-600' />}
-                  {profile?.appleWatchUUID && <Watch className='h-5 w-5 text-slate-600' />}
-                  {!profile?.hasMacBook &&
-                    !profile?.iPhoneUUID &&
-                    !profile?.iPadUUID &&
-                    !profile?.appleWatchUUID && (
+                  {devProfile?.hasMacBook && <Laptop className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.iPhoneUUID && <Smartphone className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.iPadUUID && <Tablet className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.appleWatchUUID && <Watch className='h-5 w-5 text-slate-600' />}
+                  {!devProfile?.hasMacBook &&
+                    !devProfile?.iPhoneUUID &&
+                    !devProfile?.iPadUUID &&
+                    !devProfile?.appleWatchUUID && (
                       <span className='text-muted-foreground text-sm italic'>No devices</span>
                     )}
                 </div>
               </TableCell>
               <TableCell>
-                {profile?.gitLabUsername || (
+                {devProfile?.gitLabUsername || (
                   <span className='text-muted-foreground text-sm italic'>Not set</span>
                 )}
               </TableCell>
               <TableCell>
-                {profile?.appleID || (
+                {devProfile?.appleID || (
                   <span className='text-muted-foreground text-sm italic'>Not set</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {gitlabStatus ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        {gitlabStatus.gitlabSuccess ? (
+                          <div className='flex items-center'>
+                            <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                              <Check className='h-4 w-4' />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className='flex items-center'>
+                            <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
+                              <TriangleAlert className='h-4 w-4' />
+                            </div>
+                          </div>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {gitlabStatus.gitlabSuccess
+                          ? 'Repo created successfully'
+                          : gitlabStatus.errorMessage}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className='flex items-center'>
+                          <div className='bg-red-100 text-red-700 p-1 rounded-full'>
+                            <X className='h-4 w-4' />
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>Repository not yet created</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </TableCell>
               <TableCell className='text-right'>
@@ -245,7 +300,7 @@ export const DeveloperProfilesLecturerPage = () => {
                   size='sm'
                   onClick={(e) => {
                     e.stopPropagation()
-                    setSelectedParticipant({ participation, profile })
+                    setSelectedParticipant({ participation, devProfile, gitlabStatus })
                   }}
                 >
                   Edit
@@ -258,10 +313,11 @@ export const DeveloperProfilesLecturerPage = () => {
 
       {selectedParticipant && (
         <ProfileDetailsDialog
-          participant={selectedParticipant.participation}
-          profile={selectedParticipant.profile}
+          participantWithProfile={selectedParticipant}
           phaseId={phaseId || ''}
-          onClose={() => setSelectedParticipant(undefined)}
+          onClose={() => {
+            setSelectedParticipant(undefined)
+          }}
           onSaved={handleRefresh}
         />
       )}

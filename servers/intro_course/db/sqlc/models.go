@@ -33,6 +33,7 @@ type StudentGitlabProcess struct {
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	GitlabSuccess         bool             `json:"gitlab_success"`
+	ErrorMessage          pgtype.Text      `json:"error_message"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
 	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
 }
