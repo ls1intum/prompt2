@@ -9,13 +9,13 @@ import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { Tutor } from '../../interfaces/Tutor'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { getAllTutors } from '../../network/queries/getAllTutors'
-import { useGetParticipationsWithProfiles } from '../DeveloperProfilesLecturer/hooks/useGetParticipationsWithProfiles'
 import { getSeatPlan } from '../../network/queries/getSeatPlan'
 import { Seat } from '../../interfaces/Seat'
 import { SeatUploader } from './components/SeatUploader/SeatUploader'
 import { SeatMacAssigner } from './components/SeatMacAssigner'
 import { SeatTutorAssigner } from './components/SeatTutorAssigner/SeatTutorAssigner'
 import { SeatStudentAssigner } from './components/SeatStudentAssigner/SeatStudentAssigner'
+import { useGetParticipationsWithDevProfile } from './hooks/useGetParticipationWithDevProfile'
 
 export const SeatAssignmentPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -69,7 +69,7 @@ export const SeatAssignmentPage = (): JSX.Element => {
   const isError =
     isParticipationsError || isDeveloperProfileError || isTutorsLoadingError || isSeatPlanError
 
-  const developerWithProfiles = useGetParticipationsWithProfiles(
+  const developerWithProfiles = useGetParticipationsWithDevProfile(
     coursePhaseParticipations?.participations || [],
     developerProfiles || [],
   )

@@ -1,6 +1,5 @@
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
-import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { ParticipationWithDevProfiles } from '../interfaces/pariticipationWithDevProfiles'
 
 export const useGetSortedParticipations = (
   sortConfig:
@@ -9,10 +8,7 @@ export const useGetSortedParticipations = (
         direction: 'ascending' | 'descending'
       }
     | undefined,
-  participantsWithProfiles: {
-    participation: CoursePhaseParticipationWithStudent
-    profile: DeveloperProfile | undefined
-  }[],
+  participantsWithProfiles: ParticipationWithDevProfiles[],
 ) => {
   return useMemo(() => {
     const sorted = [...participantsWithProfiles]
@@ -28,8 +24,8 @@ export const useGetSortedParticipations = (
         bValue =
           `${b.participation.student.firstName} ${b.participation.student.lastName}`.toLowerCase()
       } else if (sortConfig.key === 'profileStatus') {
-        aValue = a.profile ? 1 : 0
-        bValue = b.profile ? 1 : 0
+        aValue = a.devProfile ? 1 : 0
+        bValue = b.devProfile ? 1 : 0
       }
 
       if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1

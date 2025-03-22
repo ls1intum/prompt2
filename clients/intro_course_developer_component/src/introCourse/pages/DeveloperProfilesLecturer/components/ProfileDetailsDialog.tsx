@@ -1,8 +1,7 @@
 import type React from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import type { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Laptop, Smartphone, Tablet, Watch } from 'lucide-react'
+import { Laptop, Smartphone, Tablet, Watch, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import {
   Form,
@@ -26,43 +25,52 @@ import {
 } from '@/components/ui/form'
 import { updateDeveloperProfile } from '../../../network/mutations/updateDeveloperProfile'
 import type { PostDeveloperProfile } from '../../../interfaces/PostDeveloperProfile'
-import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import {
   instructorDevProfile,
   type InstructorDeveloperFormValues,
 } from '../../../validations/instructorDevProfile'
+import type { ParticipationWithDevProfiles } from '../interfaces/pariticipationWithDevProfiles'
+import { updateGitLabStatusCreated } from '../../../network/mutations/updateGitlabStatus'
+import { useState } from 'react'
 
 interface ProfileDetailsDialogProps {
-  participant: CoursePhaseParticipationWithStudent
-  profile: DeveloperProfile | undefined
+  participantWithProfile: ParticipationWithDevProfiles
   phaseId: string
   onClose: () => void
   onSaved: () => void
 }
 
 export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
-  participant,
-  profile,
+  participantWithProfile,
   phaseId,
   onClose,
   onSaved,
 }) => {
-  // Initialize form with React Hook Form
+  const queryClient = useQueryClient()
   const form = useForm<InstructorDeveloperFormValues>({
     resolver: zodResolver(instructorDevProfile),
     defaultValues: {
-      appleID: profile?.appleID || '',
-      gitLabUsername: profile?.gitLabUsername || '',
-      hasMacBook: profile?.hasMacBook || false,
-      iPhoneUUID: profile?.iPhoneUUID || '',
-      iPadUUID: profile?.iPadUUID || '',
-      appleWatchUUID: profile?.appleWatchUUID || '',
+      appleID: participantWithProfile.devProfile?.appleID || '',
+      gitLabUsername: participantWithProfile.devProfile?.gitLabUsername || '',
+      hasMacBook: participantWithProfile.devProfile?.hasMacBook || false,
+      iPhoneUUID: participantWithProfile.devProfile?.iPhoneUUID || '',
+      iPadUUID: participantWithProfile.devProfile?.iPadUUID || '',
+      appleWatchUUID: participantWithProfile.devProfile?.appleWatchUUID || '',
     },
   })
 
+  const [gitlabSuccess, setGitlabSuccess] = useState(
+    participantWithProfile.gitlabStatus?.gitlabSuccess || false,
+  )
+  const gitlabStatusErrorMessage = participantWithProfile.gitlabStatus?.errorMessage || ''
+
   const { mutate, isPending } = useMutation({
     mutationFn: (devProfile: PostDeveloperProfile) =>
-      updateDeveloperProfile(phaseId, participant.courseParticipationID, devProfile),
+      updateDeveloperProfile(
+        phaseId,
+        participantWithProfile.participation.courseParticipationID,
+        devProfile,
+      ),
     onSuccess: () => {
       onSaved()
       onClose()
@@ -70,6 +78,29 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
     onError: (error: unknown) => {
       console.error('Error saving profile:', error)
       let message = 'An error occurred while saving the profile.'
+      if (error instanceof Error) {
+        message = error.message
+      }
+      form.setError('root', {
+        type: 'manual',
+        message,
+      })
+    },
+  })
+
+  const updateGitlabStatusMutation = useMutation({
+    mutationFn: () =>
+      updateGitLabStatusCreated(
+        phaseId,
+        participantWithProfile.participation.courseParticipationID,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gitlab_statuses'] })
+      setGitlabSuccess(true)
+    },
+    onError: (error: unknown) => {
+      console.error('Error updating GitLab status:', error)
+      let message = 'An error occurred while updating the GitLab status.'
       if (error instanceof Error) {
         message = error.message
       }
@@ -89,11 +120,14 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
       <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>
-            {profile ? 'Edit Developer Profile' : 'Create Developer Profile'}
+            {participantWithProfile.devProfile
+              ? 'Edit Developer Profile'
+              : 'Create Developer Profile'}
           </DialogTitle>
           <DialogDescription>
-            {participant.student.firstName} {participant.student.lastName} (
-            {participant.student.email})
+            {participantWithProfile.participation.student.firstName}{' '}
+            {participantWithProfile.participation.student.lastName} (
+            {participantWithProfile.participation.student.email})
           </DialogDescription>
         </DialogHeader>
 
@@ -212,6 +246,33 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
                   </FormItem>
                 )}
               />
+            </div>
+
+            <Separator />
+
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium'>GitLab Status</h3>
+              {gitlabSuccess ? (
+                <div className='text-green-600 flex items-center gap-2'>
+                  <CheckCircle />
+                  Repository created successfully.
+                </div>
+              ) : (
+                <div className='text-orange-600 flex items-center gap-2'>
+                  <AlertTriangle />
+                  {gitlabStatusErrorMessage || 'Not created yet.'}
+                </div>
+              )}
+              {!gitlabSuccess && (
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => updateGitlabStatusMutation.mutate()}
+                  disabled={updateGitlabStatusMutation.isPending}
+                >
+                  Mark as Created
+                </Button>
+              )}
             </div>
 
             <DialogFooter>

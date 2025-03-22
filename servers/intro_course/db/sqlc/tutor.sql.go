@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTutor = `-- name: CreateTutor :exec
@@ -40,7 +41,7 @@ func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) error 
 }
 
 const getAllTutors = `-- name: GetAllTutors :many
-SELECT course_phase_id, id, first_name, last_name, email, matriculation_number, university_login 
+SELECT course_phase_id, id, first_name, last_name, email, matriculation_number, university_login, gitlab_username 
 FROM tutor
 WHERE course_phase_id = $1
 `
@@ -62,6 +63,7 @@ func (q *Queries) GetAllTutors(ctx context.Context, coursePhaseID uuid.UUID) ([]
 			&i.Email,
 			&i.MatriculationNumber,
 			&i.UniversityLogin,
+			&i.GitlabUsername,
 		); err != nil {
 			return nil, err
 		}
@@ -71,4 +73,22 @@ func (q *Queries) GetAllTutors(ctx context.Context, coursePhaseID uuid.UUID) ([]
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTutorGitlabUsername = `-- name: UpdateTutorGitlabUsername :exec
+UPDATE tutor
+SET gitlab_username = $3
+WHERE id = $1
+AND course_phase_id = $2
+`
+
+type UpdateTutorGitlabUsernameParams struct {
+	ID             uuid.UUID   `json:"id"`
+	CoursePhaseID  uuid.UUID   `json:"course_phase_id"`
+	GitlabUsername pgtype.Text `json:"gitlab_username"`
+}
+
+func (q *Queries) UpdateTutorGitlabUsername(ctx context.Context, arg UpdateTutorGitlabUsernameParams) error {
+	_, err := q.db.Exec(ctx, updateTutorGitlabUsername, arg.ID, arg.CoursePhaseID, arg.GitlabUsername)
+	return err
 }

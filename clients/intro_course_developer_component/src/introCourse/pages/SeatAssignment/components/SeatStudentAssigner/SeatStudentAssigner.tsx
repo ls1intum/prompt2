@@ -161,7 +161,7 @@ export const SeatStudentAssigner = ({
                     .sort((a, b) => a.seatName.localeCompare(b.seatName))
                     .map((seat) => {
                       const student = developerWithProfiles.find(
-                        (dev) => dev.participation.student.id === seat.assignedStudent,
+                        (dev) => dev.participation.courseParticipationID === seat.assignedStudent,
                       )
                       return (
                         <TableRow key={seat.seatName}>

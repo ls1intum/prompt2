@@ -19,7 +19,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' size='sm' className='ml-auto'>
+        <Button variant='outline'>
           <Filter className='mr-2 h-4 w-4' />
           Filters
         </Button>
@@ -137,6 +137,19 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           }}
         >
           No Devices
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem
+          checked={filters.gitlabNotCreated}
+          onClick={(e) => {
+            e.preventDefault()
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              gitlabNotCreated: !prevFilters.gitlabNotCreated,
+            }))
+          }}
+        >
+          GitLab Not Setup
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
