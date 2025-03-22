@@ -12,11 +12,6 @@ const sidebarItems: SidebarMenuItemProps = {
       goToPath: '/settings',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
-    {
-      title: 'GitHub',
-      goToPath: '/github',
-      requiredPermissions: [],
-    },
   ],
 }
 
