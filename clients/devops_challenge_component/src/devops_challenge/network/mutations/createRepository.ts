@@ -10,14 +10,9 @@ export const createRepository = async (
       repositoryUrl: string
     }
 
-    const payload = {
-      GithubUsername: gitHubHandle,
-      StudentId: 'ge63sir', //TODO: remove once Challenge server is updated
-    }
-
     const response = await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
       `${coursePhaseID}/repository`,
-      payload,
+      gitHubHandle,
       {
         headers: {
           'Content-Type': 'application/json-path+json',
