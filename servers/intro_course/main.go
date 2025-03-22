@@ -47,7 +47,10 @@ func initKeycloak() {
 
 	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	coreURL := utils.GetCoreUrl()
-	promptSDK.InitAuthenticationMiddleware(baseURL, realm, coreURL)
+	err := promptSDK.InitAuthenticationMiddleware(baseURL, realm, coreURL)
+	if err != nil {
+		log.Fatalf("Failed to initialize keycloak: %v", err)
+	}
 }
 
 func main() {
