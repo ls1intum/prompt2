@@ -13,8 +13,8 @@ import {
   CoursePhaseParticipationsWithResolution,
 } from '@tumaet/prompt-shared-state'
 
-import { Button } from '@/components/ui/button'
 import { ErrorPage } from '@/components/ErrorPage'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { getStatusBadge } from '@/utils/getStatusBadge'
 
 import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
@@ -35,55 +36,6 @@ import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipatio
 import { DevProfileFilter } from './interfaces/devProfileFilter'
 
 export const ResultsOverviewPage = (): JSX.Element => {
-  const john: CoursePhaseParticipationWithStudent = {
-    coursePhaseID: '1',
-    courseParticipationID: '1',
-    passStatus: PassStatus.FAILED,
-    restrictedData: {},
-    studentReadableData: {},
-    prevData: {
-      challenge_passed: false,
-      attempts: 2,
-    },
-    student: {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: '',
-      hasUniversityAccount: false,
-    },
-  }
-  const mike: CoursePhaseParticipationWithStudent = {
-    coursePhaseID: '1',
-    courseParticipationID: '1',
-    passStatus: PassStatus.PASSED,
-    restrictedData: {},
-    studentReadableData: {},
-    prevData: {
-      challenge_passed: true,
-      attempts: 3,
-    },
-    student: {
-      id: '1',
-      firstName: 'Mike',
-      lastName: 'Master',
-      email: '',
-      hasUniversityAccount: false,
-    },
-  }
-  const exampleParticipants = [john, mike]
-
-  const exampleProfiles: DeveloperProfile[] = [
-    {
-      coursePhaseID: '1',
-      courseParticipationID: '1',
-      repositoryURL: '123',
-      attempts: 2,
-      maxAttempts: 3,
-      hasPassed: true,
-    },
-  ]
-
   // Add state for sorting after the selectedParticipant state
   const [sortConfig, setSortConfig] = useState<
     | {
@@ -95,6 +47,11 @@ export const ResultsOverviewPage = (): JSX.Element => {
 
   // Add filter state
   const [filters, setFilters] = useState<DevProfileFilter>({
+    passed: {
+      passed: false,
+      notAssessed: false,
+      failed: false,
+    },
     challengePassed: {
       passed: false,
       notPassed: false,
@@ -102,9 +59,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
     },
   })
 
-  // get
   const { phaseId } = useParams<{ phaseId: string }>()
-
   const {
     data: coursePhaseParticipations,
     isPending: isCoursePhaseParticipationsPending,
@@ -114,7 +69,6 @@ export const ResultsOverviewPage = (): JSX.Element => {
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
-
   const {
     data: developerProfiles,
     isPending: isDeveloperProfilesPending,
@@ -133,9 +87,68 @@ export const ResultsOverviewPage = (): JSX.Element => {
     refetchDeveloperProfiles()
   }
 
+  const john: CoursePhaseParticipationWithStudent = {
+    coursePhaseID: '1',
+    courseParticipationID: '1',
+    passStatus: PassStatus.NOT_ASSESSED,
+    restrictedData: {},
+    studentReadableData: {},
+    prevData: {
+      challenge_passed: false,
+      attempts: 2,
+    },
+    student: {
+      id: '1',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: '',
+      hasUniversityAccount: false,
+    },
+  }
+  const mike: CoursePhaseParticipationWithStudent = {
+    coursePhaseID: '1',
+    courseParticipationID: '2',
+    passStatus: PassStatus.PASSED,
+    restrictedData: {},
+    studentReadableData: {},
+    prevData: {
+      challenge_passed: true,
+      attempts: 3,
+    },
+    student: {
+      id: '1',
+      firstName: 'Mike',
+      lastName: 'Master',
+      email: '',
+      hasUniversityAccount: false,
+    },
+  }
+  const exampleParticipantsWithResolution = {
+    participations: [john, mike],
+    resolution: [],
+  }
+  const exampleProfiles: DeveloperProfile[] = [
+    {
+      coursePhaseID: '1',
+      courseParticipationID: '1',
+      repositoryURL: '123',
+      attempts: 2,
+      maxAttempts: 3,
+      hasPassed: true,
+    },
+    {
+      coursePhaseID: '1',
+      courseParticipationID: '2',
+      repositoryURL: '123',
+      attempts: 3,
+      maxAttempts: 3,
+      hasPassed: false,
+    },
+  ]
+
   // Match participants with their developer profiles
   const participantsWithProfiles = useGetParticipationsWithProfiles(
-    exampleParticipants || [],
+    exampleParticipantsWithResolution.participations || [],
     exampleProfiles || [],
   )
 
@@ -196,10 +209,42 @@ export const ResultsOverviewPage = (): JSX.Element => {
                 )}
               </div>
             </TableHead>
+            <TableHead className='cursor-pointer' onClick={() => requestSort('passStatus')}>
+              <div className='flex items-center'>
+                Pass Status
+                {sortConfig?.key === 'passStatus' ? ( // Add this line
+                  <>
+                    {sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )}
+                  </>
+                ) : (
+                  <ArrowUpDown className='ml-2 h-4 w-4' />
+                )}
+              </div>
+            </TableHead>
             <TableHead className='cursor-pointer' onClick={() => requestSort('attempts')}>
               <div className='flex items-center'>
                 Attempts
                 {sortConfig?.key === 'attempts' ? ( // Add this line
+                  <>
+                    {sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )}
+                  </>
+                ) : (
+                  <ArrowUpDown className='ml-2 h-4 w-4' />
+                )}
+              </div>
+            </TableHead>
+            <TableHead className='cursor-pointer' onClick={() => requestSort('challengeStatus')}>
+              <div className='flex items-center'>
+                Challenge Status
+                {sortConfig?.key === 'challengeStatus' ? ( // Add this line
                   <>
                     {sortConfig.direction === 'ascending' ? (
                       <ArrowUp className='ml-2 h-4 w-4' />
@@ -223,12 +268,24 @@ export const ResultsOverviewPage = (): JSX.Element => {
               <TableCell className='font-medium'>
                 {participation.student.firstName} {participation.student.lastName}
               </TableCell>
+              <TableCell className='font-medium'>
+                {getStatusBadge(participation.passStatus)}
+              </TableCell>
               <TableCell>
                 <div className='flex gap-2'>
                   {profile?.attempts} / {profile?.maxAttempts}
                 </div>
               </TableCell>
-              {/* TODO add repo URL */}
+              <TableCell className='font-medium'>
+                {profile?.hasPassed ? (
+                  <Badge className='bg-green-500 hover:bg-green-500'>Accepted</Badge>
+                ) : !profile?.hasPassed &&
+                  (profile?.attempts ?? 0) < (profile?.maxAttempts ?? 1) ? (
+                  <Badge className='bg-yellow-500 hover:bg-yellow-500'>Not Completed</Badge>
+                ) : (
+                  <Badge className='bg-red-500 hover:bg-red-500'>Failed</Badge>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
