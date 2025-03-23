@@ -11,7 +11,7 @@ export function passesChallengeFilter(
   if (filters.challengePassed.passed && profile?.hasPassed) {
     passesChallenge = true
   }
-  let hasAttemptsLeft = (profile?.attempts || -1) < (profile?.maxAttempts || -1)
+  const hasAttemptsLeft = (profile?.attempts || -1) < (profile?.maxAttempts || -1)
   if (filters.challengePassed.notPassed && profile?.hasPassed === false && hasAttemptsLeft) {
     passesChallenge = true
   }

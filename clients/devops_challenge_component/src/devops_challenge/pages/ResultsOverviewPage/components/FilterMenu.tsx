@@ -14,10 +14,7 @@ import { Button } from '@/components/ui/button'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 
 import { DevProfileFilter } from '../interfaces/devProfileFilter'
-import {
-  getChallengeStatusBadge,
-  getChallengeStatusBadgeFromString,
-} from '../utils/getChallengeStatusBadge'
+import { getChallengeStatusBadgeFromString } from '../utils/getChallengeStatusBadge'
 
 interface FilterMenuProps {
   filters: DevProfileFilter

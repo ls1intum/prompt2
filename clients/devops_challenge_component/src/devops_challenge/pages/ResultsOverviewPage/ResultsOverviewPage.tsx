@@ -1,4 +1,4 @@
-import { Loader2, Check, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
@@ -7,11 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
-import {
-  CoursePhaseParticipationWithStudent,
-  PassStatus,
-  CoursePhaseParticipationsWithResolution,
-} from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 
 import { ErrorPage } from '@/components/ErrorPage'
 import {
@@ -87,69 +83,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
     refetchDeveloperProfiles()
   }
 
-  const john: CoursePhaseParticipationWithStudent = {
-    coursePhaseID: '1',
-    courseParticipationID: '1',
-    passStatus: PassStatus.NOT_ASSESSED,
-    restrictedData: {},
-    studentReadableData: {},
-    prevData: {
-      challenge_passed: false,
-      attempts: 2,
-    },
-    student: {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      hasUniversityAccount: false,
-    },
-  }
-  const mike: CoursePhaseParticipationWithStudent = {
-    coursePhaseID: '1',
-    courseParticipationID: '2',
-    passStatus: PassStatus.PASSED,
-    restrictedData: {},
-    studentReadableData: {},
-    prevData: {
-      challenge_passed: true,
-      attempts: 3,
-    },
-    student: {
-      id: '1',
-      firstName: 'Mike',
-      lastName: 'Master',
-      email: 'mike.master@gmail.com',
-      hasUniversityAccount: false,
-    },
-  }
-  const exampleParticipantsWithResolution = {
-    participations: [john, mike],
-    resolution: [],
-  }
-  const exampleProfiles: DeveloperProfile[] = [
-    {
-      coursePhaseID: '1',
-      courseParticipationID: '1',
-      repositoryURL: '123',
-      attempts: 2,
-      maxAttempts: 3,
-      hasPassed: true,
-    },
-    {
-      coursePhaseID: '1',
-      courseParticipationID: '2',
-      repositoryURL: '123',
-      attempts: 3,
-      maxAttempts: 3,
-      hasPassed: false,
-    },
-  ]
-
   // Match participants with their developer profiles
   const participantsWithProfiles = useGetParticipationsWithProfiles(
-    exampleParticipantsWithResolution.participations || [],
-    exampleProfiles || [],
+    coursePhaseParticipations?.participations || [],
+    developerProfiles || [],
   )
 
   // Add this sorting function before the return statement
