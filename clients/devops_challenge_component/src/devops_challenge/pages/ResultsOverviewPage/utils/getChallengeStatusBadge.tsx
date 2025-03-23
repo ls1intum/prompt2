@@ -4,7 +4,7 @@ import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   switch (status) {
     case 'passed':
-      return <Badge className='border border-green-500 text-green-500'>Accepted</Badge>
+      return <Badge className='border border-green-500 text-green-500'>Passed</Badge>
     case 'notCompleted':
       return <Badge className='border border-yellow-500 text-yellow-500'>Not Completed</Badge>
     case 'failed':
