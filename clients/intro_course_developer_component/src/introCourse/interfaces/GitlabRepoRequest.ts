@@ -1,5 +1,5 @@
 export type GitlabRepoRequest = {
   semesterTag: string
-  tumID: string
+  repoName: string
   submissionDeadline: string
 }

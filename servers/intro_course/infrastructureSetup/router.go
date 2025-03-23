@@ -70,7 +70,7 @@ func setupStudentInfrastructure(c *gin.Context) {
 		return
 	}
 
-	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.TumID, infrastructureRequest.SubmissionDeadline)
+	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.RepoName, infrastructureRequest.SubmissionDeadline)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

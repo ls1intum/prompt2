@@ -18,6 +18,7 @@ import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { createIntroCourseGitlabInfrastructure } from '../../../network/mutations/createIntroCourseGitlabInfrastructure'
 import { useGetCoursePhase } from '@/hooks/useGetCoursePhase'
 import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
+import { Input } from '@/components/ui/input' // make sure you have an Input component
 
 interface CreateGitlabReposDialogProps {
   participantsWithDevProfiles: ParticipationWithDevProfiles[]
@@ -31,6 +32,9 @@ export const CreateGitlabReposDialog = ({
   const [errorCount, setErrorCount] = useState(0)
   const [isCreatingRepos, setIsCreatingRepos] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
+
+  // State for storing the user-entered deadline
+  const [deadline, setDeadline] = useState('')
 
   const { phaseId, courseId } = useParams<{ phaseId: string; courseId: string }>()
   const queryClient = useQueryClient()
@@ -83,9 +87,9 @@ export const CreateGitlabReposDialog = ({
         await createGitlabRepoMutation.mutateAsync({
           coursePhaseParticipationID: participation.participation.courseParticipationID,
           createGitlabRepoDTO: {
-            tumID: participation.participation.student.universityLogin ?? '',
+            repoName: participation.participation.student.universityLogin ?? '', // use the TUM-ID as repository Name
             semesterTag,
-            submissionDeadline: '2025-12-10',
+            submissionDeadline: deadline, // Use the user-entered deadline here
           },
         })
         setSuccessCount((count) => count + 1)
@@ -110,6 +114,7 @@ export const CreateGitlabReposDialog = ({
       setSuccessCount(0)
       setErrorCount(0)
       setLogs([])
+      setDeadline('') // Reset the deadline field whenever the dialog opens
     }
   }, [isDialogOpen])
 
@@ -138,8 +143,9 @@ export const CreateGitlabReposDialog = ({
         <DialogHeader>
           <DialogTitle>Create Gitlab Repositories</DialogTitle>
           <DialogDescription>
-            Infrastructure setup and repo creation for students. Make sure that every student has a
-            tutor assigned!
+            Infrastructure setup and repo creation for students.
+            <br />
+            <strong>Important: </strong>Make sure that every student has a tutor assigned!
           </DialogDescription>
         </DialogHeader>
 
@@ -159,10 +165,28 @@ export const CreateGitlabReposDialog = ({
           )}
         </section>
 
+        {/* Submission Deadline Field */}
         <section className='mt-4'>
+          <div className='mb-2'>
+            <label htmlFor='deadline' className='block text-sm font-medium'>
+              Project Submission Deadline
+            </label>
+            <p className='text-xs text-muted-foreground'>
+              Will be inserted as Submission Deadline in the Readme of the student repository.
+            </p>
+          </div>
+          <Input
+            id='deadline'
+            placeholder='e.g. 2025-06-01 23:59'
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            className='w-full mb-4'
+          />
+
           <Button disabled={isCreatingRepos || !infraStructureExists} onClick={triggerCreateRepos}>
             Create Repositories ({participationsReadyForGitlab.length})
           </Button>
+
           {isCreatingRepos && (
             <Button variant='outline' className='ml-2' onClick={() => setIsCreatingRepos(false)}>
               Cancel
