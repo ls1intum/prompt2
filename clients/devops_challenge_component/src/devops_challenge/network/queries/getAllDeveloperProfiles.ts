@@ -5,7 +5,7 @@ export const getAllDeveloperProfiles = async (
   coursePhaseID: string,
 ): Promise<DeveloperProfile[]> => {
   try {
-    return (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/students`)).data
+    return (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/students`)).data.students
   } catch (err) {
     console.error(err)
     throw err

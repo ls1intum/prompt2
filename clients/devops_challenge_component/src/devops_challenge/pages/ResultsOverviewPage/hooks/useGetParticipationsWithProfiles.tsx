@@ -9,6 +9,7 @@ export const useGetParticipationsWithProfiles = (
 ) => {
   return useMemo(() => {
     return (
+      console.log('participants', participants),
       participants.map((participation) => {
         if (!developerProfiles || developerProfiles.length === 0) {
           console.warn('No developer profiles found')
@@ -17,13 +18,13 @@ export const useGetParticipationsWithProfiles = (
 
         console.warn('developerProfiles', developerProfiles)
 
-        // const profile =
-        //   developerProfiles?.find(
-        //     (devProfile) =>
-        //       devProfile.courseParticipationID === participation.courseParticipationID,
-        //   ) || undefined
+        const profile =
+          developerProfiles?.find(
+            (devProfile) =>
+              devProfile.courseParticipationID === participation.courseParticipationID,
+          ) || undefined
 
-        return { participation, profile: undefined }
+        return { participation, profile }
       }) || []
     )
   }, [participants, developerProfiles])
