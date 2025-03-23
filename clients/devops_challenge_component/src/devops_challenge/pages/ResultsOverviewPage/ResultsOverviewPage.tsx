@@ -14,7 +14,6 @@ import {
 } from '@tumaet/prompt-shared-state'
 
 import { ErrorPage } from '@/components/ErrorPage'
-import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -34,6 +33,7 @@ import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWi
 import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
 import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
 import { DevProfileFilter } from './interfaces/devProfileFilter'
+import { getChallengeStatusBadge } from './utils/getChallengeStatusBadge'
 
 export const ResultsOverviewPage = (): JSX.Element => {
   // Add state for sorting after the selectedParticipant state
@@ -101,7 +101,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
       id: '1',
       firstName: 'John',
       lastName: 'Doe',
-      email: '',
+      email: 'john.doe@example.com',
       hasUniversityAccount: false,
     },
   }
@@ -119,7 +119,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
       id: '1',
       firstName: 'Mike',
       lastName: 'Master',
-      email: '',
+      email: 'mike.master@gmail.com',
       hasUniversityAccount: false,
     },
   }
@@ -209,6 +209,9 @@ export const ResultsOverviewPage = (): JSX.Element => {
                 )}
               </div>
             </TableHead>
+            <TableHead>
+              <div className='flex items-center'>Mail</div>
+            </TableHead>
             <TableHead className='cursor-pointer' onClick={() => requestSort('passStatus')}>
               <div className='flex items-center'>
                 Pass Status
@@ -268,6 +271,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
               <TableCell className='font-medium'>
                 {participation.student.firstName} {participation.student.lastName}
               </TableCell>
+              <TableCell>{participation.student.email}</TableCell>
               <TableCell className='font-medium'>
                 {getStatusBadge(participation.passStatus)}
               </TableCell>
@@ -276,16 +280,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
                   {profile?.attempts} / {profile?.maxAttempts}
                 </div>
               </TableCell>
-              <TableCell className='font-medium'>
-                {profile?.hasPassed ? (
-                  <Badge className='bg-green-500 hover:bg-green-500'>Accepted</Badge>
-                ) : !profile?.hasPassed &&
-                  (profile?.attempts ?? 0) < (profile?.maxAttempts ?? 1) ? (
-                  <Badge className='bg-yellow-500 hover:bg-yellow-500'>Not Completed</Badge>
-                ) : (
-                  <Badge className='bg-red-500 hover:bg-red-500'>Failed</Badge>
-                )}
-              </TableCell>
+              <TableCell className='font-medium'>{getChallengeStatusBadge(profile)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

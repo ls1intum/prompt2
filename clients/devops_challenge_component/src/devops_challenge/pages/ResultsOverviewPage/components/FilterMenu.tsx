@@ -14,6 +14,10 @@ import { Button } from '@/components/ui/button'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 
 import { DevProfileFilter } from '../interfaces/devProfileFilter'
+import {
+  getChallengeStatusBadge,
+  getChallengeStatusBadgeFromString,
+} from '../utils/getChallengeStatusBadge'
 
 interface FilterMenuProps {
   filters: DevProfileFilter
@@ -75,7 +79,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
             })
           }
         >
-          Completed
+          {getChallengeStatusBadgeFromString('passed')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={filters.challengePassed.notPassed}
@@ -86,7 +90,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
             })
           }
         >
-          Not Completed
+          {getChallengeStatusBadgeFromString('notCompleted')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={filters.challengePassed.failed}
@@ -97,7 +101,7 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
             })
           }
         >
-          Failed
+          {getChallengeStatusBadgeFromString('failed')}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
