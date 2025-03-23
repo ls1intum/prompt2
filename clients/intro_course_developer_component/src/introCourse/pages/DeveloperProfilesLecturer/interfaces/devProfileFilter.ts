@@ -10,4 +10,5 @@ export type DevProfileFilter = {
     iPad: boolean
     appleWatch: boolean
   }
+  gitlabNotCreated: boolean
 }

@@ -12,6 +12,7 @@ type Tutor struct {
 	Email               string    `json:"email"`
 	MatriculationNumber string    `json:"matriculationNumber"`
 	UniversityLogin     string    `json:"universityLogin"`
+	GitlabUsername      string    `json:"gitlabUsername"`
 }
 
 func GetTutorDTOFromModel(model db.Tutor) Tutor {
@@ -22,6 +23,7 @@ func GetTutorDTOFromModel(model db.Tutor) Tutor {
 		Email:               model.Email,
 		MatriculationNumber: model.MatriculationNumber,
 		UniversityLogin:     model.UniversityLogin,
+		GitlabUsername:      model.GitlabUsername.String,
 	}
 }
 

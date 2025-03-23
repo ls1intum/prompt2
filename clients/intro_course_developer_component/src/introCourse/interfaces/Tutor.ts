@@ -5,4 +5,5 @@ export interface Tutor {
   email: string
   matriculationNumber?: string
   universityLogin?: string
+  gitlabUsername?: string
 }
