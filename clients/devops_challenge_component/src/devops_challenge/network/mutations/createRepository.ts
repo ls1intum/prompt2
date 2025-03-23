@@ -1,15 +1,15 @@
 import { devOpsChallengeAxiosInstance } from '../devOpsChallengeServerConfig'
 
+interface RepositoryResponse {
+  message: string
+  repositoryUrl: string
+}
+
 export const createRepository = async (
   gitHubHandle: string,
   coursePhaseID: string,
 ): Promise<string> => {
   try {
-    interface RepositoryResponse {
-      message: string
-      repositoryUrl: string
-    }
-
     const response = await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
       `${coursePhaseID}/repository`,
       gitHubHandle,

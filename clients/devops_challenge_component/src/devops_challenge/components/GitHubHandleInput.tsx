@@ -32,7 +32,7 @@ export const GitHubHandleInput = (): JSX.Element => {
         </div>
         <Button
           onClick={() => repositoryMutation.mutate(handle)}
-          disabled={!handle}
+          disabled={!handle || repositoryMutation.isPending}
           className='min-w-[120px]'
         >
           {repositoryMutation.isPending ? (

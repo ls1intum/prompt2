@@ -6,7 +6,7 @@ export const useGetDeveloperProfile = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   return useQuery({
-    queryKey: ['developerProfile', phaseId],
+    queryKey: ['devOpsDeveloperProfile', phaseId],
     queryFn: () => getDeveloperProfile(phaseId ?? ''),
     enabled: !!phaseId,
   })

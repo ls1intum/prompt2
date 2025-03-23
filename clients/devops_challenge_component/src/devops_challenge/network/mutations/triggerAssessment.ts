@@ -5,7 +5,7 @@ export const triggerAssessment = async (
   coursePhaseID: string,
 ): Promise<string> => {
   try {
-    const response = await devOpsChallengeAxiosInstance.post(
+    const response = await devOpsChallengeAxiosInstance.post<string>(
       `${coursePhaseID}/studentTest`,
       gitHubHandle,
       {
