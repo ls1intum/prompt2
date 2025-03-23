@@ -10,13 +10,20 @@ export const useGetParticipationsWithProfiles = (
   return useMemo(() => {
     return (
       participants.map((participation) => {
-        const profile =
-          developerProfiles?.find(
-            (devProfile) =>
-              devProfile.courseParticipationID === participation.courseParticipationID,
-          ) || undefined
+        if (!developerProfiles || developerProfiles.length === 0) {
+          console.warn('No developer profiles found')
+          return { participation, profile: undefined }
+        }
 
-        return { participation, profile }
+        console.warn('developerProfiles', developerProfiles)
+
+        // const profile =
+        //   developerProfiles?.find(
+        //     (devProfile) =>
+        //       devProfile.courseParticipationID === participation.courseParticipationID,
+        //   ) || undefined
+
+        return { participation, profile: undefined }
       }) || []
     )
   }, [participants, developerProfiles])
