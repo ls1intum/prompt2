@@ -32,7 +32,7 @@ export const GitHubHandleInput = (): JSX.Element => {
         </div>
         <Button
           onClick={() => repositoryMutation.mutate(handle)}
-          disabled={!handle}
+          disabled={!handle || repositoryMutation.isPending}
           className='min-w-[120px]'
         >
           {repositoryMutation.isPending ? (
@@ -40,16 +40,17 @@ export const GitHubHandleInput = (): JSX.Element => {
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               Creating
             </>
-          ) : repositoryMutation.isError ? (
-            <>
-              <AlertCircle className='mr-2 h-4 w-4' />
-              {error ?? 'An unexpected error occurred'}
-            </>
           ) : (
             'Create'
           )}
         </Button>
       </div>
+      {repositoryMutation.isError && error && (
+        <Alert variant='destructive' className='mt-2'>
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       {repositoryMutation.isSuccess && (
         <Alert>
           <AlertCircle className='h-4 w-4' />

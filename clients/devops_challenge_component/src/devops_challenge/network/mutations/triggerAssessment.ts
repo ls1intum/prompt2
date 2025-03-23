@@ -5,14 +5,9 @@ export const triggerAssessment = async (
   coursePhaseID: string,
 ): Promise<string> => {
   try {
-    const payload = {
-      GithubUsername: gitHubHandle,
-      StudentId: 'ge63sir', //TODO: remove once Challenge server is updated
-    }
-
-    const response = await devOpsChallengeAxiosInstance.post(
+    const response = await devOpsChallengeAxiosInstance.post<string>(
       `${coursePhaseID}/studentTest`,
-      payload,
+      gitHubHandle,
       {
         headers: {
           'Content-Type': 'application/json-path+json',

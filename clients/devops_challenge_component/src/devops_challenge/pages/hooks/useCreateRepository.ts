@@ -1,13 +1,18 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { createRepository } from '../../network/mutations/createRepository'
+import { useDevOpsChallengeStore } from '../../zustand/useDevOpsChallengeStore'
 
 export const useCreateRepository = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
+  const { githubHandle, setGithubHandle } = useDevOpsChallengeStore()
 
   return useMutation({
     mutationFn: (gitHubHandle?: string) => createRepository(gitHubHandle ?? '', phaseId ?? ''),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
+      setGithubHandle(githubHandle ?? '')
       setError(null)
     },
     onError: (error: any) => {

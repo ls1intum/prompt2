@@ -14,8 +14,10 @@ export const AssessmentPanel = (): JSX.Element => {
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
 
-  const remainingAttempts =
-    (developerQuery.data?.maxAttempts ?? 0) - (developerQuery.data?.attempts ?? 0)
+  const remainingAttempts = Math.max(
+    (developerQuery.data?.maxAttempts ?? 0) - (developerQuery.data?.attempts ?? 0),
+    0,
+  )
 
   const handleTriggerAssessment = () => {
     assessmentMutation.mutate(githubHandle)

@@ -1,13 +1,15 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { triggerAssessment } from '../../network/mutations/triggerAssessment'
 
 export const useTriggerAssessment = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (gitHubHandle?: string) => triggerAssessment(gitHubHandle ?? '', phaseId ?? ''),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
       setError(null)
     },
     onError: (error: any) => {
