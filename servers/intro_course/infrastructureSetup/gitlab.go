@@ -124,7 +124,7 @@ func getUserID(username string) (*gitlab.User, error) {
 	return users[0], nil
 }
 
-func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, submissionDeadline string) error {
+func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, submissionDeadline string) error {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get client: ", err)
@@ -132,7 +132,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 	}
 
 	p := &gitlab.CreateProjectOptions{
-		Name:                             gitlab.Ptr(devTumID),
+		Name:                             gitlab.Ptr(repoName),
 		NamespaceID:                      gitlab.Ptr(devGroupID),
 		SharedRunnersEnabled:             gitlab.Ptr(true),
 		OnlyAllowMergeIfPipelineSucceeds: gitlab.Ptr(true),
@@ -160,8 +160,47 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 		return errors.New("failed create student project")
 	}
 
+	err = addProjectMembers(git, project.ID, tutorID, devID, devGroupID)
+	if err != nil {
+		return err
+	}
+
+	// Add MR approval rule
+	_, _, err = git.Projects.CreateProjectApprovalRule(project.ID, &gitlab.CreateProjectLevelRuleOptions{
+		Name:              gitlab.Ptr("Tutor Approval"),
+		ApprovalsRequired: gitlab.Ptr(1),
+		UserIDs:           gitlab.Ptr([]int{tutorID}),
+	})
+	if err != nil {
+		log.Error("failed to add MR approval rule: ", err)
+		return errors.New("failed add MR approval rule")
+	}
+
+	err = createProjectFiles(git, project.ID, submissionDeadline)
+	if err != nil {
+		return err
+	}
+
+	// Add branch protection
+	_, _, err = git.Branches.ProtectBranch(project.ID, "main", &gitlab.ProtectBranchOptions{
+		DevelopersCanPush:  gitlab.Ptr(false),
+		DevelopersCanMerge: gitlab.Ptr(true),
+	})
+	if err != nil {
+		log.Error("failed to add branch protect rules: ", err)
+		return errors.New("failed add branch protect rules")
+	}
+
+	err = createIssueBoard(git, project.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func addProjectMembers(git *gitlab.Client, projectID, tutorID, devID, devGroupID int) error {
 	// Add student to the project
-	_, _, err = git.ProjectMembers.AddProjectMember(project.ID, &gitlab.AddProjectMemberOptions{
+	_, _, err := git.ProjectMembers.AddProjectMember(projectID, &gitlab.AddProjectMemberOptions{
 		UserID:      gitlab.Ptr(devID),
 		AccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions),
 	})
@@ -181,7 +220,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 	}
 
 	// Add tutor to the project
-	_, _, err = git.ProjectMembers.AddProjectMember(project.ID, &gitlab.AddProjectMemberOptions{
+	_, _, err = git.ProjectMembers.AddProjectMember(projectID, &gitlab.AddProjectMemberOptions{
 		UserID:      gitlab.Ptr(tutorID),
 		AccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions),
 	})
@@ -190,19 +229,41 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 		return errors.New("failed add tutor to project")
 	}
 
-	// Add MR approval rule
-	_, _, err = git.Projects.CreateProjectApprovalRule(project.ID, &gitlab.CreateProjectLevelRuleOptions{
-		Name:              gitlab.Ptr("Tutor Approval"),
-		ApprovalsRequired: gitlab.Ptr(1),
-		UserIDs:           gitlab.Ptr([]int{tutorID}),
+	return nil
+}
+
+func createIssueBoard(git *gitlab.Client, projectID int) error {
+	// Setup issue board
+	issueBoard, _, err := git.Boards.CreateIssueBoard(projectID, &gitlab.CreateIssueBoardOptions{
+		Name: gitlab.Ptr("Issue Board"),
 	})
 	if err != nil {
-		log.Error("failed to add MR approval rule: ", err)
-		return errors.New("failed add MR approval rule")
+		log.Error("failed to create issue board: ", err)
+		return errors.New("failed create issue board")
 	}
 
+	// Add issue board lists
+	_, _, err = git.Boards.CreateIssueBoardList(projectID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
+		LabelID: gitlab.Ptr(IN_PROGRESS_LABEL_ID),
+	})
+	if err != nil {
+		log.Error("failed to create issue board list: ", err)
+		return errors.New("failed create issue board list")
+	}
+
+	_, _, err = git.Boards.CreateIssueBoardList(projectID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
+		LabelID: gitlab.Ptr(IN_REVIEW_LABEL_ID),
+	})
+	if err != nil {
+		log.Error("failed to create issue board list: ", err)
+		return errors.New("failed create issue board list")
+	}
+	return nil
+}
+
+func createProjectFiles(git *gitlab.Client, projectID int, submissionDeadline string) error {
 	// Add custom README
-	_, _, err = git.RepositoryFiles.CreateFile(project.ID, "README.md", &gitlab.CreateFileOptions{
+	_, _, err := git.RepositoryFiles.CreateFile(projectID, "README.md", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(data.GetReadme(submissionDeadline)),
 		CommitMessage: gitlab.Ptr("Add custom README"),
@@ -213,7 +274,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 	}
 
 	// Add custom swiftlint
-	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".swiftlint.yml", &gitlab.CreateFileOptions{
+	_, _, err = git.RepositoryFiles.CreateFile(projectID, ".swiftlint.yml", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(`insert swiftlint.yml content here`),
 		CommitMessage: gitlab.Ptr("Add custom .swiftlint.yml"),
@@ -224,7 +285,7 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 	}
 
 	// Add custom gitignore
-	_, _, err = git.RepositoryFiles.CreateFile(project.ID, ".gitignore", &gitlab.CreateFileOptions{
+	_, _, err = git.RepositoryFiles.CreateFile(projectID, ".gitignore", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
 		Content:       gitlab.Ptr(`insert gitignore content here`),
 		CommitMessage: gitlab.Ptr("Add custom .gitignore"),
@@ -232,42 +293,6 @@ func CreateStudentProject(devTumID string, devID, tutorID int, devGroupID int, s
 	if err != nil {
 		log.Error("failed to add custom .gitignore: ", err)
 		return errors.New("failed add custom .gitignore")
-	}
-
-	// Add branch protection
-	_, _, err = git.Branches.ProtectBranch(project.ID, "main", &gitlab.ProtectBranchOptions{
-		DevelopersCanPush:  gitlab.Ptr(false),
-		DevelopersCanMerge: gitlab.Ptr(true),
-	})
-	if err != nil {
-		log.Error("failed to add branch protect rules: ", err)
-		return errors.New("failed add branch protect rules")
-	}
-
-	// Setup issue board
-	issueBoard, _, err := git.Boards.CreateIssueBoard(project.ID, &gitlab.CreateIssueBoardOptions{
-		Name: gitlab.Ptr("Issue Board"),
-	})
-	if err != nil {
-		log.Error("failed to create issue board: ", err)
-		return errors.New("failed create issue board")
-	}
-
-	// Add issue board lists
-	_, _, err = git.Boards.CreateIssueBoardList(project.ID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
-		LabelID: gitlab.Ptr(IN_PROGRESS_LABEL_ID),
-	})
-	if err != nil {
-		log.Error("failed to create issue board list: ", err)
-		return errors.New("failed create issue board list")
-	}
-
-	_, _, err = git.Boards.CreateIssueBoardList(project.ID, issueBoard.ID, &gitlab.CreateIssueBoardListOptions{
-		LabelID: gitlab.Ptr(IN_REVIEW_LABEL_ID),
-	})
-	if err != nil {
-		log.Error("failed to create issue board list: ", err)
-		return errors.New("failed create issue board list")
 	}
 
 	return nil

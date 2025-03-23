@@ -64,7 +64,7 @@ func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) err
 	return nil
 }
 
-func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, tumID, submissionDeadline string) error {
+func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, repoName, submissionDeadline string) error {
 	// 1.) get the student developer profile
 	devProfile, err := InfrastructureServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(ctx, db.GetDeveloperProfileByCourseParticipationIDParams{
 		CourseParticipationID: courseParticipationID,
@@ -106,6 +106,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 		return errors.New("failed to get tutor gitlab id")
 	}
 
+	// 4.) Get required GitLab groups
 	ipraktikumGroup, err := getiPraktikumGroup()
 	if err != nil {
 		return err
@@ -123,16 +124,19 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 		return err
 	}
 
-	// 2.) Create the student group
-	err = CreateStudentProject(tumID, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, submissionDeadline)
+	// 5.) Create the student group
+	err = CreateStudentProject(repoName, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, submissionDeadline)
 	if err != nil {
 		log.Error("Failed to create student project: ", err)
 		// store error in the db
-		_ = InfrastructureServiceSingleton.queries.AddGitlabError(ctx, db.AddGitlabErrorParams{
+		dbError := InfrastructureServiceSingleton.queries.AddGitlabError(ctx, db.AddGitlabErrorParams{
 			CourseParticipationID: courseParticipationID,
 			CoursePhaseID:         coursePhaseID,
 			ErrorMessage:          pgtype.Text{String: err.Error(), Valid: true},
 		})
+		if dbError != nil {
+			log.Error("Failed to store gitlab error in db: ", dbError)
+		}
 		return err
 	}
 
@@ -143,6 +147,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 
 	if err != nil {
 		log.Error("Failed to update gitlab status in db: ", err)
+		return errors.New("failed to update gitlab status in db")
 	}
 
 	return nil
