@@ -6,6 +6,7 @@ export const triggerAssessment = async (
   try {
     const response = await devOpsChallengeAxiosInstance.post<string>(
       `${coursePhaseID}/studentTest`,
+      {},
       {
         headers: {
           'Content-Type': 'application/json-path+json',
