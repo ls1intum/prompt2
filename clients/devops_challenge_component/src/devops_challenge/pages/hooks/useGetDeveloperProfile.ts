@@ -6,11 +6,9 @@ import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 
 export const useGetDeveloperProfile = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const { githubHandle } = useDevOpsChallengeStore()
 
   return useQuery<DeveloperProfile>({
     queryKey: ['devOpsDeveloperProfile', phaseId],
     queryFn: () => getDeveloperProfile(phaseId ?? ''),
-    enabled: githubHandle !== '',
   })
 }

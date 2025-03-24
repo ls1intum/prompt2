@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useGetDeveloperProfile } from './pages/hooks/useGetDeveloperProfile'
-import { GitHubHandleInput } from './components/GitHubHandleInput'
 
 interface DevOpsChallengeDataShellProps {
   children: React.ReactNode
