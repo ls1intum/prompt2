@@ -25,10 +25,10 @@ jobs:
       - run: yarn install
         working-directory: ./clients
       - name: Lint components in ${{ matrix.module }}
-        run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs" --format json --output-file "lint-results/$(basename ${{ matrix.module }})-lint-results.json" || true
+        run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs" --format json --output-file "lint-results/${{ matrix.module }})-lint-results.json" || true
         continue-on-error: true
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
         with:
           name: lint-results
-          path: clients/lint-results/$(basename ${{ matrix.module }})-lint-results.json
+          path: lint-results/${{ matrix.module }})-lint-results.json
