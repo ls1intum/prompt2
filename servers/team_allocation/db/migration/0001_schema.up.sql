@@ -5,7 +5,7 @@ CREATE TABLE team (
     name VARCHAR(255) NOT NULL,
     course_phase_id uuid NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unique_course_phase_team UNIQUE (course_phase_id, team_name)
+    CONSTRAINT unique_course_phase_team UNIQUE (course_phase_id, name)
 );
 
 CREATE TABLE student_team_preference_response (
@@ -13,7 +13,7 @@ CREATE TABLE student_team_preference_response (
     team_id uuid NOT NULL,
     preference INT NOT NULL,
     PRIMARY KEY (course_participation_id, team_id),
-    FOREIGN KEY (team_id) REFERENCES team(id)
+    FOREIGN KEY (team_id) REFERENCES team(id) ON DELETE CASCADE
 );
 
 CREATE TABLE survey_timeframe (
@@ -33,7 +33,7 @@ CREATE TABLE student_skill_response (
     skill_id uuid NOT NULL,
     rating INT NOT NULL,
     PRIMARY KEY (course_participation_id, skill_id),
-    FOREIGN KEY (skill_id) REFERENCES skill(id)
+    FOREIGN KEY (skill_id) REFERENCES skill(id) ON DELETE CASCADE
 );
 
 COMMIT;

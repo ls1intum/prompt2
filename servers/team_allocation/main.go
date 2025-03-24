@@ -11,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
+	teams "github.com/ls1intum/prompt2/servers/team_allocation/team"
 	"github.com/ls1intum/prompt2/servers/team_allocation/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -81,6 +83,9 @@ func main() {
 		c.JSON(200, gin.H{
 			"message": "Hello from team allocation service"})
 	})
+
+	skills.InitSkillModule(api, *query, conn)
+	teams.InitTeamModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)

@@ -4,7 +4,6 @@ FROM team
 WHERE course_phase_id = $1
 ORDER BY name;
 
-
 -- name: CreateTeam :exec
 INSERT INTO team (id, name, course_phase_id)
 VALUES ($1, $2, $3);
