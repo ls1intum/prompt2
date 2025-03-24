@@ -8,9 +8,8 @@ import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePh
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { useEffect, useState } from 'react'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
-import { getDeveloperProfile } from './network/queries/getDeveloperProfile'
-import { DeveloperProfile } from './interfaces/DeveloperProfile'
 import { ErrorPage } from '@/components/ErrorPage'
+import { useGetDeveloperProfile } from './pages/hooks/useGetDeveloperProfile'
 
 interface DevOpsChallengeDataShellProps {
   children: React.ReactNode
@@ -25,14 +24,13 @@ export const DevOpsChallengeDataShell = ({
 
   const { setCoursePhaseParticipation, setDeveloperProfile } = useDevOpsChallengeStore()
 
+  const [developerProfileSet, setDeveloperProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
-
-  const [githubHandle] = useState('')
 
   // getting the course phase participation
   const {
     data: fetchedParticipation,
-    error,
+    error: participationError,
     isPending: isParticipationPending,
     isError: isParticipationError,
     refetch: refetchParticipation,
@@ -44,15 +42,14 @@ export const DevOpsChallengeDataShell = ({
   // trying to get the developerProfile
   const {
     data: fetchedProfile,
+    error: developerProfileError,
+    isPending: isProfilePending,
     isError: isProfileError,
     refetch: refetchProfile,
-  } = useQuery<DeveloperProfile>({
-    queryKey: ['developer_profile'],
-    queryFn: () => getDeveloperProfile(phaseId ?? ''),
-    enabled: githubHandle !== '',
-  })
+  } = useGetDeveloperProfile()
 
-  const isPending = isParticipationPending || !participationSet
+  const isPending =
+    isParticipationPending || isProfilePending || !developerProfileSet || !participationSet
   const isError = isParticipationError || isProfileError
 
   useEffect(() => {
@@ -63,9 +60,12 @@ export const DevOpsChallengeDataShell = ({
   }, [fetchedParticipation, setCoursePhaseParticipation])
 
   useEffect(() => {
-    if (fetchedProfile) {
+    if (isProfileError && developerProfileError?.message.includes('student not found')) {
+      setDeveloperProfile(undefined)
+    } else if (fetchedProfile) {
       setDeveloperProfile(fetchedProfile)
     }
+    setDeveloperProfileSet(true)
   }, [fetchedProfile, setDeveloperProfile])
 
   // if he is not a student -> we do not wait for the participation
@@ -80,17 +80,19 @@ export const DevOpsChallengeDataShell = ({
   // Data only relevant for students - not for lecturers
   if (isStudent && isError) {
     // if the participation is not found, we show the unauthorized page bc then the student has not yet processed to this phase
-    if (isParticipationError && error.message.includes('404')) {
+    if (isParticipationError && participationError.message.includes('404')) {
       return <UnauthorizedPage backUrl={`/management/course/${courseId}`} />
     } else {
-      return (
-        <ErrorPage
-          onRetry={() => {
-            refetchProfile()
-            refetchParticipation()
-          }}
-        />
-      )
+      if (!isProfileError) {
+        return (
+          <ErrorPage
+            onRetry={() => {
+              refetchProfile()
+              refetchParticipation()
+            }}
+          />
+        )
+      }
     }
   }
 

@@ -7,7 +7,7 @@ import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 
 export const AssessmentPanel = (): JSX.Element => {
-  const { githubHandle } = useDevOpsChallengeStore()
+  const { developerProfile } = useDevOpsChallengeStore()
 
   const [error, setError] = useState<string | null>(null)
 
@@ -20,7 +20,7 @@ export const AssessmentPanel = (): JSX.Element => {
   )
 
   const handleTriggerAssessment = () => {
-    assessmentMutation.mutate(githubHandle)
+    assessmentMutation.mutate(developerProfile?.githubUsername)
     developerQuery.refetch()
   }
 

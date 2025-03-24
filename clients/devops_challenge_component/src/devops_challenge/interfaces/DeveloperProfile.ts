@@ -1,6 +1,5 @@
 export type DeveloperProfile = {
-  coursePhaseID: string
-  courseParticipationID: string
+  githubUsername?: string
   repositoryURL?: string
   attempts?: number
   maxAttempts?: number
