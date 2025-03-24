@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lint-results
-          path: clients/lint-results/*.json
+          path: clients/lint-results/$(basename ${{ matrix.module }})-lint-results.json
