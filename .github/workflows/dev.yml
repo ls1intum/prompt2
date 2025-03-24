@@ -30,7 +30,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "./clients/lint-results/*.json"
           fail-on-warning: false
-          only-pr-files: false
           check-name: "Client Linting Report"
   build-clients:
     needs: annotate-lint-clients
