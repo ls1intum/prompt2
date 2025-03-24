@@ -4,7 +4,7 @@ import { AssessmentPanel } from './components/AssessmentPanel'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
 
 export const DevOpsChallengePage = (): JSX.Element => {
-  const { developerProfile, setDeveloperProfile } = useDevOpsChallengeStore()
+  const { developerProfile } = useDevOpsChallengeStore()
 
   return (
     <div className='max-w-xl mx-auto p-4'>
