@@ -4,13 +4,22 @@ on:
   workflow_call:
 
 jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-matrix.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: echo "modules=$(ls -d servers/* | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+
   golangci-lint:
+    needs: set-matrix
     name: Run GolangCI-Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [servers/core, servers/intro_course]
-
+        module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
