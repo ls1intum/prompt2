@@ -11,11 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: set-matrix
-        run: echo "modules=$(find clients -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+        run: echo "modules=$(find . -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+        working-directory: ./clients
 
   lint-client:
     needs: set-matrix
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./clients
     strategy:
       matrix:
         module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
@@ -23,7 +27,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
       - run: yarn install
-        working-directory: ./clients
       - name: Lint components in ${{ matrix.module }}
         run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs" --format json --output-file "lint-results/${{ matrix.module }}-lint-results.json" || true
         continue-on-error: true
