@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, AlertCircle, Github } from 'lucide-react'
+import { Loader2, AlertCircle, User } from 'lucide-react'
 import { useCreateRepository } from '../pages/hooks/useCreateRepository'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -15,7 +15,7 @@ export const GithubUsernameInput = (): JSX.Element => {
     <Card className='w-full max-w-md mx-auto'>
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
-          <Github className='w-6 h-6' />
+          <User className='w-6 h-6' />
           GitHub Repository Setup
         </CardTitle>
       </CardHeader>
@@ -36,7 +36,7 @@ export const GithubUsernameInput = (): JSX.Element => {
               onChange={(e) => setHandle(e.target.value)}
               className='pl-10'
             />
-            <Github className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+            <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
           </div>
           <Button
             onClick={() => repositoryMutation.mutate(handle)}
