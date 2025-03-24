@@ -8,7 +8,7 @@ export const useCreateRepository = (setError: (error: string | null) => void) =>
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (gitHubHandle?: string) => createRepository(gitHubHandle ?? '', phaseId ?? ''),
+    mutationFn: (githubUsername?: string) => createRepository(githubUsername ?? '', phaseId ?? ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
       setError(null)

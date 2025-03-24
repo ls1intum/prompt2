@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { GitHubHandleInput } from './components/GitHubHandleInput'
+import { GithubUsernameInput } from './components/GithubUsernameInput'
 import { AssessmentPanel } from './components/AssessmentPanel'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
 
@@ -15,7 +15,7 @@ export const DevOpsChallengePage = (): JSX.Element => {
         </CardHeader>
 
         <CardContent className='space-y-6'>
-          {!developerProfile ? <GitHubHandleInput /> : <AssessmentPanel />}
+          {!developerProfile ? <GithubUsernameInput /> : <AssessmentPanel />}
         </CardContent>
       </Card>
     </div>

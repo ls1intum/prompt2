@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { useCreateRepository } from '../pages/hooks/useCreateRepository'
 
-export const GitHubHandleInput = (): JSX.Element => {
+export const GithubUsernameInput = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
 
   const repositoryMutation = useCreateRepository(setError)

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useDevOpsChallengeStore } from '../zustand/useDevOpsChallengeStore'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, CircleAlert, CheckCircle2 } from 'lucide-react'
@@ -7,8 +6,6 @@ import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 
 export const AssessmentPanel = (): JSX.Element => {
-  const { developerProfile } = useDevOpsChallengeStore()
-
   const [error, setError] = useState<string | null>(null)
 
   const assessmentMutation = useTriggerAssessment(setError)
