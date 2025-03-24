@@ -1,6 +1,6 @@
 import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
-import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
 
 function sortPassStatus(filterItem) {
   return filterItem.participation.passStatus === PassStatus.PASSED
@@ -11,11 +11,7 @@ function sortPassStatus(filterItem) {
 }
 
 function sortChallengeStatus(filterItem) {
-  return filterItem.profile?.hasPassed
-    ? 1
-    : (filterItem.profile?.attempts || -1) < (filterItem.profile?.maxAttempts || -1)
-      ? 0
-      : -1
+  return filterItem.profile?.hasPassed ? 1 : !filterItem.profile?.hasPassed ? 0 : -1
 }
 
 export const useGetSortedParticipations = (
@@ -27,7 +23,7 @@ export const useGetSortedParticipations = (
     | undefined,
   participantsWithProfiles: {
     participation: CoursePhaseParticipationWithStudent
-    profile: DeveloperProfile | undefined
+    profile: DeveloperWithInfo | undefined
   }[],
 ) => {
   return useMemo(() => {

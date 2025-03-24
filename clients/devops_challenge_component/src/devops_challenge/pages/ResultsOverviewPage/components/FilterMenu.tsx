@@ -90,15 +90,15 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
           {getChallengeStatusBadgeFromString('notCompleted')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={filters.challengePassed.failed}
+          checked={filters.challengePassed.unknown}
           onCheckedChange={(checked) =>
             setFilters({
               ...filters,
-              challengePassed: { ...filters.challengePassed, failed: checked },
+              challengePassed: { ...filters.challengePassed, unknown: checked },
             })
           }
         >
-          {getChallengeStatusBadgeFromString('failed')}
+          {getChallengeStatusBadgeFromString('')}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

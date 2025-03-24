@@ -51,7 +51,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
     challengePassed: {
       passed: false,
       notPassed: false,
-      failed: false,
+      unknown: false,
     },
   })
 
@@ -165,10 +165,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
                 )}
               </div>
             </TableHead>
-            <TableHead className='cursor-pointer' onClick={() => requestSort('attempts')}>
+            <TableHead className='cursor-pointer' onClick={() => requestSort('challengeStatus')}>
               <div className='flex items-center'>
-                Attempts
-                {sortConfig?.key === 'attempts' ? ( // Add this line
+                Challenge Status
+                {sortConfig?.key === 'challengeStatus' ? ( // Add this line
                   <>
                     {sortConfig.direction === 'ascending' ? (
                       <ArrowUp className='ml-2 h-4 w-4' />
@@ -181,10 +181,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
                 )}
               </div>
             </TableHead>
-            <TableHead className='cursor-pointer' onClick={() => requestSort('challengeStatus')}>
+            <TableHead className='cursor-pointer' onClick={() => requestSort('attempts')}>
               <div className='flex items-center'>
-                Challenge Status
-                {sortConfig?.key === 'challengeStatus' ? ( // Add this line
+                Attempts
+                {sortConfig?.key === 'attempts' ? ( // Add this line
                   <>
                     {sortConfig.direction === 'ascending' ? (
                       <ArrowUp className='ml-2 h-4 w-4' />
@@ -212,12 +212,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
               <TableCell className='font-medium'>
                 {getStatusBadge(participation.passStatus)}
               </TableCell>
-              <TableCell>
-                <div className='flex gap-2'>
-                  {profile?.attempts} / {profile?.maxAttempts}
-                </div>
-              </TableCell>
               <TableCell className='font-medium'>{getChallengeStatusBadge(profile)}</TableCell>
+              <TableCell>
+                <div className='flex gap-2'>{profile?.attempts}</div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

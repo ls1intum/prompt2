@@ -1,22 +1,21 @@
 import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
 import { DevProfileFilter } from '../interfaces/devProfileFilter'
 import { useMemo } from 'react'
-import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
 
 export function passesChallengeFilter(
-  profile: DeveloperProfile | undefined,
+  profile: DeveloperWithInfo | undefined,
   filters: DevProfileFilter,
 ) {
   let passesChallenge = false
   if (filters.challengePassed.passed && profile?.hasPassed) {
     passesChallenge = true
   }
-  const hasAttemptsLeft = (profile?.attempts || -1) < (profile?.maxAttempts || -1)
-  if (filters.challengePassed.notPassed && profile?.hasPassed === false && hasAttemptsLeft) {
+  if (filters.challengePassed.notPassed && profile?.hasPassed === false) {
     passesChallenge = true
   }
-  if (filters.challengePassed.failed && profile?.hasPassed === false && !hasAttemptsLeft) {
-    passesChallenge = true
+  if (filters.challengePassed.unknown) {
+    passesChallenge = !passesChallenge
   }
   return passesChallenge
 }
@@ -41,7 +40,7 @@ export function passesAssessmentFilter(
 export const useGetFilteredParticipations = (
   participants: {
     participation: CoursePhaseParticipationWithStudent
-    profile: DeveloperProfile | undefined
+    profile: DeveloperWithInfo | undefined
   }[],
   filters: DevProfileFilter,
 ) => {
@@ -58,7 +57,7 @@ export const useGetFilteredParticipations = (
       const challengeFilterActive =
         filters.challengePassed.passed ||
         filters.challengePassed.notPassed ||
-        filters.challengePassed.failed
+        filters.challengePassed.unknown
       let passesChallenge = true
       if (challengeFilterActive) {
         // Assume false initially then try matching any active filter.
