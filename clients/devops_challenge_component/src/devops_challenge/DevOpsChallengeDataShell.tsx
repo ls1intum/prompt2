@@ -86,14 +86,16 @@ export const DevOpsChallengeDataShell = ({
     if (isParticipationError && participationError.message.includes('404')) {
       return <UnauthorizedPage backUrl={`/management/course/${courseId}`} />
     } else {
-      return (
-        <ErrorPage
-          onRetry={() => {
-            refetchProfile()
-            refetchParticipation()
-          }}
-        />
-      )
+      if (!isProfileError) {
+        return (
+          <ErrorPage
+            onRetry={() => {
+              refetchProfile()
+              refetchParticipation()
+            }}
+          />
+        )
+      }
     }
   }
 
