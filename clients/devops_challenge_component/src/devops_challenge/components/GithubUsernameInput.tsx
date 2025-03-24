@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export const GithubUsernameInput = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
   const repositoryMutation = useCreateRepository(setError)
-  const [handle, setHandle] = useState('')
+  const [githubUsername, setGithubUsername] = useState('')
 
   return (
     <Card className='w-full max-w-md mx-auto'>
@@ -32,15 +32,15 @@ export const GithubUsernameInput = (): JSX.Element => {
           <div className='relative'>
             <Input
               placeholder='GitHub username'
-              value={handle}
-              onChange={(e) => setHandle(e.target.value)}
+              value={githubUsername}
+              onChange={(e) => setGithubUsername(e.target.value)}
               className='pl-10'
             />
             <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
           </div>
           <Button
-            onClick={() => repositoryMutation.mutate(handle)}
-            disabled={!handle || repositoryMutation.isPending}
+            onClick={() => repositoryMutation.mutate(githubUsername)}
+            disabled={!githubUsername || repositoryMutation.isPending}
             className='w-full'
           >
             {repositoryMutation.isPending ? (
