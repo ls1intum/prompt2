@@ -11,6 +11,8 @@ import { useIntroCourseStore } from './zustand/useIntroCourseStore'
 import { getOwnDeveloperProfile } from './network/queries/getOwnDeveloperProfile'
 import { DeveloperProfile } from './interfaces/DeveloperProfile'
 import { ErrorPage } from '@/components/ErrorPage'
+import { SeatAssignment } from './pages/SeatAssignment/interfaces/SeatAssignment'
+import { getOwnSeatPlanAssignment } from './network/queries/getOwnSeatPlanAssignment'
 
 interface IntroCourseDataShellProps {
   children: React.ReactNode
@@ -20,10 +22,12 @@ export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): J
   const { isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')
-  const { setCoursePhaseParticipation, setDeveloperProfile } = useIntroCourseStore()
+  const { setCoursePhaseParticipation, setDeveloperProfile, setSeatAssignment } =
+    useIntroCourseStore()
 
   const [devProfileSet, setDevProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
+  const [seatAssignmentSet, setSeatAssignmentSet] = useState(false)
 
   // getting the course phase participation
   const {
@@ -35,6 +39,7 @@ export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): J
   } = useQuery<CoursePhaseParticipationWithStudent>({
     queryKey: ['course_phase_participation', phaseId],
     queryFn: () => getOwnCoursePhaseParticipation(phaseId ?? ''),
+    enabled: isStudent,
   })
 
   // trying to get the developerProfile
@@ -46,11 +51,29 @@ export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): J
   } = useQuery<DeveloperProfile>({
     queryKey: ['developer_profile'],
     queryFn: () => getOwnDeveloperProfile(phaseId ?? ''),
+    enabled: isStudent,
   })
 
-  const isPending =
-    isParticipationPending || isProfilePending || !devProfileSet || !participationSet
-  const isError = isParticipationError || isProfileError
+  const {
+    data: fetchedSeatAssignment,
+    isPending: isSeatAssignmentPending,
+    isError: isSeatAssignmentError,
+    refetch: refetchSeatAssignment,
+  } = useQuery<SeatAssignment>({
+    queryKey: ['seat_assignment', phaseId],
+    queryFn: () => getOwnSeatPlanAssignment(phaseId ?? ''),
+    enabled: isStudent,
+  })
+
+  const isPending = isStudent
+    ? isParticipationPending ||
+      isProfilePending ||
+      !devProfileSet ||
+      !participationSet ||
+      isSeatAssignmentPending ||
+      !seatAssignmentSet
+    : false
+  const isError = isParticipationError || isProfileError || isSeatAssignmentError
 
   useEffect(() => {
     if (fetchedParticipation) {
@@ -69,6 +92,16 @@ export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): J
       setDevProfileSet(true)
     }
   }, [fetchedProfile, setDeveloperProfile])
+
+  useEffect(() => {
+    if (fetchedSeatAssignment && fetchedSeatAssignment.seatName !== '') {
+      setSeatAssignment(fetchedSeatAssignment)
+      setSeatAssignmentSet(true)
+    } else if (fetchedSeatAssignment && fetchedSeatAssignment.seatName === '') {
+      setSeatAssignment(undefined)
+      setSeatAssignmentSet(true)
+    }
+  }, [fetchedSeatAssignment, setSeatAssignment])
 
   // if he is not a student -> we do not wait for the participation
   if (isStudent && isPending) {
@@ -90,6 +123,7 @@ export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): J
           onRetry={() => {
             refetchProfile()
             refetchParticipation()
+            refetchSeatAssignment()
           }}
         />
       )
