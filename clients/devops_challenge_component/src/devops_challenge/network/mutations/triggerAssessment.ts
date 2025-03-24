@@ -1,8 +1,6 @@
 import { devOpsChallengeAxiosInstance } from '../devOpsChallengeServerConfig'
 
-export const triggerAssessment = async (
-  coursePhaseID: string,
-): Promise<string> => {
+export const triggerAssessment = async (coursePhaseID: string): Promise<string> => {
   try {
     const response = await devOpsChallengeAxiosInstance.post<string>(
       `${coursePhaseID}/studentTest`,
