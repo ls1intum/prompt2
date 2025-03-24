@@ -15,7 +15,6 @@ jobs:
 
   lint-server:
     needs: set-matrix
-    name: Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
