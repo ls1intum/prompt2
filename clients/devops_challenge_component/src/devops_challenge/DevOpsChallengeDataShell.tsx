@@ -61,14 +61,14 @@ export const DevOpsChallengeDataShell = ({
   }, [fetchedParticipation, setCoursePhaseParticipation])
 
   useEffect(() => {
-    if (fetchedProfile) {
-      if (isProfileError && developerProfileError?.message.includes('404')) {
-        setDeveloperProfile(undefined)
-      } else {
-        setDeveloperProfile(fetchedProfile)
-      }
-      setDeveloperProfileSet(true)
+    if (isProfileError && developerProfileError?.message.includes('student not found')) {
+      setDeveloperProfile(undefined)
+    } else if (fetchedProfile) {
+      setDeveloperProfile(fetchedProfile)
+    } else {
+      setDeveloperProfile(undefined)
     }
+    setDeveloperProfileSet(true)
   }, [fetchedProfile, setDeveloperProfile])
 
   // if he is not a student -> we do not wait for the participation
