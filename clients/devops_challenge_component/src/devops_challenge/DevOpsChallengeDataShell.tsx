@@ -8,9 +8,8 @@ import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePh
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { useEffect, useState } from 'react'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
-import { getDeveloperProfile } from './network/queries/getDeveloperProfile'
-import { DeveloperProfile } from './interfaces/DeveloperProfile'
 import { ErrorPage } from '@/components/ErrorPage'
+import { useGetDeveloperProfile } from './pages/hooks/useGetDeveloperProfile'
 
 interface DevOpsChallengeDataShellProps {
   children: React.ReactNode
@@ -24,10 +23,9 @@ export const DevOpsChallengeDataShell = ({
   const isStudent = isStudentOfCourse(courseId ?? '')
 
   const { setCoursePhaseParticipation, setDeveloperProfile } = useDevOpsChallengeStore()
-
+  
+  const [developerProfileSet, setDeveloperProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
-
-  const [githubHandle] = useState('')
 
   // getting the course phase participation
   const {
@@ -44,15 +42,12 @@ export const DevOpsChallengeDataShell = ({
   // trying to get the developerProfile
   const {
     data: fetchedProfile,
+    isPending: isProfilePending,
     isError: isProfileError,
     refetch: refetchProfile,
-  } = useQuery<DeveloperProfile>({
-    queryKey: ['developer_profile'],
-    queryFn: () => getDeveloperProfile(phaseId ?? ''),
-    enabled: githubHandle !== '',
-  })
+  } = useGetDeveloperProfile()
 
-  const isPending = isParticipationPending || !participationSet
+  const isPending = isParticipationPending || !participationSet || isProfilePending || !developerProfileSet
   const isError = isParticipationError || isProfileError
 
   useEffect(() => {
@@ -65,6 +60,10 @@ export const DevOpsChallengeDataShell = ({
   useEffect(() => {
     if (fetchedProfile) {
       setDeveloperProfile(fetchedProfile)
+      setDeveloperProfileSet(true)
+    } else if (isProfileError && error?.message.includes('student not found')) {
+      setDeveloperProfile(undefined)
+      setDeveloperProfileSet(true)
     }
   }, [fetchedProfile, setDeveloperProfile])
 
