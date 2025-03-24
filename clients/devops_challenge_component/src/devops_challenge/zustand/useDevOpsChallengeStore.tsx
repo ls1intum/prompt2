@@ -6,11 +6,11 @@ interface DevOpsChallengeStoreState {
   coursePhaseParticipation?: CoursePhaseParticipationWithStudent
   githubHandle?: string
   feedback?: string
-  developerProfile?: DeveloperProfile | undefined
+  developerProfile?: DeveloperProfile
 }
 
 interface DevOpsChallengeStoreActions {
-  setDeveloperProfile: (developerProfile: DeveloperProfile | undefined) => void
+  setDeveloperProfile: (developerProfile?: DeveloperProfile) => void
   setGithubHandle: (githubHandle: string) => void
   setFeedback: (feedback: string) => void
   setCoursePhaseParticipation: (

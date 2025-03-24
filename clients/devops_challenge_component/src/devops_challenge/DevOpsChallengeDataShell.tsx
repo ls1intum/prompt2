@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useGetDeveloperProfile } from './pages/hooks/useGetDeveloperProfile'
+import { GitHubHandleInput } from './components/GitHubHandleInput'
 
 interface DevOpsChallengeDataShellProps {
   children: React.ReactNode
@@ -23,14 +24,14 @@ export const DevOpsChallengeDataShell = ({
   const isStudent = isStudentOfCourse(courseId ?? '')
 
   const { setCoursePhaseParticipation, setDeveloperProfile } = useDevOpsChallengeStore()
-  
+
   const [developerProfileSet, setDeveloperProfileSet] = useState(false)
   const [participationSet, setParticipationSet] = useState(false)
 
   // getting the course phase participation
   const {
     data: fetchedParticipation,
-    error,
+    error: participationError,
     isPending: isParticipationPending,
     isError: isParticipationError,
     refetch: refetchParticipation,
@@ -42,12 +43,14 @@ export const DevOpsChallengeDataShell = ({
   // trying to get the developerProfile
   const {
     data: fetchedProfile,
+    error: developerProfileError,
     isPending: isProfilePending,
     isError: isProfileError,
     refetch: refetchProfile,
   } = useGetDeveloperProfile()
 
-  const isPending = isParticipationPending || !participationSet || isProfilePending || !developerProfileSet
+  const isPending =
+    isParticipationPending || isProfilePending || !developerProfileSet || !participationSet
   const isError = isParticipationError || isProfileError
 
   useEffect(() => {
@@ -59,10 +62,11 @@ export const DevOpsChallengeDataShell = ({
 
   useEffect(() => {
     if (fetchedProfile) {
-      setDeveloperProfile(fetchedProfile)
-      setDeveloperProfileSet(true)
-    } else if (isProfileError && error?.message.includes('student not found')) {
-      setDeveloperProfile(undefined)
+      if (isProfileError && developerProfileError?.message.includes('student not found')) {
+        setDeveloperProfile(undefined)
+      } else {
+        setDeveloperProfile(fetchedProfile)
+      }
       setDeveloperProfileSet(true)
     }
   }, [fetchedProfile, setDeveloperProfile])
@@ -79,7 +83,7 @@ export const DevOpsChallengeDataShell = ({
   // Data only relevant for students - not for lecturers
   if (isStudent && isError) {
     // if the participation is not found, we show the unauthorized page bc then the student has not yet processed to this phase
-    if (isParticipationError && error.message.includes('404')) {
+    if (isParticipationError && participationError.message.includes('404')) {
       return <UnauthorizedPage backUrl={`/management/course/${courseId}`} />
     } else {
       return (
