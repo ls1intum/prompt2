@@ -11,10 +11,10 @@ import (
 )
 
 // SetupSurveyRouter sets up survey endpoints under /survey.
-func SetupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
+func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	surveyRouter := routerGroup.Group("/survey")
 	// Endpoints accessible to CourseStudents.
-	surveyRouter.GET("/available", authMiddleware(promptSDK.CourseStudent), getAvailableSurveyData)
+	surveyRouter.GET("/available", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getAvailableSurveyData)
 	surveyRouter.GET("/answers", authMiddleware(promptSDK.CourseStudent), getStudentSurveyResponses)
 	surveyRouter.POST("/answers", authMiddleware(promptSDK.CourseStudent), submitSurveyResponses)
 

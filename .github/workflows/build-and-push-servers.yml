@@ -9,6 +9,9 @@ on:
       server_intro_course_image_tag: 
         description: "The tag of the image that was built"
         value: ${{ jobs.intro-course.outputs.image_tag }}
+      server_team_allocation_image_tag: 
+        description: "The tag of the image that was built"
+        value: ${{ jobs.team-allocation.outputs.image_tag }}
 
 jobs:
   core:
@@ -24,4 +27,11 @@ jobs:
         image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
         docker-file: servers/Dockerfile 
         docker-context: ./servers/intro_course
+      secrets: inherit
+  team-allocation:
+      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+      with:
+        image-name: ghcr.io/ls1intum/prompt2/prompt-server-team-allocation
+        docker-file: servers/Dockerfile 
+        docker-context: ./servers/team_allocation
       secrets: inherit
