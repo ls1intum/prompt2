@@ -99,7 +99,7 @@ export const SeatMacAssigner = ({ existingSeats }: SeatMacAssignerProps) => {
             <CardDescription>Assign Mac devices to seats and provide device IDs</CardDescription>
           </div>
           <div className='flex items-center gap-2'>
-            <div className='flex items-center text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md'>
+            <div className='flex items-center px-3 py-1.5 rounded-md'>
               <Laptop className='h-5 w-5 mr-2' />
               <span className='text-sm font-medium'>{macCount} Macs Assigned</span>
             </div>

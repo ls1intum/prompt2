@@ -83,7 +83,7 @@ export const SeatStudentAssigner = ({
             </CardDescription>
           </div>
           <div className='flex items-center gap-2'>
-            <div className='flex items-center text-purple-600 bg-purple-50 px-3 py-1.5 rounded-md'>
+            <div className='flex items-center text-purple-600 px-3 py-1.5 rounded-md'>
               <Users className='h-5 w-5 mr-2' />
               <span className='text-sm font-medium'>
                 {assignedStudents} of {totalStudents} Students Assigned
@@ -161,7 +161,7 @@ export const SeatStudentAssigner = ({
                     .sort((a, b) => a.seatName.localeCompare(b.seatName))
                     .map((seat) => {
                       const student = developerWithProfiles.find(
-                        (dev) => dev.participation.student.id === seat.assignedStudent,
+                        (dev) => dev.participation.courseParticipationID === seat.assignedStudent,
                       )
                       return (
                         <TableRow key={seat.seatName}>

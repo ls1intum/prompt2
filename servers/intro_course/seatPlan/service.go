@@ -2,10 +2,12 @@ package seatPlan
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan/seatPlanDTO"
@@ -104,4 +106,27 @@ func DeleteSeatPlan(ctx context.Context, coursePhaseID uuid.UUID) error {
 		return errors.New("failed to delete seat plan")
 	}
 	return nil
+}
+
+func GetOwnSeatAssignment(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (seatPlanDTO.SeatAssignment, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	seat, err := SeatPlanServiceSingleton.queries.GetOwnSeatAssignment(ctxWithTimeout, db.GetOwnSeatAssignmentParams{
+		CoursePhaseID:   coursePhaseID,
+		AssignedStudent: pgtype.UUID{Bytes: courseParticipationID, Valid: true},
+	})
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// no seat assignment found
+		return seatPlanDTO.SeatAssignment{}, nil
+	} else if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID":         coursePhaseID,
+			"courseParticipationID": courseParticipationID,
+			"error":                 err,
+		}).Error("Failed to get own seat assignment")
+		return seatPlanDTO.SeatAssignment{}, errors.New("failed to get own seat assignment")
+	}
+
+	return seatPlanDTO.GetSeatAssignmentDTOFromDBModel(seat), nil
 }
