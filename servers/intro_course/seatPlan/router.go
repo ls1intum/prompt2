@@ -23,7 +23,7 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 
 	seatPlanRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSeatPlan)
 
-	seatPlanRouter.GET("/own-assignment", authMiddleware(keycloakTokenVerifier.CourseStudent), getOwnSeatAssignment)
+	seatPlanRouter.GET("/own-assignment", authMiddleware(promptSDK.CourseStudent), getOwnSeatAssignment)
 
 }
 
