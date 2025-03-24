@@ -13,8 +13,9 @@ jobs:
       - id: set-matrix
         run: echo "modules=$(find clients -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
 
-  lint-clients:
+  lint-client:
     needs: set-matrix
+    name: Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
