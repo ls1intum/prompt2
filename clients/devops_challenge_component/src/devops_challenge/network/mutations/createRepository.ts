@@ -10,9 +10,13 @@ export const createRepository = async (
   coursePhaseID: string,
 ): Promise<string> => {
   try {
+    const payload = {
+      GithubUsername: gitHubHandle,
+    }
+
     const response = await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
       `${coursePhaseID}/repository`,
-      gitHubHandle,
+      payload,
       {
         headers: {
           'Content-Type': 'application/json-path+json',
