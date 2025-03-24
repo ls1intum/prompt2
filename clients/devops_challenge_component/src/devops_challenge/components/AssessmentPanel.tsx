@@ -20,7 +20,7 @@ export const AssessmentPanel = (): JSX.Element => {
   )
 
   const handleTriggerAssessment = () => {
-    assessmentMutation.mutate(developerProfile?.githubUsername)
+    assessmentMutation.mutate()
     developerQuery.refetch()
   }
 
