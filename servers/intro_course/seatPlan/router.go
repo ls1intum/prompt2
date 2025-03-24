@@ -23,6 +23,8 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 
 	seatPlanRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSeatPlan)
 
+	seatPlanRouter.GET("/own-assignment", authMiddleware(keycloakTokenVerifier.CourseStudent), getOwnSeatAssignment)
+
 }
 
 func createSeatPlan(c *gin.Context) {
@@ -110,6 +112,31 @@ func deleteSeatPlan(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func getOwnSeatAssignment(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		handleError(c, http.StatusInternalServerError, errors.New("error getting courseParticipationID from context"))
+		return
+	}
+
+	seatAssignment, err := GetOwnSeatAssignment(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, seatAssignment)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
