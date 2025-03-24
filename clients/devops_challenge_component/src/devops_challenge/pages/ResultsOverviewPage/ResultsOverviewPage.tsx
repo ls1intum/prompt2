@@ -21,7 +21,7 @@ import {
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 
-import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
+import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 
 import { FilterMenu } from './components/FilterMenu'
@@ -70,7 +70,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
     isPending: isDeveloperProfilesPending,
     isError: isDeveloperProfileError,
     refetch: refetchDeveloperProfiles,
-  } = useQuery<DeveloperProfile[]>({
+  } = useQuery<DeveloperWithInfo[]>({
     queryKey: ['developerProfiles', phaseId],
     queryFn: () => getAllDeveloperProfiles(phaseId ?? ''),
   })

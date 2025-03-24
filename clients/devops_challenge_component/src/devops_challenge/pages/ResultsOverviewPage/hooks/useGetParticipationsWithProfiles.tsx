@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
 
 export const useGetParticipationsWithProfiles = (
   participants: CoursePhaseParticipationWithStudent[],
-  developerProfiles: DeveloperProfile[],
+  developerProfiles: DeveloperWithInfo[],
 ) => {
   return useMemo(() => {
     return (

@@ -1,5 +1,5 @@
 import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
-import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
+import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 
 const john: CoursePhaseParticipationWithStudent = {
   coursePhaseID: '1',
@@ -41,21 +41,19 @@ const exampleParticipantsWithResolution = {
   participations: [john, mike],
   resolution: [],
 }
-const exampleProfiles: DeveloperProfile[] = [
+const exampleProfiles: DeveloperWithInfo[] = [
   {
-    coursePhaseID: '1',
     courseParticipationID: '1',
+    githubUsername: 'john_doe',
     repositoryURL: '123',
     attempts: 2,
-    maxAttempts: 3,
     hasPassed: true,
   },
   {
-    coursePhaseID: '1',
     courseParticipationID: '2',
     repositoryURL: '123',
+    githubUsername: 'mike_master',
     attempts: 3,
-    maxAttempts: 3,
     hasPassed: false,
   },
 ]
