@@ -22,7 +22,7 @@ jobs:
       - name: Download Lint Results
         uses: actions/download-artifact@v4
         with:
-          name: lint-results
+          name: lint-results-*
           path: clients/lint-results
       - name: Annotate Code Linting Results
         uses: ataylorme/eslint-annotate-action@v3
