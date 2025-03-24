@@ -12,11 +12,8 @@ export const useGetParticipationsWithProfiles = (
       console.log('participants', participants),
       participants.map((participation) => {
         if (!developerProfiles || developerProfiles.length === 0) {
-          console.warn('No developer profiles found')
           return { participation, profile: undefined }
         }
-
-        console.warn('developerProfiles', developerProfiles)
 
         const profile =
           developerProfiles?.find(

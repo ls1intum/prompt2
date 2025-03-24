@@ -14,7 +14,10 @@ export function passesChallengeFilter(
   if (filters.challengePassed.notPassed && profile?.hasPassed === false) {
     passesChallenge = true
   }
-  if (filters.challengePassed.unknown) {
+  if (
+    filters.challengePassed.unknown &&
+    (profile === undefined || profile.hasPassed === undefined || profile.hasPassed === null)
+  ) {
     passesChallenge = !passesChallenge
   }
   return passesChallenge
