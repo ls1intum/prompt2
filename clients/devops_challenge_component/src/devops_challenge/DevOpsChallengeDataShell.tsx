@@ -65,8 +65,6 @@ export const DevOpsChallengeDataShell = ({
       setDeveloperProfile(undefined)
     } else if (fetchedProfile) {
       setDeveloperProfile(fetchedProfile)
-    } else {
-      setDeveloperProfile(undefined)
     }
     setDeveloperProfileSet(true)
   }, [fetchedProfile, setDeveloperProfile])
