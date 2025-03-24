@@ -66,7 +66,7 @@ export const DevOpsChallengeDataShell = ({
       setDeveloperProfile(fetchedProfile)
     }
     setDeveloperProfileSet(true)
-  }, [fetchedProfile, setDeveloperProfile])
+  }, [fetchedProfile, setDeveloperProfile, developerProfileError?.message, isProfileError])
 
   // if he is not a student -> we do not wait for the participation
   if (isStudent && isPending) {
