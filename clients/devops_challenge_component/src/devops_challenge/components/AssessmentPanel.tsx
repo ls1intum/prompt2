@@ -25,11 +25,11 @@ export const AssessmentPanel = (): JSX.Element => {
 
   return (
     <div className='space-y-4'>
-      {developerQuery.data?.repositoryURL && (
+      {developerQuery.data?.repositoryUrl && (
         <div className='space-y-2'>
           <h3 className='text-lg font-semibold'>Repository Info</h3>
           <div className='text-sm text-gray-600'>
-            <strong>Repository URL:</strong> {developerQuery.data.repositoryURL}
+            <strong>Repository URL:</strong> {developerQuery.data.repositoryUrl}
           </div>
         </div>
       )}
@@ -57,7 +57,8 @@ export const AssessmentPanel = (): JSX.Element => {
             htmlFor='confirm-own-work'
             className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
           >
-            I confirm that I have completed this challenge independently and without unauthorized assistance.
+            I confirm that I have completed this challenge independently and without unauthorized
+            assistance.
           </label>
         </div>
 
