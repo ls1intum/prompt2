@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, CircleAlert, CheckCircle2 } from 'lucide-react'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -76,70 +75,67 @@ export const AssessmentPanel = (): JSX.Element => {
             </div>
 
             <div className='grid gap-6 mt-4'>
-                <div className='flex flex-col space-y-4'>
-                  <div className='flex justify-between items-center'>
-                    <h2 className='text-xl font-semibold'>Assessment</h2>
-                    <div className='flex items-start space-x-2 my-4'>
-                    </div>
-                    <Button
-                      onClick={handleTriggerAssessment}
-                      disabled={
-                        assessmentMutation.isPending ||
-                        remainingAttempts <= 0 ||
-                        developerQuery.data?.hasPassed ||
-                        !confirmedOwnWork
-                      }
-                      className='flex items-center space-x-2'
-                    >
-                      {assessmentMutation.isPending ? (
-                        <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
-                      ) : (
-                        <Github className='mr-2 h-4 w-4' />
-                      )}
-                      <span>
-                        {assessmentMutation.isPending ? 'Assessing...' : 'Run Assessment'}
-                      </span>
-                    </Button>
-                  </div>
-
-                  {developerQuery.data && (
-                    <div className='mt-4'>
-                      <div className='flex items-center mb-2'>
-                        <h3 className='text-lg font-medium'>Last Assessment Result</h3>
-                        <span className='ml-2'>
-                          {developerQuery.data?.hasPassed ? (
-                            <CheckCircle className='h-5 w-5 text-green-500' />
-                          ) : (
-                            <AlertCircle className='h-5 w-5 text-red-500' />
-                          )}
-                        </span>
-                      </div>
-
-                      { assessmentMutation.isError && error && (
-                        <Alert>
-                          <div className='flex items-center'>
-                            <AlertCircle className='h-4 w-4' />
-                            <AlertTitle className='ml-2'>Error</AlertTitle>
-                          </div>
-                          <AlertDescription className='mt-1'>{error}</AlertDescription>
-                        </Alert>
-                      )}
-
-                      <Checkbox
-                        id='confirm-own-work'
-                        checked={confirmedOwnWork}
-                        onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
-                      />
-                      <label
-                        htmlFor='confirm-own-work'
-                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
-                      >
-                        I confirm that I have completed this challenge independently and without unauthorized
-                        assistance.
-                      </label>
-                    </div>
-                  )}
+              <div className='flex flex-col space-y-4'>
+                <div className='flex justify-between items-center'>
+                  <h2 className='text-xl font-semibold'>Assessment</h2>
+                  <div className='flex items-start space-x-2 my-4'></div>
+                  <Button
+                    onClick={handleTriggerAssessment}
+                    disabled={
+                      assessmentMutation.isPending ||
+                      remainingAttempts <= 0 ||
+                      developerQuery.data?.hasPassed ||
+                      !confirmedOwnWork
+                    }
+                    className='flex items-center space-x-2'
+                  >
+                    {assessmentMutation.isPending ? (
+                      <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
+                    ) : (
+                      <Github className='mr-2 h-4 w-4' />
+                    )}
+                    <span>{assessmentMutation.isPending ? 'Assessing...' : 'Run Assessment'}</span>
+                  </Button>
                 </div>
+
+                {developerQuery.data && (
+                  <div className='mt-4'>
+                    <div className='flex items-center mb-2'>
+                      <h3 className='text-lg font-medium'>Last Assessment Result</h3>
+                      <span className='ml-2'>
+                        {developerQuery.data?.hasPassed ? (
+                          <CheckCircle className='h-5 w-5 text-green-500' />
+                        ) : (
+                          <AlertCircle className='h-5 w-5 text-red-500' />
+                        )}
+                      </span>
+                    </div>
+
+                    {assessmentMutation.isError && error && (
+                      <Alert>
+                        <div className='flex items-center'>
+                          <AlertCircle className='h-4 w-4' />
+                          <AlertTitle className='ml-2'>Error</AlertTitle>
+                        </div>
+                        <AlertDescription className='mt-1'>{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <Checkbox
+                      id='confirm-own-work'
+                      checked={confirmedOwnWork}
+                      onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
+                    />
+                    <label
+                      htmlFor='confirm-own-work'
+                      className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+                    >
+                      I confirm that I have completed this challenge independently and without
+                      unauthorized assistance.
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
