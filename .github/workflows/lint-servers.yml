@@ -1,16 +1,24 @@
-name: Lint Go Code
+name: Lint Servers
 
 on:
   workflow_call:
 
 jobs:
-  golangci-lint:
-    name: Run GolangCI-Lint
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-matrix.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: echo "modules=$(find servers -mindepth 1 -maxdepth 1 -type d | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+
+  lint-server:
+    needs: set-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [servers/core, servers/intro_course]
-
+        module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

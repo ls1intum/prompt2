@@ -81,7 +81,7 @@ export const SeatTutorAssigner = ({
             <CardDescription>Assign tutors to seats for student supervision</CardDescription>
           </div>
           <div className='flex items-center gap-2'>
-            <div className='flex items-center text-purple-600 bg-purple-50 px-3 py-1.5 rounded-md'>
+            <div className='flex items-center text-purple-600 px-3 py-1.5 rounded-md'>
               <UserCheck className='h-5 w-5 mr-2' />
               <span className='text-sm font-medium'>
                 {assignedSeatsCount} of {totalRequiredSeats} Required Seats Assigned
