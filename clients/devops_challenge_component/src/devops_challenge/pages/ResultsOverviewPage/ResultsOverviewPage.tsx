@@ -8,6 +8,7 @@ import {
   getSortedRowModel,
   flexRender,
   SortingState,
+  VisibilityState,
 } from '@tanstack/react-table'
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
@@ -25,6 +26,7 @@ import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { FilterMenu } from './components/FilterMenu'
+import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
 import { DevProfileFilter } from './interfaces/devProfileFilter'
@@ -36,6 +38,8 @@ export const ResultsOverviewPage = (): JSX.Element => {
     challengePassed: { passed: false, notPassed: false, unknown: false },
   })
   const [sorting, setSorting] = useState<SortingState>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
   const { phaseId } = useParams<{ phaseId: string }>()
   const {
@@ -74,8 +78,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
   const table = useReactTable({
     data: filteredParticipants,
     columns: columns.map((col) => ({ ...col, enableSorting: true })),
-    state: { sorting },
+    state: { sorting, rowSelection, columnVisibility },
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   })
@@ -95,7 +101,13 @@ export const ResultsOverviewPage = (): JSX.Element => {
         <div className='text-sm text-muted-foreground'>
           Showing {filteredParticipants.length} participants
         </div>
-        <FilterMenu filters={filters} setFilters={setFilters} />
+        <div className='flex space-x-2'>
+          <FilterMenu filters={filters} setFilters={setFilters} />
+          <GroupActionsMenu
+            selectedRows={table.getSelectedRowModel()}
+            onClose={() => table.resetRowSelection()}
+          />
+        </div>
       </div>
       <Table>
         <TableHeader>
@@ -114,15 +126,23 @@ export const ResultsOverviewPage = (): JSX.Element => {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className='cursor-pointer hover:bg-muted/50'>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className='font-medium'>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className='font-medium'>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className='h-24 text-center'>
+                No results.
+              </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

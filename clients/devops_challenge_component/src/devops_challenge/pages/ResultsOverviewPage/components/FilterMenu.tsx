@@ -25,8 +25,8 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' size='sm' className='ml-auto'>
-          <Filter className='mr-2 h-4 w-4' />
+        <Button variant='outline' className='ml-auto'>
+          <Filter className='h-4 w-4' />
           Filters
         </Button>
       </DropdownMenuTrigger>
