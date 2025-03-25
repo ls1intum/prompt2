@@ -254,6 +254,26 @@ services:
     networks:
       - prompt-network
 
+  client-team-allocation-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-team-allocation-component:${TEAM_ALLOCATION_IMAGE_TAG}"
+    container_name: prompt-client-team-allocation-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.team-allocation.rule=Host(`${CORE_HOST}`) && PathPrefix(`/team-allocation`)"
+      - "traefik.http.routers.team-allocation.entrypoints=websecure"
+      - "traefik.http.routers.team-allocation.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.team-allocation-strip-prefix.stripPrefix.prefixes=/team-allocation"
+      - "traefik.http.routers.team-allocation.middlewares=team-allocation-strip-prefix,team-allocation-compress"
+      - "traefik.http.middlewares.team-allocation-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+    networks:
+      - prompt-network
+
   client-template-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component
