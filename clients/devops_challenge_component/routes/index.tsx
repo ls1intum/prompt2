@@ -20,11 +20,6 @@ const routes: ExtendedRouteObject[] = [
     element: <ResultsOverviewPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
-  },
 ]
 
 export default routes

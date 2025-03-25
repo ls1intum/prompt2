@@ -6,15 +6,15 @@ interface RepositoryResponse {
 }
 
 export const createRepository = async (
-  gitHubHandle: string,
+  githubUsername: string,
   coursePhaseID: string,
-): Promise<string> => {
+): Promise<void> => {
   try {
     const payload = {
-      GithubUsername: gitHubHandle,
+      GithubUsername: githubUsername,
     }
 
-    const response = await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
+    await devOpsChallengeAxiosInstance.post<RepositoryResponse>(
       `${coursePhaseID}/repository`,
       payload,
       {
@@ -23,8 +23,6 @@ export const createRepository = async (
         },
       },
     )
-
-    return response.data.repositoryUrl
   } catch (err) {
     console.error(err)
     throw err

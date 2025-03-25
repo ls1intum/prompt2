@@ -7,7 +7,7 @@ export const useTriggerAssessment = (setError: (error: string | null) => void) =
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (gitHubHandle?: string) => triggerAssessment(gitHubHandle ?? '', phaseId ?? ''),
+    mutationFn: () => triggerAssessment(phaseId ?? ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
       setError(null)
