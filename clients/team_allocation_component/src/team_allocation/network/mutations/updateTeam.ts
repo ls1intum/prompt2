@@ -1,6 +1,6 @@
 import { teamAllocationAxiosInstance } from '../teamAllocationServerConfig'
 
-export const updateSkill = async (
+export const updateTeam = async (
   coursePhaseID: string,
   teamID: string,
   newTeamName: string,

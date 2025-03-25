@@ -1,21 +1,22 @@
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { Skill } from '../interfaces/skill'
-import { getAllSkills } from '../network/queries/getAllSkills'
+import { Skill } from '../../interfaces/skill'
+import { getAllSkills } from '../../network/queries/getAllSkills'
 import { useParams } from 'react-router-dom'
-import { Team } from '../interfaces/team'
-import { getAllTeams } from '../network/queries/getAllTeams'
+import { Team } from '../../interfaces/team'
+import { getAllTeams } from '../../network/queries/getAllTeams'
 import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useQuery } from '@tanstack/react-query'
-import { getSurveyTimeframe } from '../network/queries/getSurveyTimeframe'
-import { SurveyTimeframe } from '../interfaces/timeframe'
+import { getSurveyTimeframe } from '../../network/queries/getSurveyTimeframe'
+import { SurveyTimeframe } from '../../interfaces/timeframe'
+import { TeamSettings } from './components/TeamSettings'
+import { SkillSettings } from './components/SkillSettings'
 
 export const SurveySettingsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
     data: fetchedSkills,
-    error: skillsError,
     isPending: isSkillsPending,
     isError: isSkillsError,
     refetch: refetchSkills,
@@ -26,7 +27,6 @@ export const SurveySettingsPage = (): JSX.Element => {
 
   const {
     data: fetchedTeams,
-    error: teamsError,
     isPending: isTeamsPending,
     isError: isTeamsError,
     refetch: refetchTeams,
@@ -37,7 +37,6 @@ export const SurveySettingsPage = (): JSX.Element => {
 
   const {
     data: fetchedSurveyTimeframe,
-    error: surveyTimeframeError,
     isPending: isSurveyTimeframePending,
     isError: isSurveyTimeframeError,
     refetch: refetchTimeframe,
@@ -69,6 +68,12 @@ export const SurveySettingsPage = (): JSX.Element => {
   return (
     <>
       <ManagementPageHeader>Survey Settings</ManagementPageHeader>
+      {/* 1. Set the survey timeframe, skills and teams for this phase. */}
+
+      {/* 2. Set up the teams */}
+      <TeamSettings teams={fetchedTeams} />
+      {/* 3. Set up the skills */}
+      <SkillSettings skills={fetchedSkills} />
     </>
   )
 }
