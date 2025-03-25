@@ -6,7 +6,13 @@ const sidebarItems: SidebarMenuItemProps = {
   title: 'TemplateComponent',
   icon: <Construction />,
   goToPath: '',
-  subitems: [],
+  subitems: [
+    {
+      title: 'Settings',
+      goToPath: '/settings',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+  ],
 }
 
 export default sidebarItems

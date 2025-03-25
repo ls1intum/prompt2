@@ -5,7 +5,7 @@ export const getAllTeams = async (coursePhaseID: string): Promise<Skill[]> => {
   try {
     return (
       await teamAllocationAxiosInstance.get(
-        `/team-allocation/api/course_phase/${coursePhaseID}/teams`,
+        `/team-allocation/api/course_phase/${coursePhaseID}/team`,
       )
     ).data
   } catch (err) {
