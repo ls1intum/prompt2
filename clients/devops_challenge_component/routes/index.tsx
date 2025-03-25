@@ -2,7 +2,6 @@ import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { DevOpsChallengePage } from '../src/devops_challenge/DevOpsChallengePage'
 import { DevOpsChallengeDataShell } from '../src/devops_challenge/DevOpsChallengeDataShell'
-import SettingsPage from '../src/devops_challenge/pages/SettingsPage/SettingsPage'
 import { ResultsOverviewPage } from '../src/devops_challenge/pages/ResultsOverviewPage/ResultsOverviewPage'
 
 const routes: ExtendedRouteObject[] = [
