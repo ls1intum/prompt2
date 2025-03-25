@@ -5,7 +5,7 @@ export const getAllDeveloperProfiles = async (
   coursePhaseID: string,
 ): Promise<DeveloperWithInfo[]> => {
   try {
-    let students = (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/students`)).data
+    const students = (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/students`)).data
       .students
 
     return students.map((student: any) => ({
