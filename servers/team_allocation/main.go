@@ -41,6 +41,7 @@ func runMigrations(databaseURL string) {
 func initKeycloak(queries db.Queries) {
 	baseURL := promptSDK.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
+		log.Warn("Keycloak host does not start with http(s). Adding https:// as prefix.")
 		baseURL = "https://" + baseURL
 	}
 

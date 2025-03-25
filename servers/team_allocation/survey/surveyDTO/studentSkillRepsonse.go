@@ -6,7 +6,7 @@ import (
 )
 
 type StudentSkillResponse struct {
-	SkillID uuid.UUID `json:"skill_id"`
+	SkillID uuid.UUID `json:"skillID"`
 	Rating  int32     `json:"rating"`
 }
 

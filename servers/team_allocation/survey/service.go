@@ -74,6 +74,9 @@ func SubmitSurveyResponses(ctx context.Context, courseParticipationID, coursePha
 		log.Error("could not get survey timeframe: ", err)
 		return errors.New("could not get survey timeframe")
 	}
+	if time.Now().Before(timeframe.SurveyStart.Time) {
+		return errors.New("survey has not started yet")
+	}
 	if time.Now().After(timeframe.SurveyDeadline.Time) {
 		return errors.New("survey deadline has passed")
 	}
@@ -151,4 +154,13 @@ func SetSurveyTimeframe(ctx context.Context, coursePhaseID uuid.UUID, surveyStar
 		return errors.New("failed to set survey timeframe")
 	}
 	return nil
+}
+
+func GetSurveyTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (surveyDTO.SurveyTimeframe, error) {
+	timeframe, err := SurveyServiceSingleton.queries.GetSurveyTimeframe(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get survey timeframe: ", err)
+		return surveyDTO.SurveyTimeframe{}, errors.New("could not get survey timeframe")
+	}
+	return surveyDTO.GetSurveyTimeframeDTOFromDBModel(timeframe), nil
 }

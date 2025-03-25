@@ -19,6 +19,7 @@ func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowed
 	surveyRouter.POST("/answers", authMiddleware(promptSDK.CourseStudent), submitSurveyResponses)
 
 	surveyRouter.PUT("/timeframe", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), setSurveyTimeframe)
+	surveyRouter.GET("/timeframe", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSurveyTimeframe)
 
 }
 
@@ -98,7 +99,7 @@ func setSurveyTimeframe(c *gin.Context) {
 		return
 	}
 
-	var req surveyDTO.SetSurveyTimeframeRequest
+	var req surveyDTO.SurveyTimeframe
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -110,4 +111,20 @@ func setSurveyTimeframe(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func getSurveyTimeframe(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Query("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	timeframe, err := GetSurveyTimeframe(c, coursePhaseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, timeframe)
 }
