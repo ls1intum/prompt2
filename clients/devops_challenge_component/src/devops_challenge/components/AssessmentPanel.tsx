@@ -4,9 +4,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, CircleAlert, CheckCircle2 } from 'lucide-react'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const AssessmentPanel = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
+  const [confirmedOwnWork, setConfirmedOwnWork] = useState(false)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -44,10 +46,28 @@ export const AssessmentPanel = (): JSX.Element => {
             <span className='text-red-600'>Not Passed</span>
           )}
         </div>
+
+        <div className='flex items-start space-x-2 my-4'>
+          <Checkbox
+            id='confirm-own-work'
+            checked={confirmedOwnWork}
+            onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
+          />
+          <label
+            htmlFor='confirm-own-work'
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+          >
+            I confirm that I have completed this challenge independently and without unauthorized assistance.
+          </label>
+        </div>
+
         <Button
           onClick={handleTriggerAssessment}
           disabled={
-            assessmentMutation.isPending || remainingAttempts <= 0 || developerQuery.data?.hasPassed
+            assessmentMutation.isPending ||
+            remainingAttempts <= 0 ||
+            developerQuery.data?.hasPassed ||
+            !confirmedOwnWork
           }
           className='w-full'
         >
