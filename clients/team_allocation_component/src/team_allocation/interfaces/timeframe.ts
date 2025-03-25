@@ -1,5 +1,5 @@
 export type SurveyTimeframe = {
-  timeframSet: boolean
+  timeframeSet: boolean
   surveyStart: Date
   surveyDeadline: Date
 }
