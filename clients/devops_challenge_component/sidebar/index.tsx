@@ -6,6 +6,7 @@ const sidebarItems: SidebarMenuItemProps = {
   title: 'DevOps Challenge',
   icon: <GitBranch />,
   goToPath: '',
+  requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_STUDENT],
   subitems: [
     {
       title: 'Results Overview',
