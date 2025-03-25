@@ -1,6 +1,5 @@
-import OverviewPage from 'template_component/src/OverviewPage'
+import OverviewPage from '../src/OverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
-import { Role } from '@tumaet/prompt-shared-state'
 
 const routes: ExtendedRouteObject[] = [
   {
