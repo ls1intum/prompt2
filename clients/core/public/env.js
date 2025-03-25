@@ -2,7 +2,7 @@
 window.env = {
     CORE_HOST: 'http://localhost:8080',
     INTRO_COURSE_HOST: 'http://localhost:8082',
-    DEV_OPS_CHALLENGE_HOST: 'http://localhost:9000',
+    DEVOPS_CHALLENGE_HOST: 'http://localhost:9000',
     KEYCLOAK_HOST: 'http://localhost:8081',
     KEYCLOAK_REALM_NAME: 'prompt',
     CHAIR_NAME_LONG: 'TUM Research Group for Applied Education Technologies',
