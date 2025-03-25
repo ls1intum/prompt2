@@ -35,10 +35,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.passed.passed}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              passed: { ...filters.passed, passed: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              passed: { ...prevFilters.passed, passed: checked },
+            }))
           }
         >
           {getStatusBadge(PassStatus.PASSED)}
@@ -46,10 +46,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.passed.notAssessed}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              passed: { ...filters.passed, notAssessed: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              passed: { ...prevFilters.passed, notAssessed: checked },
+            }))
           }
         >
           {getStatusBadge(PassStatus.NOT_ASSESSED)}
@@ -57,10 +57,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.passed.failed}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              passed: { ...filters.passed, failed: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              passed: { ...prevFilters.passed, failed: checked },
+            }))
           }
         >
           {getStatusBadge(PassStatus.FAILED)}
@@ -70,10 +70,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.challengePassed.passed}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              challengePassed: { ...filters.challengePassed, passed: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              challengePassed: { ...prevFilters.challengePassed, passed: checked },
+            }))
           }
         >
           {getChallengeStatusBadgeFromString('passed')}
@@ -81,10 +81,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.challengePassed.notPassed}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              challengePassed: { ...filters.challengePassed, notPassed: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              challengePassed: { ...prevFilters.challengePassed, notPassed: checked },
+            }))
           }
         >
           {getChallengeStatusBadgeFromString('notCompleted')}
@@ -92,10 +92,10 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
         <DropdownMenuCheckboxItem
           checked={filters.challengePassed.unknown}
           onCheckedChange={(checked) =>
-            setFilters({
-              ...filters,
-              challengePassed: { ...filters.challengePassed, unknown: checked },
-            })
+            setFilters((prevFilters) => ({
+              ...prevFilters,
+              challengePassed: { ...prevFilters.challengePassed, unknown: checked },
+            }))
           }
         >
           {getChallengeStatusBadgeFromString('')}

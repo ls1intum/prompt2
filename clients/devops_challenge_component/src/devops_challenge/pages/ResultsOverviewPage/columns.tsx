@@ -34,8 +34,12 @@ export const columns = [
     cell: ({ row }) =>
       `${row.original.participation?.student?.firstName || ''} ${row.original.participation?.student?.lastName || ''}`,
     sortingFn: (rowA, rowB) => {
-      const valueA = `${rowA.original.participation?.student?.lastName?.toLowerCase() || ''} ${rowA.original.participation?.student?.firstName?.toLowerCase() || ''}`
-      const valueB = `${rowB.original.participation?.student?.lastName?.toLowerCase() || ''} ${rowB.original.participation?.student?.firstName?.toLowerCase() || ''}`
+      const valueA = `${
+        rowA.original.participation?.student?.lastName?.toLowerCase() || ''
+      } ${rowA.original.participation?.student?.firstName?.toLowerCase() || ''}`
+      const valueB = `${
+        rowB.original.participation?.student?.lastName?.toLowerCase() || ''
+      } ${rowB.original.participation?.student?.firstName?.toLowerCase() || ''}`
       return valueA.localeCompare(valueB)
     },
   },

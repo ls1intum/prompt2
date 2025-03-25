@@ -4,7 +4,6 @@ import { devOpsChallengeAxiosInstance } from '../devOpsChallengeServerConfig'
 interface StudentResponse {
   CourseParticipationId: string
   GithubUsername: string
-  Repository: string
   Attempts: number
   Passed: boolean
 }
@@ -18,8 +17,6 @@ export const getAllDeveloperProfiles = async (
 
     return students.map((student: StudentResponse) => ({
       courseParticipationID: student.CourseParticipationId,
-      githubUsername: student.GithubUsername,
-      repositoryURL: student.Repository,
       attempts: student.Attempts,
       hasPassed: student.Passed,
     }))

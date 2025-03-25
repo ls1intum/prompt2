@@ -30,11 +30,11 @@ interface GroupActionsMenuProps {
 export const GroupActionsMenu = ({ selectedRows, onClose }: GroupActionsMenuProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false)
   const [dialogState, setDialogState] = useState<{
-    type: 'delete' | 'setPassed' | 'setFailed' | null
+    type: 'setPassed' | 'setFailed' | null
     isOpen: boolean
   }>({ type: null, isOpen: false })
 
-  const openDialog = (type: 'delete' | 'setPassed' | 'setFailed') => {
+  const openDialog = (type: 'setPassed' | 'setFailed') => {
     setIsOpen(false)
     setDialogState({ type, isOpen: true })
   }
