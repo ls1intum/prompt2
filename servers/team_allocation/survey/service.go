@@ -52,13 +52,19 @@ func GetSurveyForm(ctx context.Context, coursePhaseID uuid.UUID) (surveyDTO.Surv
 }
 
 // GetStudentSurveyResponses returns any submitted survey answers for the student.
-func GetStudentSurveyResponses(ctx context.Context, courseParticipationID uuid.UUID) (surveyDTO.StudentSurveyResponse, error) {
-	teamResponses, err := SurveyServiceSingleton.queries.GetStudentTeamPreferences(ctx, courseParticipationID)
+func GetStudentSurveyResponses(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (surveyDTO.StudentSurveyResponse, error) {
+	teamResponses, err := SurveyServiceSingleton.queries.GetStudentTeamPreferences(ctx, db.GetStudentTeamPreferencesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error("could not get team preferences: ", err)
 		return surveyDTO.StudentSurveyResponse{}, errors.New("could not get team preferences")
 	}
-	skillResponses, err := SurveyServiceSingleton.queries.GetStudentSkillResponses(ctx, courseParticipationID)
+	skillResponses, err := SurveyServiceSingleton.queries.GetStudentSkillResponses(ctx, db.GetStudentSkillResponsesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error("could not get skill responses: ", err)
 		return surveyDTO.StudentSurveyResponse{}, errors.New("could not get skill responses")
@@ -91,11 +97,17 @@ func SubmitSurveyResponses(ctx context.Context, courseParticipationID, coursePha
 	qtx := SurveyServiceSingleton.queries.WithTx(tx)
 
 	// Delete any existing responses for this student.
-	if err := qtx.DeleteStudentTeamPreferences(ctx, courseParticipationID); err != nil {
+	if err := qtx.DeleteStudentTeamPreferences(ctx, db.DeleteStudentTeamPreferencesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}); err != nil {
 		log.Error("failed to delete existing team preferences: ", err)
 		return errors.New("failed to delete existing team preferences")
 	}
-	if err := qtx.DeleteStudentSkillResponses(ctx, courseParticipationID); err != nil {
+	if err := qtx.DeleteStudentSkillResponses(ctx, db.DeleteStudentSkillResponsesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}); err != nil {
 		log.Error("failed to delete existing skill responses: ", err)
 		return errors.New("failed to delete existing skill responses")
 	}

@@ -5,7 +5,7 @@ export const getSurveyOwnResponse = async (coursePhaseID: string): Promise<Surve
   try {
     return (
       await teamAllocationAxiosInstance.get(
-        `/team-allocation/api/course_phase/${coursePhaseID}/survey/answer`,
+        `/team-allocation/api/course_phase/${coursePhaseID}/survey/answers`,
       )
     ).data
   } catch (err) {

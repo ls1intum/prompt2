@@ -48,14 +48,21 @@ func getSurveyForm(c *gin.Context) {
 // getStudentSurveyResponses returns the student's submitted survey answers.
 // Expects courseParticipationID to be provided as a query parameter.
 func getStudentSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
+		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	responses, err := GetStudentSurveyResponses(c, courseParticipationID)
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	responses, err := GetStudentSurveyResponses(c, courseParticipationID.(uuid.UUID), coursePhaseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

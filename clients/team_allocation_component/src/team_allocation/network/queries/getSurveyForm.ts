@@ -5,7 +5,7 @@ export const getSurveyForm = async (coursePhaseID: string): Promise<SurveyForm |
   try {
     return (
       await teamAllocationAxiosInstance.get(
-        `/team-allocation/api/course_phase/${coursePhaseID}/survey/from`,
+        `/team-allocation/api/course_phase/${coursePhaseID}/survey/form`,
       )
     ).data
   } catch (err: any) {

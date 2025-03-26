@@ -1,12 +1,12 @@
-import OverviewPage from 'template_component/src/OverviewPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SurveySettingsPage } from '../src/team_allocation/pages/SurveySettings/SurveySettingsPage'
+import { StudentSurveyPage } from '../src/team_allocation/pages/StudentSurvey/StudentSurveyPage'
 
 const routes: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <OverviewPage />,
+    element: <StudentSurveyPage />,
     requiredPermissions: [],
   },
   {
