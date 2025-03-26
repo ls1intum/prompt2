@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import {
   Clock,
   PartyPopper,
   CircleX,
+  Loader2,
 } from 'lucide-react'
 
 export const Assessment = (): JSX.Element => {
@@ -35,7 +36,11 @@ export const Assessment = (): JSX.Element => {
 
   const { phaseId } = useParams<{ phaseId: string }>()
 
-  const { data: fetchedParticipation } = useQuery<CoursePhaseParticipationWithStudent>({
+  const {
+    data: fetchedParticipation,
+    isError: participationError,
+    isLoading: isParticipationPending,
+  } = useQuery<CoursePhaseParticipationWithStudent>({
     queryKey: ['course_phase_participation', phaseId],
     queryFn: () => getOwnCoursePhaseParticipation(phaseId ?? ''),
   })
@@ -69,6 +74,20 @@ export const Assessment = (): JSX.Element => {
       </CardHeader>
       <CardContent>
         <div className='flex items-start space-x-2 mt-4'>
+          {isParticipationPending && (
+            <div className='flex justify-center items-center h-64'>
+            <Loader2 className='h-12 w-12 animate-spin text-primary' />
+          </div>
+          )}
+          {participationError && (
+            <Alert variant='destructive'>
+              <AlertCircle className='h-4 w-4' />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                An error occurred while fetching the assessment status. Please try again later.
+              </AlertDescription>
+            </Alert>
+          )}
           {passed &&
             ((passingPosition !== undefined && passingPosition <= 150) ||
               fetchedParticipation?.passStatus === 'passed') && (
