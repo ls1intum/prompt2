@@ -1,4 +1,6 @@
+import { format } from 'date-fns'
 import { SortableHeader } from '@/components/table/SortableHeader'
+import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 import { getChallengeStatusBadge } from './utils/getChallengeStatusBadge'
@@ -84,6 +86,33 @@ export const columns = [
             ? ChallengeStatus.PASSED
             : ChallengeStatus.NOT_COMPLETED,
       )
+    },
+  },
+  {
+    accessorKey: 'passingPosition',
+    header: ({ column }) => <SortableHeader column={column} title='Position' />,
+    cell: ({ row }) => row.original.profile?.passingPosition ?? '-',
+    sortingFn: (rowA, rowB) => {
+      const valueA = rowA.original.profile?.passingPosition ?? -1
+      const valueB = rowB.original.profile?.passingPosition ?? -1
+      return valueA - valueB
+    },
+  },
+  {
+    accessorKey: 'passedAt',
+    header: ({ column }) => <SortableHeader column={column} title='Passed At' />,
+    cell: ({ row }) =>
+      row.original.profile?.passedAt ? (
+        <Badge variant='outline'>
+          {format(row.original.profile?.passedAt, 'dd.MM.yyyy HH:mm')}
+        </Badge>
+      ) : (
+        '-'
+      ),
+    sortingFn: (rowA, rowB) => {
+      const valueA = rowA.original.profile?.passedAt ?? ''
+      const valueB = rowB.original.profile?.passedAt ?? ''
+      return valueA.localeCompare(valueB)
     },
   },
   {

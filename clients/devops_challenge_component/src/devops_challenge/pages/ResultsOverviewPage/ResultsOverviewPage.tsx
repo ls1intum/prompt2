@@ -14,7 +14,7 @@ import {
 } from '@tanstack/react-table'
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/prompt-shared-state'
 import { ErrorPage } from '@/components/ErrorPage'
 import {
   Table,
@@ -31,6 +31,7 @@ import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { columns } from './columns'
+import { getStatusBadge } from '@/utils/getStatusBadge'
 
 export const ResultsOverviewPage = (): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -101,6 +102,12 @@ export const ResultsOverviewPage = (): JSX.Element => {
   }, [columnFilters, table])
   const filteredRowsCount = table.getFilteredRowModel().rows.length
   const totalRowsCount = participantsWithProfiles?.length ?? 0
+  const studentsPassedChallengeCount = participantsWithProfiles?.filter(
+    (p) => p.profile?.hasPassed,
+  ).length
+  const studentsPassedCount = participantsWithProfiles?.filter(
+    (p) => p.participation.passStatus === PassStatus.PASSED,
+  ).length
 
   if (isError) return <ErrorPage onRetry={handleRefresh} />
   if (isPending)
@@ -115,7 +122,8 @@ export const ResultsOverviewPage = (): JSX.Element => {
       <ManagementPageHeader>Developer Profile Management</ManagementPageHeader>
       <div className='flex justify-between items-end'>
         <div className='text-sm text-muted-foreground'>
-          Showing {filteredRowsCount} of {totalRowsCount} applications
+          Showing {filteredRowsCount} of {totalRowsCount} applications |{' '}
+          {studentsPassedChallengeCount} passed challenge | {studentsPassedCount} accepted
         </div>
         <div className='flex space-x-2'>
           <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
