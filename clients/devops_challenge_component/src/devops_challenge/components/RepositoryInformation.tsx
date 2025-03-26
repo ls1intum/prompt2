@@ -98,7 +98,7 @@ export const RepositoryInformation = (): JSX.Element => {
                 {developerQuery.data?.hasPassed
                   ? 'Passed'
                   : remainingAttempts === maxAttempts
-                    ? 'Not Assessed'
+                    ? 'Not Started'
                     : 'Failed'}
               </Badge>
             </div>
