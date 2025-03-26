@@ -16,6 +16,7 @@ import {
   Trophy,
   Clock,
   PartyPopper,
+  CircleX
 } from 'lucide-react'
 
 export const Assessment = (): JSX.Element => {
@@ -93,6 +94,16 @@ export const Assessment = (): JSX.Element => {
                 <AlertDescription>You are on the waitlist for the DevOps course!</AlertDescription>
               </Alert>
             )}
+          {!passed && remainingAttempts === 0 && (
+            <Alert variant='destructive'>
+              <CircleX className='h-4 w-4' />
+              <AlertTitle>Challenge Failed</AlertTitle>
+              <AlertDescription>
+                You have not successfully completed the technical challenge, and with no remaining
+                attempts, you are not eligible for admission to the course.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
         <div className='mt-4'>
           <div className='flex items-center mb-2'>
