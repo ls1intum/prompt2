@@ -16,12 +16,11 @@ import {
   Trophy,
   Clock,
   PartyPopper,
-  CircleX
+  CircleX,
 } from 'lucide-react'
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
-  const [coursePhasePassed, setCoursePhasePassed] = useState<boolean | null>(null)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -40,12 +39,6 @@ export const Assessment = (): JSX.Element => {
     queryKey: ['course_phase_participation', phaseId],
     queryFn: () => getOwnCoursePhaseParticipation(phaseId ?? ''),
   })
-
-  useEffect(() => {
-    if (fetchedParticipation) {
-      setCoursePhasePassed(fetchedParticipation.passStatus === 'passed')
-    }
-  }, [fetchedParticipation])
 
   const handleTriggerAssessment = () => {
     assessmentMutation.mutate()
@@ -77,7 +70,8 @@ export const Assessment = (): JSX.Element => {
       <CardContent>
         <div className='flex items-start space-x-2 mt-4'>
           {passed &&
-            ((passingPosition !== undefined && passingPosition <= 150) || coursePhasePassed) && (
+            ((passingPosition !== undefined && passingPosition <= 150) ||
+              fetchedParticipation?.passStatus === 'passed') && (
               <Alert variant='default'>
                 <PartyPopper className='h-4 w-4' />
                 <AlertTitle>Congratulations</AlertTitle>
@@ -87,7 +81,7 @@ export const Assessment = (): JSX.Element => {
           {passed &&
             passingPosition !== undefined &&
             passingPosition > 150 &&
-            !coursePhasePassed && (
+            fetchedParticipation?.passStatus !== 'passed' && (
               <Alert variant='default'>
                 <Clock className='h-4 w-4' />
                 <AlertTitle>Waitlisted</AlertTitle>
@@ -100,7 +94,7 @@ export const Assessment = (): JSX.Element => {
               <AlertTitle>Challenge Failed</AlertTitle>
               <AlertDescription>
                 You have not successfully completed the technical challenge, and with no remaining
-                attempts, you are not eligible for admission to the course.
+                attempts, you are not eligible for admission to the DevOps course.
               </AlertDescription>
             </Alert>
           )}
