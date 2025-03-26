@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
@@ -22,11 +22,21 @@ import {
   CircleX,
   Loader2,
   SearchCode,
+  AlertTriangle,
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
   const [confirmedOwnWork, setConfirmedOwnWork] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -53,6 +63,11 @@ export const Assessment = (): JSX.Element => {
   const handleTriggerAssessment = () => {
     assessmentMutation.mutate()
     developerQuery.refetch()
+    setShowConfirmDialog(false)
+  }
+
+  const openConfirmDialog = () => {
+    setShowConfirmDialog(true)
   }
 
   return (
@@ -187,7 +202,7 @@ export const Assessment = (): JSX.Element => {
 
         <div className='flex items-start space-x-2 mt-4'>
           <Button
-            onClick={handleTriggerAssessment}
+            onClick={openConfirmDialog}
             disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork}
             className='w-full'
           >
@@ -199,6 +214,38 @@ export const Assessment = (): JSX.Element => {
             <span>{assessmentMutation.isPending ? 'Testing...' : 'Start Testing'}</span>
           </Button>
         </div>
+
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className='flex items-center'>
+                <AlertTriangle className='h-5 w-5 text-amber-500 mr-2' />
+                Confirm Assessment Attempt
+              </DialogTitle>
+              <DialogDescription className='pt-2'>
+                Starting this test will decrease your remaining attempts by 1. You currently have{' '}
+                <strong>{remainingAttempts}</strong> attempt{remainingAttempts !== 1 ? 's' : ''}{' '}
+                remaining.
+                <Alert variant='default' className='mt-4'>
+                  <AlertTriangle className='h-4 w-4' />
+                  <AlertTitle>Important</AlertTitle>
+                  <AlertDescription>
+                    Once you start the test, the attempt will be counted even if you close the
+                    browser or encounter technical issues.
+                  </AlertDescription>
+                </Alert>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className='flex space-x-2 sm:space-x-0'>
+              <Button variant='outline' onClick={() => setShowConfirmDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleTriggerAssessment} variant='default'>
+                Proceed with Testing
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
