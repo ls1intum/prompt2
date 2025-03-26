@@ -10,6 +10,7 @@
     "intro_course_tutor_component",
     "shared_library",
     "assessment_component",
-    "devops_challenge_component"
+    "devops_challenge_component",
+    "team_allocation_component"
   ]
 }

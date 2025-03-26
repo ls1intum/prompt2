@@ -9,6 +9,7 @@ import { IntroCourseDeveloperRoutes } from './ExternalRoutes/IntroCourseDevelope
 import { IntroCourseTutorRoutes } from './ExternalRoutes/IntroCourseTutorRoutes'
 import { AssessmentRoutes } from './ExternalRoutes/AssessmentRoutes'
 import { DevOpsChallengeRoutes } from './ExternalRoutes/DevOpsChallengeRoutes'
+import { TeamAllocationRoutes } from './ExternalRoutes/TeamAllocationRoutes'
 
 const PhaseRouter: { [key: string]: React.FC } = {
   template_component: TemplateRoutes,
@@ -19,6 +20,7 @@ const PhaseRouter: { [key: string]: React.FC } = {
   IntroCourseTutor: IntroCourseTutorRoutes,
   Assessment: AssessmentRoutes,
   DevOpsChallenge: DevOpsChallengeRoutes,
+  'Team Allocation': TeamAllocationRoutes,
 }
 
 export const PhaseRouterMapping = (): JSX.Element => {

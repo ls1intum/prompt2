@@ -39,6 +39,9 @@ on:
       devops_challenge_image_tag:
         required: true
         type: string
+      team_allocation_image_tag:
+        required: true
+        type: string
 
     secrets:
       VM_SSH_PRIVATE_KEY:
@@ -137,6 +140,7 @@ jobs:
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_HOST=${{ vars.DEVOPS_CHALLENGE_HOST }}" >> .env.prod
+            echo "TEAM_ALLOCATION_HOST=${{ vars.TEAM_ALLOCATION_HOST }}" >> .env.prod
             echo "CHAIR_NAME_SHORT=${{ vars.CHAIR_NAME_SHORT }}" >> .env.prod
             echo "CHAIR_NAME_LONG=${{ vars.CHAIR_NAME_LONG }}" >> .env.prod
 
@@ -170,6 +174,7 @@ jobs:
             echo "INTRO_COURSE_TUTOR_IMAGE_TAG=${{ inputs.intro_course_tutor_image_tag }}" >> .env.prod
             echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_IMAGE_TAG=${{ inputs.devops_challenge_image_tag }}" >> .env.prod
+            echo "TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.team_allocation_image_tag }}" >> .env.prod
 
             echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL_ADDRESS }}" >> .env.prod
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod

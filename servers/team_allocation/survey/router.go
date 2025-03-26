@@ -26,7 +26,7 @@ func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowed
 // getAvailableSurveyData returns teams and skills if the survey has started.
 // Expects coursePhaseID to be provided as a query parameter.
 func getAvailableSurveyData(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Query("coursePhaseID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -44,7 +44,7 @@ func getAvailableSurveyData(c *gin.Context) {
 // getStudentSurveyResponses returns the student's submitted survey answers.
 // Expects courseParticipationID to be provided as a query parameter.
 func getStudentSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Query("courseParticipationID"))
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
 		log.Error("Error parsing courseParticipationID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -62,13 +62,13 @@ func getStudentSurveyResponses(c *gin.Context) {
 // submitSurveyResponses accepts and stores (or overwrites) the student's survey answers.
 // Expects courseParticipationID and coursePhaseID as query parameters.
 func submitSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Query("courseParticipationID"))
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
 		log.Error("Error parsing courseParticipationID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	coursePhaseID, err := uuid.Parse(c.Query("coursePhaseID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -92,7 +92,7 @@ func submitSurveyResponses(c *gin.Context) {
 // setSurveyTimeframe allows lecturers to set or update the survey timeframe.
 // Expects coursePhaseID as a query parameter and the new timeframe in the JSON body.
 func setSurveyTimeframe(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Query("coursePhaseID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -114,7 +114,7 @@ func setSurveyTimeframe(c *gin.Context) {
 }
 
 func getSurveyTimeframe(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Query("coursePhaseID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
