@@ -2,6 +2,7 @@ import { SortableHeader } from '@/components/table/SortableHeader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 import { getChallengeStatusBadge } from './utils/getChallengeStatusBadge'
+import { ChallengeStatus } from './interfaces/challengeStatus'
 
 export const columns = [
   {
@@ -52,11 +53,21 @@ export const columns = [
     accessorKey: 'participation.passStatus',
     header: ({ column }) => <SortableHeader column={column} title='Pass Status' />,
     cell: ({ row }) => getStatusBadge(row.original.participation?.passStatus),
+    filterFn: (row, columnId, filterValue) => {
+      return filterValue.includes(row.original.participation?.passStatus)
+    },
   },
   {
     accessorKey: 'challengeStatus',
     header: ({ column }) => <SortableHeader column={column} title='Challenge Status' />,
-    cell: ({ row }) => getChallengeStatusBadge(row.original.profile),
+    cell: ({ row }) => {
+      if (row.original.profile === undefined) {
+        return getChallengeStatusBadge(ChallengeStatus.NOT_STARTED)
+      } else if (row.original.profile.hasPassed) {
+        return getChallengeStatusBadge(ChallengeStatus.PASSED)
+      }
+      return getChallengeStatusBadge(ChallengeStatus.NOT_COMPLETED)
+    },
     sortingFn: (rowA, rowB) => {
       if (rowA.original.profile === rowB.original.profile) {
         return 0
@@ -64,6 +75,15 @@ export const columns = [
         return 1
       }
       return -1
+    },
+    filterFn: (row, columnId, filterValue) => {
+      return filterValue.includes(
+        row.original.profile?.hasPassed === undefined
+          ? ChallengeStatus.NOT_STARTED
+          : row.original.profile?.hasPassed
+            ? ChallengeStatus.PASSED
+            : ChallengeStatus.NOT_COMPLETED,
+      )
     },
   },
   {

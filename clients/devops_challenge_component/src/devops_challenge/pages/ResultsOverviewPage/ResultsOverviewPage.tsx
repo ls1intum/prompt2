@@ -1,10 +1,12 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
+  ColumnFiltersState,
   useReactTable,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   flexRender,
   SortingState,
@@ -28,16 +30,11 @@ import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperPr
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
-import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
-import { DevProfileFilter } from './interfaces/devProfileFilter'
 import { columns } from './columns'
 
 export const ResultsOverviewPage = (): JSX.Element => {
-  const [filters, setFilters] = useState<DevProfileFilter>({
-    passed: { passed: false, notAssessed: false, failed: false },
-    challengePassed: { passed: false, notPassed: false, unknown: false },
-  })
   const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
@@ -73,18 +70,37 @@ export const ResultsOverviewPage = (): JSX.Element => {
     coursePhaseParticipations?.participations || [],
     developerProfiles || [],
   )
-  const filteredParticipants = useGetFilteredParticipations(participantsWithProfiles, filters)
 
   const table = useReactTable({
-    data: filteredParticipants,
+    data: participantsWithProfiles,
     columns: columns.map((col) => ({ ...col, enableSorting: true })),
-    state: { sorting, rowSelection, columnVisibility },
+    state: { sorting, columnFilters, rowSelection, columnVisibility },
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   })
+
+  // When the filters change, update the row selection so that only visible rows remain selected
+  useEffect(() => {
+    // Get the ids of rows that are visible after filtering
+    const visibleRowIDs = new Set(table.getFilteredRowModel().rows.map((row) => row.id))
+    // Update rowSelection to only keep selections for visible rows
+    setRowSelection((prevSelection) => {
+      const newSelection = { ...prevSelection }
+      Object.keys(newSelection).forEach((id) => {
+        if (!visibleRowIDs.has(id)) {
+          delete newSelection[id]
+        }
+      })
+      return newSelection
+    })
+  }, [columnFilters, table])
+  const filteredRowsCount = table.getFilteredRowModel().rows.length
+  const totalRowsCount = participantsWithProfiles?.length ?? 0
 
   if (isError) return <ErrorPage onRetry={handleRefresh} />
   if (isPending)
@@ -99,10 +115,10 @@ export const ResultsOverviewPage = (): JSX.Element => {
       <ManagementPageHeader>Developer Profile Management</ManagementPageHeader>
       <div className='flex justify-between items-end'>
         <div className='text-sm text-muted-foreground'>
-          Showing {filteredParticipants.length} participants
+          Showing {filteredRowsCount} of {totalRowsCount} applications
         </div>
         <div className='flex space-x-2'>
-          <FilterMenu filters={filters} setFilters={setFilters} />
+          <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
           <GroupActionsMenu
             selectedRows={table.getSelectedRowModel()}
             onClose={() => table.resetRowSelection()}

@@ -7,21 +7,72 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { Filter } from 'lucide-react'
+import { ColumnFiltersState } from '@tanstack/react-table'
 
 import { PassStatus } from '@tumaet/prompt-shared-state'
 
 import { Button } from '@/components/ui/button'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 
-import { DevProfileFilter } from '../interfaces/devProfileFilter'
-import { getChallengeStatusBadgeFromString } from '../utils/getChallengeStatusBadge'
+import { getChallengeStatusBadge } from '../utils/getChallengeStatusBadge'
+import { ChallengeStatus } from '../interfaces/challengeStatus'
 
-interface FilterMenuProps {
-  filters: DevProfileFilter
-  setFilters: React.Dispatch<React.SetStateAction<DevProfileFilter>>
+interface ColumnFiltersProps {
+  columnFilters: ColumnFiltersState
+  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
 }
 
-export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
+export const FilterMenu = ({
+  columnFilters,
+  setColumnFilters,
+}: ColumnFiltersProps): JSX.Element => {
+  const isSelected = <T extends string>(id: string, value: T) => {
+    return columnFilters.some(
+      (filter) => filter.id === id && Array.isArray(filter.value) && filter.value.includes(value),
+    )
+  }
+
+  const handleFilterChange = <T extends string>(id: string, value: T) => {
+    setColumnFilters((prevFilters) => {
+      const existingFilter = prevFilters.find((filter) => filter.id === id)
+
+      if (existingFilter && Array.isArray(existingFilter.value)) {
+        const updatedValue = existingFilter.value.includes(value)
+          ? existingFilter.value.filter((v) => v !== value) // Remove if exists
+          : [...existingFilter.value, value] // Add if not exists
+
+        return updatedValue.length > 0
+          ? prevFilters.map((filter) =>
+              filter.id === id ? { ...filter, value: updatedValue } : filter,
+            )
+          : prevFilters.filter((filter) => filter.id !== id) // Remove filter if no values
+      } else {
+        return [...prevFilters, { id, value: [value] }]
+      }
+    })
+  }
+
+  const renderFilterItems = <T extends string>(
+    id: string,
+    items: Record<string, T>,
+    getDisplay: (value: T) => React.ReactNode,
+  ) => {
+    return Object.values(items).map((value) => {
+      return (
+        <DropdownMenuCheckboxItem
+          key={value}
+          checked={isSelected(id, value)}
+          onClick={(e) => {
+            e.preventDefault()
+            handleFilterChange(id, value)
+          }}
+        >
+          {getDisplay(value)}
+        </DropdownMenuCheckboxItem>
+      )
+    })
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,74 +83,12 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-56'>
         <DropdownMenuLabel>Assessment</DropdownMenuLabel>
-        <DropdownMenuCheckboxItem
-          checked={filters.passed.passed}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              passed: { ...prevFilters.passed, passed: checked },
-            }))
-          }
-        >
-          {getStatusBadge(PassStatus.PASSED)}
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={filters.passed.notAssessed}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              passed: { ...prevFilters.passed, notAssessed: checked },
-            }))
-          }
-        >
-          {getStatusBadge(PassStatus.NOT_ASSESSED)}
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={filters.passed.failed}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              passed: { ...prevFilters.passed, failed: checked },
-            }))
-          }
-        >
-          {getStatusBadge(PassStatus.FAILED)}
-        </DropdownMenuCheckboxItem>
+        {renderFilterItems('passStatus', PassStatus, getStatusBadge)}
+
         <DropdownMenuSeparator />
+
         <DropdownMenuLabel>Challenge Status</DropdownMenuLabel>
-        <DropdownMenuCheckboxItem
-          checked={filters.challengePassed.passed}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              challengePassed: { ...prevFilters.challengePassed, passed: checked },
-            }))
-          }
-        >
-          {getChallengeStatusBadgeFromString('passed')}
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={filters.challengePassed.notPassed}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              challengePassed: { ...prevFilters.challengePassed, notPassed: checked },
-            }))
-          }
-        >
-          {getChallengeStatusBadgeFromString('notCompleted')}
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={filters.challengePassed.unknown}
-          onCheckedChange={(checked) =>
-            setFilters((prevFilters) => ({
-              ...prevFilters,
-              challengePassed: { ...prevFilters.challengePassed, unknown: checked },
-            }))
-          }
-        >
-          {getChallengeStatusBadgeFromString('')}
-        </DropdownMenuCheckboxItem>
+        {renderFilterItems('challengeStatus', ChallengeStatus, getChallengeStatusBadge)}
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
+import { ChallengeStatus } from '../interfaces/challengeStatus'
 
 export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   switch (status) {
@@ -12,10 +12,10 @@ export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   }
 }
 
-export function getChallengeStatusBadge(profile: DeveloperWithInfo | undefined): JSX.Element {
-  if (profile?.hasPassed) {
+export function getChallengeStatusBadge(challengeStatus: ChallengeStatus | undefined): JSX.Element {
+  if (challengeStatus == ChallengeStatus.PASSED) {
     return getChallengeStatusBadgeFromString('passed')
-  } else if (profile?.hasPassed === false) {
+  } else if (challengeStatus == ChallengeStatus.NOT_COMPLETED) {
     return getChallengeStatusBadgeFromString('notCompleted')
   } else {
     return getChallengeStatusBadgeFromString('')
