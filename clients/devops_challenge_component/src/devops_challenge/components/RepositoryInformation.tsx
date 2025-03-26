@@ -9,6 +9,7 @@ export const RepositoryInformation = (): JSX.Element => {
     (developerQuery.data?.maxAttempts ?? 0) - (developerQuery.data?.attempts ?? 0),
     0,
   )
+  const maxAttempts = developerQuery.data?.maxAttempts ?? 0
 
   return (
     <Card>
@@ -23,8 +24,8 @@ export const RepositoryInformation = (): JSX.Element => {
                 remainingAttempts >= 3
                   ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                   : remainingAttempts === 2
-                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
               }`}
             >
               Remaining Attempts: {remainingAttempts}
@@ -51,13 +52,19 @@ export const RepositoryInformation = (): JSX.Element => {
             <div className='flex items-center space-x-2'>
               <Badge
                 variant='outline'
-                className={
+                className={`text-sm ${
                   developerQuery.data?.hasPassed
                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                }
+                    : remainingAttempts === maxAttempts
+                      ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                }`}
               >
-                {developerQuery.data?.hasPassed ? 'Passed' : 'Failed'}
+                {developerQuery.data?.hasPassed
+                  ? 'Passed'
+                  : remainingAttempts === maxAttempts
+                    ? 'Not Assessed'
+                    : 'Failed'}
               </Badge>
             </div>
           </div>
