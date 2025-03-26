@@ -6,14 +6,9 @@ import { Button } from '@/components/ui/button'
 
 export const RepositoryInformation = (): JSX.Element => {
   const developerQuery = useGetDeveloperProfile()
-  const [copied, setCopied] = useState(false)
-
-  const remainingAttempts = Math.max(
-    (developerQuery.data?.maxAttempts ?? 0) - (developerQuery.data?.attempts ?? 0),
-    0,
-  )
-  const maxAttempts = developerQuery.data?.maxAttempts ?? 0
   const repoUrl = developerQuery.data?.repositoryUrl || ''
+
+  const [copied, setCopied] = useState(false)
 
   const copyToClipboard = async () => {
     try {

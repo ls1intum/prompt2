@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { GithubUsernameInput } from './components/GithubUsernameInput'
 import { AssessmentPanel } from './components/AssessmentPanel'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
