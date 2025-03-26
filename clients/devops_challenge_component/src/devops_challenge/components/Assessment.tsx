@@ -1,5 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
@@ -16,6 +20,7 @@ import {
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
+  const [coursePhasePassed, setCoursePhasePassed] = useState<boolean | null>(null)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -24,12 +29,22 @@ export const Assessment = (): JSX.Element => {
     (developerQuery.data?.maxAttempts ?? 0) - (developerQuery.data?.attempts ?? 0),
     0,
   )
-
   const maxAttempts = developerQuery.data?.maxAttempts ?? 0
-
   const passingPosition = developerQuery.data?.position ?? undefined
-
   const passed = developerQuery.data?.hasPassed
+
+  const { phaseId } = useParams<{ phaseId: string }>()
+
+  const { data: fetchedParticipation } = useQuery<CoursePhaseParticipationWithStudent>({
+    queryKey: ['course_phase_participation', phaseId],
+    queryFn: () => getOwnCoursePhaseParticipation(phaseId ?? ''),
+  })
+
+  useEffect(() => {
+    if (fetchedParticipation) {
+      setCoursePhasePassed(fetchedParticipation.passStatus === 'passed')
+    }
+  }, [fetchedParticipation])
 
   const handleTriggerAssessment = () => {
     assessmentMutation.mutate()
@@ -60,20 +75,24 @@ export const Assessment = (): JSX.Element => {
       </CardHeader>
       <CardContent>
         <div className='flex items-start space-x-2 mt-4'>
-          {passed && passingPosition !== undefined && passingPosition <= 150 && (
-            <Alert variant='default'>
-              <PartyPopper className='h-4 w-4' />
-              <AlertTitle>Congratulations</AlertTitle>
-              <AlertDescription>You are admitted to the DevOps course!</AlertDescription>
-            </Alert>
-          )}
-          {passed && passingPosition !== undefined && passingPosition > 150 && (
-            <Alert variant='default'>
-              <Clock className='h-4 w-4' />
-              <AlertTitle>Waitlisted</AlertTitle>
-              <AlertDescription>You are on the waitlist for the DevOps course!</AlertDescription>
-            </Alert>
-          )}
+          {passed &&
+            ((passingPosition !== undefined && passingPosition <= 150) || coursePhasePassed) && (
+              <Alert variant='default'>
+                <PartyPopper className='h-4 w-4' />
+                <AlertTitle>Congratulations</AlertTitle>
+                <AlertDescription>You are admitted to the DevOps course!</AlertDescription>
+              </Alert>
+            )}
+          {passed &&
+            passingPosition !== undefined &&
+            passingPosition > 150 &&
+            !coursePhasePassed && (
+              <Alert variant='default'>
+                <Clock className='h-4 w-4' />
+                <AlertTitle>Waitlisted</AlertTitle>
+                <AlertDescription>You are on the waitlist for the DevOps course!</AlertDescription>
+              </Alert>
+            )}
         </div>
         <div className='mt-4'>
           <div className='flex items-center mb-2'>
