@@ -15,8 +15,13 @@ export const GithubUsernameInput = (): JSX.Element => {
   const [hasGithubProfile, setHasGithubProfile] = useState(false)
 
   const validateGithubUsername = (username: string): boolean => {
-    if (!/^[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(username.trim()) && username.length > 0) {
-      setValidationError('GitHub username can only contain letters, numbers, hyphens, and dots.')
+    if (
+      !/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])|\.(?=[a-zA-Z0-9]))*$/.test(username.trim()) &&
+      username.length > 0
+    ) {
+      setValidationError(
+        'GitHub username can only contain letters, numbers, hyphens, and dots. Hypens and dots cannot be at the beginning or end of the username.',
+      )
       return false
     }
 
