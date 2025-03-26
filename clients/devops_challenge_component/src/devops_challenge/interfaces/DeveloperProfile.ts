@@ -3,4 +3,6 @@ export type DeveloperProfile = {
   attempts?: number
   maxAttempts?: number
   hasPassed?: boolean
+  passedAt?: Date
+  position?: number
 }
