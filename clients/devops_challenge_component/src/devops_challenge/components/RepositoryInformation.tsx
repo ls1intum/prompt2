@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Github, ExternalLink, Clipboard, Check } from 'lucide-react'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 export const RepositoryInformation = (): JSX.Element => {
   const developerQuery = useGetDeveloperProfile()
