@@ -8,6 +8,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { cn } from '@/lib/utils'
 import {
   RefreshCw,
   CheckCircle,
@@ -18,10 +21,12 @@ import {
   PartyPopper,
   CircleX,
   Loader2,
+  SearchCode,
 } from 'lucide-react'
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
+  const [confirmedOwnWork, setConfirmedOwnWork] = useState(false)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -57,18 +62,18 @@ export const Assessment = (): JSX.Element => {
           <Trophy className='mr-2 h-5 w-5' />
           Assessment
           <div className='flex items-center space-x-2 ml-auto'>
-            <Button
-              onClick={handleTriggerAssessment}
-              disabled={assessmentMutation.isPending || remainingAttempts === 0}
-              className='flex items-center space-x-2'
+            <Badge
+              variant='outline'
+              className={cn('text-sm', {
+                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300':
+                  remainingAttempts >= 3,
+                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300':
+                  remainingAttempts === 2,
+                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': remainingAttempts < 2,
+              })}
             >
-              {assessmentMutation.isPending ? (
-                <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
-              ) : (
-                <Trophy className='mr-2 h-4 w-4' />
-              )}
-              <span>{assessmentMutation.isPending ? 'Assessing...' : 'Run Assessment'}</span>
-            </Button>
+              Remaining Attempts: {remainingAttempts}
+            </Badge>
           </div>
         </CardTitle>
       </CardHeader>
@@ -76,8 +81,8 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           {isParticipationPending && (
             <div className='flex justify-center items-center h-64'>
-            <Loader2 className='h-12 w-12 animate-spin text-primary' />
-          </div>
+              <Loader2 className='h-12 w-12 animate-spin text-primary' />
+            </div>
           )}
           {participationError && (
             <Alert variant='destructive'>
@@ -158,11 +163,41 @@ export const Assessment = (): JSX.Element => {
             {remainingAttempts === maxAttempts && (
               <Alert variant='default'>
                 <Hourglass className='h-4 w-4' />
-                <AlertTitle>Assessment Pending</AlertTitle>
+                <AlertTitle>Test Not Started</AlertTitle>
                 <AlertDescription>You have not yet attempted the challenge.</AlertDescription>
               </Alert>
             )}
           </div>
+        </div>
+
+        <div className='flex items-start space-x-2 mt-4'>
+          <Checkbox
+            id='own-work-check'
+            checked={confirmedOwnWork}
+            onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
+          />
+          <label
+            htmlFor='own-work-check'
+            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+          >
+            I confirm that I have completed this challenge independently and without unauthorized
+            assistance.
+          </label>
+        </div>
+
+        <div className='flex items-start space-x-2 mt-4'>
+          <Button
+            onClick={handleTriggerAssessment}
+            disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork}
+            className='w-full'
+          >
+            {assessmentMutation.isPending ? (
+              <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
+            ) : (
+              <SearchCode className='mr-2 h-4 w-4' />
+            )}
+            <span>{assessmentMutation.isPending ? 'Testing...' : 'Start Testing'}</span>
+          </Button>
         </div>
       </CardContent>
     </Card>
