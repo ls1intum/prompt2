@@ -67,7 +67,7 @@ export const Assessment = (): JSX.Element => {
               <AlertDescription>You are admitted to the DevOps course!</AlertDescription>
             </Alert>
           )}
-          {passed && passingPosition !== undefined &&passingPosition > 150 && (
+          {passed && passingPosition !== undefined && passingPosition > 150 && (
             <Alert variant='default'>
               <Clock className='h-4 w-4' />
               <AlertTitle>Waitlisted</AlertTitle>
@@ -99,18 +99,16 @@ export const Assessment = (): JSX.Element => {
               <Alert variant={!passed ? 'destructive' : 'default'}>
                 <div className='flex items-center'>
                   {passed ? (
-                    <CheckCircle className='h-4 w-4' />
+                    <CheckCircle className='h-4 w-4 text-green-500' />
                   ) : (
                     <AlertCircle className='h-4 w-4' />
                   )}
-                  <AlertTitle className='ml-2'>
+                  <AlertTitle className={`ml-2 ${passed ? 'text-green-500' : ''}`}>
                     {!passed ? 'Error' : 'Success'}
                   </AlertTitle>
                 </div>
-                <AlertDescription className='mt-1'>
-                  {!passed
-                    ? (error ?? 'You failed the challenge.')
-                    : 'You passed the challenge!'}
+                <AlertDescription className={`mt-1 ${passed ? 'text-green-500' : ''}`}>
+                  {!passed ? (error ?? 'You failed the challenge.') : 'You passed the challenge!'}
                 </AlertDescription>
               </Alert>
             )}
