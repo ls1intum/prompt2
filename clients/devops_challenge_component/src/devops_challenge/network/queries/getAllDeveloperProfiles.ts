@@ -15,6 +15,7 @@ export const getAllDeveloperProfiles = async (
     const students = (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/students`)).data
       .students
 
+    // custom mapping as the response uses Uppercase keys, clashing with PROMPTs naming schema
     return students.map((student: StudentResponse) => ({
       courseParticipationID: student.CourseParticipationId,
       attempts: student.Attempts,

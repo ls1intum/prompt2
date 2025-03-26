@@ -50,7 +50,7 @@ export const columns = [
     cell: ({ row }) => row.original.participation?.student?.email || '',
   },
   {
-    accessorKey: 'participation.passStatus',
+    accessorKey: 'passStatus',
     header: ({ column }) => <SortableHeader column={column} title='Pass Status' />,
     cell: ({ row }) => getStatusBadge(row.original.participation?.passStatus),
     filterFn: (row, columnId, filterValue) => {
