@@ -4,11 +4,11 @@ import { ChallengeStatus } from '../interfaces/challengeStatus'
 export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   switch (status) {
     case 'passed':
-      return <Badge className='border border-green-500 text-green-500'>Passed</Badge>
+      return <Badge className='bg-green-100 border border-green-500 text-green-700'>Passed</Badge>
     case 'notCompleted':
-      return <Badge className='border border-red-500 text-red-500'>Not Completed</Badge>
+      return <Badge className='bg-red-100 border border-red-500 text-red-700'>Not Completed</Badge>
     default:
-      return <Badge className='border border-gray-500 text-gray-500'>Not Started</Badge>
+      return <Badge className='bg-gray-100 border border-gray-500 text-gray-700'>Not Started</Badge>
   }
 }
 
