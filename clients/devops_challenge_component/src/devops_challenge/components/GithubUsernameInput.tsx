@@ -21,7 +21,7 @@ export const GithubUsernameInput = (): JSX.Element => {
     }
 
     if (username.length > 39) {
-      setValidationError('GitHub username cannot exceed 39 characters')
+      setValidationError('GitHub username cannot exceed 39 characters.')
       return false
     }
 
