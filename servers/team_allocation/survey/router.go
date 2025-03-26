@@ -14,7 +14,7 @@ import (
 func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	surveyRouter := routerGroup.Group("/survey")
 	// Endpoints accessible to CourseStudents.
-	surveyRouter.GET("/available", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getAvailableSurveyData)
+	surveyRouter.GET("/form", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getSurveyForm)
 	surveyRouter.GET("/answers", authMiddleware(promptSDK.CourseStudent), getStudentSurveyResponses)
 	surveyRouter.POST("/answers", authMiddleware(promptSDK.CourseStudent), submitSurveyResponses)
 
@@ -25,7 +25,7 @@ func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowed
 
 // getAvailableSurveyData returns teams and skills if the survey has started.
 // Expects coursePhaseID to be provided as a query parameter.
-func getAvailableSurveyData(c *gin.Context) {
+func getSurveyForm(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
@@ -33,9 +33,13 @@ func getAvailableSurveyData(c *gin.Context) {
 		return
 	}
 
-	surveyData, err := GetAvailableSurveyData(c, coursePhaseID)
+	surveyData, err := GetSurveyForm(c, coursePhaseID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err.Error() == "survey has not started yet" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 	c.JSON(http.StatusOK, surveyData)
