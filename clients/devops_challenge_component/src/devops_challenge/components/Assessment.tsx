@@ -37,6 +37,7 @@ export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
   const [confirmedOwnWork, setConfirmedOwnWork] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [assessmentTriggered, setAssessmentTriggered] = useState(false)
 
   const assessmentMutation = useTriggerAssessment(setError)
   const developerQuery = useGetDeveloperProfile()
@@ -62,6 +63,11 @@ export const Assessment = (): JSX.Element => {
 
   const handleTriggerAssessment = () => {
     assessmentMutation.mutate()
+    assessmentMutation.mutate(undefined, {
+      onSettled: () => {
+        setAssessmentTriggered(true)
+      },
+    })
     setShowConfirmDialog(false)
   }
 
@@ -80,13 +86,17 @@ export const Assessment = (): JSX.Element => {
               variant='outline'
               className={cn('text-sm', {
                 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300':
-                  remainingAttempts === maxAttempts,
+                  remainingAttempts === maxAttempts || !assessmentTriggered,
                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': passed,
                 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300':
-                  !passed && remainingAttempts !== maxAttempts,
+                  !passed && (remainingAttempts !== maxAttempts || assessmentTriggered),
               })}
             >
-              {remainingAttempts === maxAttempts ? 'Not Started' : passed ? 'Passed' : 'Failed'}
+              {passed
+                ? 'Passed'
+                : !passed && (remainingAttempts !== maxAttempts || assessmentTriggered)
+                  ? 'Failed'
+                  : 'Not Started'}
             </Badge>
             <Badge
               variant='outline'
@@ -152,7 +162,7 @@ export const Assessment = (): JSX.Element => {
         <div className='mt-4'>
           <div className='flex items-center mb-2'>
             <h3 className='text-lg font-medium'>Last Assessment Result</h3>
-            {remainingAttempts !== maxAttempts && (
+            {remainingAttempts !== maxAttempts || assessmentTriggered ? (
               <span className='ml-2'>
                 {passed ? (
                   <CheckCircle className='h-5 w-5 text-green-500' />
@@ -160,8 +170,7 @@ export const Assessment = (): JSX.Element => {
                   <AlertCircle className='h-5 w-5 text-red-500' />
                 )}
               </span>
-            )}
-            {remainingAttempts === maxAttempts && (
+            ) : (
               <span className='ml-2'>
                 <Hourglass className='h-5 w-5 text-gray-500' />
               </span>
@@ -169,7 +178,7 @@ export const Assessment = (): JSX.Element => {
           </div>
 
           <div className='space-y-3 mt-2'>
-            {remainingAttempts !== maxAttempts && (
+            {remainingAttempts !== maxAttempts || assessmentTriggered ? (
               <Alert variant={!passed ? 'destructive' : 'default'}>
                 <div className='flex items-center'>
                   {passed ? (
@@ -185,8 +194,7 @@ export const Assessment = (): JSX.Element => {
                   {!passed ? (error ?? 'You failed the challenge.') : 'You passed the challenge!'}
                 </AlertDescription>
               </Alert>
-            )}
-            {remainingAttempts === maxAttempts && (
+            ) : (
               <Alert variant='default'>
                 <Hourglass className='h-4 w-4' />
                 <AlertTitle>Test Not Started</AlertTitle>
