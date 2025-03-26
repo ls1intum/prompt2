@@ -4,13 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  Hourglass,
-  Trophy,
-} from 'lucide-react'
+import { RefreshCw, CheckCircle, AlertCircle, Hourglass, Trophy } from 'lucide-react'
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
@@ -74,13 +68,7 @@ export const Assessment = (): JSX.Element => {
 
           <div className='space-y-3 mt-2'>
             {remainingAttempts !== maxAttempts && (
-              <Alert
-                variant={
-                  !developerQuery.data?.hasPassed
-                    ? 'destructive'
-                    : 'default'
-                }
-              >
+              <Alert variant={!developerQuery.data?.hasPassed ? 'destructive' : 'default'}>
                 <div className='flex items-center'>
                   {developerQuery.data?.hasPassed ? (
                     <CheckCircle className='h-4 w-4' />
@@ -88,14 +76,12 @@ export const Assessment = (): JSX.Element => {
                     <AlertCircle className='h-4 w-4' />
                   )}
                   <AlertTitle className='ml-2'>
-                    {!developerQuery.data?.hasPassed
-                      ? 'Error'
-                      : 'Success'}
+                    {!developerQuery.data?.hasPassed ? 'Error' : 'Success'}
                   </AlertTitle>
                 </div>
                 <AlertDescription className='mt-1'>
                   {!developerQuery.data?.hasPassed
-                    ? error ?? 'You failed the challenge.'
+                    ? (error ?? 'You failed the challenge.')
                     : 'You passed the challenge!'}
                 </AlertDescription>
               </Alert>
