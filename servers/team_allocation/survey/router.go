@@ -73,15 +73,16 @@ func getStudentSurveyResponses(c *gin.Context) {
 // submitSurveyResponses accepts and stores (or overwrites) the student's survey answers.
 // Expects courseParticipationID and coursePhaseID as query parameters.
 func submitSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -92,7 +93,7 @@ func submitSurveyResponses(c *gin.Context) {
 		return
 	}
 
-	err = SubmitSurveyResponses(c, courseParticipationID, coursePhaseID, submission)
+	err = SubmitSurveyResponses(c, courseParticipationID.(uuid.UUID), coursePhaseID, submission)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

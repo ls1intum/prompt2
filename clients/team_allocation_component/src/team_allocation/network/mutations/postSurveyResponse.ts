@@ -6,7 +6,7 @@ export const postSurveyResponse = async (
   surveyResponse: SurveyResponse,
 ): Promise<void> => {
   try {
-    await teamAllocationAxiosInstance.put(
+    await teamAllocationAxiosInstance.post(
       `/team-allocation/api/course_phase/${coursePhaseID}/survey/answers`,
       surveyResponse,
       {
