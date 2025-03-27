@@ -196,11 +196,11 @@ export const ResultsOverviewPage = (): JSX.Element => {
             <Input
               placeholder='Select first ... students'
               value={selectCount}
-              type="number"
-              min="0"
+              type='number'
+              min='0'
               onChange={(e) => {
-                const value = parseInt(e.target.value);
-                setSelectCount(isNaN(value) ? 0 : Math.max(0, value));
+                const value = parseInt(e.target.value)
+                setSelectCount(isNaN(value) ? 0 : Math.max(0, value))
               }}
             />
             <DialogFooter>
