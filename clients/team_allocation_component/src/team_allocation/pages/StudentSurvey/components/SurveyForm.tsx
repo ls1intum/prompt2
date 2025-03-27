@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { TeamRanking } from './TeamRanking'
 import { SkillRanking } from './SkillRanking'
 import dayjs from 'dayjs'
+import { SurveyStatusBar } from './SurveyStatusBar'
 
 interface SurveyFormProps {
   surveyForm: SurveyForm
@@ -31,16 +32,6 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
   // Store the original data for comparison
   const [initialTeamRanking, setInitialTeamRanking] = useState<string[]>([])
   const [initialSkillRatings, setInitialSkillRatings] = useState<Record<string, number>>({})
-
-  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-  /**
-   * Convert a UTC Date to a 'YYYY-MM-DDTHH:mm' string in the user’s local time zone,
-   * so that <input type='datetime-local' /> will display the correct local time.
-   */
-  const formatDateTimeForInput = (date: Date) => {
-    return dayjs(date).tz(userTimeZone).format('YYYY-MM-DD HH:mm')
-  }
 
   // When form and response are loaded, initialize the local state.
   useEffect(() => {
@@ -111,7 +102,7 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
   }
 
   // Compute status for the top of the page
-  let status = 'Not submitted'
+  let status: 'Not submitted' | 'Submitted' | 'Modified' = 'Not submitted'
   if (surveyResponse) {
     // Check if the local states are the same as the initial ones
     const sameTeamRanking = JSON.stringify(teamRanking) === JSON.stringify(initialTeamRanking)
@@ -130,7 +121,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
             </div>
             <p className='text-muted-foreground max-w-md mx-auto'>
               You have successfully submitted the Survey. You can re-submit the survey until the{' '}
-              {formatDateTimeForInput(surveyForm.deadline)}, if you want to change your answers.
+              {dayjs(surveyForm.deadline).format('MMM D, YYYY [at] h:mm A')}, if you want to change
+              your answers.
             </p>
             <div className='pt-4'>
               <Button onClick={() => setSubmitSuccess(false)}>Go back to survey</Button>
@@ -139,12 +131,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
         </>
       ) : (
         <>
-          <div>
-            <h2 className='text-xl font-semibold'>
-              Deadline: {formatDateTimeForInput(surveyForm.deadline) ?? 'No deadline specified'}
-            </h2>
-            <p className='font-semibold'>Status: {status}</p>
-          </div>
+          <SurveyStatusBar deadline={surveyForm.deadline} status={status} />
+
           <form onSubmit={handleSubmit} className='space-y-8'>
             {/* Teams Ranking Section */}
             <TeamRanking
