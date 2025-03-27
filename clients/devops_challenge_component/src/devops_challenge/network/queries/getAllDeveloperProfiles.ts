@@ -22,7 +22,7 @@ export const getAllDeveloperProfiles = async (
       courseParticipationID: student.CourseParticipationId,
       attempts: student.Attempts,
       hasPassed: student.Passed,
-      passedAt: student.PassedAt ?? 0,
+      passedAt: student.PassedAt ? new Date(student.PassedAt) : null,
       passingPosition: student.PassingPosition,
     }))
   } catch (err) {
