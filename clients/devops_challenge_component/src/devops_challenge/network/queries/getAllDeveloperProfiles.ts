@@ -23,7 +23,7 @@ export const getAllDeveloperProfiles = async (
       attempts: student.Attempts,
       hasPassed: student.Passed,
       passedAt: student.PassedAt ? new Date(student.PassedAt) : null,
-      passingPosition: student.PassingPosition,
+      passingPosition: student.PassingPosition ?? -1, // or another appropriate default
     }))
   } catch (err) {
     console.error(err)

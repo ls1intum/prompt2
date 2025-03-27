@@ -102,7 +102,7 @@ export const columns = [
     accessorKey: 'passedAt',
     header: ({ column }) => <SortableHeader column={column} title='Passed At' />,
     cell: ({ row }) =>
-      row.original.profile?.passedAt ? (
+      row.original.profile?.passedAt && row.original.profile?.passedAt instanceof Date ? (
         <Badge variant='outline'>
           {format(row.original.profile?.passedAt, 'dd.MM.yyyy HH:mm')}
         </Badge>
