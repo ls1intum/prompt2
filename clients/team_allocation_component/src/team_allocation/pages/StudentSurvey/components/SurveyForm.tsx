@@ -6,7 +6,7 @@ import { TeamPreference } from '../../../interfaces/teamPreference'
 import { postSurveyResponse } from '../../../network/mutations/postSurveyResponse'
 import { SurveyForm } from '../../../interfaces/surveyForm'
 import { useParams } from 'react-router-dom'
-import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { TeamRanking } from './TeamRanking'
@@ -121,60 +121,78 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
 
   return (
     <div className='space-y-8'>
-      {/* Deadline & Status */}
-      <div>
-        <h2 className='text-xl font-semibold'>
-          Deadline: {formatDateTimeForInput(surveyForm.deadline) ?? 'No deadline specified'}
-        </h2>
-        <p className='font-semibold'>Status: {status}</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className='space-y-8'>
-        {/* Teams Ranking Section */}
-        <TeamRanking
-          teamRanking={teamRanking}
-          teams={surveyForm.teams}
-          setTeamRanking={setTeamRanking}
-        />
-
-        {/* Skills Rating Section */}
-        <SkillRanking
-          skills={surveyForm.skills}
-          skillRatings={skillRatings}
-          setSkillRatings={setSkillRatings}
-        />
-
-        {submitError && (
-          <Alert variant='destructive' className='mb-4 w-full'>
-            <AlertTriangle className='h-4 w-4' />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{submitError}</AlertDescription>
-          </Alert>
-        )}
-
-        {submitSuccess && (
-          <div className='flex items-center gap-2 text-green-600'>
-            <CheckCircle2 className='h-5 w-5' />
-            <span>Survey response submitted successfully!</span>
+      {submitSuccess ? (
+        <>
+          <div className='text-center space-y-4'>
+            <div className='flex flex-col items-center space-y-2 text-green-500'>
+              <CheckCircle className='h-12 w-12' />
+              <h2 className='text-2xl font-semibold'>Success</h2>
+            </div>
+            <p className='text-muted-foreground max-w-md mx-auto'>
+              You have successfully submitted the Survey. You can re-submit the survey until the{' '}
+              {formatDateTimeForInput(surveyForm.deadline)}, if you want to change your answers.
+            </p>
+            <div className='pt-4'>
+              <Button onClick={() => setSubmitSuccess(false)}>Go back to survey</Button>
+            </div>
           </div>
-        )}
+        </>
+      ) : (
+        <>
+          <div>
+            <h2 className='text-xl font-semibold'>
+              Deadline: {formatDateTimeForInput(surveyForm.deadline) ?? 'No deadline specified'}
+            </h2>
+            <p className='font-semibold'>Status: {status}</p>
+          </div>
+          <form onSubmit={handleSubmit} className='space-y-8'>
+            {/* Teams Ranking Section */}
+            <TeamRanking
+              teamRanking={teamRanking}
+              teams={surveyForm.teams}
+              setTeamRanking={setTeamRanking}
+            />
 
-        <Button
-          type='submit'
-          size='lg'
-          disabled={!isStudent || updateSurveyResponseMutation.isPending}
-          className='w-full sm:w-auto'
-        >
-          {updateSurveyResponseMutation.isPending ? (
-            <>
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-              Submitting...
-            </>
-          ) : (
-            'Submit Survey Response'
-          )}
-        </Button>
-      </form>
+            {/* Skills Rating Section */}
+            <SkillRanking
+              skills={surveyForm.skills}
+              skillRatings={skillRatings}
+              setSkillRatings={setSkillRatings}
+            />
+
+            {submitError && (
+              <Alert variant='destructive' className='mb-4 w-full'>
+                <AlertTriangle className='h-4 w-4' />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{submitError}</AlertDescription>
+              </Alert>
+            )}
+
+            {submitSuccess && (
+              <div className='flex items-center gap-2 text-green-600'>
+                <CheckCircle2 className='h-5 w-5' />
+                <span>Survey response submitted successfully!</span>
+              </div>
+            )}
+
+            <Button
+              type='submit'
+              size='lg'
+              disabled={!isStudent || updateSurveyResponseMutation.isPending}
+              className='w-full sm:w-auto'
+            >
+              {updateSurveyResponseMutation.isPending ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Survey Response'
+              )}
+            </Button>
+          </form>
+        </>
+      )}
     </div>
   )
 }
