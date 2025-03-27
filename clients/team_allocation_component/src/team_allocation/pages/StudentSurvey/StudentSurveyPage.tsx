@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, AlertTriangle, Info } from 'lucide-react'
+import { Loader2, AlertTriangle, AlertCircle } from 'lucide-react'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import type { SurveyForm } from '../../interfaces/surveyForm'
 import type { SurveyResponse } from '../../interfaces/surveyResponse'
 import { getSurveyForm } from '../../network/queries/getSurveyForm'
 import { getSurveyOwnResponse } from '../../network/queries/getSurveyOwnResponse'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SurveyFormComponent } from './components/SurveyForm'
 import { ErrorPage } from '@/components/ErrorPage'
 
@@ -22,7 +22,7 @@ export const StudentSurveyPage = (): JSX.Element => {
     isPending: isSurveyFormPending,
     isError: isSurveyFormError,
     refetch: refetchSurveyForm,
-  } = useQuery<SurveyForm | undefined>({
+  } = useQuery<SurveyForm | null>({
     queryKey: ['team_allocation_survey_form', phaseId], // TODO also update on skill / teams change
     queryFn: () => getSurveyForm(phaseId ?? ''),
   })
@@ -41,7 +41,7 @@ export const StudentSurveyPage = (): JSX.Element => {
 
   const isPending = isSurveyFormPending || isStudentSurveyResponsePending
   const isError = isSurveyFormError || isStudentSurveyResponseError
-  const surveyNotStarted = fetchedSurveyForm === undefined
+  const surveyStarted = fetchedSurveyForm !== null
 
   if (isError) {
     return (
@@ -82,21 +82,21 @@ export const StudentSurveyPage = (): JSX.Element => {
         </Alert>
       )}
 
-      {surveyNotStarted && (
-        <Card className='mb-8'>
-          <CardHeader className='bg-muted/50'>
-            <CardTitle className='flex items-center gap-2'>
-              <Info className='h-5 w-5 text-muted-foreground' />
-              Survey Not Available
-            </CardTitle>
+      {!surveyStarted && (
+        <Card>
+          <CardHeader className='space-y-1.5 pb-5 pt-6'>
+            <div className='flex items-center gap-2.5'>
+              <AlertCircle className='h-4 w-4 text-red-600' aria-hidden='true' />
+              <CardTitle className='text-lg font-semibold ml-2'>Survey Not Available</CardTitle>
+            </div>
+            <CardDescription className='text-sm text-muted-foreground/90 mt-1 ml-9'>
+              This survey hasn&apos;t started yet. Please check back later.
+            </CardDescription>
           </CardHeader>
-          <CardContent className='pt-6'>
-            <p className='text-center'>The survey has not yet started. Please check back later.</p>
-          </CardContent>
         </Card>
       )}
 
-      {fetchedSurveyForm && (
+      {fetchedSurveyForm && surveyStarted && (
         <SurveyFormComponent
           surveyForm={fetchedSurveyForm}
           surveyResponse={fetchedStudentSurveyResponse}

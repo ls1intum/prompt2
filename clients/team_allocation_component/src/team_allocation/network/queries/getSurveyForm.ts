@@ -1,7 +1,7 @@
 import { SurveyForm } from '../../interfaces/surveyForm'
 import { teamAllocationAxiosInstance } from '../teamAllocationServerConfig'
 
-export const getSurveyForm = async (coursePhaseID: string): Promise<SurveyForm | undefined> => {
+export const getSurveyForm = async (coursePhaseID: string): Promise<SurveyForm | null> => {
   try {
     return (
       await teamAllocationAxiosInstance.get(
@@ -12,7 +12,7 @@ export const getSurveyForm = async (coursePhaseID: string): Promise<SurveyForm |
     console.error(err)
     if (err?.response?.status === 400) {
       // case that survey has not yet started
-      return undefined
+      return null
     } else {
       throw err
     }
