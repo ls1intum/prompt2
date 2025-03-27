@@ -15,7 +15,18 @@ import {
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/prompt-shared-state'
+
 import { ErrorPage } from '@/components/ErrorPage'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -25,19 +36,21 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+
 import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { columns } from './columns'
-import { getStatusBadge } from '@/utils/getStatusBadge'
 
 export const ResultsOverviewPage = (): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [isSelectDialogOpen, setSelectDialogOpen] = useState(false)
+  const [selectCount, setSelectCount] = useState(0)
 
   const { phaseId } = useParams<{ phaseId: string }>()
   const {
@@ -126,6 +139,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
           {studentsPassedChallengeCount} passed challenge | {studentsPassedCount} accepted
         </div>
         <div className='flex space-x-2'>
+          <Button onClick={() => setSelectDialogOpen(true)}>Select first x students</Button>
           <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
           <GroupActionsMenu
             selectedRows={table.getSelectedRowModel()}
@@ -169,6 +183,44 @@ export const ResultsOverviewPage = (): JSX.Element => {
           )}
         </TableBody>
       </Table>
+
+      {isSelectDialogOpen && (
+        <Dialog open={isSelectDialogOpen} onOpenChange={() => setSelectDialogOpen(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select Students</DialogTitle>
+              <DialogDescription>
+                Specify how many students to select (based on passing position)
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              placeholder='Select first ... students'
+              value={selectCount}
+              onChange={(e) => setSelectCount(Number(e.target.value))}
+            />
+            <DialogFooter>
+              <Button variant='outline' onClick={() => setSelectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  const newSelection: Record<string, boolean> = {}
+                  table.getFilteredRowModel().rows.forEach((row) => {
+                    const passingPosition = row.original.profile?.passingPosition
+                    if (passingPosition && passingPosition <= selectCount) {
+                      newSelection[row.id] = true
+                    }
+                  })
+                  setRowSelection(newSelection)
+                  setSelectDialogOpen(false)
+                }}
+              >
+                Select
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
