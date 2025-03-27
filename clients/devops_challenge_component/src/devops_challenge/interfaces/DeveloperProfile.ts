@@ -1,6 +1,8 @@
 export type DeveloperProfile = {
-  repositoryURL?: string
+  repositoryUrl?: string
   attempts?: number
   maxAttempts?: number
   hasPassed?: boolean
+  passedAt?: Date
+  position?: number
 }

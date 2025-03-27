@@ -10,6 +10,13 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CalendarIcon, AlertCircle, Loader2 } from 'lucide-react'
 import { updateSurveyTimeframe as updateSurveyTimeframeFn } from '../../../network/mutations/updateSurveyTimeframe'
 
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 interface SurveyTimeframeSettingsProps {
   surveyTimeframe: SurveyTimeframe
 }
@@ -20,15 +27,35 @@ export const SurveyTimeframeSettings = ({
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
-  // Convert dates to a YYYY-MM-DD format for the date input
-  const formatDate = (date: Date) => new Date(date).toISOString().slice(0, 10)
+  // We'll assume the user's local time zone as reported by the browser.
+  // If you'd prefer a fixed/project-wide time zone (e.g. 'America/Los_Angeles'),
+  // you can hard-code that instead.
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-  const [startDate, setStartDate] = useState<string>(
-    surveyTimeframe.timeframeSet ? formatDate(surveyTimeframe.surveyStart) : '',
+  /**
+   * Convert a UTC Date to a 'YYYY-MM-DDTHH:mm' string in the user’s local time zone,
+   * so that <input type='datetime-local' /> will display the correct local time.
+   */
+  const formatDateTimeForInput = (date: Date) => {
+    return dayjs(date).tz(userTimeZone).format('YYYY-MM-DDTHH:mm')
+  }
+
+  /**
+   * When the user picks a date+time in <input type='datetime-local' />,
+   * it comes through as 'YYYY-MM-DDTHH:mm' (no time zone).
+   * We interpret it in the user’s local time zone, then convert to a UTC Date object.
+   */
+  const parseLocalDateTimeToUtc = (localDateTimeString: string) => {
+    return dayjs.tz(localDateTimeString, userTimeZone).utc().toDate()
+  }
+
+  const [startDateTime, setStartDateTime] = useState<string>(
+    surveyTimeframe.timeframeSet ? formatDateTimeForInput(surveyTimeframe.surveyStart) : '',
   )
-  const [endDate, setEndDate] = useState<string>(
-    surveyTimeframe.timeframeSet ? formatDate(surveyTimeframe.surveyDeadline) : '',
+  const [endDateTime, setEndDateTime] = useState<string>(
+    surveyTimeframe.timeframeSet ? formatDateTimeForInput(surveyTimeframe.surveyDeadline) : '',
   )
+
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
@@ -45,15 +72,18 @@ export const SurveyTimeframeSettings = ({
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault()
-    // Create Date objects from the input strings
-    const start = new Date(startDate)
-    const end = new Date(endDate)
+
+    // Convert local input to UTC
+    const start = parseLocalDateTimeToUtc(startDateTime)
+    const end = parseLocalDateTimeToUtc(endDateTime)
+
     if (start > end) {
       setError('Start date cannot be after end date.')
       return
     }
+
     setError(null)
-    mutation.mutate({ start: start, end: end })
+    mutation.mutate({ start, end })
   }
 
   return (
@@ -63,37 +93,39 @@ export const SurveyTimeframeSettings = ({
           <CalendarIcon className='h-5 w-5 text-primary' />
           Survey Timeframe
         </CardTitle>
-        <CardDescription>Set the start and end dates for the survey.</CardDescription>
+        <CardDescription>
+          Set the start/end date & time (with timezone handling) for the survey.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-6'>
           <form id='timeframe-form' onSubmit={handleUpdate} className='space-y-6'>
             <div className='grid sm:grid-cols-2 gap-6'>
               <div className='space-y-2'>
-                <Label htmlFor='start-date' className='font-medium'>
-                  Start Date
+                <Label htmlFor='start-date-time' className='font-medium'>
+                  Start Date & Time
                 </Label>
                 <div className='relative'>
                   <Input
-                    id='start-date'
-                    type='date'
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    id='start-date-time'
+                    type='datetime-local'
+                    value={startDateTime}
+                    onChange={(e) => setStartDateTime(e.target.value)}
                     className='w-full'
                     required
                   />
                 </div>
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='end-date' className='font-medium'>
-                  End Date
+                <Label htmlFor='end-date-time' className='font-medium'>
+                  End Date & Time
                 </Label>
                 <div className='relative'>
                   <Input
-                    id='end-date'
-                    type='date'
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    id='end-date-time'
+                    type='datetime-local'
+                    value={endDateTime}
+                    onChange={(e) => setEndDateTime(e.target.value)}
                     className='w-full'
                     required
                   />
@@ -116,10 +148,11 @@ export const SurveyTimeframeSettings = ({
               form='timeframe-form'
               disabled={
                 mutation.isPending ||
-                !startDate ||
-                !endDate ||
-                (startDate === formatDate(surveyTimeframe.surveyStart) &&
-                  endDate === formatDate(surveyTimeframe.surveyDeadline))
+                !startDateTime ||
+                !endDateTime ||
+                // Compare the local-formatted versions of the original dates
+                (startDateTime === formatDateTimeForInput(surveyTimeframe.surveyStart) &&
+                  endDateTime === formatDateTimeForInput(surveyTimeframe.surveyDeadline))
               }
               className='min-w-[180px]'
             >

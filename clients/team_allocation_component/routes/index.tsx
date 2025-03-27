@@ -1,6 +1,6 @@
-import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SurveySettingsPage } from '../src/team_allocation/pages/SurveySettings/SurveySettingsPage'
+import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { StudentSurveyPage } from '../src/team_allocation/pages/StudentSurvey/StudentSurveyPage'
 
 const routes: ExtendedRouteObject[] = [
