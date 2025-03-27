@@ -211,9 +211,12 @@ export const ResultsOverviewPage = (): JSX.Element => {
                 onClick={() => {
                   const newSelection: Record<string, boolean> = {}
                   table.getFilteredRowModel().rows.forEach((row) => {
-                    const passingPosition = row.original.profile?.passingPosition
                     const profile = row.original.profile
-                    if (profile && profile.passingPosition && profile.passingPosition <= selectCount) {
+                    if (
+                      profile &&
+                      profile.passingPosition &&
+                      profile.passingPosition <= selectCount
+                    ) {
                       newSelection[row.id] = true
                     }
                   })
