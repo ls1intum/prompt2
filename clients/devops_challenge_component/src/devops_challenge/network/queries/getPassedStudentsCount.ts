@@ -4,7 +4,8 @@ export const getPassedStudentsCount = async (
   coursePhaseID: string,
 ): Promise<number> => {
   try {
-    return (await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/passed`)).data
+    const response = await devOpsChallengeAxiosInstance.get(`/${coursePhaseID}/passed`)
+    return response.data.passedStudents
   } catch (err) {
     console.error(err)
     throw err
