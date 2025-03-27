@@ -6,7 +6,7 @@ import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 export const useGetDeveloperProfile = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
-  return useQuery<DeveloperProfile>({
+  return useQuery<DeveloperProfile | undefined>({
     queryKey: ['devOpsDeveloperProfile', phaseId],
     queryFn: () => getDeveloperProfile(phaseId ?? ''),
   })

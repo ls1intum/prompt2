@@ -50,7 +50,7 @@ export const DevOpsChallengeDataShell = ({
 
   const isPending =
     isParticipationPending || isProfilePending || !developerProfileSet || !participationSet
-  const isError = isParticipationError || isProfileError
+  const isError = isParticipationError || isProfileError || !fetchedProfile
 
   useEffect(() => {
     if (fetchedParticipation) {
@@ -60,7 +60,10 @@ export const DevOpsChallengeDataShell = ({
   }, [fetchedParticipation, setCoursePhaseParticipation])
 
   useEffect(() => {
-    if (isProfileError && developerProfileError?.message.includes('student not found')) {
+    if (
+      !fetchedProfile ||
+      (isProfileError && developerProfileError?.message.includes('student not found'))
+    ) {
       setDeveloperProfile(undefined)
     } else if (fetchedProfile) {
       setDeveloperProfile(fetchedProfile)
