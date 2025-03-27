@@ -16,7 +16,7 @@ import {
   CheckCircle,
   AlertCircle,
   Hourglass,
-  Trophy,
+  FileCode2,
   Clock,
   PartyPopper,
   CircleX,
@@ -79,7 +79,7 @@ export const Assessment = (): JSX.Element => {
     <Card>
       <CardHeader className='pb-2'>
         <CardTitle className='text-xl flex items-center'>
-          <Trophy className='mr-2 h-5 w-5' />
+          <FileCode2 className='mr-2 h-5 w-5' />
           Assessment
           <div className='flex items-center space-x-2 ml-auto'>
             <Badge
