@@ -15,6 +15,7 @@ export const useTriggerAssessment = (setError: (error: string | null) => void) =
     },
     onError: (error: any) => {
       queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['devOpsPassedStudentsCount', phaseId] })
       if (error?.response?.data?.error) {
         const serverError = error.response.data?.error
         setError(serverError)
