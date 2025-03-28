@@ -9,6 +9,7 @@ import { getCoursePhase } from '@/network/queries/getCoursePhase'
 
 export const MailingPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  
 
   const {
     data: coursePhase,
