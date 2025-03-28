@@ -10,6 +10,7 @@ export const useTriggerAssessment = (setError: (error: string | null) => void) =
     mutationFn: () => triggerAssessment(phaseId ?? ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devOpsDeveloperProfile', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['devOpsPassedStudentsCount', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

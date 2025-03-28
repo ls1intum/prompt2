@@ -207,12 +207,15 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           <Checkbox
             id='own-work-check'
-            checked={confirmedOwnWork}
-            onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
+            checked={passed || remainingAttempts === 0 || confirmedOwnWork}
+            onCheckedChange={(checked) => !passed && setConfirmedOwnWork(checked as boolean)}
+            disabled={passed}
           />
           <label
             htmlFor='own-work-check'
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${
+              (passed || remainingAttempts === 0) ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
           >
             I confirm that I have completed this challenge independently and without unauthorized
             assistance.
@@ -222,7 +225,7 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           <Button
             onClick={openConfirmDialog}
-            disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork}
+            disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork || passed}
             className='w-full'
           >
             {assessmentMutation.isPending ? (

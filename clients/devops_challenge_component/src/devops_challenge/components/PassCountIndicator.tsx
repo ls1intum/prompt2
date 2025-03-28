@@ -13,10 +13,10 @@ export const PassCountIndicator = (): JSX.Element => {
   const isError = passedCountQuery.isError
 
   useEffect(() => {
-    // refetch passed students count every 15 seconds
+    // refetch passed students count every 2 minutes
     const interval = setInterval(() => {
       passedCountQuery.refetch()
-    }, 15000)
+    }, 120000)
 
     return () => clearInterval(interval)
   }, [passedCountQuery])
