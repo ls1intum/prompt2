@@ -1,5 +1,5 @@
 import { Role } from '@tumaet/prompt-shared-state'
-import OverviewPage from '../src/OverviewPage'
+import { SurveySettingsPage } from '../src/team_allocation/pages/SurveySettings/SurveySettingsPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 
 const routes: ExtendedRouteObject[] = [
@@ -12,6 +12,11 @@ const routes: ExtendedRouteObject[] = [
       Role.COURSE_EDITOR,
       Role.COURSE_STUDENT,
     ],
+  },
+  {
+    path: '/settings',
+    element: <SurveySettingsPage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]
 

@@ -1,5 +1,5 @@
 package teamDTO
 
 type UpdateTeamRequest struct {
-	NewTeamName string `json:"newteamName"`
+	NewTeamName string `json:"newTeamName"`
 }

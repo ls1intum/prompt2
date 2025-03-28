@@ -140,6 +140,7 @@ jobs:
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_HOST=${{ vars.DEVOPS_CHALLENGE_HOST }}" >> .env.prod
+            echo "TEAM_ALLOCATION_HOST=${{ vars.TEAM_ALLOCATION_HOST }}" >> .env.prod
             echo "CHAIR_NAME_SHORT=${{ vars.CHAIR_NAME_SHORT }}" >> .env.prod
             echo "CHAIR_NAME_LONG=${{ vars.CHAIR_NAME_LONG }}" >> .env.prod
 

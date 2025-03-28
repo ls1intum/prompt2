@@ -12,6 +12,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
+	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
 	teams "github.com/ls1intum/prompt2/servers/team_allocation/team"
 	"github.com/ls1intum/prompt2/servers/team_allocation/utils"
 	log "github.com/sirupsen/logrus"
@@ -87,6 +88,7 @@ func main() {
 
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
+	survey.InitSurveyModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)
