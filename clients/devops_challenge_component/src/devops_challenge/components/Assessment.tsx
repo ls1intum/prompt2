@@ -214,7 +214,7 @@ export const Assessment = (): JSX.Element => {
           <label
             htmlFor='own-work-check'
             className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${
-              (passed || remainingAttempts === 0) ? 'opacity-70 cursor-not-allowed' : ''
+              passed || remainingAttempts === 0 ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
             I confirm that I have completed this challenge independently and without unauthorized
@@ -225,7 +225,9 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           <Button
             onClick={openConfirmDialog}
-            disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork || passed}
+            disabled={
+              assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork || passed
+            }
             className='w-full'
           >
             {assessmentMutation.isPending ? (
