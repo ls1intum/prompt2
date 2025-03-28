@@ -5,21 +5,16 @@ import { useGetPassedStudentsCount } from '../pages/hooks/useGetPassedStudents'
 import type { JSX } from 'react'
 
 export const PassCountIndicator = (): JSX.Element => {
-  const passedCountQuery = useGetPassedStudentsCount()
-
-  const passedCount = passedCountQuery.data ?? 0
-
-  const isLoading = passedCountQuery.isLoading
-  const isError = passedCountQuery.isError
+  const { data: passedCount = 0, isLoading, isError, refetch } = useGetPassedStudentsCount()
 
   useEffect(() => {
     // refetch passed students count every 2 minutes
     const interval = setInterval(() => {
-      passedCountQuery.refetch()
+      refetch()
     }, 120000)
 
     return () => clearInterval(interval)
-  }, [passedCountQuery])
+  }, [refetch])
 
   return (
     <Card className='w-full'>
