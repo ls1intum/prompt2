@@ -214,7 +214,7 @@ export const Assessment = (): JSX.Element => {
           <label
             htmlFor='own-work-check'
             className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${
-              passed ? 'opacity-70 cursor-not-allowed' : ''
+              passed || remainingAttempts === 0 ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
             I confirm that I have completed this challenge independently and without unauthorized
