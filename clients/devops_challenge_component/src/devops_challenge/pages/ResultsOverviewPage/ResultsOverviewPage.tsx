@@ -131,7 +131,12 @@ export const ResultsOverviewPage = (): JSX.Element => {
           {studentsPassedChallengeCount} passed challenge | {studentsPassedCount} accepted
         </div>
         <div className='flex space-x-2'>
-          <Button onClick={() => setSelectDialogOpen(true)}>Select first x students</Button>
+          <Button
+            onClick={() => setSelectDialogOpen(true)}
+            disabled={studentsPassedChallengeCount <= 0}
+          >
+            Select First Passed Students
+          </Button>
           <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
           <GroupActionsMenu
             selectedRows={table.getSelectedRowModel()}

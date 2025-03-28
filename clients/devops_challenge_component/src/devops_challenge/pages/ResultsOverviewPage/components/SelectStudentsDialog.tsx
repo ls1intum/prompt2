@@ -36,7 +36,9 @@ export const SelectStudentsDialog: React.FC<SelectStudentsDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Select Students</DialogTitle>
           <DialogDescription>
-            Specify how many rows to select (based on their challenge passing position)
+            Specify how many rows to select (based on their challenge passing position). Currently{' '}
+            {studentsPassedChallengeCount} student
+            {studentsPassedChallengeCount === 1 ? ' has' : 's have'} passed the challenge.
           </DialogDescription>
         </DialogHeader>
         <Input
@@ -47,9 +49,15 @@ export const SelectStudentsDialog: React.FC<SelectStudentsDialogProps> = ({
           max={studentsPassedChallengeCount}
           onChange={(e) => {
             const value = parseInt(e.target.value)
-            setSelectCount(
-              isNaN(value) ? 0 : Math.min(Math.max(0, value), studentsPassedChallengeCount),
-            )
+            if (isNaN(value) || value < 0 || value > studentsPassedChallengeCount) {
+              e.target.setCustomValidity(
+                `Please enter a number between 0 and ${studentsPassedChallengeCount}.`,
+              )
+            } else {
+              e.target.setCustomValidity('')
+              setSelectCount(value)
+            }
+            e.target.reportValidity()
           }}
         />
         <DialogFooter>
