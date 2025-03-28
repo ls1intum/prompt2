@@ -209,7 +209,7 @@ export const Assessment = (): JSX.Element => {
             id='own-work-check'
             checked={passed || remainingAttempts === 0 || confirmedOwnWork}
             onCheckedChange={(checked) => !passed && setConfirmedOwnWork(checked as boolean)}
-            disabled={passed}
+            disabled={passed || remainingAttempts === 0}
           />
           <label
             htmlFor='own-work-check'
