@@ -19,15 +19,6 @@ import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/pro
 import { ErrorPage } from '@/components/ErrorPage'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import {
   Table,
   TableBody,
   TableCell,
@@ -41,6 +32,7 @@ import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
+import { SelectStudentsDialog } from './components/SelectStudentsDialog'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { columns } from './columns'
 
@@ -185,50 +177,15 @@ export const ResultsOverviewPage = (): JSX.Element => {
       </Table>
 
       {isSelectDialogOpen && (
-        <Dialog open={isSelectDialogOpen} onOpenChange={() => setSelectDialogOpen(false)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Select Students</DialogTitle>
-              <DialogDescription>
-                Specify how many students to select (based on passing position)
-              </DialogDescription>
-            </DialogHeader>
-            <Input
-              placeholder='Select first ... students'
-              value={selectCount}
-              type='number'
-              min='0'
-              onChange={(e) => {
-                const value = parseInt(e.target.value)
-                setSelectCount(isNaN(value) ? 0 : Math.max(0, value))
-              }}
-            />
-            <DialogFooter>
-              <Button variant='outline' onClick={() => setSelectDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  const newSelection: Record<string, boolean> = {}
-                  table.getFilteredRowModel().rows.forEach((row) => {
-                    const profile = row.original.profile
-                    if (
-                      profile &&
-                      profile.passingPosition &&
-                      profile.passingPosition <= selectCount
-                    ) {
-                      newSelection[row.id] = true
-                    }
-                  })
-                  setRowSelection(newSelection)
-                  setSelectDialogOpen(false)
-                }}
-              >
-                Select
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <SelectStudentsDialog
+          isOpen={isSelectDialogOpen}
+          onClose={() => setSelectDialogOpen(false)}
+          selectCount={selectCount}
+          setSelectCount={setSelectCount}
+          table={table}
+          setRowSelection={setRowSelection}
+          studentsPassedChallengeCount={studentsPassedChallengeCount}
+        />
       )}
     </div>
   )

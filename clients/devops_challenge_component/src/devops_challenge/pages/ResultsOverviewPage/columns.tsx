@@ -110,8 +110,14 @@ export const columns = [
         '-'
       ),
     sortingFn: (rowA, rowB) => {
-      const valueA = rowA.original.profile?.passedAt ?? ''
-      const valueB = rowB.original.profile?.passedAt ?? ''
+      const valueA =
+        rowA.original.profile?.passedAt instanceof Date
+          ? rowA.original.profile.passedAt.toISOString()
+          : ''
+      const valueB =
+        rowB.original.profile?.passedAt instanceof Date
+          ? rowB.original.profile.passedAt.toISOString()
+          : ''
       return valueA.localeCompare(valueB)
     },
   },
