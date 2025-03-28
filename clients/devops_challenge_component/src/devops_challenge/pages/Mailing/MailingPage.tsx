@@ -35,9 +35,8 @@ export const MailingPage = (): JSX.Element => {
       ) : (
         <>
           <div>
-            {/* <ManagementPageHeader>Mailing</ManagementPageHeader>
-            <CoursePhaseMailing coursePhase={coursePhase} /> */}
-            This is the mailing page
+            <ManagementPageHeader>Mailing</ManagementPageHeader>
+            <CoursePhaseMailing coursePhase={coursePhase} />
           </div>
         </>
       )}
