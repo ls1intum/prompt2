@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Star } from 'lucide-react'
-import { Skill } from 'src/team_allocation/interfaces/skill'
+import { Skill } from '../../../interfaces/skill'
 
 interface SkillRankingProps {
   skills: Skill[]
@@ -46,21 +46,19 @@ export const SkillRanking = ({
                 onValueChange={(value) => handleSkillRatingChange(skill.id, Number(value))}
                 className='flex justify-between gap-2 pt-1'
               >
-                {[1, 2, 3, 4, 5].map((val) => (
+                {[1, 2, 3, 4].map((val) => (
                   <div key={val} className='flex flex-col items-center gap-1'>
                     {val === 1 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Beginner</span>
+                      <span className='text-xs text-muted-foreground mb-1'>Novice</span>
                     )}
-                    {val === 3 && (
+                    {val === 2 && (
                       <span className='text-xs text-muted-foreground mb-1'>Intermediate</span>
                     )}
-                    {val === 5 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Expert</span>
+                    {val === 3 && (
+                      <span className='text-xs text-muted-foreground mb-1'>Advanced</span>
                     )}
-                    {val !== 1 && val !== 3 && val !== 5 && (
-                      <span className='text-xs text-muted-foreground mb-1 invisible'>
-                        Placeholder
-                      </span>
+                    {val === 4 && (
+                      <span className='text-xs text-muted-foreground mb-1'>Expert</span>
                     )}
                     <RadioGroupItem
                       value={String(val)}
