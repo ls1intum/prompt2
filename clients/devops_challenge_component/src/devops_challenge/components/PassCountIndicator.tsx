@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { useEffect } from 'react'
 import { Loader2, Trophy, Users, AlertCircle } from 'lucide-react'
 import { useGetPassedStudentsCount } from '../pages/hooks/useGetPassedStudents'
 import type { JSX } from 'react'
@@ -11,6 +11,15 @@ export const PassCountIndicator = (): JSX.Element => {
 
   const isLoading = passedCountQuery.isLoading
   const isError = passedCountQuery.isError
+
+  useEffect(() => {
+    // refetch passed students count every 15 seconds
+    const interval = setInterval(() => {
+      passedCountQuery.refetch()
+    }, 15000)
+
+    return () => clearInterval(interval)
+  }, [passedCountQuery])
 
   return (
     <Card className='overflow-hidden border-2'>
