@@ -1,15 +1,46 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, AlertCircle, User } from 'lucide-react'
 import { useCreateRepository } from '../pages/hooks/useCreateRepository'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const GithubUsernameInput = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
   const repositoryMutation = useCreateRepository(setError)
   const [githubUsername, setGithubUsername] = useState('')
+  const [hasGithubProfile, setHasGithubProfile] = useState(false)
+
+  const validateGithubUsername = (username: string): boolean => {
+    if (
+      !/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])|\.(?=[a-zA-Z0-9]))*$/.test(username.trim()) &&
+      username.length > 0
+    ) {
+      setValidationError(
+        'GitHub username can only contain letters, numbers, hyphens, and dots. Hypens and dots cannot be at the beginning or end of the username.',
+      )
+      return false
+    }
+
+    if (username.length > 39) {
+      setValidationError('GitHub username cannot exceed 39 characters.')
+      return false
+    }
+
+    setValidationError(null)
+    return true
+  }
+
+  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newUsername = e.target.value
+    setGithubUsername(newUsername)
+    validateGithubUsername(newUsername)
+  }
+
+  const isInputValid = githubUsername.length > 0 && !validationError && hasGithubProfile
 
   return (
     <Card className='w-full max-w-md mx-auto'>
@@ -29,18 +60,42 @@ export const GithubUsernameInput = (): JSX.Element => {
         </Alert>
 
         <div className='space-y-4'>
-          <div className='relative'>
-            <Input
-              placeholder='GitHub username'
-              value={githubUsername}
-              onChange={(e) => setGithubUsername(e.target.value)}
-              className='pl-10'
-            />
-            <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+          <div className='space-y-2'>
+            <div className='relative'>
+              <Input
+                placeholder='GitHub username'
+                value={githubUsername}
+                onChange={handleUsernameChange}
+                className={`pl-10 ${validationError ? 'border-red-500' : ''}`}
+                aria-invalid={!!validationError}
+                aria-describedby={validationError ? 'username-error' : undefined}
+              />
+              <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+            </div>
+            {validationError && (
+              <p id='username-error' className='text-sm text-red-500'>
+                {validationError}
+              </p>
+            )}
           </div>
+
+          <div className='flex items-start space-x-2 mt-4'>
+            <Checkbox
+              id='github-profile-check'
+              checked={hasGithubProfile}
+              onCheckedChange={(checked) => setHasGithubProfile(checked as boolean)}
+            />
+            <label
+              htmlFor='github-profile-check'
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+            >
+              I confirm that my GitHub account has my full name and a profile picture set up.
+            </label>
+          </div>
+
           <Button
             onClick={() => repositoryMutation.mutate(githubUsername)}
-            disabled={!githubUsername || repositoryMutation.isPending}
+            disabled={!isInputValid || repositoryMutation.isPending}
             className='w-full'
           >
             {repositoryMutation.isPending ? (
