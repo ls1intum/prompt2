@@ -135,7 +135,10 @@ export const Assessment = (): JSX.Element => {
               <Alert variant='default'>
                 <PartyPopper className='h-4 w-4' />
                 <AlertTitle>Congratulations</AlertTitle>
-                <AlertDescription>You are admitted to the DevOps course!</AlertDescription>
+                <AlertDescription>
+                  You have successfully completed the technical challenge and are eligible to
+                  participate in the DevOps course!
+                </AlertDescription>
               </Alert>
             )}
           {passed &&
@@ -145,16 +148,19 @@ export const Assessment = (): JSX.Element => {
               <Alert variant='default'>
                 <Clock className='h-4 w-4' />
                 <AlertTitle>Waitlisted</AlertTitle>
-                <AlertDescription>You are on the waitlist for the DevOps course!</AlertDescription>
+                <AlertDescription>
+                  You have successfully completed the technical challenge, but due to limited
+                  capacity, you have been placed on the waitlist for the DevOps course.
+                </AlertDescription>
               </Alert>
             )}
           {!passed && remainingAttempts === 0 && (
             <Alert variant='destructive'>
               <CircleX className='h-4 w-4' />
-              <AlertTitle>Challenge Failed</AlertTitle>
+              <AlertTitle>Challenge Unsuccessful</AlertTitle>
               <AlertDescription>
-                You have not successfully completed the technical challenge, and with no remaining
-                attempts, you are not eligible for admission to the DevOps course.
+                You did not successfully complete the technical challenge and have no remaining
+                attempts.
               </AlertDescription>
             </Alert>
           )}
