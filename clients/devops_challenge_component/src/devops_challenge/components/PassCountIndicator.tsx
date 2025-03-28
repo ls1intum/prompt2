@@ -24,7 +24,9 @@ export const PassCountIndicator = (): JSX.Element => {
       </CardHeader>
       <CardContent>
         <div className='flex flex-col space-y-1'>
-          <span className='text-sm text-muted-foreground'>Students who already passed the challenge</span>
+          <span className='text-sm text-muted-foreground'>
+            Students who already passed the challenge
+          </span>
           <div className='flex items-center gap-2'>
             {isLoading ? (
               <div className='flex items-center gap-2'>
@@ -39,7 +41,10 @@ export const PassCountIndicator = (): JSX.Element => {
             ) : (
               <div className='flex items-center gap-2'>
                 <Users className='h-5 w-5 text-primary' />
-                <span className='text-2xl font-bold'>{passedCount}</span>
+                <div>
+                  <span className='text-3xl font-bold'>{passedCount}</span>
+                  <span className='ml-2 text-muted-foreground'>students</span>
+                </div>
               </div>
             )}
           </div>
