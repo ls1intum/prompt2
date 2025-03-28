@@ -49,6 +49,7 @@
         "clsx": "^2.1.1",
         "css-loader": "^7.1.2",
         "date-fns": "^4.1.0",
+        "dayjs": "^1.11.13",
         "dompurify": "^3.2.4",
         "file-saver": "^2.0.5",
         "framer-motion": "^12.4.1",
