@@ -22,7 +22,7 @@ export const PassCountIndicator = (): JSX.Element => {
   }, [passedCountQuery])
 
   return (
-    <Card className='overflow-hidden border-2'>
+    <Card className='w-full'>
       <CardHeader className='pb-2'>
         <CardTitle className='text-xl flex items-center justify-between'>
           <div className='flex items-center'>
