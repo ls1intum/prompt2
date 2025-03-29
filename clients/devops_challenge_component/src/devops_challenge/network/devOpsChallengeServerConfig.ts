@@ -2,7 +2,7 @@ import axios from 'axios'
 import { parseURL } from '@/utils/parseURL'
 import { env } from '@/env'
 
-const devOpsChallengeServer = env.DEV_OPS_CHALLENGE_HOST || ''
+const devOpsChallengeServer = env.DEVOPS_CHALLENGE_HOST || ''
 
 const serverBaseUrl = parseURL(devOpsChallengeServer)
 

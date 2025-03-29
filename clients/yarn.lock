@@ -6587,6 +6587,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.13":
+  version: 1.11.13
+  resolution: "dayjs@npm:1.11.13"
+  checksum: 10c0/a3caf6ac8363c7dade9d1ee797848ddcf25c1ace68d9fe8678ecf8ba0675825430de5d793672ec87b24a69bf04a1544b176547b2539982275d5542a7955f35b7
+  languageName: node
+  linkType: hard
+
 "debounce@npm:^1.2.1":
   version: 1.2.1
   resolution: "debounce@npm:1.2.1"
@@ -12870,6 +12877,7 @@ __metadata:
     clsx: "npm:^2.1.1"
     css-loader: "npm:^7.1.2"
     date-fns: "npm:^4.1.0"
+    dayjs: "npm:^1.11.13"
     dompurify: "npm:^3.2.4"
     eslint: "npm:^8.57.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -14958,6 +14966,15 @@ __metadata:
   checksum: 10c0/a5eca3eb50bc11552d453488344e6507156b9193efd7635e98e867fab275d527af53d8866e2370cd09dfe74378a18111622ace35af6a608e5223a7d27fe99537
   languageName: node
   linkType: hard
+
+"team_allocation_component@workspace:team_allocation_component":
+  version: 0.0.0-use.local
+  resolution: "team_allocation_component@workspace:team_allocation_component"
+  dependencies:
+    webpack: "npm:^5.91.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
 
 "temp-dir@npm:1.0.0":
   version: 1.0.0

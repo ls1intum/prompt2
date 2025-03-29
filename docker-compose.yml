@@ -89,6 +89,24 @@ services:
     ports:
       - "5433:5432"
 
+  db-team-allocation:
+    image: 'postgres:15.2-alpine'
+    container_name: prompt-team-allocation-db
+    environment:
+      - POSTGRES_USER=prompt-postgres
+      - POSTGRES_PASSWORD=prompt-postgres
+      - POSTGRES_DB=prompt
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_team_allocation_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5434:5432"
+
   keycloak-db:
     image: "postgres:15.2-alpine"
     container_name: prompt-keycloak-db

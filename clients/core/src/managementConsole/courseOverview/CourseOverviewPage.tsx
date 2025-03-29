@@ -6,7 +6,7 @@ import {
 } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { CalendarDays, GraduationCap, Clock, Calendar, Construction } from 'lucide-react'
+import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { EditCourseDropdown } from './components/EditCourseDropdown'
 
@@ -96,30 +96,6 @@ export const CourseOverview = (): JSX.Element => {
           </div>
         </CardContent>
       </Card>
-
-      <div className='grid md:grid-cols-2 gap-8'>
-        <Card className='shadow-lg'>
-          <CardHeader>
-            <CardTitle className='text-2xl font-semibold'>Course Stats</CardTitle>
-          </CardHeader>
-          <CardContent className='flex flex-col items-center justify-center'>
-            <Construction className='h-16 w-16 text-yellow-500' />
-            <p className='text-lg font-medium text-secondary-foreground'>Under Construction</p>
-            <p className='text-sm text-secondary-foreground'>This feature is coming soon!</p>
-          </CardContent>
-        </Card>
-
-        <Card className='shadow-lg'>
-          <CardHeader>
-            <CardTitle className='text-2xl font-semibold'>Upcoming To Dos</CardTitle>
-          </CardHeader>
-          <CardContent className='flex flex-col items-center justify-center'>
-            <Construction className='h-16 w-16 text-yellow-500' />
-            <p className='text-lg font-medium text-secondary-foreground'>Under Construction</p>
-            <p className='text-sm text-secondary-foreground'>This feature is coming soon!</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

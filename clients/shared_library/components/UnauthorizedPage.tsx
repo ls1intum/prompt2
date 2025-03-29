@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom'
 interface UnauthorizedPageProps {
   onLogout?: () => void
   backUrl?: string
+  customMessage?: string
 }
 
 export default function UnauthorizedPage({
   onLogout,
   backUrl,
+  customMessage,
 }: UnauthorizedPageProps): JSX.Element {
   const navigate = useNavigate()
 
@@ -30,20 +32,24 @@ export default function UnauthorizedPage({
           >
             <AlertTriangle className='h-4 w-4' />
             <AlertTitle>Unauthorized</AlertTitle>
-            <AlertDescription>You do not have permission to access this page.</AlertDescription>
+            <AlertDescription>
+              {customMessage ? customMessage : 'You do not have permission to access this page.'}
+            </AlertDescription>
           </Alert>
         </CardContent>
         <CardFooter className='flex justify-center space-x-4'>
-          <Button
-            variant='outline'
-            onClick={() => {
-              backUrl ? navigate(backUrl) : navigate(-1)
-            }}
-            className='w-full sm:w-auto'
-          >
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Go Back
-          </Button>
+          {backUrl && (
+            <Button
+              variant='outline'
+              onClick={() => {
+                navigate(backUrl)
+              }}
+              className='w-full sm:w-auto'
+            >
+              <ArrowLeft className='mr-2 h-4 w-4' />
+              Go Back
+            </Button>
+          )}
           {onLogout && (
             <Button variant='destructive' onClick={() => onLogout()} className='w-full sm:w-auto'>
               <LogOut className='mr-2 h-4 w-4' />

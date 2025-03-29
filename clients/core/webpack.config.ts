@@ -33,6 +33,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const introCourseDeveloperURL = IS_DEV ? `http://localhost:3005` : `/intro-course-developer`
   const devopsChallengURL = IS_DEV ? `http://localhost:3006` : `/devops-challenge`
   const assessmentURL = IS_DEV ? `http://localhost:3007` : `/assessment`
+  const teamAllocationURL = IS_DEV ? `http://localhost:3008` : `/team-allocation`
 
   return {
     target: 'web',
@@ -100,6 +101,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           intro_course_developer_component: `intro_course_developer_component@${introCourseDeveloperURL}/remoteEntry.js?${Date.now()}`,
           assessment_component: `assessment_component@${assessmentURL}/remoteEntry.js?${Date.now()}`,
           devops_challenge_component: `devops_challenge_component@${devopsChallengURL}/remoteEntry.js?${Date.now()}`,
+          team_allocation_component: `team_allocation_component@${teamAllocationURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },
