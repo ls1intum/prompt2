@@ -2,6 +2,7 @@ package survey
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -158,7 +159,9 @@ func SetSurveyTimeframe(ctx context.Context, coursePhaseID uuid.UUID, surveyStar
 
 func GetSurveyTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (surveyDTO.SurveyTimeframe, error) {
 	timeframe, err := SurveyServiceSingleton.queries.GetSurveyTimeframe(ctx, coursePhaseID)
-	if err != nil {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return surveyDTO.SurveyTimeframe{TimeframeSet: false}, nil
+	} else if err != nil {
 		log.Error("could not get survey timeframe: ", err)
 		return surveyDTO.SurveyTimeframe{}, errors.New("could not get survey timeframe")
 	}

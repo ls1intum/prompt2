@@ -3,7 +3,6 @@ import Keycloak from 'keycloak-js'
 import { KeycloakContext } from './KeycloakProvider'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { jwtDecode } from 'jwt-decode'
-// import { env } from '../env'
 
 // Helper function to decode JWT safely
 const parseJwt = (token: string) => {
@@ -23,7 +22,7 @@ const parseJwt = (token: string) => {
 
 export const useKeycloak = (): {
   keycloak: Keycloak | undefined
-  logout: (redirectUri?: string) => void
+  logout: () => void
   forceTokenRefresh: () => Promise<void>
 } => {
   const context = useContext(KeycloakContext)
@@ -105,18 +104,15 @@ export const useKeycloak = (): {
     }
   }, [keycloakValue, initializeKeycloak])
 
-  const logout = useCallback(
-    async (redirectUri?: string) => {
-      if (keycloakValue) {
-        await keycloakValue.logout({ redirectUri: redirectUri || window.location.origin }) // Use provided URI or fallback
-      }
-      clearUser()
-      clearPermissions()
-      localStorage.removeItem('jwt_token')
-      localStorage.removeItem('refreshToken')
-    },
-    [clearPermissions, clearUser, keycloakValue],
-  )
+  const logout = useCallback(async () => {
+    if (keycloakValue) {
+      await keycloakValue.logout({ redirectUri: window.location.origin }) // Use provided URI or fallback
+    }
+    clearUser()
+    clearPermissions()
+    localStorage.removeItem('jwt_token')
+    localStorage.removeItem('refreshToken')
+  }, [clearPermissions, clearUser, keycloakValue])
 
   useEffect(() => {
     setLogoutFunction(logout) // Inject the logout function into the store
