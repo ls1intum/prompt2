@@ -16,7 +16,7 @@ import {
   CheckCircle,
   AlertCircle,
   Hourglass,
-  Trophy,
+  FileCode2,
   Clock,
   PartyPopper,
   CircleX,
@@ -79,7 +79,7 @@ export const Assessment = (): JSX.Element => {
     <Card>
       <CardHeader className='pb-2'>
         <CardTitle className='text-xl flex items-center'>
-          <Trophy className='mr-2 h-5 w-5' />
+          <FileCode2 className='mr-2 h-5 w-5' />
           Assessment
           <div className='flex items-center space-x-2 ml-auto'>
             <Badge
@@ -135,7 +135,10 @@ export const Assessment = (): JSX.Element => {
               <Alert variant='default'>
                 <PartyPopper className='h-4 w-4' />
                 <AlertTitle>Congratulations</AlertTitle>
-                <AlertDescription>You are admitted to the DevOps course!</AlertDescription>
+                <AlertDescription>
+                  You have successfully completed the technical challenge and are eligible to
+                  participate in the DevOps course!
+                </AlertDescription>
               </Alert>
             )}
           {passed &&
@@ -145,16 +148,19 @@ export const Assessment = (): JSX.Element => {
               <Alert variant='default'>
                 <Clock className='h-4 w-4' />
                 <AlertTitle>Waitlisted</AlertTitle>
-                <AlertDescription>You are on the waitlist for the DevOps course!</AlertDescription>
+                <AlertDescription>
+                  You have successfully completed the technical challenge, but due to limited
+                  capacity, you have been placed on the waitlist for the DevOps course.
+                </AlertDescription>
               </Alert>
             )}
           {!passed && remainingAttempts === 0 && (
             <Alert variant='destructive'>
               <CircleX className='h-4 w-4' />
-              <AlertTitle>Challenge Failed</AlertTitle>
+              <AlertTitle>Challenge Unsuccessful</AlertTitle>
               <AlertDescription>
-                You have not successfully completed the technical challenge, and with no remaining
-                attempts, you are not eligible for admission to the DevOps course.
+                You did not successfully complete the technical challenge and have no remaining
+                attempts.
               </AlertDescription>
             </Alert>
           )}
@@ -207,12 +213,15 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           <Checkbox
             id='own-work-check'
-            checked={confirmedOwnWork}
-            onCheckedChange={(checked) => setConfirmedOwnWork(checked as boolean)}
+            checked={passed || remainingAttempts === 0 || confirmedOwnWork}
+            onCheckedChange={(checked) => !passed && setConfirmedOwnWork(checked as boolean)}
+            disabled={passed || remainingAttempts === 0}
           />
           <label
             htmlFor='own-work-check'
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer ${
+              passed || remainingAttempts === 0 ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
           >
             I confirm that I have completed this challenge independently and without unauthorized
             assistance.
@@ -222,7 +231,9 @@ export const Assessment = (): JSX.Element => {
         <div className='flex items-start space-x-2 mt-4'>
           <Button
             onClick={openConfirmDialog}
-            disabled={assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork}
+            disabled={
+              assessmentMutation.isPending || remainingAttempts === 0 || !confirmedOwnWork || passed
+            }
             className='w-full'
           >
             {assessmentMutation.isPending ? (
