@@ -29,7 +29,7 @@ export const SkillRanking = ({
               Skill Assessment
             </CardTitle>
             <CardDescription>
-              Rate your proficiency in each skill from 1 (beginner) to 5 (expert)
+              Rate your proficiency in each skill from 1 (novice) to 4 (expert)
             </CardDescription>
           </div>
         </div>
