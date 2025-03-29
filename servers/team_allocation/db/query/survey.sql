@@ -8,23 +8,37 @@ WHERE course_phase_id = $1;
 -- name: GetStudentTeamPreferences :many
 SELECT team_id, preference
 FROM student_team_preference_response
-WHERE course_participation_id = $1;
+JOIN team ON team.id = student_team_preference_response.team_id
+WHERE course_participation_id = $1
+AND team.course_phase_id = $2;
 
 -- Returns the student’s skill responses.
 -- name: GetStudentSkillResponses :many
 SELECT skill_id, rating
 FROM student_skill_response
-WHERE course_participation_id = $1;
+JOIN skill ON skill.id = student_skill_response.skill_id
+WHERE course_participation_id = $1
+AND skill.course_phase_id = $2;
 
 -- Deletes all student team preference responses (for overwriting answers).
 -- name: DeleteStudentTeamPreferences :exec
 DELETE FROM student_team_preference_response
-WHERE course_participation_id = $1;
+WHERE course_participation_id = $1
+AND team_id IN (
+    SELECT id
+    FROM team
+    WHERE course_phase_id = $2
+);
 
 -- Deletes all student skill responses (for overwriting answers).
 -- name: DeleteStudentSkillResponses :exec
 DELETE FROM student_skill_response
-WHERE course_participation_id = $1;
+WHERE course_participation_id = $1
+AND skill_id IN (
+    SELECT id
+    FROM skill
+    WHERE course_phase_id = $2
+);
 
 -- Inserts a new student team preference.
 -- name: InsertStudentTeamPreference :exec

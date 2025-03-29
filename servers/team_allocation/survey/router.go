@@ -14,7 +14,7 @@ import (
 func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	surveyRouter := routerGroup.Group("/survey")
 	// Endpoints accessible to CourseStudents.
-	surveyRouter.GET("/available", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getAvailableSurveyData)
+	surveyRouter.GET("/form", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getSurveyForm)
 	surveyRouter.GET("/answers", authMiddleware(promptSDK.CourseStudent), getStudentSurveyResponses)
 	surveyRouter.POST("/answers", authMiddleware(promptSDK.CourseStudent), submitSurveyResponses)
 
@@ -25,7 +25,7 @@ func setupSurveyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowed
 
 // getAvailableSurveyData returns teams and skills if the survey has started.
 // Expects coursePhaseID to be provided as a query parameter.
-func getAvailableSurveyData(c *gin.Context) {
+func getSurveyForm(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
@@ -33,9 +33,13 @@ func getAvailableSurveyData(c *gin.Context) {
 		return
 	}
 
-	surveyData, err := GetAvailableSurveyData(c, coursePhaseID)
+	surveyData, err := GetSurveyForm(c, coursePhaseID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err.Error() == "survey has not started yet" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 	c.JSON(http.StatusOK, surveyData)
@@ -44,14 +48,21 @@ func getAvailableSurveyData(c *gin.Context) {
 // getStudentSurveyResponses returns the student's submitted survey answers.
 // Expects courseParticipationID to be provided as a query parameter.
 func getStudentSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
+		log.Error("Error parsing coursePhaseID: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	responses, err := GetStudentSurveyResponses(c, courseParticipationID)
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	responses, err := GetStudentSurveyResponses(c, courseParticipationID.(uuid.UUID), coursePhaseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -62,15 +73,16 @@ func getStudentSurveyResponses(c *gin.Context) {
 // submitSurveyResponses accepts and stores (or overwrites) the student's survey answers.
 // Expects courseParticipationID and coursePhaseID as query parameters.
 func submitSurveyResponses(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -81,7 +93,7 @@ func submitSurveyResponses(c *gin.Context) {
 		return
 	}
 
-	err = SubmitSurveyResponses(c, courseParticipationID, coursePhaseID, submission)
+	err = SubmitSurveyResponses(c, courseParticipationID.(uuid.UUID), coursePhaseID, submission)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

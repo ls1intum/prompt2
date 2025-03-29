@@ -25,40 +25,46 @@ type SurveyService struct {
 // SurveyServiceSingleton provides a global instance.
 var SurveyServiceSingleton *SurveyService
 
-// GetAvailableSurveyData returns available teams and skills if the survey has started.
-func GetAvailableSurveyData(ctx context.Context, coursePhaseID uuid.UUID) (surveyDTO.SurveyData, error) {
+// GetSurveyForm returns available teams and skills if the survey has started.
+func GetSurveyForm(ctx context.Context, coursePhaseID uuid.UUID) (surveyDTO.SurveyForm, error) {
 	// Get survey timeframe
 	timeframe, err := SurveyServiceSingleton.queries.GetSurveyTimeframe(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get survey timeframe: ", err)
-		return surveyDTO.SurveyData{}, errors.New("could not get survey timeframe")
+		return surveyDTO.SurveyForm{}, errors.New("could not get survey timeframe")
 	}
 	// Ensure survey has started.
 	if time.Now().Before(timeframe.SurveyStart.Time) {
-		return surveyDTO.SurveyData{}, errors.New("survey has not started yet")
+		return surveyDTO.SurveyForm{}, errors.New("survey has not started yet")
 	}
 	// Get teams and skills
 	teams, err := SurveyServiceSingleton.queries.GetTeamsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get teams: ", err)
-		return surveyDTO.SurveyData{}, errors.New("could not get teams")
+		return surveyDTO.SurveyForm{}, errors.New("could not get teams")
 	}
 	skills, err := SurveyServiceSingleton.queries.GetSkillsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get skills: ", err)
-		return surveyDTO.SurveyData{}, errors.New("could not get skills")
+		return surveyDTO.SurveyForm{}, errors.New("could not get skills")
 	}
-	return surveyDTO.GetSurveyDataDTOFromDBModels(teams, skills), nil
+	return surveyDTO.GetSurveyDataDTOFromDBModels(teams, skills, timeframe.SurveyDeadline.Time), nil
 }
 
 // GetStudentSurveyResponses returns any submitted survey answers for the student.
-func GetStudentSurveyResponses(ctx context.Context, courseParticipationID uuid.UUID) (surveyDTO.StudentSurveyResponse, error) {
-	teamResponses, err := SurveyServiceSingleton.queries.GetStudentTeamPreferences(ctx, courseParticipationID)
+func GetStudentSurveyResponses(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (surveyDTO.StudentSurveyResponse, error) {
+	teamResponses, err := SurveyServiceSingleton.queries.GetStudentTeamPreferences(ctx, db.GetStudentTeamPreferencesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error("could not get team preferences: ", err)
 		return surveyDTO.StudentSurveyResponse{}, errors.New("could not get team preferences")
 	}
-	skillResponses, err := SurveyServiceSingleton.queries.GetStudentSkillResponses(ctx, courseParticipationID)
+	skillResponses, err := SurveyServiceSingleton.queries.GetStudentSkillResponses(ctx, db.GetStudentSkillResponsesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		log.Error("could not get skill responses: ", err)
 		return surveyDTO.StudentSurveyResponse{}, errors.New("could not get skill responses")
@@ -91,11 +97,17 @@ func SubmitSurveyResponses(ctx context.Context, courseParticipationID, coursePha
 	qtx := SurveyServiceSingleton.queries.WithTx(tx)
 
 	// Delete any existing responses for this student.
-	if err := qtx.DeleteStudentTeamPreferences(ctx, courseParticipationID); err != nil {
+	if err := qtx.DeleteStudentTeamPreferences(ctx, db.DeleteStudentTeamPreferencesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}); err != nil {
 		log.Error("failed to delete existing team preferences: ", err)
 		return errors.New("failed to delete existing team preferences")
 	}
-	if err := qtx.DeleteStudentSkillResponses(ctx, courseParticipationID); err != nil {
+	if err := qtx.DeleteStudentSkillResponses(ctx, db.DeleteStudentSkillResponsesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}); err != nil {
 		log.Error("failed to delete existing skill responses: ", err)
 		return errors.New("failed to delete existing skill responses")
 	}
