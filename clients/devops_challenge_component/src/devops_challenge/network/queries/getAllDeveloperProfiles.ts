@@ -6,6 +6,8 @@ interface StudentResponse {
   GithubUsername: string
   Attempts: number
   Passed: boolean
+  PassedAt: string
+  PassingPosition?: number
 }
 
 export const getAllDeveloperProfiles = async (
@@ -20,6 +22,8 @@ export const getAllDeveloperProfiles = async (
       courseParticipationID: student.CourseParticipationId,
       attempts: student.Attempts,
       hasPassed: student.Passed,
+      passedAt: student.PassedAt ? new Date(student.PassedAt) : null,
+      passingPosition: student.PassingPosition, // or another appropriate default
     }))
   } catch (err) {
     console.error(err)
