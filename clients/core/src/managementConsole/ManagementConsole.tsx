@@ -36,7 +36,6 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   // getting the courses
   const {
     data: fetchedCourses,
-    error,
     isPending,
     isError: isCourseError,
     refetch: refetchCourses,
@@ -86,6 +85,11 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
       } else {
         removeSelectedCourseID()
       }
+
+      // if you have only one course, redirect to it
+      if (fetchedCourses.length === 1) {
+        navigate(`/management/course/${fetchedCourses[0].id}`)
+      }
     } else if (path === '/management/general' || (courseId && !courseExists)) {
       removeSelectedCourseID()
     } else if (courseId && courseExists) {
@@ -107,9 +111,6 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   }
 
   if (isError) {
-    if (isCourseError && error.message.includes('401')) {
-      return <UnauthorizedPage onLogout={logout} />
-    }
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 

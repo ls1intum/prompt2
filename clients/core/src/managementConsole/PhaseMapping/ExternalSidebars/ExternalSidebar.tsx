@@ -32,7 +32,7 @@ export const ExternalSidebarComponent: React.FC<ExternalSidebarProps> = ({
   const {
     data: fetchedCourseParticipation,
     isError: isCourseParticipationError,
-    refetch: refetchCourseParitcipation,
+    refetch: refetchCourseParticipation,
   } = useQuery<CourseParticipation>({
     queryKey: ['course_participation', courseId],
     queryFn: () => getCourseParticipation(courseId ?? ''),
@@ -68,7 +68,7 @@ export const ExternalSidebarComponent: React.FC<ExternalSidebarProps> = ({
       <>
         <ErrorPage
           message='Failed to get the course participation data'
-          onRetry={refetchCourseParitcipation}
+          onRetry={refetchCourseParticipation}
         />
       </>
     )

@@ -28,7 +28,7 @@ export const Header = ({
           onClick={() => navigate('/management')}
         >
           <LogIn className='h-4 w-4' />
-          <span>Chair Member Login</span>
+          <span>Login</span>
         </Button>
       )}
       {userName && (
