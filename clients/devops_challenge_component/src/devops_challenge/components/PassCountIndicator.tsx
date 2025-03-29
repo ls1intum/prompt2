@@ -12,7 +12,7 @@ export const PassCountIndicator = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
-    data: passedCount = 0,
+    data: passedCount,
     isLoading,
     isError,
     refetch,
