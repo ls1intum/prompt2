@@ -135,7 +135,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
             onClick={() => setSelectDialogOpen(true)}
             disabled={studentsPassedChallengeCount <= 0}
           >
-            Select First Passed Students
+            Select First ... Passed Students
           </Button>
           <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
           <GroupActionsMenu
