@@ -15,9 +15,11 @@ import {
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/prompt-shared-state'
+import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 
 import { ErrorPage } from '@/components/ErrorPage'
 import { Button } from '@/components/ui/button'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -43,6 +45,7 @@ export const ResultsOverviewPage = (): JSX.Element => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [isSelectDialogOpen, setSelectDialogOpen] = useState(false)
   const [selectCount, setSelectCount] = useState(0)
+  const tableWidth = useCustomElementWidth('table-view')
 
   const { phaseId } = useParams<{ phaseId: string }>()
   const {
@@ -123,75 +126,82 @@ export const ResultsOverviewPage = (): JSX.Element => {
     )
 
   return (
-    <div className='space-y-6'>
-      <ManagementPageHeader>Developer Profile Management</ManagementPageHeader>
-      <div className='flex justify-between items-end'>
-        <div className='text-sm text-muted-foreground'>
-          Showing {filteredRowsCount} of {totalRowsCount} applications |{' '}
-          {studentsPassedChallengeCount} passed challenge | {studentsPassedCount} accepted
+    <div id='table-view' className='relative flex flex-col'>
+      <div className='space-y-6'>
+        <ManagementPageHeader>Developer Profile Management</ManagementPageHeader>
+        <div className='flex flex-col lg:flex-row lg:justify-between lg:items-end'>
+          <div className='text-sm text-muted-foreground lg:w-1/2'>
+            Showing {filteredRowsCount} of {totalRowsCount} applications |{' '}
+            {studentsPassedChallengeCount} passed challenge | {studentsPassedCount} accepted
+          </div>
+          <div className='flex space-x-2 mt-4 lg:mt-0'>
+            <Button
+              onClick={() => setSelectDialogOpen(true)}
+              disabled={studentsPassedChallengeCount <= 0}
+            >
+              Select First ... Passed Students
+            </Button>
+            <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+            <GroupActionsMenu
+              selectedRows={table.getSelectedRowModel()}
+              onClose={() => table.resetRowSelection()}
+            />
+          </div>
         </div>
-        <div className='flex space-x-2'>
-          <Button
-            onClick={() => setSelectDialogOpen(true)}
-            disabled={studentsPassedChallengeCount <= 0}
-          >
-            Select First ... Passed Students
-          </Button>
-          <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-          <GroupActionsMenu
-            selectedRows={table.getSelectedRowModel()}
-            onClose={() => table.resetRowSelection()}
-          />
-        </div>
-      </div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className='cursor-pointer'
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className='font-medium'>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+        <div className='rounded-md border' style={{ width: `${tableWidth}px` }}>
+          <ScrollArea className='h-[calc(100vh-300px)] overflow-x-scroll'>
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className='cursor-pointer'
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-24 text-center'>
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className='font-medium'>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className='h-24 text-center'>
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation='horizontal' />
+          </ScrollArea>
+        </div>
 
-      {isSelectDialogOpen && (
-        <SelectStudentsDialog
-          isOpen={isSelectDialogOpen}
-          onClose={() => setSelectDialogOpen(false)}
-          selectCount={selectCount}
-          setSelectCount={setSelectCount}
-          table={table}
-          setRowSelection={setRowSelection}
-          studentsPassedChallengeCount={studentsPassedChallengeCount}
-        />
-      )}
+        {isSelectDialogOpen && (
+          <SelectStudentsDialog
+            isOpen={isSelectDialogOpen}
+            onClose={() => setSelectDialogOpen(false)}
+            selectCount={selectCount}
+            setSelectCount={setSelectCount}
+            table={table}
+            setRowSelection={setRowSelection}
+            studentsPassedChallengeCount={studentsPassedChallengeCount}
+          />
+        )}
+      </div>
     </div>
   )
 }

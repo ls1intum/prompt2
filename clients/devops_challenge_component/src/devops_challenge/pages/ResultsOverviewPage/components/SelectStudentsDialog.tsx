@@ -51,7 +51,7 @@ export const SelectStudentsDialog: React.FC<SelectStudentsDialogProps> = ({
             const value = parseInt(e.target.value)
             if (isNaN(value) || value < 0 || value > studentsPassedChallengeCount) {
               e.target.setCustomValidity(
-                `Please enter a number between 0 and ${studentsPassedChallengeCount}.`,
+                `Please enter a number between 0 and ${studentsPassedChallengeCount} (max passed students count).`,
               )
             } else {
               e.target.setCustomValidity('')
