@@ -31,7 +31,7 @@ import { GroupActionsMenu } from './components/table/menus/GroupActionsMenu'
 import { downloadApplications } from './utils/downloadApplications'
 import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { useCustomElementWidth } from '@core/hooks/useCustomElementWidth'
+import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
@@ -173,7 +173,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
         Showing {filteredRowsCount} of {totalRowsCount} applications
       </div>
 
-      <div className='rounded-md border' style={{ width: `${tableWidth + 50}px` }}>
+      <div className='rounded-md border' style={{ width: `${tableWidth}px` }}>
         <ScrollArea className='h-[calc(100vh-300px)] overflow-x-scroll'>
           <Table className='table-auto min-w-full w-full relative'>
             <TableHeader className='bg-muted/100 sticky top-0 z-10'>
