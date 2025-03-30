@@ -8,9 +8,13 @@ jobs:
   build-servers:
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
+    with:
+      release_tag: ${{ github.event.release.tag_name }}
   build-clients:
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
+    with:
+      release_tag: ${{ github.event.release.tag_name }}
   deploy-dev-container:
     needs: [build-clients, build-servers]
     uses: ./.github/workflows/deploy-docker.yml
