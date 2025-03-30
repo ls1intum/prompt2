@@ -7,7 +7,12 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '',
     element: <StudentSurveyPage />,
-    requiredPermissions: [],
+    requiredPermissions: [
+      Role.PROMPT_ADMIN,
+      Role.COURSE_LECTURER,
+      Role.COURSE_EDITOR,
+      Role.COURSE_STUDENT,
+    ],
   },
   {
     path: '/settings',
