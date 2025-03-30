@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/team_allocation/utils"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -80,7 +80,7 @@ func main() {
 
 	api.GET("/hello", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Hello from team allocation service"})
+			"message": "Hello from assessment service"})
 	})
 
 	// TODO use query to setup sub modules
