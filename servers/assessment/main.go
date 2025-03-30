@@ -75,7 +75,7 @@ func main() {
 	router := gin.Default()
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
-	api := router.Group("team-allocation/api/course_phase/:coursePhaseID")
+	api := router.Group("assessment/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
 	api.GET("/hello", func(c *gin.Context) {
