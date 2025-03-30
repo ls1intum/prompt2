@@ -15,30 +15,57 @@ import (
 const deleteStudentSkillResponses = `-- name: DeleteStudentSkillResponses :exec
 DELETE FROM student_skill_response
 WHERE course_participation_id = $1
+AND skill_id IN (
+    SELECT id
+    FROM skill
+    WHERE course_phase_id = $2
+)
 `
 
+type DeleteStudentSkillResponsesParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
 // Deletes all student skill responses (for overwriting answers).
-func (q *Queries) DeleteStudentSkillResponses(ctx context.Context, courseParticipationID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteStudentSkillResponses, courseParticipationID)
+func (q *Queries) DeleteStudentSkillResponses(ctx context.Context, arg DeleteStudentSkillResponsesParams) error {
+	_, err := q.db.Exec(ctx, deleteStudentSkillResponses, arg.CourseParticipationID, arg.CoursePhaseID)
 	return err
 }
 
 const deleteStudentTeamPreferences = `-- name: DeleteStudentTeamPreferences :exec
 DELETE FROM student_team_preference_response
 WHERE course_participation_id = $1
+AND team_id IN (
+    SELECT id
+    FROM team
+    WHERE course_phase_id = $2
+)
 `
 
+type DeleteStudentTeamPreferencesParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
 // Deletes all student team preference responses (for overwriting answers).
-func (q *Queries) DeleteStudentTeamPreferences(ctx context.Context, courseParticipationID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteStudentTeamPreferences, courseParticipationID)
+func (q *Queries) DeleteStudentTeamPreferences(ctx context.Context, arg DeleteStudentTeamPreferencesParams) error {
+	_, err := q.db.Exec(ctx, deleteStudentTeamPreferences, arg.CourseParticipationID, arg.CoursePhaseID)
 	return err
 }
 
 const getStudentSkillResponses = `-- name: GetStudentSkillResponses :many
 SELECT skill_id, rating
 FROM student_skill_response
+JOIN skill ON skill.id = student_skill_response.skill_id
 WHERE course_participation_id = $1
+AND skill.course_phase_id = $2
 `
+
+type GetStudentSkillResponsesParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
 
 type GetStudentSkillResponsesRow struct {
 	SkillID uuid.UUID `json:"skill_id"`
@@ -46,8 +73,8 @@ type GetStudentSkillResponsesRow struct {
 }
 
 // Returns the student’s skill responses.
-func (q *Queries) GetStudentSkillResponses(ctx context.Context, courseParticipationID uuid.UUID) ([]GetStudentSkillResponsesRow, error) {
-	rows, err := q.db.Query(ctx, getStudentSkillResponses, courseParticipationID)
+func (q *Queries) GetStudentSkillResponses(ctx context.Context, arg GetStudentSkillResponsesParams) ([]GetStudentSkillResponsesRow, error) {
+	rows, err := q.db.Query(ctx, getStudentSkillResponses, arg.CourseParticipationID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +96,15 @@ func (q *Queries) GetStudentSkillResponses(ctx context.Context, courseParticipat
 const getStudentTeamPreferences = `-- name: GetStudentTeamPreferences :many
 SELECT team_id, preference
 FROM student_team_preference_response
+JOIN team ON team.id = student_team_preference_response.team_id
 WHERE course_participation_id = $1
+AND team.course_phase_id = $2
 `
+
+type GetStudentTeamPreferencesParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
 
 type GetStudentTeamPreferencesRow struct {
 	TeamID     uuid.UUID `json:"team_id"`
@@ -78,8 +112,8 @@ type GetStudentTeamPreferencesRow struct {
 }
 
 // Returns the student’s team preference responses.
-func (q *Queries) GetStudentTeamPreferences(ctx context.Context, courseParticipationID uuid.UUID) ([]GetStudentTeamPreferencesRow, error) {
-	rows, err := q.db.Query(ctx, getStudentTeamPreferences, courseParticipationID)
+func (q *Queries) GetStudentTeamPreferences(ctx context.Context, arg GetStudentTeamPreferencesParams) ([]GetStudentTeamPreferencesRow, error) {
+	rows, err := q.db.Query(ctx, getStudentTeamPreferences, arg.CourseParticipationID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}
