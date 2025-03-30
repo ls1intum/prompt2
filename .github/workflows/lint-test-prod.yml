@@ -3,6 +3,9 @@ name: Lint and Test Prod
 on:
   push:
     branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint-servers:
