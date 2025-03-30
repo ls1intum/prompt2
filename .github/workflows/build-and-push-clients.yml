@@ -2,6 +2,11 @@ name: Build and Push Clients Docker Clients
 
 on:
   workflow_call:
+    inputs:
+      release_tag:
+        description: "Optional image tag override"
+        required: false
+        type: string
     outputs:
       base_image_tag:
         description: "The tag of the base image that was built"
@@ -59,7 +64,7 @@ jobs:
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
         "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
         "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
@@ -73,7 +78,7 @@ jobs:
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/template_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -85,7 +90,7 @@ jobs:
       docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/interview_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -97,7 +102,7 @@ jobs:
       docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/matching_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -109,7 +114,7 @@ jobs:
       docker-file: clients/intro_course_developer_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/intro_course_developer_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -121,7 +126,7 @@ jobs:
       docker-file: clients/intro_course_tutor_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/intro_course_tutor_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -133,7 +138,7 @@ jobs:
       docker-file: clients/assessment_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/assessment_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
@@ -145,7 +150,7 @@ jobs:
       docker-file: clients/devops_challenge_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/devops_challenge_component
       build-args: |
-        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "IMAGE_TAG=${{ inputs.release_tag || needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
 
