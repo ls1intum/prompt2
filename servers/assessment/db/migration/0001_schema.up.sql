@@ -23,11 +23,10 @@ CREATE TABLE
         FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE CASCADE
     );
 
--- Assessment result on a specific competency in the competency tree
+-- Anonymous assessment of a student in a course phase on a specific competency
 CREATE TABLE
     assessment (
         id uuid NOT NULL PRIMARY KEY,
-        -- assessor_token TEXT, -- External or internal assessor, this has to be defined at a later point
         course_participation_id uuid NOT NULL,
         course_phase_id uuid NOT NULL,
         competency_id uuid NOT NULL,
@@ -38,7 +37,6 @@ CREATE TABLE
         comment TEXT,
         assessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (
-            -- assessor_token,
             course_participation_id,
             course_phase_id,
             competency_id

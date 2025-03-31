@@ -16,7 +16,6 @@ DELETE FROM rubric
 WHERE id = $1
 `
 
-// Deletes a rubric by its id.
 func (q *Queries) DeleteRubric(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteRubric, id)
 	return err
@@ -29,7 +28,6 @@ WHERE competency_id = $1
 ORDER BY level
 `
 
-// Returns all rubrics for a given competency.
 func (q *Queries) GetRubricsForCompetency(ctx context.Context, competencyID uuid.UUID) ([]Rubric, error) {
 	rows, err := q.db.Query(ctx, getRubricsForCompetency, competencyID)
 	if err != nil {
@@ -67,7 +65,6 @@ type InsertRubricParams struct {
 	Description  string    `json:"description"`
 }
 
-// Inserts a new rubric for a competency.
 func (q *Queries) InsertRubric(ctx context.Context, arg InsertRubricParams) error {
 	_, err := q.db.Exec(ctx, insertRubric,
 		arg.ID,
@@ -91,7 +88,6 @@ type UpdateRubricParams struct {
 	Description string    `json:"description"`
 }
 
-// Updates an existing rubric.
 func (q *Queries) UpdateRubric(ctx context.Context, arg UpdateRubricParams) error {
 	_, err := q.db.Exec(ctx, updateRubric, arg.ID, arg.Level, arg.Description)
 	return err

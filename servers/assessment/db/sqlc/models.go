@@ -10,13 +10,13 @@ import (
 )
 
 type Assessment struct {
-	ID           uuid.UUID        `json:"id"`
-	AssessorID   uuid.UUID        `json:"assessor_id"`
-	AssesseeID   uuid.UUID        `json:"assessee_id"`
-	CompetencyID uuid.UUID        `json:"competency_id"`
-	Score        int16            `json:"score"`
-	Comment      pgtype.Text      `json:"comment"`
-	AssessedAt   pgtype.Timestamp `json:"assessed_at"`
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CompetencyID          uuid.UUID        `json:"competency_id"`
+	Score                 int16            `json:"score"`
+	Comment               pgtype.Text      `json:"comment"`
+	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
 type Competency struct {

@@ -17,7 +17,6 @@ DELETE FROM competency
 WHERE id = $1
 `
 
-// Deletes a competency by its id.
 func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteCompetency, id)
 	return err
@@ -29,7 +28,6 @@ FROM competency
 WHERE id = $1
 `
 
-// Returns a single competency by its id.
 func (q *Queries) GetCompetencyByID(ctx context.Context, id uuid.UUID) (Competency, error) {
 	row := q.db.QueryRow(ctx, getCompetencyByID, id)
 	var i Competency
@@ -48,7 +46,6 @@ FROM competency
 WHERE super_competency_id IS NULL
 `
 
-// Returns all root competencies (competencies with no parent).
 func (q *Queries) GetRootCompetencies(ctx context.Context) ([]Competency, error) {
 	rows, err := q.db.Query(ctx, getRootCompetencies)
 	if err != nil {
@@ -80,7 +77,6 @@ FROM competency
 WHERE super_competency_id = $1
 `
 
-// Returns all sub-competencies for a given parent competency.
 func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID pgtype.UUID) ([]Competency, error) {
 	rows, err := q.db.Query(ctx, getSubCompetencies, superCompetencyID)
 	if err != nil {
@@ -118,7 +114,6 @@ type InsertCompetencyParams struct {
 	Description       pgtype.Text `json:"description"`
 }
 
-// Inserts a new competency.
 func (q *Queries) InsertCompetency(ctx context.Context, arg InsertCompetencyParams) error {
 	_, err := q.db.Exec(ctx, insertCompetency,
 		arg.ID,
@@ -144,7 +139,6 @@ type UpdateCompetencyParams struct {
 	Description       pgtype.Text `json:"description"`
 }
 
-// Updates an existing competency.
 func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) error {
 	_, err := q.db.Exec(ctx, updateCompetency,
 		arg.ID,
