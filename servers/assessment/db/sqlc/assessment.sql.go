@@ -130,22 +130,28 @@ func (q *Queries) InsertAssessment(ctx context.Context, arg InsertAssessmentPara
 
 const updateAssessment = `-- name: UpdateAssessment :exec
 UPDATE assessment
-SET score = $2,
-    comment = $3,
-    assessed_at = $4
+SET score = $4,
+    comment = $5,
+    assessed_at = $6
 WHERE id = $1
+  AND course_participation_id = $2
+  AND course_phase_id = $3
 `
 
 type UpdateAssessmentParams struct {
-	ID         uuid.UUID        `json:"id"`
-	Score      int16            `json:"score"`
-	Comment    pgtype.Text      `json:"comment"`
-	AssessedAt pgtype.Timestamp `json:"assessed_at"`
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	Score                 int16            `json:"score"`
+	Comment               pgtype.Text      `json:"comment"`
+	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
 func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) error {
 	_, err := q.db.Exec(ctx, updateAssessment,
 		arg.ID,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
 		arg.Score,
 		arg.Comment,
 		arg.AssessedAt,

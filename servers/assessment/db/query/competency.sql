@@ -17,14 +17,12 @@ WHERE id = $1;
 INSERT INTO competency (id, super_competency_id, name, description)
 VALUES ($1, $2, $3, $4);
 
--- name: UpdateAssessment :exec
-UPDATE assessment
-SET score = $4,
-    comment = $5,
-    assessed_at = $6
-WHERE id = $1
-  AND course_participation_id = $2
-  AND course_phase_id = $3;
+-- name: UpdateCompetency :exec
+UPDATE competency
+SET super_competency_id = $2,
+    name = $3,
+    description = $4
+WHERE id = $1;
 
 -- name: DeleteCompetency :exec
 DELETE FROM competency
