@@ -9697,6 +9697,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "js-sha256@npm:0.11.0"
+  checksum: 10c0/90980fe01ca01fbd166751fb16c4caa09c1ab997e8bf77c0764cc05c772c6044946f4c1b3bad266ce78357280d2131d3dc0cf2dd7646e78272996bd4d590aa4f
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -9877,10 +9884,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.1.4":
-  version: 26.1.4
-  resolution: "keycloak-js@npm:26.1.4"
-  checksum: 10c0/a2e52c7bfdd1f0f1cd69d083c62f7aa1c087f36841a4c6cfa76f5571dc162286978a511674f8fd85dde3625a4215cb6a4479c2fdee21e7ab0a1da0b05074a79f
+"keycloak-js@npm:25.0.6":
+  version: 25.0.6
+  resolution: "keycloak-js@npm:25.0.6"
+  dependencies:
+    js-sha256: "npm:^0.11.0"
+    jwt-decode: "npm:^4.0.0"
+  checksum: 10c0/56d4cc7b463096da20da3389af60b5dd889dad260fd8474d4ed912c25070fcb43559bd6a335b23462075a2e59e36a8a104f2a200317d3ff46ded4d801391bab2
   languageName: node
   linkType: hard
 
@@ -12880,7 +12890,7 @@ __metadata:
     framer-motion: "npm:^12.4.1"
     html-webpack-plugin: "npm:^5.6.0"
     jwt-decode: "npm:^4.0.0"
-    keycloak-js: "npm:26.1.4"
+    keycloak-js: "npm:25.0.6"
     lerna: "npm:^8.0.0"
     lowlight: "npm:^3.3.0"
     lucide-react: "npm:^0.460.0"
