@@ -18,10 +18,12 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- name: UpdateAssessment :exec
 UPDATE assessment
-SET score = $2,
-    comment = $3,
-    assessed_at = $4
-WHERE id = $1;
+SET score = $4,
+    comment = $5,
+    assessed_at = $6
+WHERE id = $1
+  AND course_participation_id = $2
+  AND course_phase_id = $3;
 
 -- name: DeleteAssessment :exec
 DELETE FROM assessment
