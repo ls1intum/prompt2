@@ -1,0 +1,395 @@
+openapi: 3.0.3
+info:
+  title: Prompt Assessment Service
+  description: API for managing competencies, rubrics, and assessments for course phases.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084/assessment/api/course_phase/{coursePhaseID} // TODO replace with actual server
+    variables:
+      coursePhaseID:
+        description: ID of the course phase
+        default: example-course-phase-id
+
+tags:
+  - name: Competency
+    description: Competency hierarchy and management
+  - name: Rubric
+    description: Rubric criteria for competencies
+  - name: Assessment
+    description: Tutor or peer evaluations for competencies
+
+paths:
+  /hello:
+    get:
+      summary: Hello health check
+      tags: [System]
+      responses:
+        "200":
+          description: Server is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /competency/root:
+    get:
+      summary: Get all root competencies
+      tags: [Competency]
+      responses:
+        "200":
+          description: List of root competencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Competency"
+
+  /competency/{parentID}/sub:
+    get:
+      summary: Get sub-competencies
+      tags: [Competency]
+      parameters:
+        - name: parentID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of sub-competencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Competency"
+
+  /competency:
+    post:
+      summary: Create a new competency
+      tags: [Competency]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompetencyRequest"
+      responses:
+        "201":
+          description: Competency created
+
+  /competency/{competencyID}:
+    put:
+      summary: Update a competency
+      tags: [Competency]
+      parameters:
+        - name: competencyID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompetencyRequest"
+      responses:
+        "200":
+          description: Competency updated
+
+    delete:
+      summary: Delete a competency
+      tags: [Competency]
+      parameters:
+        - name: competencyID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Competency deleted
+
+  /rubric/{competencyID}:
+    get:
+      summary: Get rubrics for a competency
+      tags: [Rubric]
+      parameters:
+        - name: competencyID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of rubric entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rubric"
+
+  /rubric:
+    post:
+      summary: Create a rubric entry
+      tags: [Rubric]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRubricRequest"
+      responses:
+        "201":
+          description: Rubric created
+
+  /rubric/{rubricID}:
+    put:
+      summary: Update a rubric
+      tags: [Rubric]
+      parameters:
+        - name: rubricID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRubricRequest"
+      responses:
+        "200":
+          description: Rubric updated
+
+    delete:
+      summary: Delete a rubric
+      tags: [Rubric]
+      parameters:
+        - name: rubricID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Rubric deleted
+
+  /assessment/{courseParticipationID}/{coursePhaseID}:
+    get:
+      summary: Get all assessments for a student in a course phase
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  /assessment:
+    post:
+      summary: Create an assessment
+      tags: [Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssessmentRequest"
+      responses:
+        "201":
+          description: Assessment created
+
+  /assessment/{assessmentID}:
+    put:
+      summary: Update an assessment
+      tags: [Assessment]
+      parameters:
+        - name: assessmentID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAssessmentRequest"
+      responses:
+        "200":
+          description: Assessment updated
+
+  /assessment/{assessmentID}/{courseParticipationID}/{coursePhaseID}:
+    delete:
+      summary: Delete an assessment
+      tags: [Assessment]
+      parameters:
+        - name: assessmentID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Assessment deleted
+
+components:
+  schemas:
+    Competency:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        superCompetencyId:
+          type: string
+          format: uuid
+          nullable: true
+
+    CreateCompetencyRequest:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        superCompetencyId:
+          type: string
+          format: uuid
+          nullable: true
+
+    UpdateCompetencyRequest:
+      allOf:
+        - $ref: "#/components/schemas/CreateCompetencyRequest"
+
+    Rubric:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        competencyId:
+          type: string
+          format: uuid
+        level:
+          type: integer
+          minimum: 1
+          maximum: 4
+        description:
+          type: string
+
+    CreateRubricRequest:
+      type: object
+      required: [competencyId, level, description]
+      properties:
+        competencyId:
+          type: string
+          format: uuid
+        level:
+          type: integer
+        description:
+          type: string
+
+    UpdateRubricRequest:
+      allOf:
+        - $ref: "#/components/schemas/CreateRubricRequest"
+
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        courseParticipationId:
+          type: string
+          format: uuid
+        coursePhaseId:
+          type: string
+          format: uuid
+        competencyId:
+          type: string
+          format: uuid
+        score:
+          type: integer
+        comment:
+          type: string
+        assessedAt:
+          type: string
+          format: date-time
+
+    CreateAssessmentRequest:
+      type: object
+      required: [courseParticipationId, coursePhaseId, competencyId, score]
+      properties:
+        courseParticipationId:
+          type: string
+          format: uuid
+        coursePhaseId:
+          type: string
+          format: uuid
+        competencyId:
+          type: string
+          format: uuid
+        score:
+          type: integer
+        comment:
+          type: string
+
+    UpdateAssessmentRequest:
+      type: object
+      required: [score]
+      properties:
+        score:
+          type: integer
+        comment:
+          type: string
