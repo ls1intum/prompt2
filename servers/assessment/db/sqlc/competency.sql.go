@@ -77,7 +77,7 @@ FROM competency
 WHERE super_competency_id = $1
 `
 
-func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID pgtype.UUID) ([]Competency, error) {
+func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID uuid.UUID) ([]Competency, error) {
 	rows, err := q.db.Query(ctx, getSubCompetencies, superCompetencyID)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ VALUES ($1, $2, $3, $4)
 
 type InsertCompetencyParams struct {
 	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID pgtype.UUID `json:"super_competency_id"`
+	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
 	Name              string      `json:"name"`
 	Description       pgtype.Text `json:"description"`
 }
@@ -134,7 +134,7 @@ WHERE id = $1
 
 type UpdateCompetencyParams struct {
 	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID pgtype.UUID `json:"super_competency_id"`
+	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
 	Name              string      `json:"name"`
 	Description       pgtype.Text `json:"description"`
 }

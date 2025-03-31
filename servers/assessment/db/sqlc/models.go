@@ -21,7 +21,7 @@ type Assessment struct {
 
 type Competency struct {
 	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID pgtype.UUID `json:"super_competency_id"`
+	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
 	Name              string      `json:"name"`
 	Description       pgtype.Text `json:"description"`
 }
