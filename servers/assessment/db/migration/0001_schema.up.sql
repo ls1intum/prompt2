@@ -1,5 +1,6 @@
 BEGIN;
 
+-- Competency hierarchy
 CREATE TABLE
     competency (
         id uuid NOT NULL PRIMARY KEY,
@@ -9,7 +10,7 @@ CREATE TABLE
         FOREIGN KEY (super_competency_id) REFERENCES competency (id) ON DELETE CASCADE
     );
 
--- save scoring guidance (text for each level - novice to expert)
+-- Scoring guidance per competency and level (e.g., novice to expert)
 CREATE TABLE
     rubric (
         id uuid NOT NULL PRIMARY KEY,
@@ -22,11 +23,13 @@ CREATE TABLE
         FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE CASCADE
     );
 
+-- Assessment result on a specific competency in the competency tree
 CREATE TABLE
     assessment (
         id uuid NOT NULL PRIMARY KEY,
-        assessor_id uuid NOT NULL,
-        assessee_id uuid NOT NULL,
+        -- assessor_token TEXT, -- External or internal assessor, this has to be defined at a later point
+        course_participation_id uuid NOT NULL,
+        course_phase_id uuid NOT NULL,
         competency_id uuid NOT NULL,
         score SMALLINT NOT NULL CHECK (
             score >= 1
@@ -34,7 +37,12 @@ CREATE TABLE
         ),
         comment TEXT,
         assessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (assessor_id, assessee_id, competency_id),
+        UNIQUE (
+            -- assessor_token,
+            course_participation_id,
+            course_phase_id,
+            competency_id
+        ),
         FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE CASCADE
     );
 
