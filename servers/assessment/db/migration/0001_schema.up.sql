@@ -4,7 +4,7 @@ BEGIN;
 CREATE TABLE
     competency (
         id uuid NOT NULL PRIMARY KEY,
-        super_competency_id uuid,
+        super_competency_id uuid NULL,
         name VARCHAR(255) NOT NULL,
         description TEXT,
         FOREIGN KEY (super_competency_id) REFERENCES competency (id) ON DELETE CASCADE
