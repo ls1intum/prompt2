@@ -2,7 +2,6 @@ import { DeveloperProfilesLecturerPage } from '../src/introCourse/pages/Develope
 import { TutorImportPage } from '../src/introCourse/pages/TutorImport/TutorImportPage'
 import { IntroCourseDataShell } from '../src/introCourse/IntroCourseDataShell'
 import { IntroCoursePage } from '../src/introCourse/IntroCoursePage'
-import SettingsPage from '../src/SettingsPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SeatAssignmentPage } from '../src/introCourse/pages/SeatAssignment/SeatAssignmentPage'
