@@ -19,6 +19,10 @@ RETURNING *;
 DELETE FROM category WHERE id = $1;
 
 -- name: GetCategoriesWithCompetencies :many
-SELECT *
+SELECT
+    c.id, c.name, c.description,
+    cmp.id AS competency_id, cmp.category_id, cmp.name AS competency_name,
+    cmp.description AS competency_description, cmp.novice, cmp.intermediate,
+    cmp.advanced, cmp.expert
 FROM category c
 JOIN competency cmp ON c.id = cmp.category_id;
