@@ -290,7 +290,7 @@ components:
           type: string
         description:
           type: string
-        superCompetencyId:
+        superCompetencyID:
           type: string
           format: uuid
           nullable: true
@@ -303,7 +303,7 @@ components:
           type: string
         description:
           type: string
-        superCompetencyId:
+        superCompetencyID:
           type: string
           format: uuid
           nullable: true
@@ -318,7 +318,7 @@ components:
         id:
           type: string
           format: uuid
-        competencyId:
+        competencyID:
           type: string
           format: uuid
         level:
@@ -330,9 +330,9 @@ components:
 
     CreateRubricRequest:
       type: object
-      required: [competencyId, level, description]
+      required: [competencyID, level, description]
       properties:
-        competencyId:
+        competencyID:
           type: string
           format: uuid
         level:
@@ -350,13 +350,13 @@ components:
         id:
           type: string
           format: uuid
-        courseParticipationId:
+        courseParticipationID:
           type: string
           format: uuid
-        coursePhaseId:
+        coursePhaseID:
           type: string
           format: uuid
-        competencyId:
+        competencyID:
           type: string
           format: uuid
         score:
@@ -369,15 +369,15 @@ components:
 
     CreateAssessmentRequest:
       type: object
-      required: [courseParticipationId, coursePhaseId, competencyId, score]
+      required: [courseParticipationID, coursePhaseID, competencyID, score]
       properties:
-        courseParticipationId:
+        courseParticipationID:
           type: string
           format: uuid
-        coursePhaseId:
+        coursePhaseID:
           type: string
           format: uuid
-        competencyId:
+        competencyID:
           type: string
           format: uuid
         score:
