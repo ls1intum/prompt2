@@ -94,8 +94,10 @@ export const Assessment = (): JSX.Element => {
               {passed
                 ? 'Passed'
                 : !passed && (remainingAttempts !== maxAttempts || assessmentTriggered)
-                  ? 'Failed'
-                  : 'Not Started'}
+                  ? 'Not Passed'
+                  : !passed && remainingAttempts === 0
+                    ? 'Failed'
+                    : 'Not Started'}
             </Badge>
             <Badge
               variant='outline'
@@ -196,7 +198,9 @@ export const Assessment = (): JSX.Element => {
                   </AlertTitle>
                 </div>
                 <AlertDescription className={`mt-1 ${passed ? 'text-green-500' : ''}`}>
-                  {!passed ? (error ?? 'You failed the challenge.') : 'You passed the challenge!'}
+                  {!passed
+                    ? (error ?? 'Your last testing attempt did not pass.')
+                    : 'You passed the challenge!'}
                 </AlertDescription>
               </Alert>
             ) : (
