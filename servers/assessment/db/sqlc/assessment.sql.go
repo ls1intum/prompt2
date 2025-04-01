@@ -12,40 +12,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteAssessment = `-- name: DeleteAssessment :exec
-DELETE FROM assessment
-WHERE id = $1
-  AND course_participation_id = $2
-  AND course_phase_id = $3
+const createAssessment = `-- name: CreateAssessment :one
+INSERT INTO assessment (
+    id, course_participation_id, course_phase_id, competency_id,
+    score, comment, assessed_at
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
-type DeleteAssessmentParams struct {
-	ID                    uuid.UUID `json:"id"`
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+type CreateAssessmentParams struct {
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CompetencyID          uuid.UUID        `json:"competency_id"`
+	Score                 int16            `json:"score"`
+	Comment               pgtype.Text      `json:"comment"`
+	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
-func (q *Queries) DeleteAssessment(ctx context.Context, arg DeleteAssessmentParams) error {
-	_, err := q.db.Exec(ctx, deleteAssessment, arg.ID, arg.CourseParticipationID, arg.CoursePhaseID)
-	return err
-}
-
-const getAssessmentByCompetency = `-- name: GetAssessmentByCompetency :one
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
-FROM assessment
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND competency_id = $3
-`
-
-type GetAssessmentByCompetencyParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-	CompetencyID          uuid.UUID `json:"competency_id"`
-}
-
-func (q *Queries) GetAssessmentByCompetency(ctx context.Context, arg GetAssessmentByCompetencyParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, getAssessmentByCompetency, arg.CourseParticipationID, arg.CoursePhaseID, arg.CompetencyID)
+func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) (Assessment, error) {
+	row := q.db.QueryRow(ctx, createAssessment,
+		arg.ID,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
+		arg.CompetencyID,
+		arg.Score,
+		arg.Comment,
+		arg.AssessedAt,
+	)
 	var i Assessment
 	err := row.Scan(
 		&i.ID,
@@ -59,21 +54,43 @@ func (q *Queries) GetAssessmentByCompetency(ctx context.Context, arg GetAssessme
 	return i, err
 }
 
-const getAssessmentsForStudentInPhase = `-- name: GetAssessmentsForStudentInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
-FROM assessment
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-ORDER BY assessed_at DESC
+const deleteAssessment = `-- name: DeleteAssessment :exec
+DELETE FROM assessment WHERE id = $1
 `
 
-type GetAssessmentsForStudentInPhaseParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+func (q *Queries) DeleteAssessment(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteAssessment, id)
+	return err
 }
 
-func (q *Queries) GetAssessmentsForStudentInPhase(ctx context.Context, arg GetAssessmentsForStudentInPhaseParams) ([]Assessment, error) {
-	rows, err := q.db.Query(ctx, getAssessmentsForStudentInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
+const getAssessment = `-- name: GetAssessment :one
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE id = $1
+`
+
+func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, error) {
+	row := q.db.QueryRow(ctx, getAssessment, id)
+	var i Assessment
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.CoursePhaseID,
+		&i.CompetencyID,
+		&i.Score,
+		&i.Comment,
+		&i.AssessedAt,
+	)
+	return i, err
+}
+
+const listAssessmentsByCategory = `-- name: ListAssessmentsByCategory :many
+SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.score, a.comment, a.assessed_at
+FROM assessment a
+JOIN competency c ON a.competency_id = c.id
+WHERE c.category_id = $1
+`
+
+func (q *Queries) ListAssessmentsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByCategory, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -100,61 +117,176 @@ func (q *Queries) GetAssessmentsForStudentInPhase(ctx context.Context, arg GetAs
 	return items, nil
 }
 
-const insertAssessment = `-- name: InsertAssessment :exec
-INSERT INTO assessment (id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+const listAssessmentsByCompetency = `-- name: ListAssessmentsByCompetency :many
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE competency_id = $1
 `
 
-type InsertAssessmentParams struct {
-	ID                    uuid.UUID        `json:"id"`
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CompetencyID          uuid.UUID        `json:"competency_id"`
-	Score                 int16            `json:"score"`
-	Comment               pgtype.Text      `json:"comment"`
-	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
+func (q *Queries) ListAssessmentsByCompetency(ctx context.Context, competencyID uuid.UUID) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByCompetency, competencyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assessment
+	for rows.Next() {
+		var i Assessment
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.CompetencyID,
+			&i.Score,
+			&i.Comment,
+			&i.AssessedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-func (q *Queries) InsertAssessment(ctx context.Context, arg InsertAssessmentParams) error {
-	_, err := q.db.Exec(ctx, insertAssessment,
-		arg.ID,
+const listAssessmentsByCoursePhase = `-- name: ListAssessmentsByCoursePhase :many
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE course_phase_id = $1
+`
+
+func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByCoursePhase, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assessment
+	for rows.Next() {
+		var i Assessment
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.CompetencyID,
+			&i.Score,
+			&i.Comment,
+			&i.AssessedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAssessmentsByStudent = `-- name: ListAssessmentsByStudent :many
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE course_participation_id = $1
+`
+
+func (q *Queries) ListAssessmentsByStudent(ctx context.Context, courseParticipationID uuid.UUID) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByStudent, courseParticipationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assessment
+	for rows.Next() {
+		var i Assessment
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.CompetencyID,
+			&i.Score,
+			&i.Comment,
+			&i.AssessedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAssessmentsByStudentInPhase = `-- name: ListAssessmentsByStudentInPhase :many
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
+FROM assessment
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+`
+
+type ListAssessmentsByStudentInPhaseParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListAssessmentsByStudentInPhaseParams) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByStudentInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Assessment
+	for rows.Next() {
+		var i Assessment
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.CompetencyID,
+			&i.Score,
+			&i.Comment,
+			&i.AssessedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateAssessment = `-- name: UpdateAssessment :one
+UPDATE assessment
+SET score = $4, comment = $5, assessed_at = CURRENT_TIMESTAMP
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND competency_id = $3
+RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
+`
+
+type UpdateAssessmentParams struct {
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CompetencyID          uuid.UUID   `json:"competency_id"`
+	Score                 int16       `json:"score"`
+	Comment               pgtype.Text `json:"comment"`
+}
+
+func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
+	row := q.db.QueryRow(ctx, updateAssessment,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
 		arg.Score,
 		arg.Comment,
-		arg.AssessedAt,
 	)
-	return err
-}
-
-const updateAssessment = `-- name: UpdateAssessment :exec
-UPDATE assessment
-SET score = $4,
-    comment = $5,
-    assessed_at = $6
-WHERE id = $1
-  AND course_participation_id = $2
-  AND course_phase_id = $3
-`
-
-type UpdateAssessmentParams struct {
-	ID                    uuid.UUID        `json:"id"`
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	Score                 int16            `json:"score"`
-	Comment               pgtype.Text      `json:"comment"`
-	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
-}
-
-func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) error {
-	_, err := q.db.Exec(ctx, updateAssessment,
-		arg.ID,
-		arg.CourseParticipationID,
-		arg.CoursePhaseID,
-		arg.Score,
-		arg.Comment,
-		arg.AssessedAt,
+	var i Assessment
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.CoursePhaseID,
+		&i.CompetencyID,
+		&i.Score,
+		&i.Comment,
+		&i.AssessedAt,
 	)
-	return err
+	return i, err
 }

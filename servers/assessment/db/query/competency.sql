@@ -1,29 +1,23 @@
--- name: GetRootCompetencies :many
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE super_competency_id IS NULL;
+-- name: CreateCompetency :one
+INSERT INTO competency (id, category_id, name, description, novice, intermediate, advanced, expert)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING *;
 
--- name: GetSubCompetencies :many
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE super_competency_id = $1;
+-- name: GetCompetency :one
+SELECT * FROM competency WHERE id = $1;
 
--- name: GetCompetencyByID :one
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE id = $1;
+-- name: ListCompetencies :many
+SELECT * FROM competency;
 
--- name: InsertCompetency :exec
-INSERT INTO competency (id, super_competency_id, name, description)
-VALUES ($1, $2, $3, $4);
+-- name: ListCompetenciesByCategory :many
+SELECT * FROM competency WHERE category_id = $1;
 
--- name: UpdateCompetency :exec
+-- name: UpdateCompetency :one
 UPDATE competency
-SET super_competency_id = $2,
-    name = $3,
-    description = $4
-WHERE id = $1;
+SET category_id = $2, name = $3, description = $4, novice = $5,
+    intermediate = $6, advanced = $7, expert = $8
+WHERE id = $1
+RETURNING *;
 
 -- name: DeleteCompetency :exec
-DELETE FROM competency
-WHERE id = $1;
+DELETE FROM competency WHERE id = $1;

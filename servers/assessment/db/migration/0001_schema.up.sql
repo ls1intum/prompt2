@@ -1,29 +1,25 @@
 BEGIN;
 
--- Competency hierarchy
+CREATE TABLE
+    category (
+        id uuid NOT NULL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT
+    );
+
 CREATE TABLE
     competency (
         id uuid NOT NULL PRIMARY KEY,
-        super_competency_id uuid NULL,
+        category_id uuid NOT NULL,
         name VARCHAR(255) NOT NULL,
         description TEXT,
-        FOREIGN KEY (super_competency_id) REFERENCES competency (id) ON DELETE CASCADE
+        novice TEXT NOT NULL,
+        intermediate TEXT NOT NULL,
+        advanced TEXT NOT NULL,
+        expert TEXT NOT NULL,
+        FOREIGN KEY (category_id) REFERENCES category (id) ON DELETE CASCADE
     );
 
--- Scoring guidance per competency and level (e.g., novice to expert)
-CREATE TABLE
-    rubric (
-        id uuid NOT NULL PRIMARY KEY,
-        competency_id uuid NOT NULL,
-        level SMALLINT NOT NULL CHECK (
-            level >= 1
-            AND level <= 4
-        ),
-        description TEXT NOT NULL,
-        FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE CASCADE
-    );
-
--- Anonymous assessment of a student in a course phase on a specific competency
 CREATE TABLE
     assessment (
         id uuid NOT NULL PRIMARY KEY,
