@@ -197,7 +197,7 @@ export const Assessment = (): JSX.Element => {
                 </div>
                 <AlertDescription className={`mt-1 ${passed ? 'text-green-500' : ''}`}>
                   {!passed
-                    ? (error ?? 'Your last testing attempt failed')
+                    ? (error ?? 'Your last testing attempt did not pass')
                     : 'You passed the challenge!'}
                 </AlertDescription>
               </Alert>
