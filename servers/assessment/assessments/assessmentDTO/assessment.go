@@ -20,7 +20,7 @@ type Assessment struct {
 
 // GetAssessmentDTOsFromDBModels converts DB assessment models into DTOs.
 func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
-	assessments := make([]Assessment, len(dbAssessments))
+	assessments := make([]Assessment, 0, len(dbAssessments))
 	for i, a := range dbAssessments {
 		assessments[i] = Assessment{
 			ID:                    a.ID,
