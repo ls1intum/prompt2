@@ -1,12 +1,12 @@
-# How to Add a New Component
+# How to Add a New Microfrontend
 
 This guide explains how to add a new microfrontend component (ending with `_component`) to this repository, using our existing template structure.
 
 ---
 
-## 1. Create Your New Component Inside This Repo
+## 1. Create Your New Microfrontend Inside This Repo
 
-### 1.1. Copy the Template Component
+### 1.1. Copy the Template Microfrontend
 
 1. **Naming**
 
@@ -32,7 +32,7 @@ This guide explains how to add a new microfrontend component (ending with `_comp
    - **`<yourName_component>/Dockerfile`**: Rename all instances of `template_component` to your new component name.
    - **`<yourName_component>/package.json`**: Update the `"name"` field to match your component.
 
-5. **Register Your Component in the Monorepo**
+5. **Register Your Microfrontend in the Monorepo**
 
    - **`lerna.json`** > `packages`
    - **`package.json`** > `packages`
@@ -42,7 +42,7 @@ This guide explains how to add a new microfrontend component (ending with `_comp
 
 6. **Install Dependencies**
 
-   - Run `yarn install` at the repository root to ensure your new component is properly integrated.
+   - Run `yarn install` at the repository root to ensure your new microfrontend is properly integrated.
 
 7. **Implement Your Functionality**
 
@@ -64,12 +64,12 @@ This guide explains how to add a new microfrontend component (ending with `_comp
 
 ---
 
-## 2. Integrate Your Component with the Core
+## 2. Integrate Your Microfrontend with the Core
 
 ### 2.1. Update `core/webpack.config.ts`
 
-1. Determine the URL of your new component (e.g., via an environment variable).
-2. In the `ModuleFederationPlugin > remotes` section, add an entry for your new component so it can be dynamically loaded.
+1. Determine the URL of your new microfrontend (e.g., via an environment variable).
+2. In the `ModuleFederationPlugin > remotes` section, add an entry for your new microfrontend so it can be dynamically loaded.
 
 ### 2.2. Set Up External Routes and Sidebars
 
@@ -92,7 +92,7 @@ IMPORTANT: Make sure to exactly follow and copy the files such that the permissi
      - Webpack requires static imports for code splitting and analysis. Hence, import paths need to be static and not in form of a variable. This could be resolved by a dictionary, but this would introduce another part which needs to be adjusted
      - Main reason: Dynamically passed import path (i.e. through a dictionary) can introduce repeated reloading and undesired "Loading" states. Our current approach ensures components are loaded and cached effectively. The downside of code repetition of the loading logic seems neglectable (for now.)
 
-### 2.3. Map the Component to Course Phases
+### 2.3. Map the Microfrontend to Course Phases
 
 We assume that every component is associated to one course phase type.
 The course phase types are stored in the DB. We assume here that you already have a course phase type to which you want to map your component.
@@ -106,7 +106,7 @@ The course phase types are stored in the DB. We assume here that you already hav
 
 ---
 
-## 3. Deploy Your Component
+## 3. Deploy Your Microfrontend
 
 1. **Environment Variables**
 
@@ -124,7 +124,7 @@ The course phase types are stored in the DB. We assume here that you already hav
 
 ---
 
-## 2. Create a New Component Outside This Repo
+## 2. Create a New Microfrontend Outside This Repo
 
 > **Not yet supported.**
 
