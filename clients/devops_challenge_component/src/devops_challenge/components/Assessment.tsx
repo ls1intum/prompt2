@@ -62,7 +62,6 @@ export const Assessment = (): JSX.Element => {
   })
 
   const handleTriggerAssessment = () => {
-    assessmentMutation.mutate()
     assessmentMutation.mutate(undefined, {
       onSettled: () => {
         setAssessmentTriggered(true)
