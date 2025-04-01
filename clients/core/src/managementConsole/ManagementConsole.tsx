@@ -67,13 +67,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   useEffect(() => {
     if (fetchedCourses) {
-      setCourses(fetchedCourses)
+      // Spreading into a new array forces an immutable update.
+      setCourses([...fetchedCourses])
     }
   }, [fetchedCourses, setCourses])
 
   useEffect(() => {
     if (fetchedOwnCourseIDs) {
-      setOwnCourseIDs(fetchedOwnCourseIDs)
+      setOwnCourseIDs([...fetchedOwnCourseIDs])
     }
   }, [fetchedOwnCourseIDs, setOwnCourseIDs])
 
