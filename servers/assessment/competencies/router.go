@@ -7,57 +7,69 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies/competencyDTO"
-	log "github.com/sirupsen/logrus"
+	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
-// setupCompetencyRouter creates a router group for competency endpoints.
 func setupCompetencyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	competencyRouter := routerGroup.Group("/competency")
 
-	competencyRouter.GET("/roots", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getRootCompetencies)
-	competencyRouter.GET("/:superCompetencyID/sub", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSubCompetencies)
+	competencyRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetencies)
+	competencyRouter.GET("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getCompetency)
+	competencyRouter.GET("/by-category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetenciesByCategory)
 	competencyRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createCompetency)
 	competencyRouter.PUT("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateCompetency)
 	competencyRouter.DELETE("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteCompetency)
 }
 
-func getRootCompetencies(c *gin.Context) {
-	competencies, err := GetRootCompetencies(c)
+func listCompetencies(c *gin.Context) {
+	competencies, err := ListCompetencies(c)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, competencies)
+	c.JSON(http.StatusOK, competencyDTO.GetCompetencyDTOsFromDBModels(competencies))
 }
 
-func getSubCompetencies(c *gin.Context) {
-	superCompetencyID, err := uuid.Parse(c.Param("superCompetencyID"))
+func getCompetency(c *gin.Context) {
+	competencyID, err := uuid.Parse(c.Param("competencyID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	subs, err := GetSubCompetencies(c, superCompetencyID)
+	competency, err := GetCompetency(c, competencyID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, subs)
+	c.JSON(http.StatusOK, competencyDTO.GetCompetencyDTOsFromDBModels([]db.Competency{competency})[0])
+}
+
+func listCompetenciesByCategory(c *gin.Context) {
+	categoryID, err := uuid.Parse(c.Param("categoryID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	competencies, err := ListCompetenciesByCategory(c, categoryID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, competencyDTO.GetCompetencyDTOsFromDBModels(competencies))
 }
 
 func createCompetency(c *gin.Context) {
-	var request competencyDTO.CreateCompetencyRequest
-	if err := c.BindJSON(&request); err != nil {
+	var req competencyDTO.CreateCompetencyRequest
+	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	err := CreateCompetency(c, request.Name, request.Description, request.SuperCompetencyID)
+	competency, err := CreateCompetency(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, competency)
 }
 
 func updateCompetency(c *gin.Context) {
@@ -66,19 +78,17 @@ func updateCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	var request competencyDTO.UpdateCompetencyRequest
-	if err := c.BindJSON(&request); err != nil {
+	var req competencyDTO.UpdateCompetencyRequest
+	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	err = UpdateCompetency(c, competencyID, request.Name, request.Description, request.SuperCompetencyID)
+	competency, err := UpdateCompetency(c, competencyID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, competency)
 }
 
 func deleteCompetency(c *gin.Context) {
@@ -87,9 +97,7 @@ func deleteCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	err = DeleteCompetency(c, competencyID)
-	if err != nil {
+	if err := DeleteCompetency(c, competencyID); err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -97,6 +105,5 @@ func deleteCompetency(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	log.Error(err)
 	c.JSON(statusCode, gin.H{"error": err.Error()})
 }

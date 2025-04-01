@@ -22,70 +22,118 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func GetAssessmentsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]assessmentDTO.Assessment, error) {
-	assessments, err := AssessmentServiceSingleton.queries.GetAssessmentsForStudentInPhase(ctx, db.GetAssessmentsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not fetch assessments: ", err)
-		return nil, errors.New("failed to retrieve assessments")
-	}
-	return assessmentDTO.GetAssessmentDTOsFromDBModels(assessments), nil
-}
-
-func CreateAssessment(ctx context.Context, request assessmentDTO.CreateAssessmentRequest) error {
+func CreateOrUpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		log.Error("could not begin transaction: ", err)
-		return errors.New("failed to start transaction")
+		return db.Assessment{}, err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = AssessmentServiceSingleton.queries.WithTx(tx).InsertAssessment(ctx, db.InsertAssessmentParams{
+	assessedAt := time.Now()
+	if req.AssessedAt != nil {
+		assessedAt = *req.AssessedAt
+	}
+
+	assessment, err := qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+		CompetencyID:          req.CompetencyID,
+		Score:                 req.Score,
+		Comment:               pgtype.Text{String: req.Comment, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+	})
+	if err == nil {
+		if err := tx.Commit(ctx); err != nil {
+			return db.Assessment{}, fmt.Errorf("failed to commit update: %w", err)
+		}
+		return assessment, nil
+	}
+
+	assessment, err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
-		CourseParticipationID: request.CourseParticipationID,
-		CoursePhaseID:         request.CoursePhaseID,
-		CompetencyID:          request.CompetencyID,
-		Score:                 request.Score,
-		Comment:               pgtype.Text{String: request.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+		CompetencyID:          req.CompetencyID,
+		Score:                 req.Score,
+		Comment:               pgtype.Text{String: req.Comment, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
 	})
 	if err != nil {
-		log.Error("could not insert assessment: ", err)
-		return errors.New("failed to insert assessment")
+		log.Error("could not create assessment: ", err)
+		return db.Assessment{}, errors.New("could not create assessment")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		log.Error("could not commit transaction: ", err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		log.Error("could not commit assessment creation: ", err)
+		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return nil
+
+	return assessment, nil
 }
 
-func UpdateAssessment(ctx context.Context, assessmentID uuid.UUID, request assessmentDTO.UpdateAssessmentRequest) error {
-	err := AssessmentServiceSingleton.queries.UpdateAssessment(ctx, db.UpdateAssessmentParams{
-		ID:         assessmentID,
-		Score:      request.Score,
-		Comment:    pgtype.Text{String: request.Comment, Valid: true},
-		AssessedAt: pgtype.Timestamp{Time: time.Now(), Valid: true},
-	})
+func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
+	assessment, err := AssessmentServiceSingleton.queries.GetAssessment(ctx, id)
 	if err != nil {
-		log.Error("could not update assessment: ", err)
-		return errors.New("failed to update assessment")
+		log.Error("could not get assessment: ", err)
+		return db.Assessment{}, errors.New("could not get assessment")
+	}
+	return assessment, nil
+}
+
+func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
+	err := AssessmentServiceSingleton.queries.DeleteAssessment(ctx, id)
+	if err != nil {
+		log.Error("could not delete assessment: ", err)
+		return errors.New("could not delete assessment")
 	}
 	return nil
 }
 
-func DeleteAssessment(ctx context.Context, assessmentID, courseParticipationID, coursePhaseID uuid.UUID) error {
-	err := AssessmentServiceSingleton.queries.DeleteAssessment(ctx, db.DeleteAssessmentParams{
-		ID:                    assessmentID,
+func ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.Assessment, error) {
+	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get assessments by course phase: ", err)
+		return nil, errors.New("could not get assessments by course phase")
+	}
+	return assessments, nil
+}
+
+func ListAssessmentsByStudent(ctx context.Context, courseParticipationID uuid.UUID) ([]db.Assessment, error) {
+	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByStudent(ctx, courseParticipationID)
+	if err != nil {
+		log.Error("could not get assessments by student: ", err)
+		return nil, errors.New("could not get assessments by student")
+	}
+	return assessments, nil
+}
+
+func ListAssessmentsByStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.Assessment, error) {
+	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByStudentInPhase(ctx, db.ListAssessmentsByStudentInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not delete assessment: ", err)
-		return errors.New("failed to delete assessment")
+		log.Error("could not get assessments for student in phase: ", err)
+		return nil, errors.New("could not get assessments for student in phase")
 	}
-	return nil
+	return assessments, nil
+}
+
+func ListAssessmentsByCompetency(ctx context.Context, competencyID uuid.UUID) ([]db.Assessment, error) {
+	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByCompetency(ctx, competencyID)
+	if err != nil {
+		log.Error("could not get assessments for competency: ", err)
+		return nil, errors.New("could not get assessments for competency")
+	}
+	return assessments, nil
+}
+
+func ListAssessmentsByCategory(ctx context.Context, categoryID uuid.UUID) ([]db.Assessment, error) {
+	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByCategory(ctx, categoryID)
+	if err != nil {
+		log.Error("could not get assessments for category: ", err)
+		return nil, errors.New("could not get assessments for category")
+	}
+	return assessments, nil
 }

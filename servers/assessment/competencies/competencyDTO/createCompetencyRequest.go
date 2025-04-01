@@ -2,9 +2,12 @@ package competencyDTO
 
 import "github.com/google/uuid"
 
-// CreateCompetencyRequest represents the request body for creating a competency.
 type CreateCompetencyRequest struct {
-	Name              string     `json:"name"`
-	Description       string     `json:"description"`
-	SuperCompetencyID *uuid.UUID `json:"superCompetencyID,omitempty"`
+	CategoryID   uuid.UUID `json:"categoryID"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+	Novice       string    `json:"novice"`
+	Intermediate string    `json:"intermediate"`
+	Advanced     string    `json:"advanced"`
+	Expert       string    `json:"expert"`
 }

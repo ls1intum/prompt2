@@ -1,21 +1,26 @@
 openapi: 3.0.3
 info:
   title: Prompt Assessment Service
-  description: API for managing competencies, rubrics, and assessments for course phases.
+  description: API for managing categories, competencies, and assessments for course phases.
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8084/assessment/api/course_phase/{coursePhaseID} // TODO replace with actual server
+  - url: http://{assessmentServerURL}/assessment/api/course_phase/{coursePhaseID}
     variables:
+      assessmentServerURL:
+        description: URL of the assessment server
+        default: localhost:8084
       coursePhaseID:
         description: ID of the course phase
         default: example-course-phase-id
 
 tags:
+  - name: System
+    description: System or health-check endpoints
+  - name: Category
+    description: Categories to group competencies
   - name: Competency
-    description: Competency hierarchy and management
-  - name: Rubric
-    description: Rubric criteria for competencies
+    description: Competency definitions and CRUD
   - name: Assessment
     description: Tutor or peer evaluations for competencies
 
@@ -35,26 +40,45 @@ paths:
                   message:
                     type: string
 
-  /competency/root:
+  ############################
+  # Category Endpoints
+  ############################
+  /category:
     get:
-      summary: Get all root competencies
-      tags: [Competency]
+      summary: List all categories
+      tags: [Category]
       responses:
         "200":
-          description: List of root competencies
+          description: List of categories
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Competency"
+                  $ref: "#/components/schemas/Category"
+    post:
+      summary: Create a new category
+      tags: [Category]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
 
-  /competency/{parentID}/sub:
+  /category/{categoryID}:
     get:
-      summary: Get sub-competencies
-      tags: [Competency]
+      summary: Get a category by ID
+      tags: [Category]
       parameters:
-        - name: parentID
+        - name: categoryID
           in: path
           required: true
           schema:
@@ -62,15 +86,78 @@ paths:
             format: uuid
       responses:
         "200":
-          description: List of sub-competencies
+          description: The requested category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    put:
+      summary: Update a category
+      tags: [Category]
+      parameters:
+        - name: categoryID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryRequest"
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      summary: Delete a category
+      tags: [Category]
+      parameters:
+        - name: categoryID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Category deleted
+
+  /category/with-competencies:
+    get:
+      summary: List categories joined with their competencies
+      tags: [Category]
+      responses:
+        "200":
+          description: Returns categories, each with a list of competencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
+
+  ############################
+  # Competency Endpoints
+  ############################
+  /competency:
+    get:
+      summary: List all competencies
+      tags: [Competency]
+      responses:
+        "200":
+          description: A list of competencies
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Competency"
-
-  /competency:
     post:
       summary: Create a new competency
       tags: [Competency]
@@ -83,8 +170,29 @@ paths:
       responses:
         "201":
           description: Competency created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Competency"
 
   /competency/{competencyID}:
+    get:
+      summary: Get a competency by ID
+      tags: [Competency]
+      parameters:
+        - name: competencyID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The requested competency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Competency"
     put:
       summary: Update a competency
       tags: [Competency]
@@ -104,7 +212,10 @@ paths:
       responses:
         "200":
           description: Competency updated
-
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Competency"
     delete:
       summary: Delete a competency
       tags: [Competency]
@@ -119,12 +230,12 @@ paths:
         "200":
           description: Competency deleted
 
-  /rubric/{competencyID}:
+  /competency/by-category/{categoryID}:
     get:
-      summary: Get rubrics for a competency
-      tags: [Rubric]
+      summary: Get all competencies for a particular category
+      tags: [Competency]
       parameters:
-        - name: competencyID
+        - name: categoryID
           in: path
           required: true
           schema:
@@ -132,107 +243,39 @@ paths:
             format: uuid
       responses:
         "200":
-          description: List of rubric entries
+          description: List of competencies
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Rubric"
+                  $ref: "#/components/schemas/Competency"
 
-  /rubric:
-    post:
-      summary: Create a rubric entry
-      tags: [Rubric]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateRubricRequest"
-      responses:
-        "201":
-          description: Rubric created
-
-  /rubric/{rubricID}:
-    put:
-      summary: Update a rubric
-      tags: [Rubric]
-      parameters:
-        - name: rubricID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateRubricRequest"
-      responses:
-        "200":
-          description: Rubric updated
-
-    delete:
-      summary: Delete a rubric
-      tags: [Rubric]
-      parameters:
-        - name: rubricID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Rubric deleted
-
-  /assessment/{courseParticipationID}/{coursePhaseID}:
-    get:
-      summary: Get all assessments for a student in a course phase
-      tags: [Assessment]
-      parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: coursePhaseID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
+  ############################
+  # Assessment Endpoints
+  ############################
   /assessment:
     post:
-      summary: Create an assessment
+      summary: Create or update an assessment
+      description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
       tags: [Assessment]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAssessmentRequest"
+              $ref: "#/components/schemas/CreateOrUpdateAssessmentRequest"
       responses:
-        "201":
-          description: Assessment created
+        "200":
+          description: Assessment created or updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assessment"
 
   /assessment/{assessmentID}:
-    put:
-      summary: Update an assessment
+    get:
+      summary: Get an assessment by ID
       tags: [Assessment]
       parameters:
         - name: assessmentID
@@ -241,17 +284,13 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateAssessmentRequest"
       responses:
         "200":
-          description: Assessment updated
-
-  /assessment/{assessmentID}/{courseParticipationID}/{coursePhaseID}:
+          description: The requested assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assessment"
     delete:
       summary: Delete an assessment
       tags: [Assessment]
@@ -262,6 +301,57 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: Assessment deleted
+
+  /assessment/by-coursephase/{coursePhaseID}:
+    get:
+      summary: Get all assessments in a course phase
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments in the specified course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  /assessment/by-student/{courseParticipationID}:
+    get:
+      summary: Get all assessments for a given student
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments for the specified student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  /assessment/by-student-in-phase/{courseParticipationID}/{coursePhaseID}:
+    get:
+      summary: Get all assessments for a student in a particular course phase
+      tags: [Assessment]
+      parameters:
         - name: courseParticipationID
           in: path
           required: true
@@ -276,74 +366,168 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Assessment deleted
+          description: List of assessments for the specified student in the specified course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  /assessment/by-competency/{competencyID}:
+    get:
+      summary: Get all assessments for a competency
+      tags: [Assessment]
+      parameters:
+        - name: competencyID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments for the specified competency
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  /assessment/by-category/{categoryID}:
+    get:
+      summary: Get all assessments for a category
+      tags: [Assessment]
+      parameters:
+        - name: categoryID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments for the specified category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
 
 components:
   schemas:
+    ################################
+    # Category Schemas
+    ################################
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+
+    CreateCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    CategoryWithCompetencies:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        competencies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Competency"
+
+    ################################
+    # Competency Schemas
+    ################################
     Competency:
       type: object
       properties:
         id:
           type: string
           format: uuid
+        categoryID:
+          type: string
+          format: uuid
         name:
           type: string
         description:
           type: string
-        superCompetencyID:
+        novice:
           type: string
-          format: uuid
-          nullable: true
+        intermediate:
+          type: string
+        advanced:
+          type: string
+        expert:
+          type: string
 
     CreateCompetencyRequest:
       type: object
-      required: [name, description]
+      required: [categoryID, name, novice, intermediate, advanced, expert]
+      properties:
+        categoryID:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        novice:
+          type: string
+        intermediate:
+          type: string
+        advanced:
+          type: string
+        expert:
+          type: string
+
+    UpdateCompetencyRequest:
+      type: object
       properties:
         name:
           type: string
         description:
           type: string
-        superCompetencyID:
+        novice:
           type: string
-          format: uuid
-          nullable: true
-
-    UpdateCompetencyRequest:
-      allOf:
-        - $ref: "#/components/schemas/CreateCompetencyRequest"
-
-    Rubric:
-      type: object
-      properties:
-        id:
+        intermediate:
           type: string
-          format: uuid
-        competencyID:
+        advanced:
           type: string
-          format: uuid
-        level:
-          type: integer
-          minimum: 1
-          maximum: 4
-        description:
+        expert:
           type: string
 
-    CreateRubricRequest:
-      type: object
-      required: [competencyID, level, description]
-      properties:
-        competencyID:
-          type: string
-          format: uuid
-        level:
-          type: integer
-        description:
-          type: string
-
-    UpdateRubricRequest:
-      allOf:
-        - $ref: "#/components/schemas/CreateRubricRequest"
-
+    ################################
+    # Assessment Schemas
+    ################################
     Assessment:
       type: object
       properties:
@@ -365,9 +549,8 @@ components:
           type: string
         assessedAt:
           type: string
-          format: date-time
 
-    CreateAssessmentRequest:
+    CreateOrUpdateAssessmentRequest:
       type: object
       required: [courseParticipationID, coursePhaseID, competencyID, score]
       properties:
@@ -384,12 +567,5 @@ components:
           type: integer
         comment:
           type: string
-
-    UpdateAssessmentRequest:
-      type: object
-      required: [score]
-      properties:
-        score:
-          type: integer
-        comment:
+        assessedAt:
           type: string

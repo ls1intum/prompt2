@@ -5,23 +5,29 @@ import (
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
-// Competency represents a simplified view of the competency record.
 type Competency struct {
-	ID                uuid.UUID  `json:"id"`
-	Name              string     `json:"name"`
-	Description       string     `json:"description"`
-	SuperCompetencyID *uuid.UUID `json:"superCompetencyID,omitempty"`
+	ID           uuid.UUID `json:"id"`
+	CategoryID   uuid.UUID `json:"categoryID"`
+	Name         string    `json:"name"`
+	Description  string    `json:"description"`
+	Novice       string    `json:"novice"`
+	Intermediate string    `json:"intermediate"`
+	Advanced     string    `json:"advanced"`
+	Expert       string    `json:"expert"`
 }
 
-// GetCompetencyDTOsFromDBModels converts a slice of DB competencies to DTOs.
 func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency {
-	competencies := make([]Competency, 0, len(dbCompetencies))
+	competencies := make([]Competency, len(dbCompetencies))
 	for i, c := range dbCompetencies {
 		competencies[i] = Competency{
-			ID:                c.ID,
-			Name:              c.Name,
-			Description:       c.Description.String,
-			SuperCompetencyID: &c.SuperCompetencyID,
+			ID:           c.ID,
+			CategoryID:   c.CategoryID,
+			Name:         c.Name,
+			Description:  c.Description.String,
+			Novice:       c.Novice,
+			Intermediate: c.Intermediate,
+			Advanced:     c.Advanced,
+			Expert:       c.Expert,
 		}
 	}
 	return competencies

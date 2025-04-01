@@ -14,13 +14,13 @@ type Assessment struct {
 	CoursePhaseID         uuid.UUID `json:"coursePhaseID"`
 	CompetencyID          uuid.UUID `json:"competencyID"`
 	Score                 int16     `json:"score"`
-	Comment               string    `json:"comment,omitempty"`
+	Comment               string    `json:"comment"`
 	AssessedAt            time.Time `json:"assessedAt"`
 }
 
-// GetAssessmentDTOsFromDBModels converts DB assessment models into DTOs.
+// GetAssessmentDTOsFromDBModels converts a slice of db.Assessment to DTOs.
 func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
-	assessments := make([]Assessment, 0, len(dbAssessments))
+	assessments := make([]Assessment, len(dbAssessments))
 	for i, a := range dbAssessments {
 		assessments[i] = Assessment{
 			ID:                    a.ID,

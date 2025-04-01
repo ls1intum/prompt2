@@ -13,64 +13,43 @@ import (
 func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentRouter := routerGroup.Group("/assessment")
 
-	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAssessmentsForStudentInPhase)
-	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createAssessment)
-	assessmentRouter.PUT("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateAssessment)
-	assessmentRouter.DELETE("/:assessmentID/:courseParticipationID/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)
+	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createOrUpdateAssessment)
+	assessmentRouter.GET("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAssessment)
+	assessmentRouter.DELETE("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)
+
+	assessmentRouter.GET("/by-coursephase", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCoursePhase)
+	assessmentRouter.GET("/:courseParticipationID/by-student", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByStudent)
+	assessmentRouter.GET("/:courseParticipationID/by-student-in-phase", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByStudentInPhase)
+	assessmentRouter.GET("/by-competency/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCompetency)
+	assessmentRouter.GET("/by-category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCategory)
 }
 
-func getAssessmentsForStudentInPhase(c *gin.Context) {
-	cpID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
+func createOrUpdateAssessment(c *gin.Context) {
+	var req assessmentDTO.CreateOrUpdateAssessmentRequest
+	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	phaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	assessments, err := GetAssessmentsForStudentInPhase(c, cpID, phaseID)
+	assessment, err := CreateOrUpdateAssessment(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessments)
+	c.JSON(http.StatusOK, assessment)
 }
 
-func createAssessment(c *gin.Context) {
-	var request assessmentDTO.CreateAssessmentRequest
-	if err := c.BindJSON(&request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := CreateAssessment(c, request); err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.Status(http.StatusCreated)
-}
-
-func updateAssessment(c *gin.Context) {
+func getAssessment(c *gin.Context) {
 	assessmentID, err := uuid.Parse(c.Param("assessmentID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	var request assessmentDTO.UpdateAssessmentRequest
-	if err := c.BindJSON(&request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := UpdateAssessment(c, assessmentID, request); err != nil {
+	assessment, err := GetAssessment(c, assessmentID)
+	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, assessment)
 }
 
 func deleteAssessment(c *gin.Context) {
@@ -79,22 +58,86 @@ func deleteAssessment(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	cpID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	phaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := DeleteAssessment(c, assessmentID, cpID, phaseID); err != nil {
+	if err := DeleteAssessment(c, assessmentID); err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func listAssessmentsByCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+}
+
+func listAssessmentsByStudent(c *gin.Context) {
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByStudent(c, courseParticipationID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+}
+
+func listAssessmentsByStudentInPhase(c *gin.Context) {
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByStudentInPhase(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+}
+
+func listAssessmentsByCompetency(c *gin.Context) {
+	competencyID, err := uuid.Parse(c.Param("competencyID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByCompetency(c, competencyID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+}
+
+func listAssessmentsByCategory(c *gin.Context) {
+	categoryID, err := uuid.Parse(c.Param("categoryID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByCategory(c, categoryID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

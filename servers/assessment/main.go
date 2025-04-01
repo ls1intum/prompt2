@@ -11,9 +11,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
+	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/assessment/rubrics"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -87,7 +87,7 @@ func main() {
 	})
 
 	competencies.InitCompetencyModule(api, *query, conn)
-	rubrics.InitRubricModule(api, *query, conn)
+	categories.InitCategoryModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
