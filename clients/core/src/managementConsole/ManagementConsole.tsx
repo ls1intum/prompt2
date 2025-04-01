@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
 import { WelcomePage } from './shared/components/WelcomePage'
 import { LoadingPage } from '@/components/LoadingPage'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Course } from '@tumaet/prompt-shared-state'
 import { getAllCourses } from '../network/queries/course'
@@ -42,6 +42,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   } = useQuery<Course[]>({
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
+    enabled: !!keycloak,
   })
 
   // getting the course ids of the course a user is enrolled in
@@ -53,6 +54,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   } = useQuery<string[]>({
     queryKey: ['own_courses'],
     queryFn: () => getOwnCourseIDs(),
+    enabled: !!keycloak,
   })
 
   const refetch = () => {
@@ -106,12 +108,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     setSelectedCourseID,
   ])
 
-  if (isLoading) {
-    return <LoadingPage />
-  }
-
   if (isError) {
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
+  }
+
+  if (isLoading || !keycloak) {
+    return <LoadingPage />
   }
 
   // Check if the user has at least some Prompt rights
