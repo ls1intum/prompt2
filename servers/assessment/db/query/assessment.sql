@@ -11,7 +11,7 @@ SELECT * FROM assessment WHERE id = $1;
 
 -- name: UpdateAssessment :one
 UPDATE assessment
-SET score = $4, comment = $5, assessed_at = CURRENT_TIMESTAMP
+SET score = $4, comment = $5, assessed_at = COALESCE($6, CURRENT_TIMESTAMP)
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND competency_id = $3

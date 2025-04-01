@@ -255,7 +255,7 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 
 const updateAssessment = `-- name: UpdateAssessment :one
 UPDATE assessment
-SET score = $4, comment = $5, assessed_at = CURRENT_TIMESTAMP
+SET score = $4, comment = $5, assessed_at = COALESCE($6, CURRENT_TIMESTAMP)
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND competency_id = $3
@@ -263,11 +263,12 @@ RETURNING id, course_participation_id, course_phase_id, competency_id, score, co
 `
 
 type UpdateAssessmentParams struct {
-	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
-	CompetencyID          uuid.UUID   `json:"competency_id"`
-	Score                 int16       `json:"score"`
-	Comment               pgtype.Text `json:"comment"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CompetencyID          uuid.UUID        `json:"competency_id"`
+	Score                 int16            `json:"score"`
+	Comment               pgtype.Text      `json:"comment"`
+	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
 func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
@@ -277,6 +278,7 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		arg.CompetencyID,
 		arg.Score,
 		arg.Comment,
+		arg.AssessedAt,
 	)
 	var i Assessment
 	err := row.Scan(
