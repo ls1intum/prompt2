@@ -12,9 +12,50 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createCompetency = `-- name: CreateCompetency :one
+INSERT INTO competency (id, category_id, name, description, novice, intermediate, advanced, expert)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, category_id, name, description, novice, intermediate, advanced, expert
+`
+
+type CreateCompetencyParams struct {
+	ID           uuid.UUID   `json:"id"`
+	CategoryID   uuid.UUID   `json:"category_id"`
+	Name         string      `json:"name"`
+	Description  pgtype.Text `json:"description"`
+	Novice       string      `json:"novice"`
+	Intermediate string      `json:"intermediate"`
+	Advanced     string      `json:"advanced"`
+	Expert       string      `json:"expert"`
+}
+
+func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) (Competency, error) {
+	row := q.db.QueryRow(ctx, createCompetency,
+		arg.ID,
+		arg.CategoryID,
+		arg.Name,
+		arg.Description,
+		arg.Novice,
+		arg.Intermediate,
+		arg.Advanced,
+		arg.Expert,
+	)
+	var i Competency
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.Description,
+		&i.Novice,
+		&i.Intermediate,
+		&i.Advanced,
+		&i.Expert,
+	)
+	return i, err
+}
+
 const deleteCompetency = `-- name: DeleteCompetency :exec
-DELETE FROM competency
-WHERE id = $1
+DELETE FROM competency WHERE id = $1
 `
 
 func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
@@ -22,32 +63,32 @@ func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getCompetencyByID = `-- name: GetCompetencyByID :one
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE id = $1
+const getCompetency = `-- name: GetCompetency :one
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency WHERE id = $1
 `
 
-func (q *Queries) GetCompetencyByID(ctx context.Context, id uuid.UUID) (Competency, error) {
-	row := q.db.QueryRow(ctx, getCompetencyByID, id)
+func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, error) {
+	row := q.db.QueryRow(ctx, getCompetency, id)
 	var i Competency
 	err := row.Scan(
 		&i.ID,
-		&i.SuperCompetencyID,
+		&i.CategoryID,
 		&i.Name,
 		&i.Description,
+		&i.Novice,
+		&i.Intermediate,
+		&i.Advanced,
+		&i.Expert,
 	)
 	return i, err
 }
 
-const getRootCompetencies = `-- name: GetRootCompetencies :many
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE super_competency_id IS NULL
+const listCompetencies = `-- name: ListCompetencies :many
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency
 `
 
-func (q *Queries) GetRootCompetencies(ctx context.Context) ([]Competency, error) {
-	rows, err := q.db.Query(ctx, getRootCompetencies)
+func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
+	rows, err := q.db.Query(ctx, listCompetencies)
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +98,13 @@ func (q *Queries) GetRootCompetencies(ctx context.Context) ([]Competency, error)
 		var i Competency
 		if err := rows.Scan(
 			&i.ID,
-			&i.SuperCompetencyID,
+			&i.CategoryID,
 			&i.Name,
 			&i.Description,
+			&i.Novice,
+			&i.Intermediate,
+			&i.Advanced,
+			&i.Expert,
 		); err != nil {
 			return nil, err
 		}
@@ -71,14 +116,12 @@ func (q *Queries) GetRootCompetencies(ctx context.Context) ([]Competency, error)
 	return items, nil
 }
 
-const getSubCompetencies = `-- name: GetSubCompetencies :many
-SELECT id, super_competency_id, name, description
-FROM competency
-WHERE super_competency_id = $1
+const listCompetenciesByCategory = `-- name: ListCompetenciesByCategory :many
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency WHERE category_id = $1
 `
 
-func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID uuid.UUID) ([]Competency, error) {
-	rows, err := q.db.Query(ctx, getSubCompetencies, superCompetencyID)
+func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]Competency, error) {
+	rows, err := q.db.Query(ctx, listCompetenciesByCategory, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,9 +131,13 @@ func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID uuid
 		var i Competency
 		if err := rows.Scan(
 			&i.ID,
-			&i.SuperCompetencyID,
+			&i.CategoryID,
 			&i.Name,
 			&i.Description,
+			&i.Novice,
+			&i.Intermediate,
+			&i.Advanced,
+			&i.Expert,
 		); err != nil {
 			return nil, err
 		}
@@ -102,49 +149,46 @@ func (q *Queries) GetSubCompetencies(ctx context.Context, superCompetencyID uuid
 	return items, nil
 }
 
-const insertCompetency = `-- name: InsertCompetency :exec
-INSERT INTO competency (id, super_competency_id, name, description)
-VALUES ($1, $2, $3, $4)
-`
-
-type InsertCompetencyParams struct {
-	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
-	Name              string      `json:"name"`
-	Description       pgtype.Text `json:"description"`
-}
-
-func (q *Queries) InsertCompetency(ctx context.Context, arg InsertCompetencyParams) error {
-	_, err := q.db.Exec(ctx, insertCompetency,
-		arg.ID,
-		arg.SuperCompetencyID,
-		arg.Name,
-		arg.Description,
-	)
-	return err
-}
-
-const updateCompetency = `-- name: UpdateCompetency :exec
+const updateCompetency = `-- name: UpdateCompetency :one
 UPDATE competency
-SET super_competency_id = $2,
-    name = $3,
-    description = $4
+SET category_id = $2, name = $3, description = $4, novice = $5,
+    intermediate = $6, advanced = $7, expert = $8
 WHERE id = $1
+RETURNING id, category_id, name, description, novice, intermediate, advanced, expert
 `
 
 type UpdateCompetencyParams struct {
-	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
-	Name              string      `json:"name"`
-	Description       pgtype.Text `json:"description"`
+	ID           uuid.UUID   `json:"id"`
+	CategoryID   uuid.UUID   `json:"category_id"`
+	Name         string      `json:"name"`
+	Description  pgtype.Text `json:"description"`
+	Novice       string      `json:"novice"`
+	Intermediate string      `json:"intermediate"`
+	Advanced     string      `json:"advanced"`
+	Expert       string      `json:"expert"`
 }
 
-func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) error {
-	_, err := q.db.Exec(ctx, updateCompetency,
+func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) (Competency, error) {
+	row := q.db.QueryRow(ctx, updateCompetency,
 		arg.ID,
-		arg.SuperCompetencyID,
+		arg.CategoryID,
 		arg.Name,
 		arg.Description,
+		arg.Novice,
+		arg.Intermediate,
+		arg.Advanced,
+		arg.Expert,
 	)
-	return err
+	var i Competency
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.Description,
+		&i.Novice,
+		&i.Intermediate,
+		&i.Advanced,
+		&i.Expert,
+	)
+	return i, err
 }

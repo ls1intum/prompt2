@@ -19,16 +19,19 @@ type Assessment struct {
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
-type Competency struct {
-	ID                uuid.UUID   `json:"id"`
-	SuperCompetencyID uuid.UUID   `json:"super_competency_id"`
-	Name              string      `json:"name"`
-	Description       pgtype.Text `json:"description"`
+type Category struct {
+	ID          uuid.UUID   `json:"id"`
+	Name        string      `json:"name"`
+	Description pgtype.Text `json:"description"`
 }
 
-type Rubric struct {
-	ID           uuid.UUID `json:"id"`
-	CompetencyID uuid.UUID `json:"competency_id"`
-	Level        int16     `json:"level"`
-	Description  string    `json:"description"`
+type Competency struct {
+	ID           uuid.UUID   `json:"id"`
+	CategoryID   uuid.UUID   `json:"category_id"`
+	Name         string      `json:"name"`
+	Description  pgtype.Text `json:"description"`
+	Novice       string      `json:"novice"`
+	Intermediate string      `json:"intermediate"`
+	Advanced     string      `json:"advanced"`
+	Expert       string      `json:"expert"`
 }
