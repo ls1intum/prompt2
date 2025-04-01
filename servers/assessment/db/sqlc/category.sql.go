@@ -41,23 +41,27 @@ func (q *Queries) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 }
 
 const getCategoriesWithCompetencies = `-- name: GetCategoriesWithCompetencies :many
-SELECT c.id, c.name, c.description, cmp.id, category_id, cmp.name, cmp.description, novice, intermediate, advanced, expert
+SELECT
+    c.id, c.name, c.description,
+    cmp.id AS competency_id, cmp.category_id, cmp.name AS competency_name,
+    cmp.description AS competency_description, cmp.novice, cmp.intermediate,
+    cmp.advanced, cmp.expert
 FROM category c
 JOIN competency cmp ON c.id = cmp.category_id
 `
 
 type GetCategoriesWithCompetenciesRow struct {
-	ID            uuid.UUID   `json:"id"`
-	Name          string      `json:"name"`
-	Description   pgtype.Text `json:"description"`
-	ID_2          uuid.UUID   `json:"id_2"`
-	CategoryID    uuid.UUID   `json:"category_id"`
-	Name_2        string      `json:"name_2"`
-	Description_2 pgtype.Text `json:"description_2"`
-	Novice        string      `json:"novice"`
-	Intermediate  string      `json:"intermediate"`
-	Advanced      string      `json:"advanced"`
-	Expert        string      `json:"expert"`
+	ID                    uuid.UUID   `json:"id"`
+	Name                  string      `json:"name"`
+	Description           pgtype.Text `json:"description"`
+	CompetencyID          uuid.UUID   `json:"competency_id"`
+	CategoryID            uuid.UUID   `json:"category_id"`
+	CompetencyName        string      `json:"competency_name"`
+	CompetencyDescription pgtype.Text `json:"competency_description"`
+	Novice                string      `json:"novice"`
+	Intermediate          string      `json:"intermediate"`
+	Advanced              string      `json:"advanced"`
+	Expert                string      `json:"expert"`
 }
 
 func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCategoriesWithCompetenciesRow, error) {
@@ -73,10 +77,10 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 			&i.ID,
 			&i.Name,
 			&i.Description,
-			&i.ID_2,
+			&i.CompetencyID,
 			&i.CategoryID,
-			&i.Name_2,
-			&i.Description_2,
+			&i.CompetencyName,
+			&i.CompetencyDescription,
 			&i.Novice,
 			&i.Intermediate,
 			&i.Advanced,
