@@ -10,7 +10,7 @@ import (
 // Assessment represents a simplified view of the assessment record.
 type Assessment struct {
 	ID                    uuid.UUID `json:"id"`
-	CourseParticipationID uuid.UUID `json:"courseParticipationId"`
+	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
 	CoursePhaseID         uuid.UUID `json:"coursePhaseId"`
 	CompetencyID          uuid.UUID `json:"competencyId"`
 	Score                 int16     `json:"score"`
