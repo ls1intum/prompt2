@@ -42,6 +42,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   } = useQuery<Course[]>({
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
+    enabled: !!keycloak,
   })
 
   // getting the course ids of the course a user is enrolled in
@@ -53,6 +54,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   } = useQuery<string[]>({
     queryKey: ['own_courses'],
     queryFn: () => getOwnCourseIDs(),
+    enabled: !!keycloak,
   })
 
   const refetch = () => {
@@ -65,13 +67,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   useEffect(() => {
     if (fetchedCourses) {
-      setCourses(fetchedCourses)
+      // Spreading into a new array forces an immutable update.
+      setCourses([...fetchedCourses])
     }
   }, [fetchedCourses, setCourses])
 
   useEffect(() => {
     if (fetchedOwnCourseIDs) {
-      setOwnCourseIDs(fetchedOwnCourseIDs)
+      setOwnCourseIDs([...fetchedOwnCourseIDs])
     }
   }, [fetchedOwnCourseIDs, setOwnCourseIDs])
 
@@ -106,12 +109,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     setSelectedCourseID,
   ])
 
-  if (isLoading) {
-    return <LoadingPage />
-  }
-
   if (isError) {
     return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
+  }
+
+  if (isLoading || !keycloak) {
+    return <LoadingPage />
   }
 
   // Check if the user has at least some Prompt rights
