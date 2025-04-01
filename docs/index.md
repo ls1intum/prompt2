@@ -22,6 +22,7 @@ user/gettingStarted
 contributor/guide
 contributor/setup
 contributor/new_component
+contributor/reusable_components
 ```
 
 ```{toctree}
