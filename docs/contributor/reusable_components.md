@@ -91,4 +91,65 @@ Start by importing the essential components required for the page, including:
 
 - Register the `MailingPage` component in the application's **routes** and **sidebar** configuration to make it accessible for the appropriate course phase.
 
+### 6. Ensure Styling
+
+To ensure proper styling for the `CoursePhaseMailing` component, you need to include the `index.css` file from the `minimal-tiptap` styles directory in the Webpack configuration (`webpack.config.ts` the component where the Mailing Page should be added).
+
+#### Steps to Modify Webpack Configuration
+
+1. Locate the CSS loader configuration within the `module.rules` section of your Webpack configuration file.
+2. Find the existing `include` array for the CSS loader. It should look something like this:
+
+    ```javascript
+    {
+      test: /\.css$/i,
+      include: [
+         path.resolve(__dirname, 'src'),
+         path.resolve(__dirname, '../shared_library/src'),
+      ],
+      use: [
+         'style-loader',
+         'css-loader',
+         'postcss-loader',
+      ],
+    },
+    ```
+
+3. Add the following line to the `include` array:
+
+    ```javascript
+    path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
+    ```
+
+4. The updated configuration should look like this:
+
+    ```javascript
+    {
+      test: /\.css$/i,
+      include: [
+         path.resolve(__dirname, 'src'),
+         path.resolve(__dirname, '../shared_library/src'),
+         path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
+      ],
+      use: [
+         'style-loader',
+         'css-loader',
+         'postcss-loader',
+      ],
+    },
+    ```
+
+#### Why This Change Is Necessary
+
+1. **Ensures Styles from `minimal-tiptap` are Included**:
+    - Without this change, Webpack may not process the CSS file inside `minimal-tiptap/styles`, leading to missing styles in the UI.
+
+2. **Explicitly Includes the Required CSS File**:
+    - The `include` option specifies which directories or files Webpack should process with the CSS loaders. Since `index.css` is outside the default `src` and `shared_library/src` paths, it must be explicitly included.
+
+3. **Fixes Potential Styling Issues in the `CoursePhaseMailing` Component**:
+    - If this component relies on `minimal-tiptap`, its styles will not be applied unless Webpack is configured to process them.
+
+By making this change, you ensure that the `minimal-tiptap` styles are correctly loaded, preventing broken or missing UI elements in your application.
+
 Following these steps ensures a well-structured Mailing page with smooth data handling and a good user experience.
