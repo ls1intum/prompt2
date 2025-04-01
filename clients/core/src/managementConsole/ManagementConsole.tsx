@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
 import { WelcomePage } from './shared/components/WelcomePage'
 import { LoadingPage } from '@/components/LoadingPage'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Course } from '@tumaet/prompt-shared-state'
 import { getAllCourses } from '../network/queries/course'
