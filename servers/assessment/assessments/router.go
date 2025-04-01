@@ -13,7 +13,7 @@ import (
 func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentRouter := routerGroup.Group("/assessment")
 
-	assessmentRouter.GET("/:courseParticipationID/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAssessmentsForStudentInPhase)
+	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAssessmentsForStudentInPhase)
 	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createAssessment)
 	assessmentRouter.PUT("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateAssessment)
 	assessmentRouter.DELETE("/:assessmentID/:courseParticipationID/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)

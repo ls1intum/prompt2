@@ -11,8 +11,8 @@ import (
 type Assessment struct {
 	ID                    uuid.UUID `json:"id"`
 	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	CoursePhaseID         uuid.UUID `json:"coursePhaseId"`
-	CompetencyID          uuid.UUID `json:"competencyId"`
+	CoursePhaseID         uuid.UUID `json:"coursePhaseID"`
+	CompetencyID          uuid.UUID `json:"competencyID"`
 	Score                 int16     `json:"score"`
 	Comment               string    `json:"comment,omitempty"`
 	AssessedAt            time.Time `json:"assessedAt"`

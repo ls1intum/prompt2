@@ -10,12 +10,12 @@ type Competency struct {
 	ID                uuid.UUID  `json:"id"`
 	Name              string     `json:"name"`
 	Description       string     `json:"description"`
-	SuperCompetencyID *uuid.UUID `json:"superCompetencyId,omitempty"`
+	SuperCompetencyID *uuid.UUID `json:"superCompetencyID,omitempty"`
 }
 
 // GetCompetencyDTOsFromDBModels converts a slice of DB competencies to DTOs.
 func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency {
-	competencies := make([]Competency, len(dbCompetencies))
+	competencies := make([]Competency, 0, len(dbCompetencies))
 	for i, c := range dbCompetencies {
 		competencies[i] = Competency{
 			ID:                c.ID,

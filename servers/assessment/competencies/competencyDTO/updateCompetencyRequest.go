@@ -6,5 +6,5 @@ import "github.com/google/uuid"
 type UpdateCompetencyRequest struct {
 	Name              string     `json:"name"`
 	Description       string     `json:"description"`
-	SuperCompetencyID *uuid.UUID `json:"superCompetencyId,omitempty"`
+	SuperCompetencyID *uuid.UUID `json:"superCompetencyID,omitempty"`
 }

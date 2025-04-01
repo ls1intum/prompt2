@@ -8,7 +8,7 @@ import (
 // Rubric represents a simplified view of the rubric record.
 type Rubric struct {
 	ID           uuid.UUID `json:"id"`
-	CompetencyID uuid.UUID `json:"competencyId"`
+	CompetencyID uuid.UUID `json:"competencyID"`
 	Level        int16     `json:"level"`
 	Description  string    `json:"description"`
 }
