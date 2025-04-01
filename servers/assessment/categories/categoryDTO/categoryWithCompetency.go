@@ -29,10 +29,10 @@ func MapToCategoryWithCompetenciesDTO(rows []db.GetCategoriesWithCompetenciesRow
 		}
 
 		competency := competencyDTO.Competency{
-			ID:           row.ID_2,
+			ID:           row.CompetencyID,
 			CategoryID:   row.CategoryID,
-			Name:         row.Name_2,
-			Description:  row.Description_2.String,
+			Name:         row.CompetencyName,
+			Description:  row.CompetencyDescription.String,
 			Novice:       row.Novice,
 			Intermediate: row.Intermediate,
 			Advanced:     row.Advanced,
