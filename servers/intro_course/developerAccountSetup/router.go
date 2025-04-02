@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
@@ -15,6 +16,7 @@ func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware fu
 	accountSetup := router.Group("/developer_account")
 	accountSetup.POST("/invite/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
 	accountSetup.POST("/invite_all/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
+	accountSetup.POST("/register_devices/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerDevicesHandler)
 }
 
 func inviteUserHandler(c *gin.Context) {
@@ -55,12 +57,9 @@ func inviteUserHandler(c *gin.Context) {
 	appleID := developerprofile.AppleID
 	firstName := student.FirstName
 	lastName := student.LastName
-	appleWatchUUID := developerprofile.AppleWatchUUID
-	iPhoneUUID := developerprofile.IPhoneUUID
-	iPadUUID := developerprofile.IPadUUID
 
 	// Invite the user
-	err = InviteUser(appleID, firstName, lastName, appleWatchUUID, iPhoneUUID, iPadUUID)
+	err = InviteUser(appleID, firstName, lastName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user"})
 		return
@@ -107,12 +106,9 @@ func inviteUsersHandler(c *gin.Context) {
 		appleID := developerprofile.AppleID
 		firstName := student.FirstName
 		lastName := student.LastName
-		appleWatchUUID := developerprofile.AppleWatchUUID
-		iPhoneUUID := developerprofile.IPhoneUUID
-		iPadUUID := developerprofile.IPadUUID
 
 		// Invite the user
-		err = InviteUser(appleID, firstName, lastName, appleWatchUUID, iPhoneUUID, iPadUUID)
+		err = InviteUser(appleID, firstName, lastName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user"})
 			return
@@ -124,4 +120,60 @@ func inviteUsersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Users invited successfully"})
 
+}
+
+func registerDevicesHandler(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.Error("Error getting developer profile: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+		return
+	}
+
+	// Extract student details
+	appleWatchUUID := developerprofile.AppleWatchUUID
+	iPhoneUUID := developerprofile.IPhoneUUID
+	iPadUUID := developerprofile.IPadUUID
+
+	devices := []struct {
+		Name string
+		UUID pgtype.UUID
+	}{
+		{Name: "Apple Watch", UUID: appleWatchUUID},
+		{Name: "iPhone", UUID: iPhoneUUID},
+		{Name: "iPad", UUID: iPadUUID},
+	}
+
+	for _, device := range devices {
+		deviceName := device.Name
+		deviceUDID := device.UUID.String()
+		platform := "IOS"
+		err = RegisterDevice(deviceName, deviceUDID, platform)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register device" + deviceName})
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{"message": "Device " + deviceName + " registered successfully"})
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Devices registered successfully"})
 }

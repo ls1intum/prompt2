@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 )
@@ -55,19 +54,27 @@ type InviteRequest struct {
 	Data struct {
 		Type       string `json:"type"`
 		Attributes struct {
-			Email               string      `json:"email"`
-			FirstName           string      `json:"firstName"`
-			LastName            string      `json:"lastName"`
-			Roles               []string    `json:"roles"`
-			ProvisioningAllowed bool        `json:"provisioningAllowed"`
-			AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
-			IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
-			IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
+			Email               string   `json:"email"`
+			FirstName           string   `json:"firstName"`
+			LastName            string   `json:"lastName"`
+			Roles               []string `json:"roles"`
+			ProvisioningAllowed bool     `json:"provisioningAllowed"`
 		} `json:"attributes"`
 	} `json:"data"`
 }
 
-func InviteUser(appleID, firstName, lastName string, appleWatchUUID, iPhoneUUID, iPadUUID pgtype.UUID) error {
+type DeviceRequest struct {
+	Data struct {
+		Type       string `json:"type"`
+		Attributes struct {
+			Name     string `json:"name"`
+			UDID     string `json:"udid"`
+			Platform string `json:"platform"`
+		} `json:"attributes"`
+	} `json:"data"`
+}
+
+func InviteUser(appleID, firstName, lastName string) error {
 	token, err := GenerateJWT()
 	if err != nil {
 		return fmt.Errorf("JWT generation failed: %w", err)
@@ -77,35 +84,26 @@ func InviteUser(appleID, firstName, lastName string, appleWatchUUID, iPhoneUUID,
 		Data: struct {
 			Type       string `json:"type"`
 			Attributes struct {
-				Email               string      `json:"email"`
-				FirstName           string      `json:"firstName"`
-				LastName            string      `json:"lastName"`
-				Roles               []string    `json:"roles"`
-				ProvisioningAllowed bool        `json:"provisioningAllowed"`
-				AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
-				IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
-				IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
+				Email               string   `json:"email"`
+				FirstName           string   `json:"firstName"`
+				LastName            string   `json:"lastName"`
+				Roles               []string `json:"roles"`
+				ProvisioningAllowed bool     `json:"provisioningAllowed"`
 			} `json:"attributes"`
 		}{
 			Type: "userInvitations",
 			Attributes: struct {
-				Email               string      `json:"email"`
-				FirstName           string      `json:"firstName"`
-				LastName            string      `json:"lastName"`
-				Roles               []string    `json:"roles"`
-				ProvisioningAllowed bool        `json:"provisioningAllowed"`
-				AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
-				IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
-				IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
+				Email               string   `json:"email"`
+				FirstName           string   `json:"firstName"`
+				LastName            string   `json:"lastName"`
+				Roles               []string `json:"roles"`
+				ProvisioningAllowed bool     `json:"provisioningAllowed"`
 			}{
 				Email:               appleID,
 				FirstName:           firstName,
 				LastName:            lastName,
 				Roles:               []string{"DEVELOPER"},
 				ProvisioningAllowed: true,
-				AppleWatchUUID:      appleWatchUUID,
-				IPhoneUUID:          iPhoneUUID,
-				IPadUUID:            iPadUUID,
 			},
 		},
 	}
@@ -133,5 +131,58 @@ func InviteUser(appleID, firstName, lastName string, appleWatchUUID, iPhoneUUID,
 		return nil
 	} else {
 		return fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body))
+	}
+}
+
+func RegisterDevice(deviceName, deviceUDID, platform string) error {
+	token, err := GenerateJWT()
+	if err != nil {
+		return fmt.Errorf("JWT generation failed: %w", err)
+	}
+
+	requestBody := DeviceRequest{
+		Data: struct {
+			Type       string `json:"type"`
+			Attributes struct {
+				Name     string `json:"name"`
+				UDID     string `json:"udid"`
+				Platform string `json:"platform"`
+			} `json:"attributes"`
+		}{
+			Type: "devices",
+			Attributes: struct {
+				Name     string `json:"name"`
+				UDID     string `json:"udid"`
+				Platform string `json:"platform"`
+			}{
+				Name:     deviceName,
+				UDID:     deviceUDID,
+				Platform: platform,
+			},
+		},
+	}
+
+	requestBodyBytes, _ := json.Marshal(requestBody)
+
+	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/devices", bytes.NewBuffer(requestBodyBytes))
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 201 {
+		fmt.Println("Device registered successfully:", deviceName)
+		return nil
+	} else {
+		return fmt.Errorf("failed to register device: %s", resp.Status)
 	}
 }
