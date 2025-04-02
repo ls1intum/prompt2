@@ -22,6 +22,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
   const [selectedContinueAsExternal, setSelectedContinueAsExternal] = useState(false)
   const [selectedContinueWithoutLogin, setSelectedContinueWithoutLogin] = useState(false)
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
+  const [confirmationMailSent, setConfirmationMailSent] = useState<boolean>(false)
 
   const {
     data: applicationForm,
@@ -37,7 +38,9 @@ export const ApplicationLoginPage = (): JSX.Element => {
     mutationFn: (application: PostApplication) => {
       return postNewApplicationExtern(phaseId ?? 'undefined', application)
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Assume the response contains a boolean "confirmationMailSent"
+      setConfirmationMailSent(data.confirmationMailSent)
       setShowDialog('success')
     },
     onError: () => {
@@ -130,6 +133,7 @@ export const ApplicationLoginPage = (): JSX.Element => {
         onClose={handleCloseDialog}
         onNavigateBack={() => navigate('/')}
         errorMessage={mutateError?.message}
+        confirmationMailSent={confirmationMailSent}
       />
     </NonAuthenticatedPageWrapper>
   )
