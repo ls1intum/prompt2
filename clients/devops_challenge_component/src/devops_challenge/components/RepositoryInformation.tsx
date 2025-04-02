@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Github, ExternalLink, Clipboard, Check } from 'lucide-react'
+import { Github, ExternalLink, Clipboard, Check, AlertCircle } from 'lucide-react'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export const RepositoryInformation = (): JSX.Element => {
   const developerQuery = useGetDeveloperProfile()
@@ -31,7 +32,46 @@ export const RepositoryInformation = (): JSX.Element => {
       <CardContent>
         <div className='space-y-4'>
           <div className='flex flex-col space-y-1'>
-            <span className='text-sm text-muted-foreground'>Repository URL</span>
+            <div className='space-y-4'>
+              <p className='text-slate-700 leading-relaxed'>
+                We have created a repository for you. Only you have access to this repository.
+              </p>
+
+              <Alert variant='default'>
+                <AlertCircle className='h-4 w-4 text-amber-600' />
+                <AlertTitle className='text-amber-800 font-medium'>Important</AlertTitle>
+                <AlertDescription className='text-amber-700'>
+                  You must solve this challenge independently! No collaboration with other students
+                  is allowed.
+                </AlertDescription>
+              </Alert>
+
+              <div className='space-y-1'>
+                <p className='text-slate-700 leading-relaxed'>
+                  You may use GenAI tools such as Github Co-Pilot or ChatGPT, but make sure that you
+                  understand what you are doing!
+                </p>
+
+                <ol className='list-decimal pl-5 text-slate-700 space-y-2 my-4'>
+                  <li>Open the GitHub repository using the link below</li>
+                  <li>Carefully read the Challenge Description in the README</li>
+                  <li>Clone the repository</li>
+                  <li>Solve the challenge</li>
+                  <li>Commit and push your changes</li>
+                </ol>
+
+                <p className='text-slate-700 leading-relaxed'>
+                  When you think you have successfully solved the challenge, click on Start Testing.
+                  <br />
+                  You have at most 3 attempts to test your solution, so use them wisely.
+                </p>
+              </div>
+            </div>
+            <div className='h-2 bg-slate-200' />
+            <h3 className='text-lg font-semibold mb-2 flex items-center'>
+              <Github className='mr-2 h-5 w-5 text-slate-700' />
+              Repository URL
+            </h3>
             <div className='flex items-center gap-2'>
               <div className='flex-1 flex items-center'>
                 <a

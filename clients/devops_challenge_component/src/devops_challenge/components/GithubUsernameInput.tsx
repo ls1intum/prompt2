@@ -2,7 +2,7 @@ import { useState, type ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, AlertCircle, User } from 'lucide-react'
+import { Loader2, AlertCircle, User, ExternalLink } from 'lucide-react'
 import { useCreateRepository } from '../pages/hooks/useCreateRepository'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -55,7 +55,20 @@ export const GithubUsernameInput = (): JSX.Element => {
           <AlertCircle className='h-4 w-4 text-black-600' />
           <AlertTitle className='text-black-800'>Getting Started</AlertTitle>
           <AlertDescription className='text-black-700'>
-            Enter your GitHub username to create a repository for this challenge.
+            For this challenge, you need a Github account. Enter your GitHub username to create a
+            repository for this challenge. If you do not have one, please signup on:{' '}
+            <a
+              href={'https://github.com/signup'}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-primary hover:underline inline-flex items-center mr-1 truncate'
+            >
+              {'https://github.com/signup'}
+              <ExternalLink className='h-3 w-3 flex-shrink-0 ml-1' />
+            </a>
+            <br />
+            Make sure to enter your full name and use a picture of yourself in your Github account
+            so that we can verify your identity.
           </AlertDescription>
         </Alert>
 
