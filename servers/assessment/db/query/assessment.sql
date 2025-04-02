@@ -1,9 +1,10 @@
--- name: CreateAssessment :exec
+-- name: CreateAssessment :one
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7);
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;
 
 -- name: GetAssessment :one
 SELECT * FROM assessment WHERE id = $1;
@@ -27,20 +28,21 @@ DELETE FROM assessment WHERE id = $1;
 -- name: ListAssessmentsByCoursePhase :many
 SELECT * FROM assessment WHERE course_phase_id = $1;
 
--- name: ListAssessmentsByStudent :many
-SELECT * FROM assessment WHERE course_participation_id = $1;
-
 -- name: ListAssessmentsByStudentInPhase :many
 SELECT *
 FROM assessment
 WHERE course_participation_id = $1
   AND course_phase_id = $2;
 
--- name: ListAssessmentsByCompetency :many
-SELECT * FROM assessment WHERE competency_id = $1;
+-- name: ListAssessmentsByCompetencyInPhase :many
+SELECT * 
+FROM assessment 
+WHERE competency_id = $1 
+  AND course_phase_id = $2;
 
--- name: ListAssessmentsByCategory :many
+-- name: ListAssessmentsByCategoryInPhase :many
 SELECT a.*
 FROM assessment a
 JOIN competency c ON a.competency_id = c.id
-WHERE c.category_id = $1;
+WHERE c.category_id = $1
+  AND a.course_phase_id = $2;

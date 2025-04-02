@@ -15,8 +15,6 @@ servers:
         default: example-course-phase-id
 
 tags:
-  - name: System
-    description: System or health-check endpoints
   - name: Category
     description: Categories to group competencies
   - name: Competency
@@ -25,21 +23,6 @@ tags:
     description: Tutor or peer evaluations for competencies
 
 paths:
-  /hello:
-    get:
-      summary: Hello health check
-      tags: [System]
-      responses:
-        "200":
-          description: Server is up
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-
   ############################
   # Category Endpoints
   ############################
@@ -230,7 +213,7 @@ paths:
         "200":
           description: Competency deleted
 
-  /competency/by-category/{categoryID}:
+  /competency/category/{categoryID}:
     get:
       summary: Get all competencies for a particular category
       tags: [Competency]
@@ -255,8 +238,44 @@ paths:
   # Assessment Endpoints
   ############################
   /assessment:
+    get:
+      summary: Get all assessments in a course phase
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of assessments in the specified course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
     post:
-      summary: Create or update an assessment
+      summary: Create an assessment
+      description: Creates a new assessment.
+      tags: [Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateAssessmentRequest"
+      responses:
+        "201":
+          description: Assessment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assessment"
+    put:
+      summary: Update an assessment
       description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
       tags: [Assessment]
       requestBody:
@@ -305,60 +324,12 @@ paths:
         "200":
           description: Assessment deleted
 
-  /assessment/by-coursephase/{coursePhaseID}:
-    get:
-      summary: Get all assessments in a course phase
-      tags: [Assessment]
-      parameters:
-        - name: coursePhaseID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments in the specified course phase
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
-  /assessment/by-student/{courseParticipationID}:
-    get:
-      summary: Get all assessments for a given student
-      tags: [Assessment]
-      parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments for the specified student
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
-  /assessment/by-student-in-phase/{courseParticipationID}/{coursePhaseID}:
+  /assessment/course-participation/{courseParticipationID}:
     get:
       summary: Get all assessments for a student in a particular course phase
       tags: [Assessment]
       parameters:
         - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: coursePhaseID
           in: path
           required: true
           schema:
@@ -374,7 +345,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
-  /assessment/by-competency/{competencyID}:
+  /assessment/competency/{competencyID}:
     get:
       summary: Get all assessments for a competency
       tags: [Assessment]
@@ -395,7 +366,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
-  /assessment/by-category/{categoryID}:
+  /assessment/category/{categoryID}:
     get:
       summary: Get all assessments for a category
       tags: [Assessment]

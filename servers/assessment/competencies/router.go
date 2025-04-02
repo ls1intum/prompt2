@@ -15,8 +15,8 @@ func setupCompetencyRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 
 	competencyRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetencies)
 	competencyRouter.GET("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getCompetency)
-	competencyRouter.GET("/by-category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetenciesByCategory)
-	competencyRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createCompetency)
+	competencyRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetenciesByCategory)
+	competencyRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createCompetency)
 	competencyRouter.PUT("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateCompetency)
 	competencyRouter.DELETE("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteCompetency)
 }

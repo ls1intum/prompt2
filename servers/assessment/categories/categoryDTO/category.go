@@ -12,7 +12,7 @@ type Category struct {
 }
 
 func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
-	categories := make([]Category, len(dbCategories))
+	categories := make([]Category, 0, len(dbCategories))
 	for i, c := range dbCategories {
 		categories[i] = Category{
 			ID:          c.ID,
