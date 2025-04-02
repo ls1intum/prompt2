@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Plus } from 'lucide-react'
-import { useCreateCategory } from '../../hooks/useCreateCategory'
+import { useCreateCategory } from '../hooks/useCreateCategory'
 
 interface CreateCategoryFormData {
   name: string

@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
-import { useCreateCompetency } from '../../hooks/useCreateCompetency'
+import { useCreateCompetency } from '../hooks/useCreateCompetency'
 import type { CreateCompetencyRequest } from '../../../interfaces/competency'
 
 export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => {
