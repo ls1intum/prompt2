@@ -12,9 +12,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCompetency = `-- name: CreateCompetency :exec
+const createCompetency = `-- name: CreateCompetency :one
 INSERT INTO competency (id, category_id, name, description, novice, intermediate, advanced, expert)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, category_id, name, description, novice, intermediate, advanced, expert
 `
 
 type CreateCompetencyParams struct {
@@ -28,8 +29,8 @@ type CreateCompetencyParams struct {
 	Expert       string      `json:"expert"`
 }
 
-func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) error {
-	_, err := q.db.Exec(ctx, createCompetency,
+func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) (Competency, error) {
+	row := q.db.QueryRow(ctx, createCompetency,
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
@@ -39,7 +40,18 @@ func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyPara
 		arg.Advanced,
 		arg.Expert,
 	)
-	return err
+	var i Competency
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.Description,
+		&i.Novice,
+		&i.Intermediate,
+		&i.Advanced,
+		&i.Expert,
+	)
+	return i, err
 }
 
 const deleteCompetency = `-- name: DeleteCompetency :exec
