@@ -54,6 +54,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           include: [
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, '../shared_library/src'),
+            path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
           ],
           use: [
             'style-loader', // Injects styles into DOM

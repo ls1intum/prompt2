@@ -144,7 +144,7 @@ services:
       - "5431:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
+    image: quay.io/keycloak/keycloak:25.0
     container_name: prompt-keycloak
     environment:
       KC_DB: postgres
