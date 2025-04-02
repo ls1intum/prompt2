@@ -237,7 +237,7 @@ paths:
   ############################
   # Assessment Endpoints
   ############################
-  /assessment:
+  /student-assessment:
     get:
       summary: Get all assessments in a course phase
       tags: [Assessment]
@@ -292,7 +292,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Assessment"
 
-  /assessment/{assessmentID}:
+  /student-assessment/{assessmentID}:
     get:
       summary: Get an assessment by ID
       tags: [Assessment]
@@ -324,7 +324,7 @@ paths:
         "200":
           description: Assessment deleted
 
-  /assessment/course-participation/{courseParticipationID}:
+  /student-assessment/course-participation/{courseParticipationID}:
     get:
       summary: Get all assessments for a student in a particular course phase
       tags: [Assessment]
@@ -345,7 +345,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
-  /assessment/competency/{competencyID}:
+  /student-assessment/competency/{competencyID}:
     get:
       summary: Get all assessments for a competency
       tags: [Assessment]
@@ -366,7 +366,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
-  /assessment/category/{categoryID}:
+  /student-assessment/category/{categoryID}:
     get:
       summary: Get all assessments for a category
       tags: [Assessment]
@@ -515,7 +515,12 @@ components:
           type: string
           format: uuid
         score:
-          type: integer
+          type: string
+          enum:
+            - novice
+            - intermediate
+            - advanced
+            - expert
         comment:
           type: string
         assessedAt:

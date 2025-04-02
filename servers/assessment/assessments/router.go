@@ -34,7 +34,7 @@ func createAssessment(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessment)
+	c.JSON(http.StatusCreated, assessment)
 }
 
 func updateAssessment(c *gin.Context) {
@@ -48,7 +48,7 @@ func updateAssessment(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessment)
+	c.JSON(http.StatusCreated, assessment)
 }
 
 func getAssessment(c *gin.Context) {
