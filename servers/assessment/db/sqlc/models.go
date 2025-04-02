@@ -5,16 +5,63 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type ScoreLevel string
+
+const (
+	ScoreLevelNovice       ScoreLevel = "novice"
+	ScoreLevelIntermediate ScoreLevel = "intermediate"
+	ScoreLevelAdvanced     ScoreLevel = "advanced"
+	ScoreLevelExpert       ScoreLevel = "expert"
+)
+
+func (e *ScoreLevel) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ScoreLevel(s)
+	case string:
+		*e = ScoreLevel(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ScoreLevel: %T", src)
+	}
+	return nil
+}
+
+type NullScoreLevel struct {
+	ScoreLevel ScoreLevel `json:"score_level"`
+	Valid      bool       `json:"valid"` // Valid is true if ScoreLevel is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullScoreLevel) Scan(value interface{}) error {
+	if value == nil {
+		ns.ScoreLevel, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ScoreLevel.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullScoreLevel) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ScoreLevel), nil
+}
 
 type Assessment struct {
 	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CompetencyID          uuid.UUID        `json:"competency_id"`
-	Score                 int16            `json:"score"`
+	Score                 ScoreLevel       `json:"score"`
 	Comment               pgtype.Text      `json:"comment"`
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }

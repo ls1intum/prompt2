@@ -20,16 +20,15 @@ CREATE TABLE
         FOREIGN KEY (category_id) REFERENCES category (id) ON DELETE CASCADE
     );
 
+CREATE TYPE score_level AS ENUM ('novice', 'intermediate', 'advanced', 'expert');
+
 CREATE TABLE
     assessment (
         id uuid NOT NULL PRIMARY KEY,
         course_participation_id uuid NOT NULL,
         course_phase_id uuid NOT NULL,
         competency_id uuid NOT NULL,
-        score SMALLINT NOT NULL CHECK (
-            score >= 1
-            AND score <= 4
-        ),
+        score score_level NOT NULL,
         comment TEXT,
         assessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (

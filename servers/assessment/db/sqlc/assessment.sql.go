@@ -12,13 +12,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createAssessment = `-- name: CreateAssessment :one
+const createAssessment = `-- name: CreateAssessment :exec
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
 type CreateAssessmentParams struct {
@@ -26,13 +25,13 @@ type CreateAssessmentParams struct {
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CompetencyID          uuid.UUID        `json:"competency_id"`
-	Score                 int16            `json:"score"`
+	Score                 ScoreLevel       `json:"score"`
 	Comment               pgtype.Text      `json:"comment"`
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
-func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, createAssessment,
+func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) error {
+	_, err := q.db.Exec(ctx, createAssessment,
 		arg.ID,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
@@ -41,17 +40,7 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		arg.Comment,
 		arg.AssessedAt,
 	)
-	var i Assessment
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.CoursePhaseID,
-		&i.CompetencyID,
-		&i.Score,
-		&i.Comment,
-		&i.AssessedAt,
-	)
-	return i, err
+	return err
 }
 
 const deleteAssessment = `-- name: DeleteAssessment :exec
@@ -253,32 +242,37 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 	return items, nil
 }
 
-const updateAssessment = `-- name: UpdateAssessment :one
-UPDATE assessment
-SET score = $4, comment = $5, assessed_at = COALESCE($6, CURRENT_TIMESTAMP)
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND competency_id = $3
+const upsertAssessment = `-- name: UpsertAssessment :one
+INSERT INTO assessment (
+  course_participation_id, course_phase_id, competency_id,
+  score, comment, assessed_at
+)
+VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_TIMESTAMP))
+ON CONFLICT (course_participation_id, course_phase_id, competency_id)
+DO UPDATE SET
+  score = EXCLUDED.score,
+  comment = EXCLUDED.comment,
+  assessed_at = COALESCE(EXCLUDED.assessed_at, CURRENT_TIMESTAMP)
 RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
-type UpdateAssessmentParams struct {
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CompetencyID          uuid.UUID        `json:"competency_id"`
-	Score                 int16            `json:"score"`
-	Comment               pgtype.Text      `json:"comment"`
-	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
+type UpsertAssessmentParams struct {
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CompetencyID          uuid.UUID   `json:"competency_id"`
+	Score                 ScoreLevel  `json:"score"`
+	Comment               pgtype.Text `json:"comment"`
+	Column6               interface{} `json:"column_6"`
 }
 
-func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, updateAssessment,
+func (q *Queries) UpsertAssessment(ctx context.Context, arg UpsertAssessmentParams) (Assessment, error) {
+	row := q.db.QueryRow(ctx, upsertAssessment,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
 		arg.Score,
 		arg.Comment,
-		arg.AssessedAt,
+		arg.Column6,
 	)
 	var i Assessment
 	err := row.Scan(
