@@ -55,7 +55,7 @@ export const GithubUsernameInput = (): JSX.Element => {
           <AlertCircle className='h-4 w-4 text-black-600' />
           <AlertTitle className='text-black-800'>Getting Started</AlertTitle>
           <AlertDescription className='text-black-700'>
-            Enter your GitHub username to create a repository for this challenge.
+          For this challenge, you need a Github account. Enter your GitHub username to create a repository for this challenge. If you do not have one, please signup on <a href="https://github.com/signup">https://github.com/signup</a>. Make sure to enter your full name and use a picture of yourself in your Github account so that we can verify your identity.
           </AlertDescription>
         </Alert>
 

@@ -31,6 +31,7 @@ export const RepositoryInformation = (): JSX.Element => {
       <CardContent>
         <div className='space-y-4'>
           <div className='flex flex-col space-y-1'>
+            <p>We have created a repository for you. Only you have access. You must solve this challenge independently! No collaboration with other students is allowed. You may use GenAI tools such as Github Co-Pilot or ChatGPT, but make sure that you understand what you are doing! Open the GitHub repository using the link below and carefully read the Challenge Description in the README. Clone the repository, solve the challenge, then commit and push your changes. When you think you have successfully solved the challenge, click on Start Testing. You have at most 3 attempts to test your solution, so use them wisely.</p>
             <span className='text-sm text-muted-foreground'>Repository URL</span>
             <div className='flex items-center gap-2'>
               <div className='flex-1 flex items-center'>
