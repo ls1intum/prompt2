@@ -50,7 +50,7 @@ func CreateOrUpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpd
 		return assessment, nil
 	}
 
-	assessment, err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
+	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,

@@ -9,13 +9,13 @@ import (
 
 // Assessment represents a simplified view of the assessment record.
 type Assessment struct {
-	ID                    uuid.UUID `json:"id"`
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	CoursePhaseID         uuid.UUID `json:"coursePhaseID"`
-	CompetencyID          uuid.UUID `json:"competencyID"`
-	Score                 int16     `json:"score"`
-	Comment               string    `json:"comment"`
-	AssessedAt            time.Time `json:"assessedAt"`
+	ID                    uuid.UUID     `json:"id"`
+	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
+	CompetencyID          uuid.UUID     `json:"competencyID"`
+	Score                 db.ScoreLevel `json:"score"`
+	Comment               string        `json:"comment"`
+	AssessedAt            time.Time     `json:"assessedAt"`
 }
 
 // GetAssessmentDTOsFromDBModels converts a slice of db.Assessment to DTOs.
