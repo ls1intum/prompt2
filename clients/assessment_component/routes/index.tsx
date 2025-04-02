@@ -1,7 +1,7 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SettingsPage } from '../src/assessment/pages/SettingsPage/SettingsPage'
-import { AssessmentOverviewPage } from 'src/assessment/pages/AssessmentOverviewPage/AssessmentOverviewPage'
+import { AssessmentOverviewPage } from '../src/assessment/pages/AssessmentOverviewPage/AssessmentOverviewPage'
 
 const routes: ExtendedRouteObject[] = [
   {

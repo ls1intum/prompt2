@@ -1,8 +1,11 @@
+import { CategoryList } from './components/CategoryList'
+import { CreateCategoryForm } from './components/CreateCategoryForm'
+
 export const SettingsPage = (): JSX.Element => {
   return (
     <div>
-      <h1>Settings Page</h1>
-      <p>This is the settings page.</p>
+      <CategoryList />
+      <CreateCategoryForm />
     </div>
   )
 }

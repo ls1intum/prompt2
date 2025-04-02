@@ -1,23 +1,13 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
-
-interface CreateCategoryRequest {
-  name: string
-  description?: string
-}
-
-interface CategoryResponse {
-  id: string
-  name: string
-  description?: string
-}
+import { Category, CreateCategoryRequest } from '../../interfaces/category'
 
 export const createCategory = async (
   coursePhaseID: string,
   category: CreateCategoryRequest,
-): Promise<CategoryResponse> => {
+): Promise<Category> => {
   try {
-    const response = await assessmentAxiosInstance.post<CategoryResponse>(
-      `/${coursePhaseID}/category`,
+    const response = await assessmentAxiosInstance.post<Category>(
+      `assessment/api/course_phase/${coursePhaseID}/category`,
       category,
       {
         headers: {
