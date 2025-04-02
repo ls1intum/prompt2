@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
@@ -35,13 +37,30 @@ func inviteUserHandler(c *gin.Context) {
 		return
 	}
 
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.Error("Error getting developer profile: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+		return
+	}
+
 	// Extract student details
-	email := student.Email
+	appleID := developerprofile.AppleID
 	firstName := student.FirstName
 	lastName := student.LastName
+	appleWatchUUID := developerprofile.AppleWatchUUID
+	iPhoneUUID := developerprofile.IPhoneUUID
+	iPadUUID := developerprofile.IPadUUID
 
 	// Invite the user
-	err = InviteUser(email, firstName, lastName)
+	err = InviteUser(appleID, firstName, lastName, appleWatchUUID, iPhoneUUID, iPadUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user"})
 		return
@@ -70,10 +89,37 @@ func inviteUsersHandler(c *gin.Context) {
 		return
 	}
 
-	err = InviteUsers(authHeader, students)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite users"})
-		return
+	for _, student := range students {
+		courseParticipationID, ok := c.Get("courseParticipationID")
+		if !ok {
+			log.Error("Error getting courseParticipationID from context")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+		if err != nil {
+			log.Error("Error getting developer profile: ", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+			return
+		}
+
+		appleID := developerprofile.AppleID
+		firstName := student.FirstName
+		lastName := student.LastName
+		appleWatchUUID := developerprofile.AppleWatchUUID
+		iPhoneUUID := developerprofile.IPhoneUUID
+		iPadUUID := developerprofile.IPadUUID
+
+		// Invite the user
+		err = InviteUser(appleID, firstName, lastName, appleWatchUUID, iPhoneUUID, iPadUUID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"message": "User " + appleID + " invited successfully"})
+
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Users invited successfully"})

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests/coreRequestDTOs"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 )
 
@@ -55,16 +55,19 @@ type InviteRequest struct {
 	Data struct {
 		Type       string `json:"type"`
 		Attributes struct {
-			Email               string   `json:"email"`
-			FirstName           string   `json:"firstName"`
-			LastName            string   `json:"lastName"`
-			Roles               []string `json:"roles"`
-			ProvisioningAllowed bool     `json:"provisioningAllowed"`
+			Email               string      `json:"email"`
+			FirstName           string      `json:"firstName"`
+			LastName            string      `json:"lastName"`
+			Roles               []string    `json:"roles"`
+			ProvisioningAllowed bool        `json:"provisioningAllowed"`
+			AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
+			IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
+			IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
 		} `json:"attributes"`
 	} `json:"data"`
 }
 
-func InviteUser(email, firstName, lastName string) error {
+func InviteUser(appleID, firstName, lastName string, appleWatchUUID, iPhoneUUID, iPadUUID pgtype.UUID) error {
 	token, err := GenerateJWT()
 	if err != nil {
 		return fmt.Errorf("JWT generation failed: %w", err)
@@ -74,26 +77,35 @@ func InviteUser(email, firstName, lastName string) error {
 		Data: struct {
 			Type       string `json:"type"`
 			Attributes struct {
-				Email               string   `json:"email"`
-				FirstName           string   `json:"firstName"`
-				LastName            string   `json:"lastName"`
-				Roles               []string `json:"roles"`
-				ProvisioningAllowed bool     `json:"provisioningAllowed"`
+				Email               string      `json:"email"`
+				FirstName           string      `json:"firstName"`
+				LastName            string      `json:"lastName"`
+				Roles               []string    `json:"roles"`
+				ProvisioningAllowed bool        `json:"provisioningAllowed"`
+				AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
+				IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
+				IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
 			} `json:"attributes"`
 		}{
 			Type: "userInvitations",
 			Attributes: struct {
-				Email               string   `json:"email"`
-				FirstName           string   `json:"firstName"`
-				LastName            string   `json:"lastName"`
-				Roles               []string `json:"roles"`
-				ProvisioningAllowed bool     `json:"provisioningAllowed"`
+				Email               string      `json:"email"`
+				FirstName           string      `json:"firstName"`
+				LastName            string      `json:"lastName"`
+				Roles               []string    `json:"roles"`
+				ProvisioningAllowed bool        `json:"provisioningAllowed"`
+				AppleWatchUUID      pgtype.UUID `json:"appleWatchUUID,omitempty"`
+				IPhoneUUID          pgtype.UUID `json:"iPhoneUUID,omitempty"`
+				IPadUUID            pgtype.UUID `json:"iPadUUID,omitempty"`
 			}{
-				Email:               email,
+				Email:               appleID,
 				FirstName:           firstName,
 				LastName:            lastName,
 				Roles:               []string{"DEVELOPER"},
 				ProvisioningAllowed: true,
+				AppleWatchUUID:      appleWatchUUID,
+				IPhoneUUID:          iPhoneUUID,
+				IPadUUID:            iPadUUID,
 			},
 		},
 	}
@@ -117,20 +129,9 @@ func InviteUser(email, firstName, lastName string) error {
 	body, _ := io.ReadAll(resp.Body)
 
 	if resp.StatusCode == 201 {
-		fmt.Println("User invited successfully:", email)
+		fmt.Println("User invited successfully:", appleID)
 		return nil
 	} else {
 		return fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body))
 	}
-}
-
-func InviteUsers(authHeader string, students []coreRequestDTOs.GetStudent) error {
-	for _, student := range students {
-		err := InviteUser(student.Email, student.FirstName, student.LastName)
-		if err != nil {
-			return fmt.Errorf("failed to invite user %s: %w", student.Email, err)
-		}
-	}
-
-	return nil
 }
