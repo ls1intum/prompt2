@@ -226,8 +226,7 @@ export const Assessment = (): JSX.Element => {
               passed || remainingAttempts === 0 ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
-            I confirm that I have completed this challenge independently and without unauthorized
-            assistance.
+            I confirm that I have completed this challenge independently.
           </label>
         </div>
 
