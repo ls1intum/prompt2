@@ -6,5 +6,3 @@ export const SettingsPage = (): JSX.Element => {
     </div>
   )
 }
-
-export default SettingsPage

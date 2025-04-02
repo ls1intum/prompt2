@@ -126,6 +126,36 @@ services:
     networks:
       - prompt-network
 
+  server-assessment:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-assessment:${SERVER_ASSESSMENT_IMAGE_TAG}"
+    container_name: prompt-server-assessment
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-assessment.rule=Host(`${CORE_HOST}`) && PathPrefix(`/assessment/api`)"
+      - "traefik.http.services.server-assessment.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-assessment.entrypoints=websecure"
+      - "traefik.http.routers.server-assessment.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server-assessment.middlewares=api-ratelimit"
+    depends_on:
+      db-assessment:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST_ASSESSMENT
+      - DB_PORT_ASSESSMENT
+      - DB_NAME
+      - DB_PASSWORD
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+    networks:
+      - prompt-network
+
   db:
     image: "postgres:15.2-alpine"
     container_name: prompt-db
