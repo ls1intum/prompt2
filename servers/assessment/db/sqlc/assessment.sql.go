@@ -242,7 +242,7 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 	return items, nil
 }
 
-const upsertAssessment = `-- name: UpsertAssessment :one
+const updateAssessment = `-- name: UpdateAssessment :one
 INSERT INTO assessment (
   course_participation_id, course_phase_id, competency_id,
   score, comment, assessed_at
@@ -256,7 +256,7 @@ DO UPDATE SET
 RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
-type UpsertAssessmentParams struct {
+type UpdateAssessmentParams struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CompetencyID          uuid.UUID   `json:"competency_id"`
@@ -265,8 +265,8 @@ type UpsertAssessmentParams struct {
 	Column6               interface{} `json:"column_6"`
 }
 
-func (q *Queries) UpsertAssessment(ctx context.Context, arg UpsertAssessmentParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, upsertAssessment,
+func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
+	row := q.db.QueryRow(ctx, updateAssessment,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
