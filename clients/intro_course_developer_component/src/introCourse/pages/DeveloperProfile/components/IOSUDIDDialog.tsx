@@ -12,7 +12,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Smartphone, Laptop, HelpCircle } from 'lucide-react'
 
-export default function IOSUUIDDialog() {
+export default function IOSUDIDDialog() {
   const [open, setOpen] = useState(false)
 
   const instructions = [
@@ -50,7 +50,7 @@ export default function IOSUUIDDialog() {
         {
           title: 'Copy device ID',
           description:
-            'Control-click the label (UUID) to copy your device ID. The UUID is of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".',
+            'Control-click the label (UDID) to copy your device ID. The UDID is of the form "XXXXXXXX-XXXXXXXXXXXXXXXX".',
         },
       ],
     },
@@ -69,7 +69,7 @@ export default function IOSUUIDDialog() {
         {
           title: 'Copy device ID',
           description:
-            'Highlight the device ID (labeled as Identifier) to copy it. The UUID is of the form "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".',
+            'Highlight the device ID (labeled as Identifier) to copy it. The UDID is of the form "XXXXXXXX-XXXXXXXXXXXXXXXX".',
         },
       ],
     },
@@ -86,9 +86,9 @@ export default function IOSUUIDDialog() {
         </DialogTrigger>
         <DialogContent className='max-w-2xl flex flex-col max-h-[90vh]'>
           <DialogHeader className='border-b pb-4'>
-            <DialogTitle>Getting iOS Device UUID</DialogTitle>
+            <DialogTitle>Getting iOS Device UDID</DialogTitle>
             <DialogDescription>
-              Follow these steps to obtain the UUID (Unique Device Identifier) of your iOS device
+              Follow these steps to obtain the UDID (Unique Device Identifier) of your iOS device
             </DialogDescription>
           </DialogHeader>
 

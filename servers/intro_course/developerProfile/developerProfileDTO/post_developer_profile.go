@@ -10,9 +10,9 @@ type PostDeveloperProfile struct {
 	AppleID        string      `json:"appleID"`
 	GitLabUsername string      `json:"gitLabUsername"`
 	HasMacBook     bool        `json:"hasMacBook"`
-	IPhoneUUID     pgtype.UUID `json:"iPhoneUUID"`
-	IPadUUID       pgtype.UUID `json:"iPadUUID"`
-	AppleWatchUUID pgtype.UUID `json:"appleWatchUUID"`
+	IPhoneUDID     pgtype.Text `json:"iPhoneUDID"`
+	IPadUDID       pgtype.Text `json:"iPadUDID"`
+	AppleWatchUDID pgtype.Text `json:"appleWatchUDID"`
 }
 
 func GetDeveloperProfileDTOFromPostRequest(request PostDeveloperProfile, coursePhaseID, courseParticipationID uuid.UUID) db.CreateDeveloperProfileParams {
@@ -22,9 +22,9 @@ func GetDeveloperProfileDTOFromPostRequest(request PostDeveloperProfile, courseP
 		AppleID:               request.AppleID,
 		GitlabUsername:        request.GitLabUsername,
 		HasMacbook:            request.HasMacBook,
-		IphoneUuid:            request.IPhoneUUID,
-		IpadUuid:              request.IPadUUID,
-		AppleWatchUuid:        request.AppleWatchUUID,
+		IphoneUdid:            request.IPhoneUDID,
+		IpadUdid:              request.IPadUDID,
+		AppleWatchUdid:        request.AppleWatchUDID,
 	}
 }
 
@@ -35,8 +35,8 @@ func GetDeveloperProfileDTOFromCreateRequest(request DeveloperProfile, coursePha
 		AppleID:               request.AppleID,
 		GitlabUsername:        request.GitLabUsername,
 		HasMacbook:            request.HasMacBook,
-		IphoneUuid:            request.IPhoneUUID,
-		IpadUuid:              request.IPadUUID,
-		AppleWatchUuid:        request.AppleWatchUUID,
+		IphoneUdid:            request.IPhoneUDID,
+		IpadUdid:              request.IPadUDID,
+		AppleWatchUdid:        request.AppleWatchUDID,
 	}
 }
