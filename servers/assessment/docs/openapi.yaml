@@ -515,7 +515,12 @@ components:
           type: string
           format: uuid
         score:
-          type: integer
+          type: string
+          enum:
+            - novice
+            - intermediate
+            - advanced
+            - expert
         comment:
           type: string
         assessedAt:
