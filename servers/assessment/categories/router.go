@@ -15,9 +15,9 @@ func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 
 	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), getAllCategories)
 	categoryRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), createCategory)
-	categoryRouter.PUT("/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), updateCategory)
-	categoryRouter.DELETE("/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), deleteCategory)
-	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), getCategoriesWithCompetencies)
+	categoryRouter.PUT("/:categoryID", authMiddleware(promptSDK.PromptAdmin), updateCategory)
+	categoryRouter.DELETE("/:categoryID", authMiddleware(promptSDK.PromptAdmin), deleteCategory)
+	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin), getCategoriesWithCompetencies)
 }
 
 func getAllCategories(c *gin.Context) {
