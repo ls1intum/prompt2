@@ -21,8 +21,17 @@ DELETE FROM category WHERE id = $1;
 -- name: GetCategoriesWithCompetencies :many
 SELECT
     c.id, c.name, c.description,
-    cmp.id AS competency_id, cmp.category_id, cmp.name AS competency_name,
-    cmp.description AS competency_description, cmp.novice, cmp.intermediate,
-    cmp.advanced, cmp.expert
+    json_agg(
+        json_build_object(
+            'id', cmp.id,
+            'name', cmp.name,
+            'description', cmp.description,
+            'novice', cmp.novice,
+            'intermediate', cmp.intermediate,
+            'advanced', cmp.advanced,
+            'expert', cmp.expert
+        )
+    ) AS competencies
 FROM category c
-JOIN competency cmp ON c.id = cmp.category_id;
+LEFT JOIN competency cmp ON c.id = cmp.category_id
+GROUP BY c.id, c.name, c.description;

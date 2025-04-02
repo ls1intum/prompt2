@@ -43,25 +43,27 @@ func (q *Queries) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 const getCategoriesWithCompetencies = `-- name: GetCategoriesWithCompetencies :many
 SELECT
     c.id, c.name, c.description,
-    cmp.id AS competency_id, cmp.category_id, cmp.name AS competency_name,
-    cmp.description AS competency_description, cmp.novice, cmp.intermediate,
-    cmp.advanced, cmp.expert
+    json_agg(
+        json_build_object(
+            'id', cmp.id,
+            'name', cmp.name,
+            'description', cmp.description,
+            'novice', cmp.novice,
+            'intermediate', cmp.intermediate,
+            'advanced', cmp.advanced,
+            'expert', cmp.expert
+        )
+    ) AS competencies
 FROM category c
-JOIN competency cmp ON c.id = cmp.category_id
+LEFT JOIN competency cmp ON c.id = cmp.category_id
+GROUP BY c.id, c.name, c.description
 `
 
 type GetCategoriesWithCompetenciesRow struct {
-	ID                    uuid.UUID   `json:"id"`
-	Name                  string      `json:"name"`
-	Description           pgtype.Text `json:"description"`
-	CompetencyID          uuid.UUID   `json:"competency_id"`
-	CategoryID            uuid.UUID   `json:"category_id"`
-	CompetencyName        string      `json:"competency_name"`
-	CompetencyDescription pgtype.Text `json:"competency_description"`
-	Novice                string      `json:"novice"`
-	Intermediate          string      `json:"intermediate"`
-	Advanced              string      `json:"advanced"`
-	Expert                string      `json:"expert"`
+	ID           uuid.UUID   `json:"id"`
+	Name         string      `json:"name"`
+	Description  pgtype.Text `json:"description"`
+	Competencies []byte      `json:"competencies"`
 }
 
 func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCategoriesWithCompetenciesRow, error) {
@@ -77,14 +79,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 			&i.ID,
 			&i.Name,
 			&i.Description,
-			&i.CompetencyID,
-			&i.CategoryID,
-			&i.CompetencyName,
-			&i.CompetencyDescription,
-			&i.Novice,
-			&i.Intermediate,
-			&i.Advanced,
-			&i.Expert,
+			&i.Competencies,
 		); err != nil {
 			return nil, err
 		}
