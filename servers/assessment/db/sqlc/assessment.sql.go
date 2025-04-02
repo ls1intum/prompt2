@@ -247,22 +247,22 @@ INSERT INTO assessment (
   course_participation_id, course_phase_id, competency_id,
   score, comment, assessed_at
 )
-VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_TIMESTAMP))
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (course_participation_id, course_phase_id, competency_id)
 DO UPDATE SET
   score = EXCLUDED.score,
   comment = EXCLUDED.comment,
-  assessed_at = COALESCE(EXCLUDED.assessed_at, CURRENT_TIMESTAMP)
+  assessed_at = EXCLUDED.assessed_at
 RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
 type UpdateAssessmentParams struct {
-	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
-	CompetencyID          uuid.UUID   `json:"competency_id"`
-	Score                 ScoreLevel  `json:"score"`
-	Comment               pgtype.Text `json:"comment"`
-	Column6               interface{} `json:"column_6"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CompetencyID          uuid.UUID        `json:"competency_id"`
+	Score                 ScoreLevel       `json:"score"`
+	Comment               pgtype.Text      `json:"comment"`
+	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
 func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
@@ -272,7 +272,7 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		arg.CompetencyID,
 		arg.Score,
 		arg.Comment,
-		arg.Column6,
+		arg.AssessedAt,
 	)
 	var i Assessment
 	err := row.Scan(
