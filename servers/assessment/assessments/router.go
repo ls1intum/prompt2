@@ -11,7 +11,7 @@ import (
 )
 
 func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	assessmentRouter := routerGroup.Group("/assessment")
+	assessmentRouter := routerGroup.Group("/student-assessment")
 
 	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCoursePhase)
 	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createAssessment)
