@@ -35,13 +35,13 @@ export const useGetFilteredParticipations = (
         passesDevices = passesDevices && !!(profile && profile.hasMacBook)
       }
       if (filters.devices.iPhone) {
-        passesDevices = passesDevices && !!(profile && profile.iPhoneUUID)
+        passesDevices = passesDevices && !!(profile && profile.iPhoneUDID)
       }
       if (filters.devices.iPad) {
-        passesDevices = passesDevices && !!(profile && profile.iPadUUID)
+        passesDevices = passesDevices && !!(profile && profile.iPadUDID)
       }
       if (filters.devices.appleWatch) {
-        passesDevices = passesDevices && !!(profile && profile.appleWatchUUID)
+        passesDevices = passesDevices && !!(profile && profile.appleWatchUDID)
       }
       if (filters.devices.noDevices) {
         // "No Devices" means there is no profile or the profile has none of the devices.
@@ -49,9 +49,9 @@ export const useGetFilteredParticipations = (
           passesDevices &&
           (!profile ||
             (!profile.hasMacBook &&
-              !profile.iPhoneUUID &&
-              !profile.iPadUUID &&
-              !profile.appleWatchUUID))
+              !profile.iPhoneUDID &&
+              !profile.iPadUDID &&
+              !profile.appleWatchUDID))
       }
 
       return passesSurvey && passesDevices
