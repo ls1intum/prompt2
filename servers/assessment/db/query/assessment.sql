@@ -8,7 +8,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 -- name: GetAssessment :one
 SELECT * FROM assessment WHERE id = $1;
 
--- name: UpsertAssessment :one
+-- name: UpdateAssessment :one
 INSERT INTO assessment (
   course_participation_id, course_phase_id, competency_id,
   score, comment, assessed_at
