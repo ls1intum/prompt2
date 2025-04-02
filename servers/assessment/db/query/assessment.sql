@@ -13,12 +13,12 @@ INSERT INTO assessment (
   course_participation_id, course_phase_id, competency_id,
   score, comment, assessed_at
 )
-VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_TIMESTAMP))
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (course_participation_id, course_phase_id, competency_id)
 DO UPDATE SET
   score = EXCLUDED.score,
   comment = EXCLUDED.comment,
-  assessed_at = COALESCE(EXCLUDED.assessed_at, CURRENT_TIMESTAMP)
+  assessed_at = EXCLUDED.assessed_at
 RETURNING *;
 
 -- name: DeleteAssessment :exec
