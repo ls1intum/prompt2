@@ -1,6 +1,7 @@
--- name: CreateCompetency :exec
+-- name: CreateCompetency :one
 INSERT INTO competency (id, category_id, name, description, novice, intermediate, advanced, expert)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING *;
 
 -- name: GetCompetency :one
 SELECT * FROM competency WHERE id = $1;

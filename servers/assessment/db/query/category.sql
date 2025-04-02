@@ -1,6 +1,7 @@
--- name: CreateCategory :exec
+-- name: CreateCategory :one
 INSERT INTO category (id, name, description)
-VALUES ($1, $2, $3);
+VALUES ($1, $2, $3)
+RETURNING *;
 
 -- name: GetCategory :one
 SELECT * FROM category WHERE id = $1;
