@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests/coreRequestDTOs"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 )
 
@@ -113,4 +114,15 @@ func InviteUser(email, firstName, lastName string) error {
 	} else {
 		return fmt.Errorf("failed to invite user: %s", resp.Status)
 	}
+}
+
+func InviteUsers(authHeader string, students []coreRequestDTOs.GetStudent) error {
+	for _, student := range students {
+		err := InviteUser(student.Email, student.FirstName, student.LastName)
+		if err != nil {
+			return fmt.Errorf("failed to invite user %s: %w", student.Email, err)
+		}
+	}
+
+	return nil
 }
