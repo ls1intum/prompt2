@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -29,6 +30,12 @@ const (
 // GenerateJWT creates a JWT token required for Apple API authentication.
 func GenerateJWT() (string, error) {
 	now := time.Now()
+
+	key, err := jwt.ParseECPrivateKeyFromPEM([]byte(privateKey))
+	if err != nil {
+		return "", fmt.Errorf("error parsing private key: %w", err)
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
 		"iss": issuerID,
 		"exp": now.Add(5 * time.Minute).Unix(),
@@ -37,7 +44,7 @@ func GenerateJWT() (string, error) {
 	})
 
 	token.Header["kid"] = keyID
-	signedToken, err := token.SignedString([]byte(privateKey))
+	signedToken, err := token.SignedString(key)
 	if err != nil {
 		return "", err
 	}
@@ -60,7 +67,7 @@ type InviteRequest struct {
 func InviteUser(email, firstName, lastName string) error {
 	token, err := GenerateJWT()
 	if err != nil {
-		return err
+		return fmt.Errorf("JWT generation failed: %w", err)
 	}
 
 	requestBody := InviteRequest{
@@ -107,12 +114,13 @@ func InviteUser(email, firstName, lastName string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.StatusCode == 201 {
 		fmt.Println("User invited successfully:", email)
 		return nil
 	} else {
-		return fmt.Errorf("failed to invite user: %s", resp.Status)
+		return fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body))
 	}
 }
 

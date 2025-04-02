@@ -1,8 +1,10 @@
 package coreRequestDTOs
 
+import "github.com/google/uuid"
+
 type CoursePhaseParticipationWithStudent struct {
-	CoursePhaseID         string         `json:"coursePhaseID"`
-	CourseParticipationID string         `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID      `json:"coursePhaseID"`
+	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
 	PassStatus            string         `json:"passStatus"`
 	RestrictedData        map[string]any `json:"restrictedData" gorm:"-"`
 	StudentReadableData   map[string]any `json:"studentReadableData" gorm:"-"`

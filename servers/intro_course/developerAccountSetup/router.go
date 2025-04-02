@@ -5,13 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
 )
 
 func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	accountSetup := router.Group("/developer_account")
-	accountSetup.POST("/invite", authMiddleware("admin"), inviteUserHandler)
-	accountSetup.POST("/invite_all/:coursePhaseID", authMiddleware("admin"), inviteUsersHandler)
+	accountSetup.POST("/invite/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
+	accountSetup.POST("/invite_all/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
 }
 
 func inviteUserHandler(c *gin.Context) {
