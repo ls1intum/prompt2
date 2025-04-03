@@ -32,14 +32,16 @@ interface CoursePhaseParticipationsTablePageProps {
   prevDataKeys: string[] // specify which prev meta data names to display
   restrictedDataKeys: string[] // specify which meta data names to display
   studentReadableDataKeys: string[]
+  onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
 }
 
 export const CoursePhaseParticipationsTablePage = ({
-  participants,
-  prevDataKeys,
-  restrictedDataKeys,
-  studentReadableDataKeys,
-}: CoursePhaseParticipationsTablePageProps): JSX.Element => {
+  participants = [],
+  prevDataKeys = [],
+  restrictedDataKeys = [],
+  studentReadableDataKeys = [],
+  onClickRowAction,
+}: Partial<CoursePhaseParticipationsTablePageProps>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
@@ -47,7 +49,7 @@ export const CoursePhaseParticipationsTablePage = ({
   const tableColumns = columns({ prevDataKeys, restrictedDataKeys, studentReadableDataKeys })
 
   const table = useReactTable({
-    data: participants ?? [],
+    data: participants,
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -126,7 +128,11 @@ export const CoursePhaseParticipationsTablePage = ({
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    onClick={() => onClickRowAction && onClickRowAction(row.original)}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

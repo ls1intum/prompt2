@@ -26,7 +26,7 @@ export const CategoryList = () => {
     )
   }
 
-  if (isError || !categories) {
+  if (isError) {
     return (
       <Card className='p-6 flex items-center gap-3 text-destructive'>
         <AlertCircle className='h-5 w-5' />
@@ -35,7 +35,7 @@ export const CategoryList = () => {
     )
   }
 
-  if (categories.length === 0) {
+  if (!categories || categories.length === 0) {
     return (
       <Card className='p-6 text-center text-muted-foreground'>
         <p>No categories found. Create your first category to get started.</p>

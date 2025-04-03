@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -42,7 +40,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
         <form id='competency-form' onSubmit={handleSubmit(onSubmit)}>
           <input type='hidden' {...register('categoryID', { required: true })} />
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+          <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6'>
             <div className='space-y-2'>
               <Label htmlFor='name' className='font-medium'>
                 Name

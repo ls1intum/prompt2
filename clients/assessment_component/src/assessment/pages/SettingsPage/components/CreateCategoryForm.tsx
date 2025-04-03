@@ -1,5 +1,3 @@
-'use client'
-
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +22,7 @@ export const CreateCategoryForm = () => {
     mutate(data, {
       onSuccess: () => {
         reset()
+        window.location.reload()
       },
     })
   }
