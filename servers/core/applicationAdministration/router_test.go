@@ -113,7 +113,7 @@ func (suite *ApplicationAdminRouterTestSuite) TestUpdateApplicationFormEndpoint_
 	suite.router.ServeHTTP(resp, req)
 
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-	var responseBody map[string]string
+	var responseBody map[string]interface{}
 	err = json.Unmarshal(resp.Body.Bytes(), &responseBody)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "application form updated", responseBody["message"])
@@ -226,7 +226,7 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	suite.router.ServeHTTP(resp, req)
 
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
-	var responseBody map[string]string
+	var responseBody map[string]interface{}
 	err = json.Unmarshal(resp.Body.Bytes(), &responseBody)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "application posted", responseBody["message"])
@@ -288,7 +288,7 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEn
 	suite.router.ServeHTTP(resp, req)
 
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
-	var responseBody map[string]string
+	var responseBody map[string]interface{}
 	err = json.Unmarshal(resp.Body.Bytes(), &responseBody)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "application posted", responseBody["message"])
@@ -337,7 +337,7 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusMethodNotAllowed, resp.Code)
 
-	var responseBody map[string]string
+	var responseBody map[string]interface{}
 	err = json.Unmarshal(resp.Body.Bytes(), &responseBody)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "already applied", responseBody["error"])

@@ -1,38 +1,44 @@
 import * as z from 'zod'
 
+const udidSchema = z
+  .union([
+    z.string().regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid UDID format'),
+    z.literal(''),
+  ])
+  .optional()
+
 export const developerFormSchema = z
   .object({
     appleID: z.string().email('Apple ID must be a valid email address'),
     gitLabUsername: z.string().min(1, 'GitLab username is required'),
     hasMacBook: z.boolean(),
     hasIPhone: z.boolean(),
-    iPhoneUUID: z.union([z.string().uuid('Invalid UUID'), z.literal('')]).optional(),
+    iPhoneUDID: udidSchema,
     hasIPad: z.boolean(),
-    iPadUUID: z.union([z.string().uuid('Invalid UUID'), z.literal('')]).optional(),
+    iPadUDID: udidSchema,
     hasAppleWatch: z.boolean(),
-    appleWatchUUID: z.union([z.string().uuid('Invalid UUID'), z.literal('')]).optional(),
+    appleWatchUDID: udidSchema,
   })
   .superRefine((values, ctx) => {
-    // If the user answered "yes", then require a UUID.
-    if (values.hasIPhone && (!values.iPhoneUUID || values.iPhoneUUID === '')) {
+    if (values.hasIPhone && (!values.iPhoneUDID || values.iPhoneUDID === '')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'iPhone UUID is required when you have an iPhone',
-        path: ['iPhoneUUID'],
+        message: 'iPhone UDID is required when you have an iPhone',
+        path: ['iPhoneUDID'],
       })
     }
-    if (values.hasIPad && (!values.iPadUUID || values.iPadUUID === '')) {
+    if (values.hasIPad && (!values.iPadUDID || values.iPadUDID === '')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'iPad UUID is required when you have an iPad',
-        path: ['iPadUUID'],
+        message: 'iPad UDID is required when you have an iPad',
+        path: ['iPadUDID'],
       })
     }
-    if (values.hasAppleWatch && (!values.appleWatchUUID || values.appleWatchUUID === '')) {
+    if (values.hasAppleWatch && (!values.appleWatchUDID || values.appleWatchUDID === '')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Apple Watch UUID is required when you have an Apple Watch',
-        path: ['appleWatchUUID'],
+        message: 'Apple Watch UDID is required when you have an Apple Watch',
+        path: ['appleWatchUDID'],
       })
     }
   })

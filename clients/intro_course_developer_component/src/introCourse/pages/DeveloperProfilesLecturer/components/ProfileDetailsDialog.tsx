@@ -54,9 +54,9 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
       appleID: profile?.appleID || '',
       gitLabUsername: profile?.gitLabUsername || '',
       hasMacBook: profile?.hasMacBook || false,
-      iPhoneUUID: profile?.iPhoneUUID || '',
-      iPadUUID: profile?.iPadUUID || '',
-      appleWatchUUID: profile?.appleWatchUUID || '',
+      iPhoneUDID: profile?.iPhoneUDID || '',
+      iPadUDID: profile?.iPadUDID || '',
+      appleWatchUDID: profile?.appleWatchUDID || '',
     },
   })
 
@@ -163,14 +163,14 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
 
               <FormField
                 control={form.control}
-                name='iPhoneUUID'
+                name='iPhoneUDID'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className='flex items-center gap-2'>
-                      <Smartphone className='h-5 w-5' /> iPhone UUID
+                      <Smartphone className='h-5 w-5' /> iPhone UDID
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder='iPhone UUID (optional)' disabled={isPending} {...field} />
+                      <Input placeholder='iPhone UDID (optional)' disabled={isPending} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -179,14 +179,14 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
 
               <FormField
                 control={form.control}
-                name='iPadUUID'
+                name='iPadUDID'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className='flex items-center gap-2'>
-                      <Tablet className='h-5 w-5' /> iPad UUID
+                      <Tablet className='h-5 w-5' /> iPad UDID
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder='iPad UUID (optional)' disabled={isPending} {...field} />
+                      <Input placeholder='iPad UDID (optional)' disabled={isPending} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -195,15 +195,15 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
 
               <FormField
                 control={form.control}
-                name='appleWatchUUID'
+                name='appleWatchUDID'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className='flex items-center gap-2'>
-                      <Watch className='h-5 w-5' /> Apple Watch UUID
+                      <Watch className='h-5 w-5' /> Apple Watch UDID
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='Apple Watch UUID (optional)'
+                        placeholder='Apple Watch UDID (optional)'
                         disabled={isPending}
                         {...field}
                       />

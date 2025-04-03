@@ -179,14 +179,14 @@ func postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
+	confirmationMailSent, err := mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted", "confirmationMailSent": confirmationMailSent})
 }
 
 func postApplicationExtern(c *gin.Context) {
@@ -224,14 +224,15 @@ func postApplicationExtern(c *gin.Context) {
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
+	confirmationMailSent, err := mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+	// return if mailing is configured.
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted", "confirmationMailSent": confirmationMailSent})
 }
 
 func postApplicationAuthenticated(c *gin.Context) {
@@ -280,15 +281,15 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	err = mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
+	confirmationMailSent, err := mailing.SendApplicationConfirmationMail(c, coursePhaseId, courseParticipationID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not send confirmation mail"))
 		return
 	}
 
-	// TODO: send mail confirmation to student!
-	c.JSON(http.StatusCreated, gin.H{"message": "application posted"})
+	// return if mailing is configured.
+	c.JSON(http.StatusCreated, gin.H{"message": "application posted", "confirmationMailSent": confirmationMailSent})
 }
 
 func getApplicationByCPID(c *gin.Context) {

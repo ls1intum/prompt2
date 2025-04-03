@@ -13,7 +13,7 @@ import (
 )
 
 const createDeveloperProfile = `-- name: CreateDeveloperProfile :exec
-INSERT INTO developer_profile (course_participation_id, course_phase_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid)
+INSERT INTO developer_profile (course_participation_id, course_phase_id, gitlab_username, apple_id, has_macbook, iphone_udid, ipad_udid, apple_watch_udid)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 `
 
@@ -23,9 +23,9 @@ type CreateDeveloperProfileParams struct {
 	GitlabUsername        string      `json:"gitlab_username"`
 	AppleID               string      `json:"apple_id"`
 	HasMacbook            bool        `json:"has_macbook"`
-	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
-	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
-	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
+	IphoneUdid            pgtype.Text `json:"iphone_udid"`
+	IpadUdid              pgtype.Text `json:"ipad_udid"`
+	AppleWatchUdid        pgtype.Text `json:"apple_watch_udid"`
 }
 
 func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDeveloperProfileParams) error {
@@ -35,9 +35,9 @@ func (q *Queries) CreateDeveloperProfile(ctx context.Context, arg CreateDevelope
 		arg.GitlabUsername,
 		arg.AppleID,
 		arg.HasMacbook,
-		arg.IphoneUuid,
-		arg.IpadUuid,
-		arg.AppleWatchUuid,
+		arg.IphoneUdid,
+		arg.IpadUdid,
+		arg.AppleWatchUdid,
 	)
 	return err
 }
@@ -49,9 +49,9 @@ INSERT INTO developer_profile (
   gitlab_username,
   apple_id,
   has_macbook,
-  iphone_uuid,
-  ipad_uuid,
-  apple_watch_uuid
+  iphone_udid,
+  ipad_udid,
+  apple_watch_udid
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 ON CONFLICT (course_phase_id, course_participation_id)
@@ -59,9 +59,9 @@ DO UPDATE SET
   gitlab_username   = EXCLUDED.gitlab_username,
   apple_id          = EXCLUDED.apple_id,
   has_macbook       = EXCLUDED.has_macbook,
-  iphone_uuid       = EXCLUDED.iphone_uuid,
-  ipad_uuid         = EXCLUDED.ipad_uuid,
-  apple_watch_uuid  = EXCLUDED.apple_watch_uuid
+  iphone_udid       = EXCLUDED.iphone_udid,
+  ipad_udid         = EXCLUDED.ipad_udid,
+  apple_watch_udid  = EXCLUDED.apple_watch_udid
 `
 
 type CreateOrUpdateDeveloperProfileParams struct {
@@ -70,9 +70,9 @@ type CreateOrUpdateDeveloperProfileParams struct {
 	GitlabUsername        string      `json:"gitlab_username"`
 	AppleID               string      `json:"apple_id"`
 	HasMacbook            bool        `json:"has_macbook"`
-	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
-	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
-	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
+	IphoneUdid            pgtype.Text `json:"iphone_udid"`
+	IpadUdid              pgtype.Text `json:"ipad_udid"`
+	AppleWatchUdid        pgtype.Text `json:"apple_watch_udid"`
 }
 
 func (q *Queries) CreateOrUpdateDeveloperProfile(ctx context.Context, arg CreateOrUpdateDeveloperProfileParams) error {
@@ -82,15 +82,15 @@ func (q *Queries) CreateOrUpdateDeveloperProfile(ctx context.Context, arg Create
 		arg.GitlabUsername,
 		arg.AppleID,
 		arg.HasMacbook,
-		arg.IphoneUuid,
-		arg.IpadUuid,
-		arg.AppleWatchUuid,
+		arg.IphoneUdid,
+		arg.IpadUdid,
+		arg.AppleWatchUdid,
 	)
 	return err
 }
 
 const getAllDeveloperProfiles = `-- name: GetAllDeveloperProfiles :many
-SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid 
+SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_udid, ipad_udid, apple_watch_udid 
 FROM developer_profile
 WHERE course_phase_id = $1
 `
@@ -110,9 +110,9 @@ func (q *Queries) GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uui
 			&i.GitlabUsername,
 			&i.AppleID,
 			&i.HasMacbook,
-			&i.IphoneUuid,
-			&i.IpadUuid,
-			&i.AppleWatchUuid,
+			&i.IphoneUdid,
+			&i.IpadUdid,
+			&i.AppleWatchUdid,
 		); err != nil {
 			return nil, err
 		}
@@ -125,7 +125,7 @@ func (q *Queries) GetAllDeveloperProfiles(ctx context.Context, coursePhaseID uui
 }
 
 const getDeveloperProfileByCourseParticipationID = `-- name: GetDeveloperProfileByCourseParticipationID :one
-SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_uuid, ipad_uuid, apple_watch_uuid
+SELECT course_phase_id, course_participation_id, gitlab_username, apple_id, has_macbook, iphone_udid, ipad_udid, apple_watch_udid
 FROM developer_profile
 WHERE course_participation_id = $1 
 AND course_phase_id = $2
@@ -145,9 +145,9 @@ func (q *Queries) GetDeveloperProfileByCourseParticipationID(ctx context.Context
 		&i.GitlabUsername,
 		&i.AppleID,
 		&i.HasMacbook,
-		&i.IphoneUuid,
-		&i.IpadUuid,
-		&i.AppleWatchUuid,
+		&i.IphoneUdid,
+		&i.IpadUdid,
+		&i.AppleWatchUdid,
 	)
 	return i, err
 }
