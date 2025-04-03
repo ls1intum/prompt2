@@ -240,7 +240,7 @@ func AddStudentIDsToKeycloakGroup(ctx context.Context, accessToken string, stude
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	students, err := KeycloakRealmSingleton.queries.GetStudentEmails(ctxWithTimeout, studentIDs)
+	students, err := KeycloakRealmSingleton.queries.GetStudentUniversityLogins(ctxWithTimeout, studentIDs)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get student emails: %w", err)
 	}
@@ -253,7 +253,7 @@ func AddStudentIDsToKeycloakGroup(ctx context.Context, accessToken string, stude
 	for _, student := range students {
 		// Get the keycloak user to the student email
 		keycloakUser, err := KeycloakRealmSingleton.client.GetUsers(ctxWithTimeout, accessToken, KeycloakRealmSingleton.Realm, gocloak.GetUsersParams{
-			Email: &student.Email.String,
+			Username: &student.UniversityLogin.String,
 		})
 
 		if err != nil || len(keycloakUser) != 1 {
