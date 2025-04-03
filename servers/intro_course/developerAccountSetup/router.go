@@ -150,22 +150,22 @@ func registerDevicesHandler(c *gin.Context) {
 	}
 
 	// Extract student details
-	appleWatchUUID := developerprofile.AppleWatchUUID
-	iPhoneUUID := developerprofile.IPhoneUUID
-	iPadUUID := developerprofile.IPadUUID
+	appleWatchUDID := developerprofile.AppleWatchUDID
+	iPhoneUDID := developerprofile.IPhoneUDID
+	iPadUDID := developerprofile.IPadUDID
 
 	devices := []struct {
 		Name string
-		UUID pgtype.UUID
+		UDID pgtype.Text
 	}{
-		{Name: "Apple Watch", UUID: appleWatchUUID},
-		{Name: "iPhone", UUID: iPhoneUUID},
-		{Name: "iPad", UUID: iPadUUID},
+		{Name: "Apple Watch", UDID: appleWatchUDID},
+		{Name: "iPhone", UDID: iPhoneUDID},
+		{Name: "iPad", UDID: iPadUDID},
 	}
 
 	for _, device := range devices {
 		deviceName := device.Name
-		deviceUDID := device.UUID.String()
+		deviceUDID := device.UDID.String
 		platform := "IOS"
 		err = RegisterDevice(deviceName, deviceUDID, platform)
 		if err != nil {

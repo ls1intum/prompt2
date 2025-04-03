@@ -12,9 +12,9 @@ type DeveloperProfile struct {
 	AppleID               string      `json:"appleID"`
 	GitLabUsername        string      `json:"gitLabUsername"`
 	HasMacBook            bool        `json:"hasMacBook"`
-	IPhoneUUID            pgtype.UUID `json:"iPhoneUUID"`
-	IPadUUID              pgtype.UUID `json:"iPadUUID"`
-	AppleWatchUUID        pgtype.UUID `json:"appleWatchUUID"`
+	IPhoneUDID            pgtype.Text `json:"iPhoneUUID"`
+	IPadUDID              pgtype.Text `json:"iPadUUID"`
+	AppleWatchUDID        pgtype.Text `json:"appleWatchUUID"`
 }
 
 func GetDeveloperProfileDTOFromDBModel(model db.DeveloperProfile) DeveloperProfile {
@@ -24,9 +24,9 @@ func GetDeveloperProfileDTOFromDBModel(model db.DeveloperProfile) DeveloperProfi
 		AppleID:               model.AppleID,
 		GitLabUsername:        model.GitlabUsername,
 		HasMacBook:            model.HasMacbook,
-		IPhoneUUID:            model.IphoneUuid,
-		IPadUUID:              model.IpadUuid,
-		AppleWatchUUID:        model.AppleWatchUuid,
+		IPhoneUDID:            model.IphoneUdid,
+		IPadUDID:              model.IpadUdid,
+		AppleWatchUDID:        model.AppleWatchUdid,
 	}
 }
 
