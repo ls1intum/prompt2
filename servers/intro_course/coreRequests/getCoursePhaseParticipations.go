@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SendGetCoursePhaseParticipations(authHeader string, coursePhaseID uuid.UUID) ([]coreRequestDTOs.GetStudent, error) {
+func SendGetCoursePhaseParticipations(authHeader string, coursePhaseID uuid.UUID) ([]coreRequestDTOs.CoursePhaseParticipationWithStudent, error) {
 	path := "/api/course_phases/" + coursePhaseID.String() + "/participations"
 
 	// Send the request with the payload attached
@@ -34,10 +34,8 @@ func SendGetCoursePhaseParticipations(authHeader string, coursePhaseID uuid.UUID
 	}
 
 	// Extract students from participations
-	var students []coreRequestDTOs.GetStudent
-	for _, participation := range participationResponse.Participations {
-		students = append(students, participation.Student)
-	}
+	var participations []coreRequestDTOs.CoursePhaseParticipationWithStudent
+	participations = append(participations, participationResponse.Participations...)
 
-	return students, nil
+	return participations, nil
 }

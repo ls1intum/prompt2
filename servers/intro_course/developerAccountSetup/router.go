@@ -82,21 +82,18 @@ func inviteUsersHandler(c *gin.Context) {
 	}
 
 	// Fetch all students from the course phase
-	students, err := coreRequests.SendGetCoursePhaseParticipations(authHeader, coursePhaseID)
+	participations, err := coreRequests.SendGetCoursePhaseParticipations(authHeader, coursePhaseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get course phase participations"})
 		return
 	}
 
-	for _, student := range students {
-		courseParticipationID, ok := c.Get("courseParticipationID")
-		if !ok {
-			log.Error("Error getting courseParticipationID from context")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+	for _, participation := range participations {
+		courseParticipationID := participation.CourseParticipationID
+		coursePhaseID := participation.CoursePhaseID
+		student := participation.Student
 
-		developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+		developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 		if err != nil {
 			log.Error("Error getting developer profile: ", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
