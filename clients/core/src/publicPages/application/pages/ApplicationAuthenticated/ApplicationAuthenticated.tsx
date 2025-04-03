@@ -24,6 +24,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
   const { user, logout } = useAuthStore()
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
   const queryClient = useQueryClient()
+  const [confirmationMailSent, setConfirmationMailSent] = useState<boolean>(false)
 
   // This data should already be fetched in the Login Page, but this page could also be loaded from a direct link
   const {
@@ -50,8 +51,9 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     mutationFn: (modifiedApplication: PostApplication) => {
       return postNewApplicationAuthenticated(phaseId ?? 'undefined', modifiedApplication)
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['application', phaseId, user?.email] })
+      setConfirmationMailSent(data.confirmationMailSent)
       setShowDialog('success')
     },
     onError: () => {
@@ -143,6 +145,7 @@ export const ApplicationAuthenticated = (): JSX.Element => {
         onClose={handleCloseDialog}
         onNavigateBack={handleBack}
         errorMessage={mutateError?.message}
+        confirmationMailSent={confirmationMailSent}
       />
     </AuthenticatedPageWrapper>
   )

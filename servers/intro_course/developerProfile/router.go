@@ -42,6 +42,13 @@ func createDeveloperProfile(c *gin.Context) {
 		return
 	}
 
+	err = validateDeveloperProfileUDIDs(request)
+	if err != nil {
+		log.Error("Error validating UDIDs: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	err = CreateDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID), request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)

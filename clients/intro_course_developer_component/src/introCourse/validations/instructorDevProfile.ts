@@ -4,18 +4,27 @@ export const instructorDevProfile = z.object({
   appleID: z.string().email('Invalid email address'),
   gitLabUsername: z.string(),
   hasMacBook: z.boolean(),
-  // Preprocess empty strings to undefined before validating UUID
-  iPhoneUUID: z.preprocess(
+  // Preprocess empty strings to undefined before validating UDID
+  iPhoneUDID: z.preprocess(
     (a) => (a === '' ? undefined : a),
-    z.string().uuid('Invalid iPhone UUID').optional(),
+    z
+      .string()
+      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPhone UDID')
+      .optional(),
   ),
-  iPadUUID: z.preprocess(
+  iPadUDID: z.preprocess(
     (a) => (a === '' ? undefined : a),
-    z.string().uuid('Invalid iPad UUID').optional(),
+    z
+      .string()
+      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPad UDID')
+      .optional(),
   ),
-  appleWatchUUID: z.preprocess(
+  appleWatchUDID: z.preprocess(
     (a) => (a === '' ? undefined : a),
-    z.string().uuid('Invalid Apple Watch UUID').optional(),
+    z
+      .string()
+      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid Apple Watch UDID')
+      .optional(),
   ),
 })
 
