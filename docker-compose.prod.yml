@@ -93,6 +93,9 @@ services:
       - KEYCLOAK_REALM_NAME
       - KEYCLOAK_AUTHORIZED_PARTY
       - KEYCLOAK_CLIENT_ID
+      - APPLE_ISSUER_ID
+      - APPLE_KEY_ID
+      - APPLE_PRIVATE_KEY
     networks:
       - prompt-network
 

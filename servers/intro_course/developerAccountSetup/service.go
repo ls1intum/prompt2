@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 )
 
 type DeveloperAccountSetupService struct {
@@ -20,10 +21,10 @@ type DeveloperAccountSetupService struct {
 
 var DeveloperAccountSetupServiceSingleton *DeveloperAccountSetupService
 
-const (
-	issuerID   = "YOUR_ISSUER_ID"
-	keyID      = "YOUR_KEY_ID"
-	privateKey = `YOUR_PRIVATE_KEY`
+var (
+	issuerID   = utils.GetEnv("APPLE_ISSUER_ID", "")
+	keyID      = utils.GetEnv("APPLE_KEY_ID", "")
+	privateKey = utils.GetEnv("APPLE_PRIVATE_KEY", "")
 )
 
 // GenerateJWT creates a JWT token required for Apple API authentication.

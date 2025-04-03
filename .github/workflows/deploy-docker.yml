@@ -154,6 +154,10 @@ jobs:
             echo "DB_HOST_INTRO_COURSE=${{ vars.DB_HOST_INTRO_COURSE }}" >> .env.prod
             echo "DB_PORT_INTRO_COURSE=${{ vars.DB_PORT_INTRO_COURSE }}" >> .env.prod
 
+            echo "APPLE_ISSUER_ID"=${{ secrets.APPLE_ISSUER_ID }}" >> .env.prod
+            echo "APPLE_KEY_ID"=${{ secrets.APPLE_KEY_ID }}" >> .env.prod
+            echo "APPLE_PRIVATE_KEY"=${{ secrets.APPLE_PRIVATE_KEY }}" >> .env.prod
+
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_ID=${{ vars.KEYCLOAK_CLIENT_ID }}" >> .env.prod
