@@ -14,7 +14,16 @@ import { Button } from '@/components/ui/button'
 import { Table } from '@tanstack/react-table'
 import { AlertCircle } from 'lucide-react'
 
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion'
+import { ChevronRight } from 'lucide-react'
+
 import { useGetAllCategoriesWithCompetencies } from '../../hooks/useGetAllCategoriesWithCompetencies'
+import { CreateAssessmentForm } from './CreateAssessmentForm'
 
 interface AssessmentDialogProps {
   isOpen: boolean
@@ -65,6 +74,48 @@ export const AssessmentDialog: React.FC<AssessmentDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Assess Students</DialogTitle>
         </DialogHeader>
+
+        {categories.map((category) => (
+          <Card key={category.id} className='p-6 overflow-hidden'>
+            <Accordion type='single' collapsible className='w-full'>
+              <AccordionItem value='competencies' className='border-none'>
+                <div className='flex justify-between items-center'>
+                  <div>
+                    <h2 className='text-xl font-semibold tracking-tight'>{category.name}</h2>
+                    {category.description && (
+                      <p className='text-muted-foreground text-sm mt-1'>{category.description}</p>
+                    )}
+                  </div>
+                  <AccordionTrigger className='py-3 hover:no-underline'>
+                    <span className='text-sm font-medium'>Show Competencies</span>
+                  </AccordionTrigger>
+                </div>
+                <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
+                  {category.competencies.length === 0 ? (
+                    <p className='text-sm text-muted-foreground italic'>
+                      No competencies available yet.
+                    </p>
+                  ) : (
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      {category.competencies.map((competency) => (
+                        <div>
+                          <CreateAssessmentForm
+                            courseParticipationID={courseParticipationID}
+                            competencyID={competency.id}
+                            noviceText={competency.novice}
+                            intermediateText={competency.intermediate}
+                            advancedText={competency.advanced}
+                            expertText={competency.expert}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+        ))}
 
         <DialogFooter>
           <Button variant='outline' onClick={onClose}>
