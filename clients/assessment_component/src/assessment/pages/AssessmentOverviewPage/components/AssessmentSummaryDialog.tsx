@@ -2,16 +2,13 @@ import React from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Table } from '@tanstack/react-table'
 import { AlertCircle } from 'lucide-react'
 
 import {
@@ -20,22 +17,21 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
-import { ChevronRight } from 'lucide-react'
 
 import { useGetAllCategoriesWithCompetencies } from '../../hooks/useGetAllCategoriesWithCompetencies'
 import { CreateAssessmentForm } from './CreateAssessmentForm'
 
-interface AssessmentDialogProps {
+interface AssessmentSummaryDialogProps {
   isOpen: boolean
   onClose: () => void
   courseParticipationID: string
 }
 
-export const AssessmentDialog: React.FC<AssessmentDialogProps> = ({
+export const AssessmentSummaryDialog: React.FC<AssessmentSummaryDialogProps> = ({
   isOpen,
   onClose,
   courseParticipationID,
-}: AssessmentDialogProps) => {
+}: AssessmentSummaryDialogProps) => {
   const { data: categories, isLoading, isError } = useGetAllCategoriesWithCompetencies()
 
   if (isLoading) {

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
 import { useQuery } from '@tanstack/react-query'
@@ -11,23 +10,10 @@ import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
-import { AssessmentDialog } from './components/AssessmentDialog'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-
 export const AssessmentOverviewPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
-  const [isAssessmentDialogOpen, setAssessmentDialogOpen] = useState(false)
-  const [courseParticipationID, setCourseParticipationID] = useState<string | undefined>(undefined)
-
-  const handleDialogOpen = (student: CoursePhaseParticipationWithStudent) => {
-    setAssessmentDialogOpen(true)
-    setCourseParticipationID(student.courseParticipationID)
-  }
-
-  const handleDialogClose = () => {
-    setAssessmentDialogOpen(false)
-    setCourseParticipationID(undefined)
-  }
+  const navigate = useNavigate()
+  const path = useLocation().pathname
 
   const {
     data: coursePhaseParticipations,
@@ -55,17 +41,11 @@ export const AssessmentOverviewPage = (): JSX.Element => {
             prevDataKeys={['score']}
             restrictedDataKeys={[]}
             studentReadableDataKeys={[]}
-            onClickRowAction={handleDialogOpen}
+            onClickRowAction={(student) =>
+              navigate(`${path}/student-assessment/${student.courseParticipationID}`)
+            }
           />
         </>
-      )}
-
-      {isAssessmentDialogOpen && (
-        <AssessmentDialog
-          isOpen={isAssessmentDialogOpen}
-          onClose={handleDialogClose}
-          courseParticipationID={courseParticipationID ?? ''}
-        />
       )}
     </div>
   )
