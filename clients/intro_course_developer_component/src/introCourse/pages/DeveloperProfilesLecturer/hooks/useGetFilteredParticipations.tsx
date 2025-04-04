@@ -31,13 +31,13 @@ export const useGetFilteredParticipations = (
         passesDevices = passesDevices && !!(devProfile && devProfile.hasMacBook)
       }
       if (filters.devices.iPhone) {
-        passesDevices = passesDevices && !!(devProfile && devProfile.iPhoneUUID)
+        passesDevices = passesDevices && !!(devProfile && devProfile.iPhoneUDID)
       }
       if (filters.devices.iPad) {
-        passesDevices = passesDevices && !!(devProfile && devProfile.iPadUUID)
+        passesDevices = passesDevices && !!(devProfile && devProfile.iPadUDID)
       }
       if (filters.devices.appleWatch) {
-        passesDevices = passesDevices && !!(devProfile && devProfile.appleWatchUUID)
+        passesDevices = passesDevices && !!(devProfile && devProfile.appleWatchUDID)
       }
       if (filters.devices.noDevices) {
         // "No Devices" means there is no profile or the profile has none of the devices.
@@ -45,9 +45,9 @@ export const useGetFilteredParticipations = (
           passesDevices &&
           (!devProfile ||
             (!devProfile.hasMacBook &&
-              !devProfile.iPhoneUUID &&
-              !devProfile.iPadUUID &&
-              !devProfile.appleWatchUUID))
+              !devProfile.iPhoneUDID &&
+              !devProfile.iPadUDID &&
+              !devProfile.appleWatchUDID))
       }
 
       // Gitlab Status filter:

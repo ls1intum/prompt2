@@ -90,7 +90,7 @@ func KeycloakMiddleware() gin.HandlerFunc {
 
 		if len(studentRoles) == 0 && len(userRoles) == 0 {
 			log.Error("User has no roles")
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User has no roles"})
 			return
 		}
 

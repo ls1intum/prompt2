@@ -63,6 +63,44 @@ func (q *Queries) GetAssignedTutor(ctx context.Context, arg GetAssignedTutorPara
 	return i, err
 }
 
+const getOwnSeatAssignment = `-- name: GetOwnSeatAssignment :one
+SELECT s.seat_name, s.has_mac, s.device_id, s.assigned_student, t.first_name as tutor_first_name, t.last_name as tutor_last_name, t.email as tutor_email
+FROM seat s
+JOIN tutor t ON s.course_phase_id = t.course_phase_id AND s.assigned_tutor = t.id
+WHERE s.course_phase_id = $1
+  AND s.assigned_student = $2
+`
+
+type GetOwnSeatAssignmentParams struct {
+	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
+	AssignedStudent pgtype.UUID `json:"assigned_student"`
+}
+
+type GetOwnSeatAssignmentRow struct {
+	SeatName        string      `json:"seat_name"`
+	HasMac          bool        `json:"has_mac"`
+	DeviceID        pgtype.Text `json:"device_id"`
+	AssignedStudent pgtype.UUID `json:"assigned_student"`
+	TutorFirstName  string      `json:"tutor_first_name"`
+	TutorLastName   string      `json:"tutor_last_name"`
+	TutorEmail      string      `json:"tutor_email"`
+}
+
+func (q *Queries) GetOwnSeatAssignment(ctx context.Context, arg GetOwnSeatAssignmentParams) (GetOwnSeatAssignmentRow, error) {
+	row := q.db.QueryRow(ctx, getOwnSeatAssignment, arg.CoursePhaseID, arg.AssignedStudent)
+	var i GetOwnSeatAssignmentRow
+	err := row.Scan(
+		&i.SeatName,
+		&i.HasMac,
+		&i.DeviceID,
+		&i.AssignedStudent,
+		&i.TutorFirstName,
+		&i.TutorLastName,
+		&i.TutorEmail,
+	)
+	return i, err
+}
+
 const getSeatPlan = `-- name: GetSeatPlan :many
 SELECT course_phase_id, seat_name, has_mac, device_id, assigned_student, assigned_tutor
 FROM seat

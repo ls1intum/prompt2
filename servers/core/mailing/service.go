@@ -26,13 +26,13 @@ type MailingService struct {
 
 var MailingServiceSingleton *MailingService
 
-func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) error {
+func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (bool, error) {
 	isApplicationPhase, err := MailingServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if !isApplicationPhase {
-		return errors.New("course phase is not an application phase")
+		return false, errors.New("course phase is not an application phase")
 	}
 
 	mailingInfo, err := MailingServiceSingleton.queries.GetConfirmationMailingInformation(ctx, db.GetConfirmationMailingInformationParams{
@@ -42,23 +42,23 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	if err != nil {
 		log.Error("failed to get mailing information: ", err)
-		return errors.New("failed to send mail")
+		return false, errors.New("failed to send mail")
 	}
 
 	if !mailingInfo.SendConfirmationMail {
 		log.Debug("not sending because SendConfirmationMail is disabled")
-		return nil
+		return false, nil
 	}
 
 	if mailingInfo.ConfirmationMailContent == "" {
 		log.Error("mailing template is not correctly configured")
-		return nil
+		return false, nil
 	}
 
 	courseMailingSettings, err := getSenderInformation(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("failed to get sender information")
-		return err
+		return false, err
 	}
 
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
@@ -73,10 +73,10 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 	err = SendMail(courseMailingSettings, mailingInfo.Email.String, finalSubject, finalMessage)
 	if err != nil {
 		log.Error("failed to send mail: ", err)
-		return errors.New("failed to send mail")
+		return false, errors.New("failed to send mail")
 	}
 
-	return nil
+	return true, nil
 }
 
 func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, status db.PassStatus) (mailingDTO.MailingReport, error) {

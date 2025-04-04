@@ -36,13 +36,13 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   // getting the courses
   const {
     data: fetchedCourses,
-    error,
     isPending,
     isError: isCourseError,
     refetch: refetchCourses,
   } = useQuery<Course[]>({
     queryKey: ['courses'],
     queryFn: () => getAllCourses(),
+    enabled: !!keycloak,
   })
 
   // getting the course ids of the course a user is enrolled in
@@ -54,6 +54,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   } = useQuery<string[]>({
     queryKey: ['own_courses'],
     queryFn: () => getOwnCourseIDs(),
+    enabled: !!keycloak,
   })
 
   const refetch = () => {
@@ -66,13 +67,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
 
   useEffect(() => {
     if (fetchedCourses) {
-      setCourses(fetchedCourses)
+      // Spreading into a new array forces an immutable update.
+      setCourses([...fetchedCourses])
     }
   }, [fetchedCourses, setCourses])
 
   useEffect(() => {
     if (fetchedOwnCourseIDs) {
-      setOwnCourseIDs(fetchedOwnCourseIDs)
+      setOwnCourseIDs([...fetchedOwnCourseIDs])
     }
   }, [fetchedOwnCourseIDs, setOwnCourseIDs])
 
@@ -85,6 +87,11 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
         navigate(`/management/course/${retrievedCourseID}`)
       } else {
         removeSelectedCourseID()
+      }
+
+      // if you have only one course, redirect to it
+      if (fetchedCourses.length === 1) {
+        navigate(`/management/course/${fetchedCourses[0].id}`)
       }
     } else if (path === '/management/general' || (courseId && !courseExists)) {
       removeSelectedCourseID()
@@ -102,15 +109,12 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
     setSelectedCourseID,
   ])
 
-  if (isLoading) {
-    return <LoadingPage />
+  if (isError) {
+    return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
   }
 
-  if (isError) {
-    if (isCourseError && error.message.includes('401')) {
-      return <UnauthorizedPage onLogout={logout} />
-    }
-    return <ErrorPage onRetry={() => refetch()} onLogout={() => logout()} />
+  if (isLoading || !keycloak) {
+    return <LoadingPage />
   }
 
   // Check if the user has at least some Prompt rights

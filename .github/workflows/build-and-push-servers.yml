@@ -2,26 +2,44 @@ name: Build and Push Docker Image Servers
 
 on:
   workflow_call:
+    inputs:
+      release_tag:
+        description: "Optional image tag override"
+        required: false
+        type: string
     outputs:
-      server_core_image_tag: 
+      server_core_image_tag:
         description: "The tag of the image that was built"
         value: ${{ jobs.core.outputs.image_tag }}
-      server_intro_course_image_tag: 
+      server_intro_course_image_tag:
         description: "The tag of the image that was built"
         value: ${{ jobs.intro-course.outputs.image_tag }}
+      server_team_allocation_image_tag:
+        description: "The tag of the image that was built"
+        value: ${{ jobs.team-allocation.outputs.image_tag }}
 
 jobs:
   core:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-core # Defaults to the repository name
       docker-file: servers/Dockerfile # Defaults to Dockerfile
       docker-context: ./servers/core
+      tags: ${{ inputs.release_tag }}
     secrets: inherit
   intro-course:
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.0.0
-      with:
-        image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
-        docker-file: servers/Dockerfile 
-        docker-context: ./servers/intro_course
-      secrets: inherit
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/intro_course
+      tags: ${{ inputs.release_tag }}
+    secrets: inherit
+  team-allocation:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-server-team-allocation
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/team_allocation
+      tags: ${{ inputs.release_tag }}
+    secrets: inherit

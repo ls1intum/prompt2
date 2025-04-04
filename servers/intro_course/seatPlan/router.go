@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan/seatPlanDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -15,13 +15,15 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 	seatPlanRouter := router.Group("/seat_plan")
 
 	// Post initial seat plan with seat names
-	seatPlanRouter.POST("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createSeatPlan)
-	seatPlanRouter.DELETE("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), deleteSeatPlan)
+	seatPlanRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createSeatPlan)
+	seatPlanRouter.DELETE("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteSeatPlan)
 
 	// Update seat plan (assigned tutor, assigned student, hasMac, deviceID)
-	seatPlanRouter.PUT("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateSeatPlan)
+	seatPlanRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateSeatPlan)
 
-	seatPlanRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getSeatPlan)
+	seatPlanRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getSeatPlan)
+
+	seatPlanRouter.GET("/own-assignment", authMiddleware(promptSDK.CourseStudent), getOwnSeatAssignment)
 
 }
 
@@ -110,6 +112,31 @@ func deleteSeatPlan(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func getOwnSeatAssignment(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		handleError(c, http.StatusInternalServerError, errors.New("error getting courseParticipationID from context"))
+		return
+	}
+
+	seatAssignment, err := GetOwnSeatAssignment(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, seatAssignment)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

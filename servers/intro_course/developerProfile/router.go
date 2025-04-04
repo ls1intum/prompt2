@@ -5,18 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile/developerProfileDTO"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	log "github.com/sirupsen/logrus"
 )
 
 func setupDeveloperProfileRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	developerProfile := router.Group("/developer_profile")
-	developerProfile.POST("", authMiddleware(keycloakTokenVerifier.CourseStudent), createDeveloperProfile)
-	developerProfile.GET("/self", authMiddleware(keycloakTokenVerifier.CourseStudent), getOwnDeveloperProfile)
+	developerProfile.POST("", authMiddleware(promptSDK.CourseStudent), createDeveloperProfile)
+	developerProfile.GET("/self", authMiddleware(promptSDK.CourseStudent), getOwnDeveloperProfile)
 	// Getting all developer profiles is only allowed for lecturers
-	developerProfile.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getAllDeveloperProfiles)
-	developerProfile.PUT("/:courseParticipationID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateDeveloperProfile)
+	developerProfile.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllDeveloperProfiles)
+	developerProfile.PUT("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateDeveloperProfile)
 
 }
 
@@ -38,6 +38,13 @@ func createDeveloperProfile(c *gin.Context) {
 
 	var request developerProfileDTO.PostDeveloperProfile
 	if err := c.BindJSON(&request); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validateDeveloperProfileUDIDs(request)
+	if err != nil {
+		log.Error("Error validating UDIDs: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}

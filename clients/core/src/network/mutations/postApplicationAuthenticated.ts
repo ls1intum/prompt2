@@ -1,16 +1,18 @@
 import { axiosInstance } from '@/network/configService'
 import { PostApplication } from '../../interfaces/application/postApplication'
+import { PostApplicationResponse } from '@core/publicPages/application/interfaces/postApplicationConfirmation'
 
 export const postNewApplicationAuthenticated = async (
   phaseId: string,
   application: PostApplication,
-): Promise<void> => {
+): Promise<PostApplicationResponse> => {
   try {
-    return await axiosInstance.post(`/api/apply/authenticated/${phaseId}`, application, {
+    const response = await axiosInstance.post(`/api/apply/authenticated/${phaseId}`, application, {
       headers: {
         'Content-Type': 'application/json-path+json',
       },
     })
+    return response.data
   } catch (err) {
     console.error(err)
     throw err

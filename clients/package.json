@@ -1,6 +1,6 @@
 {
     "name": "prompt-module-federation",
-    "version": "2.1.0",
+    "version": "2.2.5",
     "private": true,
     "workspaces": {
         "packages": [
@@ -12,7 +12,8 @@
             "intro_course_developer_component",
             "shared_library",
             "assessment_component",
-            "devops_challenge_component"
+            "devops_challenge_component",
+            "team_allocation_component"
         ]
     },
     "scripts": {
@@ -48,11 +49,12 @@
         "clsx": "^2.1.1",
         "css-loader": "^7.1.2",
         "date-fns": "^4.1.0",
+        "dayjs": "^1.11.13",
         "dompurify": "^3.2.4",
         "file-saver": "^2.0.5",
         "framer-motion": "^12.4.1",
         "jwt-decode": "^4.0.0",
-        "keycloak-js": "22.0.5",
+        "keycloak-js": "25.0.6",
         "lowlight": "^3.3.0",
         "lucide-react": "^0.460.0",
         "postcss": "^8.4.49",

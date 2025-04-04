@@ -7,6 +7,8 @@ declare global {
 type EnvType = {
   CORE_HOST: string
   INTRO_COURSE_HOST: string
+  TEAM_ALLOCATION_HOST: string
+  DEVOPS_CHALLENGE_HOST: string
   KEYCLOAK_HOST: string
   KEYCLOAK_REALM_NAME: string
   CHAIR_NAME_LONG: string

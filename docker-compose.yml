@@ -52,9 +52,9 @@ services:
       context: ./clients
       dockerfile: Dockerfile
     image: base:latest
-  
+
   db:
-    image: 'postgres:15.2-alpine'
+    image: "postgres:15.2-alpine"
     container_name: prompt-core-db
     environment:
       - POSTGRES_USER=prompt-postgres
@@ -72,7 +72,7 @@ services:
       - "5432:5432"
 
   db-intro-course:
-    image: 'postgres:15.2-alpine'
+    image: "postgres:15.2-alpine"
     container_name: prompt-intro-course-db
     environment:
       - POSTGRES_USER=prompt-postgres
@@ -88,6 +88,42 @@ services:
       retries: 5
     ports:
       - "5433:5432"
+
+  db-team-allocation:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-team-allocation-db
+    environment:
+      - POSTGRES_USER=prompt-postgres
+      - POSTGRES_PASSWORD=prompt-postgres
+      - POSTGRES_DB=prompt
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_team_allocation_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5434:5432"
+
+  db-assessment:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-assessment-db
+    environment:
+      - POSTGRES_USER=prompt-postgres
+      - POSTGRES_PASSWORD=prompt-postgres
+      - POSTGRES_DB=prompt
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_assessment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5435:5432"
 
   keycloak-db:
     image: "postgres:15.2-alpine"
@@ -108,7 +144,7 @@ services:
       - "5431:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
+    image: quay.io/keycloak/keycloak:25.0
     container_name: prompt-keycloak
     environment:
       KC_DB: postgres
@@ -129,7 +165,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit'
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit',
         ]
 
   postfix:
@@ -141,5 +177,3 @@ services:
     hostname: prompt.ase.cit.tum.de
     ports:
       - "25:25"
-  
-

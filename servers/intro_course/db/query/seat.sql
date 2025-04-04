@@ -28,3 +28,10 @@ FROM seat s
 JOIN tutor t ON s.assigned_tutor = t.id AND s.course_phase_id = t.course_phase_id
 WHERE s.course_phase_id = $1
   AND s.assigned_student = $2;
+
+-- name: GetOwnSeatAssignment :one
+SELECT s.seat_name, s.has_mac, s.device_id, s.assigned_student, t.first_name as tutor_first_name, t.last_name as tutor_last_name, t.email as tutor_email
+FROM seat s
+JOIN tutor t ON s.course_phase_id = t.course_phase_id AND s.assigned_tutor = t.id
+WHERE s.course_phase_id = $1
+  AND s.assigned_student = $2;

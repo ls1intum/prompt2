@@ -236,13 +236,13 @@ export const DeveloperProfilesLecturerPage = () => {
               <TableCell>
                 <div className='flex gap-2'>
                   {devProfile?.hasMacBook && <Laptop className='h-5 w-5 text-slate-600' />}
-                  {devProfile?.iPhoneUUID && <Smartphone className='h-5 w-5 text-slate-600' />}
-                  {devProfile?.iPadUUID && <Tablet className='h-5 w-5 text-slate-600' />}
-                  {devProfile?.appleWatchUUID && <Watch className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.iPhoneUDID && <Smartphone className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.iPadUDID && <Tablet className='h-5 w-5 text-slate-600' />}
+                  {devProfile?.appleWatchUDID && <Watch className='h-5 w-5 text-slate-600' />}
                   {!devProfile?.hasMacBook &&
-                    !devProfile?.iPhoneUUID &&
-                    !devProfile?.iPadUUID &&
-                    !devProfile?.appleWatchUUID && (
+                    !devProfile?.iPhoneUDID &&
+                    !devProfile?.iPadUDID &&
+                    !devProfile?.appleWatchUDID && (
                       <span className='text-muted-foreground text-sm italic'>No devices</span>
                     )}
                 </div>

@@ -15,24 +15,8 @@ jobs:
   lint-clients:
     uses: ./.github/workflows/lint-clients.yml
     secrets: inherit
-  annotate-lint-clients:
-    needs: lint-clients
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Lint Results
-        uses: actions/download-artifact@v4
-        with:
-          name: lint-results
-          path: clients/lint-results
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@v3
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          report-json: "./clients/lint-results/*.json"
-          fail-on-warning: false
-          check-name: "Client Linting Report"
   build-clients:
-    needs: annotate-lint-clients
+    needs: lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
   deploy-dev:
@@ -48,6 +32,8 @@ jobs:
       intro_course_developer_image_tag: ${{ needs.build-clients.outputs.intro_course_developer_image_tag }}
       intro_course_tutor_image_tag: ${{ needs.build-clients.outputs.intro_course_tutor_image_tag }}
       assessment_image_tag: ${{ needs.build-clients.outputs.assessment_image_tag }}
+      team_allocation_image_tag: ${{ needs.build-clients.outputs.team_allocation_image_tag }}
       server_core_image_tag: ${{ needs.build-servers.outputs.server_core_image_tag }}
       server_intro_course_image_tag: ${{ needs.build-servers.outputs.server_intro_course_image_tag }}
+      server_team_allocation_image_tag: ${{ needs.build-servers.outputs.server_team_allocation_image_tag }}
       devops_challenge_image_tag: ${{ needs.build-clients.outputs.devops_challenge_image_tag }}

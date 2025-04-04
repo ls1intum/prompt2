@@ -6,18 +6,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor/tutorDTO"
 	log "github.com/sirupsen/logrus"
 )
 
 func setupTutorRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	tutorRouter := router.Group("/tutor")
-	tutorRouter.GET("", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getTutors)
+	tutorRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTutors)
 	// we need the courseID to add students to keycloak groups
-	tutorRouter.POST("/course/:courseID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), importTutors)
-	tutorRouter.PUT("/:tutorID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), updateGitLabUsername)
+	tutorRouter.POST("/course/:courseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), importTutors)
+	tutorRouter.PUT("/:tutorID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateGitLabUsername)
 }
 
 func getTutors(c *gin.Context) {

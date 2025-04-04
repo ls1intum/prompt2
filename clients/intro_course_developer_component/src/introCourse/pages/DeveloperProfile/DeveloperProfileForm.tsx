@@ -16,7 +16,7 @@ import { YesNoButtons } from '../../components/YesNoButtons'
 import { developerFormSchema, type DeveloperFormValues } from '../../validations/developerProfile'
 import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
-import IOSUUIDDialog from './components/IOSUUIDDialog'
+import IOSUDIDDialog from './components/IOSUDIDDialog'
 import { useScreenSize } from '@/hooks/useScreenSize'
 import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 
@@ -40,18 +40,18 @@ export const DeveloperProfileForm = ({
       gitLabUsername: developerProfile?.gitLabUsername || '',
       hasMacBook: developerProfile?.hasMacBook,
       hasIPhone:
-        developerProfile?.iPhoneUUID === undefined
+        developerProfile?.iPhoneUDID === undefined
           ? undefined
-          : developerProfile?.iPhoneUUID !== '',
-      iPhoneUUID: developerProfile?.iPhoneUUID || '',
+          : developerProfile?.iPhoneUDID !== '',
+      iPhoneUDID: developerProfile?.iPhoneUDID || '',
       hasIPad:
-        developerProfile?.iPadUUID === undefined ? undefined : developerProfile?.iPadUUID !== '',
-      iPadUUID: developerProfile?.iPadUUID || '',
+        developerProfile?.iPadUDID === undefined ? undefined : developerProfile?.iPadUDID !== '',
+      iPadUDID: developerProfile?.iPadUDID || '',
       hasAppleWatch:
-        developerProfile?.appleWatchUUID === undefined
+        developerProfile?.appleWatchUDID === undefined
           ? undefined
-          : developerProfile?.appleWatchUUID !== '',
-      appleWatchUUID: developerProfile?.appleWatchUUID || '',
+          : developerProfile?.appleWatchUDID !== '',
+      appleWatchUDID: developerProfile?.appleWatchUDID || '',
     },
   })
 
@@ -60,9 +60,9 @@ export const DeveloperProfileForm = ({
       appleID: values.appleID,
       gitLabUsername: values.gitLabUsername,
       hasMacBook: values.hasMacBook,
-      iPhoneUUID: values.hasIPhone ? values.iPhoneUUID : undefined,
-      iPadUUID: values.hasIPad ? values.iPadUUID : undefined,
-      appleWatchUUID: values.hasAppleWatch ? values.appleWatchUUID : undefined,
+      iPhoneUDID: values.hasIPhone ? values.iPhoneUDID : undefined,
+      iPadUDID: values.hasIPad ? values.iPadUDID : undefined,
+      appleWatchUDID: values.hasAppleWatch ? values.appleWatchUDID : undefined,
     }
     onSubmit(submittedProfile)
   }
@@ -136,7 +136,7 @@ export const DeveloperProfileForm = ({
             )}
           />
 
-          {/* iPhone Section: Yes/No + UUID Input */}
+          {/* iPhone Section: Yes/No + UDID Input */}
           <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
             <div>
               <FormField
@@ -157,17 +157,17 @@ export const DeveloperProfileForm = ({
               <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
-                  name='iPhoneUUID'
+                  name='iPhoneUDID'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
-                            placeholder="Enter your iPhone's UUID."
+                            placeholder="Enter your iPhone's UDID."
                             {...field}
                             className='w-full'
                           />
-                          <IOSUUIDDialog />
+                          <IOSUDIDDialog />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -178,7 +178,7 @@ export const DeveloperProfileForm = ({
             )}
           </div>
 
-          {/* iPad Section: Yes/No + UUID Input */}
+          {/* iPad Section: Yes/No + UDID Input */}
           <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
             <div>
               <FormField
@@ -199,17 +199,17 @@ export const DeveloperProfileForm = ({
               <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
-                  name='iPadUUID'
+                  name='iPadUDID'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
-                            placeholder="Enter your iPad's UUID."
+                            placeholder="Enter your iPad's UDID."
                             {...field}
                             className='w-full'
                           />
-                          <IOSUUIDDialog />
+                          <IOSUDIDDialog />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -220,7 +220,7 @@ export const DeveloperProfileForm = ({
             )}
           </div>
 
-          {/* Apple Watch Section: Yes/No + UUID Input */}
+          {/* Apple Watch Section: Yes/No + UDID Input */}
           <div className={`grid ${width > 800 ? 'grid-cols-4' : 'grid-cols-1'} gap-4 items-center`}>
             <div>
               <FormField
@@ -241,17 +241,17 @@ export const DeveloperProfileForm = ({
               <div className='col-span-3 h-full flex flex-col justify-end'>
                 <FormField
                   control={form.control}
-                  name='appleWatchUUID'
+                  name='appleWatchUDID'
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <div className='flex items-center space-x-2'>
                           <Input
-                            placeholder="Enter your Apple Watch's UUID."
+                            placeholder="Enter your Apple Watch's UDID."
                             {...field}
                             className='w-full'
                           />
-                          <IOSUUIDDialog />
+                          <IOSUDIDDialog />
                         </div>
                       </FormControl>
                       <FormMessage />

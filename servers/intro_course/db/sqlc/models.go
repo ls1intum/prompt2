@@ -15,9 +15,9 @@ type DeveloperProfile struct {
 	GitlabUsername        string      `json:"gitlab_username"`
 	AppleID               string      `json:"apple_id"`
 	HasMacbook            bool        `json:"has_macbook"`
-	IphoneUuid            pgtype.UUID `json:"iphone_uuid"`
-	IpadUuid              pgtype.UUID `json:"ipad_uuid"`
-	AppleWatchUuid        pgtype.UUID `json:"apple_watch_uuid"`
+	IphoneUdid            pgtype.Text `json:"iphone_udid"`
+	IpadUdid              pgtype.Text `json:"ipad_udid"`
+	AppleWatchUdid        pgtype.Text `json:"apple_watch_udid"`
 }
 
 type Seat struct {
