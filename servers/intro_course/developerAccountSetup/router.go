@@ -164,8 +164,8 @@ func registerDevicesHandler(c *gin.Context) {
 	}
 
 	var results []struct {
-		deviceName   string
-		errorMessage string
+		DeviceName   string `json:"deviceName"`
+		ErrorMessage string `json:"errorMessage"`
 	}
 	for _, device := range devices {
 		deviceName := device.Name
@@ -174,11 +174,11 @@ func registerDevicesHandler(c *gin.Context) {
 		err = RegisterDevice(deviceName, deviceUDID, platform)
 		if err != nil {
 			results = append(results, struct {
-				deviceName   string
-				errorMessage string
+				DeviceName   string `json:"deviceName"`
+				ErrorMessage string `json:"errorMessage"`
 			}{
-				deviceName:   deviceName,
-				errorMessage: "Failed to register device for user with Apple ID: " + developerprofile.AppleID,
+				DeviceName:   deviceName,
+				ErrorMessage: "Failed to register device for user with Apple ID: " + developerprofile.AppleID,
 			})
 		}
 	}
