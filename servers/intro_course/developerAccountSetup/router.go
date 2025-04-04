@@ -160,17 +160,19 @@ func registerDevicesHandler(c *gin.Context) {
 		{Name: "iPad", UDID: iPadUDID},
 	}
 
+	var results []string
 	for _, device := range devices {
 		deviceName := device.Name
 		deviceUDID := device.UDID.String
 		platform := "IOS"
 		err = RegisterDevice(deviceName, deviceUDID, platform)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register device" + deviceName})
-			return
+			results = append(results, "Failed to register device: "+deviceName+" for user with Apple ID: "+developerprofile.AppleID)
 		}
-		c.JSON(http.StatusCreated, gin.H{"message": "Device " + deviceName + " registered successfully"})
 	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "Devices registered successfully"})
+	if len(results) == 0 {
+		c.JSON(http.StatusCreated, gin.H{"messages": "Devices for user with Apple ID " + developerprofile.AppleID + " registered successfully"})
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": results})
+	}
 }
