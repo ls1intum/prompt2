@@ -276,7 +276,7 @@ func createProjectFiles(git *gitlab.Client, projectID int, submissionDeadline st
 	// Add custom swiftlint
 	_, _, err = git.RepositoryFiles.CreateFile(projectID, ".swiftlint.yml", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(`insert swiftlint.yml content here`),
+		Content:       gitlab.Ptr(data.GetSwiftlint()),
 		CommitMessage: gitlab.Ptr("Add custom .swiftlint.yml"),
 	})
 	if err != nil {
@@ -287,7 +287,7 @@ func createProjectFiles(git *gitlab.Client, projectID int, submissionDeadline st
 	// Add custom gitignore
 	_, _, err = git.RepositoryFiles.CreateFile(projectID, ".gitignore", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(`insert gitignore content here`),
+		Content:       gitlab.Ptr(data.GetGitignore()),
 		CommitMessage: gitlab.Ptr("Add custom .gitignore"),
 	})
 	if err != nil {

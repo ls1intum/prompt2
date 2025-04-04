@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup/infrastructureDTO"
-	"github.com/ls1intum/prompt2/servers/intro_course/keycloakTokenVerifier"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,14 +14,14 @@ func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allo
 	infrastructureRouter := router.Group("/infrastructure")
 
 	// Infrastructure setup routes
-	infrastructureRouter.POST("/gitlab/course-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), createCourseSetup)
-	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), setupStudentInfrastructure)
+	infrastructureRouter.POST("/gitlab/course-setup", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createCourseSetup)
+	infrastructureRouter.POST("/gitlab/student-setup/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), setupStudentInfrastructure)
 
 	// Infrastructure status routes
-	infrastructureRouter.GET("/gitlab/student-setup", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), getAllStudentGitlabStatus)
+	infrastructureRouter.GET("/gitlab/student-setup", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllStudentGitlabStatus)
 
 	// Route for manually overwriting the status (i.e. if instructor manually created or fixed the repo)
-	infrastructureRouter.PUT("/gitlab/student-setup/:courseParticipationID/manual", authMiddleware(keycloakTokenVerifier.PromptAdmin, keycloakTokenVerifier.CourseLecturer), manuallyOverwriteStudentGitlabStatus)
+	infrastructureRouter.PUT("/gitlab/student-setup/:courseParticipationID/manual", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), manuallyOverwriteStudentGitlabStatus)
 }
 
 func createCourseSetup(c *gin.Context) {
