@@ -135,7 +135,7 @@ func registerDevicesHandler(c *gin.Context) {
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
 		return
 	}
 
