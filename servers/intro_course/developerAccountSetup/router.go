@@ -17,6 +17,9 @@ func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware fu
 	accountSetup.POST("/invite/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
 	accountSetup.POST("/invite_all/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
 	accountSetup.POST("/register_devices/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerDevicesHandler)
+	accountSetup.POST("/register_iphone/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPhoneHandler)
+	accountSetup.POST("/register_ipad/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPadHandler)
+	accountSetup.POST("/register_apple_watch/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerAppleWatchHandler)
 }
 
 func inviteUserHandler(c *gin.Context) {
@@ -160,14 +163,23 @@ func registerDevicesHandler(c *gin.Context) {
 		{Name: "iPad", UDID: iPadUDID},
 	}
 
-	var results []string
+	var results []struct {
+		deviceName   string
+		errorMessage string
+	}
 	for _, device := range devices {
 		deviceName := device.Name
 		deviceUDID := device.UDID.String
 		platform := "IOS"
 		err = RegisterDevice(deviceName, deviceUDID, platform)
 		if err != nil {
-			results = append(results, "Failed to register device: "+deviceName+" for user with Apple ID: "+developerprofile.AppleID)
+			results = append(results, struct {
+				deviceName   string
+				errorMessage string
+			}{
+				deviceName:   deviceName,
+				errorMessage: "Failed to register device for user with Apple ID: " + developerprofile.AppleID,
+			})
 		}
 	}
 	if len(results) == 0 {
@@ -175,4 +187,124 @@ func registerDevicesHandler(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": results})
 	}
+}
+
+func registerIPhoneHandler(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+		return
+	}
+
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.Error("Error getting developer profile: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+		return
+	}
+
+	// Extract student details
+	iPhoneUDID := developerprofile.IPhoneUDID
+	deviceName := "iPhone"
+	platform := "IOS"
+
+	err = RegisterDevice(deviceName, iPhoneUDID.String, platform)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register iPhone"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "iPhone registered successfully"})
+}
+
+func registerIPadHandler(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+		return
+	}
+
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.Error("Error getting developer profile: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+		return
+	}
+
+	// Extract student details
+	iPadUDID := developerprofile.IPadUDID
+	deviceName := "iPad"
+	platform := "IOS"
+
+	err = RegisterDevice(deviceName, iPadUDID.String, platform)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register iPad"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "iPad registered successfully"})
+}
+
+func registerAppleWatchHandler(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+		return
+	}
+
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.Error("Error getting developer profile: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
+		return
+	}
+
+	// Extract student details
+	appleWatchUDID := developerprofile.AppleWatchUDID
+	deviceName := "Apple Watch"
+	platform := "IOS"
+
+	err = RegisterDevice(deviceName, appleWatchUDID.String, platform)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register Apple Watch"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Apple Watch registered successfully"})
 }
