@@ -109,7 +109,10 @@ func InviteUser(appleID, firstName, lastName string) error {
 		},
 	}
 
-	requestBodyBytes, _ := json.Marshal(requestBody)
+	requestBodyBytes, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request body: %w", err)
+	}
 
 	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/userInvitations", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
@@ -125,7 +128,10 @@ func InviteUser(appleID, firstName, lastName string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
 
 	if resp.StatusCode == 201 {
 		fmt.Println("User invited successfully:", appleID)
