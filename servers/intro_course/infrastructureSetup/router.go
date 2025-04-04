@@ -2,6 +2,7 @@ package infrastructureSetup
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -39,7 +40,10 @@ func createCourseSetup(c *gin.Context) {
 		return
 	}
 
-	err = CreateCourseInfrastructure(coursePhaseID, infrastructureRequest.SemesterTag)
+	// TODO: remove this later - but parts of the infrastructure for ios25 were already done
+	semesterTag := strings.ToUpper(infrastructureRequest.SemesterTag)
+
+	err = CreateCourseInfrastructure(coursePhaseID, semesterTag)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -70,7 +74,10 @@ func setupStudentInfrastructure(c *gin.Context) {
 		return
 	}
 
-	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, infrastructureRequest.SemesterTag, infrastructureRequest.RepoName, infrastructureRequest.SubmissionDeadline)
+	// TODO: remove this later - but parts of the infrastructure for ios25 were already done
+	semesterTag := strings.ToUpper(infrastructureRequest.SemesterTag)
+
+	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, semesterTag, infrastructureRequest.RepoName, infrastructureRequest.SubmissionDeadline)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
