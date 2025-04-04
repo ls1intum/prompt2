@@ -160,22 +160,6 @@ func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, s
 		return errors.New("failed create student project")
 	}
 
-	err = addProjectMembers(git, project.ID, tutorID, devID, devGroupID)
-	if err != nil {
-		return err
-	}
-
-	// Add MR approval rule
-	_, _, err = git.Projects.CreateProjectApprovalRule(project.ID, &gitlab.CreateProjectLevelRuleOptions{
-		Name:              gitlab.Ptr("Tutor Approval"),
-		ApprovalsRequired: gitlab.Ptr(1),
-		UserIDs:           gitlab.Ptr([]int{tutorID}),
-	})
-	if err != nil {
-		log.Error("failed to add MR approval rule: ", err)
-		return errors.New("failed add MR approval rule")
-	}
-
 	err = createProjectFiles(git, project.ID, submissionDeadline)
 	if err != nil {
 		return err
@@ -195,6 +179,24 @@ func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, s
 	if err != nil {
 		return err
 	}
+
+	// Add project members (Last step as this might fail if the tutor is already a member of a "higher" group)
+	err = addProjectMembers(git, project.ID, tutorID, devID, devGroupID)
+	if err != nil {
+		return err
+	}
+
+	// Add MR approval rule
+	_, _, err = git.Projects.CreateProjectApprovalRule(project.ID, &gitlab.CreateProjectLevelRuleOptions{
+		Name:              gitlab.Ptr("Tutor Approval"),
+		ApprovalsRequired: gitlab.Ptr(1),
+		UserIDs:           gitlab.Ptr([]int{tutorID}),
+	})
+	if err != nil {
+		log.Error("failed to add MR approval rule: ", err)
+		return errors.New("failed add MR approval rule")
+	}
+
 	return nil
 }
 
