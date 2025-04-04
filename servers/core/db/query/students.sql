@@ -54,3 +54,8 @@ WHERE id = ANY($1::uuid[]);
 -- name: GetStudentsByEmail :many
 SELECT * FROM student
 WHERE email = ANY($1::text[]);
+
+-- name: GetStudentUniversityLogins :many
+SELECT id, university_login
+FROM student
+WHERE id = ANY($1::uuid[]);

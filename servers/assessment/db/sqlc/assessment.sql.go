@@ -12,12 +12,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createAssessment = `-- name: CreateAssessment :exec
+const createAssessment = `-- name: CreateAssessment :one
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
 `
 
 type CreateAssessmentParams struct {
@@ -30,8 +31,8 @@ type CreateAssessmentParams struct {
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
 }
 
-func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) error {
-	_, err := q.db.Exec(ctx, createAssessment,
+func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) (Assessment, error) {
+	row := q.db.QueryRow(ctx, createAssessment,
 		arg.ID,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
@@ -40,7 +41,17 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		arg.Comment,
 		arg.AssessedAt,
 	)
-	return err
+	var i Assessment
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.CoursePhaseID,
+		&i.CompetencyID,
+		&i.Score,
+		&i.Comment,
+		&i.AssessedAt,
+	)
+	return i, err
 }
 
 const deleteAssessment = `-- name: DeleteAssessment :exec
@@ -71,15 +82,21 @@ func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, 
 	return i, err
 }
 
-const listAssessmentsByCategory = `-- name: ListAssessmentsByCategory :many
+const listAssessmentsByCategoryInPhase = `-- name: ListAssessmentsByCategoryInPhase :many
 SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.score, a.comment, a.assessed_at
 FROM assessment a
 JOIN competency c ON a.competency_id = c.id
 WHERE c.category_id = $1
+  AND a.course_phase_id = $2
 `
 
-func (q *Queries) ListAssessmentsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Assessment, error) {
-	rows, err := q.db.Query(ctx, listAssessmentsByCategory, categoryID)
+type ListAssessmentsByCategoryInPhaseParams struct {
+	CategoryID    uuid.UUID `json:"category_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) ListAssessmentsByCategoryInPhase(ctx context.Context, arg ListAssessmentsByCategoryInPhaseParams) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByCategoryInPhase, arg.CategoryID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +123,20 @@ func (q *Queries) ListAssessmentsByCategory(ctx context.Context, categoryID uuid
 	return items, nil
 }
 
-const listAssessmentsByCompetency = `-- name: ListAssessmentsByCompetency :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE competency_id = $1
+const listAssessmentsByCompetencyInPhase = `-- name: ListAssessmentsByCompetencyInPhase :many
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at 
+FROM assessment 
+WHERE competency_id = $1 
+  AND course_phase_id = $2
 `
 
-func (q *Queries) ListAssessmentsByCompetency(ctx context.Context, competencyID uuid.UUID) ([]Assessment, error) {
-	rows, err := q.db.Query(ctx, listAssessmentsByCompetency, competencyID)
+type ListAssessmentsByCompetencyInPhaseParams struct {
+	CompetencyID  uuid.UUID `json:"competency_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) ListAssessmentsByCompetencyInPhase(ctx context.Context, arg ListAssessmentsByCompetencyInPhaseParams) ([]Assessment, error) {
+	rows, err := q.db.Query(ctx, listAssessmentsByCompetencyInPhase, arg.CompetencyID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -144,38 +169,6 @@ SELECT id, course_participation_id, course_phase_id, competency_id, score, comme
 
 func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Assessment, error) {
 	rows, err := q.db.Query(ctx, listAssessmentsByCoursePhase, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Assessment
-	for rows.Next() {
-		var i Assessment
-		if err := rows.Scan(
-			&i.ID,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
-			&i.CompetencyID,
-			&i.Score,
-			&i.Comment,
-			&i.AssessedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listAssessmentsByStudent = `-- name: ListAssessmentsByStudent :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE course_participation_id = $1
-`
-
-func (q *Queries) ListAssessmentsByStudent(ctx context.Context, courseParticipationID uuid.UUID) ([]Assessment, error) {
-	rows, err := q.db.Query(ctx, listAssessmentsByStudent, courseParticipationID)
 	if err != nil {
 		return nil, err
 	}

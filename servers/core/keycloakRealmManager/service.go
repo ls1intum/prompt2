@@ -23,21 +23,14 @@ func AddCustomGroup(ctx context.Context, courseID uuid.UUID, groupName string) (
 		return "", err
 	}
 
-	// 2. Get Custom Group Folder
-	customTopLevelGroupID, err := GetOrCreateCustomTopLevelGroup(ctx, token.AccessToken, courseID)
-	if err != nil {
-		log.Error("Failed to get or create custom top level group: ", err)
-		return "", errors.New("failed to get or create custom top level group")
-	}
-
-	// 3. Get Custom subgroup or create
-	customGroupID, err := GetOrCreateCustomGroup(ctx, token.AccessToken, customTopLevelGroupID, groupName)
+	// 2. Get Custom subgroup or create
+	customGroupID, err := GetOrCreateCustomGroup(ctx, token.AccessToken, groupName, courseID)
 	if err != nil {
 		log.Error("Failed to get or create custom group: ", err)
 		return "", errors.New("failed to get or create custom top level group")
 	}
 
-	// 4. Create desired role
+	// 3. Create desired role
 	roleName := courseGroupName + "-cg-" + groupName
 	role, err := GetOrCreateRealmRole(ctx, token.AccessToken, roleName)
 	if err != nil {
@@ -45,7 +38,7 @@ func AddCustomGroup(ctx context.Context, courseID uuid.UUID, groupName string) (
 		return "", errors.New("failed to create keycloak roles")
 	}
 
-	// 5. Associate role with group
+	// 4. Associate role with group
 	err = AddRoleToGroup(ctx, token.AccessToken, customGroupID, role)
 	if err != nil {
 		log.Error("failed to associate role with group: ", err)
@@ -53,8 +46,6 @@ func AddCustomGroup(ctx context.Context, courseID uuid.UUID, groupName string) (
 	}
 
 	return customGroupID, nil
-	// 4. Add desired group to subgroup
-
 }
 
 func AddStudentsToGroup(ctx context.Context, courseID uuid.UUID, studentIDs []uuid.UUID, groupName string) (keycloakRealmDTO.AddStudentsToGroupResponse, error) {
@@ -164,31 +155,19 @@ func AddStudentsToEditorGroup(ctx context.Context, courseID uuid.UUID, studentID
 	// 1. Log into keycloak
 	token, err := LoginClient(ctx)
 	if err != nil {
+		log.Error("Failed to login to keycloak: ", err)
 		return keycloakRealmDTO.AddStudentsToGroupResponse{}, err
 	}
 
 	// 2. Get Course Group
-	courseGroup, err := GetCourseGroup(ctx, token.AccessToken, courseID)
+	editorGroup, err := GetCourseEditorGroup(ctx, token.AccessToken, courseID)
 	if err != nil {
-		log.Error("Failed to get custom group: ", err)
-		return keycloakRealmDTO.AddStudentsToGroupResponse{}, errors.New("failed to get custom group")
-	}
-
-	// Get the editor group of the course group
-	var editorGroupID string
-	for _, subgroup := range *courseGroup.SubGroups {
-		if subgroup.Name != nil && *subgroup.Name == "Editor" {
-			editorGroupID = *subgroup.ID
-			break
-		}
-	}
-
-	if editorGroupID == "" {
-		return keycloakRealmDTO.AddStudentsToGroupResponse{}, errors.New("editor group not found")
+		log.Error("Failed to get course group: ", err)
+		return keycloakRealmDTO.AddStudentsToGroupResponse{}, errors.New("failed to get course group")
 	}
 
 	// 3. Get the keycloak userIDs of the students
-	succeededStudents, failedStudentIDs, err := AddStudentIDsToKeycloakGroup(ctx, token.AccessToken, studentIDs, editorGroupID)
+	succeededStudents, failedStudentIDs, err := AddStudentIDsToKeycloakGroup(ctx, token.AccessToken, studentIDs, *editorGroup.ID)
 	// some error occurred before adding students to group
 	if err != nil {
 		log.Error("Failed to add students to group: ", err)
