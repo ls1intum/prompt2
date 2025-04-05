@@ -1,24 +1,26 @@
 import { useCallback } from 'react'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import type { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { GitlabStatus } from '../../../interfaces/GitlabStatus'
 
 export type ParticipantWithProfile = {
   participation: CoursePhaseParticipationWithStudent
-  profile: DeveloperProfile | undefined
+  devProfile: DeveloperProfile | undefined
+  gitlabStatus: GitlabStatus | undefined
 }
 
 export const useDownloadDeveloperProfiles = () => {
   return useCallback((participants: ParticipantWithProfile[]) => {
     const header = 'First Name,Last Name,Apple ID,MacBook,iPhone,iPad,Apple Watch\n'
     const rows = participants
-      .map(({ participation, profile }) => {
+      .map(({ participation, devProfile }) => {
         const firstName = participation.student.firstName
         const lastName = participation.student.lastName
-        const appleID = profile?.appleID || ''
-        const macBook = profile?.hasMacBook ? 'true' : 'false'
-        const iPhone = profile?.iPhoneUDID || ''
-        const iPad = profile?.iPadUDID || ''
-        const appleWatch = profile?.appleWatchUDID || ''
+        const appleID = devProfile?.appleID || ''
+        const macBook = devProfile?.hasMacBook ? 'true' : 'false'
+        const iPhone = devProfile?.iPhoneUDID || ''
+        const iPad = devProfile?.iPadUDID || ''
+        const appleWatch = devProfile?.appleWatchUDID || ''
         return `${firstName},${lastName},${appleID},${macBook},${iPhone},${iPad},${appleWatch}`
       })
       .join('\n')

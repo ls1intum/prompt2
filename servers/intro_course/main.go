@@ -12,6 +12,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
+	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
@@ -79,6 +80,10 @@ func main() {
 	developerProfile.InitDeveloperProfileModule(api, *query, conn)
 	tutor.InitTutorModule(api, *query, conn)
 	seatPlan.InitSeatPlanModule(api, *query, conn)
+
+	// Infrastructure Setup
+	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")
+	infrastructureSetup.InitInfrastructureModule(api, *query, conn, gitlabAccessToken)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	err = router.Run(serverAddress)
