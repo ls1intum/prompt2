@@ -96,7 +96,7 @@ export const CreateAssessmentForm = ({
           description: advancedText,
           color: 'border-orange-600',
           bgColor: 'bg-orange-50',
-          selectedBg: 'bg-orange-200',
+          selectedBg: 'bg-orange-100',
           icon: '🟠',
         }
       case 'expert':
@@ -123,10 +123,10 @@ export const CreateAssessmentForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <div>
             <Label className='text-sm font-medium mb-3 block'>Select Competency Level</Label>
-            <div className='grid grid-cols-4 sm:grid-cols-4'>
+            <div className='grid grid-cols-4 sm:grid-cols-4 gap-1'>
               {(['novice', 'intermediate', 'advanced', 'expert'] as ScoreLevel[]).map((level) => {
                 const config = getLevelConfig(level)
                 const isSelected = selectedScore === level
@@ -143,7 +143,7 @@ export const CreateAssessmentForm = ({
                       'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                     )}
                   >
-                    <div className='flex items-center justify-between mb-2'>
+                    <div className='flex justify-between mb-2'>
                       <span className='font-semibold'>{config.title}</span>
                       <span>{config.icon}</span>
                     </div>
@@ -160,7 +160,7 @@ export const CreateAssessmentForm = ({
             </Label>
             <Textarea
               id='comment'
-              placeholder='Enter notable information about the assessment'
+              placeholder='Enter notable information about the assessment, e.g. remarkable strengths'
               className='resize-none min-h-[120px] focus-visible:ring-1'
               {...register('comment', { required: true })}
             />

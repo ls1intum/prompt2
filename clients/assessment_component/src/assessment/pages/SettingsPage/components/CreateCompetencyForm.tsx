@@ -26,7 +26,10 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
 
   const onSubmit = (data: CreateCompetencyRequest) => {
     mutate(data, {
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        reset()
+        window.location.reload()
+      },
     })
   }
 
@@ -37,7 +40,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
       </CardHeader>
 
       <CardContent>
-        <form id='competency-form' onSubmit={handleSubmit(onSubmit)}>
+        <form id='competency-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <input type='hidden' {...register('categoryID', { required: true })} />
 
           <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6'>
@@ -66,7 +69,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
             </div>
           </div>
 
-          <div className='space-y-4'>
+          <div className='space-y-2'>
             <h3 className='text-sm font-medium text-muted-foreground'>Proficiency Levels</h3>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -115,6 +118,10 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
               </div>
             </div>
           </div>
+
+          <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
+            {isPending ? 'Creating...' : 'Create'}
+          </Button>
         </form>
 
         {error && (
@@ -124,12 +131,6 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
           </Alert>
         )}
       </CardContent>
-
-      <CardFooter className='flex justify-end border-t pt-4'>
-        <Button type='submit' form='competency-form' disabled={isPending} className='px-6'>
-          {isPending ? 'Creating...' : 'Create'}
-        </Button>
-      </CardFooter>
     </Card>
   )
 }

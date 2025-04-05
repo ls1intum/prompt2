@@ -1,6 +1,6 @@
 import { AlertCircle } from 'lucide-react'
-
 import { useParams } from 'react-router-dom'
+import { useState } from 'react'
 
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,6 +22,14 @@ export const AssessmentPage = (): JSX.Element => {
 
   const { data: categories, isLoading, isError } = useGetAllCategoriesWithCompetencies()
 
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
+
+  const handleAccordionChange = (value: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value],
+    )
+  }
+
   if (isLoading) {
     return <div className='space-y-4'>Error</div>
   }
@@ -42,7 +50,13 @@ export const AssessmentPage = (): JSX.Element => {
     <div>
       {categories.map((category) => (
         <Card key={category.id} className='p-6 overflow-hidden'>
-          <Accordion type='single' collapsible className='w-full'>
+          <Accordion
+            type='single'
+            collapsible
+            className='w-full'
+            value={expandedItems.includes(category.id) ? 'competencies' : ''}
+            onValueChange={() => handleAccordionChange(category.id)}
+          >
             <AccordionItem value='competencies' className='border-none'>
               <div className='flex justify-between items-center'>
                 <div>
