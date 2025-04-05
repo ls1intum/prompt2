@@ -61,10 +61,12 @@ export const AssessmentPage = (): JSX.Element => {
                     No competencies available yet.
                   </p>
                 ) : (
-                  <div className='grid gap-4 sm:grid-cols-2'>
+                  <div className='grid gap-4'>
                     {category.competencies.map((competency) => (
                       <div>
                         <CreateAssessmentForm
+                          competency={competency.name}
+                          description={competency.description}
                           courseParticipationID={courseParticipationID ?? ''}
                           competencyID={competency.id}
                           noviceText={competency.novice}

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, CalendarIcon, ClipboardCheck } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { useCreateAssessment } from '../hooks/useCreateAssessment'
@@ -15,6 +15,8 @@ import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 
 interface CreateAssessmentFormProps {
+  competency: string
+  description: string
   courseParticipationID: string
   competencyID: string
   noviceText: string
@@ -24,6 +26,8 @@ interface CreateAssessmentFormProps {
 }
 
 export const CreateAssessmentForm = ({
+  competency,
+  description,
   courseParticipationID,
   competencyID,
   noviceText,
@@ -90,9 +94,9 @@ export const CreateAssessmentForm = ({
         return {
           title: 'Advanced',
           description: advancedText,
-          color: 'border-amber-500',
-          bgColor: 'bg-amber-50',
-          selectedBg: 'bg-amber-100',
+          color: 'border-orange-600',
+          bgColor: 'bg-orange-50',
+          selectedBg: 'bg-orange-200',
           icon: '🟠',
         }
       case 'expert':
@@ -112,14 +116,17 @@ export const CreateAssessmentForm = ({
       <CardHeader className='pb-3'>
         <CardTitle className='text-lg font-medium flex items-center gap-2'>
           <ClipboardCheck className='h-4 w-4 text-muted-foreground' />
-          Create New Assessment
+          Assess {competency}
         </CardTitle>
+        <CardDescription>
+          <p className='text-sm text-muted-foreground'>{description}</p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           <div>
             <Label className='text-sm font-medium mb-3 block'>Select Competency Level</Label>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3'>
+            <div className='grid grid-cols-4 sm:grid-cols-4'>
               {(['novice', 'intermediate', 'advanced', 'expert'] as ScoreLevel[]).map((level) => {
                 const config = getLevelConfig(level)
                 const isSelected = selectedScore === level
@@ -148,35 +155,12 @@ export const CreateAssessmentForm = ({
           </div>
 
           <div className='space-y-2'>
-            <Label htmlFor='assessedAt' className='text-sm font-medium'>
-              Assessment Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant='outline'
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    !date && 'text-muted-foreground',
-                  )}
-                >
-                  <CalendarIcon className='mr-2 h-4 w-4' />
-                  {date ? format(date, 'PPP') : 'Select date'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className='w-auto p-0'>
-                <Calendar mode='single' selected={date} onSelect={setDate} initialFocus />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className='space-y-2'>
             <Label htmlFor='comment' className='text-sm font-medium'>
               Assessment Comments
             </Label>
             <Textarea
               id='comment'
-              placeholder='Enter your assessment comments'
+              placeholder='Enter notable information about the assessment'
               className='resize-none min-h-[120px] focus-visible:ring-1'
               {...register('comment', { required: true })}
             />

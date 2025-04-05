@@ -92,20 +92,7 @@ export const AssessmentSummaryDialog: React.FC<AssessmentSummaryDialogProps> = (
                       No competencies available yet.
                     </p>
                   ) : (
-                    <div className='grid gap-4 sm:grid-cols-2'>
-                      {category.competencies.map((competency) => (
-                        <div>
-                          <CreateAssessmentForm
-                            courseParticipationID={courseParticipationID}
-                            competencyID={competency.id}
-                            noviceText={competency.novice}
-                            intermediateText={competency.intermediate}
-                            advancedText={competency.advanced}
-                            expertText={competency.expert}
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    <div className='grid gap-4 sm:grid-cols-2'>Competency Description</div>
                   )}
                 </AccordionContent>
               </AccordionItem>
