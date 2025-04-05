@@ -29,12 +29,22 @@ type Seat struct {
 	AssignedTutor   pgtype.UUID `json:"assigned_tutor"`
 }
 
+type StudentGitlabProcess struct {
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	GitlabSuccess         bool             `json:"gitlab_success"`
+	ErrorMessage          pgtype.Text      `json:"error_message"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
+}
+
 type Tutor struct {
-	CoursePhaseID       uuid.UUID `json:"course_phase_id"`
-	ID                  uuid.UUID `json:"id"`
-	FirstName           string    `json:"first_name"`
-	LastName            string    `json:"last_name"`
-	Email               string    `json:"email"`
-	MatriculationNumber string    `json:"matriculation_number"`
-	UniversityLogin     string    `json:"university_login"`
+	CoursePhaseID       uuid.UUID   `json:"course_phase_id"`
+	ID                  uuid.UUID   `json:"id"`
+	FirstName           string      `json:"first_name"`
+	LastName            string      `json:"last_name"`
+	Email               string      `json:"email"`
+	MatriculationNumber string      `json:"matriculation_number"`
+	UniversityLogin     string      `json:"university_login"`
+	GitlabUsername      pgtype.Text `json:"gitlab_username"`
 }
