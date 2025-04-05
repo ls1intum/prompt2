@@ -17,7 +17,7 @@ type Competency struct {
 }
 
 func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency {
-	competencies := make([]Competency, len(dbCompetencies))
+	competencies := make([]Competency, 0, len(dbCompetencies))
 	for i, c := range dbCompetencies {
 		competencies[i] = Competency{
 			ID:           c.ID,

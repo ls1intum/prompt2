@@ -15,6 +15,7 @@ interface ApplicationSavingDialogProps {
   onClose: () => void
   onNavigateBack: () => void
   errorMessage?: string
+  confirmationMailSent?: boolean
 }
 
 export const ApplicationSavingDialog = ({
@@ -22,6 +23,7 @@ export const ApplicationSavingDialog = ({
   onClose,
   onNavigateBack,
   errorMessage,
+  confirmationMailSent = false,
 }: ApplicationSavingDialogProps): JSX.Element => {
   const isOpen = showDialog !== null
 
@@ -38,7 +40,11 @@ export const ApplicationSavingDialog = ({
       case 'success':
         return {
           title: 'Application Saved',
-          description: 'Your application was successfully saved!',
+          description: `Your application was successfully saved! ${
+            confirmationMailSent
+              ? 'We’ve sent you a confirmation mail, where you find all important information about the next steps.'
+              : ''
+          }`,
           icon: CheckCircle,
           iconColor: 'text-green-500',
           iconBg: 'bg-green-100',
@@ -66,7 +72,7 @@ export const ApplicationSavingDialog = ({
         } else {
           return {
             title: 'Error',
-            description: `An error occurred while saving your application. Please try again later.`,
+            description: 'An error occurred while saving your application. Please try again later.',
             icon: XCircle,
             iconColor: 'text-red-500',
             iconBg: 'bg-red-100',
