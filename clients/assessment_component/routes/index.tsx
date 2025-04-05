@@ -11,7 +11,7 @@ const routes: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   },
   {
-    path: '/student-assessment/{courseParticipationID}',
+    path: '/student-assessment/:courseParticipationID',
     element: <AssessmentPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   },

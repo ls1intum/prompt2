@@ -13,6 +13,7 @@ import {
 
 import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
 import { CreateAssessmentForm } from '../AssessmentOverviewPage/components/CreateAssessmentForm'
+import { ErrorPage } from '@/components/ErrorPage'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{
@@ -22,25 +23,11 @@ export const AssessmentPage = (): JSX.Element => {
   const { data: categories, isLoading, isError } = useGetAllCategoriesWithCompetencies()
 
   if (isLoading) {
-    return (
-      <div className='space-y-4'>
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className='p-6'>
-            <Skeleton className='h-6 w-1/3 mb-2' />
-            <Skeleton className='h-4 w-2/3' />
-          </Card>
-        ))}
-      </div>
-    )
+    return <div className='space-y-4'>Error</div>
   }
 
   if (isError) {
-    return (
-      <Card className='p-6 flex items-center gap-3 text-destructive'>
-        <AlertCircle className='h-5 w-5' />
-        <p>Failed to load categories. Please try again later.</p>
-      </Card>
-    )
+    return <ErrorPage />
   }
 
   if (!categories || categories.length === 0) {
