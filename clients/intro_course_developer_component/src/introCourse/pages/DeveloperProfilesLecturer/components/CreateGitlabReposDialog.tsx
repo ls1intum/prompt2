@@ -150,7 +150,7 @@ export const CreateGitlabReposDialog = ({
         </DialogHeader>
 
         <section className='flex items-center justify-between py-4 border-b'>
-          <span>Infrastructure Setup</span>
+          <span>Create Gitlab Course Group</span>
           {infraStructureExists ? (
             <CheckCircle className='text-green-500' />
           ) : (
@@ -165,7 +165,6 @@ export const CreateGitlabReposDialog = ({
           )}
         </section>
 
-        {/* Submission Deadline Field */}
         <section className='mt-4'>
           <div className='mb-2'>
             <label htmlFor='deadline' className='block text-sm font-medium'>
