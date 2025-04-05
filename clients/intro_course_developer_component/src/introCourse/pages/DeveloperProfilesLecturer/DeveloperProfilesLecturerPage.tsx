@@ -21,6 +21,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Download,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -38,6 +39,7 @@ import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
 import { FilterMenu } from './components/FilterMenu'
 import { DevProfileFilter } from './interfaces/devProfileFilter'
 import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
+import { useDownloadDeveloperProfiles } from './hooks/useDownloadDeveloperProfiles'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
@@ -115,6 +117,8 @@ export const DeveloperProfilesLecturerPage = () => {
   // Filter participants based on the current filter settings
   const filteredParticipants = useGetFilteredParticipations(sortedParticipants, filters)
 
+  const downloadProfiles = useDownloadDeveloperProfiles()
+
   if (isError) {
     return <ErrorPage onRetry={handleRefresh} />
   }
@@ -145,7 +149,13 @@ export const DeveloperProfilesLecturerPage = () => {
         <div className='text-sm text-muted-foreground'>
           Showing {filteredParticipants.length} of {sortedParticipants.length} participants
         </div>
-        <FilterMenu filters={filters} setFilters={setFilters} />
+        <div className='flex gap-2'>
+          <FilterMenu filters={filters} setFilters={setFilters} />
+          <Button onClick={() => downloadProfiles(participantsWithProfiles)}>
+            <Download className='h-4 w-4 mr-2' />
+            Download Profiles
+          </Button>
+        </div>
       </div>
       <Table>
         <TableHeader>
