@@ -10,6 +10,7 @@ import (
 
 const IN_PROGRESS_LABEL_ID = 53319
 const IN_REVIEW_LABEL_ID = 53320
+const ASE_GROUP_ID = 186940
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client
@@ -298,33 +299,6 @@ func createProjectFiles(git *gitlab.Client, projectID int, studentName, submissi
 	}
 
 	return nil
-}
-
-func getGroup(groupName string) (*gitlab.Group, error) {
-	git, err := getClient()
-	if err != nil {
-		log.Error("failed to get group: ", err)
-		return nil, err
-	}
-
-	groupOpts := &gitlab.ListGroupsOptions{
-		Search:       gitlab.Ptr(groupName),
-		AllAvailable: gitlab.Ptr(true),
-	}
-
-	groups, _, err := git.Groups.ListGroups(groupOpts)
-	if err != nil {
-		log.Error("failed to get group: ", err)
-		return nil, err
-	}
-
-	for _, group := range groups {
-		log.Info("group: ", group.Name)
-		if group.Name == groupName {
-			return group, nil
-		}
-	}
-	return nil, errors.New("group not found")
 }
 
 func getSubGroup(groupName string, parentGroupID int) (*gitlab.Group, error) {

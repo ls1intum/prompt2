@@ -44,19 +44,19 @@ func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) err
 	}
 
 	// 3.) Create the tutor groups
-	_, err = createTeachingGroup(courseGroup.ID, "tutor")
+	_, err = createTeachingGroup(courseGroup.ID, "tutors")
 	if err != nil {
 		log.Error("Failed to create tutor group: ", err)
 	}
 
 	// 4.) Create the coach group
-	_, err = createTeachingGroup(courseGroup.ID, "coach")
+	_, err = createTeachingGroup(courseGroup.ID, "coaches")
 	if err != nil {
 		log.Error("Failed to create coach group: ", err)
 	}
 
 	// 5.) Create the introCourse group
-	_, err = createTeachingGroup(courseGroup.ID, "IntroCourse")
+	_, err = createTeachingGroup(courseGroup.ID, "Introcourse")
 	if err != nil {
 		log.Error("Failed to create introCourse group: ", err)
 	}
@@ -118,7 +118,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 		return err
 	}
 
-	introCourseGroup, err := getSubGroup("IntroCourse", semesterGroup.ID)
+	introCourseGroup, err := getSubGroup("Introcourse", semesterGroup.ID)
 	if err != nil {
 		log.Error("Failed to get intro course group: ", err)
 		return err
@@ -154,14 +154,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 }
 
 func getiPraktikumGroup() (*gitlab.Group, error) {
-	aseGroup, err := getGroup(TOP_LEVEL_GROUP_NAME)
-	if err != nil {
-		log.Error("Failed to get group: ", err)
-		return nil, err
-	}
-
-	// 2.) Get iPraktikum Group
-	ipraktikumGroup, err := getSubGroup(I_PRAKTIKUM_GROUP_NAME, aseGroup.ID)
+	ipraktikumGroup, err := getSubGroup(I_PRAKTIKUM_GROUP_NAME, ASE_GROUP_ID)
 	if err != nil {
 		log.Error("Failed to get group: ", err)
 		return nil, err
