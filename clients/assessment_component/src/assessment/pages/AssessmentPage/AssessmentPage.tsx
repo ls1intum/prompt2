@@ -12,9 +12,10 @@ import {
 
 import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
-import { CreateAssessmentForm } from './components/CreateAssessmentForm'
+import { AssessmentForm } from './components/AssessmentForm'
 import { ErrorPage } from '@/components/ErrorPage'
 import { CompetencyWithAssessmentItem } from './components/CompetencyWithAssessment'
+import { useCreateAssessment } from './hooks/useCreateAssessment'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{
@@ -112,15 +113,10 @@ export const AssessmentPage = (): JSX.Element => {
 
                       return (
                         <div>
-                          <CreateAssessmentForm
-                            competency={competency.name}
-                            description={competency.description}
+                          <AssessmentForm
+                            competency={competency}
                             courseParticipationID={courseParticipationID ?? ''}
-                            competencyID={competency.id}
-                            noviceText={competency.novice}
-                            intermediateText={competency.intermediate}
-                            advancedText={competency.advanced}
-                            expertText={competency.expert}
+                            useMutation={useCreateAssessment}
                           />
                         </div>
                       )

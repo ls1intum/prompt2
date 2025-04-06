@@ -244,17 +244,15 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 }
 
 const updateAssessment = `-- name: UpdateAssessment :one
-INSERT INTO assessment (
-  course_participation_id, course_phase_id, competency_id,
-  score, comment, assessed_at, author
-)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-ON CONFLICT (course_participation_id, course_phase_id, competency_id)
-DO UPDATE SET
-  score = EXCLUDED.score,
-  comment = EXCLUDED.comment,
-  assessed_at = EXCLUDED.assessed_at,
-  author = EXCLUDED.author
+UPDATE assessment
+SET
+  score = $4,
+  comment = $5,
+  assessed_at = $6,
+  author = $7
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND competency_id = $3
 RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 `
 

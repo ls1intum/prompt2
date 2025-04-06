@@ -3,7 +3,7 @@ import { CreateCategoryForm } from './components/CreateCategoryForm'
 
 export const SettingsPage = (): JSX.Element => {
   return (
-    <div>
+    <div className='space-y-4'>
       <CategoryList />
       <CreateCategoryForm />
     </div>

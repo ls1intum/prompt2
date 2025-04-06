@@ -5,35 +5,30 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, ClipboardCheck } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { useCreateAssessment } from '../../AssessmentOverviewPage/hooks/useCreateAssessment'
-import type { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 import { getLevelConfig } from '../../utils/getLevelConfig'
 
-interface CreateAssessmentFormProps {
-  competency: string
-  description: string
+import { Competency } from '../../../interfaces/competency'
+import type { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
+
+interface AssessmentFormProps {
+  competency: Competency
   courseParticipationID: string
-  competencyID: string
-  noviceText: string
-  intermediateText: string
-  advancedText: string
-  expertText: string
+  comment?: string
+  useMutation: any //TODO
+  score?: ScoreLevel
 }
 
-export const CreateAssessmentForm = ({
+export const AssessmentForm = ({
   competency,
-  description,
   courseParticipationID,
-  competencyID,
-  noviceText,
-  intermediateText,
-  advancedText,
-  expertText,
-}: CreateAssessmentFormProps) => {
+  comment,
+  useMutation,
+  score,
+}: AssessmentFormProps) => {
   const [error, setError] = useState<string | null>(null)
   const [date, setDate] = useState<Date | undefined>(new Date())
 
@@ -42,15 +37,15 @@ export const CreateAssessmentForm = ({
     useForm<CreateOrUpdateAssessmentRequest>({
       defaultValues: {
         courseParticipationID,
-        competencyID,
-        score: 'novice' as ScoreLevel,
-        comment: '',
+        competencyID: competency.id,
+        score: score ?? 'novice',
+        comment: comment ?? '',
         assessedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
         author: `${user?.firstName} ${user?.lastName}`,
       },
     })
 
-  const { mutate, isPending } = useCreateAssessment(setError)
+  const { mutate, isPending } = useMutation(setError)
   const selectedScore = watch('score')
 
   const onSubmit = (data: CreateOrUpdateAssessmentRequest) => {
@@ -76,10 +71,10 @@ export const CreateAssessmentForm = ({
       <CardHeader className='pb-3'>
         <CardTitle className='text-lg font-medium flex items-center gap-2'>
           <ClipboardCheck className='h-4 w-4 text-muted-foreground' />
-          Assess {competency}
+          Assess {competency.name}
         </CardTitle>
         <CardDescription>
-          <p className='text-sm text-muted-foreground'>{description}</p>
+          <p className='text-sm text-muted-foreground'>{competency.description}</p>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -110,12 +105,12 @@ export const CreateAssessmentForm = ({
 
                     <p className='text-sm text-gray-700 line-clamp-4'>
                       {level === 'novice'
-                        ? noviceText
+                        ? competency.novice
                         : level === 'intermediate'
-                          ? intermediateText
+                          ? competency.intermediate
                           : level === 'advanced'
-                            ? advancedText
-                            : expertText}
+                            ? competency.advanced
+                            : competency.expert}
                     </p>
                   </button>
                 )
