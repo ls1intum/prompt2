@@ -35,7 +35,6 @@ export const AssessmentForm = ({
   onClose,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | null>(null)
-  const [date, setDate] = useState<Date | undefined>(new Date())
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
@@ -60,10 +59,6 @@ export const AssessmentForm = ({
   const selectedScore = watch('score')
 
   const onSubmit = (data: CreateOrUpdateAssessmentRequest) => {
-    if (date) {
-      data.assessedAt = format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    }
-
     if (onClose) {
       onClose()
     }

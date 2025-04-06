@@ -45,3 +45,27 @@ FROM assessment a
 JOIN competency c ON a.competency_id = c.id
 WHERE c.category_id = $1
   AND a.course_phase_id = $2;
+
+-- name: CountRemainingAssessmentsForStudent :one
+SELECT
+  COUNT(*) - (
+    SELECT COUNT(*)
+    FROM assessment
+    WHERE course_participation_id = $1
+      AND course_phase_id = $2
+  ) AS remaining_assessments
+FROM competency;
+
+-- name: CountRemainingAssessmentsForStudentInCategory :one
+SELECT
+  COUNT(*) - (
+    SELECT COUNT(*)
+    FROM assessment
+    WHERE course_participation_id = $1
+      AND course_phase_id = $2
+      AND competency_id IN (
+        SELECT id FROM competency WHERE competency.category_id = $3
+      )
+  ) AS remaining_assessments
+FROM competency
+WHERE category_id = $3;

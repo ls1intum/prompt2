@@ -13,9 +13,18 @@ import {
 import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
 import { AssessmentForm } from './components/AssessmentForm'
+import AssessmentStatusBadge from './components/AssessmentStatusBadge'
 import { ErrorPage } from '@/components/ErrorPage'
 import { CompetencyWithAssessmentItem } from './components/CompetencyWithAssessment'
 import { useCreateAssessment } from './hooks/useCreateAssessment'
+import { useRemainingAssessmentsForStudent } from './hooks/useRemainingAssessmentsForStudent'
+import { useRemainingAssessmentsForStudentInCategory } from './hooks/useRemainingAssessmentsForStudentInCategory'
+import { CategoryWithCompetencies } from '../../interfaces/category'
+
+interface CategoryWithCompetenciesAndRemainingAssessments {
+  category: CategoryWithCompetencies
+  remainingAssessments: number
+}
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{
@@ -36,6 +45,13 @@ export const AssessmentPage = (): JSX.Element => {
     refetch: refetchAssessments,
   } = useGetAllStudentAssessmentsInPhase()
 
+  const {
+    data: remainingAssessments,
+    isPending: isRemainingAssessmentsPending,
+    isError: isRemainingAssessmentsError,
+    refetch: refetchRemainingAssessments,
+  } = useRemainingAssessmentsForStudent()
+
   const [expandedItems, setExpandedItems] = useState<string[]>([])
 
   const handleAccordionChange = (value: string) => {
@@ -47,10 +63,11 @@ export const AssessmentPage = (): JSX.Element => {
   const handleRefetch = () => {
     refetchCategories()
     refetchAssessments()
+    refetchRemainingAssessments()
   }
 
-  const isError = isCategoriesError || isAssessmentsError
-  const isPending = isCategoriesPending || isAssessmentsPending
+  const isError = isCategoriesError || isAssessmentsError || isRemainingAssessmentsError
+  const isPending = isCategoriesPending || isAssessmentsPending || isRemainingAssessmentsPending
 
   if (isError) return <ErrorPage onRetry={handleRefetch} />
   if (isPending)
@@ -69,65 +86,70 @@ export const AssessmentPage = (): JSX.Element => {
 
   return (
     <div className='space-y-4'>
-      {categories.map((category) => (
-        <Card key={category.id} className='p-6 overflow-hidden'>
-          <Accordion
-            type='single'
-            collapsible
-            className='w-full'
-            value={expandedItems.includes(category.id) ? 'competencies' : ''}
-            onValueChange={() => handleAccordionChange(category.id)}
-          >
-            <AccordionItem value='competencies' className='border-none'>
-              <div className='flex justify-between items-center'>
-                <div>
-                  <h2 className='text-xl font-semibold tracking-tight'>{category.name}</h2>
-                  {category.description && (
-                    <p className='text-muted-foreground text-sm mt-1'>{category.description}</p>
-                  )}
-                </div>
-                <AccordionTrigger className='py-3 hover:no-underline' />
-              </div>
-              <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
-                {category.competencies.length === 0 ? (
-                  <p className='text-sm text-muted-foreground italic'>
-                    No competencies available yet.
-                  </p>
-                ) : (
-                  <div className='grid gap-4'>
-                    {category.competencies.map((competency) => {
-                      const assessment = assessments.find(
-                        (assessment) => assessment.competencyID === competency.id,
-                      )
+      <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
+      <AssessmentStatusBadge remainingAssessments={remainingAssessments} />
 
-                      if (assessment) {
+      {categories.map((category) => {
+        return (
+          <Card key={category.id} className='p-6 overflow-hidden'>
+            <Accordion
+              type='single'
+              collapsible
+              className='w-full'
+              value={expandedItems.includes(category.id) ? 'competencies' : ''}
+              onValueChange={() => handleAccordionChange(category.id)}
+            >
+              <AccordionItem value='competencies' className='border-none'>
+                <div className='flex justify-between items-center'>
+                  <div>
+                    <h2 className='text-xl font-semibold tracking-tight'>{category.name}</h2>
+                    {category.description && (
+                      <p className='text-muted-foreground text-sm mt-1'>{category.description}</p>
+                    )}
+                  </div>
+                  <AccordionTrigger className='py-3 hover:no-underline' />
+                </div>
+                <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
+                  {category.competencies.length === 0 ? (
+                    <p className='text-sm text-muted-foreground italic'>
+                      No competencies available yet.
+                    </p>
+                  ) : (
+                    <div className='grid gap-4'>
+                      {category.competencies.map((competency) => {
+                        const assessment = assessments.find(
+                          (assessment) => assessment.competencyID === competency.id,
+                        )
+
+                        if (assessment) {
+                          return (
+                            <div>
+                              <CompetencyWithAssessmentItem
+                                competency={competency}
+                                assessment={assessment}
+                              />
+                            </div>
+                          )
+                        }
+
                         return (
-                          <div>
-                            <CompetencyWithAssessmentItem
+                          <div key={competency.id}>
+                            <AssessmentForm
                               competency={competency}
-                              assessment={assessment}
+                              courseParticipationID={courseParticipationID ?? ''}
+                              useMutation={useCreateAssessment}
                             />
                           </div>
                         )
-                      }
-
-                      return (
-                        <div key={competency.id}>
-                          <AssessmentForm
-                            competency={competency}
-                            courseParticipationID={courseParticipationID ?? ''}
-                            useMutation={useCreateAssessment}
-                          />
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </Card>
-      ))}
+                      })}
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+        )
+      })}
     </div>
   )
 }

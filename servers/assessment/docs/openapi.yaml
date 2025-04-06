@@ -387,6 +387,68 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
+  /student-assessment/remaining/{courseParticipationID}:
+    get:
+      summary: Get count of remaining assessments for a student
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Count of remaining assessments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remainingAssessments:
+                    type: integer
+
+  /student-assessment/remaining/{courseParticipationID}/category/{categoryID}:
+    get:
+      summary: Get count of remaining assessments for a student in a specific category
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: categoryID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Count of remaining assessments in category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remainingAssessments:
+                    type: integer
+
 components:
   schemas:
     ################################
@@ -402,6 +464,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CreateCategoryRequest:
       type: object
@@ -411,6 +475,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     UpdateCategoryRequest:
       type: object
@@ -419,6 +485,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CategoryWithCompetencies:
       type: object
@@ -430,6 +498,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
         competencies:
           type: array
           items:
@@ -459,6 +529,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     CreateCompetencyRequest:
       type: object
@@ -479,6 +551,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     UpdateCompetencyRequest:
       type: object
@@ -495,6 +569,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     ################################
     # Assessment Schemas
@@ -525,6 +601,8 @@ components:
           type: string
         assessedAt:
           type: string
+        author:
+          type: string
 
     CreateOrUpdateAssessmentRequest:
       type: object
@@ -549,4 +627,6 @@ components:
         comment:
           type: string
         assessedAt:
+          type: string
+        author:
           type: string

@@ -12,6 +12,57 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countRemainingAssessmentsForStudent = `-- name: CountRemainingAssessmentsForStudent :one
+SELECT
+  COUNT(*) - (
+    SELECT COUNT(*)
+    FROM assessment
+    WHERE course_participation_id = $1
+      AND course_phase_id = $2
+  ) AS remaining_assessments
+FROM competency
+`
+
+type CountRemainingAssessmentsForStudentParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg CountRemainingAssessmentsForStudentParams) (int32, error) {
+	row := q.db.QueryRow(ctx, countRemainingAssessmentsForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
+	var remaining_assessments int32
+	err := row.Scan(&remaining_assessments)
+	return remaining_assessments, err
+}
+
+const countRemainingAssessmentsForStudentInCategory = `-- name: CountRemainingAssessmentsForStudentInCategory :one
+SELECT
+  COUNT(*) - (
+    SELECT COUNT(*)
+    FROM assessment
+    WHERE course_participation_id = $1
+      AND course_phase_id = $2
+      AND competency_id IN (
+        SELECT id FROM competency WHERE competency.category_id = $3
+      )
+  ) AS remaining_assessments
+FROM competency
+WHERE category_id = $3
+`
+
+type CountRemainingAssessmentsForStudentInCategoryParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CategoryID            uuid.UUID `json:"category_id"`
+}
+
+func (q *Queries) CountRemainingAssessmentsForStudentInCategory(ctx context.Context, arg CountRemainingAssessmentsForStudentInCategoryParams) (int32, error) {
+	row := q.db.QueryRow(ctx, countRemainingAssessmentsForStudentInCategory, arg.CourseParticipationID, arg.CoursePhaseID, arg.CategoryID)
+	var remaining_assessments int32
+	err := row.Scan(&remaining_assessments)
+	return remaining_assessments, err
+}
+
 const createAssessment = `-- name: CreateAssessment :one
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,

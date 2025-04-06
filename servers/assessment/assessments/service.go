@@ -141,3 +141,28 @@ func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePha
 	}
 	return assessments, nil
 }
+
+func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (int32, error) {
+	count, err := AssessmentServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return 0, errors.New("could not count remaining assessments")
+	}
+	return count, nil
+}
+
+func CountRemainingAssessmentsForStudentInCategory(ctx context.Context, courseParticipationID, coursePhaseID, categoryID uuid.UUID) (int32, error) {
+	count, err := AssessmentServiceSingleton.queries.CountRemainingAssessmentsForStudentInCategory(ctx, db.CountRemainingAssessmentsForStudentInCategoryParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+		CategoryID:            categoryID,
+	})
+	if err != nil {
+		log.Error("could not count remaining assessments in category: ", err)
+		return 0, errors.New("could not count remaining assessments in category")
+	}
+	return count, nil
+}

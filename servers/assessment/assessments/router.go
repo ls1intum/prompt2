@@ -21,6 +21,8 @@ func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByStudentInPhase)
 	assessmentRouter.GET("/competency/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCompetencyInPhase)
 	assessmentRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCategoryInPhase)
+	assessmentRouter.GET("/remaining/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), countRemainingAssessmentsForStudent)
+	assessmentRouter.GET("/remaining/:courseParticipationID/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), countRemainingAssessmentsForStudentInCategory)
 }
 
 func createAssessment(c *gin.Context) {
@@ -147,6 +149,53 @@ func listAssessmentsByCategoryInPhase(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+}
+
+func countRemainingAssessmentsForStudent(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	count, err := CountRemainingAssessmentsForStudent(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"remainingAssessments": count})
+}
+
+func countRemainingAssessmentsForStudentInCategory(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	categoryID, err := uuid.Parse(c.Param("categoryID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	count, err := CountRemainingAssessmentsForStudentInCategory(c, courseParticipationID, coursePhaseID, categoryID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"remainingAssessments": count})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
