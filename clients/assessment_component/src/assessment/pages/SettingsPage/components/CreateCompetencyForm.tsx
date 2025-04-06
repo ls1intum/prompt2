@@ -28,7 +28,6 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
     mutate(data, {
       onSuccess: () => {
         reset()
-        window.location.reload()
       },
     })
   }

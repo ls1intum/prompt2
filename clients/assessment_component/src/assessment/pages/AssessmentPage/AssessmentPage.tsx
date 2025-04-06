@@ -44,7 +44,7 @@ export const AssessmentPage = (): JSX.Element => {
     )
   }
 
-  const handleRefresh = () => {
+  const handleRefetch = () => {
     refetchCategories()
     refetchAssessments()
   }
@@ -52,7 +52,7 @@ export const AssessmentPage = (): JSX.Element => {
   const isError = isCategoriesError || isAssessmentsError
   const isPending = isCategoriesPending || isAssessmentsPending
 
-  if (isError) return <ErrorPage onRetry={handleRefresh} />
+  if (isError) return <ErrorPage onRetry={handleRefetch} />
   if (isPending)
     return (
       <div className='flex justify-center items-center h-64'>
@@ -112,7 +112,7 @@ export const AssessmentPage = (): JSX.Element => {
                       }
 
                       return (
-                        <div>
+                        <div key={competency.id}>
                           <AssessmentForm
                             competency={competency}
                             courseParticipationID={courseParticipationID ?? ''}

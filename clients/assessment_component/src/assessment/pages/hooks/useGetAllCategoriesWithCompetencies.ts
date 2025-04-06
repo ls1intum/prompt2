@@ -7,7 +7,7 @@ export const useGetAllCategoriesWithCompetencies = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   return useQuery<CategoryWithCompetencies[]>({
-    queryKey: ['categories'],
+    queryKey: ['categories', phaseId],
     queryFn: () => getAllCategoriesWithCompetencies(phaseId ?? ''),
   })
 }

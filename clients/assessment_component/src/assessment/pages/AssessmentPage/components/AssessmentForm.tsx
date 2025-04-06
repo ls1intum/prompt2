@@ -18,8 +18,12 @@ interface AssessmentFormProps {
   competency: Competency
   courseParticipationID: string
   comment?: string
-  useMutation: any //TODO
+  useMutation: (setError: React.Dispatch<React.SetStateAction<string | null>>) => {
+    mutate: (data: CreateOrUpdateAssessmentRequest, options?: { onSuccess?: () => void }) => void
+    isPending: boolean
+  }
   score?: ScoreLevel
+  onClose?: () => void
 }
 
 export const AssessmentForm = ({
@@ -28,11 +32,13 @@ export const AssessmentForm = ({
   comment,
   useMutation,
   score,
+  onClose,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | null>(null)
   const [date, setDate] = useState<Date | undefined>(new Date())
 
   const { user } = useAuthStore()
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<CreateOrUpdateAssessmentRequest>({
       defaultValues: {
@@ -41,7 +47,7 @@ export const AssessmentForm = ({
         score: score ?? 'novice',
         comment: comment ?? '',
         assessedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
-        author: `${user?.firstName} ${user?.lastName}`,
+        author: userName,
       },
     })
 
@@ -53,11 +59,14 @@ export const AssessmentForm = ({
       data.assessedAt = format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'")
     }
 
+    if (onClose) {
+      onClose()
+    }
+
     mutate(data, {
       onSuccess: () => {
         reset()
         setDate(new Date())
-        window.location.reload()
       },
     })
   }

@@ -25,7 +25,6 @@ func MapToCategoryWithCompetenciesDTO(rows []db.GetCategoriesWithCompetenciesRow
 		if row.Competencies != nil {
 			if err := json.Unmarshal(row.Competencies, &competencies); err != nil {
 				log.Printf("Error unmarshalling competencies for category %s: %v", row.ID, err)
-				continue
 			}
 		}
 

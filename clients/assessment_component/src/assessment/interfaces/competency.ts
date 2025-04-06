@@ -7,6 +7,7 @@ export type Competency = {
   intermediate: string
   advanced: string
   expert: string
+  weight: number
 }
 
 export type CreateCompetencyRequest = {
@@ -17,4 +18,5 @@ export type CreateCompetencyRequest = {
   intermediate: string
   advanced: string
   expert: string
+  weight: number
 }

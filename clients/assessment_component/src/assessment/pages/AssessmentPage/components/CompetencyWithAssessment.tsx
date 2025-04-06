@@ -32,20 +32,6 @@ export function CompetencyWithAssessmentItem({
     setEdit(true)
   }
 
-  if (edit) {
-    return (
-      <div>
-        <AssessmentForm
-          competency={competency}
-          score={assessment.score}
-          comment={assessment.comment}
-          courseParticipationID={assessment.courseParticipationID}
-          useMutation={useUpdateAssessment}
-        />
-      </div>
-    )
-  }
-
   return (
     <div>
       {edit ? (
@@ -55,6 +41,7 @@ export function CompetencyWithAssessmentItem({
           comment={assessment.comment}
           courseParticipationID={assessment.courseParticipationID}
           useMutation={useUpdateAssessment}
+          onClose={() => setEdit(false)}
         />
       ) : (
         <Card className='shadow-sm hover:shadow-md transition-all relative'>

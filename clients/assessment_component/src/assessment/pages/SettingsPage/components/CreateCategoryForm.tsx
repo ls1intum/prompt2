@@ -22,7 +22,6 @@ export const CreateCategoryForm = () => {
     mutate(data, {
       onSuccess: () => {
         reset()
-        window.location.reload()
       },
     })
   }

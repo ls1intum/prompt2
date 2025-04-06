@@ -34,5 +34,14 @@ export const getLevelConfig = (level: ScoreLevel) => {
         selectedBg: 'bg-purple-100',
         icon: '🟣',
       }
+    default:
+      console.error(`Unknown level: ${level}`)
+      return {
+        title: 'Unknown',
+        color: 'border-gray-500',
+        textColor: 'text-gray-700',
+        selectedBg: 'bg-gray-100',
+        icon: '?',
+      }
   }
 }
