@@ -148,8 +148,8 @@ services:
       - CORE_HOST
       - SERVER_CORE_HOST
       - SERVER_ADDRESS
-      - DB_HOST_ASSESSMENT
-      - DB_PORT_ASSESSMENT
+      - DB_HOST_ASSESSMENT=db-assessment
+      - DB_PORT_ASSESSMENT=5432
       - DB_NAME
       - DB_PASSWORD
       - KEYCLOAK_HOST
