@@ -7,7 +7,8 @@ RETURNING *;
 SELECT * FROM category WHERE id = $1;
 
 -- name: ListCategories :many
-SELECT * FROM category;
+SELECT * FROM category
+ORDER BY name ASC;
 
 -- name: UpdateCategory :one
 UPDATE category
@@ -38,4 +39,5 @@ SELECT
     )::json AS competencies
 FROM category c
 LEFT JOIN competency cmp ON c.id = cmp.category_id
-GROUP BY c.id, c.name, c.description, c.weight;
+GROUP BY c.id, c.name, c.description, c.weight
+ORDER BY c.name ASC;

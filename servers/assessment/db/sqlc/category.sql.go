@@ -72,6 +72,7 @@ SELECT
 FROM category c
 LEFT JOIN competency cmp ON c.id = cmp.category_id
 GROUP BY c.id, c.name, c.description, c.weight
+ORDER BY c.name ASC
 `
 
 type GetCategoriesWithCompetenciesRow struct {
@@ -126,6 +127,7 @@ func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, erro
 
 const listCategories = `-- name: ListCategories :many
 SELECT id, name, description, weight FROM category
+ORDER BY name ASC
 `
 
 func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
