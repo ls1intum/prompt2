@@ -63,12 +63,13 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
               </Label>
               <Input
                 id='weight'
-                placeholder='Enter competency name'
+                placeholder='Enter competency weight'
+                type='number'
                 className={errors.weight ? 'border-red-500' : ''}
                 aria-invalid={errors.weight ? 'true' : 'false'}
-                {...register('weight', { required: true })}
+                {...register('weight', { required: true, valueAsNumber: true })}
               />
-              {errors.weight && <p className='text-sm text-red-500 mt-1'>Name is required</p>}
+              {errors.weight && <p className='text-sm text-red-500 mt-1'>Weight is required</p>}
             </div>
           </div>
           <div className='grid grid-cols-1 gap-4 mb-6'>
