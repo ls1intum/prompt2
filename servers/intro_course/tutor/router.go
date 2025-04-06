@@ -17,6 +17,7 @@ func setupTutorRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles 
 	tutorRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTutors)
 	// we need the courseID to add students to keycloak groups
 	tutorRouter.POST("/course/:courseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), importTutors)
+	tutorRouter.PUT("/:tutorID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateGitLabUsername)
 }
 
 func getTutors(c *gin.Context) {
@@ -83,6 +84,37 @@ func importTutors(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+func updateGitLabUsername(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tutorID, err := uuid.Parse(c.Param("tutorID"))
+	if err != nil {
+		log.Error("Error parsing tutorID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var tutor tutorDTO.UpdateTutor
+	if err := c.BindJSON(&tutor); err != nil {
+		log.Error("Error binding tutor: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := UpdateGitLabUsername(c, coursePhaseID, tutorID, tutor); err != nil {
+		log.Error("Error updating gitlab username: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

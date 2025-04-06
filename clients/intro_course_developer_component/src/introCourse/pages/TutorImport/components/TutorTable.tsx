@@ -9,23 +9,51 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { SearchIcon } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getAllTutors } from '../../../network/queries/getAllTutors'
 import { Tutor } from '../../../interfaces/Tutor'
 import translations from '@/lib/translations.json'
+import { UpdateTutor } from '../../../interfaces/UpdateTutor'
+import { updateTutorGitLabUsername } from '../../../network/mutations/updateTutor'
 
 export function TutorTable() {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [searchQuery, setSearchQuery] = useState('')
+  // Store gitlab usernames for each tutor by their id.
+  const [gitlabUsernames, setGitlabUsernames] = useState<{ [id: string]: string }>({})
+  // Store error messages for update failures by tutor id.
+  const [updateErrors, setUpdateErrors] = useState<{ [id: string]: string }>({})
+  const queryClient = useQueryClient()
 
   const {
     data: tutors,
-    isLoading: isLoading,
+    isLoading,
     isError: isTutorsLoadingError,
   } = useQuery<Tutor[]>({
     queryKey: ['tutors', phaseId],
     queryFn: () => getAllTutors(phaseId ?? ''),
+  })
+
+  const { mutate: mutateUpdateTutors } = useMutation({
+    mutationFn: ({ tutorID, updateTutorDTO }: { tutorID: string; updateTutorDTO: UpdateTutor }) =>
+      updateTutorGitLabUsername(phaseId ?? '', tutorID, updateTutorDTO),
+    onSuccess: (data, variables) => {
+      // Clear error for the tutor that was updated
+      setUpdateErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[variables.tutorID]
+        return newErrors
+      })
+      queryClient.invalidateQueries({ queryKey: ['tutors', phaseId] })
+    },
+    onError: (error: unknown, variables) => {
+      console.error('Error updating tutor:', error)
+      setUpdateErrors((prev) => ({
+        ...prev,
+        [variables.tutorID]: 'Failed to save GitLab username',
+      }))
+    },
   })
 
   if (isTutorsLoadingError) {
@@ -56,7 +84,7 @@ export function TutorTable() {
               <TableHead>Email</TableHead>
               <TableHead>Mat Nr</TableHead>
               <TableHead>{translations.university['login-name']}</TableHead>
-
+              <TableHead>GitLab Username</TableHead>
               <TableHead className='w-[80px]'></TableHead>
             </TableRow>
           </TableHeader>
@@ -64,7 +92,7 @@ export function TutorTable() {
             {isLoading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <TableRow key={index}>
-                  {Array.from({ length: 6 }).map((__, cellIndex) => (
+                  {Array.from({ length: 7 }).map((__, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <div className='h-5 w-full animate-pulse rounded bg-muted' />
                     </TableCell>
@@ -73,7 +101,7 @@ export function TutorTable() {
               ))
             ) : tutors?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className='h-24 text-center'>
+                <TableCell colSpan={7} className='h-24 text-center'>
                   No tutors found.
                 </TableCell>
               </TableRow>
@@ -85,6 +113,33 @@ export function TutorTable() {
                   <TableCell>{tutor.email}</TableCell>
                   <TableCell>{tutor.matriculationNumber}</TableCell>
                   <TableCell>{tutor.universityLogin}</TableCell>
+                  <TableCell>
+                    <div>
+                      <Input
+                        placeholder='GitLab Username'
+                        value={gitlabUsernames[tutor.id] ?? tutor.gitlabUsername ?? ''}
+                        onChange={(e) =>
+                          setGitlabUsernames((prev) => ({
+                            ...prev,
+                            [tutor.id]: e.target.value,
+                          }))
+                        }
+                        onBlur={(e) => {
+                          const newGitlabUsername = e.target.value
+                          // Only update if the value has changed
+                          if (newGitlabUsername !== tutor.gitlabUsername) {
+                            mutateUpdateTutors({
+                              tutorID: tutor.id,
+                              updateTutorDTO: { gitlabUsername: newGitlabUsername },
+                            })
+                          }
+                        }}
+                      />
+                      {updateErrors[tutor.id] && (
+                        <p className='text-red-500 text-xs mt-1'>{updateErrors[tutor.id]}</p>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}

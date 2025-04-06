@@ -6,3 +6,9 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 SELECT * 
 FROM tutor
 WHERE course_phase_id = $1;
+
+-- name: UpdateTutorGitlabUsername :exec
+UPDATE tutor
+SET gitlab_username = $3
+WHERE id = $1
+AND course_phase_id = $2;
