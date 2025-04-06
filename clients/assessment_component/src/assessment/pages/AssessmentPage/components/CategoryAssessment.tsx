@@ -76,7 +76,7 @@ export const CategoryAssessment = ({
 
                   if (assessment) {
                     return (
-                      <div>
+                      <div key={competency.id}>
                         <CompetencyWithAssessmentItem
                           competency={competency}
                           assessment={assessment}
