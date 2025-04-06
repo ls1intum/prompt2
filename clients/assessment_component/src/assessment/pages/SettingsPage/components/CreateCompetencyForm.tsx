@@ -19,7 +19,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
     reset,
     formState: { errors },
   } = useForm<CreateCompetencyRequest>({
-    defaultValues: { categoryID },
+    defaultValues: { categoryID, weight: 1 },
   })
 
   const { mutate, isPending } = useCreateCompetency(setError)
@@ -42,7 +42,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
         <form id='competency-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <input type='hidden' {...register('categoryID', { required: true })} />
 
-          <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6'>
             <div className='space-y-2'>
               <Label htmlFor='name' className='font-medium'>
                 Name
@@ -51,20 +51,41 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 id='name'
                 placeholder='Enter competency name'
                 className={errors.name ? 'border-red-500' : ''}
+                aria-invalid={errors.name ? 'true' : 'false'}
                 {...register('name', { required: true })}
               />
+              {errors.name && <p className='text-sm text-red-500 mt-1'>Name is required</p>}
             </div>
 
             <div className='space-y-2'>
+              <Label htmlFor='weight' className='font-medium'>
+                Weight
+              </Label>
+              <Input
+                id='weight'
+                placeholder='Enter competency name'
+                className={errors.weight ? 'border-red-500' : ''}
+                aria-invalid={errors.weight ? 'true' : 'false'}
+                {...register('weight', { required: true })}
+              />
+              {errors.weight && <p className='text-sm text-red-500 mt-1'>Name is required</p>}
+            </div>
+          </div>
+          <div className='grid grid-cols-1 gap-4 mb-6'>
+            <div className='space-y-2 sm:col-span-2'>
               <Label htmlFor='description' className='font-medium'>
                 Description
               </Label>
               <Textarea
                 id='description'
                 placeholder='Brief description of this competency'
-                className='resize-none h-10'
+                className={`resize-none h-10 ${errors.description ? 'border-red-500' : ''}`}
+                aria-invalid={errors.description ? 'true' : 'false'}
                 {...register('description', { required: true })}
               />
+              {errors.description && (
+                <p className='text-sm text-red-500 mt-1'>Description is required</p>
+              )}
             </div>
           </div>
 
@@ -79,8 +100,13 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 <Input
                   id='novice'
                   placeholder='Novice level description'
+                  className={errors.novice ? 'border-red-500' : ''}
+                  aria-invalid={errors.novice ? 'true' : 'false'}
                   {...register('novice', { required: true })}
                 />
+                {errors.novice && (
+                  <p className='text-sm text-red-500 mt-1'>Novice description is required</p>
+                )}
               </div>
 
               <div className='space-y-2'>
@@ -90,8 +116,13 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 <Input
                   id='intermediate'
                   placeholder='Intermediate level description'
+                  className={errors.intermediate ? 'border-red-500' : ''}
+                  aria-invalid={errors.intermediate ? 'true' : 'false'}
                   {...register('intermediate', { required: true })}
                 />
+                {errors.intermediate && (
+                  <p className='text-sm text-red-500 mt-1'>Intermediate description is required</p>
+                )}
               </div>
 
               <div className='space-y-2'>
@@ -101,8 +132,13 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 <Input
                   id='advanced'
                   placeholder='Advanced level description'
+                  className={errors.advanced ? 'border-red-500' : ''}
+                  aria-invalid={errors.advanced ? 'true' : 'false'}
                   {...register('advanced', { required: true })}
                 />
+                {errors.advanced && (
+                  <p className='text-sm text-red-500 mt-1'>Advanced description is required</p>
+                )}
               </div>
 
               <div className='space-y-2'>
@@ -112,8 +148,13 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 <Input
                   id='expert'
                   placeholder='Expert level description'
+                  className={errors.advanced ? 'border-red-500' : ''}
+                  aria-invalid={errors.advanced ? 'true' : 'false'}
                   {...register('expert', { required: true })}
                 />
+                {errors.expert && (
+                  <p className='text-sm text-red-500 mt-1'>Expert description is required</p>
+                )}
               </div>
             </div>
           </div>

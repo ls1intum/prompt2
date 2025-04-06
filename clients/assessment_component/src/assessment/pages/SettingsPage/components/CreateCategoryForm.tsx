@@ -7,18 +7,14 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Plus } from 'lucide-react'
 import { useCreateCategory } from '../hooks/useCreateCategory'
-
-interface CreateCategoryFormData {
-  name: string
-  description?: string
-}
+import { CreateCategoryRequest } from 'src/assessment/interfaces/category'
 
 export const CreateCategoryForm = () => {
   const [error, setError] = useState<string | null>(null)
-  const { register, handleSubmit, reset } = useForm<CreateCategoryFormData>()
+  const { register, handleSubmit, reset } = useForm<CreateCategoryRequest>()
   const { mutate, isPending } = useCreateCategory(setError)
 
-  const onSubmit = (data: CreateCategoryFormData) => {
+  const onSubmit = (data: CreateCategoryRequest) => {
     mutate(data, {
       onSuccess: () => {
         reset()
@@ -57,6 +53,23 @@ export const CreateCategoryForm = () => {
               placeholder='Enter category description (optional)'
               className='resize-none min-h-[80px] focus-visible:ring-1'
               {...register('description')}
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='weight' className='text-sm font-medium'>
+              Weight
+            </Label>
+            <Input
+              id='weight'
+              type='number'
+              placeholder='Enter weight'
+              className='focus-visible:ring-1'
+              {...register('weight', {
+                required: true,
+                valueAsNumber: true,
+                validate: (value) => value > 0 || 'Weight must be greater than 0',
+              })}
             />
           </div>
 

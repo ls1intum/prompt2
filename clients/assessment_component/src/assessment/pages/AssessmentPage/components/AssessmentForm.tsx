@@ -59,14 +59,13 @@ export const AssessmentForm = ({
       data.assessedAt = format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'")
     }
 
-    if (onClose) {
-      onClose()
-    }
-
     mutate(data, {
       onSuccess: () => {
         reset()
         setDate(new Date())
+        if (onClose) {
+          onClose()
+        }
       },
     })
   }
