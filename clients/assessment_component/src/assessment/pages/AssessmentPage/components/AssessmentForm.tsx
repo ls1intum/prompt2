@@ -39,17 +39,22 @@ export const AssessmentForm = ({
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
-  const { register, handleSubmit, reset, setValue, watch } =
-    useForm<CreateOrUpdateAssessmentRequest>({
-      defaultValues: {
-        courseParticipationID,
-        competencyID: competency.id,
-        score: score ?? 'novice',
-        comment: comment ?? '',
-        assessedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
-        author: userName,
-      },
-    })
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<CreateOrUpdateAssessmentRequest>({
+    defaultValues: {
+      courseParticipationID,
+      competencyID: competency.id,
+      score: score ?? 'novice',
+      comment: comment ?? '',
+      assessedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+      author: userName,
+    },
+  })
 
   const { mutate, isPending } = useMutation(setError)
   const selectedScore = watch('score')
@@ -130,8 +135,13 @@ export const AssessmentForm = ({
               id='comment'
               placeholder='Enter notable information about the assessment, e.g. remarkable strengths'
               className='resize-none min-h-[120px] focus-visible:ring-1'
-              {...register('comment', { required: true })}
+              {...register('comment', {
+                required: 'Assessment comments are required',
+              })}
             />
+            {errors.comment && (
+              <p className='text-sm text-destructive mt-1'>{errors.comment.message}</p>
+            )}
           </div>
 
           {error && (

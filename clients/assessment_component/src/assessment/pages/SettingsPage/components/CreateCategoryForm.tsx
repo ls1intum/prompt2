@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Plus } from 'lucide-react'
 import { useCreateCategory } from '../hooks/useCreateCategory'
-import { CreateCategoryRequest } from 'src/assessment/interfaces/category'
+import { CreateCategoryRequest } from '../../../interfaces/category'
 
 export const CreateCategoryForm = () => {
   const [error, setError] = useState<string | null>(null)
