@@ -8,6 +8,7 @@ export type Assessment = {
   score: ScoreLevel
   comment: string
   assessedAt: string // ISO 8601 date string
+  author: string
 }
 
 export type CreateOrUpdateAssessmentRequest = {
@@ -17,4 +18,5 @@ export type CreateOrUpdateAssessmentRequest = {
   score: ScoreLevel
   comment: string
   assessedAt?: string // ISO 8601 date string, optional
+  author: string
 }

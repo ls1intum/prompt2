@@ -13,21 +13,32 @@ import (
 )
 
 const createCategory = `-- name: CreateCategory :one
-INSERT INTO category (id, name, description)
-VALUES ($1, $2, $3)
-RETURNING id, name, description
+INSERT INTO category (id, name, description, weight)
+VALUES ($1, $2, $3, $4)
+RETURNING id, name, description, weight
 `
 
 type CreateCategoryParams struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
+	Weight      int32       `json:"weight"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, createCategory, arg.ID, arg.Name, arg.Description)
+	row := q.db.QueryRow(ctx, createCategory,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.Weight,
+	)
 	var i Category
-	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Weight,
+	)
 	return i, err
 }
 
@@ -42,7 +53,7 @@ func (q *Queries) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 
 const getCategoriesWithCompetencies = `-- name: GetCategoriesWithCompetencies :many
 SELECT
-    c.id, c.name, c.description,
+    c.id, c.name, c.description, c.weight,
     COALESCE(
         json_agg(
             json_build_object(
@@ -52,20 +63,22 @@ SELECT
                 'novice', cmp.novice,
                 'intermediate', cmp.intermediate,
                 'advanced', cmp.advanced,
-                'expert', cmp.expert
+                'expert', cmp.expert,
+                'weight', cmp.weight
             )
         ) FILTER (WHERE cmp.id IS NOT NULL),
         '[]'
     )::json AS competencies
 FROM category c
 LEFT JOIN competency cmp ON c.id = cmp.category_id
-GROUP BY c.id, c.name, c.description
+GROUP BY c.id, c.name, c.description, c.weight
 `
 
 type GetCategoriesWithCompetenciesRow struct {
 	ID           uuid.UUID   `json:"id"`
 	Name         string      `json:"name"`
 	Description  pgtype.Text `json:"description"`
+	Weight       int32       `json:"weight"`
 	Competencies []byte      `json:"competencies"`
 }
 
@@ -82,6 +95,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 			&i.ID,
 			&i.Name,
 			&i.Description,
+			&i.Weight,
 			&i.Competencies,
 		); err != nil {
 			return nil, err
@@ -95,18 +109,23 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, name, description FROM category WHERE id = $1
+SELECT id, name, description, weight FROM category WHERE id = $1
 `
 
 func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, error) {
 	row := q.db.QueryRow(ctx, getCategory, id)
 	var i Category
-	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Weight,
+	)
 	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, description FROM category
+SELECT id, name, description, weight FROM category
 `
 
 func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
@@ -118,7 +137,12 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 	var items []Category
 	for rows.Next() {
 		var i Category
-		if err := rows.Scan(&i.ID, &i.Name, &i.Description); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Weight,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -131,20 +155,31 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 
 const updateCategory = `-- name: UpdateCategory :one
 UPDATE category
-SET name = $2, description = $3
+SET name = $2, description = $3, weight = $4
 WHERE id = $1
-RETURNING id, name, description
+RETURNING id, name, description, weight
 `
 
 type UpdateCategoryParams struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
+	Weight      int32       `json:"weight"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, updateCategory, arg.ID, arg.Name, arg.Description)
+	row := q.db.QueryRow(ctx, updateCategory,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.Weight,
+	)
 	var i Category
-	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Weight,
+	)
 	return i, err
 }

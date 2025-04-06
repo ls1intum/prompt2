@@ -88,7 +88,7 @@ export function CompetencyWithAssessmentItem({
         </div>
 
         <div className='flex justify-between items-center text-xs text-muted-foreground pt-2 border-t border-muted'>
-          <span>Assessed by: Maximilian Rapp</span>
+          <span>Assessed by: {assessment.author}</span>
           <span>{formattedDate}</span>
         </div>
       </div>

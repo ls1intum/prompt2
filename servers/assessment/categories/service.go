@@ -21,7 +21,7 @@ type CategoryService struct {
 
 var CategoryServiceSingleton *CategoryService
 
-func CreateCategory(ctx context.Context, name string, description string) (db.Category, error) {
+func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) (db.Category, error) {
 	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return db.Category{}, err
@@ -32,8 +32,9 @@ func CreateCategory(ctx context.Context, name string, description string) (db.Ca
 
 	category, err := qtx.CreateCategory(ctx, db.CreateCategoryParams{
 		ID:          uuid.New(),
-		Name:        name,
-		Description: pgtype.Text{String: description, Valid: true},
+		Name:        req.Name,
+		Description: pgtype.Text{String: req.Description, Valid: true},
+		Weight:      req.Weight,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -66,11 +67,12 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 	return categories, nil
 }
 
-func UpdateCategory(ctx context.Context, id uuid.UUID, name, description string) (db.Category, error) {
+func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCategoryRequest) (db.Category, error) {
 	category, err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
 		ID:          id,
-		Name:        name,
-		Description: pgtype.Text{String: description, Valid: true},
+		Name:        req.Name,
+		Description: pgtype.Text{String: req.Description, Valid: true},
+		Weight:      req.Weight,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)

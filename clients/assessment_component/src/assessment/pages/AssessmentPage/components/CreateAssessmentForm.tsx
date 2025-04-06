@@ -9,6 +9,7 @@ import { useCreateAssessment } from '../../AssessmentOverviewPage/hooks/useCreat
 import type { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 import { getLevelConfig } from '../../utils/getLevelConfig'
 
@@ -36,6 +37,7 @@ export const CreateAssessmentForm = ({
   const [error, setError] = useState<string | null>(null)
   const [date, setDate] = useState<Date | undefined>(new Date())
 
+  const { user } = useAuthStore()
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<CreateOrUpdateAssessmentRequest>({
       defaultValues: {
@@ -44,6 +46,7 @@ export const CreateAssessmentForm = ({
         score: 'novice' as ScoreLevel,
         comment: '',
         assessedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+        author: `${user?.firstName} ${user?.lastName}`,
       },
     })
 

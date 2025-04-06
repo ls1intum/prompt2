@@ -7,4 +7,5 @@ type UpdateCompetencyRequest struct {
 	Intermediate string `json:"intermediate"`
 	Advanced     string `json:"advanced"`
 	Expert       string `json:"expert"`
+	Weight       int32  `json:"weight"`
 }

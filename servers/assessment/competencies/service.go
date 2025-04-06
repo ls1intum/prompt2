@@ -38,6 +38,7 @@ func CreateCompetency(ctx context.Context, req competencyDTO.CreateCompetencyReq
 		Intermediate: req.Intermediate,
 		Advanced:     req.Advanced,
 		Expert:       req.Expert,
+		Weight:       req.Weight,
 	})
 	if err != nil {
 		log.Error("could not create competency: ", err)
@@ -88,6 +89,7 @@ func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.Updat
 		Intermediate: req.Intermediate,
 		Advanced:     req.Advanced,
 		Expert:       req.Expert,
+		Weight:       req.Weight,
 	})
 	if err != nil {
 		log.Error("could not update competency: ", err)

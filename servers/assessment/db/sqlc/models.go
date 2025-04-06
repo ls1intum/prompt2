@@ -64,12 +64,14 @@ type Assessment struct {
 	Score                 ScoreLevel       `json:"score"`
 	Comment               pgtype.Text      `json:"comment"`
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
+	Author                string           `json:"author"`
 }
 
 type Category struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
+	Weight      int32       `json:"weight"`
 }
 
 type Competency struct {
@@ -81,4 +83,5 @@ type Competency struct {
 	Intermediate string      `json:"intermediate"`
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
+	Weight       int32       `json:"weight"`
 }

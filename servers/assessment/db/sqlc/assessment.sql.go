@@ -15,10 +15,10 @@ import (
 const createAssessment = `-- name: CreateAssessment :one
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
-    score, comment, assessed_at
+    score, comment, assessed_at, author
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 `
 
 type CreateAssessmentParams struct {
@@ -29,6 +29,7 @@ type CreateAssessmentParams struct {
 	Score                 ScoreLevel       `json:"score"`
 	Comment               pgtype.Text      `json:"comment"`
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
+	Author                string           `json:"author"`
 }
 
 func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) (Assessment, error) {
@@ -40,6 +41,7 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		arg.Score,
 		arg.Comment,
 		arg.AssessedAt,
+		arg.Author,
 	)
 	var i Assessment
 	err := row.Scan(
@@ -50,6 +52,7 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		&i.Score,
 		&i.Comment,
 		&i.AssessedAt,
+		&i.Author,
 	)
 	return i, err
 }
@@ -64,7 +67,7 @@ func (q *Queries) DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAssessment = `-- name: GetAssessment :one
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE id = $1
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author FROM assessment WHERE id = $1
 `
 
 func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, error) {
@@ -78,12 +81,13 @@ func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, 
 		&i.Score,
 		&i.Comment,
 		&i.AssessedAt,
+		&i.Author,
 	)
 	return i, err
 }
 
 const listAssessmentsByCategoryInPhase = `-- name: ListAssessmentsByCategoryInPhase :many
-SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.score, a.comment, a.assessed_at
+SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.score, a.comment, a.assessed_at, a.author
 FROM assessment a
 JOIN competency c ON a.competency_id = c.id
 WHERE c.category_id = $1
@@ -112,6 +116,7 @@ func (q *Queries) ListAssessmentsByCategoryInPhase(ctx context.Context, arg List
 			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
+			&i.Author,
 		); err != nil {
 			return nil, err
 		}
@@ -124,7 +129,7 @@ func (q *Queries) ListAssessmentsByCategoryInPhase(ctx context.Context, arg List
 }
 
 const listAssessmentsByCompetencyInPhase = `-- name: ListAssessmentsByCompetencyInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at 
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author 
 FROM assessment 
 WHERE competency_id = $1 
   AND course_phase_id = $2
@@ -152,6 +157,7 @@ func (q *Queries) ListAssessmentsByCompetencyInPhase(ctx context.Context, arg Li
 			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
+			&i.Author,
 		); err != nil {
 			return nil, err
 		}
@@ -164,7 +170,7 @@ func (q *Queries) ListAssessmentsByCompetencyInPhase(ctx context.Context, arg Li
 }
 
 const listAssessmentsByCoursePhase = `-- name: ListAssessmentsByCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at FROM assessment WHERE course_phase_id = $1
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author FROM assessment WHERE course_phase_id = $1
 `
 
 func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Assessment, error) {
@@ -184,6 +190,7 @@ func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseI
 			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
+			&i.Author,
 		); err != nil {
 			return nil, err
 		}
@@ -196,7 +203,7 @@ func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseI
 }
 
 const listAssessmentsByStudentInPhase = `-- name: ListAssessmentsByStudentInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
+SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 FROM assessment
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -224,6 +231,7 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
+			&i.Author,
 		); err != nil {
 			return nil, err
 		}
@@ -238,15 +246,16 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 const updateAssessment = `-- name: UpdateAssessment :one
 INSERT INTO assessment (
   course_participation_id, course_phase_id, competency_id,
-  score, comment, assessed_at
+  score, comment, assessed_at, author
 )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 ON CONFLICT (course_participation_id, course_phase_id, competency_id)
 DO UPDATE SET
   score = EXCLUDED.score,
   comment = EXCLUDED.comment,
-  assessed_at = EXCLUDED.assessed_at
-RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at
+  assessed_at = EXCLUDED.assessed_at,
+  author = EXCLUDED.author
+RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 `
 
 type UpdateAssessmentParams struct {
@@ -256,6 +265,7 @@ type UpdateAssessmentParams struct {
 	Score                 ScoreLevel       `json:"score"`
 	Comment               pgtype.Text      `json:"comment"`
 	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
+	Author                string           `json:"author"`
 }
 
 func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
@@ -266,6 +276,7 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		arg.Score,
 		arg.Comment,
 		arg.AssessedAt,
+		arg.Author,
 	)
 	var i Assessment
 	err := row.Scan(
@@ -276,6 +287,7 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		&i.Score,
 		&i.Comment,
 		&i.AssessedAt,
+		&i.Author,
 	)
 	return i, err
 }

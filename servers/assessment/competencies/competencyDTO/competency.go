@@ -14,6 +14,7 @@ type Competency struct {
 	Intermediate string    `json:"intermediate"`
 	Advanced     string    `json:"advanced"`
 	Expert       string    `json:"expert"`
+	Weight       int32     `json:"weight"`
 }
 
 func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency {
@@ -28,6 +29,7 @@ func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency 
 			Intermediate: c.Intermediate,
 			Advanced:     c.Advanced,
 			Expert:       c.Expert,
+			Weight:       c.Weight,
 		}
 	}
 	return competencies

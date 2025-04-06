@@ -13,6 +13,7 @@ type CategoryWithCompetencies struct {
 	ID           uuid.UUID                  `json:"id"`
 	Name         string                     `json:"name"`
 	Description  string                     `json:"description"`
+	Weight       int32                      `json:"weight"`
 	Competencies []competencyDTO.Competency `json:"competencies"`
 }
 
@@ -32,6 +33,7 @@ func MapToCategoryWithCompetenciesDTO(rows []db.GetCategoriesWithCompetenciesRow
 			ID:           row.ID,
 			Name:         row.Name,
 			Description:  row.Description.String,
+			Weight:       row.Weight,
 			Competencies: competencies,
 		}
 		result = append(result, category)

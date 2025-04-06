@@ -13,9 +13,12 @@ import (
 )
 
 const createCompetency = `-- name: CreateCompetency :one
-INSERT INTO competency (id, category_id, name, description, novice, intermediate, advanced, expert)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, category_id, name, description, novice, intermediate, advanced, expert
+INSERT INTO competency (
+    id, category_id, name, description, novice,
+    intermediate, advanced, expert, weight
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, category_id, name, description, novice, intermediate, advanced, expert, weight
 `
 
 type CreateCompetencyParams struct {
@@ -27,6 +30,7 @@ type CreateCompetencyParams struct {
 	Intermediate string      `json:"intermediate"`
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
+	Weight       int32       `json:"weight"`
 }
 
 func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) (Competency, error) {
@@ -39,6 +43,7 @@ func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyPara
 		arg.Intermediate,
 		arg.Advanced,
 		arg.Expert,
+		arg.Weight,
 	)
 	var i Competency
 	err := row.Scan(
@@ -50,6 +55,7 @@ func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyPara
 		&i.Intermediate,
 		&i.Advanced,
 		&i.Expert,
+		&i.Weight,
 	)
 	return i, err
 }
@@ -64,7 +70,7 @@ func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
 }
 
 const getCompetency = `-- name: GetCompetency :one
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency WHERE id = $1
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency WHERE id = $1
 `
 
 func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, error) {
@@ -79,12 +85,13 @@ func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, 
 		&i.Intermediate,
 		&i.Advanced,
 		&i.Expert,
+		&i.Weight,
 	)
 	return i, err
 }
 
 const listCompetencies = `-- name: ListCompetencies :many
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency
 `
 
 func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
@@ -105,6 +112,7 @@ func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
 			&i.Intermediate,
 			&i.Advanced,
 			&i.Expert,
+			&i.Weight,
 		); err != nil {
 			return nil, err
 		}
@@ -117,7 +125,7 @@ func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
 }
 
 const listCompetenciesByCategory = `-- name: ListCompetenciesByCategory :many
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert FROM competency WHERE category_id = $1
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency WHERE category_id = $1
 `
 
 func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]Competency, error) {
@@ -138,6 +146,7 @@ func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uui
 			&i.Intermediate,
 			&i.Advanced,
 			&i.Expert,
+			&i.Weight,
 		); err != nil {
 			return nil, err
 		}
@@ -151,10 +160,16 @@ func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uui
 
 const updateCompetency = `-- name: UpdateCompetency :one
 UPDATE competency
-SET category_id = $2, name = $3, description = $4, novice = $5,
-    intermediate = $6, advanced = $7, expert = $8
+SET category_id = $2,
+    name = $3,
+    description = $4,
+    novice = $5,
+    intermediate = $6,
+    advanced = $7,
+    expert = $8,
+    weight = $9
 WHERE id = $1
-RETURNING id, category_id, name, description, novice, intermediate, advanced, expert
+RETURNING id, category_id, name, description, novice, intermediate, advanced, expert, weight
 `
 
 type UpdateCompetencyParams struct {
@@ -166,6 +181,7 @@ type UpdateCompetencyParams struct {
 	Intermediate string      `json:"intermediate"`
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
+	Weight       int32       `json:"weight"`
 }
 
 func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) (Competency, error) {
@@ -178,6 +194,7 @@ func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyPara
 		arg.Intermediate,
 		arg.Advanced,
 		arg.Expert,
+		arg.Weight,
 	)
 	var i Competency
 	err := row.Scan(
@@ -189,6 +206,7 @@ func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyPara
 		&i.Intermediate,
 		&i.Advanced,
 		&i.Expert,
+		&i.Weight,
 	)
 	return i, err
 }

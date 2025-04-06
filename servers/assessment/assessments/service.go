@@ -43,6 +43,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not create assessment: ", err)
@@ -75,6 +76,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not update assessment: ", err)

@@ -16,6 +16,7 @@ type Assessment struct {
 	Score                 db.ScoreLevel `json:"score"`
 	Comment               string        `json:"comment"`
 	AssessedAt            time.Time     `json:"assessedAt"`
+	Author                string        `json:"author"`
 }
 
 // GetAssessmentDTOsFromDBModels converts a slice of db.Assessment to DTOs.
@@ -30,6 +31,7 @@ func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
 			Score:                 a.Score,
 			Comment:               a.Comment.String,
 			AssessedAt:            a.AssessedAt.Time,
+			Author:                a.Author,
 		})
 	}
 	return assessments
