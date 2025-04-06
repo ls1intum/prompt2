@@ -231,6 +231,24 @@ services:
     networks:
       - prompt-network
 
+  db-assessment:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-assessment
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_assessment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+
   client-devops-challenge-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-devops-challenge-component:${DEVOPS_CHALLENGE_IMAGE_TAG}"
     container_name: prompt-client-devops-challenge-component
