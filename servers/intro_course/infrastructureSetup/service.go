@@ -56,7 +56,7 @@ func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) err
 	}
 
 	// 5.) Create the introCourse group
-	_, err = createTeachingGroup(courseGroup.ID, "IntroCourse")
+	_, err = createTeachingGroup(courseGroup.ID, "Introcourse")
 	if err != nil {
 		log.Error("Failed to create introCourse group: ", err)
 	}
