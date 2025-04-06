@@ -38,7 +38,7 @@ export default function AssessmentStatusBadge({
         <>
           <Clock className='h-3.5 w-3.5' />
           <span>
-            {remainingAssessments} {remainingAssessments === 1 ? 'attempt' : 'attempts'} left
+            {remainingAssessments} {remainingAssessments === 1 ? 'assessment' : 'assessments'} left
           </span>
         </>
       )}
