@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/accordion'
 
 import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
-import { useGetAllStudentAssessmentsInPhase } from '../AssessmentOverviewPage/hooks/useGetAllStudentAssessmentsInPhase'
-import { CreateAssessmentForm } from '../AssessmentOverviewPage/components/CreateAssessmentForm'
+import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
+import { CreateAssessmentForm } from './components/CreateAssessmentForm'
 import { ErrorPage } from '@/components/ErrorPage'
-import { CompetencyWithAssessmentItem } from '../AssessmentOverviewPage/components/CompetencyWithAssessment'
+import { CompetencyWithAssessmentItem } from './components/CompetencyWithAssessment'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{
@@ -67,7 +67,7 @@ export const AssessmentPage = (): JSX.Element => {
     )
 
   return (
-    <div>
+    <div className='space-y-4'>
       {categories.map((category) => (
         <Card key={category.id} className='p-6 overflow-hidden'>
           <Accordion
@@ -85,9 +85,7 @@ export const AssessmentPage = (): JSX.Element => {
                     <p className='text-muted-foreground text-sm mt-1'>{category.description}</p>
                   )}
                 </div>
-                <AccordionTrigger className='py-3 hover:no-underline'>
-                  <span className='text-sm font-medium'>Show Competencies</span>
-                </AccordionTrigger>
+                <AccordionTrigger className='py-3 hover:no-underline' />
               </div>
               <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
                 {category.competencies.length === 0 ? (

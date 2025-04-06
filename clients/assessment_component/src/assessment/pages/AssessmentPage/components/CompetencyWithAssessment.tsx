@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 import { Competency } from '../../../interfaces/competency'
-import { Assessment, ScoreLevel } from '../../../interfaces/assessment'
+import { Assessment } from '../../../interfaces/assessment'
+
+import { getLevelConfig } from '../../utils/getLevelConfig'
 
 interface CompetencyAssessmentItemProps {
   competency: Competency
@@ -20,47 +22,6 @@ export function CompetencyWithAssessmentItem({
   onEdit,
   onDelete,
 }: CompetencyAssessmentItemProps) {
-  const getLevelConfig = (level: ScoreLevel) => {
-    switch (level) {
-      case 'novice':
-        return {
-          title: 'Novice',
-          color: 'border-blue-500',
-          textColor: 'text-blue-700',
-          bgColor: 'bg-blue-50',
-          selectedBg: 'bg-blue-100',
-          icon: '🔵',
-        }
-      case 'intermediate':
-        return {
-          title: 'Intermediate',
-          color: 'border-green-500',
-          textColor: 'text-green-700',
-          bgColor: 'bg-green-50',
-          selectedBg: 'bg-green-100',
-          icon: '🟢',
-        }
-      case 'advanced':
-        return {
-          title: 'Advanced',
-          color: 'border-orange-600',
-          textColor: 'text-orange-700',
-          bgColor: 'bg-orange-50',
-          selectedBg: 'bg-orange-100',
-          icon: '🟠',
-        }
-      case 'expert':
-        return {
-          title: 'Expert',
-          color: 'border-purple-500',
-          textColor: 'text-purple-700',
-          bgColor: 'bg-purple-50',
-          selectedBg: 'bg-purple-100',
-          icon: '🟣',
-        }
-    }
-  }
-
   const config = getLevelConfig(assessment.score)
   const scoreText = competency[assessment.score]
   const formattedDate = format(new Date(assessment.assessedAt), 'MMM d, yyyy')
@@ -108,7 +69,7 @@ export function CompetencyWithAssessmentItem({
           </div>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-2'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2'>
           <div className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</div>
           <div
             className={cn(

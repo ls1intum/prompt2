@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, ClipboardCheck } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { useCreateAssessment } from '../hooks/useCreateAssessment'
+import { useCreateAssessment } from '../../AssessmentOverviewPage/hooks/useCreateAssessment'
 import type { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+
+import { getLevelConfig } from '../../utils/getLevelConfig'
 
 interface CreateAssessmentFormProps {
   competency: string
@@ -66,47 +68,6 @@ export const CreateAssessmentForm = ({
     setValue('score', value)
   }
 
-  const getLevelConfig = (level: ScoreLevel) => {
-    switch (level) {
-      case 'novice':
-        return {
-          title: 'Novice',
-          description: noviceText,
-          color: 'border-blue-500',
-          bgColor: 'bg-blue-50',
-          selectedBg: 'bg-blue-100',
-          icon: '🔵',
-        }
-      case 'intermediate':
-        return {
-          title: 'Intermediate',
-          description: intermediateText,
-          color: 'border-green-500',
-          bgColor: 'bg-green-50',
-          selectedBg: 'bg-green-100',
-          icon: '🟢',
-        }
-      case 'advanced':
-        return {
-          title: 'Advanced',
-          description: advancedText,
-          color: 'border-orange-600',
-          bgColor: 'bg-orange-50',
-          selectedBg: 'bg-orange-100',
-          icon: '🟠',
-        }
-      case 'expert':
-        return {
-          title: 'Expert',
-          description: expertText,
-          color: 'border-purple-500',
-          bgColor: 'bg-purple-50',
-          selectedBg: 'bg-purple-100',
-          icon: '🟣',
-        }
-    }
-  }
-
   return (
     <Card className='shadow-sm transition-all hover:shadow-md'>
       <CardHeader className='pb-3'>
@@ -135,7 +96,7 @@ export const CreateAssessmentForm = ({
                     className={cn(
                       'h-full text-left p-4 rounded-lg border-2 transition-all',
                       config.color,
-                      isSelected ? config.selectedBg : config.bgColor,
+                      isSelected ? config.selectedBg : 'bg-blue-50',
                       'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                     )}
                   >
@@ -143,7 +104,16 @@ export const CreateAssessmentForm = ({
                       <span className='font-semibold'>{config.title}</span>
                       <span>{config.icon}</span>
                     </div>
-                    <p className='text-sm text-gray-700 line-clamp-4'>{config.description}</p>
+
+                    <p className='text-sm text-gray-700 line-clamp-4'>
+                      {level === 'novice'
+                        ? noviceText
+                        : level === 'intermediate'
+                          ? intermediateText
+                          : level === 'advanced'
+                            ? advancedText
+                            : expertText}
+                    </p>
                   </button>
                 )
               })}

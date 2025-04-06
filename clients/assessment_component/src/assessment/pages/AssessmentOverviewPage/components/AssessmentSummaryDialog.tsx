@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/accordion'
 
 import { useGetAllCategoriesWithCompetencies } from '../../hooks/useGetAllCategoriesWithCompetencies'
-import { CreateAssessmentForm } from './CreateAssessmentForm'
+import { CreateAssessmentForm } from '../../AssessmentPage/components/CreateAssessmentForm'
 
 interface AssessmentSummaryDialogProps {
   isOpen: boolean
