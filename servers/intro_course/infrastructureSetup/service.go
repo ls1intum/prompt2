@@ -118,7 +118,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 		return err
 	}
 
-	introCourseGroup, err := getSubGroup("IntroCourse", semesterGroup.ID)
+	introCourseGroup, err := getSubGroup("Introcourse", semesterGroup.ID)
 	if err != nil {
 		log.Error("Failed to get intro course group: ", err)
 		return err
