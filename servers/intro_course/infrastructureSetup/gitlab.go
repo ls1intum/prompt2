@@ -10,6 +10,7 @@ import (
 
 const IN_PROGRESS_LABEL_ID = 53319
 const IN_REVIEW_LABEL_ID = 53320
+const ASE_GROUP_ID = 186940
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client

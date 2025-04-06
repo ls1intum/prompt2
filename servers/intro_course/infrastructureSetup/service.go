@@ -154,14 +154,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 }
 
 func getiPraktikumGroup() (*gitlab.Group, error) {
-	aseGroup, err := getGroup(TOP_LEVEL_GROUP_NAME)
-	if err != nil {
-		log.Error("Failed to get group: ", err)
-		return nil, err
-	}
-
-	// 2.) Get iPraktikum Group
-	ipraktikumGroup, err := getSubGroup(I_PRAKTIKUM_GROUP_NAME, aseGroup.ID)
+	ipraktikumGroup, err := getSubGroup(I_PRAKTIKUM_GROUP_NAME, ASE_GROUP_ID)
 	if err != nil {
 		log.Error("Failed to get group: ", err)
 		return nil, err
