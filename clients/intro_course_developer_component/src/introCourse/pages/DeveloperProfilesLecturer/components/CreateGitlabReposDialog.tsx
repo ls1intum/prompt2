@@ -89,9 +89,8 @@ export const CreateGitlabReposDialog = ({
           createGitlabRepoDTO: {
             repoName: participation.participation.student.universityLogin ?? '', // use the TUM-ID as repository Name
             studentName:
-              participation.participation.student.firstName ??
-              '' + ' ' + participation.participation.student.lastName ??
-              '',
+              `${participation.participation.student.firstName ?? ''} ${participation.participation.student.lastName ?? ''}`.trim(),
+
             semesterTag,
             submissionDeadline: deadline, // Use the user-entered deadline here
           },
