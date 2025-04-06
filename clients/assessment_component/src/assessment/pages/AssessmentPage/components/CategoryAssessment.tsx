@@ -91,6 +91,7 @@ export const CategoryAssessment = ({
                         competency={competency}
                         courseParticipationID={courseParticipationID ?? ''}
                         useMutation={useCreateAssessment}
+                        submitButtonText='Create'
                       />
                     </div>
                   )

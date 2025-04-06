@@ -42,6 +42,7 @@ export function CompetencyWithAssessmentItem({
           courseParticipationID={assessment.courseParticipationID}
           useMutation={useUpdateAssessment}
           onClose={() => setEdit(false)}
+          submitButtonText='Update'
         />
       ) : (
         <Card className='shadow-sm hover:shadow-md transition-all relative'>

@@ -24,6 +24,7 @@ interface AssessmentFormProps {
   }
   score?: ScoreLevel
   onClose?: () => void
+  submitButtonText: string
 }
 
 export const AssessmentForm = ({
@@ -33,6 +34,7 @@ export const AssessmentForm = ({
   useMutation,
   score,
   onClose,
+  submitButtonText,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | null>(null)
 
@@ -148,7 +150,7 @@ export const AssessmentForm = ({
 
           <div className='flex justify-end'>
             <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
-              {isPending ? 'Creating...' : 'Submit Assessment'}
+              {isPending ? submitButtonText + '...' : submitButtonText}
             </Button>
           </div>
         </form>
