@@ -35,32 +35,50 @@ func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg C
 	return remaining_assessments, err
 }
 
-const countRemainingAssessmentsForStudentInCategory = `-- name: CountRemainingAssessmentsForStudentInCategory :one
+const countRemainingAssessmentsPerCategory = `-- name: CountRemainingAssessmentsPerCategory :many
 SELECT
+  c.category_id,
   COUNT(*) - (
     SELECT COUNT(*)
-    FROM assessment
-    WHERE course_participation_id = $1
-      AND course_phase_id = $2
-      AND competency_id IN (
-        SELECT id FROM competency WHERE competency.category_id = $3
+    FROM assessment a
+    WHERE a.course_participation_id = $1
+      AND a.course_phase_id = $2
+      AND a.competency_id IN (
+        SELECT id FROM competency WHERE competency.category_id = c.category_id
       )
   ) AS remaining_assessments
-FROM competency
-WHERE category_id = $3
+FROM competency c
+GROUP BY c.category_id
 `
 
-type CountRemainingAssessmentsForStudentInCategoryParams struct {
+type CountRemainingAssessmentsPerCategoryParams struct {
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-	CategoryID            uuid.UUID `json:"category_id"`
 }
 
-func (q *Queries) CountRemainingAssessmentsForStudentInCategory(ctx context.Context, arg CountRemainingAssessmentsForStudentInCategoryParams) (int32, error) {
-	row := q.db.QueryRow(ctx, countRemainingAssessmentsForStudentInCategory, arg.CourseParticipationID, arg.CoursePhaseID, arg.CategoryID)
-	var remaining_assessments int32
-	err := row.Scan(&remaining_assessments)
-	return remaining_assessments, err
+type CountRemainingAssessmentsPerCategoryRow struct {
+	CategoryID           uuid.UUID `json:"category_id"`
+	RemainingAssessments int32     `json:"remaining_assessments"`
+}
+
+func (q *Queries) CountRemainingAssessmentsPerCategory(ctx context.Context, arg CountRemainingAssessmentsPerCategoryParams) ([]CountRemainingAssessmentsPerCategoryRow, error) {
+	rows, err := q.db.Query(ctx, countRemainingAssessmentsPerCategory, arg.CourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CountRemainingAssessmentsPerCategoryRow
+	for rows.Next() {
+		var i CountRemainingAssessmentsPerCategoryRow
+		if err := rows.Scan(&i.CategoryID, &i.RemainingAssessments); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const createAssessment = `-- name: CreateAssessment :one

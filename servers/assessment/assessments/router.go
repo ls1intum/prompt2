@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/categories/categoryDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	assessmentRouter.GET("/competency/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCompetencyInPhase)
 	assessmentRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCategoryInPhase)
 	assessmentRouter.GET("/remaining/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), countRemainingAssessmentsForStudent)
-	assessmentRouter.GET("/remaining/:courseParticipationID/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), countRemainingAssessmentsForStudentInCategory)
+	assessmentRouter.GET("/remaining/:courseParticipationID/per-category", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), countRemainingAssessmentsPerCategory)
 }
 
 func createAssessment(c *gin.Context) {
@@ -172,7 +173,7 @@ func countRemainingAssessmentsForStudent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"remainingAssessments": count})
 }
 
-func countRemainingAssessmentsForStudentInCategory(c *gin.Context) {
+func countRemainingAssessmentsPerCategory(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -183,19 +184,14 @@ func countRemainingAssessmentsForStudentInCategory(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	categoryID, err := uuid.Parse(c.Param("categoryID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
 
-	count, err := CountRemainingAssessmentsForStudentInCategory(c, courseParticipationID, coursePhaseID, categoryID)
+	count, err := CountRemainingAssessmentsPerCategory(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"remainingAssessments": count})
+	c.JSON(http.StatusOK, categoryDTO.MapToCategoryWithRemainingAssessments(count))
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

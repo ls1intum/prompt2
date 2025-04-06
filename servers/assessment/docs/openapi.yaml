@@ -415,7 +415,7 @@ paths:
                   remainingAssessments:
                     type: integer
 
-  /student-assessment/remaining/{courseParticipationID}/category/{categoryID}:
+  /student-assessment/remaining/{courseParticipationID}/per-category:
     get:
       summary: Get count of remaining assessments for a student in a specific category
       tags: [Assessment]
@@ -432,22 +432,15 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         "200":
           description: Count of remaining assessments in category
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  remainingAssessments:
-                    type: integer
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithRemainingAssessments"
 
 components:
   schemas:
@@ -504,6 +497,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Competency"
+
+    CategoryWithRemainingAssessments:
+      type: object
+      properties:
+        categoryID:
+          type: string
+          format: uuid
+        remainingAssessments:
+          type: integer
 
     ################################
     # Competency Schemas

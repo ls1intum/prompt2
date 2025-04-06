@@ -56,16 +56,17 @@ SELECT
   ) AS remaining_assessments
 FROM competency;
 
--- name: CountRemainingAssessmentsForStudentInCategory :one
+-- name: CountRemainingAssessmentsPerCategory :many
 SELECT
+  c.category_id,
   COUNT(*) - (
     SELECT COUNT(*)
-    FROM assessment
-    WHERE course_participation_id = $1
-      AND course_phase_id = $2
-      AND competency_id IN (
-        SELECT id FROM competency WHERE competency.category_id = $3
+    FROM assessment a
+    WHERE a.course_participation_id = $1
+      AND a.course_phase_id = $2
+      AND a.competency_id IN (
+        SELECT id FROM competency WHERE competency.category_id = c.category_id
       )
   ) AS remaining_assessments
-FROM competency
-WHERE category_id = $3;
+FROM competency c
+GROUP BY c.category_id;
