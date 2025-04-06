@@ -44,13 +44,13 @@ func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) err
 	}
 
 	// 3.) Create the tutor groups
-	_, err = createTeachingGroup(courseGroup.ID, "tutor")
+	_, err = createTeachingGroup(courseGroup.ID, "tutors")
 	if err != nil {
 		log.Error("Failed to create tutor group: ", err)
 	}
 
 	// 4.) Create the coach group
-	_, err = createTeachingGroup(courseGroup.ID, "coach")
+	_, err = createTeachingGroup(courseGroup.ID, "coaches")
 	if err != nil {
 		log.Error("Failed to create coach group: ", err)
 	}
