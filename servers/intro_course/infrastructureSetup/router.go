@@ -77,7 +77,7 @@ func setupStudentInfrastructure(c *gin.Context) {
 	// TODO: remove this later - but parts of the infrastructure for ios25 were already done
 	semesterTag := strings.ToUpper(infrastructureRequest.SemesterTag)
 
-	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, semesterTag, infrastructureRequest.RepoName, infrastructureRequest.SubmissionDeadline)
+	err = CreateStudentInfrastructure(c, coursePhaseID, courseParticipationID, semesterTag, infrastructureRequest.RepoName, infrastructureRequest.StudentName, infrastructureRequest.SubmissionDeadline)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

@@ -64,7 +64,7 @@ func CreateCourseInfrastructure(coursePhaseID uuid.UUID, semesterTag string) err
 	return nil
 }
 
-func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, repoName, submissionDeadline string) error {
+func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, semesterTag, repoName, studentName, submissionDeadline string) error {
 	// 1.) get the student developer profile
 	devProfile, err := InfrastructureServiceSingleton.queries.GetDeveloperProfileByCourseParticipationID(ctx, db.GetDeveloperProfileByCourseParticipationIDParams{
 		CourseParticipationID: courseParticipationID,
@@ -125,7 +125,7 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 	}
 
 	// 5.) Create the student group
-	err = CreateStudentProject(repoName, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, submissionDeadline)
+	err = CreateStudentProject(repoName, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, studentName, submissionDeadline)
 	if err != nil {
 		log.Error("Failed to create student project: ", err)
 		// store error in the db

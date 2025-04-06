@@ -124,7 +124,7 @@ func getUserID(username string) (*gitlab.User, error) {
 	return users[0], nil
 }
 
-func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, submissionDeadline string) error {
+func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, studentName, submissionDeadline string) error {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get client: ", err)
@@ -160,7 +160,7 @@ func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, s
 		return errors.New("failed create student project")
 	}
 
-	err = createProjectFiles(git, project.ID, submissionDeadline)
+	err = createProjectFiles(git, project.ID, studentName, submissionDeadline)
 	if err != nil {
 		return err
 	}
@@ -263,11 +263,11 @@ func createIssueBoard(git *gitlab.Client, projectID int) error {
 	return nil
 }
 
-func createProjectFiles(git *gitlab.Client, projectID int, submissionDeadline string) error {
+func createProjectFiles(git *gitlab.Client, projectID int, studentName, submissionDeadline string) error {
 	// Add custom README
 	_, _, err := git.RepositoryFiles.CreateFile(projectID, "README.md", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
-		Content:       gitlab.Ptr(data.GetReadme(submissionDeadline)),
+		Content:       gitlab.Ptr(data.GetReadme(studentName, submissionDeadline)),
 		CommitMessage: gitlab.Ptr("Add custom README"),
 	})
 	if err != nil {
