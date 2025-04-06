@@ -1,17 +1,13 @@
-'use client'
-
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, CalendarIcon, ClipboardCheck } from 'lucide-react'
+import { AlertCircle, ClipboardCheck } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { useCreateAssessment } from '../hooks/useCreateAssessment'
 import type { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
 import { format } from 'date-fns'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 
 interface CreateAssessmentFormProps {
@@ -53,7 +49,6 @@ export const CreateAssessmentForm = ({
   const selectedScore = watch('score')
 
   const onSubmit = (data: CreateOrUpdateAssessmentRequest) => {
-    // If date is selected, format it properly
     if (date) {
       data.assessedAt = format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'")
     }
@@ -62,6 +57,7 @@ export const CreateAssessmentForm = ({
       onSuccess: () => {
         reset()
         setDate(new Date())
+        window.location.reload()
       },
     })
   }

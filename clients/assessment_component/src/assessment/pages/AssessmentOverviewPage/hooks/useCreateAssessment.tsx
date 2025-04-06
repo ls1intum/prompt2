@@ -8,10 +8,12 @@ export const useCreateAssessment = (setError: (error: string | null) => void) =>
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (assessment: CreateOrUpdateAssessmentRequest) =>
-      createAssessment(phaseId ?? '', assessment),
+    mutationFn: (assessment: CreateOrUpdateAssessmentRequest) => {
+      assessment.coursePhaseID = phaseId ?? ''
+      return createAssessment(assessment)
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

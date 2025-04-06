@@ -1,9 +1,8 @@
-import { AlertCircle } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 
 import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Accordion,
   AccordionContent,
@@ -12,15 +11,29 @@ import {
 } from '@/components/ui/accordion'
 
 import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
+import { useGetAllStudentAssessmentsInPhase } from '../AssessmentOverviewPage/hooks/useGetAllStudentAssessmentsInPhase'
 import { CreateAssessmentForm } from '../AssessmentOverviewPage/components/CreateAssessmentForm'
 import { ErrorPage } from '@/components/ErrorPage'
+import { CompetencyWithAssessmentItem } from '../AssessmentOverviewPage/components/CompetencyWithAssessment'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{
     courseParticipationID: string
   }>()
 
-  const { data: categories, isLoading, isError } = useGetAllCategoriesWithCompetencies()
+  const {
+    data: categories,
+    isPending: isCategoriesPending,
+    isError: isCategoriesError,
+    refetch: refetchCategories,
+  } = useGetAllCategoriesWithCompetencies()
+
+  const {
+    data: assessments,
+    isPending: isAssessmentsPending,
+    isError: isAssessmentsError,
+    refetch: refetchAssessments,
+  } = useGetAllStudentAssessmentsInPhase()
 
   const [expandedItems, setExpandedItems] = useState<string[]>([])
 
@@ -30,21 +43,28 @@ export const AssessmentPage = (): JSX.Element => {
     )
   }
 
-  if (isLoading) {
-    return <div className='space-y-4'>Error</div>
+  const handleRefresh = () => {
+    refetchCategories()
+    refetchAssessments()
   }
 
-  if (isError) {
-    return <ErrorPage />
-  }
+  const isError = isCategoriesError || isAssessmentsError
+  const isPending = isCategoriesPending || isAssessmentsPending
 
-  if (!categories || categories.length === 0) {
+  if (isError) return <ErrorPage onRetry={handleRefresh} />
+  if (isPending)
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
+
+  if (!categories || categories.length === 0)
     return (
       <Card className='p-6 text-center text-muted-foreground'>
         <p>No categories found. Create your first category to get started.</p>
       </Card>
     )
-  }
 
   return (
     <div>
@@ -76,20 +96,37 @@ export const AssessmentPage = (): JSX.Element => {
                   </p>
                 ) : (
                   <div className='grid gap-4'>
-                    {category.competencies.map((competency) => (
-                      <div>
-                        <CreateAssessmentForm
-                          competency={competency.name}
-                          description={competency.description}
-                          courseParticipationID={courseParticipationID ?? ''}
-                          competencyID={competency.id}
-                          noviceText={competency.novice}
-                          intermediateText={competency.intermediate}
-                          advancedText={competency.advanced}
-                          expertText={competency.expert}
-                        />
-                      </div>
-                    ))}
+                    {category.competencies.map((competency) => {
+                      const assessment = assessments.find(
+                        (assessment) => assessment.competencyID === competency.id,
+                      )
+
+                      if (assessment) {
+                        return (
+                          <div>
+                            <CompetencyWithAssessmentItem
+                              competency={competency}
+                              assessment={assessment}
+                            />
+                          </div>
+                        )
+                      }
+
+                      return (
+                        <div>
+                          <CreateAssessmentForm
+                            competency={competency.name}
+                            description={competency.description}
+                            courseParticipationID={courseParticipationID ?? ''}
+                            competencyID={competency.id}
+                            noviceText={competency.novice}
+                            intermediateText={competency.intermediate}
+                            advancedText={competency.advanced}
+                            expertText={competency.expert}
+                          />
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </AccordionContent>
