@@ -1,15 +1,14 @@
 import { Loader2 } from 'lucide-react'
-
 import { useParams } from 'react-router-dom'
 
 import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
-import AssessmentStatusBadge from './components/AssessmentStatusBadge'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useRemainingAssessmentsForStudent } from './hooks/useRemainingAssessmentsForStudent'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useGetRemainingAssessmentsForStudentPerCategory } from './hooks/useGetRemainingAssessmentsForStudentPerCategory'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
+import { AssessmentProfile } from './components/AssessmentProfile'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -65,11 +64,15 @@ export const AssessmentPage = (): JSX.Element => {
   return (
     <div className='space-y-4'>
       <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
-      <AssessmentStatusBadge remainingAssessments={remainingAssessments} />
+
+      {participant && (
+        <AssessmentProfile participant={participant} remainingAssessments={remainingAssessments} />
+      )}
 
       {categories.map((category) => {
         return (
           <CategoryAssessment
+            key={category.id}
             category={category}
             remainingAssessments={
               categoriesWithRemainingAssessments.find((item) => item.categoryID === category.id)

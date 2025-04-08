@@ -12,7 +12,10 @@ export const AssessmentOverviewPage = (): JSX.Element => {
 
   return (
     <div>
-      <ManagementPageHeader>Course Phase Participants</ManagementPageHeader>
+      <ManagementPageHeader>Assessment Overview</ManagementPageHeader>
+      <p className='text-sm text-muted-foregrount mb-4'>
+        Click on a participant to view/edit their assessment.
+      </p>
       <CoursePhaseParticipationsTablePage
         participants={participations ?? []}
         prevDataKeys={['score']}
