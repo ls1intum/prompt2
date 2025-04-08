@@ -1,6 +1,16 @@
-import { ScoreLevel } from '../../interfaces/assessment'
+import { ScoreLevel } from '../../interfaces/scoreLevel'
 
-export const getLevelConfig = (level: ScoreLevel) => {
+export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
+  if (unknown) {
+    return {
+      title: 'Unknown',
+      textColor: 'text-gray-700',
+      selectedBg: 'bg-gray-100',
+      icon: '⚪',
+      border: 'border-gray-300',
+    }
+  }
+
   switch (level) {
     case ScoreLevel.Novice:
       return {
@@ -8,6 +18,7 @@ export const getLevelConfig = (level: ScoreLevel) => {
         textColor: 'text-red-700',
         selectedBg: 'bg-red-100',
         icon: '🔴',
+        border: 'border-red-300',
       }
     case ScoreLevel.Intermediate:
       return {
@@ -15,6 +26,7 @@ export const getLevelConfig = (level: ScoreLevel) => {
         textColor: 'text-yellow-700',
         selectedBg: 'bg-yellow-100',
         icon: '🟡',
+        border: 'border-yellow-300',
       }
     case ScoreLevel.Advanced:
       return {
@@ -22,6 +34,7 @@ export const getLevelConfig = (level: ScoreLevel) => {
         textColor: 'text-green-700',
         selectedBg: 'bg-green-100',
         icon: '🟢',
+        border: 'border-green-300',
       }
     case ScoreLevel.Expert:
       return {
@@ -29,6 +42,7 @@ export const getLevelConfig = (level: ScoreLevel) => {
         textColor: 'text-blue-700',
         selectedBg: 'bg-blue-100',
         icon: '🔵',
+        border: 'border-blue-300',
       }
   }
 }

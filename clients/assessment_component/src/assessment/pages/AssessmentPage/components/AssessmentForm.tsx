@@ -13,9 +13,9 @@ import { getLevelConfig } from '../../utils/getLevelConfig'
 import { useUpdateAssessment } from '../hooks/useUpdateAssessment'
 import { useCreateAssessment } from '../hooks/useCreateAssessment'
 
-import type { Assessment } from '../../../interfaces/assessment'
+import type { Assessment, CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
 import type { Competency } from '../../../interfaces/competency'
-import { CreateOrUpdateAssessmentRequest, ScoreLevel } from '../../../interfaces/assessment'
+import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 interface AssessmentFormProps {
   courseParticipationID: string

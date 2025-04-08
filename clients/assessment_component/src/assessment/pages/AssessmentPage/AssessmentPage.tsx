@@ -66,7 +66,11 @@ export const AssessmentPage = (): JSX.Element => {
       <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
 
       {participant && (
-        <AssessmentProfile participant={participant} remainingAssessments={remainingAssessments} />
+        <AssessmentProfile
+          participant={participant}
+          remainingAssessments={remainingAssessments}
+          assessments={assessments}
+        />
       )}
 
       {categories.map((category) => {
