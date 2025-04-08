@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,14 +26,15 @@ export const SeatPlanDialog = ({ seatPlan }: SeatPlanDialogProps): JSX.Element =
           View Seat Plan
         </Button>
       </DialogTrigger>
-      <DialogContent className='max-w-2xl max-h-[80vh] overflow-y-auto'>
-        <DialogHeader>
+      <DialogContent className='max-w-2xl max-h-[90vh] flex flex-col'>
+        {/* Sticky header */}
+        <DialogHeader className='sticky top-0 bg-white'>
           <DialogTitle>Current Seat Plan</DialogTitle>
           <DialogDescription>This seat plan contains {seatPlan.length} seats.</DialogDescription>
         </DialogHeader>
 
-        {/* Render list of seats */}
-        <div className='mt-4'>
+        {/* Scrollable content area */}
+        <div className='flex-1 overflow-y-auto my-4'>
           {seatPlan.length > 0 ? (
             <ul className='list-disc pl-5'>
               {seatPlan.map((seat, index) => (
@@ -45,10 +45,6 @@ export const SeatPlanDialog = ({ seatPlan }: SeatPlanDialogProps): JSX.Element =
             <p>No seats available.</p>
           )}
         </div>
-
-        <DialogFooter className='mt-4'>
-          <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
