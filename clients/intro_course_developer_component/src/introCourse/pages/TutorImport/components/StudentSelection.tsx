@@ -24,7 +24,7 @@ export const StudentSelection = ({
           {selectedStudents.length === students.length ? 'Deselect All' : 'Select All'}
         </Button>
       </div>
-      <div className='max-h-[200px] overflow-y-auto border rounded-md p-2'>
+      <div className='overflow-y-auto border rounded-md p-2 max-h-[300px]'>
         {students.map((student) => (
           <div key={student.id} className='flex items-center space-x-2 py-2'>
             <Checkbox
