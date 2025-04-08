@@ -358,6 +358,7 @@ services:
       - SERVER_IMAGE_TAG
       - INTRO_COURSE_HOST
       - DEVOPS_CHALLENGE_HOST
+      - TEAM_ALLOCATION_HOST
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
