@@ -5,43 +5,12 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { AlertCircle, ChevronRight } from 'lucide-react'
-import { useGetAllCategoriesWithCompetencies } from '../../hooks/useGetAllCategoriesWithCompetencies'
+import { ChevronRight } from 'lucide-react'
 import { CreateCompetencyForm } from './CreateCompetencyForm'
+import { useCategoryStore } from '../../../zustand/useCategoryStore'
 
 export const CategoryList = () => {
-  const { data: categories, isLoading, isError } = useGetAllCategoriesWithCompetencies()
-
-  if (isLoading) {
-    return (
-      <div className='space-y-4'>
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className='p-6'>
-            <Skeleton className='h-6 w-1/3 mb-2' />
-            <Skeleton className='h-4 w-2/3' />
-          </Card>
-        ))}
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <Card className='p-6 flex items-center gap-3 text-destructive'>
-        <AlertCircle className='h-5 w-5' />
-        <p>Failed to load categories. Please try again later.</p>
-      </Card>
-    )
-  }
-
-  if (!categories || categories.length === 0) {
-    return (
-      <Card className='p-6 text-center text-muted-foreground'>
-        <p>No categories found. Create your first category to get started.</p>
-      </Card>
-    )
-  }
+  const { categories } = useCategoryStore()
 
   return (
     <div className='space-y-6'>

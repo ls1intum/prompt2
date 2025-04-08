@@ -1,22 +1,24 @@
 import { Loader2 } from 'lucide-react'
 
-import { Card } from '@/components/ui/card'
+import { useParams } from 'react-router-dom'
 
-import { useGetAllCategoriesWithCompetencies } from '../hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
 import AssessmentStatusBadge from './components/AssessmentStatusBadge'
 import { ErrorPage } from '@/components/ErrorPage'
 import { useRemainingAssessmentsForStudent } from './hooks/useRemainingAssessmentsForStudent'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useGetRemainingAssessmentsForStudentPerCategory } from './hooks/useGetRemainingAssessmentsForStudentPerCategory'
+import { useCategoryStore } from '../../zustand/useCategoryStore'
+import { useParticipationStore } from '../../zustand/useParticipationStore'
 
 export const AssessmentPage = (): JSX.Element => {
-  const {
-    data: categories,
-    isPending: isCategoriesPending,
-    isError: isCategoriesError,
-    refetch: refetchCategories,
-  } = useGetAllCategoriesWithCompetencies()
+  const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
+
+  const { categories } = useCategoryStore()
+  const { participations } = useParticipationStore()
+  const participant = participations.find(
+    (participation) => participation.courseParticipationID === courseParticipationID,
+  )
 
   const {
     data: assessments,
@@ -40,19 +42,14 @@ export const AssessmentPage = (): JSX.Element => {
   } = useGetRemainingAssessmentsForStudentPerCategory()
 
   const handleRefetch = () => {
-    refetchCategories()
     refetchAssessments()
     refetchRemainingAssessments()
     refetchCategoriesWithRemainingAssessments()
   }
 
   const isError =
-    isCategoriesError ||
-    isAssessmentsError ||
-    isRemainingAssessmentsError ||
-    isCategoriesWithRemainingAssessmentsError
+    isAssessmentsError || isRemainingAssessmentsError || isCategoriesWithRemainingAssessmentsError
   const isPending =
-    isCategoriesPending ||
     isAssessmentsPending ||
     isRemainingAssessmentsPending ||
     isCategoriesWithRemainingAssessmentsPending
@@ -63,13 +60,6 @@ export const AssessmentPage = (): JSX.Element => {
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
       </div>
-    )
-
-  if (!categories || categories.length === 0)
-    return (
-      <Card className='p-6 text-center text-muted-foreground'>
-        <p>No categories found. Create your first category to get started.</p>
-      </Card>
     )
 
   return (
