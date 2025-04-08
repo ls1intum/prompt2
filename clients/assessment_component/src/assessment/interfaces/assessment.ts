@@ -1,4 +1,9 @@
-export type ScoreLevel = 'novice' | 'intermediate' | 'advanced' | 'expert'
+export enum ScoreLevel {
+  Novice = 'novice',
+  Intermediate = 'intermediate',
+  Advanced = 'advanced',
+  Expert = 'expert',
+}
 
 export type Assessment = {
   id: string // UUID

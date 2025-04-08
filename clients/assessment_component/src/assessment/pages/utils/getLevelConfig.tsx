@@ -2,46 +2,33 @@ import { ScoreLevel } from '../../interfaces/assessment'
 
 export const getLevelConfig = (level: ScoreLevel) => {
   switch (level) {
-    case 'novice':
+    case ScoreLevel.Novice:
       return {
         title: 'Novice',
-        color: 'border-blue-500',
-        textColor: 'text-blue-700',
-        selectedBg: 'bg-blue-100',
-        icon: '🔵',
+        textColor: 'text-red-700',
+        selectedBg: 'bg-red-100',
+        icon: '🔴',
       }
-    case 'intermediate':
+    case ScoreLevel.Intermediate:
       return {
         title: 'Intermediate',
-        color: 'border-green-500',
+        textColor: 'text-yellow-700',
+        selectedBg: 'bg-yellow-100',
+        icon: '🟡',
+      }
+    case ScoreLevel.Advanced:
+      return {
+        title: 'Advanced',
         textColor: 'text-green-700',
         selectedBg: 'bg-green-100',
         icon: '🟢',
       }
-    case 'advanced':
-      return {
-        title: 'Advanced',
-        color: 'border-orange-600',
-        textColor: 'text-orange-700',
-        selectedBg: 'bg-orange-100',
-        icon: '🟠',
-      }
-    case 'expert':
+    case ScoreLevel.Expert:
       return {
         title: 'Expert',
-        color: 'border-purple-500',
-        textColor: 'text-purple-700',
-        selectedBg: 'bg-purple-100',
-        icon: '🟣',
-      }
-    default:
-      console.error(`Unknown level: ${level}`)
-      return {
-        title: 'Unknown',
-        color: 'border-gray-500',
-        textColor: 'text-gray-700',
-        selectedBg: 'bg-gray-100',
-        icon: '?',
+        textColor: 'text-blue-700',
+        selectedBg: 'bg-blue-100',
+        icon: '🔵',
       }
   }
 }

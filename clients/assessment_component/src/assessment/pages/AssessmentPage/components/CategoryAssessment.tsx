@@ -3,8 +3,6 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 import { AssessmentForm } from './AssessmentForm'
-import { CompetencyWithAssessmentItem } from './CompetencyWithAssessment'
-import { useCreateAssessment } from '../hooks/useCreateAssessment'
 import type { CategoryWithCompetencies } from '../../../interfaces/category'
 import type { Assessment } from '../../../interfaces/assessment'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
@@ -48,7 +46,9 @@ export const CategoryAssessment = ({
       {isExpanded && (
         <div id={`content-${category.id}`} className='pt-4 pb-2 space-y-5 border-t mt-2'>
           {category.competencies.length === 0 ? (
-            <p className='text-sm text-muted-foreground italic'>No competencies available yet.</p>
+            <p className='text-sm text-muted-foreground italic'>
+              No competencies available in this category.
+            </p>
           ) : (
             <div className='grid gap-4'>
               {category.competencies.map((competency) => {
@@ -56,24 +56,12 @@ export const CategoryAssessment = ({
                   (assessment) => assessment.competencyID === competency.id,
                 )
 
-                if (assessment) {
-                  return (
-                    <div key={competency.id}>
-                      <CompetencyWithAssessmentItem
-                        competency={competency}
-                        assessment={assessment}
-                      />
-                    </div>
-                  )
-                }
-
                 return (
                   <div key={competency.id}>
                     <AssessmentForm
-                      competency={competency}
                       courseParticipationID={courseParticipationID ?? ''}
-                      useMutation={useCreateAssessment}
-                      submitButtonText='Create'
+                      competency={competency}
+                      assessment={assessment}
                     />
                   </div>
                 )
