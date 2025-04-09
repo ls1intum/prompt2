@@ -36,7 +36,7 @@ export const AssessmentForm = ({
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
-      score: assessment ? assessment.score : ScoreLevel.Novice,
+      score: assessment?.score,
       comment: assessment ? assessment.comment : '',
       assessedAt: assessment
         ? format(new Date(assessment.assessedAt), "yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -124,7 +124,8 @@ export const AssessmentForm = ({
             {assessment && (
               <div className='text-xs text-muted-foreground mt-2'>
                 <div>
-                  Assessed by {userName} at {format(new Date(assessment.assessedAt), 'MMM d, yyyy')}
+                  Last assessed by {userName} at{' '}
+                  {format(new Date(assessment.assessedAt), 'MMM d, yyyy')}
                 </div>
               </div>
             )}

@@ -30,10 +30,6 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
-	}
 
 	assessment, err := qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
@@ -42,7 +38,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 	})
 	if err != nil {
@@ -57,18 +53,13 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 }
 
 func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
-	}
-
 	assessment, err := AssessmentServiceSingleton.queries.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 	})
 	if err != nil {
