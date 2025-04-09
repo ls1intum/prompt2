@@ -33,6 +33,7 @@ export const AssessmentForm = ({
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
   const form = useForm<CreateOrUpdateAssessmentRequest>({
+    mode: 'onChange',
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
@@ -49,18 +50,20 @@ export const AssessmentForm = ({
   const selectedScore = form.watch('score')
 
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        const data = form.getValues()
-        mutate(data)
+        const isValid = await form.trigger('comment')
+        if (isValid) {
+          const data = form.getValues()
+          mutate(data)
+        }
       }
     })
-
     return () => subscription.unsubscribe()
   }, [form, mutate])
 
   const handleScoreChange = (value: ScoreLevel) => {
-    form.setValue('score', value)
+    form.setValue('score', value, { shouldValidate: true })
   }
 
   return (
@@ -107,12 +110,17 @@ export const AssessmentForm = ({
             <FormField
               control={form.control}
               name='comment'
+              rules={{ required: 'Comment is required.' }}
               render={({ field }) => (
                 <FormItem className='flex flex-col flex-grow'>
                   <FormControl className='flex-grow'>
                     <Textarea
                       placeholder='additional comments'
-                      className='resize-none text-xs h-full'
+                      className={cn(
+                        'resize-none text-xs h-full',
+                        form.formState.errors.comment &&
+                          'border border-destructive focus-visible:ring-destructive',
+                      )}
                       {...field}
                     />
                   </FormControl>
