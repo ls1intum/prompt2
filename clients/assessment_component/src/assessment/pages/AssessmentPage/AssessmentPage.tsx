@@ -79,7 +79,7 @@ export const AssessmentPage = (): JSX.Element => {
             key={category.id}
             category={category}
             remainingAssessments={
-              categoriesWithRemainingAssessments.find((item) => item.categoryID === category.id)
+              categoriesWithRemainingAssessments?.find((item) => item.categoryID === category.id)
                 ?.remainingAssessments ?? 0
             }
             assessments={assessments}
