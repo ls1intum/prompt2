@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { updateCompetency } from '../../../network/mutations/updateCompency'
+import { updateCompetency } from '../../../network/mutations/updateCompetency'
 import { UpdateCompetencyRequest } from '../../../interfaces/competency'
 
 export const useUpdateCompetency = (setError: (error: string | null) => void) => {

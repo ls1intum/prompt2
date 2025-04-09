@@ -12,7 +12,7 @@ const ScoreLevelBadge: React.FC<ScoreLevelBadgeProps> = ({ score }) => {
 
   return (
     <Badge className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}>
-      {config.icon} {config.title} - suggested grade: {score.toFixed(2)}
+      {config.icon} {config.title} - avg. Score: {score.toFixed(2)}
     </Badge>
   )
 }

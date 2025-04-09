@@ -25,6 +25,18 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { CategoryWithCompetencies, UpdateCategoryRequest } from '../../../interfaces/category'
 import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
+import { debounceMutate } from '../../utils/debounceMutate'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
+const updateCategorySchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+})
+
 interface EditCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -42,6 +54,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
       description: category?.description,
       weight: category?.weight,
     },
+    resolver: zodResolver(updateCategorySchema),
   })
 
   useEffect(() => {
@@ -61,7 +74,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
     const subscription = form.watch((value, { name, type }) => {
       if (name && type === 'change') {
         const data = form.getValues() as UpdateCategoryRequest
-        mutate(data)
+        debounceMutate(mutate, data)
       }
     })
 

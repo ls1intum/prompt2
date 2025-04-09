@@ -16,6 +16,7 @@ import { useCreateAssessment } from '../hooks/useCreateAssessment'
 import type { Assessment, CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
 import type { Competency } from '../../../interfaces/competency'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { debounceMutate } from '../../utils/debounceMutate'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -46,7 +47,9 @@ export const AssessmentForm = ({
     },
   })
 
-  const { mutate } = assessment ? useUpdateAssessment(setError) : useCreateAssessment(setError)
+  const { mutate, isPending } = assessment
+    ? useUpdateAssessment(setError)
+    : useCreateAssessment(setError)
   const selectedScore = form.watch('score')
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export const AssessmentForm = ({
         const isValid = await form.trigger('comment')
         if (isValid) {
           const data = form.getValues()
-          mutate(data)
+          debounceMutate(mutate, data)
         }
       }
     })
@@ -88,6 +91,7 @@ export const AssessmentForm = ({
                   key={level}
                   type='button'
                   onClick={() => handleScoreChange(level)}
+                  disabled={isPending}
                   className={cn(
                     'w-full text-sm border-2 rounded-lg p-3 transition-all text-left',
                     isSelected ? config.selectedBg : 'bg-blue-50',
@@ -97,7 +101,13 @@ export const AssessmentForm = ({
                 >
                   <div className='flex justify-between mb-1'>
                     <span className='font-semibold'>{config.title}</span>
-                    <span>{config.icon}</span>
+                    <span>
+                      {isPending && isSelected ? (
+                        <span className='animate-pulse'>⏳</span>
+                      ) : (
+                        config.icon
+                      )}
+                    </span>
                   </div>
 
                   <p className='line-clamp-3 text-muted-foreground'>{competency[level]}</p>
@@ -132,7 +142,7 @@ export const AssessmentForm = ({
             {assessment && (
               <div className='text-xs text-muted-foreground mt-2'>
                 <div>
-                  Last assessed by {userName} at{' '}
+                  Last assessed by {assessment.author} at{' '}
                   {format(new Date(assessment.assessedAt), 'MMM d, yyyy')}
                 </div>
               </div>

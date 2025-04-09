@@ -72,7 +72,11 @@ export const CategoryList = () => {
                 ) : (
                   <div className='grid gap-4 sm:grid-cols-2'>
                     {category.competencies.map((competency) => (
-                      <CompetencyItem competency={competency} categoryID={category.id} />
+                      <CompetencyItem
+                        key={competency.id}
+                        competency={competency}
+                        categoryID={category.id}
+                      />
                     ))}
                   </div>
                 )}

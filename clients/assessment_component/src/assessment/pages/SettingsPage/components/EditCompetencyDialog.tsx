@@ -1,3 +1,4 @@
+import { debounce } from 'lodash'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -24,6 +25,22 @@ import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { Competency, UpdateCompetencyRequest } from '../../../interfaces/competency'
 import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
+import { debounceMutate } from '../../utils/debounceMutate'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
+const updateCompetencySchema = z.object({
+  id: z.string(),
+  categoryID: z.string(),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  novice: z.string().min(1, 'Novice level description is required'),
+  intermediate: z.string().min(1, 'Intermediate level description is required'),
+  advanced: z.string().min(1, 'Advanced level description is required'),
+  expert: z.string().min(1, 'Expert level description is required'),
+  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+})
 
 interface EditCompetencyDialogProps {
   open: boolean
@@ -51,6 +68,7 @@ export function EditCompetencyDialog({
       expert: competency?.expert,
       weight: competency?.weight,
     },
+    resolver: zodResolver(updateCompetencySchema),
   })
 
   useEffect(() => {
@@ -75,7 +93,7 @@ export function EditCompetencyDialog({
     const subscription = form.watch((value, { name, type }) => {
       if (name && type === 'change') {
         const data = form.getValues() as UpdateCompetencyRequest
-        mutate(data)
+        debounceMutate(mutate, data)
       }
     })
 

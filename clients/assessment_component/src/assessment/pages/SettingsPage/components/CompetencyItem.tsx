@@ -24,10 +24,7 @@ export const CompetencyItem = ({ competency, categoryID }: CompetencyItemProps) 
 
   return (
     <div>
-      <div
-        key={competency.id}
-        className='rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md relative'
-      >
+      <div className='rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md relative'>
         <div className='absolute top-2 right-2 flex gap-1'>
           <Button
             variant='ghost'

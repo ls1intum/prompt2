@@ -12,7 +12,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { useDeleteCategory } from '../hooks/useDeleteCategory'
-import { useDeleteCompetency } from '../hooks/useDeleteComptency'
+import { useDeleteCompetency } from '../hooks/useDeleteCompetency'
 
 interface DeleteConfirmDialogProps {
   open: boolean
@@ -47,7 +47,7 @@ export function DeleteConfirmDialog({
           onOpenChange(false)
         },
       })
-    } else if (itemType === 'competency' && categoryId) {
+    } else if (itemType === 'competency') {
       deleteCompetency(itemId, {
         onSuccess: () => {
           onOpenChange(false)
