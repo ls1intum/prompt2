@@ -5,12 +5,23 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Card } from '@/components/ui/card'
-import { ChevronRight } from 'lucide-react'
+import { Edit, Trash2 } from 'lucide-react'
 import { CreateCompetencyForm } from './CreateCompetencyForm'
 import { useCategoryStore } from '../../../zustand/useCategoryStore'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { EditCategoryDialog } from './EditCategoryDialog'
+import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import type { CategoryWithCompetencies } from '../../../interfaces/category'
+import { CompetencyItem } from './CompetencyItem'
 
 export const CategoryList = () => {
   const { categories } = useCategoryStore()
+
+  const [categoryToEdit, setCategoryToEdit] = useState<CategoryWithCompetencies | undefined>(
+    undefined,
+  )
+  const [categoryToDelete, setCategoryToDelete] = useState<string | undefined>(undefined)
 
   return (
     <div className='space-y-6'>
@@ -25,9 +36,33 @@ export const CategoryList = () => {
                     <p className='text-muted-foreground text-sm mt-1'>{category.description}</p>
                   )}
                 </div>
-                <AccordionTrigger className='py-3 hover:no-underline'>
-                  <span className='text-sm font-medium'>Show Competencies</span>
-                </AccordionTrigger>
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setCategoryToEdit(category)
+                    }}
+                    aria-label={`Edit ${category.name}`}
+                  >
+                    <Edit className='h-4 w-4' />
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setCategoryToDelete(category.id)
+                    }}
+                    aria-label={`Delete ${category.name}`}
+                  >
+                    <Trash2 className='h-4 w-4 text-destructive' />
+                  </Button>
+                  <AccordionTrigger className='py-3 hover:no-underline'>
+                    <span className='text-sm font-medium'>Show Competencies</span>
+                  </AccordionTrigger>
+                </div>
               </div>
               <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
                 {category.competencies.length === 0 ? (
@@ -37,36 +72,7 @@ export const CategoryList = () => {
                 ) : (
                   <div className='grid gap-4 sm:grid-cols-2'>
                     {category.competencies.map((competency) => (
-                      <div
-                        key={competency.id}
-                        className='rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md'
-                      >
-                        <div className='text-base font-medium mb-2 flex items-center gap-2'>
-                          <ChevronRight className='h-4 w-4 text-muted-foreground' />
-                          {competency.name}
-                        </div>
-                        <div className='text-sm text-muted-foreground mb-3'>
-                          {competency.description}
-                        </div>
-                        <div className='text-xs grid grid-cols-4 gap-x-2'>
-                          <div className='space-y-1'>
-                            <div className='font-semibold'>Novice</div>
-                            <div>{competency.novice}</div>
-                          </div>
-                          <div className='space-y-1'>
-                            <div className='font-semibold'>Intermediate</div>
-                            <div>{competency.intermediate}</div>
-                          </div>
-                          <div className='space-y-1'>
-                            <div className='font-semibold'>Advanced</div>
-                            <div>{competency.advanced}</div>
-                          </div>
-                          <div className='space-y-1'>
-                            <div className='font-semibold'>Expert</div>
-                            <div>{competency.expert}</div>
-                          </div>
-                        </div>
-                      </div>
+                      <CompetencyItem competency={competency} categoryID={category.id} />
                     ))}
                   </div>
                 )}
@@ -78,6 +84,23 @@ export const CategoryList = () => {
           </Accordion>
         </Card>
       ))}
+
+      <EditCategoryDialog
+        open={!!categoryToEdit}
+        onOpenChange={(open) => !open && setCategoryToEdit(undefined)}
+        category={categoryToEdit}
+      />
+
+      {categoryToDelete && (
+        <DeleteConfirmDialog
+          open={!!categoryToDelete}
+          onOpenChange={(open) => !open && setCategoryToDelete(undefined)}
+          title='Delete Category'
+          description='Are you sure you want to delete this category? This action cannot be undone and will also delete all competencies within this category.'
+          itemType='category'
+          itemId={categoryToDelete}
+        />
+      )}
     </div>
   )
 }

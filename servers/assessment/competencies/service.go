@@ -83,6 +83,7 @@ func ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]db
 func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.UpdateCompetencyRequest) (db.Competency, error) {
 	competency, err := CompetencyServiceSingleton.queries.UpdateCompetency(ctx, db.UpdateCompetencyParams{
 		ID:           id,
+		CategoryID:   req.CategoryID,
 		Name:         req.Name,
 		Description:  pgtype.Text{String: req.Description, Valid: true},
 		Novice:       req.Novice,

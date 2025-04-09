@@ -26,6 +26,7 @@ SELECT
         json_agg(
             json_build_object(
                 'id', cmp.id,
+                'categoryID', cmp.category_id,
                 'name', cmp.name,
                 'description', cmp.description,
                 'novice', cmp.novice,

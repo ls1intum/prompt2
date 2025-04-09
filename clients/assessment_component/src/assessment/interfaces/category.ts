@@ -25,3 +25,10 @@ export interface CreateCategoryRequest {
   description?: string
   weight: number
 }
+
+export interface UpdateCategoryRequest {
+  id: string
+  name?: string
+  description?: string
+  weight?: number
+}
