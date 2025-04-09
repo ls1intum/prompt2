@@ -19,10 +19,11 @@ export const AssessmentProfile = ({
   assessments,
 }: AssessmentProfileProps): JSX.Element => {
   const averageScore =
-    assessments
-      .map((assessment) => mapScoreLevelToNumber({ score: assessment.score }))
-      .reduce<number>((a, b) => a + b, 0) / assessments.length
-
+    assessments.length === 0
+      ? 0
+      : assessments
+          .map((assessment) => mapScoreLevelToNumber({ score: assessment.score }))
+          .reduce<number>((a, b) => a + b, 0) / assessments.length
   return (
     <Card className='relative overflow-hidden'>
       <CardHeader>
