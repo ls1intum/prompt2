@@ -31,7 +31,7 @@ const routes: ExtendedRouteObject[] = [
         <SettingsPage />
       </AssessmentDataShell>
     ),
-    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    requiredPermissions: [Role.PROMPT_ADMIN],
   },
 ]
 
