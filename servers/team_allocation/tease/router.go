@@ -27,7 +27,12 @@ func getAllCoursePhases(c *gin.Context) {
 		return
 	}
 
-	userRoles := rolesVal.(map[string]bool)
+	userRoles, ok := rolesVal.(map[string]bool)
+	if !ok {
+		handleError(c, http.StatusInternalServerError, errors.New("invalid user roles format"))
+		return
+	}
+
 	teasePhases, err := GetTeamAllocationCoursePhases(
 		c.Request.Context(),
 		authHeader,
