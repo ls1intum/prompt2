@@ -51,10 +51,6 @@ paths:
       responses:
         "201":
           description: Category created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
 
   /category/{categoryID}:
     get:
@@ -93,10 +89,6 @@ paths:
       responses:
         "200":
           description: Category updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
     delete:
       summary: Delete a category
       tags: [Category]
@@ -153,10 +145,6 @@ paths:
       responses:
         "201":
           description: Competency created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
 
   /competency/{competencyID}:
     get:
@@ -195,10 +183,6 @@ paths:
       responses:
         "200":
           description: Competency updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
     delete:
       summary: Delete a competency
       tags: [Competency]
@@ -270,10 +254,6 @@ paths:
       responses:
         "201":
           description: Assessment created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
     put:
       summary: Update an assessment
       description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
@@ -287,10 +267,6 @@ paths:
       responses:
         "200":
           description: Assessment created or updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
 
   /student-assessment/{assessmentID}:
     get:
@@ -387,6 +363,61 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
+  /student-assessment/remaining/{courseParticipationID}:
+    get:
+      summary: Get count of remaining assessments for a student
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Count of remaining assessments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remainingAssessments:
+                    type: integer
+
+  /student-assessment/remaining/{courseParticipationID}/per-category:
+    get:
+      summary: Get count of remaining assessments for a student in a specific category
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Count of remaining assessments in category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithRemainingAssessments"
+
 components:
   schemas:
     ################################
@@ -402,6 +433,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CreateCategoryRequest:
       type: object
@@ -411,6 +444,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     UpdateCategoryRequest:
       type: object
@@ -419,6 +454,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CategoryWithCompetencies:
       type: object
@@ -430,10 +467,21 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
         competencies:
           type: array
           items:
             $ref: "#/components/schemas/Competency"
+
+    CategoryWithRemainingAssessments:
+      type: object
+      properties:
+        categoryID:
+          type: string
+          format: uuid
+        remainingAssessments:
+          type: integer
 
     ################################
     # Competency Schemas
@@ -459,6 +507,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     CreateCompetencyRequest:
       type: object
@@ -479,6 +529,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     UpdateCompetencyRequest:
       type: object
@@ -495,6 +547,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     ################################
     # Assessment Schemas
@@ -525,6 +579,8 @@ components:
           type: string
         assessedAt:
           type: string
+        author:
+          type: string
 
     CreateOrUpdateAssessmentRequest:
       type: object
@@ -549,4 +605,6 @@ components:
         comment:
           type: string
         assessedAt:
+          type: string
+        author:
           type: string

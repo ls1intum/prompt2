@@ -21,31 +21,32 @@ type CategoryService struct {
 
 var CategoryServiceSingleton *CategoryService
 
-func CreateCategory(ctx context.Context, name string, description string) (db.Category, error) {
+func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) error {
 	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Category{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
-	category, err := qtx.CreateCategory(ctx, db.CreateCategoryParams{
+	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
 		ID:          uuid.New(),
-		Name:        name,
-		Description: pgtype.Text{String: description, Valid: true},
+		Name:        req.Name,
+		Description: pgtype.Text{String: req.Description, Valid: true},
+		Weight:      req.Weight,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
-		return db.Category{}, errors.New("could not create category")
+		return errors.New("could not create category")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		log.Error(err)
-		return db.Category{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return category, nil
+	return nil
 }
 
 func GetCategory(ctx context.Context, id uuid.UUID) (db.Category, error) {
@@ -66,17 +67,18 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 	return categories, nil
 }
 
-func UpdateCategory(ctx context.Context, id uuid.UUID, name, description string) (db.Category, error) {
-	category, err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
+func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
+	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
 		ID:          id,
-		Name:        name,
-		Description: pgtype.Text{String: description, Valid: true},
+		Name:        req.Name,
+		Description: pgtype.Text{String: req.Description, Valid: true},
+		Weight:      req.Weight,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
-		return db.Category{}, errors.New("could not update category")
+		return errors.New("could not update category")
 	}
-	return category, nil
+	return nil
 }
 
 func DeleteCategory(ctx context.Context, id uuid.UUID) error {

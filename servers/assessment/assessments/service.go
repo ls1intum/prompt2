@@ -22,70 +22,60 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
+func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Assessment{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
-	}
 
-	assessment, err := qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
+	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not create assessment: ", err)
-		return db.Assessment{}, errors.New("could not create assessment")
+		return errors.New("could not create assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment creation: ", err)
-		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return assessment, nil
+	return nil
 }
 
-func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
+func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Assessment{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
+
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
-	}
-
-	assessment, err := qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
+	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not update assessment: ", err)
-		return db.Assessment{}, errors.New("could not update assessment")
-	}
-	if err := tx.Commit(ctx); err != nil {
-		log.Error("could not commit assessment update: ", err)
-		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return errors.New("could not update assessment")
 	}
 
-	return assessment, nil
+	return nil
 }
 
 func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
@@ -149,4 +139,16 @@ func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePha
 		return nil, errors.New("could not get assessments for category")
 	}
 	return assessments, nil
+}
+
+func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (db.CountRemainingAssessmentsForStudentRow, error) {
+	remainingAssessments, err := AssessmentServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
+	}
+	return remainingAssessments, nil
 }

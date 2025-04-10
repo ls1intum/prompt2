@@ -17,6 +17,9 @@ on:
       server_team_allocation_image_tag:
         description: "The tag of the image that was built"
         value: ${{ jobs.team-allocation.outputs.image_tag }}
+      server_assessment_image_tag:
+        description: "The tag of the image that was built"
+        value: ${{ jobs.assessment.outputs.image_tag }}
 
 jobs:
   core:
@@ -41,5 +44,13 @@ jobs:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-team-allocation
       docker-file: servers/Dockerfile
       docker-context: ./servers/team_allocation
+      tags: ${{ inputs.release_tag }}
+    secrets: inherit
+  assessment:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    with:
+      image-name: ghcr.io/ls1intum/prompt2/prompt-server-assessment
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/assessment
       tags: ${{ inputs.release_tag }}
     secrets: inherit
