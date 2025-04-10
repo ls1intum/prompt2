@@ -53,7 +53,15 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 }
 
 func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
-	err := AssessmentServiceSingleton.queries.UpdateAssessment(ctx, db.UpdateAssessmentParams{
+	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
