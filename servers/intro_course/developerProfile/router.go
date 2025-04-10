@@ -1,6 +1,8 @@
 package developerProfile
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +19,11 @@ func setupDeveloperProfileRouter(router *gin.RouterGroup, authMiddleware func(al
 	// Getting all developer profiles is only allowed for lecturers
 	developerProfile.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllDeveloperProfiles)
 	developerProfile.PUT("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateDeveloperProfile)
+
+	// Export for the next phase
+	devices := router.Group("/devices")
+	devices.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getDevicesForAllParticipations)
+	devices.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getDevicesForCourseParticipation)
 
 }
 
@@ -123,6 +130,48 @@ func updateDeveloperProfile(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func getDevicesForAllParticipations(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	devices, err := GetDevicesForCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, devices)
+}
+
+func getDevicesForCourseParticipation(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	devices, err := GetDevicesForCourseParticipation(c, coursePhaseID, courseParticipationID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No devices found"})
+		return
+	} else if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, devices)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
