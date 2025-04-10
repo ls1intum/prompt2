@@ -12,10 +12,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCategory = `-- name: CreateCategory :one
+const createCategory = `-- name: CreateCategory :exec
 INSERT INTO category (id, name, description, weight)
 VALUES ($1, $2, $3, $4)
-RETURNING id, name, description, weight
 `
 
 type CreateCategoryParams struct {
@@ -25,21 +24,14 @@ type CreateCategoryParams struct {
 	Weight      int32       `json:"weight"`
 }
 
-func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, createCategory,
+func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) error {
+	_, err := q.db.Exec(ctx, createCategory,
 		arg.ID,
 		arg.Name,
 		arg.Description,
 		arg.Weight,
 	)
-	var i Category
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.Weight,
-	)
-	return i, err
+	return err
 }
 
 const deleteCategory = `-- name: DeleteCategory :exec
@@ -156,11 +148,10 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
-const updateCategory = `-- name: UpdateCategory :one
+const updateCategory = `-- name: UpdateCategory :exec
 UPDATE category
 SET name = $2, description = $3, weight = $4
 WHERE id = $1
-RETURNING id, name, description, weight
 `
 
 type UpdateCategoryParams struct {
@@ -170,19 +161,12 @@ type UpdateCategoryParams struct {
 	Weight      int32       `json:"weight"`
 }
 
-func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, updateCategory,
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
+	_, err := q.db.Exec(ctx, updateCategory,
 		arg.ID,
 		arg.Name,
 		arg.Description,
 		arg.Weight,
 	)
-	var i Category
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.Weight,
-	)
-	return i, err
+	return err
 }

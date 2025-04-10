@@ -64,12 +64,12 @@ func createCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	competency, err := CreateCompetency(c, req)
+	err := CreateCompetency(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, competency)
+	c.Status(http.StatusCreated)
 }
 
 func updateCompetency(c *gin.Context) {
@@ -83,12 +83,12 @@ func updateCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	competency, err := UpdateCompetency(c, competencyID, req)
+	err = UpdateCompetency(c, competencyID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, competency)
+	c.Status(http.StatusOK)
 }
 
 func deleteCompetency(c *gin.Context) {

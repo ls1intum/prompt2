@@ -4,9 +4,9 @@ import { Competency, CreateCompetencyRequest } from '../../interfaces/competency
 export const createCompetency = async (
   coursePhaseID: string,
   competency: CreateCompetencyRequest,
-): Promise<Competency> => {
+): Promise<void> => {
   try {
-    const response = await assessmentAxiosInstance.post<Competency>(
+    await assessmentAxiosInstance.post<Competency>(
       `assessment/api/course_phase/${coursePhaseID}/competency`,
       competency,
       {
@@ -15,8 +15,6 @@ export const createCompetency = async (
         },
       },
     )
-
-    return response.data
   } catch (err) {
     console.error(err)
     throw err

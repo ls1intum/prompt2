@@ -12,13 +12,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCompetency = `-- name: CreateCompetency :one
+const createCompetency = `-- name: CreateCompetency :exec
 INSERT INTO competency (
     id, category_id, name, description, novice,
     intermediate, advanced, expert, weight
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, category_id, name, description, novice, intermediate, advanced, expert, weight
 `
 
 type CreateCompetencyParams struct {
@@ -33,8 +32,8 @@ type CreateCompetencyParams struct {
 	Weight       int32       `json:"weight"`
 }
 
-func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) (Competency, error) {
-	row := q.db.QueryRow(ctx, createCompetency,
+func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyParams) error {
+	_, err := q.db.Exec(ctx, createCompetency,
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
@@ -45,19 +44,7 @@ func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyPara
 		arg.Expert,
 		arg.Weight,
 	)
-	var i Competency
-	err := row.Scan(
-		&i.ID,
-		&i.CategoryID,
-		&i.Name,
-		&i.Description,
-		&i.Novice,
-		&i.Intermediate,
-		&i.Advanced,
-		&i.Expert,
-		&i.Weight,
-	)
-	return i, err
+	return err
 }
 
 const deleteCompetency = `-- name: DeleteCompetency :exec
@@ -158,7 +145,7 @@ func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uui
 	return items, nil
 }
 
-const updateCompetency = `-- name: UpdateCompetency :one
+const updateCompetency = `-- name: UpdateCompetency :exec
 UPDATE competency
 SET category_id = $2,
     name = $3,
@@ -169,7 +156,6 @@ SET category_id = $2,
     expert = $8,
     weight = $9
 WHERE id = $1
-RETURNING id, category_id, name, description, novice, intermediate, advanced, expert, weight
 `
 
 type UpdateCompetencyParams struct {
@@ -184,8 +170,8 @@ type UpdateCompetencyParams struct {
 	Weight       int32       `json:"weight"`
 }
 
-func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) (Competency, error) {
-	row := q.db.QueryRow(ctx, updateCompetency,
+func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyParams) error {
+	_, err := q.db.Exec(ctx, updateCompetency,
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
@@ -196,17 +182,5 @@ func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyPara
 		arg.Expert,
 		arg.Weight,
 	)
-	var i Competency
-	err := row.Scan(
-		&i.ID,
-		&i.CategoryID,
-		&i.Name,
-		&i.Description,
-		&i.Novice,
-		&i.Intermediate,
-		&i.Advanced,
-		&i.Expert,
-		&i.Weight,
-	)
-	return i, err
+	return err
 }

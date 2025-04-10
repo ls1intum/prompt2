@@ -22,16 +22,16 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
+func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Assessment{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	assessment, err := qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
+	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
@@ -43,17 +43,17 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	})
 	if err != nil {
 		log.Error("could not create assessment: ", err)
-		return db.Assessment{}, errors.New("could not create assessment")
+		return errors.New("could not create assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment creation: ", err)
-		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return assessment, nil
+	return nil
 }
 
-func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
-	assessment, err := AssessmentServiceSingleton.queries.UpdateAssessment(ctx, db.UpdateAssessmentParams{
+func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
+	err := AssessmentServiceSingleton.queries.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
@@ -64,10 +64,10 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	})
 	if err != nil {
 		log.Error("could not update assessment: ", err)
-		return db.Assessment{}, errors.New("could not update assessment")
+		return errors.New("could not update assessment")
 	}
 
-	return assessment, nil
+	return nil
 }
 
 func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {

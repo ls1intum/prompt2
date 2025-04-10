@@ -4,9 +4,9 @@ import { Category, UpdateCategoryRequest } from '../../interfaces/category'
 export const updateCategory = async (
   coursePhaseID: string,
   category: UpdateCategoryRequest,
-): Promise<Category> => {
+): Promise<void> => {
   try {
-    const response = await assessmentAxiosInstance.put<Category>(
+    await assessmentAxiosInstance.put<Category>(
       `assessment/api/course_phase/${coursePhaseID}/category/${category.id}`,
       category,
       {
@@ -15,8 +15,6 @@ export const updateCategory = async (
         },
       },
     )
-
-    return response.data
   } catch (err) {
     console.error(err)
     throw err

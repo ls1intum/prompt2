@@ -51,10 +51,6 @@ paths:
       responses:
         "201":
           description: Category created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
 
   /category/{categoryID}:
     get:
@@ -93,10 +89,6 @@ paths:
       responses:
         "200":
           description: Category updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
     delete:
       summary: Delete a category
       tags: [Category]
@@ -153,10 +145,6 @@ paths:
       responses:
         "201":
           description: Competency created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
 
   /competency/{competencyID}:
     get:
@@ -195,10 +183,6 @@ paths:
       responses:
         "200":
           description: Competency updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
     delete:
       summary: Delete a competency
       tags: [Competency]
@@ -270,10 +254,6 @@ paths:
       responses:
         "201":
           description: Assessment created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
     put:
       summary: Update an assessment
       description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
@@ -287,10 +267,6 @@ paths:
       responses:
         "200":
           description: Assessment created or updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
 
   /student-assessment/{assessmentID}:
     get:

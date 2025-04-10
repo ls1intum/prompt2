@@ -4,9 +4,9 @@ import { Competency, UpdateCompetencyRequest } from '../../interfaces/competency
 export const updateCompetency = async (
   coursePhaseID: string,
   competency: UpdateCompetencyRequest,
-): Promise<Competency> => {
+): Promise<void> => {
   try {
-    const response = await assessmentAxiosInstance.put<Competency>(
+    await assessmentAxiosInstance.put<Competency>(
       `assessment/api/course_phase/${coursePhaseID}/competency/${competency.id}`,
       competency,
       {
@@ -15,8 +15,6 @@ export const updateCompetency = async (
         },
       },
     )
-
-    return response.data
   } catch (err) {
     console.error(err)
     throw err

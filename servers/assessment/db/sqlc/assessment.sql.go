@@ -81,13 +81,12 @@ func (q *Queries) CountRemainingAssessmentsPerCategory(ctx context.Context, arg 
 	return items, nil
 }
 
-const createAssessment = `-- name: CreateAssessment :one
+const createAssessment = `-- name: CreateAssessment :exec
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at, author
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 `
 
 type CreateAssessmentParams struct {
@@ -101,8 +100,8 @@ type CreateAssessmentParams struct {
 	Author                string           `json:"author"`
 }
 
-func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, createAssessment,
+func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) error {
+	_, err := q.db.Exec(ctx, createAssessment,
 		arg.ID,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
@@ -112,18 +111,7 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		arg.AssessedAt,
 		arg.Author,
 	)
-	var i Assessment
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.CoursePhaseID,
-		&i.CompetencyID,
-		&i.Score,
-		&i.Comment,
-		&i.AssessedAt,
-		&i.Author,
-	)
-	return i, err
+	return err
 }
 
 const deleteAssessment = `-- name: DeleteAssessment :exec
@@ -312,7 +300,7 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 	return items, nil
 }
 
-const updateAssessment = `-- name: UpdateAssessment :one
+const updateAssessment = `-- name: UpdateAssessment :exec
 UPDATE assessment
 SET
   score = $4,
@@ -322,7 +310,6 @@ SET
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND competency_id = $3
-RETURNING id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
 `
 
 type UpdateAssessmentParams struct {
@@ -335,8 +322,8 @@ type UpdateAssessmentParams struct {
 	Author                string           `json:"author"`
 }
 
-func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) (Assessment, error) {
-	row := q.db.QueryRow(ctx, updateAssessment,
+func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) error {
+	_, err := q.db.Exec(ctx, updateAssessment,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
@@ -345,16 +332,5 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		arg.AssessedAt,
 		arg.Author,
 	)
-	var i Assessment
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.CoursePhaseID,
-		&i.CompetencyID,
-		&i.Score,
-		&i.Comment,
-		&i.AssessedAt,
-		&i.Author,
-	)
-	return i, err
+	return err
 }

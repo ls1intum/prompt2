@@ -1,15 +1,14 @@
--- name: CreateAssessment :one
+-- name: CreateAssessment :exec
 INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at, author
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 
 -- name: GetAssessment :one
 SELECT * FROM assessment WHERE id = $1;
 
--- name: UpdateAssessment :one
+-- name: UpdateAssessment :exec
 UPDATE assessment
 SET
   score = $4,
@@ -18,8 +17,7 @@ SET
   author = $7
 WHERE course_participation_id = $1
   AND course_phase_id = $2
-  AND competency_id = $3
-RETURNING *;
+  AND competency_id = $3;
 
 -- name: DeleteAssessment :exec
 DELETE FROM assessment WHERE id = $1;

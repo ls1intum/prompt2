@@ -32,12 +32,12 @@ func createAssessment(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	assessment, err := CreateAssessment(c, req)
+	err := CreateAssessment(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, assessment)
+	c.JSON(http.StatusCreated, gin.H{"message": "Assessment created successfully"})
 }
 
 func updateAssessment(c *gin.Context) {
@@ -46,12 +46,12 @@ func updateAssessment(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	assessment, err := UpdateAssessment(c, req)
+	err := UpdateAssessment(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, assessment)
+	c.JSON(http.StatusCreated, gin.H{"message": "Assessment updated successfully"})
 }
 
 func getAssessment(c *gin.Context) {

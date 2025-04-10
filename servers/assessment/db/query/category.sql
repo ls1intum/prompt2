@@ -1,7 +1,6 @@
--- name: CreateCategory :one
+-- name: CreateCategory :exec
 INSERT INTO category (id, name, description, weight)
-VALUES ($1, $2, $3, $4)
-RETURNING *;
+VALUES ($1, $2, $3, $4);
 
 -- name: GetCategory :one
 SELECT * FROM category WHERE id = $1;
@@ -10,11 +9,10 @@ SELECT * FROM category WHERE id = $1;
 SELECT * FROM category
 ORDER BY name ASC;
 
--- name: UpdateCategory :one
+-- name: UpdateCategory :exec
 UPDATE category
 SET name = $2, description = $3, weight = $4
-WHERE id = $1
-RETURNING *;
+WHERE id = $1;
 
 -- name: DeleteCategory :exec
 DELETE FROM category WHERE id = $1;

@@ -1,10 +1,9 @@
--- name: CreateCompetency :one
+-- name: CreateCompetency :exec
 INSERT INTO competency (
     id, category_id, name, description, novice,
     intermediate, advanced, expert, weight
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING *;
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 
 -- name: GetCompetency :one
 SELECT * FROM competency WHERE id = $1;
@@ -15,7 +14,7 @@ SELECT * FROM competency;
 -- name: ListCompetenciesByCategory :many
 SELECT * FROM competency WHERE category_id = $1;
 
--- name: UpdateCompetency :one
+-- name: UpdateCompetency :exec
 UPDATE competency
 SET category_id = $2,
     name = $3,
@@ -25,8 +24,7 @@ SET category_id = $2,
     advanced = $7,
     expert = $8,
     weight = $9
-WHERE id = $1
-RETURNING *;
+WHERE id = $1;
 
 -- name: DeleteCompetency :exec
 DELETE FROM competency WHERE id = $1;

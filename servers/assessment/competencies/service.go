@@ -21,15 +21,15 @@ type CompetencyService struct {
 
 var CompetencyServiceSingleton *CompetencyService
 
-func CreateCompetency(ctx context.Context, req competencyDTO.CreateCompetencyRequest) (db.Competency, error) {
+func CreateCompetency(ctx context.Context, req competencyDTO.CreateCompetencyRequest) error {
 	tx, err := CompetencyServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Competency{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CompetencyServiceSingleton.queries.WithTx(tx)
 
-	competency, err := qtx.CreateCompetency(ctx, db.CreateCompetencyParams{
+	err = qtx.CreateCompetency(ctx, db.CreateCompetencyParams{
 		ID:           uuid.New(),
 		CategoryID:   req.CategoryID,
 		Name:         req.Name,
@@ -42,15 +42,15 @@ func CreateCompetency(ctx context.Context, req competencyDTO.CreateCompetencyReq
 	})
 	if err != nil {
 		log.Error("could not create competency: ", err)
-		return db.Competency{}, errors.New("could not create competency")
+		return errors.New("could not create competency")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit competency creation: ", err)
-		return db.Competency{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return competency, nil
+	return nil
 }
 
 func GetCompetency(ctx context.Context, id uuid.UUID) (db.Competency, error) {
@@ -80,8 +80,8 @@ func ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]db
 	return competencies, nil
 }
 
-func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.UpdateCompetencyRequest) (db.Competency, error) {
-	competency, err := CompetencyServiceSingleton.queries.UpdateCompetency(ctx, db.UpdateCompetencyParams{
+func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.UpdateCompetencyRequest) error {
+	err := CompetencyServiceSingleton.queries.UpdateCompetency(ctx, db.UpdateCompetencyParams{
 		ID:           id,
 		CategoryID:   req.CategoryID,
 		Name:         req.Name,
@@ -94,9 +94,9 @@ func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.Updat
 	})
 	if err != nil {
 		log.Error("could not update competency: ", err)
-		return db.Competency{}, errors.New("could not update competency")
+		return errors.New("could not update competency")
 	}
-	return competency, nil
+	return nil
 }
 
 func DeleteCompetency(ctx context.Context, id uuid.UUID) error {
