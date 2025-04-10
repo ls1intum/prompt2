@@ -235,9 +235,6 @@ export function EditCompetencyDialog({
               <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
                 Close
               </Button>
-              {isUpdating && (
-                <span className='text-sm text-muted-foreground'>Saving changes...</span>
-              )}
             </DialogFooter>
           </div>
         </Form>

@@ -125,9 +125,9 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
                 <FormItem>
                   <FormLabel>Weight</FormLabel>
                   <FormControl>
-                    <Input 
-                      type='number' 
-                      {...field} 
+                    <Input
+                      type='number'
+                      {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -147,9 +147,6 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
               <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
                 Close
               </Button>
-              {isUpdating && (
-                <span className='text-sm text-muted-foreground'>Saving changes...</span>
-              )}
             </DialogFooter>
           </div>
         </Form>
