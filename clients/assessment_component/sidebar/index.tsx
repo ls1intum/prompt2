@@ -6,7 +6,7 @@ const sidebarItems: SidebarMenuItemProps = {
   title: 'Assessment Component',
   icon: <ClipboardList />,
   goToPath: '',
-  requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   subitems: [
     {
       title: 'Settings',
