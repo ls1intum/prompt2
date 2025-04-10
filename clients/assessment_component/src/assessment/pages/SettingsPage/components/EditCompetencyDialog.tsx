@@ -25,7 +25,6 @@ import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { Competency, UpdateCompetencyRequest } from '../../../interfaces/competency'
 import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
-import { debounceMutate } from '../../utils/debounceMutate'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -93,7 +92,7 @@ export function EditCompetencyDialog({
     const subscription = form.watch((value, { name, type }) => {
       if (name && type === 'change') {
         const data = form.getValues() as UpdateCompetencyRequest
-        debounceMutate(mutate, data)
+        mutate(data)
       }
     })
 

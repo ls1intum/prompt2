@@ -16,7 +16,6 @@ import { useCreateAssessment } from '../hooks/useCreateAssessment'
 import type { Assessment, CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
 import type { Competency } from '../../../interfaces/competency'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
-import { debounceMutate } from '../../utils/debounceMutate'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -58,7 +57,7 @@ export const AssessmentForm = ({
         const isValid = await form.trigger('comment')
         if (isValid) {
           const data = form.getValues()
-          debounceMutate(mutate, data)
+          mutate(data)
         }
       }
     })

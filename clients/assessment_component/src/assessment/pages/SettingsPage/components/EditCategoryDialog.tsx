@@ -25,8 +25,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { CategoryWithCompetencies, UpdateCategoryRequest } from '../../../interfaces/category'
 import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
-import { debounceMutate } from '../../utils/debounceMutate'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 
@@ -74,7 +72,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
     const subscription = form.watch((value, { name, type }) => {
       if (name && type === 'change') {
         const data = form.getValues() as UpdateCategoryRequest
-        debounceMutate(mutate, data)
+        mutate(data)
       }
     })
 
