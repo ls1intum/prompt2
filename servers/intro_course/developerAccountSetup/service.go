@@ -2,6 +2,7 @@ package developerAccountSetup
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,9 +10,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type DeveloperAccountSetupService struct {
@@ -75,10 +79,10 @@ type DeviceRequest struct {
 	} `json:"data"`
 }
 
-func InviteUser(appleID, firstName, lastName string) error {
+func InviteUser(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, appleID, firstName, lastName string) error {
 	token, err := GenerateJWT()
 	if err != nil {
-		return fmt.Errorf("JWT generation failed: %w", err)
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("JWT generation failed: %w", err))
 	}
 
 	requestBody := InviteRequest{
@@ -109,42 +113,38 @@ func InviteUser(appleID, firstName, lastName string) error {
 		},
 	}
 
-	requestBodyBytes, err := json.Marshal(requestBody)
+	bodyBytes, err := json.Marshal(requestBody)
 	if err != nil {
-		return fmt.Errorf("failed to marshal request body: %w", err)
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("marshal error: %w", err))
 	}
 
-	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/userInvitations", bytes.NewBuffer(requestBodyBytes))
+	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/userInvitations", bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		return err
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("request creation failed: %w", err))
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("request failed: %w", err))
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 201 {
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body)))
 	}
 
-	if resp.StatusCode == 201 {
-		fmt.Println("User invited successfully:", appleID)
-		return nil
-	} else {
-		return fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body))
-	}
+	log.Infof("User invited successfully: %s", appleID)
+	return storeAppleSuccess(ctx, coursePhaseID, courseParticipationID)
 }
 
-func RegisterDevice(deviceName, deviceUDID, platform string) error {
+func RegisterDevice(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, deviceName, deviceUDID, platform string) error {
 	token, err := GenerateJWT()
 	if err != nil {
-		return fmt.Errorf("JWT generation failed: %w", err)
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("JWT generation failed: %w", err))
 	}
 
 	requestBody := DeviceRequest{
@@ -169,27 +169,51 @@ func RegisterDevice(deviceName, deviceUDID, platform string) error {
 		},
 	}
 
-	requestBodyBytes, _ := json.Marshal(requestBody)
-
-	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/devices", bytes.NewBuffer(requestBodyBytes))
+	bodyBytes, _ := json.Marshal(requestBody)
+	req, err := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/devices", bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("request creation failed: %w", err))
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("error sending request: %w", err)
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("request failed: %w", err))
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 201 {
-		fmt.Println("Device registered successfully:", deviceName)
-		return nil
-	} else {
-		return fmt.Errorf("failed to register device: %s", resp.Status)
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 201 {
+		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("failed to register device: %s, details: %s", resp.Status, string(body)))
 	}
+
+	log.Infof("Device registered successfully: %s", deviceName)
+	return storeAppleSuccess(ctx, coursePhaseID, courseParticipationID)
+}
+
+func storeAppleError(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, err error) error {
+	log.Error("Apple Setup Error: ", err)
+	dbErr := DeveloperAccountSetupServiceSingleton.queries.AddAppleError(ctx, db.AddAppleErrorParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+		ErrorMessage:          pgtype.Text{String: err.Error(), Valid: true},
+	})
+	if dbErr != nil {
+		log.Error("Failed to store apple error in DB: ", dbErr)
+	}
+	return err
+}
+
+func storeAppleSuccess(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) error {
+	err := DeveloperAccountSetupServiceSingleton.queries.AddAppleStatus(ctx, db.AddAppleStatusParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	})
+	if err != nil {
+		log.Error("Failed to store apple success in DB: ", err)
+		return err
+	}
+	return nil
 }
