@@ -13,14 +13,33 @@ import (
 )
 
 const countRemainingAssessmentsForStudent = `-- name: CountRemainingAssessmentsForStudent :one
+WITH total_competencies AS (
+  SELECT COUNT(*) AS total FROM competency
+),
+assessed_competencies AS (
+  SELECT COUNT(*) AS assessed
+  FROM assessment a
+  WHERE a.course_participation_id = $1
+    AND a.course_phase_id = $2
+),
+remaining_per_category AS (
+  SELECT
+    c.category_id,
+    COUNT(*) - COUNT(ass.id) AS remaining_assessments
+  FROM competency c
+  LEFT JOIN assessment ass
+    ON ass.competency_id = c.id
+    AND ass.course_participation_id = $1
+    AND ass.course_phase_id = $2
+  GROUP BY c.category_id
+)
 SELECT
-  COUNT(*) - (
-    SELECT COUNT(*)
-    FROM assessment
-    WHERE course_participation_id = $1
-      AND course_phase_id = $2
-  ) AS remaining_assessments
-FROM competency
+  (SELECT total FROM total_competencies) - (SELECT assessed FROM assessed_competencies) AS remaining_assessments,
+  json_agg(json_build_object(
+    'categoryID', rpc.category_id,
+    'remainingAssessments', rpc.remaining_assessments
+  )) AS categories
+FROM remaining_per_category rpc
 `
 
 type CountRemainingAssessmentsForStudentParams struct {
@@ -28,57 +47,16 @@ type CountRemainingAssessmentsForStudentParams struct {
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg CountRemainingAssessmentsForStudentParams) (int32, error) {
+type CountRemainingAssessmentsForStudentRow struct {
+	RemainingAssessments int32  `json:"remaining_assessments"`
+	Categories           []byte `json:"categories"`
+}
+
+func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg CountRemainingAssessmentsForStudentParams) (CountRemainingAssessmentsForStudentRow, error) {
 	row := q.db.QueryRow(ctx, countRemainingAssessmentsForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
-	var remaining_assessments int32
-	err := row.Scan(&remaining_assessments)
-	return remaining_assessments, err
-}
-
-const countRemainingAssessmentsPerCategory = `-- name: CountRemainingAssessmentsPerCategory :many
-SELECT
-  c.category_id,
-  COUNT(*) - (
-    SELECT COUNT(*)
-    FROM assessment a
-    WHERE a.course_participation_id = $1
-      AND a.course_phase_id = $2
-      AND a.competency_id IN (
-        SELECT id FROM competency WHERE competency.category_id = c.category_id
-      )
-  ) AS remaining_assessments
-FROM competency c
-GROUP BY c.category_id
-`
-
-type CountRemainingAssessmentsPerCategoryParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-type CountRemainingAssessmentsPerCategoryRow struct {
-	CategoryID           uuid.UUID `json:"category_id"`
-	RemainingAssessments int32     `json:"remaining_assessments"`
-}
-
-func (q *Queries) CountRemainingAssessmentsPerCategory(ctx context.Context, arg CountRemainingAssessmentsPerCategoryParams) ([]CountRemainingAssessmentsPerCategoryRow, error) {
-	rows, err := q.db.Query(ctx, countRemainingAssessmentsPerCategory, arg.CourseParticipationID, arg.CoursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []CountRemainingAssessmentsPerCategoryRow
-	for rows.Next() {
-		var i CountRemainingAssessmentsPerCategoryRow
-		if err := rows.Scan(&i.CategoryID, &i.RemainingAssessments); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	var i CountRemainingAssessmentsForStudentRow
+	err := row.Scan(&i.RemainingAssessments, &i.Categories)
+	return i, err
 }
 
 const createAssessment = `-- name: CreateAssessment :exec

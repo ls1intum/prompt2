@@ -20,3 +20,13 @@ export type CreateOrUpdateAssessmentRequest = {
   assessedAt?: string // ISO 8601 date string, optional
   author: string
 }
+
+export type CategoryWithRemainingAssessments = {
+  categoryID: string
+  remainingAssessments: number
+}
+
+export type RemainingAssessmentsForStudent = {
+  remainingAssessments: number
+  categories: CategoryWithRemainingAssessments[]
+}

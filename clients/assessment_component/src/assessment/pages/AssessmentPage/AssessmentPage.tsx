@@ -5,7 +5,6 @@ import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAsse
 import { ErrorPage } from '@/components/ErrorPage'
 import { useGetRemainingAssessmentsForStudent } from './hooks/useGetRemainingAssessmentsForStudent'
 import { CategoryAssessment } from './components/CategoryAssessment'
-import { useGetRemainingAssessmentsForStudentPerCategory } from './hooks/useGetRemainingAssessmentsForStudentPerCategory'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { AssessmentProfile } from './components/AssessmentProfile'
@@ -33,25 +32,13 @@ export const AssessmentPage = (): JSX.Element => {
     refetch: refetchRemainingAssessments,
   } = useGetRemainingAssessmentsForStudent()
 
-  const {
-    data: categoriesWithRemainingAssessments,
-    isPending: isCategoriesWithRemainingAssessmentsPending,
-    isError: isCategoriesWithRemainingAssessmentsError,
-    refetch: refetchCategoriesWithRemainingAssessments,
-  } = useGetRemainingAssessmentsForStudentPerCategory()
-
   const handleRefetch = () => {
     refetchAssessments()
     refetchRemainingAssessments()
-    refetchCategoriesWithRemainingAssessments()
   }
 
-  const isError =
-    isAssessmentsError || isRemainingAssessmentsError || isCategoriesWithRemainingAssessmentsError
-  const isPending =
-    isAssessmentsPending ||
-    isRemainingAssessmentsPending ||
-    isCategoriesWithRemainingAssessmentsPending
+  const isError = isAssessmentsError || isRemainingAssessmentsError
+  const isPending = isAssessmentsPending || isRemainingAssessmentsPending
 
   if (!participant) {
     return (
@@ -77,7 +64,7 @@ export const AssessmentPage = (): JSX.Element => {
       {participant && (
         <AssessmentProfile
           participant={participant}
-          remainingAssessments={remainingAssessments}
+          remainingAssessments={remainingAssessments.remainingAssessments}
           assessments={assessments}
         />
       )}
@@ -88,7 +75,7 @@ export const AssessmentPage = (): JSX.Element => {
             key={category.id}
             category={category}
             remainingAssessments={
-              categoriesWithRemainingAssessments?.find((item) => item.categoryID === category.id)
+              remainingAssessments.categories?.find((item) => item.categoryID === category.id)
                 ?.remainingAssessments ?? 0
             }
             assessments={assessments}

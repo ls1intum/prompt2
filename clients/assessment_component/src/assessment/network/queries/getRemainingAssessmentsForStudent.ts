@@ -1,10 +1,11 @@
+import { RemainingAssessmentsForStudent } from '../../interfaces/assessment'
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
 export const getRemainingAssessmentsForStudent = async (
   coursePhaseID: string,
   courseParticipationID: string,
-): Promise<number> => {
-  const response = await assessmentAxiosInstance.get<{ remainingAssessments: number }>(
+): Promise<RemainingAssessmentsForStudent> => {
+  const response = await assessmentAxiosInstance.get<RemainingAssessmentsForStudent>(
     `assessment/api/course_phase/${coursePhaseID}/student-assessment/remaining/${courseParticipationID}`,
     {
       headers: {
@@ -12,5 +13,5 @@ export const getRemainingAssessmentsForStudent = async (
       },
     },
   )
-  return response.data.remainingAssessments
+  return response.data
 }

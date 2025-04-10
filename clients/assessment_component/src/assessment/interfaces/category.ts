@@ -15,11 +15,6 @@ export type CategoryWithCompetencies = {
   competencies: Competency[]
 }
 
-export type CategoryWithRemainingAssessments = {
-  categoryID: string
-  remainingAssessments: number
-}
-
 export interface CreateCategoryRequest {
   name: string
   description?: string

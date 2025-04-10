@@ -1,5 +1,5 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
-import { CategoryWithRemainingAssessments } from '../../interfaces/category'
+import { CategoryWithRemainingAssessments } from '../../interfaces/assessment'
 
 export const getRemainingAssessmentsForStudentPerCategory = async (
   coursePhaseID: string,
