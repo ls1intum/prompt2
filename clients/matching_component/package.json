@@ -1,6 +1,6 @@
 {
     "name": "matching_component",
-    "version": "2.2.9",
+    "version": "2.2.10",
     "main": "src/index.ts",
     "license": "MIT",
     "scripts": {
