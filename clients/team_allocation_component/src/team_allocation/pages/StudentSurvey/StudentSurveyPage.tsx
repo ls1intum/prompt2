@@ -39,7 +39,7 @@ export const StudentSurveyPage = (): JSX.Element => {
     enabled: isStudent,
   })
 
-  const isPending = isSurveyFormPending || isStudentSurveyResponsePending
+  const isPending = isSurveyFormPending || (isStudent && isStudentSurveyResponsePending)
   const isError = isSurveyFormError || isStudentSurveyResponseError
   const surveyStarted = fetchedSurveyForm !== null
 
