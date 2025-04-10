@@ -60,7 +60,7 @@ func initInterview() error {
 			return err
 		}
 
-		err = qtx.CreateInterviewRequiredApplicationAnswers(ctx, newInterviewPhase.ID)
+		err = qtx.CreateRequiredApplicationAnswers(ctx, newInterviewPhase.ID)
 		if err != nil {
 			log.Error("failed to create required application answers: ", err)
 			return err
@@ -306,6 +306,79 @@ func initAssessmentChallenge() error {
 		}
 
 		// No requires inputs and no provided outputs
+
+	} else {
+		log.Debug("assessment module already exists")
+	}
+
+	return nil
+}
+
+func initTeamAllocation() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestTeamAllocationTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if team allocation phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer utils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
+		// 1.) Create the phase
+		newAssessment := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "Team Allocation",
+			InitialPhase: false,
+			BaseUrl:      "{CORE_HOST}/team-allocation/api", // We use core here, as the server does not provide any exported DTOs
+		}
+		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
+		if err != nil {
+			log.Error("failed to create assessment module: ", err)
+			return err
+		}
+
+		// 2.) Create the required input meta data
+
+		// Languages from the application
+		err = qtx.CreateRequiredApplicationAnswers(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required application answers: ", err)
+			return err
+		}
+
+		// devices from the intro course
+		err = qtx.CreateRequiredDevices(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required devices: ", err)
+			return err
+		}
+
+		// assessment from the intro course
+		// TODO: @rappm we need to define the data schema.
+
+		// 3.) Provided Output
+		err = qtx.InsertTeamAllocationOutput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required provided team allocation: ", err)
+			return err
+		}
+
+		err = qtx.InsertTeamOutput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required provided teams: ", err)
+			return err
+		}
+
+		// 3.) Commit the transaction
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
 
 	} else {
 		log.Debug("assessment module already exists")
