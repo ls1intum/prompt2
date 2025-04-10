@@ -28,11 +28,11 @@ const assessmentOperation = async (
 export const createAssessment = async (
   assessment: CreateOrUpdateAssessmentRequest,
 ): Promise<void> => {
-  assessmentOperation('post', assessment)
+  await assessmentOperation('post', assessment)
 }
 
 export const updateAssessment = async (
   assessment: CreateOrUpdateAssessmentRequest,
 ): Promise<void> => {
-  assessmentOperation('put', assessment)
+  await assessmentOperation('put', assessment)
 }
