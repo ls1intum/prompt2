@@ -55,7 +55,7 @@ func (q *Queries) DeleteStudentTeamPreferences(ctx context.Context, arg DeleteSt
 }
 
 const getStudentSkillResponses = `-- name: GetStudentSkillResponses :many
-SELECT skill_id, rating
+SELECT skill_id, skill_level
 FROM student_skill_response
 JOIN skill ON skill.id = student_skill_response.skill_id
 WHERE course_participation_id = $1
@@ -68,8 +68,8 @@ type GetStudentSkillResponsesParams struct {
 }
 
 type GetStudentSkillResponsesRow struct {
-	SkillID uuid.UUID `json:"skill_id"`
-	Rating  int32     `json:"rating"`
+	SkillID    uuid.UUID  `json:"skill_id"`
+	SkillLevel SkillLevel `json:"skill_level"`
 }
 
 // Returns the student’s skill responses.
@@ -82,7 +82,7 @@ func (q *Queries) GetStudentSkillResponses(ctx context.Context, arg GetStudentSk
 	var items []GetStudentSkillResponsesRow
 	for rows.Next() {
 		var i GetStudentSkillResponsesRow
-		if err := rows.Scan(&i.SkillID, &i.Rating); err != nil {
+		if err := rows.Scan(&i.SkillID, &i.SkillLevel); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -152,19 +152,19 @@ func (q *Queries) GetSurveyTimeframe(ctx context.Context, coursePhaseID uuid.UUI
 }
 
 const insertStudentSkillResponse = `-- name: InsertStudentSkillResponse :exec
-INSERT INTO student_skill_response (course_participation_id, skill_id, rating)
+INSERT INTO student_skill_response (course_participation_id, skill_id, skill_level)
 VALUES ($1, $2, $3)
 `
 
 type InsertStudentSkillResponseParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	SkillID               uuid.UUID `json:"skill_id"`
-	Rating                int32     `json:"rating"`
+	CourseParticipationID uuid.UUID  `json:"course_participation_id"`
+	SkillID               uuid.UUID  `json:"skill_id"`
+	SkillLevel            SkillLevel `json:"skill_level"`
 }
 
 // Inserts a new student skill response.
 func (q *Queries) InsertStudentSkillResponse(ctx context.Context, arg InsertStudentSkillResponseParams) error {
-	_, err := q.db.Exec(ctx, insertStudentSkillResponse, arg.CourseParticipationID, arg.SkillID, arg.Rating)
+	_, err := q.db.Exec(ctx, insertStudentSkillResponse, arg.CourseParticipationID, arg.SkillID, arg.SkillLevel)
 	return err
 }
 

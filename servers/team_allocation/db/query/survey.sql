@@ -14,7 +14,7 @@ AND team.course_phase_id = $2;
 
 -- Returns the student’s skill responses.
 -- name: GetStudentSkillResponses :many
-SELECT skill_id, rating
+SELECT skill_id, skill_level
 FROM student_skill_response
 JOIN skill ON skill.id = student_skill_response.skill_id
 WHERE course_participation_id = $1
@@ -47,7 +47,7 @@ VALUES ($1, $2, $3);
 
 -- Inserts a new student skill response.
 -- name: InsertStudentSkillResponse :exec
-INSERT INTO student_skill_response (course_participation_id, skill_id, rating)
+INSERT INTO student_skill_response (course_participation_id, skill_id, skill_level)
 VALUES ($1, $2, $3);
 
 -- Upsert the survey timeframe for a given course phase.

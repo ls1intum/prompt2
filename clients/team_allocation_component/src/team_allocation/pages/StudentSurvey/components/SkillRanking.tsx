@@ -3,20 +3,29 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Star } from 'lucide-react'
 import { Skill } from '../../../interfaces/skill'
+import { SkillLevel } from '../../../interfaces/skillResponse'
+import React from 'react'
 
 interface SkillRankingProps {
   skills: Skill[]
-  skillRatings: Record<string, number>
-  setSkillRatings: React.Dispatch<React.SetStateAction<Record<string, number>>>
+  skillRatings: Record<string, SkillLevel | undefined>
+  setSkillRatings: React.Dispatch<React.SetStateAction<Record<string, SkillLevel | undefined>>>
 }
+
+const skillLevelOptions = [
+  { label: 'Novice', value: SkillLevel.NOVICE },
+  { label: 'Intermediate', value: SkillLevel.INTERMEDIATE },
+  { label: 'Advanced', value: SkillLevel.ADVANCED },
+  { label: 'Expert', value: SkillLevel.EXPERT },
+]
 
 export const SkillRanking = ({
   skills,
   skillRatings,
   setSkillRatings,
 }: SkillRankingProps): JSX.Element => {
-  const handleSkillRatingChange = (skillID: string, rating: number) => {
-    setSkillRatings({ ...skillRatings, [skillID]: rating })
+  const handleSkillRatingChange = (skillID: string, skillLevel: SkillLevel) => {
+    setSkillRatings((prev) => ({ ...prev, [skillID]: skillLevel }))
   }
 
   return (
@@ -29,7 +38,7 @@ export const SkillRanking = ({
               Skill Assessment
             </CardTitle>
             <CardDescription>
-              Rate your proficiency in each skill from 1 (novice) to 4 (expert)
+              Rate your proficiency in each skill. Leave unselected if you’re unsure.
             </CardDescription>
           </div>
         </div>
@@ -41,39 +50,25 @@ export const SkillRanking = ({
               <div className='flex items-center justify-between'>
                 <span className='font-medium'>{skill.name}</span>
               </div>
+
               <RadioGroup
-                value={String(skillRatings[skill.id] || 3)}
-                onValueChange={(value) => handleSkillRatingChange(skill.id, Number(value))}
+                value={skillRatings[skill.id] || ''}
+                onValueChange={(val) => handleSkillRatingChange(skill.id, val as SkillLevel)}
                 className='flex justify-between gap-2 pt-1'
               >
-                {[1, 2, 3, 4].map((val) => (
-                  <div key={val} className='flex flex-col items-center gap-1'>
-                    {val === 1 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Novice</span>
-                    )}
-                    {val === 2 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Intermediate</span>
-                    )}
-                    {val === 3 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Advanced</span>
-                    )}
-                    {val === 4 && (
-                      <span className='text-xs text-muted-foreground mb-1'>Expert</span>
-                    )}
-                    <RadioGroupItem
-                      value={String(val)}
-                      id={`${skill.id}-${val}`}
-                      className='h-5 w-5'
-                    />
+                {skillLevelOptions.map(({ label, value }) => (
+                  <div key={value} className='flex flex-col items-center gap-1'>
+                    <RadioGroupItem value={value} id={`${skill.id}-${value}`} className='h-5 w-5' />
                     <label
-                      htmlFor={`${skill.id}-${val}`}
+                      htmlFor={`${skill.id}-${value}`}
                       className='text-xs text-muted-foreground cursor-pointer'
                     >
-                      {val}
+                      {label}
                     </label>
                   </div>
                 ))}
               </RadioGroup>
+
               <Separator className='mt-4' />
             </div>
           ))}

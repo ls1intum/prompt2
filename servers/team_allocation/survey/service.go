@@ -130,7 +130,7 @@ func SubmitSurveyResponses(ctx context.Context, courseParticipationID, coursePha
 		err := qtx.InsertStudentSkillResponse(ctx, db.InsertStudentSkillResponseParams{
 			CourseParticipationID: courseParticipationID,
 			SkillID:               sr.SkillID,
-			Rating:                sr.Rating,
+			SkillLevel:            sr.SkillLevel,
 		})
 		if err != nil {
 			log.Error("failed to insert skill response: ", err)
