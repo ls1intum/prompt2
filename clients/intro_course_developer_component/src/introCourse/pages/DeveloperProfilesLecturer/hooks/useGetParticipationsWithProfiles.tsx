@@ -1,22 +1,28 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
 import { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
+import { GitlabStatus } from '../../../interfaces/GitlabStatus'
 
 export const useGetParticipationsWithProfiles = (
   participants: CoursePhaseParticipationWithStudent[],
   developerProfiles: DeveloperProfile[],
+  gitlabStatuses: GitlabStatus[],
 ) => {
   return useMemo(() => {
     return (
       participants.map((participation) => {
-        const profile =
+        const devProfile =
           developerProfiles?.find(
-            (devProfile) =>
-              devProfile.courseParticipationID === participation.courseParticipationID,
+            (profile) => profile.courseParticipationID === participation.courseParticipationID,
           ) || undefined
 
-        return { participation, profile }
+        const gitlabStatus =
+          gitlabStatuses?.find(
+            (status) => status.courseParticipationID === participation.courseParticipationID,
+          ) || undefined
+
+        return { participation, devProfile, gitlabStatus }
       }) || []
     )
-  }, [participants, developerProfiles])
+  }, [participants, developerProfiles, gitlabStatuses])
 }

@@ -185,6 +185,8 @@ jobs:
             echo "SMTP_HOST=${{ vars.SMTP_HOST }}" >> .env.prod
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
 
+            echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
+
       - name: SSH to VM and Execute Docker-Compose Up
         uses: appleboy/ssh-action@v1.0.3
         with:
