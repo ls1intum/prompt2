@@ -127,8 +127,8 @@ func GetDevicesForCourseParticipation(ctx context.Context, coursePhaseID uuid.UU
 			"coursePhaseID":         coursePhaseID,
 			"courseParticipationID": courseParticipationID,
 			"error":                 err,
-		}).Error("Failed to get device with participation ID")
-		return nil, errors.New("failed to get device with participation ID")
+		}).Error("Failed to get devices with participation ID")
+		return nil, errors.New("failed to get devices with participation ID")
 	}
 
 	return devices, nil
