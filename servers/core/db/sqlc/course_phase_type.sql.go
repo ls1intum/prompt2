@@ -81,7 +81,7 @@ func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg Cr
 	return err
 }
 
-const createInterviewRequiredApplicationAnswers = `-- name: CreateInterviewRequiredApplicationAnswers :exec
+const createRequiredApplicationAnswers = `-- name: CreateRequiredApplicationAnswers :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
        gen_random_uuid(),
@@ -117,8 +117,29 @@ VALUES (
 )
 `
 
-func (q *Queries) CreateInterviewRequiredApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, createInterviewRequiredApplicationAnswers, coursePhaseTypeID)
+func (q *Queries) CreateRequiredApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, createRequiredApplicationAnswers, coursePhaseTypeID)
+	return err
+}
+
+const createRequiredDevices = `-- name: CreateRequiredDevices :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'devices',
+      '{
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
+)
+`
+
+func (q *Queries) CreateRequiredDevices(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, createRequiredDevices, coursePhaseTypeID)
 	return err
 }
 
@@ -394,6 +415,52 @@ func (q *Queries) InsertProficiencyLevelOutput(ctx context.Context, coursePhaseT
 	return err
 }
 
+const insertTeamAllocationOutput = `-- name: InsertTeamAllocationOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'teamAllocation',
+      1,
+      '/team-allocation',
+      '{
+          "type": "string"
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertTeamAllocationOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertTeamAllocationOutput, coursePhaseTypeID)
+	return err
+}
+
+const insertTeamOutput = `-- name: InsertTeamOutput :exec
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'teams',
+      1,
+      '/teams',
+      '{
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+            "teamID": { "type": "string" },
+            "teamName": { "type": "string" }
+            },
+            "required": ["teamID", "teamName"]
+        }
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertTeamOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertTeamOutput, coursePhaseTypeID)
+	return err
+}
+
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -494,6 +561,21 @@ SELECT EXISTS (
 
 func (q *Queries) TestMatchingPhaseTypeExists(ctx context.Context) (bool, error) {
 	row := q.db.QueryRow(ctx, testMatchingPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
+const testTeamAllocationTypeExists = `-- name: TestTeamAllocationTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Team Allocation'
+) AS does_exist
+`
+
+func (q *Queries) TestTeamAllocationTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testTeamAllocationTypeExists)
 	var does_exist bool
 	err := row.Scan(&does_exist)
 	return does_exist, err

@@ -124,8 +124,14 @@ func CreateStudentInfrastructure(ctx context.Context, coursePhaseID, courseParti
 		return err
 	}
 
+	developerGroup, err := getSubGroup("developer", semesterGroup.ID)
+	if err != nil {
+		log.Error("Failed to get intro course group: ", err)
+		return err
+	}
+
 	// 5.) Create the student group
-	err = CreateStudentProject(repoName, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, studentName, submissionDeadline)
+	err = CreateStudentProject(repoName, studentGitlabUser.ID, tutorGitlabUser.ID, introCourseGroup.ID, developerGroup.ID, studentName, submissionDeadline)
 	if err != nil {
 		log.Error("Failed to create student project: ", err)
 		// store error in the db

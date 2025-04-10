@@ -72,6 +72,12 @@ SELECT EXISTS (
     WHERE name = 'Assessment'
 ) AS does_exist;
 
+-- name: TestTeamAllocationTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Team Allocation'
+) AS does_exist;
 
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
@@ -85,7 +91,7 @@ VALUES ($1, $2, $3, $4);
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6);
 
--- name: CreateInterviewRequiredApplicationAnswers :exec
+-- name: CreateRequiredApplicationAnswers :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
        gen_random_uuid(),
@@ -210,5 +216,55 @@ VALUES (
                 "appleWatchUUID"    : {"type": "string"}
             },
             "required": ["appleID", "gitLabID"]
+        }'::jsonb
+);
+
+-- name: CreateRequiredDevices :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'devices',
+      '{
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
+);
+
+
+-- name: InsertTeamAllocationOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'teamAllocation',
+      1,
+      '/team-allocation',
+      '{
+          "type": "string"
+        }'::jsonb
+);
+
+-- name: InsertTeamOutput :exec
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'teams',
+      1,
+      '/teams',
+      '{
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+            "teamID": { "type": "string" },
+            "teamName": { "type": "string" }
+            },
+            "required": ["teamID", "teamName"]
+        }
         }'::jsonb
 );

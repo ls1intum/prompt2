@@ -125,7 +125,7 @@ func getUserID(username string) (*gitlab.User, error) {
 	return users[0], nil
 }
 
-func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, studentName, submissionDeadline string) error {
+func CreateStudentProject(repoName string, devID, tutorID int, introCourseID, devGroupID int, studentName, submissionDeadline string) error {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get client: ", err)
@@ -134,7 +134,7 @@ func CreateStudentProject(repoName string, devID, tutorID int, devGroupID int, s
 
 	p := &gitlab.CreateProjectOptions{
 		Name:                             gitlab.Ptr(repoName),
-		NamespaceID:                      gitlab.Ptr(devGroupID),
+		NamespaceID:                      gitlab.Ptr(introCourseID),
 		SharedRunnersEnabled:             gitlab.Ptr(true),
 		OnlyAllowMergeIfPipelineSucceeds: gitlab.Ptr(true),
 		BuildsAccessLevel:                gitlab.Ptr(gitlab.PrivateAccessControl),
