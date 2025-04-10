@@ -35,12 +35,12 @@ func createCategory(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	category, err := CreateCategory(c, request.Name, request.Description)
+	err := CreateCategory(c, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, category)
+	c.Status(http.StatusCreated)
 }
 
 func updateCategory(c *gin.Context) {
@@ -57,7 +57,7 @@ func updateCategory(c *gin.Context) {
 		return
 	}
 
-	_, err = UpdateCategory(c, categoryID, request.Name, request.Description)
+	err = UpdateCategory(c, categoryID, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
