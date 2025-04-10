@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	log "github.com/sirupsen/logrus"
 )
@@ -140,37 +141,58 @@ func registerDevicesHandler(c *gin.Context) {
 		return
 	}
 
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
+		return
+	}
+
+	// get semester tag
+	var addDeviceRequest developerAccountSetupDTO.AddDeviceRequest
+	if err := c.BindJSON(&addDeviceRequest); err != nil {
+		log.Error("Error binding JSON: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
 	// Extract student details
 	appleWatchUDID := developerprofile.AppleWatchUDID
 	iPhoneUDID := developerprofile.IPhoneUDID
 	iPadUDID := developerprofile.IPadUDID
 
+	studentLastName := student.LastName
+	semesterTag := addDeviceRequest.SemesterTag
+
 	devices := []struct {
 		Name string
 		UDID pgtype.Text
 	}{
-		{Name: "Apple Watch", UDID: appleWatchUDID},
-		{Name: "iPhone", UDID: iPhoneUDID},
-		{Name: "iPad", UDID: iPadUDID},
+		{Name: semesterTag + "-" + studentLastName + "-" + "Apple Watch", UDID: appleWatchUDID},
+		{Name: semesterTag + "-" + studentLastName + "-" + "iPhone", UDID: iPhoneUDID},
+		{Name: semesterTag + "-" + studentLastName + "-" + "iPad", UDID: iPadUDID},
 	}
 
 	var results []struct {
 		DeviceName   string `json:"deviceName"`
 		ErrorMessage string `json:"errorMessage"`
 	}
+
 	for _, device := range devices {
 		deviceName := device.Name
-		deviceUDID := device.UDID.String
-		platform := "IOS"
-		err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, deviceUDID, platform)
-		if err != nil {
-			results = append(results, struct {
-				DeviceName   string `json:"deviceName"`
-				ErrorMessage string `json:"errorMessage"`
-			}{
-				DeviceName:   deviceName,
-				ErrorMessage: "Failed to register device for user with Apple ID: " + developerprofile.AppleID,
-			})
+		deviceUDIDValid := device.UDID.Valid
+		if deviceUDIDValid {
+			deviceUDID := device.UDID.String
+			platform := "IOS"
+			err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, deviceUDID, platform)
+			if err != nil {
+				results = append(results, struct {
+					DeviceName   string `json:"deviceName"`
+					ErrorMessage string `json:"errorMessage"`
+				}{
+					DeviceName:   deviceName,
+					ErrorMessage: "Failed to register device for user with Apple ID: " + developerprofile.AppleID,
+				})
+			}
 		}
 	}
 	if len(results) == 0 {
@@ -207,9 +229,26 @@ func registerIPhoneHandler(c *gin.Context) {
 		return
 	}
 
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
+		return
+	}
+
+	// get semester tag
+	var addDeviceRequest developerAccountSetupDTO.AddDeviceRequest
+	if err := c.BindJSON(&addDeviceRequest); err != nil {
+		log.Error("Error binding JSON: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	studentLastName := student.LastName
+	semesterTag := addDeviceRequest.SemesterTag
+
 	// Extract student details
 	iPhoneUDID := developerprofile.IPhoneUDID
-	deviceName := "iPhone"
+	deviceName := semesterTag + "-" + studentLastName + "-" + "iPhone"
 	platform := "IOS"
 
 	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, iPhoneUDID.String, platform)
@@ -248,10 +287,28 @@ func registerIPadHandler(c *gin.Context) {
 		return
 	}
 
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
+		return
+	}
+
+	// get semester tag
+	var addDeviceRequest developerAccountSetupDTO.AddDeviceRequest
+	if err := c.BindJSON(&addDeviceRequest); err != nil {
+		log.Error("Error binding JSON: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	studentLastName := student.LastName
+	semesterTag := addDeviceRequest.SemesterTag
+
 	// Extract student details
 	iPadUDID := developerprofile.IPadUDID
-	deviceName := "iPad"
+	deviceName := semesterTag + "-" + studentLastName + "-" + "iPad"
 	platform := "IOS"
+
 	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, iPadUDID.String, platform)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register iPad"})
@@ -287,9 +344,26 @@ func registerAppleWatchHandler(c *gin.Context) {
 		return
 	}
 
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
+		return
+	}
+
+	// get semester tag
+	var addDeviceRequest developerAccountSetupDTO.AddDeviceRequest
+	if err := c.BindJSON(&addDeviceRequest); err != nil {
+		log.Error("Error binding JSON: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	studentLastName := student.LastName
+	semesterTag := addDeviceRequest.SemesterTag
+
 	// Extract student details
 	appleWatchUDID := developerprofile.AppleWatchUDID
-	deviceName := "Apple Watch"
+	deviceName := semesterTag + "-" + studentLastName + "Apple Watch"
 	platform := "IOS"
 
 	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, appleWatchUDID.String, platform)

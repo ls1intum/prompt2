@@ -1,4 +1,4 @@
-package developerProfileDTO
+package developerAccountSetupDTO
 
 import (
 	"github.com/google/uuid"
