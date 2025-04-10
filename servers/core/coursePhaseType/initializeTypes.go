@@ -331,13 +331,13 @@ func initTeamAllocation() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
-		newAssessment := db.CreateCoursePhaseTypeParams{
+		newTeamAllocation := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      "{CORE_HOST}/team-allocation/api", // We use core here, as the server does not provide any exported DTOs
 		}
-		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
+		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {
 			log.Error("failed to create assessment module: ", err)
 			return err
@@ -346,14 +346,14 @@ func initTeamAllocation() error {
 		// 2.) Create the required input meta data
 
 		// Languages from the application
-		err = qtx.CreateRequiredApplicationAnswers(ctx, newAssessment.ID)
+		err = qtx.CreateRequiredApplicationAnswers(ctx, newTeamAllocation.ID)
 		if err != nil {
 			log.Error("failed to create required application answers: ", err)
 			return err
 		}
 
 		// devices from the intro course
-		err = qtx.CreateRequiredDevices(ctx, newAssessment.ID)
+		err = qtx.CreateRequiredDevices(ctx, newTeamAllocation.ID)
 		if err != nil {
 			log.Error("failed to create required devices: ", err)
 			return err
@@ -363,13 +363,13 @@ func initTeamAllocation() error {
 		// TODO: @rappm we need to define the data schema.
 
 		// 3.) Provided Output
-		err = qtx.InsertTeamAllocationOutput(ctx, newAssessment.ID)
+		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
 		if err != nil {
 			log.Error("failed to create required provided team allocation: ", err)
 			return err
 		}
 
-		err = qtx.InsertTeamOutput(ctx, newAssessment.ID)
+		err = qtx.InsertTeamOutput(ctx, newTeamAllocation.ID)
 		if err != nil {
 			log.Error("failed to create required provided teams: ", err)
 			return err
@@ -381,7 +381,7 @@ func initTeamAllocation() error {
 		}
 
 	} else {
-		log.Debug("assessment module already exists")
+		log.Debug("team allocation module already exists")
 	}
 
 	return nil
