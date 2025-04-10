@@ -132,6 +132,7 @@ export const CoursePhaseParticipationsTablePage = ({
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={() => onClickRowAction && onClickRowAction(row.original)}
+                    className={onClickRowAction ? 'cursor-pointer' : ''}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
