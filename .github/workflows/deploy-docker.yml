@@ -157,8 +157,6 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
             echo "DB_HOST_INTRO_COURSE=${{ vars.DB_HOST_INTRO_COURSE }}" >> .env.prod
             echo "DB_PORT_INTRO_COURSE=${{ vars.DB_PORT_INTRO_COURSE }}" >> .env.prod
-            echo "DB_PORT_ASSESSMENT=${{ vars.DB_PORT_ASSESSMENT }}" >> .env.prod
-            echo "DB_HOST_ASSESSMENT=${{ vars.DB_HOST_ASSESSMENT }}" >> .env.prod
 
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod

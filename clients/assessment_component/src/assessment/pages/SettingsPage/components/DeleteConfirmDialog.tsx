@@ -31,7 +31,6 @@ export function DeleteConfirmDialog({
   description,
   itemType,
   itemId,
-  categoryId,
 }: DeleteConfirmDialogProps) {
   const [error, setError] = useState<string | null>(null)
   const { mutate: deleteCategory, isPending: isDeletingCategory } = useDeleteCategory(setError)

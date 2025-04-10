@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
-import { ChevronRight, ChevronUp } from 'lucide-react'
+import { ChevronRight, ChevronDown } from 'lucide-react'
 
 import { AssessmentForm } from './AssessmentForm'
 import type { CategoryWithCompetencies } from '../../../interfaces/category'
@@ -37,7 +37,7 @@ export const CategoryAssessment = ({
           aria-expanded={isExpanded}
           aria-controls={`content-${category.id}`}
         >
-          {isExpanded ? <ChevronUp size={18} /> : <ChevronRight size={18} />}
+          {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
         </button>
         <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
         <AssessmentStatusBadge remainingAssessments={remainingAssessments} />
@@ -52,9 +52,7 @@ export const CategoryAssessment = ({
           ) : (
             <div className='grid gap-4'>
               {category.competencies.map((competency) => {
-                const assessment = assessments.find(
-                  (assessment) => assessment.competencyID === competency.id,
-                )
+                const assessment = assessments.find((ass) => ass.competencyID === competency.id)
 
                 return (
                   <div key={competency.id}>

@@ -149,8 +149,8 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 <Input
                   id='expert'
                   placeholder='Expert level description'
-                  className={errors.advanced ? 'border-red-500' : ''}
-                  aria-invalid={errors.advanced ? 'true' : 'false'}
+                  className={errors.expert ? 'border-red-500' : ''}
+                  aria-invalid={errors.expert ? 'true' : 'false'}
                   {...register('expert', { required: true })}
                 />
                 {errors.expert && (

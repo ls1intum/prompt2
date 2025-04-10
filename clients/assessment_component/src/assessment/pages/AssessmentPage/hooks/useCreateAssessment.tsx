@@ -13,6 +13,8 @@ export const useCreateAssessment = (setError: (error: string | null) => void) =>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['remaining-assessments', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['remaining-assessments-per-category', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

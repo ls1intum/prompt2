@@ -5,7 +5,7 @@ import ScoreLevelBadge from './ScoreLevelBadge'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 
 import { Assessment } from '../../../interfaces/assessment'
-import { ScoreLevel, mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
+import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent

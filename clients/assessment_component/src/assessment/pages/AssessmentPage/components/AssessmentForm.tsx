@@ -46,9 +46,7 @@ export const AssessmentForm = ({
     },
   })
 
-  const { mutate, isPending } = assessment
-    ? useUpdateAssessment(setError)
-    : useCreateAssessment(setError)
+  const { mutate } = assessment ? useUpdateAssessment(setError) : useCreateAssessment(setError)
   const selectedScore = form.watch('score')
 
   useEffect(() => {
@@ -90,7 +88,6 @@ export const AssessmentForm = ({
                   key={level}
                   type='button'
                   onClick={() => handleScoreChange(level)}
-                  disabled={isPending}
                   className={cn(
                     'w-full text-sm border-2 rounded-lg p-3 transition-all text-left',
                     isSelected ? config.selectedBg : 'bg-blue-50',
@@ -100,13 +97,7 @@ export const AssessmentForm = ({
                 >
                   <div className='flex justify-between mb-1'>
                     <span className='font-semibold'>{config.title}</span>
-                    <span>
-                      {isPending && isSelected ? (
-                        <span className='animate-pulse'>⏳</span>
-                      ) : (
-                        config.icon
-                      )}
-                    </span>
+                    <span>{config.icon}</span>
                   </div>
 
                   <p className='line-clamp-3 text-muted-foreground'>{competency[level]}</p>

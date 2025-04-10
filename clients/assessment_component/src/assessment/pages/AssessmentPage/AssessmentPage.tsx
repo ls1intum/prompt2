@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
 import { ErrorPage } from '@/components/ErrorPage'
-import { useRemainingAssessmentsForStudent } from './hooks/useRemainingAssessmentsForStudent'
+import { useGetRemainingAssessmentsForStudent } from './hooks/useGetRemainingAssessmentsForStudent'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useGetRemainingAssessmentsForStudentPerCategory } from './hooks/useGetRemainingAssessmentsForStudentPerCategory'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
@@ -31,7 +31,7 @@ export const AssessmentPage = (): JSX.Element => {
     isPending: isRemainingAssessmentsPending,
     isError: isRemainingAssessmentsError,
     refetch: refetchRemainingAssessments,
-  } = useRemainingAssessmentsForStudent()
+  } = useGetRemainingAssessmentsForStudent()
 
   const {
     data: categoriesWithRemainingAssessments,
@@ -52,6 +52,15 @@ export const AssessmentPage = (): JSX.Element => {
     isAssessmentsPending ||
     isRemainingAssessmentsPending ||
     isCategoriesWithRemainingAssessmentsPending
+
+  if (!participant) {
+    return (
+      <ErrorPage
+        title='No participant found for this course participation ID'
+        description='We like what you are doing. To contribute, checkout https://github.com/ls1intum/prompt2'
+      />
+    )
+  }
 
   if (isError) return <ErrorPage onRetry={handleRefetch} />
   if (isPending)

@@ -5,7 +5,7 @@ export const deleteCompetency = async (
   competencyID: string,
 ): Promise<void> => {
   try {
-    return await assessmentAxiosInstance.delete(
+    await assessmentAxiosInstance.delete(
       `assessment/api/course_phase/${coursePhaseID}/competency/${competencyID}`,
       {
         headers: {
