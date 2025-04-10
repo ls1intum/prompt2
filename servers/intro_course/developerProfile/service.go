@@ -94,3 +94,42 @@ func CreateOrUpdateDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID
 	}
 	return nil
 }
+
+func GetDevicesForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]developerProfileDTO.DeviceWithParticipationID, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	devicesWithParticipations, err := DeveloperProfileServiceSingleton.queries.GetDevicesForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"error":         err,
+		}).Error("Failed to get devices with participation ID")
+		return nil, errors.New("failed to get devices with participation ID")
+	}
+
+	return developerProfileDTO.GetDeviceWithParticipationIDFromDBModel(devicesWithParticipations), nil
+}
+
+func GetDevicesForCourseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) ([]string, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	params := db.GetDevicesForCourseParticipationParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	}
+	devices, err := DeveloperProfileServiceSingleton.queries.GetDevicesForCourseParticipation(ctxWithTimeout, params)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, err // return the error to write a 404
+	} else if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID":         coursePhaseID,
+			"courseParticipationID": courseParticipationID,
+			"error":                 err,
+		}).Error("Failed to get device with participation ID")
+		return nil, errors.New("failed to get device with participation ID")
+	}
+
+	return devices, nil
+}
