@@ -14,6 +14,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
 	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
 	teams "github.com/ls1intum/prompt2/servers/team_allocation/team"
+	"github.com/ls1intum/prompt2/servers/team_allocation/tease"
 	"github.com/ls1intum/prompt2/servers/team_allocation/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -89,6 +90,7 @@ func main() {
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
 	survey.InitSurveyModule(api, *query, conn)
+	tease.InitTeaseModule(router.Group("team-allocation/api"), *query, conn) // some tease endpoint are coursePhase independent
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)
