@@ -1,32 +1,32 @@
 {
-    "name": "client",
-    "version": "2.2.10",
-    "main": "src/index.ts",
-    "license": "MIT",
-    "scripts": {
-        "dev": "webpack serve --open --mode development",
-        "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
-        "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
-        "build": "webpack --mode=production --env NODE_ENV=production",
-        "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
-    },
-    "dependencies": {
-        "@dagrejs/dagre": "^1.1.4",
-        "@xyflow/react": "^12.3.6",
-        "date-fns-tz": "^3.2.0",
-        "external-remotes-plugin": "^1.0.0",
-        "i18n-iso-countries": "^7.13.0",
-        "react-beautiful-dnd": "^13.1.1",
-        "sha256": "^0.2.0"
-    },
-    "devDependencies": {
-        "clean-webpack-plugin": "^4.0.0",
-        "compression-webpack-plugin": "^11.1.0",
-        "css-minimizer-webpack-plugin": "^7.0.0",
-        "html-webpack-plugin": "^5.6.0",
-        "webpack": "^5.91.0",
-        "webpack-bundle-analyzer": "^4.10.2",
-        "webpack-cli": "^5.1.4"
-    },
-    "packageManager": "yarn@4.1.0"
+  "name": "client",
+  "version": "2.2.11",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "dev": "webpack serve --open --mode development",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "build": "webpack --mode=production --env NODE_ENV=production",
+    "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
+    "@xyflow/react": "^12.3.6",
+    "date-fns-tz": "^3.2.0",
+    "external-remotes-plugin": "^1.0.0",
+    "i18n-iso-countries": "^7.13.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "sha256": "^0.2.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0",
+    "compression-webpack-plugin": "^11.1.0",
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "html-webpack-plugin": "^5.6.0",
+    "webpack": "^5.91.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "packageManager": "yarn@4.1.0"
 }
