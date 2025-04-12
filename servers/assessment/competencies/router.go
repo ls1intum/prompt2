@@ -13,12 +13,12 @@ import (
 func setupCompetencyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	competencyRouter := routerGroup.Group("/competency")
 
-	competencyRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetencies)
-	competencyRouter.GET("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getCompetency)
-	competencyRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listCompetenciesByCategory)
+	competencyRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listCompetencies)
+	competencyRouter.GET("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCompetency)
+	competencyRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listCompetenciesByCategory)
 	competencyRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createCompetency)
-	competencyRouter.PUT("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateCompetency)
-	competencyRouter.DELETE("/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteCompetency)
+	competencyRouter.PUT("/:competencyID", authMiddleware(promptSDK.PromptAdmin), updateCompetency)
+	competencyRouter.DELETE("/:competencyID", authMiddleware(promptSDK.PromptAdmin), deleteCompetency)
 }
 
 func listCompetencies(c *gin.Context) {
