@@ -43,9 +43,6 @@ func ValidateStudentResponse(ctx context.Context, coursePhaseID uuid.UUID, submi
 
 	// Validate each skill response.
 	for _, skillResponse := range submission.SkillResponses {
-		if skillResponse.Rating < 1 || skillResponse.Rating > 5 {
-			return fmt.Errorf("invalid rating for skill %s: rating must be between 1 and 5", skillResponse.SkillID)
-		}
 		if !validSkillIDs[skillResponse.SkillID] {
 			return fmt.Errorf("skill %s is not valid for this course phase", skillResponse.SkillID)
 		}
