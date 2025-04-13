@@ -6,16 +6,16 @@ import (
 )
 
 type StudentSkillResponse struct {
-	SkillID uuid.UUID `json:"skillID"`
-	Rating  int32     `json:"rating"`
+	SkillID    uuid.UUID     `json:"skillID"`
+	SkillLevel db.SkillLevel `json:"skillLevel"`
 }
 
 func GetStudentSkillResponsesDTOFromDBModel(skills []db.GetStudentSkillResponsesRow) []StudentSkillResponse {
 	skillDTOs := make([]StudentSkillResponse, 0, len(skills))
 	for _, skill := range skills {
 		skillDTOs = append(skillDTOs, StudentSkillResponse{
-			SkillID: skill.SkillID,
-			Rating:  skill.Rating,
+			SkillID:    skill.SkillID,
+			SkillLevel: skill.SkillLevel,
 		})
 	}
 	return skillDTOs
