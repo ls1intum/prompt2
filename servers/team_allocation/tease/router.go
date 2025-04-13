@@ -18,8 +18,12 @@ func setupTeaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedR
 	teaseRouter.GET("/course-phases", keycloakTokenVerifier.KeycloakMiddleware(), getAllCoursePhases)
 
 	// course phase specific endpoints
+<<<<<<< HEAD
 	teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter.GET("/students", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseStudentsForCoursePhase)
+=======
+	// teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
+>>>>>>> main
 }
 
 func getAllCoursePhases(c *gin.Context) {
@@ -38,7 +42,11 @@ func getAllCoursePhases(c *gin.Context) {
 	}
 
 	teasePhases, err := GetTeamAllocationCoursePhases(
+<<<<<<< HEAD
 		c,
+=======
+		c.Request.Context(),
+>>>>>>> main
 		authHeader,
 		userRoles,
 	)
@@ -50,6 +58,7 @@ func getAllCoursePhases(c *gin.Context) {
 	c.JSON(http.StatusOK, teasePhases)
 }
 
+<<<<<<< HEAD
 func getTeaseStudentsForCoursePhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -67,6 +76,8 @@ func getTeaseStudentsForCoursePhase(c *gin.Context) {
 	c.JSON(http.StatusOK, students)
 }
 
+=======
+>>>>>>> main
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, gin.H{"error": err.Error()})
 }
