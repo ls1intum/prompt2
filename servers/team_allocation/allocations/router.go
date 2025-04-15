@@ -18,7 +18,7 @@ func setupAllocationsRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	allocationsRouter.GET("/course-phases", keycloakTokenVerifier.KeycloakMiddleware(), getAllCoursePhases)
 
 	allocationsRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), putAllocation)
-	allocationsRouter.GET("/:courseParticipationId", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getStudentAllocation)
+	allocationsRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getStudentAllocation)
 	allocationsRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllAllocations)
 }
 
