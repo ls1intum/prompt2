@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/team_allocation/allocations/allocationDTO"
 )
@@ -16,9 +17,9 @@ func setupAllocationsRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	// we need the keycloak middleware here to ensure that the user has a valid token
 	allocationsRouter.GET("/course-phases", keycloakTokenVerifier.KeycloakMiddleware(), getAllCoursePhases)
 
-	allocationsRouter.PUT("", keycloakTokenVerifier.KeycloakMiddleware(), putAllocation)
-	allocationsRouter.GET("/:courseParticipationId", keycloakTokenVerifier.KeycloakMiddleware(), getStudentAllocation)
-	allocationsRouter.GET("", keycloakTokenVerifier.KeycloakMiddleware(), getAllAllocations)
+	allocationsRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), putAllocation)
+	allocationsRouter.GET("/:courseParticipationId", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getStudentAllocation)
+	allocationsRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllAllocations)
 }
 
 func getAllCoursePhases(c *gin.Context) {
