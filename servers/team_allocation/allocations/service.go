@@ -98,3 +98,53 @@ func hasCoursePhasePermission(userPermissions map[string]bool, semesterTag, cour
 	requiredPermission := fmt.Sprintf("%s-%s-%s", semesterTag, courseName, promptSDK.CourseLecturer)
 	return userPermissions[requiredPermission]
 }
+
+func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.Allocation, error) {
+	dbAllocations, err := AllocationsServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get the allocations from the database: ", err)
+		return nil, errors.New("could not get the allocations from the database")
+	}
+	return dbAllocations, nil
+}
+
+func GetStudentAllocation(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (db.Allocation, error) {
+
+	arg := db.GetAllocationForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}
+
+	dbAllocation, err := AllocationsServiceSingleton.queries.GetAllocationForStudent(ctx, arg)
+	if err != nil {
+		log.Error("could not get the allocation from the database: ", err)
+		return db.Allocation{}, errors.New("could not get the allocation from the database")
+	}
+	return dbAllocation, nil
+}
+
+func PutAllocation(ctx context.Context, courseParticipationID uuid.UUID, teamID uuid.UUID, coursePhaseID uuid.UUID) error {
+	tx, err := AllocationsServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := AllocationsServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
+		ID:                    uuid.New(),
+		CourseParticipationID: courseParticipationID,
+		TeamID:                teamID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not create the allocation in the database: ", err)
+		return errors.New("could not create the allocation in the database")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+}

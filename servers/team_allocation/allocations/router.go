@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/ls1intum/prompt-sdk/keycloakTokenVerifier"
+	"github.com/ls1intum/prompt2/servers/team_allocation/allocations/allocationDTO"
 )
 
 func setupAllocationsRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
@@ -13,6 +15,10 @@ func setupAllocationsRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 
 	// we need the keycloak middleware here to ensure that the user has a valid token
 	allocationsRouter.GET("/course-phases", keycloakTokenVerifier.KeycloakMiddleware(), getAllCoursePhases)
+
+	allocationsRouter.PUT("", keycloakTokenVerifier.KeycloakMiddleware(), putAllocation)
+	allocationsRouter.GET("/:courseParticipationId", keycloakTokenVerifier.KeycloakMiddleware(), getStudentAllocation)
+	allocationsRouter.GET("", keycloakTokenVerifier.KeycloakMiddleware(), getAllAllocations)
 }
 
 func getAllCoursePhases(c *gin.Context) {
@@ -41,6 +47,61 @@ func getAllCoursePhases(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, teasePhases)
+}
+
+func getAllAllocations(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("invalid course phase ID"))
+		return
+	}
+
+	allocations, err := GetAllocationsByCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, allocations)
+}
+
+func getStudentAllocation(c *gin.Context) {
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("invalid course phase ID"))
+		return
+	}
+
+	allocation, err := GetStudentAllocation(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, allocation)
+}
+
+func putAllocation(c *gin.Context) {
+	var req allocationDTO.AllocationRequest
+
+	if err := c.BindJSON(&req); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err := PutAllocation(c, req.CourseParticipationID, req.TeamID, req.CoursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Allocation created successfully"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
