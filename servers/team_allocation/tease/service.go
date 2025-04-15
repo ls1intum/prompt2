@@ -98,3 +98,16 @@ func hasCoursePhasePermission(userPermissions map[string]bool, semesterTag, cour
 	requiredPermission := fmt.Sprintf("%s-%s-%s", semesterTag, courseName, promptSDK.CourseLecturer)
 	return userPermissions[requiredPermission]
 }
+
+func GetTeaseSkillsByCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]teaseDTO.SkillResponse, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	skills, err := TeaseServiceSingleton.queries.GetSkillsByCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get skills for course phase: ", err)
+		return nil, err
+	}
+
+	return teaseDTO.GetTeaseSkillResponseFromDBModel(skills), nil
+}
