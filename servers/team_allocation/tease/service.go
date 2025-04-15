@@ -111,3 +111,16 @@ func GetTeaseSkillsByCoursePhase(ctx context.Context, authHeader string, courseP
 
 	return teaseDTO.GetTeaseSkillResponseFromDBModel(skills), nil
 }
+
+func GetTeaseTeamsByCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]teaseDTO.TeaseTeam, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	teams, err := TeaseServiceSingleton.queries.GetTeamsByCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get teams for course phase: ", err)
+		return nil, err
+	}
+
+	return teaseDTO.GetTeaseTeamResponseFromDBModel(teams), nil
+}

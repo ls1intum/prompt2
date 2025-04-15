@@ -21,6 +21,7 @@ func setupTeaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedR
 	// teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter.GET("/skills", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseSkillsByCoursePhase)
+	teaseCoursePhaseRouter.GET("/teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseTeamsByCoursePhase)
 }
 
 func getAllCoursePhases(c *gin.Context) {
@@ -67,6 +68,24 @@ func getTeaseSkillsByCoursePhase(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, skills)
+}
+
+func getTeaseTeamsByCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	authHeader := c.GetHeader("Authorization")
+
+	teams, err := GetTeaseTeamsByCoursePhase(c, authHeader, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, teams)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
