@@ -1,9 +1,8 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
-import { useGetAllStudentAssessmentsInPhase } from './hooks/useGetAllStudentAssessmentsInPhase'
 import { ErrorPage } from '@/components/ErrorPage'
-import { useGetRemainingAssessmentsForStudent } from './hooks/useGetRemainingAssessmentsForStudent'
+import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
@@ -19,28 +18,13 @@ export const AssessmentPage = (): JSX.Element => {
   )
 
   const {
-    data: assessments,
-    isPending: isAssessmentsPending,
-    isError: isAssessmentsError,
-    refetch: refetchAssessments,
-  } = useGetAllStudentAssessmentsInPhase()
+    data: studentAssessment,
+    isPending: isStudentAssessmentPending,
+    isError: isStudentAssessmentError,
+    refetch: refetchStudentAssessment,
+  } = useGetStudentAssessment()
 
-  const {
-    data: remainingAssessments,
-    isPending: isRemainingAssessmentsPending,
-    isError: isRemainingAssessmentsError,
-    refetch: refetchRemainingAssessments,
-  } = useGetRemainingAssessmentsForStudent()
-
-  const handleRefetch = () => {
-    refetchAssessments()
-    refetchRemainingAssessments()
-  }
-
-  const isError = isAssessmentsError || isRemainingAssessmentsError
-  const isPending = isAssessmentsPending || isRemainingAssessmentsPending
-
-  if (!participant) {
+  if (!studentAssessment) {
     return (
       <ErrorPage
         title='No participant found for this course participation ID'
@@ -49,8 +33,8 @@ export const AssessmentPage = (): JSX.Element => {
     )
   }
 
-  if (isError) return <ErrorPage onRetry={handleRefetch} />
-  if (isPending)
+  if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
+  if (isStudentAssessmentPending)
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -62,11 +46,7 @@ export const AssessmentPage = (): JSX.Element => {
       <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
 
       {participant && (
-        <AssessmentProfile
-          participant={participant}
-          remainingAssessments={remainingAssessments.remainingAssessments}
-          assessments={assessments}
-        />
+        <AssessmentProfile participant={participant} studentAssessment={studentAssessment} />
       )}
 
       {categories.map((category) => {
@@ -75,10 +55,11 @@ export const AssessmentPage = (): JSX.Element => {
             key={category.id}
             category={category}
             remainingAssessments={
-              remainingAssessments.categories?.find((item) => item.categoryID === category.id)
-                ?.remainingAssessments ?? 0
+              studentAssessment.remainingAssessments.categories?.find(
+                (item) => item.categoryID === category.id,
+              )?.remainingAssessments ?? 0
             }
-            assessments={assessments}
+            assessments={studentAssessment.assessments}
           />
         )
       })}

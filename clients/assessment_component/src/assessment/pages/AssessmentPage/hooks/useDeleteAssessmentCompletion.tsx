@@ -1,16 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { deleteCategory } from '../../../network/mutations/deleteCategory'
+import { deleteAssessmentCompletion } from '../../../network/mutations/deleteAssessmentCompletion'
 
-export const useDeleteCategory = (setError: (error: string | null) => void) => {
+export const useDeleteAssessmentCompletion = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (categoryID: string) => deleteCategory(phaseId ?? '', categoryID),
+    mutationFn: (courseParticipationID: string) =>
+      deleteAssessmentCompletion(phaseId ?? '', courseParticipationID),
     onSuccess: () => {
-      // TODO update this to invalidate all queries that are related to categories
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

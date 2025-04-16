@@ -1,70 +1,182 @@
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import ScoreLevelBadge from './ScoreLevelBadge'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
-import { Assessment } from '../../../interfaces/assessment'
+import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
+import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
+import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
 
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
-  remainingAssessments: number
-  assessments: Assessment[]
+  studentAssessment: StudentAssessment
 }
 
 export const AssessmentProfile = ({
   participant,
-  remainingAssessments,
-  assessments,
+  studentAssessment,
 }: AssessmentProfileProps): JSX.Element => {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { phaseId } = useParams<{ phaseId: string }>()
+
+  const { mutate: createCompletion, isPending: isCreating } =
+    useCreateAssessmentCompletion(setError)
+
+  const { mutate: deleteCompletion, isPending: isDeleting } =
+    useDeleteAssessmentCompletion(setError)
+
   const averageScore =
-    assessments.length === 0
+    studentAssessment.assessments.length === 0
       ? 0
-      : assessments
+      : studentAssessment.assessments
           .map((assessment) => mapScoreLevelToNumber({ score: assessment.score }))
-          .reduce<number>((a, b) => a + b, 0) / assessments.length
+          .reduce<number>((a, b) => a + b, 0) / studentAssessment.assessments.length
+
+  const handleButtonClick = () => {
+    setError(null) // Clear any previous errors
+    setDialogOpen(true)
+  }
+
+  const { user } = useAuthStore()
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+  const handleConfirm = () => {
+    if (studentAssessment.assessmentCompletion.completed) {
+      deleteCompletion(studentAssessment.courseParticipationID)
+    } else {
+      createCompletion({
+        courseParticipationID: studentAssessment.courseParticipationID,
+        coursePhaseID: phaseId ?? '',
+        author: userName,
+        completedAt: new Date().toISOString(),
+        completed: false,
+      })
+    }
+  }
+
+  const isLoading = isCreating || isDeleting
+
   return (
-    <Card className='relative overflow-hidden'>
-      <CardHeader>
-        <div className='flex flex-col sm:flex-row items-center'>
-          <div className='flex-1 text-center sm:text-left'>
-            <div className='flex flex-col sm:flex-row sm:items-center gap-1'>
-              <h1 className='text-2xl font-bold mr-2'>
-                {participant.student.firstName} {participant.student.lastName}
-              </h1>
-              <AssessmentStatusBadge remainingAssessments={remainingAssessments} />
-              <ScoreLevelBadge score={averageScore} />
+    <>
+      <Card className='relative overflow-hidden'>
+        <CardHeader className='relative'>
+          <div className='absolute top-4 right-4'>
+            <Button variant='outline' size='sm' onClick={handleButtonClick}>
+              {studentAssessment.assessmentCompletion.completed
+                ? 'Edit Assessment'
+                : 'Mark Assessment as Final'}
+            </Button>
+          </div>
+          <div className='flex flex-col sm:flex-row items-center'>
+            <div className='flex-1 text-center sm:text-left'>
+              <div className='flex flex-col sm:flex-row sm:items-center gap-1'>
+                <h1 className='text-2xl font-bold mr-2'>
+                  {participant.student.firstName} {participant.student.lastName}
+                </h1>
+                <AssessmentStatusBadge
+                  remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
+                />
+                <ScoreLevelBadge score={averageScore} />
+              </div>
             </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent>
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm'>
-          <div className='flex items-center'>
-            <Book className='w-5 h-5 mr-2 text-primary' />
-            <strong className='mr-2'>Program:</strong>
-            <span className='text-muted-foreground'>
-              {participant.student.studyProgram || 'N/A'}
-            </span>
+        <CardContent>
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm'>
+            <div className='flex items-center'>
+              <Book className='w-5 h-5 mr-2 text-primary' />
+              <strong className='mr-2'>Program:</strong>
+              <span className='text-muted-foreground'>
+                {participant.student.studyProgram || 'N/A'}
+              </span>
+            </div>
+            <div className='flex items-center'>
+              <GraduationCap className='w-5 h-5 mr-2 text-primary' />
+              <strong className='mr-2'>Degree:</strong>
+              <span className='text-muted-foreground'>
+                {participant.student.studyDegree || 'N/A'}
+              </span>
+            </div>
+            <div className='flex items-center'>
+              <Calendar className='w-5 h-5 mr-2 text-primary' />
+              <strong className='mr-2'>Semester:</strong>
+              <span className='text-muted-foreground'>
+                {participant.student.currentSemester || 'N/A'}
+              </span>
+            </div>
           </div>
-          <div className='flex items-center'>
-            <GraduationCap className='w-5 h-5 mr-2 text-primary' />
-            <strong className='mr-2'>Degree:</strong>
-            <span className='text-muted-foreground'>
-              {participant.student.studyDegree || 'N/A'}
-            </span>
-          </div>
-          <div className='flex items-center'>
-            <Calendar className='w-5 h-5 mr-2 text-primary' />
-            <strong className='mr-2'>Semester:</strong>
-            <span className='text-muted-foreground'>
-              {participant.student.currentSemester || 'N/A'}
-            </span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Display error outside of dialog if needed */}
+          {error && !dialogOpen && (
+            <Alert variant='destructive' className='mt-4'>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) setError(null) // Clear error when closing dialog
+          setDialogOpen(open)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {studentAssessment.assessmentCompletion.completed
+                ? 'Reopen Assessment for Editing'
+                : 'Mark Assessment as Final'}
+            </DialogTitle>
+            <DialogDescription>
+              {studentAssessment.assessmentCompletion.completed
+                ? 'Are you sure you want to reopen this assessment for editing? This will allow you to make changes to the assessment.'
+                : 'Are you sure you want to mark this assessment as final? This will lock the assessment and prevent further changes.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Display error in dialog */}
+          {error && (
+            <Alert variant='destructive'>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={isLoading}
+              variant={studentAssessment.assessmentCompletion.completed ? 'destructive' : 'default'}
+            >
+              {isLoading
+                ? 'Processing...'
+                : studentAssessment.assessmentCompletion.completed
+                  ? 'Yes, Reopen for Editing'
+                  : 'Yes, Mark as Final'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

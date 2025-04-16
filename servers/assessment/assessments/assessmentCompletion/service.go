@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -21,6 +22,18 @@ type AssessmentCompletionService struct {
 }
 
 var AssessmentCompletionServiceSingleton *AssessmentCompletionService
+
+func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (bool, error) {
+	exists, err := AssessmentCompletionServiceSingleton.queries.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return false, errors.New("could not check assessment completion existence")
+	}
+	return exists, nil
+}
 
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
@@ -77,6 +90,9 @@ func GetAssessmentCompletion(ctx context.Context, courseParticipationID, courseP
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return db.AssessmentCompletion{}, nil
+		}
 		log.Error("could not get assessment completion: ", err)
 		return db.AssessmentCompletion{}, errors.New("could not get assessment completion")
 	}

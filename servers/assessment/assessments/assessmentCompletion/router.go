@@ -11,9 +11,8 @@ import (
 )
 
 func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	assessmentRouter := routerGroup.Group("/completed")
+	assessmentRouter := routerGroup.Group("/student-assessment/completed")
 
-	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor))
 	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmenAsComplete)
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessment)
 	assessmentRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), unmarkAssessmentAsCompleted)
@@ -62,26 +61,12 @@ func getAssessment(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	assessment, err := GetAssessmentCompletion(c, coursePhaseID, courseParticipationID)
+	assessmentCompletion, err := GetAssessmentCompletion(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessment)
-}
-
-func listAssessmentCompletionsByCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	assessments, err := ListAssessmentCompletionsByCoursePhase(c, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, assessments)
+	c.JSON(http.StatusOK, assessmentCompletion)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

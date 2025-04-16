@@ -12,6 +12,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkAssessmentCompletionExists = `-- name: CheckAssessmentCompletionExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM assessment_completion
+    WHERE course_participation_id = $1
+      AND course_phase_id = $2
+)
+`
+
+type CheckAssessmentCompletionExistsParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) CheckAssessmentCompletionExists(ctx context.Context, arg CheckAssessmentCompletionExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkAssessmentCompletionExists, arg.CourseParticipationID, arg.CoursePhaseID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getAssessmentCompletion = `-- name: GetAssessmentCompletion :one
 SELECT course_participation_id, course_phase_id, completed_at, author
 FROM assessment_completion

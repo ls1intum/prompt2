@@ -269,23 +269,6 @@ paths:
           description: Assessment created or updated
 
   /student-assessment/{assessmentID}:
-    get:
-      summary: Get an assessment by ID
-      tags: [Assessment]
-      parameters:
-        - name: assessmentID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: The requested assessment
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
     delete:
       summary: Delete an assessment
       tags: [Assessment]
