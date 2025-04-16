@@ -154,7 +154,7 @@ func getTeaseProjectPreferences(ctx context.Context, coursePhaseID uuid.UUID, co
 	return teaseDTO.GetProjectPreferenceFromDBModel(teamPreferences), nil
 }
 
-func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) ([]teaseDTO.SkillResponse, error) {
+func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) ([]teaseDTO.StudentSkillResponse, error) {
 	skills, err := TeaseServiceSingleton.queries.GetStudentSkillResponses(ctx, db.GetStudentSkillResponsesParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
@@ -167,8 +167,8 @@ func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, coursePart
 			"course_participation_id": courseParticipationID,
 			"course_phase_id":         coursePhaseID,
 		}).Warn("no skills found for this course participation, continuing anyway")
-		return []teaseDTO.SkillResponse{}, nil
+		return []teaseDTO.StudentSkillResponse{}, nil
 	}
 
-	return teaseDTO.GetTeaseSkillResponseFromDBModel(skills), nil
+	return teaseDTO.GetTeaseStudentSkillResponseFromDBModel(skills), nil
 }

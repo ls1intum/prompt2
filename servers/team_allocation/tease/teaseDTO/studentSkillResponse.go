@@ -5,15 +5,15 @@ import (
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 )
 
-type SkillResponse struct {
+type StudentSkillResponse struct {
 	ID          uuid.UUID `json:"id"`
 	Proficiency string    `json:"proficiency"`
 }
 
-func GetTeaseSkillResponseFromDBModel(skillResponses []db.GetStudentSkillResponsesRow) []SkillResponse {
-	skills := make([]SkillResponse, 0, len(skillResponses))
+func GetTeaseStudentSkillResponseFromDBModel(skillResponses []db.GetStudentSkillResponsesRow) []StudentSkillResponse {
+	skills := make([]StudentSkillResponse, 0, len(skillResponses))
 	for _, skillResponse := range skillResponses {
-		skills = append(skills, SkillResponse{
+		skills = append(skills, StudentSkillResponse{
 			ID:          skillResponse.SkillID,
 			Proficiency: getTeaseSkillLevel(skillResponse.SkillLevel),
 		})

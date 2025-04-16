@@ -14,23 +14,23 @@ const (
 
 // Student is the TEASE representation of a student's data.
 type Student struct {
-	CourseParticipationID  uuid.UUID           `json:"id"` // use the coursePhaseID, though in TEASE it's called StudentID
-	FirstName              string              `json:"firstName"`
-	LastName               string              `json:"lastName"`
-	Gender                 string              `json:"gender"`
-	Nationality            string              `json:"nationality"`
-	Email                  string              `json:"email"`
-	StudyDegree            string              `json:"studyDegree"`
-	StudyProgram           string              `json:"studyProgram"`
-	Semester               pgtype.Int4         `json:"semester"`
-	Languages              []Language          `json:"languages"`
-	IntroSelfAssessment    string              `json:"introSelfAssessment"`
-	IntroCourseProficiency string              `json:"introCourseProficiency"`
-	Skill                  []SkillResponse     `json:"skill"`
-	Devices                []string            `json:"devices"`
-	StudentComments        string              `json:"studentComments"` // @rappm pls update once your assessment is done
-	TutorComments          string              `json:"tutorComments"`   // @rappm pls update once your assessment is done
-	ProjectPreferences     []ProjectPreference `json:"projectPreferences"`
+	CourseParticipationID  uuid.UUID              `json:"id"` // use the coursePhaseID, though in TEASE it's called StudentID
+	FirstName              string                 `json:"firstName"`
+	LastName               string                 `json:"lastName"`
+	Gender                 string                 `json:"gender"`
+	Nationality            string                 `json:"nationality"`
+	Email                  string                 `json:"email"`
+	StudyDegree            string                 `json:"studyDegree"`
+	StudyProgram           string                 `json:"studyProgram"`
+	Semester               pgtype.Int4            `json:"semester"`
+	Languages              []Language             `json:"languages"`
+	IntroSelfAssessment    string                 `json:"introSelfAssessment"`
+	IntroCourseProficiency string                 `json:"introCourseProficiency"`
+	Skill                  []StudentSkillResponse `json:"skill"`
+	Devices                []string               `json:"devices"`
+	StudentComments        string                 `json:"studentComments"` // @rappm pls update once your assessment is done
+	TutorComments          string                 `json:"tutorComments"`   // @rappm pls update once your assessment is done
+	ProjectPreferences     []ProjectPreference    `json:"projectPreferences"`
 }
 
 // convertPromptGenderToTease maps the promptSDK gender to TEASE gender labels.
@@ -54,7 +54,7 @@ func convertPromptGenderToTease(gender promptTypes.Gender) string {
 func ConvertCourseParticipationToTeaseStudent(
 	cp promptTypes.CoursePhaseParticipationWithStudent,
 	projectPreferences []ProjectPreference,
-	skillResponses []SkillResponse,
+	skillResponses []StudentSkillResponse,
 ) (Student, error) {
 	// 1) Read the application answers from meta data
 	_, multiSelectAnswers, err := promptTypes.ReadApplicationAnswersFromMetaData(cp.PrevData["applicationAnswers"])
