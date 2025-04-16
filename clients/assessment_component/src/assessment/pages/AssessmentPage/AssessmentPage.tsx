@@ -49,20 +49,18 @@ export const AssessmentPage = (): JSX.Element => {
         <AssessmentProfile participant={participant} studentAssessment={studentAssessment} />
       )}
 
-      {categories.map((category) => {
-        return (
-          <CategoryAssessment
-            key={category.id}
-            category={category}
-            remainingAssessments={
-              studentAssessment.remainingAssessments.categories?.find(
-                (item) => item.categoryID === category.id,
-              )?.remainingAssessments ?? 0
-            }
-            assessments={studentAssessment.assessments}
-          />
-        )
-      })}
+      {categories.map((category) => (
+        <CategoryAssessment
+          key={category.id}
+          category={category}
+          remainingAssessments={
+            studentAssessment.remainingAssessments.categories?.find(
+              (item) => item.categoryID === category.id,
+            )?.remainingAssessments ?? 0
+          }
+          assessments={studentAssessment.assessments}
+        />
+      ))}
     </div>
   )
 }
