@@ -9,6 +9,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/team_allocation/allocations/allocationDTO"
+	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 )
 
 func setupAllocationsRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
@@ -87,7 +88,6 @@ func getStudentAllocation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, allocation)
 }
-
 func putAllocation(c *gin.Context) {
 	var req allocationDTO.AllocationRequest
 
@@ -96,13 +96,24 @@ func putAllocation(c *gin.Context) {
 		return
 	}
 
-	err := PutAllocation(c, req.CourseParticipationID, req.TeamID, req.CoursePhaseID)
+	arg := db.GetAllocationForStudentParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+	}
+	_, err := AllocationsServiceSingleton.queries.GetAllocationForStudent(c, arg)
+	allocationExists := err == nil
+
+	err = PutAllocation(c, req.CourseParticipationID, req.TeamID, req.CoursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Allocation created successfully"})
+	if allocationExists {
+		c.JSON(http.StatusOK, gin.H{"message": "Allocation updated successfully"})
+	} else {
+		c.JSON(http.StatusCreated, gin.H{"message": "Allocation created successfully"})
+	}
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
