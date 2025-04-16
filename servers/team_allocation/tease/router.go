@@ -59,9 +59,8 @@ func getTeaseSkillsByCoursePhase(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	authHeader := c.GetHeader("Authorization")
 
-	skills, err := GetTeaseSkillsByCoursePhase(c, authHeader, coursePhaseID)
+	skills, err := GetTeaseSkillsByCoursePhase(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -77,9 +76,8 @@ func getTeaseTeamsByCoursePhase(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	authHeader := c.GetHeader("Authorization")
 
-	teams, err := GetTeaseTeamsByCoursePhase(c, authHeader, coursePhaseID)
+	teams, err := GetTeaseTeamsByCoursePhase(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

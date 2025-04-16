@@ -99,7 +99,7 @@ func hasCoursePhasePermission(userPermissions map[string]bool, semesterTag, cour
 	return userPermissions[requiredPermission]
 }
 
-func GetTeaseSkillsByCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]teaseDTO.SkillResponse, error) {
+func GetTeaseSkillsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.SkillResponse, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
@@ -112,7 +112,7 @@ func GetTeaseSkillsByCoursePhase(ctx context.Context, authHeader string, courseP
 	return teaseDTO.GetTeaseSkillResponseFromDBModel(skills), nil
 }
 
-func GetTeaseTeamsByCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]teaseDTO.TeaseTeam, error) {
+func GetTeaseTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.TeaseTeam, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 

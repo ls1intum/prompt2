@@ -11,7 +11,7 @@ type SkillResponse struct {
 }
 
 func GetTeaseSkillResponseFromDBModel(skills []db.Skill) []SkillResponse {
-	var teaseSkills []SkillResponse
+	teaseSkills := make([]SkillResponse, 0, len(skills))
 	for _, skill := range skills {
 		teaseSkill := SkillResponse{
 			SkillTitle:       skill.Name,

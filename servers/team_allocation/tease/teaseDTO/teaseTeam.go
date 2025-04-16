@@ -10,7 +10,7 @@ type TeaseTeam struct {
 }
 
 func GetTeaseTeamResponseFromDBModel(teams []db.Team) []TeaseTeam {
-	var teaseTeams []TeaseTeam
+	teaseTeams := make([]TeaseTeam, 0, len(teams))
 	for _, team := range teams {
 		teaseTeam := TeaseTeam{
 			TeamID:   team.ID.String(),
