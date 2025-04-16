@@ -103,7 +103,7 @@ func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (
 	dbAllocations, err := AllocationsServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the allocations from the database: ", err)
-		return nil, errors.New("could not get the allocations from the database")
+		return nil, fmt.Errorf("could not get the allocations from the database: %w", err)
 	}
 	return dbAllocations, nil
 }
@@ -118,7 +118,7 @@ func GetStudentAllocation(ctx context.Context, courseParticipationID uuid.UUID, 
 	dbAllocation, err := AllocationsServiceSingleton.queries.GetAllocationForStudent(ctx, arg)
 	if err != nil {
 		log.Error("could not get the allocation from the database: ", err)
-		return db.Allocation{}, errors.New("could not get the allocation from the database")
+		return db.Allocation{}, fmt.Errorf("could not get the allocation from the database: %w", err)
 	}
 	return dbAllocation, nil
 }
