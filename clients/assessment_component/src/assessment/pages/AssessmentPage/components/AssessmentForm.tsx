@@ -46,7 +46,9 @@ export const AssessmentForm = ({
     },
   })
 
-  const { mutate } = assessment ? useUpdateAssessment(setError) : useCreateAssessment(setError)
+  const updateAssessment = useUpdateAssessment(setError)
+  const createAssessment = useCreateAssessment(setError)
+  const { mutate } = assessment ? updateAssessment : createAssessment
   const selectedScore = form.watch('score')
 
   useEffect(() => {
