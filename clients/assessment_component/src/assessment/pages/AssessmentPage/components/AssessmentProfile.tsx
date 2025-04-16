@@ -106,7 +106,10 @@ export const AssessmentProfile = ({
               <GraduationCap className='w-5 h-5 mr-2 text-primary' />
               <strong className='mr-2'>Degree:</strong>
               <span className='text-muted-foreground'>
-                {participant.student.studyDegree || 'N/A'}
+                {participant.student.studyDegree
+                  ? participant.student.studyDegree.charAt(0).toUpperCase() +
+                    participant.student.studyDegree.slice(1)
+                  : 'N/A'}
               </span>
             </div>
             <div className='flex items-center'>
