@@ -43,7 +43,7 @@ func unmarkAssessmentAsCompleted(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	if err := UnmarkAssessmentAsCompleted(c, coursePhaseID, courseParticipationID); err != nil {
+	if err := UnmarkAssessmentAsCompleted(c, courseParticipationID, coursePhaseID); err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}

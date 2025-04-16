@@ -35,11 +35,8 @@ export const AssessmentProfile = ({
   const [error, setError] = useState<string | null>(null)
   const { phaseId } = useParams<{ phaseId: string }>()
 
-  const { mutate: createCompletion, isPending: isCreating } =
-    useCreateAssessmentCompletion(setError)
-
-  const { mutate: deleteCompletion, isPending: isDeleting } =
-    useDeleteAssessmentCompletion(setError)
+  const { mutate: createCompletion } = useCreateAssessmentCompletion(setError)
+  const { mutate: deleteCompletion } = useDeleteAssessmentCompletion(setError)
 
   const averageScore =
     studentAssessment.assessments.length === 0
@@ -49,7 +46,7 @@ export const AssessmentProfile = ({
           .reduce<number>((a, b) => a + b, 0) / studentAssessment.assessments.length
 
   const handleButtonClick = () => {
-    setError(null) // Clear any previous errors
+    setError(null)
     setDialogOpen(true)
   }
 
@@ -67,9 +64,8 @@ export const AssessmentProfile = ({
         completed: false,
       })
     }
+    setDialogOpen(false)
   }
-
-  const isLoading = isCreating || isDeleting
 
   return (
     <>
@@ -122,7 +118,6 @@ export const AssessmentProfile = ({
             </div>
           </div>
 
-          {/* Display error outside of dialog if needed */}
           {error && !dialogOpen && (
             <Alert variant='destructive' className='mt-4'>
               <AlertDescription>{error}</AlertDescription>
@@ -152,7 +147,6 @@ export const AssessmentProfile = ({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Display error in dialog */}
           {error && (
             <Alert variant='destructive'>
               <AlertDescription>{error}</AlertDescription>
@@ -165,14 +159,11 @@ export const AssessmentProfile = ({
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={isLoading}
               variant={studentAssessment.assessmentCompletion.completed ? 'destructive' : 'default'}
             >
-              {isLoading
-                ? 'Processing...'
-                : studentAssessment.assessmentCompletion.completed
-                  ? 'Yes, Reopen for Editing'
-                  : 'Yes, Mark as Final'}
+              {studentAssessment.assessmentCompletion.completed
+                ? 'Yes, Reopen for Editing'
+                : 'Yes, Mark as Final'}
             </Button>
           </DialogFooter>
         </DialogContent>
