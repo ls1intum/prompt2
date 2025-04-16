@@ -131,15 +131,36 @@ func PutAllocation(ctx context.Context, courseParticipationID uuid.UUID, teamID 
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := AllocationsServiceSingleton.queries.WithTx(tx)
 
-	err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
-		ID:                    uuid.New(),
+	arg := db.GetAllocationForStudentParams{
 		CourseParticipationID: courseParticipationID,
-		TeamID:                teamID,
 		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not create the allocation in the database: ", err)
-		return errors.New("could not create the allocation in the database")
+	}
+	existingAllocation, err := qtx.GetAllocationForStudent(ctx, arg)
+	if err == nil {
+		updateArg := db.UpdateAllocationParams{
+			ID:            existingAllocation.ID,
+			CoursePhaseID: coursePhaseID,
+			TeamID:        teamID,
+		}
+		err = qtx.UpdateAllocation(ctx, updateArg)
+		if err != nil {
+			log.Error("could not update the allocation in the database: ", err)
+			return errors.New("could not update the allocation in the database")
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		log.Error("error checking for existing allocation: ", err)
+		return errors.New("could not check for existing allocation")
+	} else {
+		err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
+			ID:                    uuid.New(),
+			CourseParticipationID: courseParticipationID,
+			TeamID:                teamID,
+			CoursePhaseID:         coursePhaseID,
+		})
+		if err != nil {
+			log.Error("could not create the allocation in the database: ", err)
+			return errors.New("could not create the allocation in the database")
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
