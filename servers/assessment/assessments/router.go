@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,7 +65,7 @@ func getAssessment(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessment)
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels([]db.Assessment{assessment}))
 }
 
 func deleteAssessment(c *gin.Context) {
