@@ -121,7 +121,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
 	var level = scoreLevelDTO.StudentScore{}
-	if remainingAssessments.RemainingAssessments == 0 {
+	if len(assessments) > 0 {
 		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {
 			log.Error("could not check assessment completion existence: ", err)
