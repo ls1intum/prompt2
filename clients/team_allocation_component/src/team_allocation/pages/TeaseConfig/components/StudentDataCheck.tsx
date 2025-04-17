@@ -23,17 +23,72 @@ type StudentCheck = {
 }
 
 const checksConfig: StudentCheck[] = [
-  { label: 'First Name', extractor: s => s.firstName, isEmpty: v => !v, missingMessage: 'first names' },
-  { label: 'Last Name', extractor: s => s.lastName, isEmpty: v => !v, missingMessage: 'last names' },
-  { label: 'Gender', extractor: s => s.gender, isEmpty: v => !v, missingMessage: 'gender info' },
-  { label: 'Nationality', extractor: s => s.nationality, isEmpty: v => !v, missingMessage: 'nationality info' },
-  { label: 'Study Degree', extractor: s => s.studyDegree, isEmpty: v => !v, missingMessage: 'study degree info' },
-  { label: 'Study Program', extractor: s => s.studyProgram, isEmpty: v => !v, missingMessage: 'study program info' },
-  { label: 'Semester', extractor: s => s.semester, isEmpty: v => v === 0, missingMessage: 'semester info' },
-  { label: 'Language Proficiency', extractor: s => s.languages.every(l => l.proficiency), isEmpty: v => !v, missingMessage: 'language proficiency info' },
-  { label: 'Skills', extractor: s => s.skill, isEmpty: arr => arr.length === 0, missingMessage: 'skills' },
-  { label: 'Devices', extractor: s => s.devices, isEmpty: arr => arr.length === 0, missingMessage: 'devices' },
-  { label: 'Project Preferences', extractor: s => s.projectPreferences, isEmpty: arr => arr.length === 0, missingMessage: 'project preferences' },
+  {
+    label: 'First Name',
+    extractor: (s) => s.firstName,
+    isEmpty: (v) => !v,
+    missingMessage: 'first names',
+  },
+  {
+    label: 'Last Name',
+    extractor: (s) => s.lastName,
+    isEmpty: (v) => !v,
+    missingMessage: 'last names',
+  },
+  {
+    label: 'Gender',
+    extractor: (s) => s.gender,
+    isEmpty: (v) => !v,
+    missingMessage: 'gender info',
+  },
+  {
+    label: 'Nationality',
+    extractor: (s) => s.nationality,
+    isEmpty: (v) => !v,
+    missingMessage: 'nationality info',
+  },
+  {
+    label: 'Study Degree',
+    extractor: (s) => s.studyDegree,
+    isEmpty: (v) => !v,
+    missingMessage: 'study degree info',
+  },
+  {
+    label: 'Study Program',
+    extractor: (s) => s.studyProgram,
+    isEmpty: (v) => !v,
+    missingMessage: 'study program info',
+  },
+  {
+    label: 'Semester',
+    extractor: (s) => s.semester,
+    isEmpty: (v) => v === 0,
+    missingMessage: 'semester info',
+  },
+  {
+    label: 'Language Proficiency',
+    extractor: (s) => s.languages.every((l) => l.proficiency),
+    isEmpty: (v) => !v,
+    missingMessage: 'language proficiency info',
+  },
+  {
+    label: 'Skills',
+    extractor: (s) => s.skill,
+    isEmpty: (arr) => arr.length === 0,
+    missingMessage: 'skills',
+  },
+  {
+    label: 'Devices',
+    extractor: (s) => s.devices,
+    isEmpty: (arr) => arr.length === 0,
+    missingMessage: 'devices',
+  },
+  {
+    label: 'Project Preferences',
+    extractor: (s) => s.projectPreferences,
+    isEmpty: (arr) => arr.length === 0,
+    missingMessage: 'project preferences',
+  },
 ]
 
 export const StudentDataCheck = (): JSX.Element => {
@@ -54,20 +109,22 @@ export const StudentDataCheck = (): JSX.Element => {
   useEffect(() => {
     if (!students || students.length === 0) return
 
-    const results: ValidationResult[] = checksConfig.map(({ label, extractor, isEmpty, missingMessage }) => {
-      const allValid = students.every(s => !isEmpty(extractor(s)))
-      const noneValid = students.every(s => isEmpty(extractor(s)))
+    const results: ValidationResult[] = checksConfig.map(
+      ({ label, extractor, isEmpty, missingMessage }) => {
+        const allValid = students.every((s) => !isEmpty(extractor(s)))
+        const noneValid = students.every((s) => isEmpty(extractor(s)))
 
-      return {
-        label,
-        isValid: allValid,
-        details: allValid
-          ? undefined
-          : noneValid
-            ? `No students have ${missingMessage}. Please check if your application contains ${missingMessage}.`
-            : `Some students are missing ${missingMessage}.`,
-      }
-    })
+        return {
+          label,
+          isValid: allValid,
+          details: allValid
+            ? undefined
+            : noneValid
+              ? `No students have ${missingMessage}. Please check if your application contains ${missingMessage}.`
+              : `Some students are missing ${missingMessage}.`,
+        }
+      },
+    )
 
     setChecks(results)
   }, [students])
