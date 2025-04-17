@@ -424,7 +424,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
                 $ref: "#/components/schemas/AssessmentCompletion"
     delete:
       summary: Unmark an AssessmentCompletion of a student
