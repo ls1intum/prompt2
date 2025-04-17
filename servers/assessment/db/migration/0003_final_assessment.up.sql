@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE
     assessment_completion (
         course_participation_id UUID NOT NULL,
