@@ -92,3 +92,9 @@ type Competency struct {
 	Expert       string      `json:"expert"`
 	Weight       int32       `json:"weight"`
 }
+
+type WeightedParticipantScore struct {
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
+}

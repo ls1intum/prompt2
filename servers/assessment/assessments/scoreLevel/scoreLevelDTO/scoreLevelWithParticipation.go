@@ -1,6 +1,8 @@
 package scoreLevelDTO
 
-import db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+import (
+	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+)
 
 type ScoreLevelWithParticipation struct {
 	CourseParticipationID string        `json:"courseParticipationID"`

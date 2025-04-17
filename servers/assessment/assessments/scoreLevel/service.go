@@ -46,3 +46,36 @@ func GetScoreLevelByCourseParticipationID(ctx context.Context, courseParticipati
 
 	return scoreLevel, nil
 }
+
+func GetStudentScore(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (scoreLevelDTO.StudentScore, error) {
+	dbScoreLevel, err := ScoreLevelServiceSingleton.queries.GetScoreLevelByCourseParticipationID(ctx, db.GetScoreLevelByCourseParticipationIDParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("Error fetching score level from database: ", err)
+		return scoreLevelDTO.StudentScore{}, err
+	}
+	scoreLevel := db.ScoreLevel(dbScoreLevel)
+
+	dbScore, err := ScoreLevelServiceSingleton.queries.GetScoreLevelByCourseParticipationIDNumeric(ctx, db.GetScoreLevelByCourseParticipationIDNumericParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("Error fetching score from database: ", err)
+		return scoreLevelDTO.StudentScore{}, err
+	}
+	score, err := dbScore.Float64Value()
+	if err != nil {
+		log.Error("Error converting score to float64: ", err)
+		return scoreLevelDTO.StudentScore{}, err
+	}
+
+	studentScore := scoreLevelDTO.StudentScore{
+		ScoreLevel: scoreLevel,
+		Score:      score,
+	}
+
+	return studentScore, nil
+}

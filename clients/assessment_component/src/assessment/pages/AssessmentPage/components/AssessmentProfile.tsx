@@ -18,7 +18,6 @@ import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
-import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
 import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
@@ -39,13 +38,6 @@ export const AssessmentProfile = ({
   const { mutate: createCompletion } = useCreateAssessmentCompletion(setError)
   const { mutate: deleteCompletion } = useDeleteAssessmentCompletion(setError)
   const { mutate: updateParticipation } = useUpdateCoursePhaseParticipation()
-
-  const averageScore =
-    studentAssessment.assessments.length === 0
-      ? 0
-      : studentAssessment.assessments
-          .map((assessment) => mapScoreLevelToNumber({ score: assessment.score }))
-          .reduce<number>((a, b) => a + b, 0) / studentAssessment.assessments.length
 
   const handleButtonClick = () => {
     setError(null)
@@ -106,7 +98,12 @@ export const AssessmentProfile = ({
                 <AssessmentStatusBadge
                   remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
                 />
-                <ScoreLevelBadge score={averageScore} scoreLevel={studentAssessment.scoreLevel} />
+                {studentAssessment.assessments.length > 0 && (
+                  <ScoreLevelBadge
+                    score={studentAssessment.studentScore.score}
+                    scoreLevel={studentAssessment.studentScore.scoreLevel}
+                  />
+                )}
               </div>
             </div>
           </div>
