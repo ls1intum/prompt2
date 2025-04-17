@@ -59,6 +59,7 @@ export const AssessmentPage = (): JSX.Element => {
             )?.remainingAssessments ?? 0
           }
           assessments={studentAssessment.assessments}
+          completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}
     </div>

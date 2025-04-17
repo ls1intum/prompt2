@@ -11,12 +11,14 @@ interface CategoryAssessmentProps {
   category: CategoryWithCompetencies
   remainingAssessments: number
   assessments: Assessment[]
+  completed: boolean
 }
 
 export const CategoryAssessment = ({
   category,
   remainingAssessments,
   assessments,
+  completed,
 }: CategoryAssessmentProps): JSX.Element => {
   const { courseParticipationID } = useParams<{
     courseParticipationID: string
@@ -60,6 +62,7 @@ export const CategoryAssessment = ({
                       courseParticipationID={courseParticipationID ?? ''}
                       competency={competency}
                       assessment={assessment}
+                      completed={completed}
                     />
                   </div>
                 )
