@@ -21,6 +21,7 @@ import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
 import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
+import { format } from 'date-fns'
 
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
@@ -157,9 +158,20 @@ export const AssessmentProfile = ({
                 : 'Mark Assessment as Final'}
             </DialogTitle>
             <DialogDescription>
-              {studentAssessment.assessmentCompletion.completed
-                ? 'Are you sure you want to reopen this assessment for editing? This will allow you to make changes to the assessment.'
-                : 'Are you sure you want to mark this assessment as final? This will lock the assessment and prevent further changes.'}
+              {studentAssessment.assessmentCompletion.completed ? (
+                <>
+                  Marked as final by {studentAssessment.assessmentCompletion.author} at{' '}
+                  {format(
+                    new Date(studentAssessment.assessmentCompletion.completedAt),
+                    'MMM d, yyyy',
+                  )}
+                  <br />
+                  Are you sure you want to reopen this assessment for editing? This will allow you
+                  to make changes to the assessment.
+                </>
+              ) : (
+                'Are you sure you want to mark this assessment as final? This will lock the assessment and prevent further changes.'
+              )}
             </DialogDescription>
           </DialogHeader>
 
