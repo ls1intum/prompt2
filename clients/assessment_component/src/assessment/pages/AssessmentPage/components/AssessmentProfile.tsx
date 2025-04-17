@@ -15,12 +15,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import ScoreLevelBadge from './ScoreLevelBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
+import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
+import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
 
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
@@ -37,6 +38,7 @@ export const AssessmentProfile = ({
 
   const { mutate: createCompletion } = useCreateAssessmentCompletion(setError)
   const { mutate: deleteCompletion } = useDeleteAssessmentCompletion(setError)
+  const { mutate: updateParticipation } = useUpdateCoursePhaseParticipation()
 
   const averageScore =
     studentAssessment.assessments.length === 0
@@ -53,6 +55,7 @@ export const AssessmentProfile = ({
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
   const handleConfirm = () => {
+    let passStatus = PassStatus.NOT_ASSESSED
     if (studentAssessment.assessmentCompletion.completed) {
       deleteCompletion(studentAssessment.courseParticipationID)
     } else {
@@ -63,7 +66,15 @@ export const AssessmentProfile = ({
         completedAt: new Date().toISOString(),
         completed: false,
       })
+      passStatus = PassStatus.PASSED
     }
+    updateParticipation({
+      coursePhaseID: participant.coursePhaseID,
+      courseParticipationID: participant.courseParticipationID,
+      passStatus: passStatus,
+      restrictedData: participant.restrictedData,
+      studentReadableData: participant.studentReadableData,
+    })
     setDialogOpen(false)
   }
 
