@@ -21,7 +21,7 @@ func setupTeaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedR
 	// teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter.GET("/skills", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseSkillsByCoursePhase)
-	teaseCoursePhaseRouter.GET("/teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseTeamsByCoursePhase)
+	teaseCoursePhaseRouter.GET("/projects", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseTeamsByCoursePhase)
 }
 
 func getAllCoursePhases(c *gin.Context) {
