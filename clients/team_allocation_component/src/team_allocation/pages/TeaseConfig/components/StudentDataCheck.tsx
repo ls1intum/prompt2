@@ -120,7 +120,7 @@ export const StudentDataCheck = (): JSX.Element => {
           details: allValid
             ? undefined
             : noneValid
-              ? `No students have ${missingMessage}. Please check if your application contains ${missingMessage}.`
+              ? `No students have ${missingMessage}. Please check if your previouse course phases (e.g. application) forward information on ${missingMessage} to this phase.`
               : `Some students are missing ${missingMessage}.`,
         }
       },
