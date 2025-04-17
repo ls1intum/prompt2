@@ -172,3 +172,74 @@ func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, coursePart
 
 	return teaseDTO.GetTeaseStudentSkillResponseFromDBModel(skills), nil
 }
+
+func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.Allocation, error) {
+	dbAllocations, err := TeaseServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get the allocations from the database: ", err)
+		return nil, fmt.Errorf("could not get the allocations from the database: %w", err)
+	}
+	return dbAllocations, nil
+}
+
+func GetStudentAllocation(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (db.Allocation, error) {
+
+	arg := db.GetAllocationForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}
+
+	dbAllocation, err := TeaseServiceSingleton.queries.GetAllocationForStudent(ctx, arg)
+	if err != nil {
+		log.Error("could not get the allocation from the database: ", err)
+		return db.Allocation{}, fmt.Errorf("could not get the allocation from the database: %w", err)
+	}
+	return dbAllocation, nil
+}
+
+func PutAllocation(ctx context.Context, courseParticipationID uuid.UUID, teamID uuid.UUID, coursePhaseID uuid.UUID) error {
+	tx, err := TeaseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := TeaseServiceSingleton.queries.WithTx(tx)
+
+	arg := db.GetAllocationForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	}
+	existingAllocation, err := qtx.GetAllocationForStudent(ctx, arg)
+	if err == nil {
+		updateArg := db.UpdateAllocationParams{
+			ID:            existingAllocation.ID,
+			CoursePhaseID: coursePhaseID,
+			TeamID:        teamID,
+		}
+		err = qtx.UpdateAllocation(ctx, updateArg)
+		if err != nil {
+			log.Error("could not update the allocation in the database: ", err)
+			return errors.New("could not update the allocation in the database")
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		log.Error("error checking for existing allocation: ", err)
+		return errors.New("could not check for existing allocation")
+	} else {
+		err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
+			ID:                    uuid.New(),
+			CourseParticipationID: courseParticipationID,
+			TeamID:                teamID,
+			CoursePhaseID:         coursePhaseID,
+		})
+		if err != nil {
+			log.Error("could not create the allocation in the database: ", err)
+			return errors.New("could not create the allocation in the database")
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+}

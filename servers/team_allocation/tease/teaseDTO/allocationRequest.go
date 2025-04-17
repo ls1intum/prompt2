@@ -1,4 +1,4 @@
-package allocationDTO
+package teaseDTO
 
 import (
 	"github.com/google/uuid"
