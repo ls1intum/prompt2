@@ -27,11 +27,6 @@ type AssessmentService struct {
 var AssessmentServiceSingleton *AssessmentService
 
 func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
-	err := checkAssessmentCompletionExists(ctx, req.CourseParticipationID, req.CoursePhaseID)
-	if err != nil {
-		return err
-	}
-
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -39,6 +34,19 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return errors.New("could not check assessment completion existence")
+	}
+	if exists {
+		log.Error("cannot create assessment, completion already exists")
+		return errors.New("assessment was already marked as completed and cannot be modified")
+	}
 
 	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
@@ -62,11 +70,6 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 }
 
 func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
-	err := checkAssessmentCompletionExists(ctx, req.CourseParticipationID, req.CoursePhaseID)
-	if err != nil {
-		return err
-	}
-
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -74,6 +77,19 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return errors.New("could not check assessment completion existence")
+	}
+	if exists {
+		log.Error("cannot update assessment, completion already exists")
+		return errors.New("assessment was already marked as completed and cannot be modified")
+	}
 
 	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
@@ -193,20 +209,4 @@ func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePha
 		return nil, errors.New("could not get assessments for category")
 	}
 	return assessments, nil
-}
-
-func checkAssessmentCompletionExists(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
-	exists, err := AssessmentServiceSingleton.queries.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot create assessment, completion already exists")
-		return errors.New("assessment was already marked as completed")
-	}
-	return nil
 }
