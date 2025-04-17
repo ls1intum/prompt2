@@ -10,8 +10,8 @@ export const useCreateCategory = (setError: (error: string | null) => void) => {
   return useMutation({
     mutationFn: (category: CreateCategoryRequest) => createCategory(phaseId ?? '', category),
     onSuccess: () => {
-      // update this to invalidate all queries that are related to categories
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {

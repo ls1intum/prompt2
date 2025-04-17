@@ -9,8 +9,8 @@ export const useDeleteCategory = (setError: (error: string | null) => void) => {
   return useMutation({
     mutationFn: (categoryID: string) => deleteCategory(phaseId ?? '', categoryID),
     onSuccess: () => {
-      // TODO update this to invalidate all queries that are related to categories
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {
