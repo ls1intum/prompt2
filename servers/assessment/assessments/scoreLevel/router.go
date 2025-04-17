@@ -14,8 +14,6 @@ func setupScoreLevelRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 
 	scoreLevelRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllScoreLevels)
 	scoreLevelRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getScoreLevelByCourseParticipationID)
-
-	scoreLevelRouter.GET("student-score", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentScore)
 }
 
 func getAllScoreLevels(c *gin.Context) {
@@ -48,28 +46,6 @@ func getScoreLevelByCourseParticipationID(c *gin.Context) {
 	}
 
 	scoreLevel, err := GetScoreLevelByCourseParticipationID(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, scoreLevel)
-}
-
-func getStudentScore(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	scoreLevel, err := GetStudentScore(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
