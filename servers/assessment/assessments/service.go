@@ -74,7 +74,10 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		log.Error("could not update assessment: ", err)
 		return errors.New("could not update assessment")
 	}
-
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit assessment update: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
 	return nil
 }
 
