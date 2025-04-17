@@ -13,6 +13,8 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -99,7 +101,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		return assessmentDTO.StudentAssessment{}, errors.New("could not get assessments for student in phase")
 	}
 
-	remainingAssessments, err := CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
+	remainingAssessments, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
 		log.Error("could not count remaining assessments: ", err)
 		return assessmentDTO.StudentAssessment{}, errors.New("could not count remaining assessments")
@@ -124,7 +126,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	return assessmentDTO.StudentAssessment{
 		CourseParticipationID: courseParticipationID,
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
-		RemainingAssessments:  assessmentDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
+		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
 		AssessmentCompletion:  completion,
 	}, nil
 }
@@ -181,16 +183,4 @@ func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePha
 		return nil, errors.New("could not get assessments for category")
 	}
 	return assessments, nil
-}
-
-func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (db.CountRemainingAssessmentsForStudentRow, error) {
-	remainingAssessments, err := AssessmentServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not count remaining assessments: ", err)
-		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
-	}
-	return remainingAssessments, nil
 }

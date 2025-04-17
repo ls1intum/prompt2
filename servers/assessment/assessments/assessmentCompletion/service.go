@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -36,6 +36,16 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 }
 
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	remaining, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return errors.New("could not count remaining assessments")
+	}
+	if remaining.RemainingAssessments > 0 {
+		log.Error("cannot mark assessment as completed, remaining assessments exist")
+		return errors.New("cannot mark assessment as completed, remaining assessments exist")
+	}
+
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -90,9 +100,6 @@ func GetAssessmentCompletion(ctx context.Context, courseParticipationID, courseP
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return db.AssessmentCompletion{}, nil
-		}
 		log.Error("could not get assessment completion: ", err)
 		return db.AssessmentCompletion{}, errors.New("could not get assessment completion")
 	}
