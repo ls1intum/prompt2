@@ -54,7 +54,7 @@ export const AssessmentPage = (): JSX.Element => {
           key={category.id}
           category={category}
           remainingAssessments={
-            studentAssessment.remainingAssessments.categories?.find(
+            studentAssessment.remainingAssessments?.categories?.find(
               (item) => item.categoryID === category.id,
             )?.remainingAssessments ?? 0
           }

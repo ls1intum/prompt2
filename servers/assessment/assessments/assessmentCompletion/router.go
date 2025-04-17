@@ -61,7 +61,7 @@ func getAssessmentCompletion(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	assessmentCompletion, err := GetAssessmentCompletion(c, coursePhaseID, courseParticipationID)
+	assessmentCompletion, err := GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

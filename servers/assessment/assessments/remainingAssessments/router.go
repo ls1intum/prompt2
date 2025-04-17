@@ -13,7 +13,7 @@ import (
 func setupRemainingAssessmentsRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentRouter := routerGroup.Group("/student-assessment/remaining")
 
-	assessmentRouter.GET("/remaining/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), countRemainingAssessmentsForStudent)
+	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), countRemainingAssessmentsForStudent)
 }
 
 func countRemainingAssessmentsForStudent(c *gin.Context) {

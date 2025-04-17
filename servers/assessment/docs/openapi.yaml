@@ -391,9 +391,7 @@ paths:
                 type: object
                 properties:
                   remainingAssessments:
-                    type: object
-                    items:
-                      $ref: "#/components/schemas/RemainingAssessments"
+                    $ref: "#/components/schemas/RemainingAssessments"
 
   /student-assessment/completed:
     post:
@@ -429,9 +427,7 @@ paths:
                 type: object
                 properties:
                   assessmentCompletion:
-                    type: object
-                    items:
-                      $ref: "#/components/schemas/AssessmentCompletion"
+                    $ref: "#/components/schemas/AssessmentCompletion"
     delete:
       summary: Unmark an AssessmentCompletion of a student
       tags: [Assessment]
@@ -676,10 +672,6 @@ components:
           items:
             $ref: "#/components/schemas/Assessment"
         remainingAssessments:
-          type: object
-          items:
-            $ref: "#/components/schemas/RemainingAssessments"
+          $ref: "#/components/schemas/RemainingAssessments"
         assessmentCompletion:
-          type: object
-          items:
-            $ref: "#/components/schemas/AssessmentCompletion"
+          $ref: "#/components/schemas/AssessmentCompletion"

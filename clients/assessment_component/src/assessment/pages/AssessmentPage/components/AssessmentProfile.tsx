@@ -56,25 +56,33 @@ export const AssessmentProfile = ({
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
   const handleConfirm = () => {
     let passStatus = PassStatus.NOT_ASSESSED
-    if (studentAssessment.assessmentCompletion.completed) {
-      deleteCompletion(studentAssessment.courseParticipationID)
-    } else {
-      createCompletion({
-        courseParticipationID: studentAssessment.courseParticipationID,
-        coursePhaseID: phaseId ?? '',
-        author: userName,
-        completedAt: new Date().toISOString(),
-        completed: false,
-      })
-      passStatus = PassStatus.PASSED
+    const handleCompletion = async () => {
+      try {
+        if (studentAssessment.assessmentCompletion.completed) {
+          await deleteCompletion(studentAssessment.courseParticipationID)
+        } else {
+          await createCompletion({
+            courseParticipationID: studentAssessment.courseParticipationID,
+            coursePhaseID: phaseId ?? '',
+            author: userName,
+            completedAt: new Date().toISOString(),
+            completed: true,
+          })
+          passStatus = PassStatus.PASSED
+        }
+        await updateParticipation({
+          coursePhaseID: participant.coursePhaseID,
+          courseParticipationID: participant.courseParticipationID,
+          passStatus: passStatus,
+          restrictedData: participant.restrictedData,
+          studentReadableData: participant.studentReadableData,
+        })
+      } catch (err) {
+        setError('An error occurred while updating the assessment completion status.')
+      }
     }
-    updateParticipation({
-      coursePhaseID: participant.coursePhaseID,
-      courseParticipationID: participant.courseParticipationID,
-      passStatus: passStatus,
-      restrictedData: participant.restrictedData,
-      studentReadableData: participant.studentReadableData,
-    })
+
+    handleCompletion()
     setDialogOpen(false)
   }
 
