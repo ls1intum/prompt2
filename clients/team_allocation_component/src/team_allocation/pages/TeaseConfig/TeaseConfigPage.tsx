@@ -4,7 +4,7 @@ import { StudentDataCheck } from './components/StudentDataCheck'
 export const TeaseConfigPage = (): JSX.Element => {
   return (
     <>
-      <ManagementPageHeader>Tease Config</ManagementPageHeader>
+      <ManagementPageHeader>TEASE Configuration</ManagementPageHeader>
       <p>
         TEASE is a team matching tool that matches students to projects based on their preferences
         and skills. This page offers functionality for you to check if all data for your students is
