@@ -99,6 +99,80 @@ func hasCoursePhasePermission(userPermissions map[string]bool, semesterTag, cour
 	return userPermissions[requiredPermission]
 }
 
+func GetTeaseStudentsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]teaseDTO.Student, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	coreURL := utils.GetCoreUrl()
+	coursePhaseParticipations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.Error("could not get students from core: ", err)
+		return nil, err
+	}
+
+	mappedStudents := make([]teaseDTO.Student, 0, len(coursePhaseParticipations))
+	for _, cp := range coursePhaseParticipations {
+		projectPreferences, err := getTeaseProjectPreferences(ctxWithTimeout, coursePhaseID, cp.CourseParticipationID)
+		if err != nil {
+			log.Error("could not get project preferences for course participation: ", err)
+			return nil, err
+		}
+
+		skillResponses, err := getTeaseSkillLevel(ctxWithTimeout, coursePhaseID, cp.CourseParticipationID)
+		if err != nil {
+			log.Error("could not get skill responses for course participation: ", err)
+			return nil, err
+		}
+
+		student, err := teaseDTO.ConvertCourseParticipationToTeaseStudent(cp, projectPreferences, skillResponses)
+		if err != nil {
+			log.Error("could not convert course participation to tease student: ", err)
+			return nil, err
+		}
+		mappedStudents = append(mappedStudents, student)
+	}
+
+	return mappedStudents, nil
+}
+
+func getTeaseProjectPreferences(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) ([]teaseDTO.ProjectPreference, error) {
+	teamPreferences, err := TeaseServiceSingleton.queries.GetStudentTeamPreferences(ctx, db.GetStudentTeamPreferencesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error("could not get team preferences for course participation: ", err)
+		return nil, err
+	} else if err != nil && errors.Is(err, sql.ErrNoRows) {
+		log.WithFields(log.Fields{
+			"course_participation_id": courseParticipationID,
+			"course_phase_id":         coursePhaseID,
+		}).Warn("no team preferences found for this course participation, continuing anyway")
+		return []teaseDTO.ProjectPreference{}, nil
+	}
+
+	return teaseDTO.GetProjectPreferenceFromDBModel(teamPreferences), nil
+}
+
+func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) ([]teaseDTO.StudentSkillResponse, error) {
+	skills, err := TeaseServiceSingleton.queries.GetStudentSkillResponses(ctx, db.GetStudentSkillResponsesParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error("could not get skills for course participation: ", err)
+		return nil, err
+	} else if err != nil && errors.Is(err, sql.ErrNoRows) {
+		log.WithFields(log.Fields{
+			"course_participation_id": courseParticipationID,
+			"course_phase_id":         coursePhaseID,
+		}).Warn("no skills found for this course participation, continuing anyway")
+		return []teaseDTO.StudentSkillResponse{}, nil
+	}
+
+	return teaseDTO.GetTeaseStudentSkillResponseFromDBModel(skills), nil
+}
+
 func GetTeaseSkillsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.Skill, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
