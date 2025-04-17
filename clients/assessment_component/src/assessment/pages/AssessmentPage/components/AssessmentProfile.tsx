@@ -78,13 +78,13 @@ export const AssessmentProfile = ({
           restrictedData: participant.restrictedData,
           studentReadableData: participant.studentReadableData,
         })
+        setDialogOpen(false)
       } catch (err) {
         setError('An error occurred while updating the assessment completion status.')
       }
     }
 
     handleCompletion()
-    setDialogOpen(false)
   }
 
   return (

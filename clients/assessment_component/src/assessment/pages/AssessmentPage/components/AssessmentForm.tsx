@@ -84,11 +84,11 @@ export const AssessmentForm = ({
         <div>
           <div className='flex items-center gap-2 mb-2'>
             <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-            <h3 className='text-base font-medium text-gray-100'>{competency.name}</h3>
+            <h3 className='text-base font-medium'>{competency.name}</h3>
           </div>
-          <p className='text-xs text-gray-400 line-clamp-2'>{competency.description}</p>
+          <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
           {completed && (
-            <div className='flex items-center gap-1 mt-2 text-xs text-gray-400'>
+            <div className='flex items-center gap-1 mt-2 text-xs text-muted-foreground'>
               <LockIcon className='h-3 w-3' />
               <span>Assessment completed</span>
             </div>
@@ -109,19 +109,19 @@ export const AssessmentForm = ({
                   disabled={completed}
                   className={cn(
                     'w-full text-sm border-2 rounded-lg p-3 transition-all text-left',
-                    isSelected ? config.selectedBg : 'bg-gray-700',
+                    isSelected ? config.selectedBg : 'bg-blue-50',
                     isSelected && config.textColor,
                     !completed &&
-                      'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500',
+                      'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                     completed && 'opacity-80 cursor-not-allowed',
                   )}
                 >
                   <div className='flex justify-between mb-1'>
-                    <span className='font-semibold text-gray-100'>{config.title}</span>
+                    <span className='font-semibold'>{config.title}</span>
                     <span>{config.icon}</span>
                   </div>
 
-                  <p className='line-clamp-3 text-gray-400'>{competency[level]}</p>
+                  <p className='line-clamp-3 text-muted-foreground'>{competency[level]}</p>
                 </button>
               )
             })}
@@ -138,10 +138,10 @@ export const AssessmentForm = ({
                     <Textarea
                       placeholder={completed ? '' : 'additional comments'}
                       className={cn(
-                        'resize-none text-xs h-full bg-gray-800 text-gray-100',
+                        'resize-none text-xs h-full',
                         form.formState.errors.comment &&
                           'border border-destructive focus-visible:ring-destructive',
-                        completed && 'bg-gray-700 cursor-not-allowed opacity-80',
+                        completed && 'bg-gray-100 cursor-not-allowed opacity-80',
                       )}
                       disabled={completed}
                       readOnly={completed}
@@ -154,7 +154,7 @@ export const AssessmentForm = ({
             />
 
             {assessment && (
-              <div className='text-xs text-gray-400 mt-2'>
+              <div className='text-xs text-muted-foreground mt-2'>
                 <div>
                   Last assessed by {assessment.author} at{' '}
                   {format(new Date(assessment.assessedAt), 'MMM d, yyyy')}
