@@ -425,9 +425,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  assessmentCompletion:
-                    $ref: "#/components/schemas/AssessmentCompletion"
+                $ref: "#/components/schemas/AssessmentCompletion"
     delete:
       summary: Unmark an AssessmentCompletion of a student
       tags: [Assessment]
