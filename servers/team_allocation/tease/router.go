@@ -22,9 +22,8 @@ func setupTeaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedR
 	teaseCoursePhaseRouter := teaseRouter.Group("/course_phase/:coursePhaseID")
 	teaseCoursePhaseRouter.GET("/students", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeaseStudentsForCoursePhase)
 
-	teaseCoursePhaseRouter.PUT("/allocations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), putAllocation)
-	teaseCoursePhaseRouter.GET("/allocations/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getStudentAllocation)
-	teaseCoursePhaseRouter.GET("/allocations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllAllocations)
+	teaseCoursePhaseRouter.POST("/allocations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), postAllocations)
+	teaseCoursePhaseRouter.GET("/allocations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllocations)
 }
 
 func getAllCoursePhases(c *gin.Context) {
@@ -76,8 +75,9 @@ func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, gin.H{"error": err.Error()})
 }
 
-func getAllAllocations(c *gin.Context) {
+func getAllocations(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+
 	if err != nil {
 		handleError(c, http.StatusBadRequest, errors.New("invalid course phase ID"))
 		return
@@ -92,41 +92,19 @@ func getAllAllocations(c *gin.Context) {
 	c.JSON(http.StatusOK, allocations)
 }
 
-func getStudentAllocation(c *gin.Context) {
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, errors.New("invalid course phase ID"))
-		return
-	}
-
-	allocation, err := GetStudentAllocation(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, allocation)
-}
-
-func putAllocation(c *gin.Context) {
-	var req teaseDTO.AllocationRequest
+func postAllocations(c *gin.Context) {
+	var req []teaseDTO.Allocation
 
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err := PutAllocation(c, req.CourseParticipationID, req.TeamID, req.CoursePhaseID)
+	err := PostAllocations(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Allocation created successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Allocations created successfully"})
 }

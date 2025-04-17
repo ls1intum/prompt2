@@ -182,22 +182,7 @@ func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (
 	return dbAllocations, nil
 }
 
-func GetStudentAllocation(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) (db.Allocation, error) {
-
-	arg := db.GetAllocationForStudentParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	}
-
-	dbAllocation, err := TeaseServiceSingleton.queries.GetAllocationForStudent(ctx, arg)
-	if err != nil {
-		log.Error("could not get the allocation from the database: ", err)
-		return db.Allocation{}, fmt.Errorf("could not get the allocation from the database: %w", err)
-	}
-	return dbAllocation, nil
-}
-
-func PutAllocation(ctx context.Context, courseParticipationID uuid.UUID, teamID uuid.UUID, coursePhaseID uuid.UUID) error {
+func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) error {
 	tx, err := TeaseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -205,41 +190,41 @@ func PutAllocation(ctx context.Context, courseParticipationID uuid.UUID, teamID 
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := TeaseServiceSingleton.queries.WithTx(tx)
 
-	arg := db.GetAllocationForStudentParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	}
-	existingAllocation, err := qtx.GetAllocationForStudent(ctx, arg)
-	if err == nil {
-		updateArg := db.UpdateAllocationParams{
-			ID:            existingAllocation.ID,
-			CoursePhaseID: coursePhaseID,
-			TeamID:        teamID,
-		}
-		err = qtx.UpdateAllocation(ctx, updateArg)
-		if err != nil {
-			log.Error("could not update the allocation in the database: ", err)
-			return errors.New("could not update the allocation in the database")
-		}
-	} else if !errors.Is(err, sql.ErrNoRows) {
-		log.Error("error checking for existing allocation: ", err)
-		return errors.New("could not check for existing allocation")
-	} else {
-		err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
-			ID:                    uuid.New(),
-			CourseParticipationID: courseParticipationID,
-			TeamID:                teamID,
-			CoursePhaseID:         coursePhaseID,
-		})
-		if err != nil {
-			log.Error("could not create the allocation in the database: ", err)
-			return errors.New("could not create the allocation in the database")
+	for _, allocation := range allocations {
+		for _, studentID := range allocation.Students {
+			_, err = qtx.GetAllocationForStudent(ctx, studentID)
+			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
+						ID:                    uuid.New(),
+						CourseParticipationID: studentID,
+						TeamID:                allocation.ProjectID,
+					})
+					if err != nil {
+						log.Errorf("failed to create allocation for student %s: %v", studentID, err)
+						return fmt.Errorf("failed to create allocation: %w", err)
+					}
+				} else {
+					log.Errorf("error checking existing allocation for student %s: %v", studentID, err)
+					return fmt.Errorf("error fetching existing allocation: %w", err)
+				}
+			} else {
+				err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
+					CourseParticipationID: studentID,
+					TeamID:                allocation.ProjectID,
+				})
+				if err != nil {
+					log.Errorf("failed to update allocation for student %s: %v", studentID, err)
+					return fmt.Errorf("failed to update allocation: %w", err)
+				}
+			}
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		log.Error(err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		log.Error("transaction commit failed: ", err)
+		return fmt.Errorf("transaction commit failed: %w", err)
 	}
+
 	return nil
 }
