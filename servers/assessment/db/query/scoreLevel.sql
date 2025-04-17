@@ -1,0 +1,83 @@
+-- name: GetAllScoreLevels :many
+WITH score_values AS (
+    SELECT
+        a.course_participation_id,
+        a.score,
+        -- Map score levels to integers
+        CASE a.score
+            WHEN 'novice' THEN 1
+            WHEN 'intermediate' THEN 2
+            WHEN 'advanced' THEN 3
+            WHEN 'expert' THEN 4
+        END AS score_numeric,
+        comp.id AS competency_id,
+        comp.weight AS competency_weight,
+        cat.weight AS category_weight
+    FROM assessment a
+    JOIN competency comp ON a.competency_id = comp.id
+    JOIN category cat ON comp.category_id = cat.id
+    WHERE a.course_phase_id = $1
+),
+weighted_scores AS (
+    SELECT
+        course_participation_id,
+        SUM(score_numeric * competency_weight * category_weight) AS weighted_score_sum,
+        SUM(competency_weight * category_weight) AS total_weight
+    FROM score_values
+    GROUP BY course_participation_id
+),
+final_scores AS (
+    SELECT
+        course_participation_id,
+        ROUND(weighted_score_sum * 1.0 / total_weight, 2) AS average_score_numeric
+    FROM weighted_scores
+)
+SELECT
+    course_participation_id,
+    CASE
+        WHEN average_score_numeric < 1.5 THEN 'novice'
+        WHEN average_score_numeric < 2.5 THEN 'intermediate'
+        WHEN average_score_numeric < 3.5 THEN 'advanced'
+        ELSE 'expert'
+    END AS score_level
+FROM final_scores;
+
+-- name: GetScoreLevelByCourseParticipationID :one
+WITH score_values AS (
+    SELECT
+        a.course_participation_id,
+        a.score,
+        CASE a.score
+            WHEN 'novice' THEN 1
+            WHEN 'intermediate' THEN 2
+            WHEN 'advanced' THEN 3
+            WHEN 'expert' THEN 4
+        END AS score_numeric,
+        comp.weight AS competency_weight,
+        cat.weight AS category_weight
+    FROM assessment a
+    JOIN competency comp ON a.competency_id = comp.id
+    JOIN category cat ON comp.category_id = cat.id
+    WHERE a.course_phase_id = $1
+      AND a.course_participation_id = $2
+),
+weighted_scores AS (
+    SELECT
+        SUM(score_numeric * competency_weight * category_weight) AS weighted_score_sum,
+        SUM(competency_weight * category_weight) AS total_weight
+    FROM score_values
+),
+final_score AS (
+    SELECT
+        ROUND(weighted_score_sum * 1.0 / total_weight, 2) AS average_score_numeric
+    FROM weighted_scores
+)
+SELECT
+    CASE
+        WHEN average_score_numeric < 1.5 THEN 'novice'
+        WHEN average_score_numeric < 2.5 THEN 'intermediate'
+        WHEN average_score_numeric < 3.5 THEN 'advanced'
+        ELSE 'expert'
+    END AS score_level
+FROM final_score;
+

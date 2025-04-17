@@ -340,7 +340,7 @@ func initAssessmentChallenge() error {
 				"enum": ["novice", "intermediate", "advanced", "expert"]
 			}`),
 				VersionNumber: 1,
-				EndpointPath:  "/scoreLevel",
+				EndpointPath:  "/student-assessment/scoreLevel",
 			})
 			if err != nil {
 				log.Error("failed to create assessment output type: ", err)

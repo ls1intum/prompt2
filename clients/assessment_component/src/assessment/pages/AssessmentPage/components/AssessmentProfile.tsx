@@ -106,7 +106,7 @@ export const AssessmentProfile = ({
                 <AssessmentStatusBadge
                   remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
                 />
-                <ScoreLevelBadge score={averageScore} />
+                <ScoreLevelBadge score={averageScore} scoreLevel={studentAssessment.scoreLevel} />
               </div>
             </div>
           </div>

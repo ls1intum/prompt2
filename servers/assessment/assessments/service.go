@@ -15,6 +15,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -133,11 +134,18 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
 	}
 
+	scoreLevel, err := scoreLevel.GetScoreLevelByCourseParticipationID(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not get score level: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get score level")
+	}
+
 	return assessmentDTO.StudentAssessment{
 		CourseParticipationID: courseParticipationID,
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
 		AssessmentCompletion:  completion,
+		ScoreLevel:            scoreLevel,
 	}, nil
 }
 
