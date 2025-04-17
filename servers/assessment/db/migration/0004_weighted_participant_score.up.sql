@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE VIEW weighted_participant_scores AS
 WITH score_values AS (
     SELECT
@@ -29,3 +31,18 @@ SELECT
     course_participation_id,
     ROUND((weighted_score_sum / total_weight)::numeric, 2) AS score_numeric
 FROM weighted_scores;
+
+CREATE OR REPLACE VIEW score_level_categories AS
+SELECT
+    course_phase_id,
+    course_participation_id,
+    score_numeric,
+    CASE
+        WHEN score_numeric < 1.5 THEN 'novice'
+        WHEN score_numeric < 2.5 THEN 'intermediate'
+        WHEN score_numeric < 3.5 THEN 'advanced'
+        ELSE 'expert'
+    END AS score_level
+FROM weighted_participant_scores;
+
+COMMIT;

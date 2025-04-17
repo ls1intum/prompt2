@@ -120,7 +120,10 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	}
 
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
-	var level = scoreLevelDTO.StudentScore{}
+	var level = scoreLevelDTO.StudentScore{
+		ScoreLevel: db.ScoreLevelNovice,
+		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
+	}
 	if len(assessments) > 0 {
 		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {

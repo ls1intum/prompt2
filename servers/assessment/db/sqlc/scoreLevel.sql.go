@@ -15,13 +15,8 @@ import (
 const getAllScoreLevels = `-- name: GetAllScoreLevels :many
 SELECT
     course_participation_id,
-    CASE
-        WHEN score_numeric < 1.5 THEN 'novice'
-        WHEN score_numeric < 2.5 THEN 'intermediate'
-        WHEN score_numeric < 3.5 THEN 'advanced'
-        ELSE 'expert'
-    END AS score_level
-FROM weighted_participant_scores
+    score_level
+FROM score_level_categories
 WHERE course_phase_id = $1
 `
 
@@ -50,47 +45,12 @@ func (q *Queries) GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID
 	return items, nil
 }
 
-const getAllScoreLevelsNumeric = `-- name: GetAllScoreLevelsNumeric :many
-SELECT course_participation_id, score_numeric
-FROM weighted_participant_scores
-WHERE course_phase_id = $1
-`
-
-type GetAllScoreLevelsNumericRow struct {
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
-	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
-}
-
-func (q *Queries) GetAllScoreLevelsNumeric(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllScoreLevelsNumericRow, error) {
-	rows, err := q.db.Query(ctx, getAllScoreLevelsNumeric, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetAllScoreLevelsNumericRow
-	for rows.Next() {
-		var i GetAllScoreLevelsNumericRow
-		if err := rows.Scan(&i.CourseParticipationID, &i.ScoreNumeric); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getScoreLevelByCourseParticipationID = `-- name: GetScoreLevelByCourseParticipationID :one
 SELECT
-    CASE
-        WHEN score_numeric < 1.5 THEN 'novice'
-        WHEN score_numeric < 2.5 THEN 'intermediate'
-        WHEN score_numeric < 3.5 THEN 'advanced'
-        ELSE 'expert'
-    END AS score_level
-FROM weighted_participant_scores
-WHERE course_phase_id = $1 AND course_participation_id = $2
+    score_level
+FROM score_level_categories
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
 `
 
 type GetScoreLevelByCourseParticipationIDParams struct {
@@ -106,9 +66,11 @@ func (q *Queries) GetScoreLevelByCourseParticipationID(ctx context.Context, arg 
 }
 
 const getScoreLevelByCourseParticipationIDNumeric = `-- name: GetScoreLevelByCourseParticipationIDNumeric :one
-SELECT score_numeric
+SELECT
+    COALESCE(score_numeric, 0) AS score_numeric
 FROM weighted_participant_scores
-WHERE course_phase_id = $1 AND course_participation_id = $2
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
 `
 
 type GetScoreLevelByCourseParticipationIDNumericParams struct {
@@ -121,4 +83,37 @@ func (q *Queries) GetScoreLevelByCourseParticipationIDNumeric(ctx context.Contex
 	var score_numeric pgtype.Numeric
 	err := row.Scan(&score_numeric)
 	return score_numeric, err
+}
+
+const getStudentScoreWithLevel = `-- name: GetStudentScoreWithLevel :one
+SELECT
+    course_participation_id,
+    score_numeric,
+    CASE
+        WHEN score_numeric < 1.5 THEN 'novice'
+        WHEN score_numeric < 2.5 THEN 'intermediate'
+        WHEN score_numeric < 3.5 THEN 'advanced'
+        ELSE 'expert'
+    END AS score_level
+FROM weighted_participant_scores
+WHERE course_phase_id = $1
+  AND course_participation_id = $2
+`
+
+type GetStudentScoreWithLevelParams struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+}
+
+type GetStudentScoreWithLevelRow struct {
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
+	ScoreLevel            string         `json:"score_level"`
+}
+
+func (q *Queries) GetStudentScoreWithLevel(ctx context.Context, arg GetStudentScoreWithLevelParams) (GetStudentScoreWithLevelRow, error) {
+	row := q.db.QueryRow(ctx, getStudentScoreWithLevel, arg.CoursePhaseID, arg.CourseParticipationID)
+	var i GetStudentScoreWithLevelRow
+	err := row.Scan(&i.CourseParticipationID, &i.ScoreNumeric, &i.ScoreLevel)
+	return i, err
 }
