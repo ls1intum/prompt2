@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
-import ScoreLevelBadge from './ScoreLevelBadge'
+import StudentScoreBadge from './StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 
@@ -99,10 +99,7 @@ export const AssessmentProfile = ({
                   remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
                 />
                 {studentAssessment.assessments.length > 0 && (
-                  <ScoreLevelBadge
-                    score={studentAssessment.studentScore.score}
-                    scoreLevel={studentAssessment.studentScore.scoreLevel}
-                  />
+                  <StudentScoreBadge studentScore={studentAssessment.studentScore} />
                 )}
               </div>
             </div>
