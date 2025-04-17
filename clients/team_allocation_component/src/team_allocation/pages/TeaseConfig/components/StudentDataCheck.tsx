@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
-import { Card, CardContent } from '@/components/ui/card'
-import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { CheckCircle, AlertCircle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+
+import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import { TeaseStudent } from 'src/team_allocation/interfaces/tease/student'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
 import { ErrorPage } from '@/components/ErrorPage'
-import { Loader2 } from 'lucide-react'
 
 type ValidationResult = {
   label: string
@@ -15,14 +15,35 @@ type ValidationResult = {
   details?: string
 }
 
+type StudentCheck = {
+  label: string
+  extractor: (student: TeaseStudent) => any
+  isEmpty: (value: any) => boolean
+  missingMessage: string
+}
+
+const checksConfig: StudentCheck[] = [
+  { label: 'First Name', extractor: s => s.firstName, isEmpty: v => !v, missingMessage: 'first names' },
+  { label: 'Last Name', extractor: s => s.lastName, isEmpty: v => !v, missingMessage: 'last names' },
+  { label: 'Gender', extractor: s => s.gender, isEmpty: v => !v, missingMessage: 'gender info' },
+  { label: 'Nationality', extractor: s => s.nationality, isEmpty: v => !v, missingMessage: 'nationality info' },
+  { label: 'Study Degree', extractor: s => s.studyDegree, isEmpty: v => !v, missingMessage: 'study degree info' },
+  { label: 'Study Program', extractor: s => s.studyProgram, isEmpty: v => !v, missingMessage: 'study program info' },
+  { label: 'Semester', extractor: s => s.semester, isEmpty: v => v === 0, missingMessage: 'semester info' },
+  { label: 'Language Proficiency', extractor: s => s.languages.every(l => l.proficiency), isEmpty: v => !v, missingMessage: 'language proficiency info' },
+  { label: 'Skills', extractor: s => s.skill, isEmpty: arr => arr.length === 0, missingMessage: 'skills' },
+  { label: 'Devices', extractor: s => s.devices, isEmpty: arr => arr.length === 0, missingMessage: 'devices' },
+  { label: 'Project Preferences', extractor: s => s.projectPreferences, isEmpty: arr => arr.length === 0, missingMessage: 'project preferences' },
+]
+
 export const StudentDataCheck = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
-    data: fetchedStudents,
-    isPending: isStudentsPending,
-    isError: isStudentsError,
-    refetch: refetchStudents,
+    data: students,
+    isPending,
+    isError,
+    refetch,
   } = useQuery<TeaseStudent[]>({
     queryKey: ['tease_students', phaseId],
     queryFn: () => getAllTeaseStudents(phaseId ?? ''),
@@ -31,71 +52,37 @@ export const StudentDataCheck = (): JSX.Element => {
   const [checks, setChecks] = useState<ValidationResult[] | null>(null)
 
   useEffect(() => {
-    if (!fetchedStudents || fetchedStudents.length === 0) return
+    if (!students || students.length === 0) return
 
-    const results: ValidationResult[] = []
+    const results: ValidationResult[] = checksConfig.map(({ label, extractor, isEmpty, missingMessage }) => {
+      const allValid = students.every(s => !isEmpty(extractor(s)))
+      const noneValid = students.every(s => isEmpty(extractor(s)))
 
-    const allHaveLanguageProficiency = fetchedStudents.every((student) =>
-      student.languages.every((lang) => !!lang.proficiency),
-    )
-    const noneHaveLanguageProficiency = fetchedStudents.every(
-      (student) => student.languages.length === 0,
-    )
-
-    results.push({
-      label: 'Language Proficiency',
-      isValid: allHaveLanguageProficiency,
-      details: allHaveLanguageProficiency
-        ? undefined
-        : noneHaveLanguageProficiency
-          ? 'No students have language proficiency info. Please check if your application contains language proficiencies.'
-          : 'Some students are missing language proficiency info.',
-    })
-
-    const allHaveProjectPreferences = fetchedStudents.every(
-      (student) => student.projectPreferences.length > 0,
-    )
-    const noneHaveProjectPreferences = fetchedStudents.every(
-      (student) => student.projectPreferences.length === 0,
-    )
-
-    results.push({
-      label: 'Project Preferences',
-      isValid: allHaveProjectPreferences,
-      details: allHaveProjectPreferences
-        ? undefined
-        : noneHaveProjectPreferences
-          ? 'No students have project preferences. Please check if your application contains project preferences.'
-          : 'Some students are missing project preferences.',
-    })
-
-    const allHaveSkills = fetchedStudents.every((student) => student.skill.length > 0)
-    const noneHaveSkills = fetchedStudents.every((student) => student.skill.length === 0)
-
-    results.push({
-      label: 'Skills',
-      isValid: allHaveSkills,
-      details: allHaveSkills
-        ? undefined
-        : noneHaveSkills
-          ? 'No students have skills. Please check if your application contains skills.'
-          : 'Some students are missing skills.',
-    })
-
-    const allHaveDevices = fetchedStudents.every((student) => student.devices.length > 0)
-    const noneHaveDevices = fetchedStudents.every((student) => student.devices.length === 0)
-    results.push({
-      label: 'Devices',
-      isValid: allHaveDevices,
-      details: allHaveDevices
-        ? undefined
-        : noneHaveDevices
-          ? 'No students have devices. Please check if your application contains devices.'
-          : 'Some students are missing devices.',
+      return {
+        label,
+        isValid: allValid,
+        details: allValid
+          ? undefined
+          : noneValid
+            ? `No students have ${missingMessage}. Please check if your application contains ${missingMessage}.`
+            : `Some students are missing ${missingMessage}.`,
+      }
     })
 
     setChecks(results)
-  }, [fetchedStudents])
+  }, [students])
+
+  if (isPending) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorPage onRetry={refetch} />
+  }
 
   if (!checks) {
     return (
@@ -106,38 +93,27 @@ export const StudentDataCheck = (): JSX.Element => {
     )
   }
 
-  if (isStudentsPending) {
-    return (
-      <div className='flex justify-center items-center h-64'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-      </div>
-    )
-  }
-  if (isStudentsError) {
-    return <ErrorPage onRetry={refetchStudents} />
-  } else {
-    return (
-      <div className='grid gap-4'>
-        {checks.map((check, index) => (
-          <Card key={index}>
-            <CardContent className='flex items-center gap-4 p-4'>
-              {check.isValid ? (
-                <CheckCircle className='text-green-500' />
-              ) : (
-                <AlertCircle className='text-red-500' />
+  return (
+    <div className='grid gap-4'>
+      {checks.map((check, index) => (
+        <Card key={index}>
+          <CardContent className='flex items-center gap-4 p-4'>
+            {check.isValid ? (
+              <CheckCircle className='text-green-500' />
+            ) : (
+              <AlertCircle className='text-red-500' />
+            )}
+            <div className='flex flex-col'>
+              <span className='font-medium'>{check.label}</span>
+              {check.details && (
+                <span className='mt-1 text-sm text-muted-foreground'>{check.details}</span>
               )}
-              <div className='flex flex-col'>
-                <span className='font-medium'>{check.label}</span>
-                {check.details && (
-                  <span className='mt-1 text-sm text-muted-foreground'>{check.details}</span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
 }
 
 export default StudentDataCheck
