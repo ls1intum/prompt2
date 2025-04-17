@@ -139,3 +139,5 @@ export const StudentDataCheck = (): JSX.Element => {
     )
   }
 }
+
+export default StudentDataCheck
