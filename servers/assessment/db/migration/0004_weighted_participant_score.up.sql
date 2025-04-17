@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE VIEW
     weighted_participant_scores AS
 WITH
@@ -38,3 +40,5 @@ SELECT
     ROUND((weighted_score_sum / total_weight), 2) AS score_numeric
 FROM
     weighted_scores;
+
+COMMIT;
