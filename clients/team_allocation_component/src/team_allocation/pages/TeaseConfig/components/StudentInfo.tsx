@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import { TeaseStudent } from 'src/team_allocation/interfaces/tease/student'
+import StudentDataCheck from './StudentDataCheck'
 
 export const StudentInfo = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -27,13 +28,7 @@ export const StudentInfo = (): JSX.Element => {
       )}
       {fetchedStudents && (
         <div>
-          <ul>
-            {fetchedStudents.map((student) => (
-              <li key={student.id}>
-                {student.firstName} {student.lastName}
-              </li>
-            ))}
-          </ul>
+          <StudentDataCheck students={fetchedStudents} />
         </div>
       )}
     </div>
