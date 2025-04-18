@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
-import { TeaseStudent } from 'src/team_allocation/interfaces/tease/student'
+import { TeaseStudent } from '../../../interfaces/tease/student'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { ErrorPage } from '@/components/ErrorPage'
@@ -120,7 +120,8 @@ export const StudentDataCheck = (): JSX.Element => {
           details: allValid
             ? undefined
             : noneValid
-              ? `No students have ${missingMessage}. Please check if your previouse course phases (e.g. application) forward information on ${missingMessage} to this phase.`
+              ? `No students have ${missingMessage}. Please check if your previouse course phases (e.g. application)
+                forward information on ${missingMessage} to this phase.`
               : `Some students are missing ${missingMessage}.`,
         }
       },
