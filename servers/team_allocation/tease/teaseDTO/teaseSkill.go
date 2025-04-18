@@ -5,18 +5,18 @@ import (
 )
 
 type Skill struct {
-	SkillTitle       string `json:"skillTitle"`
-	SkillID          string `json:"skillId"`
-	SkillDescription string `json:"skillDescription"`
+	Title       string `json:"title"`
+	ID          string `json:"id"`
+	Description string `json:"description"`
 }
 
 func GetTeaseSkillFromDBModel(skills []db.Skill) []Skill {
 	teaseSkills := make([]Skill, 0, len(skills))
 	for _, skill := range skills {
 		teaseSkill := Skill{
-			SkillTitle:       skill.Name,
-			SkillID:          skill.ID.String(),
-			SkillDescription: "",
+			Title:       skill.Name,
+			ID:          skill.ID.String(),
+			Description: "",
 		}
 		teaseSkills = append(teaseSkills, teaseSkill)
 	}
