@@ -28,8 +28,8 @@ type Student struct {
 	IntroCourseProficiency string                 `json:"introCourseProficiency"`
 	Skill                  []StudentSkillResponse `json:"skill"`
 	Devices                []string               `json:"devices"`
-	StudentComments        string                 `json:"studentComments"` // @rappm pls update once your assessment is done
-	TutorComments          string                 `json:"tutorComments"`   // @rappm pls update once your assessment is done
+	StudentComments        []string               `json:"studentComments"` // @rappm pls update once your assessment is done
+	TutorComments          []string               `json:"tutorComments"`   // @rappm pls update once your assessment is done
 	ProjectPreferences     []ProjectPreference    `json:"projectPreferences"`
 }
 
@@ -88,6 +88,8 @@ func ConvertCourseParticipationToTeaseStudent(
 		Devices:               devices,
 		Skill:                 skillResponses,
 		ProjectPreferences:    projectPreferences,
+		StudentComments:       []string{},
+		TutorComments:         []string{},
 		// IntroSelfAssessment, IntroCourseProficiency, StudentComments,
 		// TutorComments can be added when needed
 	}
