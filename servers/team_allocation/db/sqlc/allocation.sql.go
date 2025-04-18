@@ -12,14 +12,11 @@ import (
 )
 
 const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
-WITH old AS (
-    SELECT created_at
-    FROM allocations
-    WHERE course_participation_id = $2
-),
-deleted AS (
+WITH deleted AS (
     DELETE FROM allocations
     WHERE course_participation_id = $2
+      AND course_phase_id = $4
+    RETURNING created_at
 )
 INSERT INTO allocations (
     id,
@@ -31,7 +28,7 @@ INSERT INTO allocations (
 )
 SELECT
     $1, $2, $3, $4,
-    COALESCE((SELECT created_at FROM old), CURRENT_TIMESTAMP),
+    COALESCE((SELECT created_at FROM deleted), CURRENT_TIMESTAMP),
     CURRENT_TIMESTAMP
 `
 
