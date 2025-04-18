@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Book, Calendar, GraduationCap } from 'lucide-react'
+import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import ScoreLevelBadge from './ScoreLevelBadge'
@@ -89,10 +89,18 @@ export const AssessmentProfile = ({
       <Card className='relative overflow-hidden'>
         <CardHeader className='relative'>
           <div className='absolute top-4 right-4'>
-            <Button variant='outline' size='sm' onClick={handleButtonClick}>
-              {studentAssessment.assessmentCompletion.completed
-                ? 'Edit Assessment'
-                : 'Mark Assessment as Final'}
+            <Button size='sm' onClick={handleButtonClick}>
+              {studentAssessment.assessmentCompletion.completed ? (
+                <span className='flex items-center gap-1'>
+                  <Unlock className='h-3.5 w-3.5' />
+                  Edit Assessment
+                </span>
+              ) : (
+                <span className='flex items-center gap-1'>
+                  <Lock className='h-3.5 w-3.5' />
+                  Mark Assessment as Final
+                </span>
+              )}
             </Button>
           </div>
           <div className='flex flex-col sm:flex-row items-center'>
