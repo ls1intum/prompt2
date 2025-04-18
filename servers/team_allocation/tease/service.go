@@ -192,31 +192,14 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) err
 
 	for _, allocation := range allocations {
 		for _, studentID := range allocation.Students {
-			_, err = qtx.GetAllocationForStudent(ctx, studentID)
+			err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
+				ID:                    uuid.New(),
+				CourseParticipationID: studentID,
+				TeamID:                allocation.ProjectID,
+			})
 			if err != nil {
-				if errors.Is(err, sql.ErrNoRows) {
-					err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
-						ID:                    uuid.New(),
-						CourseParticipationID: studentID,
-						TeamID:                allocation.ProjectID,
-					})
-					if err != nil {
-						log.Errorf("failed to create allocation for student %s: %v", studentID, err)
-						return fmt.Errorf("failed to create allocation: %w", err)
-					}
-				} else {
-					log.Errorf("error checking existing allocation for student %s: %v", studentID, err)
-					return fmt.Errorf("error fetching existing allocation: %w", err)
-				}
-			} else {
-				err = qtx.UpdateAllocation(ctx, db.UpdateAllocationParams{
-					CourseParticipationID: studentID,
-					TeamID:                allocation.ProjectID,
-				})
-				if err != nil {
-					log.Errorf("failed to update allocation for student %s: %v", studentID, err)
-					return fmt.Errorf("failed to update allocation: %w", err)
-				}
+				log.Error("could not create or update allocation: ", err)
+				return fmt.Errorf("could not create or update allocation: %w", err)
 			}
 		}
 	}

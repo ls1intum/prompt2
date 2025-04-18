@@ -4,7 +4,7 @@ FROM allocations a
 JOIN team t ON a.team_id = t.id
 WHERE t.course_phase_id = $1;
 
--- name: CreateAllocation :exec
+-- name: CreateOrUpdateAllocation :exec
 INSERT INTO allocations (
     id,
     course_participation_id,
@@ -14,14 +14,13 @@ INSERT INTO allocations (
     updated_at
 ) VALUES (
     $1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-);
+)
+ON CONFLICT (course_participation_id, team_id)
+DO UPDATE SET
+    team_id = EXCLUDED.team_id,
+    course_phase_id = EXCLUDED.course_phase_id,
+    updated_at = CURRENT_TIMESTAMP;
 
--- name: UpdateAllocation :exec
-UPDATE allocations
-SET team_id = $2,
-    course_phase_id = $3,
-    updated_at = CURRENT_TIMESTAMP
-WHERE course_participation_id = $1;
 
 -- name: DeleteAllocationsByPhase :exec
 DELETE FROM allocations a

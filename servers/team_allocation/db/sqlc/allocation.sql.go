@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const createAllocation = `-- name: CreateAllocation :exec
+const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
 INSERT INTO allocations (
     id,
     course_participation_id,
@@ -22,17 +22,22 @@ INSERT INTO allocations (
 ) VALUES (
     $1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 )
+ON CONFLICT (course_participation_id, team_id)
+DO UPDATE SET
+    team_id = EXCLUDED.team_id,
+    course_phase_id = EXCLUDED.course_phase_id,
+    updated_at = CURRENT_TIMESTAMP
 `
 
-type CreateAllocationParams struct {
+type CreateOrUpdateAllocationParams struct {
 	ID                    uuid.UUID `json:"id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	TeamID                uuid.UUID `json:"team_id"`
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) CreateAllocation(ctx context.Context, arg CreateAllocationParams) error {
-	_, err := q.db.Exec(ctx, createAllocation,
+func (q *Queries) CreateOrUpdateAllocation(ctx context.Context, arg CreateOrUpdateAllocationParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateAllocation,
 		arg.ID,
 		arg.CourseParticipationID,
 		arg.TeamID,
@@ -111,23 +116,4 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateAllocation = `-- name: UpdateAllocation :exec
-UPDATE allocations
-SET team_id = $2,
-    course_phase_id = $3,
-    updated_at = CURRENT_TIMESTAMP
-WHERE course_participation_id = $1
-`
-
-type UpdateAllocationParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	TeamID                uuid.UUID `json:"team_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) UpdateAllocation(ctx context.Context, arg UpdateAllocationParams) error {
-	_, err := q.db.Exec(ctx, updateAllocation, arg.CourseParticipationID, arg.TeamID, arg.CoursePhaseID)
-	return err
 }
