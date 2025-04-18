@@ -16,6 +16,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,22 +27,6 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func checkAssessmentCompletionExists(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID uuid.UUID) error {
-	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot create/update assessment, completion already exists")
-		return errors.New("assessment was already marked as completed and cannot be modified")
-	}
-	return nil
-}
-
 func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
@@ -51,7 +36,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = checkAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -86,7 +71,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = checkAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
