@@ -300,22 +300,24 @@ func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, courseP
 	return items, nil
 }
 
-const getCoursePhaseTypeByName = `-- name: GetCoursePhaseTypeByName :one
-SELECT id, name, initial_phase, base_url
-FROM course_phase_type
-WHERE name = $1
+const insertAssessmentScoreOutput = `-- name: InsertAssessmentScoreOutput :exec
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      1,
+      '/student-assessment/scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
+        }'::jsonb
+)
 `
 
-func (q *Queries) GetCoursePhaseTypeByName(ctx context.Context, name string) (CoursePhaseType, error) {
-	row := q.db.QueryRow(ctx, getCoursePhaseTypeByName, name)
-	var i CoursePhaseType
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.InitialPhase,
-		&i.BaseUrl,
-	)
-	return i, err
+func (q *Queries) InsertAssessmentScoreOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertAssessmentScoreOutput, coursePhaseTypeID)
+	return err
 }
 
 const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
@@ -494,25 +496,6 @@ func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, err
 	return does_exist, err
 }
 
-const testAssessmentOutputTypeExists = `-- name: TestAssessmentOutputTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type_participation_provided_output_dto
-    WHERE course_phase_type_id = (
-        SELECT id
-        FROM course_phase_type
-        WHERE name = 'Assessment'
-    )
-) AS does_exist
-`
-
-func (q *Queries) TestAssessmentOutputTypeExists(ctx context.Context) (bool, error) {
-	row := q.db.QueryRow(ctx, testAssessmentOutputTypeExists)
-	var does_exist bool
-	err := row.Scan(&does_exist)
-	return does_exist, err
-}
-
 const testAssessmentTypeExists = `-- name: TestAssessmentTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -616,29 +599,4 @@ func (q *Queries) TestTeamAllocationTypeExists(ctx context.Context) (bool, error
 	var does_exist bool
 	err := row.Scan(&does_exist)
 	return does_exist, err
-}
-
-const updateCoursePhaseType = `-- name: UpdateCoursePhaseType :exec
-UPDATE course_phase_type
-SET name = $2,
-    initial_phase = $3,
-    base_url = $4
-WHERE id = $1
-`
-
-type UpdateCoursePhaseTypeParams struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
-	BaseUrl      string    `json:"base_url"`
-}
-
-func (q *Queries) UpdateCoursePhaseType(ctx context.Context, arg UpdateCoursePhaseTypeParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhaseType,
-		arg.ID,
-		arg.Name,
-		arg.InitialPhase,
-		arg.BaseUrl,
-	)
-	return err
 }

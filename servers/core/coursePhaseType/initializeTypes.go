@@ -292,62 +292,38 @@ func initAssessmentChallenge() error {
 		return err
 	}
 	if !exists {
-		// 1.) Create the phase
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer utils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
+		// create the phase
 		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Assessment",
 			InitialPhase: false,
-			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
+			BaseUrl:      "{CORE_HOST}/assessment/api",
 		}
-		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newAssessment)
+		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
 			log.Error("failed to create assessment module: ", err)
 			return err
 		}
 
-		// No requires inputs and no provided outputs
-
-	} else {
-		outputTypeExists, err := CoursePhaseTypeServiceSingleton.queries.TestAssessmentOutputTypeExists(ctx)
+		// create the required output
+		err = qtx.InsertAssessmentScoreOutput(ctx, newAssessment.ID)
 		if err != nil {
-			log.Error("failed to check if assessment output type exists: ", err)
+			log.Error("failed to create required assessment output: ", err)
 			return err
 		}
-		if !outputTypeExists {
-			assessmentType, err := CoursePhaseTypeServiceSingleton.queries.GetCoursePhaseTypeByName(ctx, "Assessment")
-			if err != nil {
-				log.Error("failed to get assessment module: ", err)
-				return err
-			}
 
-			err = CoursePhaseTypeServiceSingleton.queries.UpdateCoursePhaseType(ctx, db.UpdateCoursePhaseTypeParams{
-				ID:           assessmentType.ID,
-				Name:         "Assessment",
-				InitialPhase: false,
-				BaseUrl:      "{CORE_HOST}/assessment/api",
-			})
-			if err != nil {
-				log.Error("failed to update assessment module: ", err)
-				return err
-			}
-
-			err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseTypeProvidedOutput(ctx, db.CreateCoursePhaseTypeProvidedOutputParams{
-				ID:                uuid.New(),
-				CoursePhaseTypeID: assessmentType.ID,
-				DtoName:           "scoreLevel",
-				Specification: []byte(`{
-				"type": "string",
-				"enum": ["novice", "intermediate", "advanced", "expert"]
-			}`),
-				VersionNumber: 1,
-				EndpointPath:  "/student-assessment/scoreLevel",
-			})
-			if err != nil {
-				log.Error("failed to create assessment output type: ", err)
-				return err
-			}
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
 		}
 
+	} else {
 		log.Debug("assessment module already exists")
 	}
 

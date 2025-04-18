@@ -1,19 +1,6 @@
 -- name: GetAllCoursePhaseTypes :many
 SELECT * FROM course_phase_type;
 
--- name: GetCoursePhaseTypeByName :one
-SELECT *
-FROM course_phase_type
-WHERE name = $1;
-
--- name: UpdateCoursePhaseType :exec
-UPDATE course_phase_type
-SET name = $2,
-    initial_phase = $3,
-    base_url = $4
-WHERE id = $1;
-
-
 -- name: GetCoursePhaseRequiredParticipationInputs :many
 SELECT *
 FROM course_phase_type_participation_required_input_dto
@@ -81,17 +68,6 @@ SELECT EXISTS (
     SELECT 1
     FROM course_phase_type
     WHERE name = 'Assessment'
-) AS does_exist;
-
--- name: TestAssessmentOutputTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type_participation_provided_output_dto
-    WHERE course_phase_type_id = (
-        SELECT id
-        FROM course_phase_type
-        WHERE name = 'Assessment'
-    )
 ) AS does_exist;
 
 -- name: TestTeamAllocationTypeExists :one
@@ -287,5 +263,19 @@ VALUES (
             },
             "required": ["teamID", "teamName"]
         }
+        }'::jsonb
+);
+
+-- name: InsertAssessmentScoreOutput :exec
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      1,
+      '/student-assessment/scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
         }'::jsonb
 );
