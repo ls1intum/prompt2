@@ -26,6 +26,22 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
+func checkAssessmentCompletionExists(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID uuid.UUID) error {
+	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return errors.New("could not check assessment completion existence")
+	}
+	if exists {
+		log.Error("cannot create/update assessment, completion already exists")
+		return errors.New("assessment was already marked as completed and cannot be modified")
+	}
+	return nil
+}
+
 func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
@@ -35,17 +51,9 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-	})
+	err = checkAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot create assessment, completion already exists")
-		return errors.New("assessment was already marked as completed and cannot be modified")
+		return err
 	}
 
 	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
@@ -78,17 +86,9 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-	})
+	err = checkAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot update assessment, completion already exists")
-		return errors.New("assessment was already marked as completed and cannot be modified")
+		return err
 	}
 
 	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
