@@ -60,7 +60,9 @@ type Allocation struct {
 	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	TeamID                uuid.UUID        `json:"team_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
 }
 
 type Skill struct {

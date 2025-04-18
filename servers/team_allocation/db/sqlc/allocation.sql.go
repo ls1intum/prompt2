@@ -11,21 +11,33 @@ import (
 	"github.com/google/uuid"
 )
 
-const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
-INSERT INTO allocations (id, course_participation_id, team_id)
-VALUES ($1, $2, $3)
-ON CONFLICT (course_participation_id) DO UPDATE
-SET team_id = EXCLUDED.team_id
+const createAllocation = `-- name: CreateAllocation :exec
+INSERT INTO allocations (
+    id,
+    course_participation_id,
+    team_id,
+    course_phase_id,
+    created_at,
+    updated_at
+) VALUES (
+    $1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+)
 `
 
-type CreateOrUpdateAllocationParams struct {
+type CreateAllocationParams struct {
 	ID                    uuid.UUID `json:"id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	TeamID                uuid.UUID `json:"team_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) CreateOrUpdateAllocation(ctx context.Context, arg CreateOrUpdateAllocationParams) error {
-	_, err := q.db.Exec(ctx, createOrUpdateAllocation, arg.ID, arg.CourseParticipationID, arg.TeamID)
+func (q *Queries) CreateAllocation(ctx context.Context, arg CreateAllocationParams) error {
+	_, err := q.db.Exec(ctx, createAllocation,
+		arg.ID,
+		arg.CourseParticipationID,
+		arg.TeamID,
+		arg.CoursePhaseID,
+	)
 	return err
 }
 
@@ -33,7 +45,7 @@ const deleteAllocationsByPhase = `-- name: DeleteAllocationsByPhase :exec
 DELETE FROM allocations a
 USING team t
 WHERE a.team_id = t.id
-AND t.course_phase_id = $1
+  AND t.course_phase_id = $1
 `
 
 func (q *Queries) DeleteAllocationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) error {
@@ -42,7 +54,13 @@ func (q *Queries) DeleteAllocationsByPhase(ctx context.Context, coursePhaseID uu
 }
 
 const getAllocationForStudent = `-- name: GetAllocationForStudent :one
-SELECT id, course_participation_id, team_id, created_at
+SELECT
+    id,
+    course_participation_id,
+    team_id,
+    course_phase_id,
+    created_at,
+    updated_at
 FROM allocations
 WHERE course_participation_id = $1
 `
@@ -54,13 +72,15 @@ func (q *Queries) GetAllocationForStudent(ctx context.Context, courseParticipati
 		&i.ID,
 		&i.CourseParticipationID,
 		&i.TeamID,
+		&i.CoursePhaseID,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
-SELECT a.id, a.course_participation_id, a.team_id, a.created_at
+SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at
 FROM allocations a
 JOIN team t ON a.team_id = t.id
 WHERE t.course_phase_id = $1
@@ -79,7 +99,9 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 			&i.ID,
 			&i.CourseParticipationID,
 			&i.TeamID,
+			&i.CoursePhaseID,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -89,4 +111,23 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateAllocation = `-- name: UpdateAllocation :exec
+UPDATE allocations
+SET team_id = $2,
+    course_phase_id = $3,
+    updated_at = CURRENT_TIMESTAMP
+WHERE course_participation_id = $1
+`
+
+type UpdateAllocationParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	TeamID                uuid.UUID `json:"team_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) UpdateAllocation(ctx context.Context, arg UpdateAllocationParams) error {
+	_, err := q.db.Exec(ctx, updateAllocation, arg.CourseParticipationID, arg.TeamID, arg.CoursePhaseID)
+	return err
 }

@@ -195,7 +195,7 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) err
 			_, err = qtx.GetAllocationForStudent(ctx, studentID)
 			if err != nil {
 				if errors.Is(err, sql.ErrNoRows) {
-					err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
+					err = qtx.CreateAllocation(ctx, db.CreateAllocationParams{
 						ID:                    uuid.New(),
 						CourseParticipationID: studentID,
 						TeamID:                allocation.ProjectID,
@@ -209,7 +209,7 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) err
 					return fmt.Errorf("error fetching existing allocation: %w", err)
 				}
 			} else {
-				err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
+				err = qtx.UpdateAllocation(ctx, db.UpdateAllocationParams{
 					CourseParticipationID: studentID,
 					TeamID:                allocation.ProjectID,
 				})
