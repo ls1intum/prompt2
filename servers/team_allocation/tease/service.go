@@ -173,6 +173,32 @@ func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, coursePart
 	return teaseDTO.GetTeaseStudentSkillResponseFromDBModel(skills), nil
 }
 
+func GetTeaseSkillsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.Skill, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	skills, err := TeaseServiceSingleton.queries.GetSkillsByCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get skills for course phase: ", err)
+		return nil, err
+	}
+
+	return teaseDTO.GetTeaseSkillFromDBModel(skills), nil
+}
+
+func GetTeaseTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.TeaseTeam, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	teams, err := TeaseServiceSingleton.queries.GetTeamsByCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error("failed to get teams for course phase: ", err)
+		return nil, err
+	}
+
+	return teaseDTO.GetTeaseTeamResponseFromDBModel(teams), nil
+}
+
 func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.Allocation, error) {
 	dbAllocations, err := TeaseServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
