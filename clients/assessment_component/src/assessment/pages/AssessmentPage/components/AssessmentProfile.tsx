@@ -111,6 +111,7 @@ export const AssessmentProfile = ({
                 </h1>
                 <AssessmentStatusBadge
                   remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
+                  isFinalized={studentAssessment.assessmentCompletion.completed}
                 />
                 <ScoreLevelBadge score={averageScore} />
               </div>
