@@ -12,6 +12,15 @@ import (
 )
 
 const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
+WITH old AS (
+    SELECT created_at
+    FROM allocations
+    WHERE course_participation_id = $2
+),
+deleted AS (
+    DELETE FROM allocations
+    WHERE course_participation_id = $2
+)
 INSERT INTO allocations (
     id,
     course_participation_id,
@@ -19,14 +28,11 @@ INSERT INTO allocations (
     course_phase_id,
     created_at,
     updated_at
-) VALUES (
-    $1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 )
-ON CONFLICT (course_participation_id, team_id)
-DO UPDATE SET
-    team_id = EXCLUDED.team_id,
-    course_phase_id = EXCLUDED.course_phase_id,
-    updated_at = CURRENT_TIMESTAMP
+SELECT
+    $1, $2, $3, $4,
+    COALESCE((SELECT created_at FROM old), CURRENT_TIMESTAMP),
+    CURRENT_TIMESTAMP
 `
 
 type CreateOrUpdateAllocationParams struct {
