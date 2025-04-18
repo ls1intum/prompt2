@@ -3,14 +3,6 @@ import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import ScoreLevelBadge from './ScoreLevelBadge'
@@ -22,7 +14,7 @@ import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
 import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
-import { format } from 'date-fns'
+import { AssessmentCompletionDialog } from './AssessmentCompletionDialog'
 
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
@@ -37,9 +29,14 @@ export const AssessmentProfile = ({
   const [error, setError] = useState<string | null>(null)
   const { phaseId } = useParams<{ phaseId: string }>()
 
-  const { mutate: createCompletion } = useCreateAssessmentCompletion(setError)
-  const { mutate: deleteCompletion } = useDeleteAssessmentCompletion(setError)
-  const { mutate: updateParticipation } = useUpdateCoursePhaseParticipation()
+  const { mutate: createCompletion, isPending: isCreatePending } =
+    useCreateAssessmentCompletion(setError)
+  const { mutate: deleteCompletion, isPending: isUpdatePending } =
+    useDeleteAssessmentCompletion(setError)
+  const { mutate: updateParticipation, isPending: isParticipationPending } =
+    useUpdateCoursePhaseParticipation()
+
+  const isPending = isCreatePending || isUpdatePending || isParticipationPending
 
   const averageScore =
     studentAssessment.assessments.length === 0
@@ -149,59 +146,15 @@ export const AssessmentProfile = ({
         </CardContent>
       </Card>
 
-      <Dialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          if (!open) setError(null) // Clear error when closing dialog
-          setDialogOpen(open)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {studentAssessment.assessmentCompletion.completed
-                ? 'Reopen Assessment for Editing'
-                : 'Mark Assessment as Final'}
-            </DialogTitle>
-            <DialogDescription>
-              {studentAssessment.assessmentCompletion.completed ? (
-                <>
-                  Marked as final by {studentAssessment.assessmentCompletion.author} at{' '}
-                  {format(
-                    new Date(studentAssessment.assessmentCompletion.completedAt),
-                    'MMM d, yyyy',
-                  )}
-                  <br />
-                  Are you sure you want to reopen this assessment for editing? This will allow you
-                  to make changes to the assessment.
-                </>
-              ) : (
-                'Are you sure you want to mark this assessment as final? This will lock the assessment and prevent further changes.'
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          {error && (
-            <Alert variant='destructive'>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              variant={studentAssessment.assessmentCompletion.completed ? 'destructive' : 'default'}
-            >
-              {studentAssessment.assessmentCompletion.completed
-                ? 'Yes, Reopen for Editing'
-                : 'Yes, Mark as Final'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AssessmentCompletionDialog
+        studentAssessment={studentAssessment}
+        isPending={isPending}
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+        error={error}
+        setError={setError}
+        handleConfirm={handleConfirm}
+      />
     </>
   )
 }
