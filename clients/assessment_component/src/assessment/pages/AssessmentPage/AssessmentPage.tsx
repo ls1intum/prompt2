@@ -24,6 +24,14 @@ export const AssessmentPage = (): JSX.Element => {
     refetch: refetchStudentAssessment,
   } = useGetStudentAssessment()
 
+  if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
+  if (isStudentAssessmentPending)
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
+
   if (!studentAssessment) {
     return (
       <ErrorPage
@@ -32,14 +40,6 @@ export const AssessmentPage = (): JSX.Element => {
       />
     )
   }
-
-  if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
-  if (isStudentAssessmentPending)
-    return (
-      <div className='flex justify-center items-center h-64'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-      </div>
-    )
 
   return (
     <div className='space-y-4'>

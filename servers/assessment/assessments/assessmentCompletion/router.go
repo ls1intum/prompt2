@@ -13,12 +13,12 @@ import (
 func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentRouter := routerGroup.Group("/student-assessment/completed")
 
-	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmenAsComplete)
+	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmenTAsComplete)
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentCompletion)
 	assessmentRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), unmarkAssessmentAsCompleted)
 }
 
-func markAssessmenAsComplete(c *gin.Context) {
+func markAssessmenTAsComplete(c *gin.Context) {
 	var req assessmentCompletionDTO.AssessmentCompletion
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)

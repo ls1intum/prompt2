@@ -78,7 +78,7 @@ export const AssessmentForm = ({
       <div
         className={cn(
           'grid grid-cols-4 gap-4 items-start p-4 border rounded-md',
-          completed && 'bg-gray-50 border-gray-200',
+          completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
         <div>

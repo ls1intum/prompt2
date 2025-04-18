@@ -18,6 +18,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,17 +38,9 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-	})
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot create assessment, completion already exists")
-		return errors.New("assessment was already marked as completed and cannot be modified")
+		return err
 	}
 
 	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
@@ -80,17 +73,9 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-	})
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return errors.New("could not check assessment completion existence")
-	}
-	if exists {
-		log.Error("cannot update assessment, completion already exists")
-		return errors.New("assessment was already marked as completed and cannot be modified")
+		return err
 	}
 
 	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
