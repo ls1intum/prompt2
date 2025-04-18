@@ -220,7 +220,7 @@ func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (
 	return teaseAllocations, nil
 }
 
-func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) error {
+func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation, coursePhaseID uuid.UUID) error {
 	tx, err := TeaseServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -234,6 +234,7 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) err
 				ID:                    uuid.New(),
 				CourseParticipationID: studentID,
 				TeamID:                allocation.ProjectID,
+				CoursePhaseID:         coursePhaseID,
 			})
 			if err != nil {
 				log.Error("could not create or update allocation: ", err)

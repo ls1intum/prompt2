@@ -129,14 +129,19 @@ func getAllocations(c *gin.Context) {
 }
 
 func postAllocations(c *gin.Context) {
-	var req []teaseDTO.Allocation
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, errors.New("invalid course phase ID"))
+		return
+	}
 
+	var req []teaseDTO.Allocation
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err := PostAllocations(c, req)
+	err = PostAllocations(c, req, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
