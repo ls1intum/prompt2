@@ -229,12 +229,21 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation, cou
 	qtx := TeaseServiceSingleton.queries.WithTx(tx)
 
 	for _, allocation := range allocations {
+		if allocation.ProjectID == uuid.Nil {
+			return fmt.Errorf("invalid project ID in allocation")
+		}
+		if len(allocation.Students) == 0 {
+			log.Warn("allocation with no students: ", allocation.ProjectID)
+			continue
+		}
 		for _, studentID := range allocation.Students {
+			if studentID == uuid.Nil {
+				return fmt.Errorf("invalid student ID in allocation")
+			}
 			err = qtx.CreateOrUpdateAllocation(ctx, db.CreateOrUpdateAllocationParams{
 				ID:                    uuid.New(),
 				CourseParticipationID: studentID,
 				TeamID:                allocation.ProjectID,
-				CoursePhaseID:         coursePhaseID,
 			})
 			if err != nil {
 				log.Error("could not create or update allocation: ", err)
