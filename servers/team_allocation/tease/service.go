@@ -173,13 +173,25 @@ func getTeaseSkillLevel(ctx context.Context, coursePhaseID uuid.UUID, coursePart
 	return teaseDTO.GetTeaseStudentSkillResponseFromDBModel(skills), nil
 }
 
-func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.Allocation, error) {
+func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.Allocation, error) {
 	dbAllocations, err := TeaseServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the allocations from the database: ", err)
 		return nil, fmt.Errorf("could not get the allocations from the database: %w", err)
 	}
-	return dbAllocations, nil
+	teaseAllocations := make([]teaseDTO.Allocation, 0, len(dbAllocations))
+	for _, dbAllocation := range dbAllocations {
+		students, err := TeaseServiceSingleton.queries.GetStudentsForTeam(ctx, dbAllocation.TeamID)
+		if err != nil {
+			log.Error("could not get students for team: ", err)
+			return nil, fmt.Errorf("could not get students for team: %w", err)
+		}
+		teaseAllocations = append(teaseAllocations, teaseDTO.Allocation{
+			ProjectID: dbAllocation.TeamID,
+			Students:  students,
+		})
+	}
+	return teaseAllocations, nil
 }
 
 func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation) error {

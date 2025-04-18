@@ -117,3 +117,29 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 	}
 	return items, nil
 }
+
+const getStudentsForTeam = `-- name: GetStudentsForTeam :many
+SELECT course_participation_id
+FROM allocations
+WHERE team_id = $1
+`
+
+func (q *Queries) GetStudentsForTeam(ctx context.Context, teamID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getStudentsForTeam, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var course_participation_id uuid.UUID
+		if err := rows.Scan(&course_participation_id); err != nil {
+			return nil, err
+		}
+		items = append(items, course_participation_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

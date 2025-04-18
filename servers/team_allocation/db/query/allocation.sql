@@ -38,3 +38,8 @@ SELECT
     updated_at
 FROM allocations
 WHERE course_participation_id = $1;
+
+-- name: GetStudentsForTeam :many
+SELECT course_participation_id
+FROM allocations
+WHERE team_id = $1;
