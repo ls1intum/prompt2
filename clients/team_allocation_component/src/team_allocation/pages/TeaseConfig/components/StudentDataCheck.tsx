@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, AlertCircle, Loader2, Users, ClipboardCheck } from 'lucide-react'
+import { CheckCircle, AlertCircle, Loader2, Users, ClipboardCheck, RefreshCcw } from 'lucide-react'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -445,12 +445,38 @@ export const StudentDataCheck = (): JSX.Element => {
           <p className='text-sm text-muted-foreground'>
             {students?.length || 0} students in this phase
           </p>
-          <Button onClick={() => refetch()} variant='outline' size='sm' className='gap-2'>
-            <Loader2 className='h-4 w-4' />
+          <Button
+            onClick={() => refetch()}
+            variant='outline'
+            size='sm'
+            className='gap-2'
+            disabled={isPending}
+          >
+            <RefreshCcw className={`h-5 w-5 ${isPending ? 'animate-spin' : ''}`} />
             Refresh Data
           </Button>
         </CardFooter>
       </Card>
+      {!checks.every((c) => c.isValid) && (
+        <p className='text-sm text-muted-foreground mt-2 text-left'>
+          <span className='font-semibold'>
+            Please ensure all student data fields are completed before proceeding to TEASE!{' '}
+          </span>
+        </p>
+      )}
+      <div className='mt-4 w-full'>
+        {checks.every((c) => c.isValid) ? (
+          <Button asChild className='gap-2 w-full'>
+            <a href='https://prompt.aet.cit.tum.de/tease' target='_blank' rel='noopener noreferrer'>
+              Go to TEASE
+            </a>
+          </Button>
+        ) : (
+          <Button disabled className='gap-2 w-full'>
+            Go to TEASE
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
