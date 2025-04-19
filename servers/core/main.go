@@ -112,14 +112,19 @@ func main() {
 	permissionValidation.InitValidationService(*query, conn)
 
 	// this initializes also all available course phase types
-	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
+	environment := utils.GetEnv("ENVIRONMENT", "development")
+	isDevEnvironment := environment == "development"
+	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn, isDevEnvironment)
+
 	coursePhaseAuth.InitCoursePhaseAuthModule(api, *query, conn)
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
+
+	coreHost := utils.GetEnv("CORE_HOST", "localhost:8080")
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn, coreHost)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")

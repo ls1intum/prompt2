@@ -8,11 +8,12 @@ import (
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 )
 
-func InitCoursePhaseParticipationModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
+func InitCoursePhaseParticipationModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, coreHost string) {
 	setupCoursePhaseParticipationRouter(routerGroup, keycloakTokenVerifier.KeycloakMiddleware, checkAccessControlByIDWrapper)
 	CoursePhaseParticipationServiceSingleton = &CoursePhaseParticipationService{
-		queries: queries,
-		conn:    conn,
+		queries:  queries,
+		conn:     conn,
+		coreHost: coreHost,
 	}
 }
 

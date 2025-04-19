@@ -9,18 +9,20 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, base_url)
-VALUES ($1, $2, $3, $4)
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, local_url)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
-	BaseUrl      string    `json:"base_url"`
+	ID           uuid.UUID   `json:"id"`
+	Name         string      `json:"name"`
+	InitialPhase bool        `json:"initial_phase"`
+	BaseUrl      string      `json:"base_url"`
+	LocalUrl     pgtype.Text `json:"local_url"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
@@ -29,6 +31,7 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 		arg.Name,
 		arg.InitialPhase,
 		arg.BaseUrl,
+		arg.LocalUrl,
 	)
 	return err
 }

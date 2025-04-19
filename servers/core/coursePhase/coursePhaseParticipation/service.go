@@ -18,9 +18,10 @@ import (
 )
 
 type CoursePhaseParticipationService struct {
-	queries db.Queries
-	conn    *pgxpool.Pool
-	coreURL string
+	queries          db.Queries
+	conn             *pgxpool.Pool
+	coreHost         string
+	isDevEnvironment bool
 }
 
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
@@ -214,37 +215,38 @@ func GetStudentsOfCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]s
 }
 
 func replaceResolutionURLs(ctx context.Context, resolutionDTOs []coursePhaseParticipationDTO.Resolution, resolveLocally bool) ([]coursePhaseParticipationDTO.Resolution, error) {
-	// Ensure coreURL has a scheme.
-	coreURL := CoursePhaseParticipationServiceSingleton.coreURL
-	if !strings.HasPrefix(coreURL, "http://") && !strings.HasPrefix(coreURL, "https://") {
-		coreURL = "https://" + coreURL
+
+	coreHost := CoursePhaseParticipationServiceSingleton.coreHost
+	if !strings.HasPrefix(coreHost, "http://") && !strings.HasPrefix(coreHost, "https://") {
+		coreHost = "https://" + coreHost
 	}
 
-	for _, resolution := range resolutionDTOs {
-		if strings.HasPrefix(resolution.BaseURL, "{CORE_HOST}") {
-			// no need to update anything
-			if resolveLocally {
-				// get the correct host
-				localURL, err := CoursePhaseParticipationServiceSingleton.queries.GetLocalResolution(ctx, resolution.CoursePhaseID)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get local resolution: %w", err)
-				}
+	for i := range resolutionDTOs {
+		r := &resolutionDTOs[i] // pointer to the real element, not a copy
 
-				if !localURL.Valid {
-					// no local resolution, use coreURL
-					log.Warn("no local resolution found, defaulting to coreURL")
-					resolution.BaseURL = strings.ReplaceAll(resolution.BaseURL, "{CORE_HOST}", coreURL)
-				}
-
-				resolution.BaseURL = strings.ReplaceAll(resolution.BaseURL, "{CORE_HOST}", localURL.String)
-
-			} else {
-				resolution.BaseURL = strings.ReplaceAll(resolution.BaseURL, "{CORE_HOST}", coreURL)
-			}
-
-		} else {
+		if !strings.HasPrefix(r.BaseURL, "{CORE_HOST}") {
 			continue
 		}
+
+		// Decide which host should replace {CORE_HOST}
+		targetHost := coreHost
+		if resolveLocally {
+			localURL, err := CoursePhaseParticipationServiceSingleton.
+				queries.GetLocalResolution(ctx, r.CoursePhaseID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get local resolution: %w", err)
+			}
+
+			if localURL.Valid && localURL.String != "" {
+				targetHost = localURL.String
+			} else {
+				log.Warn("no local resolution found, defaulting to core host")
+			}
+		}
+
+		r.BaseURL = strings.ReplaceAll(r.BaseURL, "{CORE_HOST}", targetHost)
 	}
+
 	return resolutionDTOs, nil
+
 }
