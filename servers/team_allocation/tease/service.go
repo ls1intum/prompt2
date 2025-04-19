@@ -241,6 +241,7 @@ func PostAllocations(ctx context.Context, allocations []teaseDTO.Allocation, cou
 				ID:                    uuid.New(),
 				CourseParticipationID: studentID,
 				TeamID:                allocation.ProjectID,
+				CoursePhaseID:         coursePhaseID,
 			})
 			if err != nil {
 				log.Error("could not create or update allocation: ", err)
