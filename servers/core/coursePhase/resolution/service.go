@@ -11,10 +11,9 @@ import (
 )
 
 type ResolutionService struct {
-	queries          db.Queries
-	conn             *pgxpool.Pool
-	coreHost         string
-	isDevEnvironment bool
+	queries  db.Queries
+	conn     *pgxpool.Pool
+	coreHost string
 }
 
 var ResolutionServiceSingleton *ResolutionService
