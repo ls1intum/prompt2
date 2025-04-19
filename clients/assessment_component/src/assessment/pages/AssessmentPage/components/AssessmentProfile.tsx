@@ -50,6 +50,7 @@ export const AssessmentProfile = ({
       try {
         if (studentAssessment.assessmentCompletion.completed) {
           await deleteCompletion(studentAssessment.courseParticipationID)
+          passStatus = PassStatus.NOT_ASSESSED
         } else {
           await createCompletion({
             courseParticipationID: studentAssessment.courseParticipationID,
