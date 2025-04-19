@@ -19,6 +19,7 @@ import (
 type CoursePhaseParticipationService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
+	coreURL string
 }
 
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
@@ -63,11 +64,7 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 	}
 
-	resolutionDTOs := make([]coursePhaseParticipationDTO.Resolution, 0, len(resolutions))
-	for _, resolution := range resolutions {
-		dto := coursePhaseParticipationDTO.GetResolutionDTOFromDBModel(resolution)
-		resolutionDTOs = append(resolutionDTOs, dto)
-	}
+	resolutionDTOs := coursePhaseParticipationDTO.GetResolutionsDTOFromDBModels(resolutions, CoursePhaseParticipationServiceSingleton.coreURL)
 
 	return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{
 		Participations: participationDTOs,
