@@ -5,24 +5,25 @@ JOIN team t ON a.team_id = t.id
 WHERE t.course_phase_id = $1;
 
 -- name: CreateOrUpdateAllocation :exec
-WITH deleted AS (
-    DELETE FROM allocations
-    WHERE course_participation_id = $2
-      AND course_phase_id = $4
-    RETURNING created_at
+INSERT INTO allocations AS a (
+id,
+course_participation_id,
+team_id,
+course_phase_id,
+created_at,
+updated_at
+) VALUES (
+$1, -- id to use on first insert only
+$2, -- course_participation_id
+$3, -- team_id
+$4, -- course_phase_id
+CURRENT_TIMESTAMP, -- created_at (first insert only)
+CURRENT_TIMESTAMP -- updated_at
 )
-INSERT INTO allocations (
-    id,
-    course_participation_id,
-    team_id,
-    course_phase_id,
-    created_at,
-    updated_at
-)
-SELECT
-    $1, $2, $3, $4,
-    COALESCE((SELECT created_at FROM deleted), CURRENT_TIMESTAMP),
-    CURRENT_TIMESTAMP;
+ON CONFLICT ON CONSTRAINT allocations_participation_phase_uk
+DO UPDATE
+SET team_id = EXCLUDED.team_id,
+updated_at = CURRENT_TIMESTAMP; -- keep original id & created_at
 
 
 -- name: DeleteAllocationsByPhase :exec

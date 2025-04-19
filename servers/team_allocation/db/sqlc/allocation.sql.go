@@ -12,24 +12,25 @@ import (
 )
 
 const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
-WITH deleted AS (
-    DELETE FROM allocations
-    WHERE course_participation_id = $2
-      AND course_phase_id = $4
-    RETURNING created_at
+INSERT INTO allocations AS a (
+id,
+course_participation_id,
+team_id,
+course_phase_id,
+created_at,
+updated_at
+) VALUES (
+$1, -- id to use on first insert only
+$2, -- course_participation_id
+$3, -- team_id
+$4, -- course_phase_id
+CURRENT_TIMESTAMP, -- created_at (first insert only)
+CURRENT_TIMESTAMP -- updated_at
 )
-INSERT INTO allocations (
-    id,
-    course_participation_id,
-    team_id,
-    course_phase_id,
-    created_at,
-    updated_at
-)
-SELECT
-    $1, $2, $3, $4,
-    COALESCE((SELECT created_at FROM deleted), CURRENT_TIMESTAMP),
-    CURRENT_TIMESTAMP
+ON CONFLICT ON CONSTRAINT allocations_participation_phase_uk
+DO UPDATE
+SET team_id = EXCLUDED.team_id,
+updated_at = CURRENT_TIMESTAMP
 `
 
 type CreateOrUpdateAllocationParams struct {
@@ -50,12 +51,15 @@ func (q *Queries) CreateOrUpdateAllocation(ctx context.Context, arg CreateOrUpda
 }
 
 const deleteAllocationsByPhase = `-- name: DeleteAllocationsByPhase :exec
+
+
 DELETE FROM allocations a
 USING team t
 WHERE a.team_id = t.id
   AND t.course_phase_id = $1
 `
 
+// keep original id & created_at
 func (q *Queries) DeleteAllocationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteAllocationsByPhase, coursePhaseID)
 	return err

@@ -12,7 +12,7 @@ CREATE TABLE
         FOREIGN KEY (team_id) REFERENCES team (id) ON DELETE CASCADE,
         -- …and also enforce that the phase matches the one on the team:
         FOREIGN KEY (team_id, course_phase_id) REFERENCES team (id, course_phase_id) ON DELETE CASCADE,
-        UNIQUE (course_participation_id, team_id)
+        CONSTRAINT allocations_participation_phase_uk UNIQUE (course_participation_id, course_phase_id)
     );
 
 COMMIT;
