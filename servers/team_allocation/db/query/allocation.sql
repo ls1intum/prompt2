@@ -43,7 +43,11 @@ SELECT
 FROM allocations
 WHERE course_participation_id = $1;
 
--- name: GetStudentsForTeam :many
-SELECT course_participation_id
+-- name: GetAggregatedAllocationsByCoursePhase :many
+SELECT
+    team_id,
+    array_agg(course_participation_id ORDER BY course_participation_id)::uuid[] AS student_ids
 FROM allocations
-WHERE team_id = $1;
+WHERE course_phase_id = $1
+GROUP BY team_id
+ORDER BY team_id;

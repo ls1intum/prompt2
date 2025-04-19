@@ -65,6 +65,41 @@ func (q *Queries) DeleteAllocationsByPhase(ctx context.Context, coursePhaseID uu
 	return err
 }
 
+const getAggregatedAllocationsByCoursePhase = `-- name: GetAggregatedAllocationsByCoursePhase :many
+SELECT
+    team_id,
+    array_agg(course_participation_id ORDER BY course_participation_id)::uuid[] AS student_ids
+FROM allocations
+WHERE course_phase_id = $1
+GROUP BY team_id
+ORDER BY team_id
+`
+
+type GetAggregatedAllocationsByCoursePhaseRow struct {
+	TeamID     uuid.UUID   `json:"team_id"`
+	StudentIds []uuid.UUID `json:"student_ids"`
+}
+
+func (q *Queries) GetAggregatedAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAggregatedAllocationsByCoursePhaseRow, error) {
+	rows, err := q.db.Query(ctx, getAggregatedAllocationsByCoursePhase, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAggregatedAllocationsByCoursePhaseRow
+	for rows.Next() {
+		var i GetAggregatedAllocationsByCoursePhaseRow
+		if err := rows.Scan(&i.TeamID, &i.StudentIds); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllocationForStudent = `-- name: GetAllocationForStudent :one
 SELECT
     id,
@@ -118,32 +153,6 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getStudentsForTeam = `-- name: GetStudentsForTeam :many
-SELECT course_participation_id
-FROM allocations
-WHERE team_id = $1
-`
-
-func (q *Queries) GetStudentsForTeam(ctx context.Context, teamID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, getStudentsForTeam, teamID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uuid.UUID
-	for rows.Next() {
-		var course_participation_id uuid.UUID
-		if err := rows.Scan(&course_participation_id); err != nil {
-			return nil, err
-		}
-		items = append(items, course_participation_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

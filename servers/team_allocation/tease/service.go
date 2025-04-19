@@ -200,23 +200,20 @@ func GetTeaseTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([
 }
 
 func GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teaseDTO.Allocation, error) {
-	dbAllocations, err := TeaseServiceSingleton.queries.GetAllocationsByCoursePhase(ctx, coursePhaseID)
+	rows, err := TeaseServiceSingleton.queries.GetAggregatedAllocationsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the allocations from the database: ", err)
 		return nil, fmt.Errorf("could not get the allocations from the database: %w", err)
 	}
-	teaseAllocations := make([]teaseDTO.Allocation, 0, len(dbAllocations))
-	for _, dbAllocation := range dbAllocations {
-		students, err := TeaseServiceSingleton.queries.GetStudentsForTeam(ctx, dbAllocation.TeamID)
-		if err != nil {
-			log.Error("could not get students for team: ", err)
-			return nil, fmt.Errorf("could not get students for team: %w", err)
-		}
+
+	teaseAllocations := make([]teaseDTO.Allocation, 0, len(rows))
+	for _, row := range rows {
 		teaseAllocations = append(teaseAllocations, teaseDTO.Allocation{
-			ProjectID: dbAllocation.TeamID,
-			Students:  students,
+			ProjectID: row.TeamID,
+			Students:  row.StudentIds,
 		})
 	}
+
 	return teaseAllocations, nil
 }
 
