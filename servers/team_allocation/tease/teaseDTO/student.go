@@ -26,7 +26,7 @@ type Student struct {
 	Languages              []Language             `json:"languages"`
 	IntroSelfAssessment    string                 `json:"introSelfAssessment"`
 	IntroCourseProficiency string                 `json:"introCourseProficiency"`
-	Skill                  []StudentSkillResponse `json:"skill"`
+	Skills                 []StudentSkillResponse `json:"skills"`
 	Devices                []string               `json:"devices"`
 	StudentComments        []string               `json:"studentComments"` // @rappm pls update once your assessment is done
 	TutorComments          []string               `json:"tutorComments"`   // @rappm pls update once your assessment is done
@@ -86,7 +86,7 @@ func ConvertCourseParticipationToTeaseStudent(
 		Semester:              cp.Student.CurrentSemester,
 		Languages:             []Language{},
 		Devices:               devices,
-		Skill:                 skillResponses,
+		Skills:                skillResponses,
 		ProjectPreferences:    projectPreferences,
 		StudentComments:       []string{},
 		TutorComments:         []string{},
