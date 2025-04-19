@@ -66,12 +66,7 @@ func ConvertCourseParticipationToTeaseStudent(
 	}
 
 	// 2) Attempt to read the "devices" field as []string
-	devices, ok := cp.PrevData["devices"].([]string)
-	if !ok {
-		log.WithField("courseParticipationID", cp.CourseParticipationID).
-			Error("Field 'devices' in PrevData is not []string; using empty slice")
-		devices = []string{}
-	}
+	devices := parseDeviceData(cp.PrevData["devices"])
 
 	// 3) Attempt to read the scoreLevel field as a string
 	scoreLevel, ok := cp.PrevData["scoreLevel"].(string)
@@ -136,4 +131,21 @@ func addLanguageProficiency(
 		Language:    langCode,
 		Proficiency: proficiency,
 	})
+}
+
+func parseDeviceData(rawDevices interface{}) []string {
+	if rawDevices == nil {
+		log.Error("devices is nil")
+		return []string{}
+	}
+	devices := []string{}
+	for i, v := range rawDevices.([]interface{}) {
+		s, ok := v.(string)
+		if !ok {
+			log.Errorf("devices[%d] is not a string", i)
+			continue
+		}
+		devices = append(devices, s)
+	}
+	return devices
 }
