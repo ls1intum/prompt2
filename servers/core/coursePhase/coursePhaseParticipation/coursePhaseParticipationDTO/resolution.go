@@ -41,5 +41,5 @@ func ReplaceCoreURL(coreURL, resolutionURL string) string {
 	}
 
 	// Perform the replacement and return the result.
-	return strings.ReplaceAll(resolutionURL, "{CORE_URL}", coreURL)
+	return strings.ReplaceAll(resolutionURL, "{CORE_HOST}", coreURL)
 }
