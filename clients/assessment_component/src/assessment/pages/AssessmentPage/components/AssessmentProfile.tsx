@@ -30,12 +30,12 @@ export const AssessmentProfile = ({
 
   const { mutate: createCompletion, isPending: isCreatePending } =
     useCreateAssessmentCompletion(setError)
-  const { mutate: deleteCompletion, isPending: isUpdatePending } =
+  const { mutate: deleteCompletion, isPending: isDeletePending } =
     useDeleteAssessmentCompletion(setError)
   const { mutate: updateParticipation, isPending: isParticipationPending } =
     useUpdateCoursePhaseParticipation()
 
-  const isPending = isCreatePending || isUpdatePending || isParticipationPending
+  const isPending = isCreatePending || isDeletePending || isParticipationPending
 
   const handleButtonClick = () => {
     setError(null)
@@ -81,7 +81,11 @@ export const AssessmentProfile = ({
       <Card className='relative overflow-hidden'>
         <CardHeader className='relative'>
           <div className='absolute top-4 right-4'>
-            <Button size='sm' onClick={handleButtonClick}>
+            <Button
+              size='sm'
+              disabled={studentAssessment.remainingAssessments.remainingAssessments > 0}
+              onClick={handleButtonClick}
+            >
               {studentAssessment.assessmentCompletion.completed ? (
                 <span className='flex items-center gap-1'>
                   <Unlock className='h-3.5 w-3.5' />
