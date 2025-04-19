@@ -132,8 +132,7 @@ func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocation
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
 SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at
 FROM allocations a
-JOIN team t ON a.team_id = t.id
-WHERE t.course_phase_id = $1
+WHERE a.course_phase_id = $1
 `
 
 func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Allocation, error) {

@@ -1,8 +1,7 @@
 -- name: GetAllocationsByCoursePhase :many
 SELECT a.*
 FROM allocations a
-JOIN team t ON a.team_id = t.id
-WHERE t.course_phase_id = $1;
+WHERE a.course_phase_id = $1;
 
 -- name: CreateOrUpdateAllocation :exec
 INSERT INTO allocations AS a (
