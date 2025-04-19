@@ -13,24 +13,24 @@ import (
 
 const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
 INSERT INTO allocations AS a (
-id,
-course_participation_id,
-team_id,
-course_phase_id,
-created_at,
-updated_at
+  id,
+  course_participation_id,
+  team_id,
+  course_phase_id,
+  created_at,
+  updated_at
 ) VALUES (
-$1, -- id to use on first insert only
-$2, -- course_participation_id
-$3, -- team_id
-$4, -- course_phase_id
-CURRENT_TIMESTAMP, -- created_at (first insert only)
-CURRENT_TIMESTAMP -- updated_at
+  $1,
+  $2,
+  $3,
+  $4,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
 )
 ON CONFLICT ON CONSTRAINT allocations_participation_phase_uk
-DO UPDATE
+  DO UPDATE
 SET team_id = EXCLUDED.team_id,
-updated_at = CURRENT_TIMESTAMP
+  updated_at = CURRENT_TIMESTAMP
 `
 
 type CreateOrUpdateAllocationParams struct {
@@ -51,15 +51,12 @@ func (q *Queries) CreateOrUpdateAllocation(ctx context.Context, arg CreateOrUpda
 }
 
 const deleteAllocationsByPhase = `-- name: DeleteAllocationsByPhase :exec
-
-
 DELETE FROM allocations a
 USING team t
 WHERE a.team_id = t.id
   AND t.course_phase_id = $1
 `
 
-// keep original id & created_at
 func (q *Queries) DeleteAllocationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteAllocationsByPhase, coursePhaseID)
 	return err
@@ -98,6 +95,38 @@ func (q *Queries) GetAggregatedAllocationsByCoursePhase(ctx context.Context, cou
 		return nil, err
 	}
 	return items, nil
+}
+
+const getAllocationForStudent = `-- name: GetAllocationForStudent :one
+SELECT
+    id,
+    course_participation_id,
+    team_id,
+    course_phase_id,
+    created_at,
+    updated_at
+FROM allocations
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+`
+
+type GetAllocationForStudentParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocationForStudentParams) (Allocation, error) {
+	row := q.db.QueryRow(ctx, getAllocationForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
+	var i Allocation
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.TeamID,
+		&i.CoursePhaseID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
