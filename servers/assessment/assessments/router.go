@@ -16,13 +16,26 @@ func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentsByCoursePhase)
 	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createAssessment)
 	assessmentRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateAssessment)
-	assessmentRouter.GET("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAssessment)
+	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentAssessment)
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentsByStudentInPhase)
-	assessmentRouter.GET("/remaining/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), countRemainingAssessmentsForStudent)
 	assessmentRouter.DELETE("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)
 
 	assessmentRouter.GET("/competency/:competencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCompetencyInPhase)
 	assessmentRouter.GET("/category/:categoryID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), listAssessmentsByCategoryInPhase)
+}
+
+func listAssessmentsByCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	assessments, err := ListAssessmentsByCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
 }
 
 func createAssessment(c *gin.Context) {
@@ -53,18 +66,23 @@ func updateAssessment(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Assessment updated successfully"})
 }
 
-func getAssessment(c *gin.Context) {
-	assessmentID, err := uuid.Parse(c.Param("assessmentID"))
+func getStudentAssessment(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	assessment, err := GetAssessment(c, assessmentID)
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	studentAssessment, err := GetStudentAssessment(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessment)
+	c.JSON(http.StatusOK, studentAssessment)
 }
 
 func deleteAssessment(c *gin.Context) {
@@ -78,20 +96,6 @@ func deleteAssessment(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
-}
-
-func listAssessmentsByCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	assessments, err := ListAssessmentsByCoursePhase(c, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
 }
 
 func listAssessmentsByStudentInPhase(c *gin.Context) {
@@ -149,27 +153,6 @@ func listAssessmentsByCategoryInPhase(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
-}
-
-func countRemainingAssessmentsForStudent(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	remainingAssessments, err := CountRemainingAssessmentsForStudent(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, assessmentDTO.MapToRemainingAssessmentsDTO(remainingAssessments))
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

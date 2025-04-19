@@ -67,6 +67,13 @@ type Assessment struct {
 	Author                string           `json:"author"`
 }
 
+type AssessmentCompletion struct {
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CompletedAt           pgtype.Timestamp `json:"completed_at"`
+	Author                string           `json:"author"`
+}
+
 type Category struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`

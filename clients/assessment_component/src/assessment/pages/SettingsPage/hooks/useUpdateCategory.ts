@@ -11,6 +11,7 @@ export const useUpdateCategory = (setError: (error: string | null) => void) => {
     mutationFn: (category: UpdateCategoryRequest) => updateCategory(phaseId ?? '', category),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {
