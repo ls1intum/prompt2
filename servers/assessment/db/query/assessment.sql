@@ -72,3 +72,4 @@ SELECT
     'remainingAssessments', rpc.remaining_assessments
   )) AS categories
 FROM remaining_per_category rpc;
+

@@ -439,6 +439,39 @@ paths:
         "200":
           description: AssessmentCompletion deleted
 
+  /student-assessment/score-level:
+    get:
+      summary: Get all score levels in a phase
+      tags: [Assessment]
+      responses:
+        "200":
+          description: List of score levels in the specified course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreLevelWithParticipation"
+
+  /student-assessment/score-level/{courseParticipationID}:
+    get:
+      summary: Get the score level for a student
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The score level for the specified student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreLevelWithParticipation"
+
 components:
   schemas:
     ################################
@@ -573,6 +606,14 @@ components:
     ################################
     # Assessment Schemas
     ################################
+    ScoreLevel:
+      type: string
+      enum:
+        - novice
+        - intermediate
+        - advanced
+        - expert
+
     Assessment:
       type: object
       properties:
@@ -589,12 +630,7 @@ components:
           type: string
           format: uuid
         score:
-          type: string
-          enum:
-            - novice
-            - intermediate
-            - advanced
-            - expert
+          $ref: "#/components/schemas/ScoreLevel"
         comment:
           type: string
         assessedAt:
@@ -655,6 +691,23 @@ components:
         completed:
           type: boolean
 
+    ScoreLevelWithParticipation:
+      type: object
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+
+    StudentScore:
+      type: object
+      properties:
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+        score:
+          type: number
+
     StudentAssessment:
       type: object
       properties:
@@ -672,3 +725,5 @@ components:
           $ref: "#/components/schemas/RemainingAssessments"
         assessmentCompletion:
           $ref: "#/components/schemas/AssessmentCompletion"
+        studentScore:
+          $ref: "#/components/schemas/StudentScore"
