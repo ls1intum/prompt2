@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -42,7 +43,7 @@ func GetOwnCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID
 	return participationDTO, nil
 }
 
-func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions, error) {
+func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, resolveLocally bool) (coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions, error) {
 	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
 	if err != nil {
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
@@ -63,10 +64,11 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 	}
 
-	resolutionDTOs := make([]coursePhaseParticipationDTO.Resolution, 0, len(resolutions))
-	for _, resolution := range resolutions {
-		dto := coursePhaseParticipationDTO.GetResolutionDTOFromDBModel(resolution)
-		resolutionDTOs = append(resolutionDTOs, dto)
+	resolutionDTOs := resolution.GetParticipationResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs, resolveLocally)
+	if err != nil {
+		log.Error(err)
+		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, errors.New("failed to replace resolution URLs")
 	}
 
 	return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{

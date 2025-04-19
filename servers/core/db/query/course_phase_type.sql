@@ -80,8 +80,8 @@ SELECT EXISTS (
 ) AS does_exist;
 
 -- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, base_url)
-VALUES ($1, $2, $3, $4);
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, local_url)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: CreateCoursePhaseTypeRequiredInput :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)

@@ -1,13 +1,14 @@
 package coursePhaseDTO
 
 import (
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 )
 
 type PrevCoursePhaseData struct {
 	PrevData    meta.MetaData           `json:"prevData"`
-	Resolutions []CoursePhaseResolution `json:"resolutions"`
+	Resolutions []resolution.Resolution `json:"resolutions"`
 }
 
 func GetPrevCoursePhaseDataDTO(prevCoreData []byte, resolutions []db.GetPrevCoursePhaseDataResolutionRow) (PrevCoursePhaseData, error) {
@@ -16,9 +17,9 @@ func GetPrevCoursePhaseDataDTO(prevCoreData []byte, resolutions []db.GetPrevCour
 		return PrevCoursePhaseData{}, err
 	}
 
-	resolutionDTOs := make([]CoursePhaseResolution, 0, len(resolutions))
-	for _, resolution := range resolutions {
-		resolutionDTOs = append(resolutionDTOs, GetResolutionDTOFromDBModel(resolution))
+	resolutionDTOs := make([]resolution.Resolution, 0, len(resolutions))
+	for _, resolutionDTO := range resolutions {
+		resolutionDTOs = append(resolutionDTOs, resolution.GetPhaseResolutionDTOFromDBModel(resolutionDTO))
 	}
 
 	return PrevCoursePhaseData{

@@ -9,8 +9,9 @@ import (
 )
 
 type CoursePhaseTypeService struct {
-	queries db.Queries
-	conn    *pgxpool.Pool
+	queries          db.Queries
+	conn             *pgxpool.Pool
+	isDevEnvironment bool
 }
 
 var CoursePhaseTypeServiceSingleton *CoursePhaseTypeService

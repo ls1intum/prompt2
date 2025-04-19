@@ -7,12 +7,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
+func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, isDevEnvironment bool) {
 
 	setupCoursePhaseTypeRouter(routerGroup)
 	CoursePhaseTypeServiceSingleton = &CoursePhaseTypeService{
-		queries: queries,
-		conn:    conn,
+		queries:          queries,
+		conn:             conn,
+		isDevEnvironment: isDevEnvironment,
 	}
 
 	// initialize course phase types

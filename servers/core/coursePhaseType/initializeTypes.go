@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -175,6 +176,7 @@ func initIntroCourseDeveloper() error {
 			Name:         "IntroCourseDeveloper",
 			InitialPhase: false,
 			BaseUrl:      "{CORE_HOST}/intro-course/api",
+			LocalUrl:     pgtype.Text{String: "http://server-intro-course", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {
@@ -227,11 +229,19 @@ func initIntroCourseTutor() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/intro-course/api"
+		localURL := "http://server-intro-course"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8082/intro-course/api"
+			localURL = "http://localhost:8082"
+		}
+
 		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "IntroCourseTutor",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/intro-course/api",
+			BaseUrl:      baseURL,
+			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseTutor)
 		if err != nil {
@@ -293,11 +303,18 @@ func initAssessmentChallenge() error {
 	}
 	if !exists {
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/assessment/api"
+		localURL := "http://server-assessment" // Docker env address
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8084/assessment/api"
+			localURL = "http://localhost:8084"
+		}
 		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Assessment",
 			InitialPhase: false,
-			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
+			BaseUrl:      baseURL,
+			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
@@ -331,11 +348,19 @@ func initTeamAllocation() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/team-allocation/api"
+		localURL := "http://server-team-allocation"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8083/team-allocation/api"
+			localURL = "http://localhost:8083"
+		}
+
 		newTeamAllocation := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Team Allocation",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/team-allocation/api", // We use core here, as the server does not provide any exported DTOs
+			BaseUrl:      baseURL,
+			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {
