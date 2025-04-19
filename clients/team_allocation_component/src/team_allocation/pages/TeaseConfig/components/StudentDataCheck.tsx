@@ -136,13 +136,13 @@ const checksConfig: StudentCheck[] = [
 
 const CheckItem = ({ check }: { check: ValidationResult }) => {
   return (
-    <Card className={`border-l-4 ${check.isValid ? 'border-l-green-500' : 'border-l-amber-500'}`}>
+    <Card className={`border-l-4 ${check.isValid ? 'border-l-green-500' : 'border-l-yellow-500'}`}>
       <CardContent className='flex items-center gap-4 p-4'>
         <div className='flex-shrink-0'>
           {check.isValid ? (
             <CheckCircle className='h-6 w-6 text-green-500' />
           ) : (
-            <AlertCircle className='h-6 w-6 text-amber-500' />
+            <AlertCircle className='h-6 w-6 text-yellow-500' />
           )}
         </div>
         <div className='flex-grow'>
@@ -151,7 +151,7 @@ const CheckItem = ({ check }: { check: ValidationResult }) => {
             <Badge
               variant={check.isValid ? 'default' : 'outline'}
               className={
-                check.isValid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                check.isValid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
               }
             >
               {check.isValid ? 'Complete' : `${check.completionRate}% Complete`}
