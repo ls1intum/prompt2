@@ -359,6 +359,13 @@ func initTeamAllocation() error {
 			return err
 		}
 
+		// score level from the intro course
+		err = qtx.InsertAssessmentScoreRequiredInput(ctx, newTeamAllocation.ID)
+		if err != nil {
+			log.Error("failed to create required score level: ", err)
+			return err
+		}
+
 		// assessment from the intro course
 		// TODO: @rappm we need to define the data schema.
 

@@ -268,3 +268,15 @@ VALUES (
         }
         }'::jsonb
 );
+
+-- name: InsertAssessmentScoreRequiredInput :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
+        }'::jsonb
+);

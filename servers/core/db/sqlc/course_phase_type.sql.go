@@ -300,6 +300,24 @@ func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, courseP
 	return items, nil
 }
 
+const insertAssessmentScoreRequiredInput = `-- name: InsertAssessmentScoreRequiredInput :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertAssessmentScoreRequiredInput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertAssessmentScoreRequiredInput, coursePhaseTypeID)
+	return err
+}
+
 const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (

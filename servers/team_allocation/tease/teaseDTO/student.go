@@ -73,23 +73,33 @@ func ConvertCourseParticipationToTeaseStudent(
 		devices = []string{}
 	}
 
+	// 3) Attempt to read the scoreLevel field as a string
+	scoreLevel, ok := cp.PrevData["scoreLevel"].(string)
+	if !ok {
+		log.WithField("courseParticipationID", cp.CourseParticipationID).
+			Error("Field 'scoreLevel' in PrevData is not a string; using empty string")
+		scoreLevel = ""
+	}
+
 	// 3) Build a Student object
 	student := Student{
-		CourseParticipationID: cp.CourseParticipationID,
-		FirstName:             cp.Student.FirstName,
-		LastName:              cp.Student.LastName,
-		Gender:                convertPromptGenderToTease(cp.Student.Gender),
-		Nationality:           cp.Student.Nationality,
-		Email:                 cp.Student.Email,
-		StudyDegree:           string(cp.Student.StudyDegree),
-		StudyProgram:          cp.Student.StudyProgram,
-		Semester:              cp.Student.CurrentSemester,
-		Languages:             []Language{},
-		Devices:               devices,
-		Skills:                skillResponses,
-		ProjectPreferences:    projectPreferences,
-		StudentComments:       []string{},
-		TutorComments:         []string{},
+		CourseParticipationID:  cp.CourseParticipationID,
+		FirstName:              cp.Student.FirstName,
+		LastName:               cp.Student.LastName,
+		Gender:                 convertPromptGenderToTease(cp.Student.Gender),
+		Nationality:            cp.Student.Nationality,
+		Email:                  cp.Student.Email,
+		StudyDegree:            string(cp.Student.StudyDegree),
+		StudyProgram:           cp.Student.StudyProgram,
+		Semester:               cp.Student.CurrentSemester,
+		Languages:              []Language{},
+		Devices:                devices,
+		Skills:                 skillResponses,
+		ProjectPreferences:     projectPreferences,
+		StudentComments:        []string{},
+		TutorComments:          []string{},
+		IntroCourseProficiency: scoreLevel,
+		IntroSelfAssessment:    scoreLevel, // we currently use the same for both as we do not yet have a self-assessment
 		// IntroSelfAssessment, IntroCourseProficiency, StudentComments,
 		// TutorComments can be added when needed
 	}
