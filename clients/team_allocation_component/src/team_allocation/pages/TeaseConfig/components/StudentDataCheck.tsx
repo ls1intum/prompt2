@@ -101,8 +101,8 @@ const checksConfig: StudentCheck[] = [
   },
   {
     label: 'Language Proficiency',
-    extractor: (s) => s.languages.every((l) => l.proficiency),
-    isEmpty: (v) => !v,
+    extractor: (s) => s.languages,
+    isEmpty: (arr) => arr.length === 0 || !arr.every((l) => l.proficiency),
     missingMessage: 'language proficiency info',
     userHint: 'Ensure students provide their proficiency for each language they speak.',
     category: 'academic',
