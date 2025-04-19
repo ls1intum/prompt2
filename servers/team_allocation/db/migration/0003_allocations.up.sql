@@ -1,5 +1,7 @@
 BEGIN;
 
+ALTER TABLE team ADD CONSTRAINT team_id_course_phase_uk UNIQUE (id, course_phase_id);
+
 CREATE TABLE
     allocations (
         id UUID NOT NULL PRIMARY KEY,
