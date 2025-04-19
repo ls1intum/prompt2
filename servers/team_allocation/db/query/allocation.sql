@@ -32,17 +32,6 @@ USING team t
 WHERE a.team_id = t.id
   AND t.course_phase_id = $1;
 
--- name: GetAllocationForStudent :one
-SELECT
-    id,
-    course_participation_id,
-    team_id,
-    course_phase_id,
-    created_at,
-    updated_at
-FROM allocations
-WHERE course_participation_id = $1;
-
 -- name: GetAggregatedAllocationsByCoursePhase :many
 SELECT
     team_id,

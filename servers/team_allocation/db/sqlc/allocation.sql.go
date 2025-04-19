@@ -100,32 +100,6 @@ func (q *Queries) GetAggregatedAllocationsByCoursePhase(ctx context.Context, cou
 	return items, nil
 }
 
-const getAllocationForStudent = `-- name: GetAllocationForStudent :one
-SELECT
-    id,
-    course_participation_id,
-    team_id,
-    course_phase_id,
-    created_at,
-    updated_at
-FROM allocations
-WHERE course_participation_id = $1
-`
-
-func (q *Queries) GetAllocationForStudent(ctx context.Context, courseParticipationID uuid.UUID) (Allocation, error) {
-	row := q.db.QueryRow(ctx, getAllocationForStudent, courseParticipationID)
-	var i Allocation
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.TeamID,
-		&i.CoursePhaseID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
 SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at
 FROM allocations a
