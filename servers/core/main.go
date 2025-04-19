@@ -119,7 +119,9 @@ func main() {
 	course.InitCourseModule(api, *query, conn)
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
+
+	coreURL := utils.GetEnv("CORE_HOST", "http://localhost:3000")
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn, coreURL)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")

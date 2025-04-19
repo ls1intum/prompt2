@@ -181,50 +181,29 @@ VALUES (
         }'::jsonb
 );
 
-
--- name: InsertProficiencyLevelOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'proficiency',
-      1,
-      '/proficiency',
-      '{
-            "type": "string",
-            "enum": ["novice", "intermediate", "advanced", "expert"] 
-        }'::jsonb
-);
-
-
--- name: InsertDeveloperProfileOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'developerProfile',
-      1,
-      '/developer-profile',
-      '{
-            "type": "object",
-            "properties": {
-                "appleID"           : {"type": "string"},
-                "gitLabID"          : {"type": "string"},
-                "macBookUUID"       : {"type": "string"},
-                "iphoneUUID"        : {"type": "string"},
-                "ipadUUID"          : {"type": "string"},
-                "appleWatchUUID"    : {"type": "string"}
-            },
-            "required": ["appleID", "gitLabID"]
-        }'::jsonb
-);
-
 -- name: CreateRequiredDevices :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
       gen_random_uuid(),
       $1,
       'devices',
+      '{
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
+);
+
+-- name: InsertProvidedOutputDevices :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'devices',
+      1,
+      '/devices',
       '{
         "type": "array",
         "items": {
