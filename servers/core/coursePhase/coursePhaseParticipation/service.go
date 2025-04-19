@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -18,10 +18,8 @@ import (
 )
 
 type CoursePhaseParticipationService struct {
-	queries          db.Queries
-	conn             *pgxpool.Pool
-	coreHost         string
-	isDevEnvironment bool
+	queries db.Queries
+	conn    *pgxpool.Pool
 }
 
 var CoursePhaseParticipationServiceSingleton *CoursePhaseParticipationService
@@ -66,8 +64,8 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 	}
 
-	resolutionDTOs := coursePhaseParticipationDTO.GetResolutionsDTOFromDBModels(resolutions)
-	resolutionDTOs, err = replaceResolutionURLs(ctx, resolutionDTOs, resolveLocally)
+	resolutionDTOs := resolution.GetParticipationResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs, resolveLocally)
 	if err != nil {
 		log.Error(err)
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, errors.New("failed to replace resolution URLs")
@@ -212,41 +210,4 @@ func GetStudentsOfCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]s
 	}
 
 	return studentDTOs, nil
-}
-
-func replaceResolutionURLs(ctx context.Context, resolutionDTOs []coursePhaseParticipationDTO.Resolution, resolveLocally bool) ([]coursePhaseParticipationDTO.Resolution, error) {
-
-	coreHost := CoursePhaseParticipationServiceSingleton.coreHost
-	if !strings.HasPrefix(coreHost, "http://") && !strings.HasPrefix(coreHost, "https://") {
-		coreHost = "https://" + coreHost
-	}
-
-	for i := range resolutionDTOs {
-		r := &resolutionDTOs[i] // pointer to the real element, not a copy
-
-		if !strings.HasPrefix(r.BaseURL, "{CORE_HOST}") {
-			continue
-		}
-
-		// Decide which host should replace {CORE_HOST}
-		targetHost := coreHost
-		if resolveLocally {
-			localURL, err := CoursePhaseParticipationServiceSingleton.
-				queries.GetLocalResolution(ctx, r.CoursePhaseID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get local resolution: %w", err)
-			}
-
-			if localURL.Valid && localURL.String != "" {
-				targetHost = localURL.String
-			} else {
-				log.Warn("no local resolution found, defaulting to core host")
-			}
-		}
-
-		r.BaseURL = strings.ReplaceAll(r.BaseURL, "{CORE_HOST}", targetHost)
-	}
-
-	return resolutionDTOs, nil
-
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	"github.com/niclasheun/prompt2.0/coursePhaseAuth"
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -116,15 +117,16 @@ func main() {
 	isDevEnvironment := environment == "development"
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn, isDevEnvironment)
 
+	coreHost := utils.GetEnv("CORE_HOST", "localhost:8080")
+	resolution.InitResolutionModule(api, *query, conn, coreHost)
+
 	coursePhaseAuth.InitCoursePhaseAuthModule(api, *query, conn)
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
-
-	coreHost := utils.GetEnv("CORE_HOST", "localhost:8080")
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn, coreHost)
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")

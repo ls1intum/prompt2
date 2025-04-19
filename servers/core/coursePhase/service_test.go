@@ -152,7 +152,7 @@ func (suite *CoursePhaseTestSuite) TestGetPrevPhaseDataByCoursePhaseID() {
 	predecessorPhaseID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
 
 	// Call the function under test.
-	prevData, err := GetPrevPhaseDataByCoursePhaseID(suite.ctx, targetPhaseID)
+	prevData, err := GetPrevPhaseDataByCoursePhaseID(suite.ctx, targetPhaseID, false)
 	suite.NoError(err)
 
 	// Verify that the core data (from the provided output DTO with endpoint 'core') is merged correctly.
