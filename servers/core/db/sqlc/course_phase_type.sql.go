@@ -144,7 +144,7 @@ func (q *Queries) CreateRequiredDevices(ctx context.Context, coursePhaseTypeID u
 }
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
-SELECT id, name, initial_phase, base_url FROM course_phase_type
+SELECT id, name, initial_phase, base_url, local_url FROM course_phase_type
 `
 
 func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType, error) {
@@ -161,6 +161,7 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 			&i.Name,
 			&i.InitialPhase,
 			&i.BaseUrl,
+			&i.LocalUrl,
 		); err != nil {
 			return nil, err
 		}
