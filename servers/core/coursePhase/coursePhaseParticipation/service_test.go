@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
@@ -37,6 +38,8 @@ func (suite *CoursePhaseParticipationTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CoursePhaseParticipationServiceSingleton = &suite.coursePhaseParticipationService
+
+	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TearDownSuite() {

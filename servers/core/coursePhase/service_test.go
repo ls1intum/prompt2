@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
 	log "github.com/sirupsen/logrus"
@@ -36,6 +37,8 @@ func (suite *CoursePhaseTestSuite) SetupSuite() {
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 	}
+	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
+
 	CoursePhaseServiceSingleton = &suite.coursePhaseService
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/testutils"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +43,7 @@ func (suite *RouterTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CoursePhaseServiceSingleton = &suite.coursePhaseService
+	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
 
 	suite.router = setupRouter()
 }
