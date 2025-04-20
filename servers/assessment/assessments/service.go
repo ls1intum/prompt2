@@ -153,7 +153,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
 		AssessmentCompletion:  completion,
-		ScoreLevel:            level,
+		StudentScore:          level,
 	}, nil
 }
 

@@ -12,5 +12,5 @@ type StudentAssessment struct {
 	Assessments           []Assessment                                 `json:"assessments"`
 	RemainingAssessments  remainingAssessmentsDTO.RemainingAssessments `json:"remainingAssessments"`
 	AssessmentCompletion  assessmentCompletionDTO.AssessmentCompletion `json:"assessmentCompletion"`
-	ScoreLevel            scoreLevelDTO.StudentScore                   `json:"studentScore"`
+	StudentScore          scoreLevelDTO.StudentScore                   `json:"studentScore"`
 }
