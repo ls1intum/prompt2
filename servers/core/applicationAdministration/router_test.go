@@ -56,7 +56,7 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	setupApplicationRouter(api, testMiddleware, testMiddleware, testutils.MockPermissionMiddleware)
 	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn, "http://localhost:8080")
+	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	mailing.InitMailingModule(api, *testDB.Queries, testDB.Conn, "localhost", "25", "test@test.de", "Test-Email-Sender", "localhost")
 }
 
