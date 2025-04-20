@@ -1,4 +1,4 @@
-package assessmentDTO
+package remainingAssessmentsDTO
 
 import (
 	"encoding/json"

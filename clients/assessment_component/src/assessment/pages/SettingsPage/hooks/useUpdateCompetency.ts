@@ -11,7 +11,8 @@ export const useUpdateCompetency = (setError: (error: string | null) => void) =>
     mutationFn: (competency: UpdateCompetencyRequest) =>
       updateCompetency(phaseId ?? '', competency),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['competencies'] })
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {
