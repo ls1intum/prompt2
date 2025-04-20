@@ -10,7 +10,7 @@ type ScoreLevelWithParticipation struct {
 }
 
 func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []ScoreLevelWithParticipation {
-	scoreLevelWithParticipation := make([]ScoreLevelWithParticipation, len(scoreLevels))
+	scoreLevelWithParticipation := make([]ScoreLevelWithParticipation, 0, len(scoreLevels))
 	for i, scoreLevel := range scoreLevels {
 		scoreLevelWithParticipation[i] = ScoreLevelWithParticipation{
 			CourseParticipationID: scoreLevel.CourseParticipationID.String(),
