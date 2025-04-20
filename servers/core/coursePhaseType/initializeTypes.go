@@ -283,7 +283,7 @@ func initDevOpsChallenge() error {
 	return nil
 }
 
-func initAssessmentChallenge() error {
+func initAssessment() error {
 	ctx := context.Background()
 	exists, err := CoursePhaseTypeServiceSingleton.queries.TestAssessmentTypeExists(ctx)
 
