@@ -205,6 +205,18 @@ const checksConfig: StudentCheck[] = [
     highLevelCategory: 'previous',
     icon: <Languages className='h-4 w-4' />,
   },
+
+  // Survey Results
+  {
+    label: 'Survey Submission',
+    extractor: (s) => s.projectPreferences,
+    isEmpty: (arr) => arr.length === 0,
+    missingMessage: 'survey submissions',
+    userHint: 'Track whether students have submitted the required survey.',
+    category: 'survey',
+    highLevelCategory: 'survey',
+    icon: <BarChart3 className='h-4 w-4' />,
+  },
 ]
 
 const CheckItem = ({ check }: { check: ValidationResult }) => {
