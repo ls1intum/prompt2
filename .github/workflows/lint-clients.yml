@@ -28,4 +28,4 @@ jobs:
       - uses: ./.github/actions/setup-node
       - run: yarn install
       - name: Lint components in ${{ matrix.module }}
-        run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs" --format json --output-file "lint-results/${{ matrix.module }}-lint-results.json" || true
+        run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs"

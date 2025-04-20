@@ -1,4 +1,3 @@
-import { debounce } from 'lodash'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -233,7 +232,7 @@ export function EditCompetencyDialog({
 
             <DialogFooter>
               <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
-                Close
+                {isUpdating ? 'Saving...' : 'Close'}
               </Button>
             </DialogFooter>
           </div>
