@@ -277,6 +277,9 @@ export const StudentDataCheck = (): JSX.Element => {
 
   const [checks, setChecks] = useState<ValidationResult[] | null>(null)
 
+  const numberOfStudentsSubmitted =
+    students?.filter((s) => s.projectPreferences.length > 0).length || 0
+
   useEffect(() => {
     if (!students || students.length === 0) return
 
