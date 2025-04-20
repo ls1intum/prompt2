@@ -267,7 +267,7 @@ VALUES (
 );
 
 -- name: InsertAssessmentScoreOutput :exec
-INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
