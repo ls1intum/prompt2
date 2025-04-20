@@ -30,3 +30,11 @@ export type RemainingAssessmentsForStudent = {
   remainingAssessments: number
   categories: CategoryWithRemainingAssessments[]
 }
+
+export type AssessmentCompletion = {
+  coursePhaseID: string // UUID
+  courseParticipationID: string // UUID
+  completedAt: string // ISO 8601 date string
+  author: string
+  completed: boolean
+}

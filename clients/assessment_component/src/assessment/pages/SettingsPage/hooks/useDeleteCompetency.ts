@@ -9,7 +9,8 @@ export const useDeleteCompetency = (setError: (error: string | null) => void) =>
   return useMutation({
     mutationFn: (competencyID: string) => deleteCompetency(phaseId ?? '', competencyID),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['competencies'] })
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {

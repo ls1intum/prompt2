@@ -268,12 +268,12 @@ paths:
         "200":
           description: Assessment created or updated
 
-  /student-assessment/{assessmentID}:
+  /student-assessment/{courseParticipationID}:
     get:
-      summary: Get an assessment by ID
+      summary: Get the student assessment fo an object in a course phase
       tags: [Assessment]
       parameters:
-        - name: assessmentID
+        - name: courseParticipationID
           in: path
           required: true
           schema:
@@ -285,7 +285,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Assessment"
+                $ref: "#/components/schemas/StudentAssessment"
+
+  /student-assessment/{assessmentID}:
     delete:
       summary: Delete an assessment
       tags: [Assessment]
@@ -389,19 +391,27 @@ paths:
                 type: object
                 properties:
                   remainingAssessments:
-                    type: integer
+                    $ref: "#/components/schemas/RemainingAssessments"
 
-  /student-assessment/remaining/{courseParticipationID}/per-category:
+  /student-assessment/completed:
+    post:
+      summary: Mark an Assessment of a student as completed
+      tags: [Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentCompletion"
+      responses:
+        "201":
+          description: Assessment marked as completed
+
+  /student-assessment/completed/course-participation/{courseParticipationID}:
     get:
-      summary: Get count of remaining assessments for a student in a specific category
+      summary: Get AssessmentCompletion for a student, if it exists
       tags: [Assessment]
       parameters:
-        - name: coursePhaseID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
         - name: courseParticipationID
           in: path
           required: true
@@ -410,13 +420,24 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Count of remaining assessments in category
+          description: AssessmentCompletion for the specified student
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/CategoryWithRemainingAssessments"
+                $ref: "#/components/schemas/AssessmentCompletion"
+    delete:
+      summary: Unmark an AssessmentCompletion of a student
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: AssessmentCompletion deleted
 
 components:
   schemas:
@@ -512,7 +533,6 @@ components:
 
     CreateCompetencyRequest:
       type: object
-      required: [categoryID, name, novice, intermediate, advanced, expert]
       properties:
         categoryID:
           type: string
@@ -584,7 +604,6 @@ components:
 
     CreateOrUpdateAssessmentRequest:
       type: object
-      required: [courseParticipationID, coursePhaseID, competencyID, score]
       properties:
         courseParticipationID:
           type: string
@@ -608,3 +627,48 @@ components:
           type: string
         author:
           type: string
+
+    RemainingAssessments:
+      type: object
+      properties:
+        remainingAssessments:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryWithRemainingAssessments"
+
+    AssessmentCompletion:
+      type: object
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        author:
+          type: string
+        completed:
+          type: boolean
+
+    StudentAssessment:
+      type: object
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assessment"
+        remainingAssessments:
+          $ref: "#/components/schemas/RemainingAssessments"
+        assessmentCompletion:
+          $ref: "#/components/schemas/AssessmentCompletion"

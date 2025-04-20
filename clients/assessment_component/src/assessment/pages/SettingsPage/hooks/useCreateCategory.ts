@@ -11,6 +11,7 @@ export const useCreateCategory = (setError: (error: string | null) => void) => {
     mutationFn: (category: CreateCategoryRequest) => createCategory(phaseId ?? '', category),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {

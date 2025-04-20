@@ -10,6 +10,7 @@ export const useDeleteCategory = (setError: (error: string | null) => void) => {
     mutationFn: (categoryID: string) => deleteCategory(phaseId ?? '', categoryID),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['assessments'] })
       setError(null)
     },
     onError: (error: any) => {
