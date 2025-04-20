@@ -1,7 +1,23 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, AlertCircle, Loader2, Users, ClipboardCheck, RefreshCcw } from 'lucide-react'
+import {
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Users,
+  ClipboardCheck,
+  RefreshCcw,
+  FileText,
+  Laptop,
+  MessageSquare,
+  Star,
+  Languages,
+  BarChart3,
+} from 'lucide-react'
+import type React from 'react'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -29,8 +45,10 @@ type ValidationResult = {
   label: string
   isValid: boolean
   details?: string
-  category: 'personal' | 'academic' | 'preferences'
+  category: 'previous' | 'devices' | 'comments' | 'score' | 'language' | 'survey'
+  highLevelCategory: 'previous' | 'survey'
   completionRate: number
+  icon: React.ReactNode
 }
 
 type StudentCheck = {
@@ -39,98 +57,153 @@ type StudentCheck = {
   isEmpty: (value: any) => boolean
   missingMessage: string
   userHint: string
-  category: 'personal' | 'academic' | 'preferences'
+  category: 'previous' | 'devices' | 'comments' | 'score' | 'language' | 'survey'
+  highLevelCategory: 'previous' | 'survey'
+  icon: React.ReactNode
 }
 
 const checksConfig: StudentCheck[] = [
+  // Data from previous phases
   {
     label: 'First Name',
     extractor: (s) => s.firstName,
     isEmpty: (v) => !v,
     missingMessage: 'first names',
-    userHint: 'Ask students to provide their first name.',
-    category: 'personal',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Last Name',
     extractor: (s) => s.lastName,
     isEmpty: (v) => !v,
     missingMessage: 'last names',
-    userHint: 'Ask students to provide their last name.',
-    category: 'personal',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Gender',
     extractor: (s) => s.gender,
     isEmpty: (v) => !v,
     missingMessage: 'gender info',
-    userHint: "Add a question asking for the student's gender (e.g., for team diversity analysis).",
-    category: 'personal',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Nationality',
     extractor: (s) => s.nationality,
     isEmpty: (v) => !v,
     missingMessage: 'nationality info',
-    userHint: 'Include a question asking students about their nationality.',
-    category: 'personal',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Study Degree',
     extractor: (s) => s.studyDegree,
     isEmpty: (v) => !v,
     missingMessage: 'study degree info',
-    userHint: 'Ask for the degree students are pursuing (e.g., B.Sc., M.Sc.).',
-    category: 'academic',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Study Program',
     extractor: (s) => s.studyProgram,
     isEmpty: (v) => !v,
     missingMessage: 'study program info',
-    userHint: 'Include a field for the exact study program (e.g., Informatics, Data Science).',
-    category: 'academic',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
   {
     label: 'Semester',
     extractor: (s) => s.semester,
     isEmpty: (v) => v === 0,
     missingMessage: 'semester info',
-    userHint: 'Ask students to state which semester they are currently in.',
-    category: 'academic',
+    userHint: 'This data should be forwarded from previous phases.',
+    category: 'previous',
+    highLevelCategory: 'previous',
+    icon: <FileText className='h-4 w-4' />,
   },
-  {
-    label: 'Language Proficiency',
-    extractor: (s) => s.languages,
-    isEmpty: (arr) => arr.length === 0 || !arr.every((l) => l.proficiency),
-    missingMessage: 'language proficiency info',
-    userHint: 'Ensure students provide their proficiency for each language they speak.',
-    category: 'academic',
-  },
-  {
-    label: 'Skills',
-    extractor: (s) => s.skill,
-    isEmpty: (arr) => arr.length === 0,
-    missingMessage: 'skills',
-    userHint: 'Ask students to rate their technical and soft skills.',
-    category: 'academic',
-  },
+
+  // Devices
   {
     label: 'Devices',
     extractor: (s) => s.devices,
     isEmpty: (arr) => arr.length === 0,
-    missingMessage: 'devices',
+    missingMessage: 'devices information',
     userHint:
       'Include a question about what kind of devices (laptop, tablet) students can use during the course.',
-    category: 'preferences',
+    category: 'devices',
+    highLevelCategory: 'previous',
+    icon: <Laptop className='h-4 w-4' />,
+  },
+
+  // Comments
+  {
+    label: 'Tutor Comments',
+    extractor: (s) => s.tutorComments,
+    isEmpty: (arr) => !arr || arr.length === 0,
+    missingMessage: 'tutor comments',
+    userHint: 'Ensure tutors can provide comments on student performance.',
+    category: 'comments',
+    highLevelCategory: 'previous',
+    icon: <MessageSquare className='h-4 w-4' />,
   },
   {
-    label: 'Project Preferences',
-    extractor: (s) => s.projectPreferences,
-    isEmpty: (arr) => arr.length === 0,
-    missingMessage: 'project preferences',
-    userHint: "Let students rank or select projects they're most interested in.",
-    category: 'preferences',
+    label: 'Student Comments',
+    extractor: (s) => s.studentComments,
+    isEmpty: (arr) => !arr || arr.length === 0,
+    missingMessage: 'student comments',
+    userHint: 'Allow students to provide feedback or comments.',
+    category: 'comments',
+    highLevelCategory: 'previous',
+    icon: <MessageSquare className='h-4 w-4' />,
+  },
+
+  // ScoreLevel
+  {
+    label: 'Score Level',
+    extractor: (s) => s.introCourseProficiency,
+    isEmpty: (v) => v === undefined || v === null,
+    missingMessage: 'score level information',
+    userHint: 'Ensure score levels are assigned to students.',
+    category: 'score',
+    highLevelCategory: 'previous',
+    icon: <Star className='h-4 w-4' />,
+  },
+
+  // Language Proficiency
+  {
+    label: 'English Proficiency',
+    extractor: (s) => s.languages?.find((l) => l.language === 'English')?.proficiency,
+    isEmpty: (v) => !v,
+    missingMessage: 'English proficiency levels',
+    userHint:
+      'Add application question with possible answers "A1/A2, B1/B2, C1/C2, Native" and export with access key "language_proficiency_english".',
+    category: 'language',
+    highLevelCategory: 'previous',
+    icon: <Languages className='h-4 w-4' />,
+  },
+  {
+    label: 'German Proficiency',
+    extractor: (s) => s.languages?.find((l) => l.language === 'German')?.proficiency,
+    isEmpty: (v) => !v,
+    missingMessage: 'German proficiency levels',
+    userHint:
+      'Add application question with possible answers "A1/A2, B1/B2, C1/C2, Native" and export with access key "language_proficiency_german".',
+    category: 'language',
+    highLevelCategory: 'previous',
+    icon: <Languages className='h-4 w-4' />,
   },
 ]
 
@@ -147,7 +220,10 @@ const CheckItem = ({ check }: { check: ValidationResult }) => {
         </div>
         <div className='flex-grow'>
           <div className='flex items-center justify-between'>
-            <h3 className='font-medium'>{check.label}</h3>
+            <div className='flex items-center gap-2'>
+              {check.icon}
+              <h3 className='font-medium'>{check.label}</h3>
+            </div>
             <Badge
               variant={check.isValid ? 'default' : 'outline'}
               className={
@@ -171,18 +247,14 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
   const completedChecks = checks.filter((check) => check.isValid).length
   const completionPercentage = Math.round((completedChecks / totalChecks) * 100)
 
-  const categoryStats = {
-    personal: {
-      total: checks.filter((c) => c.category === 'personal').length,
-      completed: checks.filter((c) => c.category === 'personal' && c.isValid).length,
+  const highLevelCategoryStats = {
+    previous: {
+      total: checks.filter((c) => c.highLevelCategory === 'previous').length,
+      completed: checks.filter((c) => c.highLevelCategory === 'previous' && c.isValid).length,
     },
-    academic: {
-      total: checks.filter((c) => c.category === 'academic').length,
-      completed: checks.filter((c) => c.category === 'academic' && c.isValid).length,
-    },
-    preferences: {
-      total: checks.filter((c) => c.category === 'preferences').length,
-      completed: checks.filter((c) => c.category === 'preferences' && c.isValid).length,
+    survey: {
+      total: checks.filter((c) => c.highLevelCategory === 'survey').length,
+      completed: checks.filter((c) => c.highLevelCategory === 'survey' && c.isValid).length,
     },
   }
 
@@ -204,55 +276,48 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
           <Progress value={completionPercentage} className='h-2' />
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <Card className='border-green-100'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <Card className='border-amber-100'>
             <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-green-700'>Personal Info</CardTitle>
+              <CardTitle className='text-sm font-medium text-amber-700 flex items-center gap-2'>
+                <FileText className='h-4 w-4' />
+                Data from Previous Phases
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
                 {Math.round(
-                  (categoryStats.personal.completed / categoryStats.personal.total) * 100,
+                  (highLevelCategoryStats.previous.completed /
+                    highLevelCategoryStats.previous.total) *
+                    100,
                 )}
                 %
               </div>
               <p className='text-xs text-muted-foreground'>
-                {categoryStats.personal.completed} of {categoryStats.personal.total} checks complete
+                {highLevelCategoryStats.previous.completed} of{' '}
+                {highLevelCategoryStats.previous.total} checks complete
               </p>
             </CardContent>
           </Card>
 
-          <Card className='border-blue-100'>
+          <Card className='border-teal-100'>
             <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-blue-700'>Academic Info</CardTitle>
+              <CardTitle className='text-sm font-medium text-teal-700 flex items-center gap-2'>
+                <BarChart3 className='h-4 w-4' />
+                Survey Results
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
                 {Math.round(
-                  (categoryStats.academic.completed / categoryStats.academic.total) * 100,
+                  (highLevelCategoryStats.survey.completed / highLevelCategoryStats.survey.total) *
+                    100,
                 )}
                 %
               </div>
               <p className='text-xs text-muted-foreground'>
-                {categoryStats.academic.completed} of {categoryStats.academic.total} checks complete
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className='border-purple-100'>
-            <CardHeader className='pb-2'>
-              <CardTitle className='text-sm font-medium text-purple-700'>Preferences</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>
-                {Math.round(
-                  (categoryStats.preferences.completed / categoryStats.preferences.total) * 100,
-                )}
-                %
-              </div>
-              <p className='text-xs text-muted-foreground'>
-                {categoryStats.preferences.completed} of {categoryStats.preferences.total} checks
-                complete
+                {highLevelCategoryStats.survey.completed} of {highLevelCategoryStats.survey.total}{' '}
+                checks complete
               </p>
             </CardContent>
           </Card>
@@ -284,7 +349,7 @@ export const StudentDataCheck = (): JSX.Element => {
     if (!students || students.length === 0) return
 
     const results: ValidationResult[] = checksConfig.map(
-      ({ label, extractor, isEmpty, missingMessage, category }) => {
+      ({ label, extractor, isEmpty, missingMessage, category, icon, highLevelCategory }) => {
         const validStudents = students.filter((s) => !isEmpty(extractor(s)))
         const completionRate = Math.round((validStudents.length / students.length) * 100)
         const allValid = completionRate === 100
@@ -294,7 +359,9 @@ export const StudentDataCheck = (): JSX.Element => {
           label,
           isValid: allValid,
           category,
+          highLevelCategory,
           completionRate,
+          icon,
           details: allValid
             ? undefined
             : noneValid
@@ -353,93 +420,289 @@ export const StudentDataCheck = (): JSX.Element => {
   }
 
   // Group checks by category
-  const personalChecks = checks.filter((check) => check.category === 'personal')
-  const academicChecks = checks.filter((check) => check.category === 'academic')
-  const preferenceChecks = checks.filter((check) => check.category === 'preferences')
+  const previousChecks = checks.filter((check) => check.category === 'previous')
+  const deviceChecks = checks.filter((check) => check.category === 'devices')
+  const commentChecks = checks.filter((check) => check.category === 'comments')
+  const scoreChecks = checks.filter((check) => check.category === 'score')
+  const languageChecks = checks.filter((check) => check.category === 'language')
+  const surveyChecks = checks.filter((check) => check.category === 'survey')
 
   return (
     <div className='space-y-6'>
       <DataCompletionSummary checks={checks} />
 
       <Tabs defaultValue='all' className='w-full'>
-        <TabsList className='grid grid-cols-4 mb-4'>
-          <TabsTrigger value='all'>All Checks</TabsTrigger>
-          <TabsTrigger value='personal'>Personal</TabsTrigger>
-          <TabsTrigger value='academic'>Academic</TabsTrigger>
-          <TabsTrigger value='preferences'>Preferences</TabsTrigger>
+        <TabsList className='grid grid-cols-3 mb-4'>
+          <TabsTrigger value='all'>All</TabsTrigger>
+          <TabsTrigger value='previous'>Previous Phases</TabsTrigger>
+          <TabsTrigger value='survey'>Survey Results</TabsTrigger>
         </TabsList>
 
         <TabsContent value='all' className='space-y-4'>
           <Accordion type='single' collapsible className='w-full'>
-            <AccordionItem value='personal'>
+            <AccordionItem value='previous'>
               <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
                 <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-green-50 text-green-700 border-green-200'>
-                    Personal
+                  <Badge variant='outline' className='bg-amber-50 text-amber-700 border-amber-200'>
+                    Previous
                   </Badge>
-                  <span>Personal Information</span>
+                  <span>Data from Previous Phases</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className='space-y-4 pt-2'>
+                <Accordion type='single' collapsible className='w-full'>
+                  <AccordionItem value='basic-info'>
+                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='bg-amber-50 text-amber-700 border-amber-200'
+                        >
+                          Basic
+                        </Badge>
+                        <span>Basic Information</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='space-y-6 pt-2'>
+                      {previousChecks.map((check, index) => (
+                        <CheckItem key={index} check={check} />
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value='devices'>
+                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='bg-gray-50 text-gray-700 border-gray-200'
+                        >
+                          Devices
+                        </Badge>
+                        <span>Student Devices</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='space-y-6 pt-2'>
+                      {deviceChecks.map((check, index) => (
+                        <CheckItem key={index} check={check} />
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value='comments'>
+                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='bg-purple-50 text-purple-700 border-purple-200'
+                        >
+                          Comments
+                        </Badge>
+                        <span>Tutor & Student Comments</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='space-y-6 pt-2'>
+                      {commentChecks.map((check, index) => (
+                        <CheckItem key={index} check={check} />
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value='score'>
+                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='bg-yellow-50 text-yellow-700 border-yellow-200'
+                        >
+                          Score
+                        </Badge>
+                        <span>Score Level</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='space-y-6 pt-2'>
+                      {scoreChecks.map((check, index) => (
+                        <CheckItem key={index} check={check} />
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value='language'>
+                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                      <div className='flex items-center gap-2'>
+                        <Badge
+                          variant='outline'
+                          className='bg-blue-50 text-blue-700 border-blue-200'
+                        >
+                          Language
+                        </Badge>
+                        <span>Language Proficiency</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='space-y-6 pt-2'>
+                      {languageChecks.map((check, index) => (
+                        <CheckItem key={index} check={check} />
+                      ))}
+                      <Card className='bg-blue-50 border-blue-200'>
+                        <CardContent className='p-4 text-sm'>
+                          <p className='font-medium text-blue-800'>Important:</p>
+                          <p className='text-blue-700 mt-1'>
+                            Language proficiency must be added as application questions with
+                            possible answers &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported
+                            with access keys &quot;language_proficiency_german&quot; and
+                            &quot;language_proficiency_english&quot;.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value='survey'>
+              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                <div className='flex items-center gap-2'>
+                  <Badge variant='outline' className='bg-teal-50 text-teal-700 border-teal-200'>
+                    Survey
+                  </Badge>
+                  <span>Survey Results</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className='space-y-6 pt-2'>
-                {personalChecks.map((check, index) => (
+                {surveyChecks.map((check, index) => (
+                  <CheckItem key={index} check={check} />
+                ))}
+                <Card className='bg-teal-50 border-teal-200'>
+                  <CardContent className='p-4'>
+                    <div className='flex justify-between items-center'>
+                      <span className='font-medium text-teal-800'>Survey Submissions:</span>
+                      <Badge variant='outline' className='bg-teal-100 text-teal-800'>
+                        {numberOfStudentsSubmitted} of {students?.length || 0} students
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </TabsContent>
+
+        <TabsContent value='previous' className='space-y-4'>
+          <Accordion type='single' collapsible className='w-full'>
+            <AccordionItem value='basic-info'>
+              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                <div className='flex items-center gap-2'>
+                  <Badge variant='outline' className='bg-amber-50 text-amber-700 border-amber-200'>
+                    Basic
+                  </Badge>
+                  <span>Basic Information</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className='space-y-6 pt-2'>
+                {previousChecks.map((check, index) => (
                   <CheckItem key={index} check={check} />
                 ))}
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value='academic'>
+            <AccordionItem value='devices'>
               <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
                 <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-blue-50 text-blue-700 border-blue-200'>
-                    Academic
+                  <Badge variant='outline' className='bg-gray-50 text-gray-700 border-gray-200'>
+                    Devices
                   </Badge>
-                  <span>Academic Information</span>
+                  <span>Student Devices</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className='space-y-6 pt-2'>
-                {academicChecks.map((check, index) => (
+                {deviceChecks.map((check, index) => (
                   <CheckItem key={index} check={check} />
                 ))}
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value='preferences'>
+            <AccordionItem value='comments'>
               <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
                 <div className='flex items-center gap-2'>
                   <Badge
                     variant='outline'
                     className='bg-purple-50 text-purple-700 border-purple-200'
                   >
-                    Preferences
+                    Comments
                   </Badge>
-                  <span>Student Preferences</span>
+                  <span>Tutor & Student Comments</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className='space-y-6 pt-2'>
-                {preferenceChecks.map((check, index) => (
+                {commentChecks.map((check, index) => (
                   <CheckItem key={index} check={check} />
                 ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value='score'>
+              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                <div className='flex items-center gap-2'>
+                  <Badge
+                    variant='outline'
+                    className='bg-yellow-50 text-yellow-700 border-yellow-200'
+                  >
+                    Score
+                  </Badge>
+                  <span>Score Level</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className='space-y-6 pt-2'>
+                {scoreChecks.map((check, index) => (
+                  <CheckItem key={index} check={check} />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value='language'>
+              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
+                <div className='flex items-center gap-2'>
+                  <Badge variant='outline' className='bg-blue-50 text-blue-700 border-blue-200'>
+                    Language
+                  </Badge>
+                  <span>Language Proficiency</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className='space-y-6 pt-2'>
+                {languageChecks.map((check, index) => (
+                  <CheckItem key={index} check={check} />
+                ))}
+                <Card className='bg-blue-50 border-blue-200'>
+                  <CardContent className='p-4 text-sm'>
+                    <p className='font-medium text-blue-800'>Important:</p>
+                    <p className='text-blue-700 mt-1'>
+                      Language proficiency must be added as application questions with possible
+                      answers &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported with access keys
+                      &quot;language_proficiency_german&quot; and
+                      &quot;language_proficiency_english&quot;.
+                    </p>
+                  </CardContent>
+                </Card>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </TabsContent>
 
-        <TabsContent value='personal' className='space-y-6'>
-          {personalChecks.map((check, index) => (
+        <TabsContent value='survey' className='space-y-6'>
+          {surveyChecks.map((check, index) => (
             <CheckItem key={index} check={check} />
           ))}
-        </TabsContent>
-
-        <TabsContent value='academic' className='space-y-6'>
-          {academicChecks.map((check, index) => (
-            <CheckItem key={index} check={check} />
-          ))}
-        </TabsContent>
-
-        <TabsContent value='preferences' className='space-y-6'>
-          {preferenceChecks.map((check, index) => (
-            <CheckItem key={index} check={check} />
-          ))}
+          <Card className='bg-teal-50 border-teal-200'>
+            <CardContent className='p-4'>
+              <div className='flex justify-between items-center'>
+                <span className='font-medium text-teal-800'>Survey Submissions:</span>
+                <Badge variant='outline' className='bg-teal-100 text-teal-800'>
+                  {numberOfStudentsSubmitted} of {students?.length || 0} students
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
@@ -460,7 +723,7 @@ export const StudentDataCheck = (): JSX.Element => {
           </Button>
         </CardFooter>
       </Card>
-      {!checks.every((c) => c.isValid) && (
+      {!checks?.every((c) => c.isValid) && (
         <p className='text-sm text-muted-foreground mt-2 text-left'>
           <span className='font-semibold'>
             Please ensure all student data fields are completed before proceeding to TEASE!{' '}
@@ -468,7 +731,7 @@ export const StudentDataCheck = (): JSX.Element => {
         </p>
       )}
       <div className='mt-4 w-full'>
-        {checks.every((c) => c.isValid) ? (
+        {checks?.every((c) => c.isValid) ? (
           <Button asChild className='gap-2 w-full'>
             <a href='https://prompt.aet.cit.tum.de/tease' target='_blank' rel='noopener noreferrer'>
               Go to TEASE

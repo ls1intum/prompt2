@@ -10,7 +10,7 @@ module.exports = {
     'ProseMirror',
     {
       pattern:
-        /(bg|text|border)-(blue|red|green|yellow|orange|purple|pink|gray|neutral|indigo|emerald|teal)-(50|100|200|300|400|500|600|700|800|900)/,
+        /(bg|text|border)-(blue|red|green|yellow|orange|amber|purple|pink|gray|neutral|indigo|emerald|teal)-(50|100|200|300|400|500|600|700|800|900)/,
       variants: ['hover', 'focus'],
     },
   ],
