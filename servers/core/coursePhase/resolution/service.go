@@ -19,38 +19,46 @@ type ResolutionService struct {
 
 var ResolutionServiceSingleton *ResolutionService
 
-func ReplaceResolutionURLs(ctx context.Context, resolutionDTOs []resolutionDTO.Resolution, resolveLocally bool) ([]resolutionDTO.Resolution, error) {
+// ReplaceResolutionURLs rewrites BaseURL for each resolution.
+//
+// • If resolveLocally == true and a local resolution exists, its URL is preferred; otherwise we fall back to the core host. (For example, when requesting server is in same docker network as providing server.)
+// • The placeholder {CORE_HOST} is always replaced by the normalised core host.
+func ReplaceResolutionURLs(ctx context.Context, resolutions []resolutionDTO.Resolution, resolveLocally bool) ([]resolutionDTO.Resolution, error) {
 
-	coreHost := ResolutionServiceSingleton.coreHost
-	if !strings.HasPrefix(coreHost, "http://") && !strings.HasPrefix(coreHost, "https://") {
-		coreHost = "https://" + coreHost
+	if len(resolutions) == 0 {
+		return resolutions, nil
 	}
 
-	for i := range resolutionDTOs {
-		r := &resolutionDTOs[i] // pointer to the real element, not a copy
+	coreHost := normaliseHost(ResolutionServiceSingleton.coreHost)
 
-		if !strings.HasPrefix(r.BaseURL, "{CORE_HOST}") {
-			continue
-		}
+	for i, r := range resolutions {
+		base := r.BaseURL
 
-		// Decide which host should replace {CORE_HOST}
-		targetHost := coreHost
 		if resolveLocally {
 			localURL, err := ResolutionServiceSingleton.queries.GetLocalResolution(ctx, r.CoursePhaseID)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get local resolution: %w", err)
+				return nil, fmt.Errorf("fetching local resolution for coursePhase %s: %w",
+					r.CoursePhaseID, err)
 			}
 
 			if localURL.Valid && localURL.String != "" {
-				targetHost = localURL.String
+				base = localURL.String
 			} else {
-				log.Warn("no local resolution found, defaulting to core host")
+				log.WithField("coursePhaseID", r.CoursePhaseID).
+					Debug("no local resolution found; falling back to core host")
 			}
 		}
 
-		r.BaseURL = strings.ReplaceAll(r.BaseURL, "{CORE_HOST}", targetHost)
+		resolutions[i].BaseURL = strings.ReplaceAll(base, "{CORE_HOST}", coreHost)
 	}
 
-	return resolutionDTOs, nil
+	return resolutions, nil
+}
 
+// normaliseHost ensures the host string starts with a scheme.
+func normaliseHost(host string) string {
+	if strings.HasPrefix(host, "http://") || strings.HasPrefix(host, "https://") {
+		return host
+	}
+	return "https://" + host
 }

@@ -154,64 +154,6 @@ func initMatching() error {
 	return nil
 }
 
-func initIntroCourseDeveloper() error {
-	ctx := context.Background()
-	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseDeveloperPhaseTypeExists(ctx)
-
-	if err != nil {
-		log.Error("failed to check if intro course developer phase type exists: ", err)
-		return err
-	}
-	if !exists {
-		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
-		if err != nil {
-			return err
-		}
-		defer utils.DeferRollback(tx, ctx)
-		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
-
-		// 1.) Create the phase
-		newIntroCourseDeveloper := db.CreateCoursePhaseTypeParams{
-			ID:           uuid.New(),
-			Name:         "IntroCourseDeveloper",
-			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/intro-course/api",
-			LocalUrl:     pgtype.Text{String: "http://server-intro-course", Valid: true},
-		}
-		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
-		if err != nil {
-			log.Error("failed to create intro course developer module: ", err)
-			return err
-		}
-
-		// 2.) Create the required input meta data
-		// TODO: Think about available devices -> or in survey?
-
-		// 3.) Provided Output
-		err = qtx.InsertDeveloperProfileOutput(ctx, newIntroCourseDeveloper.ID)
-		if err != nil {
-			log.Error("failed to create required developer profile output: ", err)
-			return err
-		}
-
-		err = qtx.InsertProficiencyLevelOutput(ctx, newIntroCourseDeveloper.ID)
-		if err != nil {
-			log.Error("failed to create required proficiency level output: ", err)
-			return err
-		}
-
-		// 3.) Commit the transaction
-		if err := tx.Commit(ctx); err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
-		}
-
-	} else {
-		log.Debug("matching module already exists")
-	}
-
-	return nil
-}
-
 func initIntroCourseTutor() error {
 	ctx := context.Background()
 	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseTutorPhaseTypeExists(ctx)
@@ -230,10 +172,10 @@ func initIntroCourseTutor() error {
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/intro-course/api"
-		localURL := "http://server-intro-course"
+		localURL := "http://server-intro-course/intro-course/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8082/intro-course/api"
-			localURL = "http://localhost:8082"
+			localURL = "http://localhost:8082/intro-course/api"
 		}
 
 		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
@@ -304,10 +246,10 @@ func initAssessmentChallenge() error {
 	if !exists {
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/assessment/api"
-		localURL := "http://server-assessment" // Docker env address
+		localURL := "http://server-assessment/assessment/api" // Docker env address
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8084/assessment/api"
-			localURL = "http://localhost:8084"
+			localURL = "http://localhost:8084/assessment/api"
 		}
 		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
@@ -349,10 +291,10 @@ func initTeamAllocation() error {
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/team-allocation/api"
-		localURL := "http://server-team-allocation"
+		localURL := "http://server-team-allocation/team-allocation/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8083/team-allocation/api"
-			localURL = "http://localhost:8083"
+			localURL = "http://localhost:8083/team-allocation/api"
 		}
 
 		newTeamAllocation := db.CreateCoursePhaseTypeParams{
@@ -383,9 +325,6 @@ func initTeamAllocation() error {
 			log.Error("failed to create required devices: ", err)
 			return err
 		}
-
-		// assessment from the intro course
-		// TODO: @rappm we need to define the data schema.
 
 		// 3.) Provided Output
 		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
