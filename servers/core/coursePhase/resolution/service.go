@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,7 +19,7 @@ type ResolutionService struct {
 
 var ResolutionServiceSingleton *ResolutionService
 
-func ReplaceResolutionURLs(ctx context.Context, resolutionDTOs []Resolution, resolveLocally bool) ([]Resolution, error) {
+func ReplaceResolutionURLs(ctx context.Context, resolutionDTOs []resolutionDTO.Resolution, resolveLocally bool) ([]resolutionDTO.Resolution, error) {
 
 	coreHost := ResolutionServiceSingleton.coreHost
 	if !strings.HasPrefix(coreHost, "http://") && !strings.HasPrefix(coreHost, "https://") {

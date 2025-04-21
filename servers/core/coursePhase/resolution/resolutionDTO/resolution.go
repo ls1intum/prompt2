@@ -1,4 +1,4 @@
-package resolution
+package resolutionDTO
 
 import (
 	"github.com/google/uuid"
