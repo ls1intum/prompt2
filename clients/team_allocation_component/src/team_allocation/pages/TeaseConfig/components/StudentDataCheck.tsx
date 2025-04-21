@@ -44,7 +44,16 @@ export const StudentDataCheck = (): JSX.Element => {
     if (!students || students.length === 0) return
 
     const results: ValidationResult[] = checksConfig.map(
-      ({ label, extractor, isEmpty, missingMessage, category, icon, highLevelCategory }) => {
+      ({
+        label,
+        extractor,
+        isEmpty,
+        missingMessage,
+        problemDescription,
+        category,
+        icon,
+        highLevelCategory,
+      }) => {
         const validStudents = students.filter((s) => !isEmpty(extractor(s)))
         const completionRate = Math.round((validStudents.length / students.length) * 100)
         const allValid = completionRate === 100
@@ -60,8 +69,7 @@ export const StudentDataCheck = (): JSX.Element => {
           details: allValid
             ? undefined
             : noneValid
-              ? `No students have ${missingMessage}. Please check if your previous course phases (e.g. application)
-                forward information on ${missingMessage} to this phase.`
+              ? `${problemDescription}`
               : `${validStudents.length} of ${students.length} students have provided ${missingMessage}.`,
         }
       },
@@ -115,7 +123,6 @@ export const StudentDataCheck = (): JSX.Element => {
   }
 
   // Group checks by category
-  const previousChecks = checks.filter((check) => check.category === 'previous')
   const deviceChecks = checks.filter((check) => check.category === 'devices')
   const commentChecks = checks.filter((check) => check.category === 'comments')
   const scoreChecks = checks.filter((check) => check.category === 'score')
@@ -146,25 +153,6 @@ export const StudentDataCheck = (): JSX.Element => {
               </AccordionTrigger>
               <AccordionContent className='space-y-4 pt-2'>
                 <Accordion type='single' collapsible className='w-full'>
-                  <AccordionItem value='basic-info'>
-                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant='outline'
-                          className='bg-amber-50 text-amber-700 border-amber-200'
-                        >
-                          Basic
-                        </Badge>
-                        <span>Basic Information</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='space-y-6 pt-2'>
-                      {previousChecks.map((check, index) => (
-                        <CheckItem key={index} check={check} />
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-
                   <AccordionItem value='devices'>
                     <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
                       <div className='flex items-center gap-2'>
@@ -285,22 +273,6 @@ export const StudentDataCheck = (): JSX.Element => {
 
         <TabsContent value='previous' className='space-y-4'>
           <Accordion type='single' collapsible className='w-full'>
-            <AccordionItem value='basic-info'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-amber-50 text-amber-700 border-amber-200'>
-                    Basic
-                  </Badge>
-                  <span>Basic Information</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {previousChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-
             <AccordionItem value='devices'>
               <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
                 <div className='flex items-center gap-2'>
