@@ -49,7 +49,6 @@ SELECT EXISTS (
     WHERE name = 'IntroCourseDeveloper'
 ) AS does_exist;
 
-
 -- name: TestIntroCourseTutorPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -63,7 +62,6 @@ SELECT EXISTS (
     FROM course_phase_type
     WHERE name = 'DevOpsChallenge'
 ) AS does_exist;
-
 
 -- name: TestAssessmentTypeExists :one
 SELECT EXISTS (
@@ -234,7 +232,6 @@ VALUES (
        }'::jsonb
 );
 
-
 -- name: InsertTeamAllocationOutput :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
@@ -266,5 +263,19 @@ VALUES (
             },
             "required": ["teamID", "teamName"]
         }
+        }'::jsonb
+);
+
+-- name: InsertAssessmentScoreOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      1,
+      '/student-assessment/scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
         }'::jsonb
 );

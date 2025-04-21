@@ -235,7 +235,7 @@ func initDevOpsChallenge() error {
 	return nil
 }
 
-func initAssessmentChallenge() error {
+func initAssessment() error {
 	ctx := context.Background()
 	exists, err := CoursePhaseTypeServiceSingleton.queries.TestAssessmentTypeExists(ctx)
 
@@ -244,6 +244,13 @@ func initAssessmentChallenge() error {
 		return err
 	}
 	if !exists {
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer utils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/assessment/api"
 		localURL := "http://server-assessment/assessment/api" // Docker env address
@@ -251,6 +258,8 @@ func initAssessmentChallenge() error {
 			baseURL = "http://localhost:8084/assessment/api"
 			localURL = "http://localhost:8084/assessment/api"
 		}
+
+		// create the phase
 		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Assessment",
@@ -258,13 +267,22 @@ func initAssessmentChallenge() error {
 			BaseUrl:      baseURL,
 			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
-		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newAssessment)
+		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
 			log.Error("failed to create assessment module: ", err)
 			return err
 		}
 
-		// No requires inputs and no provided outputs
+		// create the required output
+		err = qtx.InsertAssessmentScoreOutput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required assessment output: ", err)
+			return err
+		}
+
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
 
 	} else {
 		log.Debug("assessment module already exists")
