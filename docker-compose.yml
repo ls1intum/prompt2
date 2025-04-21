@@ -1,15 +1,13 @@
 services:
-  server:
-    build:
-      context: ./servers/core
-      dockerfile: ../Dockerfile
-    container_name: prompt-core-server
+  server-core:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:latest"
+    container_name: prompt-server-core
     depends_on:
       db:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    ports:
+    expose:
       - "8080:8080"
     environment:
       - CORE_HOST=http://localhost:3000
@@ -20,38 +18,173 @@ services:
       - DB_NAME=prompt
       - SSL_MODE=disable
       - SERVER_ADDRESS=0.0.0.0:8080
-      - KEYCLOAK_HOST=localhost:8081
+      - KEYCLOAK_HOST=http://localhost:8081
       - KEYCLOAK_REALM_NAME=prompt
       - KEYCLOAK_CLIENT_ID=prompt-server
-      - KEYCLOAK_CLIENT_SECRET=TvoTuMQWcwXTk8bqY49ElCVz8JthXyMb #DO NOT USE IN PRODUCTION !!!
-      - KEYCLOAK_ID_OF_CLIENT=a584ca61-fa83-4e95-98b6-c5f3157ae4b4
+      - KEYCLOAK_CLIENT_SECRET=
+      - KEYCLOAK_ID_OF_CLIENT=
       - KEYCLOAK_AUTHORIZED_PARTY=prompt-client
+  
+  server-assessment:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-assessment:latest"
+    container_name: prompt-server-assessment
+    depends_on:
+      db-assessment:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    expose:
+      - "8084:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=localhost:8084
+      - DB_HOST_ASSESSMENT=localhost
+      - DB_PORT_ASSESSMENT=5435
+      - DB_NAME=prompt-postgres
+      - DB_USER=prompt-postgres
+      - DB_PASSWORD=prompt
+      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_REALM_NAME=prompt
 
-  core:
+  server-intro-course:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-intro-course:latest"
+    container_name: prompt-server-intro-course
+    depends_on:
+      db-intro-course:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    expose:
+      - "8082:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=localhost:8082
+      - DB_HOST_INTRO_COURSE=localhost
+      - DB_PORT_INTRO_COURSE=5433
+      - DB_NAME=prompt-postgres
+      - DB_USER=prompt-postgres
+      - DB_PASSWORD=prompt
+      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_REALM_NAME=prompt
+
+  server-team-allocation:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-team-allocation:latest"
+    container_name: prompt-server-team-allocation
+    depends_on:
+      db-team-allocation:
+        condition: service_healthy
+    expose:
+      - "8083:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=localhost:8083
+      - DB_HOST_TEAM_ALLOCATION=localhost
+      - DB_PORT_TEAM_ALLOCATION=5434
+      - DB_NAME=prompt-postgres
+      - DB_USER=prompt-postgres
+      - DB_PASSWORD=prompt
+      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_REALM_NAME=prompt
+
+  clients-core:
     build:
       context: ./clients/core
       dockerfile: Dockerfile
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
     container_name: prompt-client-core
+    environment:
+      - IMAGE_TAG=latest
+      - TZ=Europe/Berlin
+      - CORE_HOST=http://localhost:8080
+      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_REALM_NAME=prompt
+      - CHAIR_NAME_SHORT=Applied Education Technologies
+      - CHAIR_NAME_LONG=TUM Research Group for Applied Education Technologies
+      - INTRO_COURSE_HOST=http://localhost:8082
+      - DEVOPS_CHALLENGE_HOST
+      - TEAM_ALLOCATION_HOST=http://localhost:8083
+      - ASSESSMENT_HOST=http://localhost:8084
     ports:
       - "3000:80"
     depends_on:
-      - clients-base
+      - server-core
 
-  template_component:
+  client-assessment-component:
     build:
-      context: ./clients/template_component
+      context: ./clients/assessment_component
       dockerfile: Dockerfile
-    container_name: prompt-client-template-component
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-assessment-component
+    environment:
+      - TZ=Europe/Berlin
     ports:
-      - "3001:80"
+      - "3007:80"
     depends_on:
-      - clients-base
+      - server-core
+      - server-assessment
+      - db-assessment
 
-  clients-base:
+  client-devops-challenge-component:
     build:
-      context: ./clients
+      context: ./clients/devops_challenge_component
       dockerfile: Dockerfile
-    image: base:latest
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-devops-challenge-component
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - "3006:80"
+    depends_on:
+      - server-core
+
+  client-interview-component:
+    build:
+      context: ./clients/interview_component
+      dockerfile: Dockerfile
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-interview-component
+    environment:
+      - TZ=Europe/Berlin
+    expose:
+      - "3002:80"
+    depends_on:
+      - server-core
+  
+  client-matching-component:
+    build:
+      context: ./clients/matching_component
+      dockerfile: Dockerfile
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-matching-component
+    environment:
+      - TZ=Europe/Berlin
+    expose:
+      - "3003:80"
+    depends_on:
+      - server-core
+
+  client-team-allocation-component:
+    build:
+      context: ./clients/team_allocation_component
+      dockerfile: Dockerfile
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-team-allocation-component
+    environment:
+      - TZ=Europe/Berlin
+    expose:
+      - "3008:80"
+    depends_on:
+      - server-core
+      - server-team-allocation
 
   db:
     image: "postgres:15.2-alpine"
