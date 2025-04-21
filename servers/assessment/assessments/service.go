@@ -15,6 +15,8 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
@@ -118,20 +120,32 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		return assessmentDTO.StudentAssessment{}, errors.New("could not count remaining assessments")
 	}
 
-	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not check assessment completion existence: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
-	}
-
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
-	if exists {
-		dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+	var level = scoreLevelDTO.StudentScore{
+		ScoreLevel: db.ScoreLevelNovice,
+		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
+	}
+	if len(assessments) > 0 {
+		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {
-			log.Error("could not get assessment completion: ", err)
-			return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
+			log.Error("could not check assessment completion existence: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
 		}
-		completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
+
+		if exists {
+			dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+			if err != nil {
+				log.Error("could not get assessment completion: ", err)
+				return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
+			}
+			completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
+		}
+
+		level, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get score level: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not get score level")
+		}
 	}
 
 	return assessmentDTO.StudentAssessment{
@@ -139,6 +153,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
 		AssessmentCompletion:  completion,
+		StudentScore:          level,
 	}, nil
 }
 
