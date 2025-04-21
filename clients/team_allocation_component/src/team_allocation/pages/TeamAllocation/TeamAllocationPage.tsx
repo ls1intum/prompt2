@@ -113,7 +113,7 @@ export const TeamAllocationPage: React.FC = () => {
       {teamsWithMembers.length === 0 ? (
         <Card className='bg-muted/40'>
           <CardContent className='pt-6 flex flex-col items-center justify-center text-center p-8'>
-            <div className='rounded-full bg-muted p-3 mb-4'>
+            <div className='rounded-full bg-muted p-3 mt-4 mb-4'>
               <Users className='h-8 w-8 text-muted-foreground' />
             </div>
             <h3 className='text-lg font-medium mb-2'>No Teams Created Yet</h3>

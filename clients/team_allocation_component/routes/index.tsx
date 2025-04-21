@@ -16,13 +16,13 @@ const routes: ExtendedRouteObject[] = [
     ],
   },
   {
-    path: '/allocations',
-    element: <TeamAllocationPage />,
+    path: '/settings',
+    element: <SurveySettingsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
-    path: '/settings',
-    element: <SurveySettingsPage />,
+    path: '/allocations',
+    element: <TeamAllocationPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]
