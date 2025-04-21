@@ -70,10 +70,13 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {Math.round(
-                  (highLevelCategoryStats.survey.completed / highLevelCategoryStats.survey.total) *
-                    100,
-                )}
+                {highLevelCategoryStats.survey.total > 0
+                  ? Math.round(
+                      (highLevelCategoryStats.survey.completed /
+                        highLevelCategoryStats.survey.total) *
+                        100,
+                    )
+                  : 0}
                 %
               </div>
               <p className='text-xs text-muted-foreground'>
