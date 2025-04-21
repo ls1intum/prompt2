@@ -6,7 +6,8 @@ import { Progress } from '@/components/ui/progress'
 const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
   const totalChecks = checks.length
   const completedChecks = checks.filter((check) => check.isValid).length
-  const completionPercentage = Math.round((completedChecks / totalChecks) * 100)
+  const completionPercentage =
+    totalChecks > 0 ? Math.round((completedChecks / totalChecks) * 100) : 0
 
   const highLevelCategoryStats = {
     previous: {
