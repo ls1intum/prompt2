@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
+	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -69,12 +70,14 @@ func ConvertCourseParticipationToTeaseStudent(
 	devices := parseDeviceData(cp.PrevData["devices"])
 
 	// 3) Attempt to read the scoreLevel field as a string
-	scoreLevel, ok := cp.PrevData["scoreLevel"].(string)
+	scoreLevel, ok := cp.PrevData["scoreLevel"].(db.SkillLevel)
 	if !ok {
 		log.WithField("courseParticipationID", cp.CourseParticipationID).
 			Error("Field 'scoreLevel' in PrevData is not a string; using empty string")
 		scoreLevel = ""
 	}
+
+	teaseProficiency := getTeaseSkillLevel(scoreLevel)
 
 	// 3) Build a Student object
 	student := Student{
@@ -93,8 +96,8 @@ func ConvertCourseParticipationToTeaseStudent(
 		ProjectPreferences:     projectPreferences,
 		StudentComments:        []string{},
 		TutorComments:          []string{},
-		IntroCourseProficiency: scoreLevel,
-		IntroSelfAssessment:    scoreLevel, // we currently use the same for both as we do not yet have a self-assessment
+		IntroCourseProficiency: teaseProficiency,
+		IntroSelfAssessment:    teaseProficiency, // we currently use the same for both as we do not yet have a self-assessment
 	}
 
 	// 4) Process multi-select answers for language proficiency
