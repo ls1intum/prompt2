@@ -1,7 +1,7 @@
 services:
   server:
     build:
-      context: ./server
+      context: ./servers
       dockerfile: Dockerfile
     container_name: prompt-core-server
     depends_on:
