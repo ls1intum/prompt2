@@ -1,24 +1,32 @@
+#####################################################################################################################
+# Warning: Make sure that `/etc/hosts` on the your machine contains the 127.0.0.1 idp.local line.
+#####################################################################################################################
+
 services:
   server-core:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-core:latest"
+    build:
+      context: ./servers/core
+      dockerfile: ../Dockerfile
     container_name: prompt-server-core
     depends_on:
       db:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    expose:
+    ports:
       - "8080:8080"
+    extra_hosts:
+      - "idp.local:host-gateway"
     environment:
       - CORE_HOST=http://localhost:3000
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - DB_HOST=localhost
+      - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=prompt
       - SSL_MODE=disable
-      - SERVER_ADDRESS=0.0.0.0:8080
-      - KEYCLOAK_HOST=http://localhost:8081
+      - SERVER_ADDRESS=:8080
+      - KEYCLOAK_HOST=http://idp.local:8081
       - KEYCLOAK_REALM_NAME=prompt
       - KEYCLOAK_CLIENT_ID=prompt-server
       - KEYCLOAK_CLIENT_SECRET=
@@ -33,17 +41,17 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    expose:
+    ports:
       - "8084:8080"
     environment:
       - CORE_HOST=http://localhost:3000
-      - SERVER_CORE_HOST=http://localhost:8080
-      - SERVER_ADDRESS=localhost:8084
-      - DB_HOST_ASSESSMENT=localhost
-      - DB_PORT_ASSESSMENT=5435
-      - DB_NAME=prompt-postgres
+      - SERVER_CORE_HOST=http://server-core:8080
+      - SERVER_ADDRESS=:8084
+      - DB_HOST_ASSESSMENT=db-assessment
+      - DB_PORT_ASSESSMENT=5432
+      - DB_NAME=prompt
       - DB_USER=prompt-postgres
-      - DB_PASSWORD=prompt
+      - DB_PASSWORD=prompt-postgres
       - KEYCLOAK_HOST=http://localhost:8081
       - KEYCLOAK_REALM_NAME=prompt
 
@@ -55,18 +63,18 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-    expose:
+    ports:
       - "8082:8080"
     environment:
       - CORE_HOST=http://localhost:3000
-      - SERVER_CORE_HOST=http://localhost:8080
-      - SERVER_ADDRESS=localhost:8082
-      - DB_HOST_INTRO_COURSE=localhost
-      - DB_PORT_INTRO_COURSE=5433
-      - DB_NAME=prompt-postgres
+      - SERVER_CORE_HOST=http://server-core:8080
+      - SERVER_ADDRESS=:8082
+      - DB_HOST_INTRO_COURSE=db-intro-course
+      - DB_PORT_INTRO_COURSE=5432
+      - DB_NAME=prompt
       - DB_USER=prompt-postgres
-      - DB_PASSWORD=prompt
-      - KEYCLOAK_HOST=http://localhost:8081
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
       - KEYCLOAK_REALM_NAME=prompt
 
   server-team-allocation:
@@ -75,18 +83,18 @@ services:
     depends_on:
       db-team-allocation:
         condition: service_healthy
-    expose:
+    ports:
       - "8083:8080"
     environment:
       - CORE_HOST=http://localhost:3000
       - SERVER_CORE_HOST=http://localhost:8080
-      - SERVER_ADDRESS=localhost:8083
-      - DB_HOST_TEAM_ALLOCATION=localhost
-      - DB_PORT_TEAM_ALLOCATION=5434
-      - DB_NAME=prompt-postgres
+      - SERVER_ADDRESS=:8083
+      - DB_HOST_TEAM_ALLOCATION=db-team-allocation
+      - DB_PORT_TEAM_ALLOCATION=5432
+      - DB_NAME=prompt
       - DB_USER=prompt-postgres
-      - DB_PASSWORD=prompt
-      - KEYCLOAK_HOST=http://localhost:8081
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
       - KEYCLOAK_REALM_NAME=prompt
 
   clients-core:
@@ -100,7 +108,7 @@ services:
       - IMAGE_TAG=latest
       - TZ=Europe/Berlin
       - CORE_HOST=http://localhost:8080
-      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_HOST=http://idp.local:8081
       - KEYCLOAK_REALM_NAME=prompt
       - CHAIR_NAME_SHORT=Applied Education Technologies
       - CHAIR_NAME_LONG=TUM Research Group for Applied Education Technologies
@@ -285,15 +293,19 @@ services:
       KC_DB_URL_PORT: 5432
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_URL: http://idp.local:8081   
+      KC_HOSTNAME_STRICT: 'false' 
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     entrypoint: /opt/keycloak/bin/kc.sh start-dev
+    extra_hosts:
+      - "idp.local:host-gateway"  
     depends_on:
       keycloak-db:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8081:8080"
+      - "8081:8080"
     healthcheck:
       test:
         [
@@ -301,12 +313,12 @@ services:
           'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit',
         ]
 
-  postfix:
-    image: ghcr.io/ls1admin/postfix:latest
-    container_name: prompt-postfix
-    restart: unless-stopped
-    volumes:
-      - ./postfix-config:/config # See https://github.com/ls1admin/postfix-container-tum-mailrelay/tree/main for details
-    hostname: prompt.ase.cit.tum.de
-    ports:
-      - "25:25"
+  # postfix:
+  #   image: ghcr.io/ls1admin/postfix:latest
+  #   container_name: prompt-postfix
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./postfix-config:/config # See https://github.com/ls1admin/postfix-container-tum-mailrelay/tree/main for details
+  #   hostname: prompt.ase.cit.tum.de
+  #   ports:
+  #     - "25:25"
