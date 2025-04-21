@@ -57,13 +57,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
       surveyResponse.skillResponses.forEach((sr) => {
         newSkillRatings[sr.skillID] = sr.skillLevel
       })
-    } else {
-      // Do nothing here so they remain undefined
-      // If you want every skill to default to 'novice', you could do:
-      // surveyForm.skills.forEach(skill => {
-      //   newSkillRatings[skill.id] = SkillLevel.NOVICE
-      // })
     }
+
     setSkillRatings(newSkillRatings)
     setInitialSkillRatings(newSkillRatings)
   }, [surveyForm, surveyResponse])
@@ -113,6 +108,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
     const sameSkillRatings = JSON.stringify(skillRatings) === JSON.stringify(initialSkillRatings)
     status = sameTeamRanking && sameSkillRatings ? 'Submitted' : 'Modified'
   }
+
+  const allSkillsSelected = surveyForm.skills.every((skill) => skillRatings[skill.id] !== undefined)
 
   return (
     <div className='space-y-8'>
@@ -168,7 +165,7 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
             <Button
               type='submit'
               size='lg'
-              disabled={!isStudent || updateSurveyResponseMutation.isPending}
+              disabled={!isStudent || updateSurveyResponseMutation.isPending || !allSkillsSelected}
               className='w-full sm:w-auto'
             >
               {updateSurveyResponseMutation.isPending ? (
