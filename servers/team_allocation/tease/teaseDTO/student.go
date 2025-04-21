@@ -95,8 +95,6 @@ func ConvertCourseParticipationToTeaseStudent(
 		TutorComments:          []string{},
 		IntroCourseProficiency: scoreLevel,
 		IntroSelfAssessment:    scoreLevel, // we currently use the same for both as we do not yet have a self-assessment
-		// IntroSelfAssessment, IntroCourseProficiency, StudentComments,
-		// TutorComments can be added when needed
 	}
 
 	// 4) Process multi-select answers for language proficiency
