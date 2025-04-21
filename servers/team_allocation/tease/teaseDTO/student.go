@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -70,14 +69,14 @@ func ConvertCourseParticipationToTeaseStudent(
 	devices := parseDeviceData(cp.PrevData["devices"])
 
 	// 3) Attempt to read the scoreLevel field as a string
-	scoreLevel, ok := cp.PrevData["scoreLevel"].(db.SkillLevel)
+	scoreLevel, ok := cp.PrevData["scoreLevel"].(string)
 	if !ok {
 		log.WithField("courseParticipationID", cp.CourseParticipationID).
 			Error("Field 'scoreLevel' in PrevData is not a string; using empty string")
 		scoreLevel = ""
 	}
 
-	teaseProficiency := getTeaseSkillLevel(scoreLevel)
+	teaseProficiency := getTeaseScoreLevel(scoreLevel)
 
 	// 3) Build a Student object
 	student := Student{
@@ -149,4 +148,20 @@ func parseDeviceData(rawDevices interface{}) []string {
 		devices = append(devices, s)
 	}
 	return devices
+}
+
+// Tease defines the Scores upper case, while the DB (and Assessment) defines them lower case
+func getTeaseScoreLevel(skillLevel string) string {
+	switch skillLevel {
+	case "novice":
+		return "Novice"
+	case "intermediate":
+		return "Intermediate"
+	case "advanced":
+		return "Advanced"
+	case "expert":
+		return "Expert"
+	default:
+		return "Unknown"
+	}
 }

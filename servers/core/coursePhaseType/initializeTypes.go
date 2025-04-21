@@ -373,9 +373,6 @@ func initTeamAllocation() error {
 			return err
 		}
 
-		// assessment from the intro course
-		// TODO: @rappm we need to define the data schema.
-
 		// 3.) Provided Output
 		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
 		if err != nil {
