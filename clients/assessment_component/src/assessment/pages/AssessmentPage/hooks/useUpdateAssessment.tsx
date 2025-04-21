@@ -16,7 +16,6 @@ export const useUpdateAssessment = (setError: (error: string | null) => void) =>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
-      queryClient.invalidateQueries({ queryKey: ['remaining-assessments', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

@@ -145,7 +145,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
 
             <DialogFooter>
               <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
-                Close
+                {isUpdating ? 'Saving...' : 'Close'}
               </Button>
             </DialogFooter>
           </div>

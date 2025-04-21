@@ -10,8 +10,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,6 +37,11 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
 
 	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
@@ -61,6 +73,11 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
@@ -88,6 +105,56 @@ func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
 		return db.Assessment{}, errors.New("could not get assessment")
 	}
 	return assessment, nil
+}
+
+func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
+	assessments, err := ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not get assessments for student in phase: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get assessments for student in phase")
+	}
+
+	remainingAssessments, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not count remaining assessments")
+	}
+
+	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
+	var level = scoreLevelDTO.StudentScore{
+		ScoreLevel: db.ScoreLevelNovice,
+		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
+	}
+	if len(assessments) > 0 {
+		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not check assessment completion existence: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
+		}
+
+		if exists {
+			dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+			if err != nil {
+				log.Error("could not get assessment completion: ", err)
+				return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
+			}
+			completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
+		}
+
+		level, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get score level: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not get score level")
+		}
+	}
+
+	return assessmentDTO.StudentAssessment{
+		CourseParticipationID: courseParticipationID,
+		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
+		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
+		AssessmentCompletion:  completion,
+		StudentScore:          level,
+	}, nil
 }
 
 func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
@@ -142,16 +209,4 @@ func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePha
 		return nil, errors.New("could not get assessments for category")
 	}
 	return assessments, nil
-}
-
-func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (db.CountRemainingAssessmentsForStudentRow, error) {
-	remainingAssessments, err := AssessmentServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not count remaining assessments: ", err)
-		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
-	}
-	return remainingAssessments, nil
 }
