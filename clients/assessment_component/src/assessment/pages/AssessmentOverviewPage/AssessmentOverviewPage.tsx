@@ -22,9 +22,6 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     refetch: refetchScoreLevels,
   } = useGetAllScoreLevels()
 
-  const isError = isScoreLevelsError
-  const isPending = isScoreLevelsPending
-
   const refetch = () => {
     refetchScoreLevels()
   }
@@ -34,8 +31,9 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     value: <StudentScoreBadge scoreLevel={scoreLevelWithParticipation.scoreLevel} />,
   }))
 
-  if (isError) return <ErrorPage onRetry={refetch} />
-  if (isPending)
+  if (isScoreLevelsError)
+    return <ErrorPage onRetry={refetch} description='Could not fetch scoreLevels' />
+  if (isScoreLevelsPending)
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
