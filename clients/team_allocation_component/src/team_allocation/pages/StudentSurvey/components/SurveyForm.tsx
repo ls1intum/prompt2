@@ -119,6 +119,11 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
 
   const allSkillsSelected = surveyForm.skills.every((skill) => skillRatings[skill.id] !== undefined)
 
+  const now = dayjs()
+  const deadlineTime = dayjs(surveyForm.deadline)
+  const diff = deadlineTime.diff(now, 'second')
+  const hasDeadlinePassed = diff <= 0
+
   return (
     <div className='space-y-8'>
       {submitSuccess ? (
@@ -146,6 +151,7 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
               teamRanking={teamRanking}
               teams={surveyForm.teams}
               setTeamRanking={setTeamRanking}
+              disabled={!isStudent || updateSurveyResponseMutation.isPending || hasDeadlinePassed}
             />
 
             {/* Skills Rating Section */}
@@ -153,6 +159,7 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
               skills={surveyForm.skills}
               skillRatings={skillRatings}
               setSkillRatings={setSkillRatings}
+              disabled={!isStudent || updateSurveyResponseMutation.isPending || hasDeadlinePassed}
             />
 
             {submitError && (
@@ -173,7 +180,12 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
             <Button
               type='submit'
               size='lg'
-              disabled={!isStudent || updateSurveyResponseMutation.isPending || !allSkillsSelected}
+              disabled={
+                !isStudent ||
+                updateSurveyResponseMutation.isPending ||
+                !allSkillsSelected ||
+                hasDeadlinePassed
+              }
               className='w-full sm:w-auto'
             >
               {updateSurveyResponseMutation.isPending ? (
