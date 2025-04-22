@@ -7,6 +7,7 @@ import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { ErrorPage } from '@/components/ErrorPage'
 import StudentScoreBadge from '../components/StudentScoreBadge'
 import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
+import { useMemo } from 'react'
 
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
@@ -26,10 +27,12 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     refetchScoreLevels()
   }
 
-  const extraData = scoreLevels?.map((scoreLevelWithParticipation) => ({
-    courseParticipationID: scoreLevelWithParticipation.courseParticipationID,
-    value: <StudentScoreBadge scoreLevel={scoreLevelWithParticipation.scoreLevel} />,
-  }))
+  const extraData = useMemo(() => {
+    return scoreLevels?.map((scoreLevelWithParticipation) => ({
+      courseParticipationID: scoreLevelWithParticipation.courseParticipationID,
+      value: <StudentScoreBadge scoreLevel={scoreLevelWithParticipation.scoreLevel} />,
+    }))
+  }, [scoreLevels])
 
   if (isScoreLevelsError)
     return <ErrorPage onRetry={refetch} description='Could not fetch scoreLevels' />
@@ -57,6 +60,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           onClickRowAction={(student) =>
             navigate(`${path}/student-assessment/${student.courseParticipationID}`)
           }
+          key={JSON.stringify(scoreLevels)}
         />
       </div>
     </div>
