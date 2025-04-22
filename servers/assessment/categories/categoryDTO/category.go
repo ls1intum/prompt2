@@ -14,13 +14,13 @@ type Category struct {
 
 func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
 	categories := make([]Category, 0, len(dbCategories))
-	for i, c := range dbCategories {
-		categories[i] = Category{
+	for _, c := range dbCategories {
+		categories = append(categories, Category{
 			ID:          c.ID,
 			Name:        c.Name,
 			Description: c.Description.String,
 			Weight:      c.Weight,
-		}
+		})
 	}
 	return categories
 }

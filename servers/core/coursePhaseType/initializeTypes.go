@@ -182,19 +182,10 @@ func initIntroCourseDeveloper() error {
 			return err
 		}
 
-		// 2.) Create the required input meta data
-		// TODO: Think about available devices -> or in survey?
-
-		// 3.) Provided Output
-		err = qtx.InsertDeveloperProfileOutput(ctx, newIntroCourseDeveloper.ID)
+		// 2.) Provided Output
+		err = qtx.InsertProvidedOutputDevices(ctx, newIntroCourseDeveloper.ID)
 		if err != nil {
-			log.Error("failed to create required developer profile output: ", err)
-			return err
-		}
-
-		err = qtx.InsertProficiencyLevelOutput(ctx, newIntroCourseDeveloper.ID)
-		if err != nil {
-			log.Error("failed to create required proficiency level output: ", err)
+			log.Error("failed to create required application answers output: ", err)
 			return err
 		}
 
@@ -375,8 +366,12 @@ func initTeamAllocation() error {
 			return err
 		}
 
-		// assessment from the intro course
-		// TODO: @rappm we need to define the data schema.
+		// score level from the intro course
+		err = qtx.InsertAssessmentScoreRequiredInput(ctx, newTeamAllocation.ID)
+		if err != nil {
+			log.Error("failed to create required score level: ", err)
+			return err
+		}
 
 		// 3.) Provided Output
 		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
