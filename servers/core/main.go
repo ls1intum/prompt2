@@ -14,6 +14,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseParticipation"
 	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	"github.com/niclasheun/prompt2.0/coursePhaseAuth"
 	"github.com/niclasheun/prompt2.0/coursePhaseType"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
@@ -112,7 +113,13 @@ func main() {
 	permissionValidation.InitValidationService(*query, conn)
 
 	// this initializes also all available course phase types
-	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn)
+	environment := utils.GetEnv("ENVIRONMENT", "development")
+	isDevEnvironment := environment == "development"
+	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn, isDevEnvironment)
+
+	coreHost := utils.GetEnv("CORE_HOST", "localhost:8080")
+	resolution.InitResolutionModule(coreHost)
+
 	coursePhaseAuth.InitCoursePhaseAuthModule(api, *query, conn)
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
