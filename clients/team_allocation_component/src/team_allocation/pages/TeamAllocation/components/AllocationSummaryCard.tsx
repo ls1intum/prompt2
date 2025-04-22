@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { Allocation } from '../../../interfaces/allocation'
 
 interface AllocationSummaryCardProps {
