@@ -13,6 +13,7 @@ export const useCreateAssessmentCompletion = (setError: (error: string | null) =
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['scoreLevels', phaseId] })
       setError(null)
     },
     onError: (error: any) => {

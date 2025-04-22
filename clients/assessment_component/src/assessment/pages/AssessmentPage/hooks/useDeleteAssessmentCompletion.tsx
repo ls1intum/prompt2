@@ -11,6 +11,8 @@ export const useDeleteAssessmentCompletion = (setError: (error: string | null) =
       deleteAssessmentCompletion(phaseId ?? '', courseParticipationID),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['scoreLevels', phaseId] })
+      console.log('Assessment completion deleted successfully')
       setError(null)
     },
     onError: (error: any) => {
