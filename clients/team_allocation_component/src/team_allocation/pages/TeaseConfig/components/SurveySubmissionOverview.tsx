@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -22,6 +20,9 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { TriangleAlert } from 'lucide-react'
+
 interface StudentTableProps {
   students: TeaseStudent[]
 }
@@ -43,8 +44,7 @@ export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
             <TableRow>
               <TableHead>First Name</TableHead>
               <TableHead>Last Name</TableHead>
-              <TableHead>Matriculation Number</TableHead>
-              <TableHead>University Login</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Survey Completed</TableHead>
             </TableRow>
           </TableHeader>
@@ -63,15 +63,41 @@ export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
                   <TableCell>{student.email}</TableCell>
                   <TableCell>
                     {hasSubmitted ? (
-                      <div className='flex items-center'>
-                        <Check className='h-5 w-5 text-green-500 mr-1' />
-                        <span className='text-sm text-green-600'>Completed</span>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            {hasSubmitted ? (
+                              <div className='flex items-center'>
+                                <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                                  <Check className='h-4 w-4' />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className='flex items-center'>
+                                <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
+                                  <TriangleAlert className='h-4 w-4' />
+                                </div>
+                              </div>
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {hasSubmitted ? 'Survey not submitted yet' : 'Survey submitted'}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     ) : (
-                      <div className='flex items-center'>
-                        <X className='h-5 w-5 text-red-500 mr-1' />
-                        <span className='text-sm text-red-600'>Not completed</span>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className='flex items-center'>
+                              <div className='bg-red-100 text-red-700 p-1 rounded-full'>
+                                <X className='h-4 w-4' />
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>Survey not submitted yet</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </TableCell>
                 </TableRow>

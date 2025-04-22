@@ -32,10 +32,6 @@ export const StudentDataCheck = (): JSX.Element => {
     queryFn: () => getAllTeaseStudents(phaseId ?? ''),
   })
 
-  const numberOfStudentsSubmitted =
-    students?.filter((s) => s.projectPreferences.length > 0).length || 0
-  const numberOfStudents = students?.length || 0
-
   useEffect(() => {
     if (!students || students.length === 0) return
 
@@ -167,14 +163,7 @@ export const StudentDataCheck = (): JSX.Element => {
         </TabsContent>
 
         <TabsContent value='survey' className='space-y-6'>
-          <div className='mb-4'>
-            <h3 className='text-lg font-medium mb-2'>Survey Submission Status</h3>
-            <p className='text-sm text-muted-foreground mb-4'>
-              {numberOfStudentsSubmitted} of {numberOfStudents} students have submitted their survey
-              ({Math.round((numberOfStudentsSubmitted / numberOfStudents) * 100)}%)
-            </p>
-            <SurveySubmissionOverview students={students || []} />
-          </div>
+          <SurveySubmissionOverview students={students || []} />
         </TabsContent>
       </Tabs>
 
