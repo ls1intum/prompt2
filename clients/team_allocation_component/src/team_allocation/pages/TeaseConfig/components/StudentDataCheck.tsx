@@ -31,9 +31,6 @@ export const StudentDataCheck = (): JSX.Element => {
     queryFn: () => getAllTeaseStudents(phaseId ?? ''),
   })
 
-  const numberOfStudentsSubmitted =
-    students?.filter((s) => s.projectPreferences.length > 0).length || 0
-
   useEffect(() => {
     if (!students || students.length === 0) return
 
@@ -161,19 +158,11 @@ export const StudentDataCheck = (): JSX.Element => {
         </TabsContent>
 
         <TabsContent value='survey' className='space-y-6'>
-          {surveyChecks.map((check, index) => (
-            <CheckItem key={index} check={check} />
-          ))}
-          <Card className='bg-teal-50 border-teal-200'>
-            <CardContent className='p-4'>
-              <div className='flex justify-between items-center'>
-                <span className='font-medium text-teal-800'>Survey Submissions:</span>
-                <span className='text-teal-800'>
-                  {numberOfStudentsSubmitted} of {students?.length || 0} students
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+          <div className='space-y-6'>
+            {surveyChecks.map((check, index) => (
+              <CheckItem key={index} check={check} />
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 
