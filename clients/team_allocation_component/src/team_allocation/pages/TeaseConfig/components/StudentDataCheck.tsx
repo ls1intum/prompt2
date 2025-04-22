@@ -123,7 +123,12 @@ export const StudentDataCheck = (): JSX.Element => {
 
   return (
     <div className='space-y-6'>
-      <DataCompletionSummary checks={checks} />
+      <DataCompletionSummary
+        checks={checks}
+        students={students}
+        isLoading={isPending}
+        isError={isError}
+      />
 
       <Tabs defaultValue='previous' className='w-full'>
         <TabsList className='grid grid-cols-2 mb-4'>

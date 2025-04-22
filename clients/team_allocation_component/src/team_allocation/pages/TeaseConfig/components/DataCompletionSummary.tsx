@@ -1,24 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ValidationResult } from '../../../interfaces/validationResult'
 import { ClipboardCheck, FileText, BarChart3 } from 'lucide-react'
-import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
 
-const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
-  const { phaseId } = useParams<{ phaseId: string }>()
-
-  const {
-    data: students,
-    isPending,
-    isError,
-    //refetch,
-  } = useQuery<TeaseStudent[]>({
-    queryKey: ['tease_students', phaseId],
-    queryFn: () => getAllTeaseStudents(phaseId ?? ''),
-  })
-
+const DataCompletionSummary = ({
+  checks,
+  students,
+  isLoading,
+  isError,
+}: {
+  checks: ValidationResult[]
+  students?: TeaseStudent[]
+  isLoading: boolean
+  isError: boolean
+}) => {
   const numberOfStudentsSubmitted =
     students?.filter((s) => s.projectPreferences.length > 0).length || 0
   const numberOfStudents = students?.length || 0
@@ -79,13 +74,13 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {!isPending && !isError && numberOfStudents > 0
+                {!isLoading && !isError && numberOfStudents > 0
                   ? Math.round((numberOfStudentsSubmitted / numberOfStudents) * 100)
                   : 0}
                 %
               </div>
               <p className='text-xs text-muted-foreground'>
-                {!isPending && !isError && numberOfStudents > 0 && (
+                {!isLoading && !isError && numberOfStudents > 0 && (
                   <>
                     {numberOfStudentsSubmitted} of {numberOfStudents} students have submitted
                   </>
