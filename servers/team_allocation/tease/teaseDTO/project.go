@@ -15,7 +15,7 @@ func GetProjectPreferenceFromDBModel(teamPreferences []db.GetStudentTeamPreferen
 	for _, teamPreference := range teamPreferences {
 		projectPreferences = append(projectPreferences, ProjectPreference{
 			ProjectID: teamPreference.TeamID,
-			Priority:  teamPreference.Preference,
+			Priority:  teamPreference.Preference - 1, // in tease 0 is the highest priority
 		})
 	}
 	return projectPreferences

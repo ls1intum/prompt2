@@ -320,6 +320,24 @@ func (q *Queries) InsertAssessmentScoreOutput(ctx context.Context, coursePhaseTy
 	return err
 }
 
+const insertAssessmentScoreRequiredInput = `-- name: InsertAssessmentScoreRequiredInput :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
+        }'::jsonb
+)
+`
+
+func (q *Queries) InsertAssessmentScoreRequiredInput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertAssessmentScoreRequiredInput, coursePhaseTypeID)
+	return err
+}
+
 const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
@@ -387,51 +405,26 @@ func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, co
 	return err
 }
 
-const insertDeveloperProfileOutput = `-- name: InsertDeveloperProfileOutput :exec
+const insertProvidedOutputDevices = `-- name: InsertProvidedOutputDevices :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
-      'developerProfile',
+      'devices',
       1,
-      '/developer-profile',
+      '/devices',
       '{
-            "type": "object",
-            "properties": {
-                "appleID"           : {"type": "string"},
-                "gitLabID"          : {"type": "string"},
-                "macBookUUID"       : {"type": "string"},
-                "iphoneUUID"        : {"type": "string"},
-                "ipadUUID"          : {"type": "string"},
-                "appleWatchUUID"    : {"type": "string"}
-            },
-            "required": ["appleID", "gitLabID"]
-        }'::jsonb
-)
-`
-
-func (q *Queries) InsertDeveloperProfileOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, insertDeveloperProfileOutput, coursePhaseTypeID)
-	return err
-}
-
-const insertProficiencyLevelOutput = `-- name: InsertProficiencyLevelOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'proficiency',
-      1,
-      '/proficiency',
-      '{
+        "type": "array",
+        "items": {
             "type": "string",
-            "enum": ["novice", "intermediate", "advanced", "expert"] 
-        }'::jsonb
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
 )
 `
 
-func (q *Queries) InsertProficiencyLevelOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, insertProficiencyLevelOutput, coursePhaseTypeID)
+func (q *Queries) InsertProvidedOutputDevices(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertProvidedOutputDevices, coursePhaseTypeID)
 	return err
 }
 

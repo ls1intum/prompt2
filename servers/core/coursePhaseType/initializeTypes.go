@@ -334,6 +334,13 @@ func initTeamAllocation() error {
 			return err
 		}
 
+		// score level from the intro course
+		err = qtx.InsertAssessmentScoreRequiredInput(ctx, newTeamAllocation.ID)
+		if err != nil {
+			log.Error("failed to create required score level: ", err)
+			return err
+		}
+
 		// 3.) Provided Output
 		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
 		if err != nil {
