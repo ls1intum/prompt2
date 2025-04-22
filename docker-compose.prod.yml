@@ -26,6 +26,7 @@ services:
       - ./letsencrypt:/letsencrypt
     networks:
       - prompt-network
+    hostname: ${CORE_HOST}
 
   server-core:
     image: "ghcr.io/ls1intum/prompt2/prompt-server-core:${SERVER_CORE_IMAGE_TAG}"
@@ -428,7 +429,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./postfix-config:/config
-    hostname: ${CORE_HOST}
     networks:
       - prompt-network
 
