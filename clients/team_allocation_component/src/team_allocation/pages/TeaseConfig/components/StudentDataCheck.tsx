@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Users, RefreshCcw } from 'lucide-react'
+import { AlertCircle, Loader2, Users } from 'lucide-react'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -11,19 +11,14 @@ import { CheckItem } from './CheckItem'
 import { checksConfig } from './ChecksConfig'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export const StudentDataCheck = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+
+  const [checks, setChecks] = useState<ValidationResult[] | null>(null)
 
   const {
     data: students,
@@ -34,8 +29,6 @@ export const StudentDataCheck = (): JSX.Element => {
     queryKey: ['tease_students', phaseId],
     queryFn: () => getAllTeaseStudents(phaseId ?? ''),
   })
-
-  const [checks, setChecks] = useState<ValidationResult[] | null>(null)
 
   const numberOfStudentsSubmitted =
     students?.filter((s) => s.projectPreferences.length > 0).length || 0
@@ -133,227 +126,47 @@ export const StudentDataCheck = (): JSX.Element => {
     <div className='space-y-6'>
       <DataCompletionSummary checks={checks} />
 
-      <Tabs defaultValue='all' className='w-full'>
-        <TabsList className='grid grid-cols-3 mb-4'>
-          <TabsTrigger value='all'>All</TabsTrigger>
+      <Tabs defaultValue='previous' className='w-full'>
+        <TabsList className='grid grid-cols-2 mb-4'>
           <TabsTrigger value='previous'>Previous Phases</TabsTrigger>
           <TabsTrigger value='survey'>Survey Results</TabsTrigger>
         </TabsList>
 
-        <TabsContent value='all' className='space-y-4'>
-          <Accordion type='single' collapsible className='w-full'>
-            <AccordionItem value='previous'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-amber-50 text-amber-700 border-amber-200'>
-                    Previous
-                  </Badge>
-                  <span>Data from Previous Phases</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-4 pt-2'>
-                <Accordion type='single' collapsible className='w-full'>
-                  <AccordionItem value='devices'>
-                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant='outline'
-                          className='bg-gray-50 text-gray-700 border-gray-200'
-                        >
-                          Devices
-                        </Badge>
-                        <span>Student Devices</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='space-y-6 pt-2'>
-                      {deviceChecks.map((check, index) => (
-                        <CheckItem key={index} check={check} />
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value='comments'>
-                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant='outline'
-                          className='bg-purple-50 text-purple-700 border-purple-200'
-                        >
-                          Comments
-                        </Badge>
-                        <span>Tutor & Student Comments</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='space-y-6 pt-2'>
-                      {commentChecks.map((check, index) => (
-                        <CheckItem key={index} check={check} />
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value='score'>
-                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant='outline'
-                          className='bg-yellow-50 text-yellow-700 border-yellow-200'
-                        >
-                          Score
-                        </Badge>
-                        <span>Score Level</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='space-y-6 pt-2'>
-                      {scoreChecks.map((check, index) => (
-                        <CheckItem key={index} check={check} />
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value='language'>
-                    <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                      <div className='flex items-center gap-2'>
-                        <Badge
-                          variant='outline'
-                          className='bg-blue-50 text-blue-700 border-blue-200'
-                        >
-                          Language
-                        </Badge>
-                        <span>Language Proficiency</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='space-y-6 pt-2'>
-                      {languageChecks.map((check, index) => (
-                        <CheckItem key={index} check={check} />
-                      ))}
-                      <Card className='bg-blue-50 border-blue-200'>
-                        <CardContent className='p-4 text-sm'>
-                          <p className='font-medium text-blue-800'>Important:</p>
-                          <p className='text-blue-700 mt-1'>
-                            Language proficiency must be added as application questions with
-                            possible answers &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported
-                            with access keys &quot;language_proficiency_german&quot; and
-                            &quot;language_proficiency_english&quot;.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value='survey'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-teal-50 text-teal-700 border-teal-200'>
-                    Survey
-                  </Badge>
-                  <span>Survey Results</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {surveyChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-                <Card className='bg-teal-50 border-teal-200'>
-                  <CardContent className='p-4'>
-                    <div className='flex justify-between items-center'>
-                      <span className='font-medium text-teal-800'>Survey Submissions:</span>
-                      <Badge variant='outline' className='bg-teal-100 text-teal-800'>
-                        {numberOfStudentsSubmitted} of {students?.length || 0} students
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </TabsContent>
-
         <TabsContent value='previous' className='space-y-4'>
-          <Accordion type='single' collapsible className='w-full'>
-            <AccordionItem value='devices'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-gray-50 text-gray-700 border-gray-200'>
-                    Devices
-                  </Badge>
-                  <span>Student Devices</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {deviceChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-              </AccordionContent>
-            </AccordionItem>
+          <div className='space-y-6'>
+            {deviceChecks.map((check, index) => (
+              <CheckItem key={index} check={check} />
+            ))}
+          </div>
 
-            <AccordionItem value='comments'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge
-                    variant='outline'
-                    className='bg-purple-50 text-purple-700 border-purple-200'
-                  >
-                    Comments
-                  </Badge>
-                  <span>Tutor & Student Comments</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {commentChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-              </AccordionContent>
-            </AccordionItem>
+          <div className='space-y-6'>
+            {commentChecks.map((check, index) => (
+              <CheckItem key={index} check={check} />
+            ))}
+          </div>
 
-            <AccordionItem value='score'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge
-                    variant='outline'
-                    className='bg-yellow-50 text-yellow-700 border-yellow-200'
-                  >
-                    Score
-                  </Badge>
-                  <span>Score Level</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {scoreChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-              </AccordionContent>
-            </AccordionItem>
+          <div className='space-y-6'>
+            {scoreChecks.map((check, index) => (
+              <CheckItem key={index} check={check} />
+            ))}
+          </div>
 
-            <AccordionItem value='language'>
-              <AccordionTrigger className='hover:bg-slate-50 px-4 rounded-lg'>
-                <div className='flex items-center gap-2'>
-                  <Badge variant='outline' className='bg-blue-50 text-blue-700 border-blue-200'>
-                    Language
-                  </Badge>
-                  <span>Language Proficiency</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className='space-y-6 pt-2'>
-                {languageChecks.map((check, index) => (
-                  <CheckItem key={index} check={check} />
-                ))}
-                <Card className='bg-blue-50 border-blue-200'>
-                  <CardContent className='p-4 text-sm'>
-                    <p className='font-medium text-blue-800'>Important:</p>
-                    <p className='text-blue-700 mt-1'>
-                      Language proficiency must be added as application questions with possible
-                      answers &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported with access keys
-                      &quot;language_proficiency_german&quot; and
-                      &quot;language_proficiency_english&quot;.
-                    </p>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <div className='space-y-6'>
+            {languageChecks.map((check, index) => (
+              <CheckItem key={index} check={check} />
+            ))}
+            <Card className='bg-blue-50 border-blue-200'>
+              <CardContent className='p-4 text-sm'>
+                <p className='font-medium text-blue-800'>Important:</p>
+                <p className='text-blue-700 mt-1'>
+                  Language proficiency must be added as application questions with possible answers
+                  &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported with access keys
+                  &quot;language_proficiency_german&quot; and
+                  &quot;language_proficiency_english&quot;.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value='survey' className='space-y-6'>
@@ -364,32 +177,15 @@ export const StudentDataCheck = (): JSX.Element => {
             <CardContent className='p-4'>
               <div className='flex justify-between items-center'>
                 <span className='font-medium text-teal-800'>Survey Submissions:</span>
-                <Badge variant='outline' className='bg-teal-100 text-teal-800'>
+                <span className='text-teal-800'>
                   {numberOfStudentsSubmitted} of {students?.length || 0} students
-                </Badge>
+                </span>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      <Card>
-        <CardFooter className='flex justify-between p-4'>
-          <p className='text-sm text-muted-foreground'>
-            {students?.length || 0} students in this phase
-          </p>
-          <Button
-            onClick={() => refetch()}
-            variant='outline'
-            size='sm'
-            className='gap-2'
-            disabled={isPending}
-          >
-            <RefreshCcw className={`h-5 w-5 ${isPending ? 'animate-spin' : ''}`} />
-            Refresh Data
-          </Button>
-        </CardFooter>
-      </Card>
       {!checks?.every((c) => c.isValid) && (
         <p className='text-sm text-muted-foreground mt-2 text-left'>
           <span className='font-semibold'>
@@ -398,17 +194,13 @@ export const StudentDataCheck = (): JSX.Element => {
         </p>
       )}
       <div className='mt-4 w-full'>
-        {checks?.every((c) => c.isValid) ? (
+        <>
           <Button asChild className='gap-2 w-full'>
             <a href='https://prompt.aet.cit.tum.de/tease' target='_blank' rel='noopener noreferrer'>
               Go to TEASE
             </a>
           </Button>
-        ) : (
-          <Button disabled className='gap-2 w-full'>
-            Go to TEASE
-          </Button>
-        )}
+        </>
       </div>
     </div>
   )

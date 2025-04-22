@@ -1,13 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ValidationResult } from '../../../interfaces/validationResult'
 import { ClipboardCheck, FileText, BarChart3 } from 'lucide-react'
-import { Progress } from '@/components/ui/progress'
+import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import type { TeaseStudent } from '../../../interfaces/tease/student'
 
 const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
-  const totalChecks = checks.length
-  const completedChecks = checks.filter((check) => check.isValid).length
-  const completionPercentage =
-    totalChecks > 0 ? Math.round((completedChecks / totalChecks) * 100) : 0
+  const { phaseId } = useParams<{ phaseId: string }>()
+
+  const {
+    data: students,
+    isPending,
+    isError,
+    //refetch,
+  } = useQuery<TeaseStudent[]>({
+    queryKey: ['tease_students', phaseId],
+    queryFn: () => getAllTeaseStudents(phaseId ?? ''),
+  })
+
+  const numberOfStudentsSubmitted =
+    students?.filter((s) => s.projectPreferences.length > 0).length || 0
+  const numberOfStudents = students?.length || 0
 
   const highLevelCategoryStats = {
     previous: {
@@ -30,14 +44,6 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
         <CardDescription>Overall student data completeness and category breakdown</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='mb-6'>
-          <div className='flex justify-between mb-2'>
-            <span className='text-sm font-medium'>Overall Completion</span>
-            <span className='text-sm font-medium'>{completionPercentage}%</span>
-          </div>
-          <Progress value={completionPercentage} className='h-2' />
-        </div>
-
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <Card className='border-amber-100'>
             <CardHeader className='pb-2'>
@@ -73,18 +79,17 @@ const DataCompletionSummary = ({ checks }: { checks: ValidationResult[] }) => {
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {highLevelCategoryStats.survey.total > 0
-                  ? Math.round(
-                      (highLevelCategoryStats.survey.completed /
-                        highLevelCategoryStats.survey.total) *
-                        100,
-                    )
+                {!isPending && !isError && numberOfStudents > 0
+                  ? Math.round((numberOfStudentsSubmitted / numberOfStudents) * 100)
                   : 0}
                 %
               </div>
               <p className='text-xs text-muted-foreground'>
-                {highLevelCategoryStats.survey.completed} of {highLevelCategoryStats.survey.total}{' '}
-                checks complete
+                {!isPending && !isError && numberOfStudents > 0 && (
+                  <>
+                    {numberOfStudentsSubmitted} of {numberOfStudents} students have submitted
+                  </>
+                )}
               </p>
             </CardContent>
           </Card>
