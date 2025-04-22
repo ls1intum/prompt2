@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Check, X, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import type { TeaseStudent } from '../../../interfaces/tease/student'

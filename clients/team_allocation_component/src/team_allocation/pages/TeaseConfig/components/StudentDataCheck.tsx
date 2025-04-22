@@ -42,7 +42,7 @@ export const StudentDataCheck = (): JSX.Element => {
         isEmpty,
         missingMessage,
         problemDescription,
-        userHint,
+        details,
         category,
         icon,
         highLevelCategory,
@@ -61,9 +61,14 @@ export const StudentDataCheck = (): JSX.Element => {
           completionRate,
           icon,
           details: allValid
-            ? userHint
+            ? details
             : noneValid
-              ? `${problemDescription}`
+              ? `${details}`
+              : `${validStudents.length} of ${students.length} students have provided ${missingMessage}.`,
+          problemDescription: allValid
+            ? undefined
+            : noneValid
+              ? problemDescription
               : `${validStudents.length} of ${students.length} students have provided ${missingMessage}.`,
         }
       },

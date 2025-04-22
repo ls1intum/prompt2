@@ -6,7 +6,7 @@ export type StudentCheck = {
   isEmpty: (value: any) => boolean
   missingMessage: string
   problemDescription: string
-  userHint: string
+  details: string
   category: 'previous' | 'devices' | 'comments' | 'score' | 'language' | 'survey'
   highLevelCategory: 'previous' | 'survey'
   icon: React.ReactNode
