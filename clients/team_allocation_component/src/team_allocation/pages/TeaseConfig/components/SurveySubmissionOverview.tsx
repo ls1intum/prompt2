@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { Check, X, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -10,17 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { StudentDetailDialog } from './StudentDetailDialog'
 
 interface StudentTableProps {
   students: TeaseStudent[]
@@ -194,55 +187,11 @@ export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
         </Table>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        {selectedStudent && (
-          <DialogContent className='sm:max-w-[600px]'>
-            <DialogHeader>
-              <DialogTitle>
-                {selectedStudent.firstName} {selectedStudent.lastName}
-              </DialogTitle>
-              <DialogDescription>Student details and preferences</DialogDescription>
-            </DialogHeader>
-
-            <div className='space-y-6 py-4'>
-              <div>
-                <h3 className='text-lg font-medium mb-2'>Skills</h3>
-                <div className='flex flex-wrap gap-2'>
-                  {selectedStudent.skill && selectedStudent.skill.length > 0 ? (
-                    selectedStudent.skill.map((skillItem, index) => (
-                      <Badge key={index} variant='secondary'>
-                        {String(skillItem)}
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>No skills provided</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <h3 className='text-lg font-medium mb-2'>Project Preferences</h3>
-                {selectedStudent.projectPreferences &&
-                selectedStudent.projectPreferences.length > 0 ? (
-                  <ScrollArea className='h-[200px] rounded-md border p-4'>
-                    <ol className='space-y-4'>
-                      {selectedStudent.projectPreferences.map((preference, index) => (
-                        <li key={index} className='border-b pb-2 last:border-0'>
-                          <div className='font-medium'>
-                            {index + 1}. {preference.projectId}
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  </ScrollArea>
-                ) : (
-                  <p className='text-sm text-muted-foreground'>No project preferences submitted</p>
-                )}
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      <StudentDetailDialog
+        student={selectedStudent}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   )
 }
