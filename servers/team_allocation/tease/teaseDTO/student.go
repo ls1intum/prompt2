@@ -26,10 +26,10 @@ type Student struct {
 	Languages              []Language             `json:"languages"`
 	IntroSelfAssessment    string                 `json:"introSelfAssessment"`
 	IntroCourseProficiency string                 `json:"introCourseProficiency"`
-	Skill                  []StudentSkillResponse `json:"skill"`
+	Skills                 []StudentSkillResponse `json:"skills"`
 	Devices                []string               `json:"devices"`
-	StudentComments        string                 `json:"studentComments"` // @rappm pls update once your assessment is done
-	TutorComments          string                 `json:"tutorComments"`   // @rappm pls update once your assessment is done
+	StudentComments        []string               `json:"studentComments"` // @rappm pls update once your assessment is done
+	TutorComments          []string               `json:"tutorComments"`   // @rappm pls update once your assessment is done
 	ProjectPreferences     []ProjectPreference    `json:"projectPreferences"`
 }
 
@@ -66,30 +66,37 @@ func ConvertCourseParticipationToTeaseStudent(
 	}
 
 	// 2) Attempt to read the "devices" field as []string
-	devices, ok := cp.PrevData["devices"].([]string)
+	devices := parseDeviceData(cp.PrevData["devices"])
+
+	// 3) Attempt to read the scoreLevel field as a string
+	scoreLevel, ok := cp.PrevData["scoreLevel"].(string)
 	if !ok {
 		log.WithField("courseParticipationID", cp.CourseParticipationID).
-			Error("Field 'devices' in PrevData is not []string; using empty slice")
-		devices = []string{}
+			Error("Field 'scoreLevel' in PrevData is not a string; using empty string")
+		scoreLevel = ""
 	}
+
+	teaseProficiency := getTeaseScoreLevel(scoreLevel)
 
 	// 3) Build a Student object
 	student := Student{
-		CourseParticipationID: cp.CourseParticipationID,
-		FirstName:             cp.Student.FirstName,
-		LastName:              cp.Student.LastName,
-		Gender:                convertPromptGenderToTease(cp.Student.Gender),
-		Nationality:           cp.Student.Nationality,
-		Email:                 cp.Student.Email,
-		StudyDegree:           string(cp.Student.StudyDegree),
-		StudyProgram:          cp.Student.StudyProgram,
-		Semester:              cp.Student.CurrentSemester,
-		Languages:             []Language{},
-		Devices:               devices,
-		Skill:                 skillResponses,
-		ProjectPreferences:    projectPreferences,
-		// IntroSelfAssessment, IntroCourseProficiency, StudentComments,
-		// TutorComments can be added when needed
+		CourseParticipationID:  cp.CourseParticipationID,
+		FirstName:              cp.Student.FirstName,
+		LastName:               cp.Student.LastName,
+		Gender:                 convertPromptGenderToTease(cp.Student.Gender),
+		Nationality:            cp.Student.Nationality,
+		Email:                  cp.Student.Email,
+		StudyDegree:            string(cp.Student.StudyDegree),
+		StudyProgram:           cp.Student.StudyProgram,
+		Semester:               cp.Student.CurrentSemester,
+		Languages:              []Language{},
+		Devices:                devices,
+		Skills:                 skillResponses,
+		ProjectPreferences:     projectPreferences,
+		StudentComments:        []string{},
+		TutorComments:          []string{},
+		IntroCourseProficiency: teaseProficiency,
+		IntroSelfAssessment:    teaseProficiency, // we currently use the same for both as we do not yet have a self-assessment
 	}
 
 	// 4) Process multi-select answers for language proficiency
@@ -124,4 +131,37 @@ func addLanguageProficiency(
 		Language:    langCode,
 		Proficiency: proficiency,
 	})
+}
+
+func parseDeviceData(rawDevices interface{}) []string {
+	if rawDevices == nil {
+		log.Error("devices is nil")
+		return []string{}
+	}
+	devices := []string{}
+	for i, v := range rawDevices.([]interface{}) {
+		s, ok := v.(string)
+		if !ok {
+			log.Errorf("devices[%d] is not a string", i)
+			continue
+		}
+		devices = append(devices, s)
+	}
+	return devices
+}
+
+// Tease defines the Scores upper case, while the DB (and Assessment) defines them lower case
+func getTeaseScoreLevel(skillLevel string) string {
+	switch skillLevel {
+	case "novice":
+		return "Novice"
+	case "intermediate":
+		return "Intermediate"
+	case "advanced":
+		return "Advanced"
+	case "expert":
+		return "Expert"
+	default:
+		return "Unknown"
+	}
 }

@@ -249,6 +249,7 @@ func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.
 	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
 	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	message.WriteString("MIME-Version: 1.0\r\n") // Improve Spam Score by setting explicit MIME-Version
 	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
 
 	if len(courseMailingSettings.CC) > 0 {

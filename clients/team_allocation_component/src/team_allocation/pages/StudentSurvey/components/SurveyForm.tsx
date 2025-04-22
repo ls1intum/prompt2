@@ -46,7 +46,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
       const sorted = [...surveyResponse.teamPreferences].sort((a, b) => a.preference - b.preference)
       newTeamRanking = sorted.map((pref) => pref.teamID)
     } else {
-      newTeamRanking = surveyForm.teams.map((team) => team.id)
+      // We randomize the order in the beginning to avoid bias
+      newTeamRanking = surveyForm.teams.map((team) => team.id).sort(() => Math.random() - 0.5)
     }
     setTeamRanking(newTeamRanking)
     setInitialTeamRanking(newTeamRanking)
@@ -57,13 +58,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
       surveyResponse.skillResponses.forEach((sr) => {
         newSkillRatings[sr.skillID] = sr.skillLevel
       })
-    } else {
-      // Do nothing here so they remain undefined
-      // If you want every skill to default to 'novice', you could do:
-      // surveyForm.skills.forEach(skill => {
-      //   newSkillRatings[skill.id] = SkillLevel.NOVICE
-      // })
     }
+
     setSkillRatings(newSkillRatings)
     setInitialSkillRatings(newSkillRatings)
   }, [surveyForm, surveyResponse])
@@ -111,7 +107,14 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
     // Check if the local states are the same as the initial ones
     const sameTeamRanking = JSON.stringify(teamRanking) === JSON.stringify(initialTeamRanking)
     const sameSkillRatings = JSON.stringify(skillRatings) === JSON.stringify(initialSkillRatings)
-    status = sameTeamRanking && sameSkillRatings ? 'Submitted' : 'Modified'
+    const skillsSubmitted = Object.values(initialSkillRatings).some(
+      (rating) => rating !== undefined,
+    )
+    status = skillsSubmitted
+      ? sameTeamRanking && sameSkillRatings
+        ? 'Submitted'
+        : 'Modified'
+      : 'Not submitted'
   }
 
   return (

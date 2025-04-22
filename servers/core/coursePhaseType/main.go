@@ -41,7 +41,7 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 		log.Fatal("failed to init dev ops challenge phase type: ", err)
 	}
 
-	err = initAssessmentChallenge()
+	err = initAssessment()
 	if err != nil {
 		log.Fatal("failed to init assessment phase type: ", err)
 	}

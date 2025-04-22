@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
-import ScoreLevelBadge from './ScoreLevelBadge'
+import StudentScoreBadge from './StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
-import { mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
 import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
@@ -38,13 +37,6 @@ export const AssessmentProfile = ({
 
   const isPending = isCreatePending || isDeletePending || isParticipationPending
 
-  const averageScore =
-    studentAssessment.assessments.length === 0
-      ? 0
-      : studentAssessment.assessments
-          .map((assessment) => mapScoreLevelToNumber({ score: assessment.score }))
-          .reduce<number>((a, b) => a + b, 0) / studentAssessment.assessments.length
-
   const handleButtonClick = () => {
     setError(null)
     setDialogOpen(true)
@@ -58,6 +50,7 @@ export const AssessmentProfile = ({
       try {
         if (studentAssessment.assessmentCompletion.completed) {
           await deleteCompletion(studentAssessment.courseParticipationID)
+          passStatus = PassStatus.NOT_ASSESSED
         } else {
           await createCompletion({
             courseParticipationID: studentAssessment.courseParticipationID,
@@ -117,7 +110,9 @@ export const AssessmentProfile = ({
                   remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
                   isFinalized={studentAssessment.assessmentCompletion.completed}
                 />
-                <ScoreLevelBadge score={averageScore} />
+                {studentAssessment.assessments.length > 0 && (
+                  <StudentScoreBadge studentScore={studentAssessment.studentScore} />
+                )}
               </div>
             </div>
           </div>

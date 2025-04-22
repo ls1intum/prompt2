@@ -20,3 +20,13 @@ func GetResolutionDTOFromDBModel(model db.GetResolutionsForCoursePhaseRow) Resol
 		CoursePhaseID: model.FromCoursePhaseID,
 	}
 }
+
+func GetResolutionsDTOFromDBModels(models []db.GetResolutionsForCoursePhaseRow) []Resolution {
+	resolutionDTOs := make([]Resolution, 0, len(models))
+
+	for _, resolution := range models {
+		dto := GetResolutionDTOFromDBModel(resolution)
+		resolutionDTOs = append(resolutionDTOs, dto)
+	}
+	return resolutionDTOs
+}
