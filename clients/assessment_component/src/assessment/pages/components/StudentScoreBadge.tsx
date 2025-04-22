@@ -14,7 +14,7 @@ const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel, score }
 
   return (
     <Badge className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}>
-      {config.icon} {config.title}
+      {config.title}
       {score !== undefined ? ` - Score: ${score.toFixed(2)}` : ''}
     </Badge>
   )
