@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -50,7 +49,6 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 	})
 	if err != nil {
@@ -84,7 +82,6 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 	})
 	if err != nil {

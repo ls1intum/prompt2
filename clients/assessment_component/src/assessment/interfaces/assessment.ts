@@ -17,7 +17,6 @@ export type CreateOrUpdateAssessmentRequest = {
   competencyID: string // UUID
   score: ScoreLevel
   comment: string
-  assessedAt?: string // ISO 8601 date string, optional
   author: string
 }
 

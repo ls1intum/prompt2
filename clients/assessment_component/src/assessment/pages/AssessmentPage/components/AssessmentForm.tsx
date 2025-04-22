@@ -41,9 +41,6 @@ export const AssessmentForm = ({
       competencyID: competency.id,
       score: assessment?.score,
       comment: assessment ? assessment.comment : '',
-      assessedAt: assessment
-        ? format(new Date(assessment.assessedAt), "yyyy-MM-dd'T'HH:mm:ss'Z'")
-        : format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
       author: userName,
     },
   })
