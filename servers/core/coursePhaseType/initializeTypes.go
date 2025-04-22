@@ -153,54 +153,6 @@ func initMatching() error {
 	return nil
 }
 
-func initIntroCourseDeveloper() error {
-	ctx := context.Background()
-	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseDeveloperPhaseTypeExists(ctx)
-
-	if err != nil {
-		log.Error("failed to check if intro course developer phase type exists: ", err)
-		return err
-	}
-	if !exists {
-		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
-		if err != nil {
-			return err
-		}
-		defer utils.DeferRollback(tx, ctx)
-		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
-
-		// 1.) Create the phase
-		newIntroCourseDeveloper := db.CreateCoursePhaseTypeParams{
-			ID:           uuid.New(),
-			Name:         "IntroCourseDeveloper",
-			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/intro-course/api",
-		}
-		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
-		if err != nil {
-			log.Error("failed to create intro course developer module: ", err)
-			return err
-		}
-
-		// 2.) Provided Output
-		err = qtx.InsertProvidedOutputDevices(ctx, newIntroCourseDeveloper.ID)
-		if err != nil {
-			log.Error("failed to create required application answers output: ", err)
-			return err
-		}
-
-		// 3.) Commit the transaction
-		if err := tx.Commit(ctx); err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
-		}
-
-	} else {
-		log.Debug("matching module already exists")
-	}
-
-	return nil
-}
-
 func initIntroCourseTutor() error {
 	ctx := context.Background()
 	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseTutorPhaseTypeExists(ctx)
@@ -218,11 +170,16 @@ func initIntroCourseTutor() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/intro-course/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8082/intro-course/api"
+		}
+
 		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "IntroCourseTutor",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/intro-course/api",
+			BaseUrl:      baseURL,
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseTutor)
 		if err != nil {
@@ -290,12 +247,18 @@ func initAssessment() error {
 		defer utils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
+		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/assessment/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8084/assessment/api"
+		}
+
 		// create the phase
 		newAssessment := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Assessment",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/assessment/api",
+			BaseUrl:      baseURL,
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
@@ -338,11 +301,16 @@ func initTeamAllocation() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/team-allocation/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8083/team-allocation/api"
+		}
+
 		newTeamAllocation := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Team Allocation",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/team-allocation/api", // We use core here, as the server does not provide any exported DTOs
+			BaseUrl:      baseURL,
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {

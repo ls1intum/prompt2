@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/student/studentDTO"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -63,7 +65,12 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
 	}
 
-	resolutionDTOs := coursePhaseParticipationDTO.GetResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs := resolutionDTO.GetParticipationResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs)
+	if err != nil {
+		log.Error(err)
+		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, errors.New("failed to replace resolution URLs")
+	}
 
 	return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{
 		Participations: participationDTOs,
