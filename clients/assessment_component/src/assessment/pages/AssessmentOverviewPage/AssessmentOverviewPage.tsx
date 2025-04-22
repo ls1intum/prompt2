@@ -2,16 +2,16 @@ import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
-
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-
 import { ErrorPage } from '@/components/ErrorPage'
 import StudentScoreBadge from '../components/StudentScoreBadge'
+import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
   const path = useLocation().pathname
+  const tableWidth = useCustomElementWidth('table-view')
 
   const { participations } = useParticipationStore()
 
@@ -41,22 +41,24 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     )
 
   return (
-    <div>
+    <div id='table-view' className='relative flex flex-col'>
       <ManagementPageHeader>Assessment Overview</ManagementPageHeader>
-      <p className='text-sm text-muted-foregrount mb-4'>
+      <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
-      <CoursePhaseParticipationsTablePage
-        participants={participations ?? []}
-        prevDataKeys={[]}
-        extraData={extraData}
-        extraColumnHeader='ScoreLevel'
-        restrictedDataKeys={[]}
-        studentReadableDataKeys={[]}
-        onClickRowAction={(student) =>
-          navigate(`${path}/student-assessment/${student.courseParticipationID}`)
-        }
-      />
+      <div style={{ width: `${tableWidth}px` }}>
+        <CoursePhaseParticipationsTablePage
+          participants={participations ?? []}
+          prevDataKeys={[]}
+          extraData={extraData}
+          extraColumnHeader='ScoreLevel'
+          restrictedDataKeys={[]}
+          studentReadableDataKeys={[]}
+          onClickRowAction={(student) =>
+            navigate(`${path}/student-assessment/${student.courseParticipationID}`)
+          }
+        />
+      </div>
     </div>
   )
 }
