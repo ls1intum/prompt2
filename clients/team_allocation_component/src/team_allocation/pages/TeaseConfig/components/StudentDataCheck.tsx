@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Users } from 'lucide-react'
+import { AlertCircle, Loader2, Users, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -186,9 +187,10 @@ export const StudentDataCheck = (): JSX.Element => {
       <div className='mt-4 w-full'>
         <>
           <Button asChild className='gap-2 w-full'>
-            <a href='https://prompt.aet.cit.tum.de/tease' target='_blank' rel='noopener noreferrer'>
+            <Link to={`/tease`}>
               Go to TEASE
-            </a>
+              <ArrowRight className='ml-2 h-4 w-4' />
+            </Link>
           </Button>
         </>
       </div>
