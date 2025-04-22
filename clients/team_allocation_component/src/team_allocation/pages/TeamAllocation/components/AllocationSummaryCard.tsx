@@ -101,7 +101,6 @@ export const AllocationSummaryCard = ({
         </div>
       </CardContent>
       <CardContent className='pt-0 pb-4 flex justify-end'>
-        {/* Replace with the correct path for your app */}
         <Button asChild>
           <Link to={`/tease`}>
             Go to Tease

@@ -121,48 +121,44 @@ export const TeamAllocationPage: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {teamsWithMembers.map((team) => (
-              <Card
-                key={team.id}
-                className='overflow-hidden border-l-4 hover:shadow-md transition-shadow duration-200'
-              >
-                <CardHeader className='pb-2'>
-                  <div className='flex justify-between items-center'>
-                    <h3 className='text-lg font-semibold tracking-tight'>{team.name}</h3>
-                    <Badge variant='outline' className='ml-2'>
-                      <Users className='h-3.5 w-3.5 mr-1' />
-                      {team.members.length}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <Separator />
-                <CardContent className='pt-4'>
-                  {team.members.length === 0 ? (
-                    <p className='text-sm italic text-muted-foreground'>
-                      No members allocated yet.
-                    </p>
-                  ) : (
-                    <ul className='space-y-2'>
-                      {team.members.map((member) => (
-                        <li key={member.id} className='text-sm flex items-center gap-2'>
-                          <div className='h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium'>
-                            {member.firstName[0]}
-                            {member.lastName[0]}
-                          </div>
-                          <span>
-                            {member.firstName} {member.lastName}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {teamsWithMembers.map((team) => (
+            <Card
+              key={team.id}
+              className='overflow-hidden border-l-4 hover:shadow-md transition-shadow duration-200'
+            >
+              <CardHeader className='pb-2'>
+                <div className='flex justify-between items-center'>
+                  <h3 className='text-lg font-semibold tracking-tight'>{team.name}</h3>
+                  <Badge variant='outline' className='ml-2'>
+                    <Users className='h-3.5 w-3.5 mr-1' />
+                    {team.members.length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <Separator />
+              <CardContent className='pt-4'>
+                {team.members.length === 0 ? (
+                  <p className='text-sm italic text-muted-foreground'>No members allocated yet.</p>
+                ) : (
+                  <ul className='space-y-2'>
+                    {team.members.map((member) => (
+                      <li key={member.id} className='text-sm flex items-center gap-2'>
+                        <div className='h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium'>
+                          {member.firstName[0]}
+                          {member.lastName[0]}
+                        </div>
+                        <span>
+                          {member.firstName} {member.lastName}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   )
