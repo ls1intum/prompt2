@@ -14,7 +14,7 @@ const sidebarItems: SidebarMenuItemProps = {
     },
     {
       title: 'Tease Configuration',
-      goToPath: '/tease_config',
+      goToPath: '/tease-config',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
