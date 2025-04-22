@@ -19,11 +19,6 @@ export const CheckItem = ({ check }: { check: ValidationResult }) => {
               {check.icon}
               <h3 className='font-medium'>{check.label}</h3>
             </div>
-            <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                check.isValid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              }`}
-            ></span>
           </div>
 
           {check.isValid ? (

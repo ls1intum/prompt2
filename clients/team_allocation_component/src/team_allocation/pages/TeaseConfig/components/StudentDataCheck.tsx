@@ -181,14 +181,12 @@ export const StudentDataCheck = (): JSX.Element => {
         </p>
       )}
       <div className='mt-4 w-full'>
-        <>
-          <Button asChild className='gap-2 w-full'>
-            <Link to={`/tease`}>
-              Go to TEASE
-              <ArrowRight className='ml-2 h-4 w-4' />
-            </Link>
-          </Button>
-        </>
+        <Button asChild className='gap-2 w-full'>
+          <Link to={`/tease`}>
+            Go to TEASE
+            <ArrowRight className='ml-2 h-4 w-4' />
+          </Link>
+        </Button>
       </div>
     </div>
   )
