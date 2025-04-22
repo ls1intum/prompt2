@@ -1,6 +1,5 @@
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ValidationResult } from '../../../interfaces/validationResult'
 
 export const CheckItem = ({ check }: { check: ValidationResult }) => {
@@ -20,14 +19,6 @@ export const CheckItem = ({ check }: { check: ValidationResult }) => {
               {check.icon}
               <h3 className='font-medium'>{check.label}</h3>
             </div>
-            <Badge
-              variant={check.isValid ? 'default' : 'outline'}
-              className={
-                check.isValid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              }
-            >
-              {check.isValid ? 'Complete' : `${check.completionRate}% Complete`}
-            </Badge>
           </div>
           <p className='mt-1 text-sm text-muted-foreground'>
             {check.details || 'All students have provided this information.'}

@@ -43,6 +43,7 @@ export const StudentDataCheck = (): JSX.Element => {
         isEmpty,
         missingMessage,
         problemDescription,
+        userHint,
         category,
         icon,
         highLevelCategory,
@@ -60,7 +61,7 @@ export const StudentDataCheck = (): JSX.Element => {
           completionRate,
           icon,
           details: allValid
-            ? undefined
+            ? userHint
             : noneValid
               ? `${problemDescription}`
               : `${validStudents.length} of ${students.length} students have provided ${missingMessage}.`,
@@ -155,17 +156,6 @@ export const StudentDataCheck = (): JSX.Element => {
             {languageChecks.map((check, index) => (
               <CheckItem key={index} check={check} />
             ))}
-            <Card className='bg-blue-50 border-blue-200'>
-              <CardContent className='p-4 text-sm'>
-                <p className='font-medium text-blue-800'>Important:</p>
-                <p className='text-blue-700 mt-1'>
-                  Language proficiency must be added as application questions with possible answers
-                  &quot;A1/A2, B1/B2, C1/C2, Native&quot; and exported with access keys
-                  &quot;language_proficiency_german&quot; and
-                  &quot;language_proficiency_english&quot;.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
 
