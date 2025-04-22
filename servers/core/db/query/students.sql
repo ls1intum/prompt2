@@ -36,6 +36,12 @@ RETURNING *;
 SELECT * FROM student
 WHERE email = $1 LIMIT 1;
 
+-- name: GetStudentByMatriculationNumberAndUniversityLogin :one
+SELECT * FROM student
+WHERE matriculation_number = $1
+  AND university_login = $2
+LIMIT 1;
+
 -- name: SearchStudents :many
 SELECT *
 FROM student

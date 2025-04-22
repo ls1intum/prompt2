@@ -7,11 +7,11 @@ import (
 )
 
 type AssessmentCompletion struct {
-	CourseParticipationID uuid.UUID        `json:"courseParticipationID"`
-	CoursePhaseID         uuid.UUID        `json:"coursePhaseID"`
-	CompletedAt           pgtype.Timestamp `json:"completedAt"`
-	Author                string           `json:"author"`
-	Completed             bool             `json:"completed"`
+	CourseParticipationID uuid.UUID          `json:"courseParticipationID"`
+	CoursePhaseID         uuid.UUID          `json:"coursePhaseID"`
+	CompletedAt           pgtype.Timestamptz `json:"completedAt"`
+	Author                string             `json:"author"`
+	Completed             bool               `json:"completed"`
 }
 
 // GetAssessmentCompletionDTOsFromDBModels converts a slice of db.AssessmentCompletion to DTOs.

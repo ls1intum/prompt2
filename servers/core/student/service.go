@@ -73,6 +73,17 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
+func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, matriculation_number string, universityLogin string) (studentDTO.Student, error) {
+	student, err := StudentServiceSingleton.queries.GetStudentByMatriculationNumberAndUniversityLogin(ctx, db.GetStudentByMatriculationNumberAndUniversityLoginParams{
+		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
+		MatriculationNumber: pgtype.Text{String: matriculation_number, Valid: true},
+	})
+	if err != nil {
+		return studentDTO.Student{}, err
+	}
+	return studentDTO.GetStudentDTOFromDBModel(student), nil
+}
+
 func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 	updateStudentParams := student.GetDBModel()
@@ -88,7 +99,7 @@ func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.
 
 func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
 	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
-	studentByEmail, err := GetStudentByEmail(ctx, studentObj.Email)
+	studentByEmail, err := GetStudentByMatriculationNumberAndUniversityLogin(ctx, studentObj.MatriculationNumber, studentObj.UniversityLogin)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return CreateStudent(ctx, &queries, studentObj)
 	}

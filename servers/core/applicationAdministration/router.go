@@ -125,20 +125,24 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 }
 
 func getApplicationAuthenticated(c *gin.Context) {
-	coursePhaseId, err := uuid.Parse(c.Param("coursePhaseID"))
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	userEmail := c.GetString("userEmail")
-
-	if userEmail == "" {
-		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
+	matriculationNumber := c.GetString("matriculationNumber")
+	if matriculationNumber == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no matriculation number found"))
 		return
 	}
 
-	// TODO: maybe rewrite in near future to MatrNr as this is safer to not change!
-	applicationForm, err := GetApplicationAuthenticatedByEmail(c, userEmail, coursePhaseId)
+	universityLogin := c.GetString("universityLogin")
+	if universityLogin == "" {
+		handleError(c, http.StatusUnauthorized, errors.New("no university login found"))
+		return
+	}
+
+	applicationForm, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(c, coursePhaseID, matriculationNumber, universityLogin)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))

@@ -8,12 +8,14 @@ interface TeamRankingProps {
   teamRanking: string[]
   teams: Team[]
   setTeamRanking: (teamRanking: string[]) => void
+  disabled: boolean
 }
 
 export const TeamRanking = ({
   teamRanking,
   teams,
   setTeamRanking,
+  disabled,
 }: TeamRankingProps): JSX.Element => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
@@ -40,7 +42,7 @@ export const TeamRanking = ({
       </CardHeader>
       <CardContent className='pt-6'>
         <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId='teamRanking'>
+          <Droppable droppableId='teamRanking' isDropDisabled={disabled}>
             {(provided) => (
               <div className='space-y-4' {...provided.droppableProps} ref={provided.innerRef}>
                 {teamRanking.map((teamID, index) => {

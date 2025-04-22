@@ -5,14 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
-import StudentScoreBadge from './StudentScoreBadge'
+import StudentScoreBadge from '../../components/StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
 import { useDeleteAssessmentCompletion } from '../hooks/useDeleteAssessmentCompletion'
-import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
 import { AssessmentCompletionDialog } from './AssessmentCompletionDialog'
 
 interface AssessmentProfileProps {
@@ -32,10 +31,8 @@ export const AssessmentProfile = ({
     useCreateAssessmentCompletion(setError)
   const { mutate: deleteCompletion, isPending: isDeletePending } =
     useDeleteAssessmentCompletion(setError)
-  const { mutate: updateParticipation, isPending: isParticipationPending } =
-    useUpdateCoursePhaseParticipation()
 
-  const isPending = isCreatePending || isDeletePending || isParticipationPending
+  const isPending = isCreatePending || isDeletePending
 
   const handleButtonClick = () => {
     setError(null)
@@ -45,12 +42,10 @@ export const AssessmentProfile = ({
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
   const handleConfirm = () => {
-    let passStatus = PassStatus.NOT_ASSESSED
     const handleCompletion = async () => {
       try {
         if (studentAssessment.assessmentCompletion.completed) {
           await deleteCompletion(studentAssessment.courseParticipationID)
-          passStatus = PassStatus.NOT_ASSESSED
         } else {
           await createCompletion({
             courseParticipationID: studentAssessment.courseParticipationID,
@@ -59,15 +54,7 @@ export const AssessmentProfile = ({
             completedAt: new Date().toISOString(),
             completed: true,
           })
-          passStatus = PassStatus.PASSED
         }
-        await updateParticipation({
-          coursePhaseID: participant.coursePhaseID,
-          courseParticipationID: participant.courseParticipationID,
-          passStatus: passStatus,
-          restrictedData: participant.restrictedData,
-          studentReadableData: participant.studentReadableData,
-        })
         setDialogOpen(false)
       } catch (err) {
         setError('An error occurred while updating the assessment completion status.')
@@ -111,7 +98,10 @@ export const AssessmentProfile = ({
                   isFinalized={studentAssessment.assessmentCompletion.completed}
                 />
                 {studentAssessment.assessments.length > 0 && (
-                  <StudentScoreBadge studentScore={studentAssessment.studentScore} />
+                  <StudentScoreBadge
+                    scoreLevel={studentAssessment.studentScore.scoreLevel}
+                    score={studentAssessment.studentScore.score}
+                  />
                 )}
               </div>
             </div>
