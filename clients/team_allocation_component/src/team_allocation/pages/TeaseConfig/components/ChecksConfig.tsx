@@ -64,7 +64,7 @@ export const checksConfig: StudentCheck[] = [
   // Language Proficiency
   {
     label: 'English Proficiency',
-    extractor: (s) => s.languages?.find((l) => l.language === 'English')?.proficiency,
+    extractor: (s) => s.languages?.find((l) => l.language === 'en')?.proficiency,
     isEmpty: (v) => !v,
     missingMessage: 'English proficiency levels',
     problemDescription:
@@ -78,7 +78,7 @@ export const checksConfig: StudentCheck[] = [
   },
   {
     label: 'German Proficiency',
-    extractor: (s) => s.languages?.find((l) => l.language === 'German')?.proficiency,
+    extractor: (s) => s.languages?.find((l) => l.language === 'de')?.proficiency,
     isEmpty: (v) => !v,
     missingMessage: 'German proficiency levels',
     problemDescription:
