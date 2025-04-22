@@ -1,19 +1,12 @@
 // Default values that shall be reused in every component
 
-import { colors as defaultColors } from 'tailwindcss/colors'
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  safelist: [
-    'dark',
-    'ProseMirror',
-    { pattern: /(bg|text|border)-./, variants: ['dark', 'hover', 'focus'] },
-  ],
+  safelist: ['dark', 'ProseMirror', { pattern: /(bg|text|border)-./, variants: ['dark'] }],
   theme: {
     extend: {
       colors: {
-        ...defaultColors,
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
