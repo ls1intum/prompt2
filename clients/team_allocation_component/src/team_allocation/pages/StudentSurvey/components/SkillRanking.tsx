@@ -10,6 +10,7 @@ interface SkillRankingProps {
   skills: Skill[]
   skillRatings: Record<string, SkillLevel | undefined>
   setSkillRatings: React.Dispatch<React.SetStateAction<Record<string, SkillLevel | undefined>>>
+  disabled: boolean
 }
 
 const skillLevelOptions = [
@@ -23,6 +24,7 @@ export const SkillRanking = ({
   skills,
   skillRatings,
   setSkillRatings,
+  disabled,
 }: SkillRankingProps): JSX.Element => {
   const handleSkillRatingChange = (skillID: string, skillLevel: SkillLevel) => {
     setSkillRatings((prev) => ({ ...prev, [skillID]: skillLevel }))
@@ -55,6 +57,7 @@ export const SkillRanking = ({
                 value={skillRatings[skill.id] || ''}
                 onValueChange={(val) => handleSkillRatingChange(skill.id, val as SkillLevel)}
                 className='flex justify-between gap-2 pt-1'
+                disabled={disabled}
               >
                 {skillLevelOptions.map(({ label, value }) => (
                   <div key={value} className='flex flex-col items-center gap-1'>
