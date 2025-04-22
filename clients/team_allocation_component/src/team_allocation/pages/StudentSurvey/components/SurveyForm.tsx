@@ -117,6 +117,8 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
       : 'Not submitted'
   }
 
+  const allSkillsSelected = surveyForm.skills.every((skill) => skillRatings[skill.id] !== undefined)
+
   return (
     <div className='space-y-8'>
       {submitSuccess ? (
@@ -171,7 +173,7 @@ export const SurveyFormComponent = ({ surveyForm, surveyResponse, isStudent }: S
             <Button
               type='submit'
               size='lg'
-              disabled={!isStudent || updateSurveyResponseMutation.isPending}
+              disabled={!isStudent || updateSurveyResponseMutation.isPending || !allSkillsSelected}
               className='w-full sm:w-auto'
             >
               {updateSurveyResponseMutation.isPending ? (

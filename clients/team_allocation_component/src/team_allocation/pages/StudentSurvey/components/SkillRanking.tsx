@@ -35,10 +35,10 @@ export const SkillRanking = ({
           <div>
             <CardTitle className='flex items-center gap-2'>
               <Star className='h-5 w-5 text-primary' />
-              Skill Assessment
+              Personal Proficiency Level
             </CardTitle>
             <CardDescription>
-              Rate your proficiency in each skill. Leave unselected if you’re unsure.
+              Rate your personal proficiency level in the following areas:
             </CardDescription>
           </div>
         </div>
