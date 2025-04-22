@@ -43,16 +43,18 @@ services:
         condition: service_healthy
     ports:
       - "8084:8080"
+    extra_hosts:
+      - "idp.local:host-gateway"
     environment:
       - CORE_HOST=http://localhost:3000
       - SERVER_CORE_HOST=http://server-core:8080
-      - SERVER_ADDRESS=:8084
+      - SERVER_ADDRESS=0.0.0.0:8080
       - DB_HOST_ASSESSMENT=db-assessment
       - DB_PORT_ASSESSMENT=5432
       - DB_NAME=prompt
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_HOST=http://idp.local:8081
       - KEYCLOAK_REALM_NAME=prompt
 
   server-intro-course:
@@ -65,16 +67,18 @@ services:
         condition: service_healthy
     ports:
       - "8082:8080"
+    extra_hosts:
+      - "idp.local:host-gateway"
     environment:
       - CORE_HOST=http://localhost:3000
       - SERVER_CORE_HOST=http://server-core:8080
-      - SERVER_ADDRESS=:8082
+      - SERVER_ADDRESS=0.0.0.0:8080
       - DB_HOST_INTRO_COURSE=db-intro-course
       - DB_PORT_INTRO_COURSE=5432
       - DB_NAME=prompt
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_HOST=http://idp.local:8081
       - KEYCLOAK_REALM_NAME=prompt
 
   server-team-allocation:
@@ -85,24 +89,27 @@ services:
         condition: service_healthy
     ports:
       - "8083:8080"
+    extra_hosts:
+      - "idp.local:host-gateway"
     environment:
       - CORE_HOST=http://localhost:3000
       - SERVER_CORE_HOST=http://localhost:8080
-      - SERVER_ADDRESS=:8083
+      - SERVER_ADDRESS=0.0.0.0:8080
       - DB_HOST_TEAM_ALLOCATION=db-team-allocation
       - DB_PORT_TEAM_ALLOCATION=5432
       - DB_NAME=prompt
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_HOST=http://idp.local:8081
       - KEYCLOAK_REALM_NAME=prompt
 
-  clients-core:
+  client-core:
     build:
       context: ./clients/core
       dockerfile: Dockerfile
       args:                    
         IMAGE_TAG: ${IMAGE_TAG:-latest}
+        NODE_ENV: development
     container_name: prompt-client-core
     environment:
       - IMAGE_TAG=latest
@@ -160,11 +167,25 @@ services:
     container_name: prompt-client-interview-component
     environment:
       - TZ=Europe/Berlin
-    expose:
+    ports:
       - "3002:80"
     depends_on:
       - server-core
   
+  client-intro-course-component:
+    build:
+      context: ./clients/intro_course_developer_component
+      dockerfile: Dockerfile
+      args:                    
+        IMAGE_TAG: ${IMAGE_TAG:-latest}
+    container_name: prompt-client-intro-course-component
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - "3005:80"
+    depends_on:
+      - server-core
+
   client-matching-component:
     build:
       context: ./clients/matching_component
@@ -174,7 +195,7 @@ services:
     container_name: prompt-client-matching-component
     environment:
       - TZ=Europe/Berlin
-    expose:
+    ports:
       - "3003:80"
     depends_on:
       - server-core
@@ -188,7 +209,7 @@ services:
     container_name: prompt-client-team-allocation-component
     environment:
       - TZ=Europe/Berlin
-    expose:
+    ports:
       - "3008:80"
     depends_on:
       - server-core

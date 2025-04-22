@@ -1,10 +1,13 @@
 # base will be the the image build by the base dockerfile.
 ARG IMAGE_TAG
+ARG NODE_ENV
 FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG} AS core-base
 
 WORKDIR /app/core
 
 COPY . ./
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
 RUN yarn install
 
 RUN yarn build
