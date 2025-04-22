@@ -5,7 +5,7 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Allocation } from 'src/team_allocation/interfaces/allocation'
+import { Allocation } from '../../../interfaces/allocation'
 
 interface AllocationSummaryCardProps {
   coursePhaseParticipations: CoursePhaseParticipationsWithResolution | null
