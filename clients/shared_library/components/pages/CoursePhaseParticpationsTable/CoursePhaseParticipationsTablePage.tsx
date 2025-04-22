@@ -11,6 +11,7 @@ import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { SearchIcon } from 'lucide-react'
 
 import {
+  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -19,19 +20,26 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { columns } from './components/columns'
+import { columns as baseColumns } from './components/columns'
 import { Input } from '@/components/ui/input'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 
+export interface ExtraParticipationData {
+  courseParticipationID: string
+  value: React.ReactNode
+}
+
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
-  prevDataKeys: string[] // specify which prev meta data names to display
-  restrictedDataKeys: string[] // specify which meta data names to display
+  prevDataKeys: string[]
+  restrictedDataKeys: string[]
   studentReadableDataKeys: string[]
+  extraData?: ExtraParticipationData[]
+  extraColumnHeader?: string
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
 }
 
@@ -40,13 +48,45 @@ export const CoursePhaseParticipationsTablePage = ({
   prevDataKeys = [],
   restrictedDataKeys = [],
   studentReadableDataKeys = [],
+  extraData,
+  extraColumnHeader = 'Additional',
   onClickRowAction,
 }: Partial<CoursePhaseParticipationsTablePageProps>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
 
-  const tableColumns = columns({ prevDataKeys, restrictedDataKeys, studentReadableDataKeys })
+  const extraDataMap = useMemo(() => {
+    if (!extraData) return new Map<string, React.ReactNode>()
+    return new Map(extraData.map((d) => [d.courseParticipationID, d.value]))
+  }, [extraData])
+
+  const baseCols = useMemo(
+    () => baseColumns({ prevDataKeys, restrictedDataKeys, studentReadableDataKeys }),
+    [prevDataKeys, restrictedDataKeys, studentReadableDataKeys],
+  )
+
+  const tableColumns = useMemo((): ColumnDef<CoursePhaseParticipationWithStudent, unknown>[] => {
+    if (!extraData) return baseCols
+
+    const extraColumn: ColumnDef<CoursePhaseParticipationWithStudent, unknown> = {
+      id: 'extraColumn',
+      header: extraColumnHeader,
+      accessorFn: (row) =>
+        extraDataMap.get(
+          (row as unknown as { courseParticipationID: string }).courseParticipationID,
+        ) ?? '',
+      enableSorting: false,
+      enableColumnFilter: false,
+      meta: {
+        // hide completely when every cell would be empty
+        isEmpty: extraData.length === 0,
+      },
+      cell: (info) => info.getValue(),
+    }
+
+    return [...baseCols, extraColumn]
+  }, [baseCols, extraData, extraColumnHeader, extraDataMap])
 
   const table = useReactTable({
     data: participants,
@@ -75,7 +115,7 @@ export const CoursePhaseParticipationsTablePage = ({
 
   return (
     <div>
-      <div className='space-y-4'>
+      <div className='space-y-4 mb-2'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
           <div className='relative flex-grow max-w-md w-full'>
             <Input
@@ -104,9 +144,6 @@ export const CoursePhaseParticipationsTablePage = ({
               />
             )}
           </div>
-        </div>
-        <div className='flex flex-wrap gap-2'>
-          {/* <FilterBadges filters={columnFilters} onRemoveFilter={setColumnFilters} /> */}
         </div>
       </div>
       <div className='rounded-md border'>

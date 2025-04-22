@@ -1,14 +1,46 @@
+import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
+import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
+
+import { ErrorPage } from '@/components/ErrorPage'
+import StudentScoreBadge from '../components/StudentScoreBadge'
 
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
   const path = useLocation().pathname
 
   const { participations } = useParticipationStore()
+
+  const {
+    data: scoreLevels,
+    isPending: isScoreLevelsPending,
+    isError: isScoreLevelsError,
+    refetch: refetchScoreLevels,
+  } = useGetAllScoreLevels()
+
+  const isError = isScoreLevelsError
+  const isPending = isScoreLevelsPending
+
+  const refetch = () => {
+    refetchScoreLevels()
+  }
+
+  const extraData = scoreLevels?.map((scoreLevelWithParticipation) => ({
+    courseParticipationID: scoreLevelWithParticipation.courseParticipationID,
+    value: <StudentScoreBadge scoreLevel={scoreLevelWithParticipation.scoreLevel} />,
+  }))
+
+  if (isError) return <ErrorPage onRetry={refetch} />
+  if (isPending)
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
 
   return (
     <div>
@@ -18,7 +50,9 @@ export const AssessmentOverviewPage = (): JSX.Element => {
       </p>
       <CoursePhaseParticipationsTablePage
         participants={participations ?? []}
-        prevDataKeys={['score']}
+        prevDataKeys={[]}
+        extraData={extraData}
+        extraColumnHeader='ScoreLevel'
         restrictedDataKeys={[]}
         studentReadableDataKeys={[]}
         onClickRowAction={(student) =>
