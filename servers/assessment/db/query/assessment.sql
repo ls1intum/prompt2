@@ -3,7 +3,7 @@ INSERT INTO assessment (
     id, course_participation_id, course_phase_id, competency_id,
     score, comment, assessed_at, author
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7);
 
 -- name: GetAssessment :one
 SELECT * FROM assessment WHERE id = $1;
@@ -13,8 +13,8 @@ UPDATE assessment
 SET
   score = $4,
   comment = $5,
-  assessed_at = $6,
-  author = $7
+  assessed_at = CURRENT_TIMESTAMP,
+  author = $6
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND competency_id = $3;

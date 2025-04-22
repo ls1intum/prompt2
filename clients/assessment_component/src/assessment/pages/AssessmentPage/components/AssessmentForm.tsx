@@ -41,9 +41,6 @@ export const AssessmentForm = ({
       competencyID: competency.id,
       score: assessment?.score,
       comment: assessment ? assessment.comment : '',
-      assessedAt: assessment
-        ? format(new Date(assessment.assessedAt), "yyyy-MM-dd'T'HH:mm:ss'Z'")
-        : format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
       author: userName,
     },
   })
@@ -109,7 +106,7 @@ export const AssessmentForm = ({
                   disabled={completed}
                   className={cn(
                     'w-full text-sm border-2 rounded-lg p-3 transition-all text-left',
-                    isSelected ? config.selectedBg : 'bg-blue-50',
+                    isSelected ? config.selectedBg : '',
                     isSelected && config.textColor,
                     !completed &&
                       'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
@@ -157,7 +154,7 @@ export const AssessmentForm = ({
               <div className='text-xs text-muted-foreground mt-2'>
                 <div>
                   Last assessed by {assessment.author} at{' '}
-                  {format(new Date(assessment.assessedAt), 'MMM d, yyyy')}
+                  {format(new Date(assessment.assessedAt), "MMM d, yyyy 'at' HH:mm")}
                 </div>
               </div>
             )}

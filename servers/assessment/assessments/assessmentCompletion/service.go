@@ -57,7 +57,7 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 	err = qtx.MarkAssessmentAsFinished(ctx, db.MarkAssessmentAsFinishedParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
-		CompletedAt:           pgtype.Timestamp{Time: time.Now(), Valid: true},
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 	})
 	if err != nil {

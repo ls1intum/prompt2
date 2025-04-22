@@ -2,7 +2,6 @@ package scoreLevel
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -25,10 +24,6 @@ func GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID) ([]scoreLev
 		return []scoreLevelDTO.ScoreLevelWithParticipation{}, err
 	}
 	scoreLevels := scoreLevelDTO.GetScoreLevelsFromDBScoreLevels(dbScoreLevels)
-	if len(scoreLevels) == 0 {
-		log.Error("No score levels found for course phase ID: ", coursePhaseID)
-		return []scoreLevelDTO.ScoreLevelWithParticipation{}, errors.New("no score levels found")
-	}
 
 	return scoreLevels, nil
 }
