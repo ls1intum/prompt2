@@ -5,7 +5,11 @@ import { colors as defaultColors } from 'tailwindcss/colors'
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  safelist: ['dark', 'ProseMirror', { pattern: /(bg|text|border)-./, variants: ['dark'] }],
+  safelist: [
+    'dark',
+    'ProseMirror',
+    { pattern: /(bg|text|border)-./, variants: ['dark', 'hover', 'focus'] },
+  ],
   theme: {
     extend: {
       colors: {
