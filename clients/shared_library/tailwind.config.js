@@ -3,7 +3,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  safelist: ['dark', 'ProseMirror'],
+  safelist: ['dark', 'ProseMirror', { pattern: /(bg|text|border)-./, variants: ['dark'] }],
   theme: {
     extend: {
       colors: {
