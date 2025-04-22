@@ -37,7 +37,7 @@ func (suite *CoursePhaseTestSuite) SetupSuite() {
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 	}
-	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
+	resolution.InitResolutionModule("localhost:8080")
 
 	CoursePhaseServiceSingleton = &suite.coursePhaseService
 }
@@ -155,7 +155,7 @@ func (suite *CoursePhaseTestSuite) TestGetPrevPhaseDataByCoursePhaseID() {
 	predecessorPhaseID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
 
 	// Call the function under test.
-	prevData, err := GetPrevPhaseDataByCoursePhaseID(suite.ctx, targetPhaseID, false)
+	prevData, err := GetPrevPhaseDataByCoursePhaseID(suite.ctx, targetPhaseID)
 	suite.NoError(err)
 
 	// Verify that the core data (from the provided output DTO with endpoint 'core') is merged correctly.

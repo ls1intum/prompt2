@@ -44,7 +44,7 @@ func GetOwnCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID
 	return participationDTO, nil
 }
 
-func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, resolveLocally bool) (coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions, error) {
+func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions, error) {
 	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
 	if err != nil {
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, err
@@ -66,7 +66,7 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 	}
 
 	resolutionDTOs := resolutionDTO.GetParticipationResolutionsDTOFromDBModels(resolutions)
-	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs, resolveLocally)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs)
 	if err != nil {
 		log.Error(err)
 		return coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions{}, errors.New("failed to replace resolution URLs")

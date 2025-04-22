@@ -71,7 +71,7 @@ func CheckCoursePhasesBelongToCourse(ctx context.Context, courseId uuid.UUID, co
 	return ok, nil
 }
 
-func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUID, resolveLocally bool) (coursePhaseDTO.PrevCoursePhaseData, error) {
+func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseDTO.PrevCoursePhaseData, error) {
 	dataFromCore, err := CoursePhaseServiceSingleton.queries.GetPrevCoursePhaseDataFromCore(ctx, coursePhaseID)
 	if err != nil {
 		return coursePhaseDTO.PrevCoursePhaseData{}, err
@@ -91,7 +91,7 @@ func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUI
 	}
 
 	// Replace resolution URLs with the correct host
-	prevCoursePhaseDataDTO.Resolutions, err = resolution.ReplaceResolutionURLs(ctx, prevCoursePhaseDataDTO.Resolutions, resolveLocally)
+	prevCoursePhaseDataDTO.Resolutions, err = resolution.ReplaceResolutionURLs(ctx, prevCoursePhaseDataDTO.Resolutions)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"coursePhaseID": coursePhaseID,

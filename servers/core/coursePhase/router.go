@@ -138,14 +138,7 @@ func getPrevPhaseDataByCoursePhaseID(c *gin.Context) {
 		return
 	}
 
-	// Get resolveLocally Flag from query params
-	resolveLocallyParam := c.Query("resolveLocally")
-	resolveLocally := false
-	if resolveLocallyParam == "true" {
-		resolveLocally = true
-	}
-
-	coursePhaseData, err := GetPrevPhaseDataByCoursePhaseID(c, id, resolveLocally)
+	coursePhaseData, err := GetPrevPhaseDataByCoursePhaseID(c, id)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

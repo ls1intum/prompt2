@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/utils"
@@ -172,10 +171,8 @@ func initIntroCourseTutor() error {
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/intro-course/api"
-		localURL := "http://server-intro-course/intro-course/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8082/intro-course/api"
-			localURL = "http://localhost:8082/intro-course/api"
 		}
 
 		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
@@ -183,7 +180,6 @@ func initIntroCourseTutor() error {
 			Name:         "IntroCourseTutor",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseTutor)
 		if err != nil {
@@ -253,10 +249,8 @@ func initAssessment() error {
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/assessment/api"
-		localURL := "http://server-assessment/assessment/api" // Docker env address
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8084/assessment/api"
-			localURL = "http://localhost:8084/assessment/api"
 		}
 
 		// create the phase
@@ -265,7 +259,6 @@ func initAssessment() error {
 			Name:         "Assessment",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
@@ -309,10 +302,8 @@ func initTeamAllocation() error {
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/team-allocation/api"
-		localURL := "http://server-team-allocation/team-allocation/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
 			baseURL = "http://localhost:8083/team-allocation/api"
-			localURL = "http://localhost:8083/team-allocation/api"
 		}
 
 		newTeamAllocation := db.CreateCoursePhaseTypeParams{
@@ -320,7 +311,6 @@ func initTeamAllocation() error {
 			Name:         "Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-			LocalUrl:     pgtype.Text{String: localURL, Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {

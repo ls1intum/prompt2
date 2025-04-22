@@ -39,7 +39,7 @@ func (suite *CoursePhaseParticipationTestSuite) SetupSuite() {
 	}
 	CoursePhaseParticipationServiceSingleton = &suite.coursePhaseParticipationService
 
-	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
+	resolution.InitResolutionModule("localhost:8080")
 }
 
 func (suite *CoursePhaseParticipationTestSuite) TearDownSuite() {
@@ -49,7 +49,7 @@ func (suite *CoursePhaseParticipationTestSuite) TearDownSuite() {
 func (suite *CoursePhaseParticipationTestSuite) TestGetAllParticipationsForCoursePhase() {
 	coursePhaseID := uuid.MustParse("4e736d05-c125-48f0-8fa0-848b03ca6908")
 
-	participationsWithResolution, err := GetAllParticipationsForCoursePhase(suite.ctx, coursePhaseID, false)
+	participationsWithResolution, err := GetAllParticipationsForCoursePhase(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.Greater(suite.T(), len(participationsWithResolution.Participations), 0, "Expected participations for the course phase")
 
@@ -61,7 +61,7 @@ func (suite *CoursePhaseParticipationTestSuite) TestGetAllParticipationsForCours
 func (suite *CoursePhaseParticipationTestSuite) TestGetParticipationsWithPrevData() {
 	coursePhaseID := uuid.MustParse("2b1a55ad-8b1d-453f-b2b4-2373ecb35bc1")
 
-	participationsWithResolution, err := GetAllParticipationsForCoursePhase(suite.ctx, coursePhaseID, false)
+	participationsWithResolution, err := GetAllParticipationsForCoursePhase(suite.ctx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.Greater(suite.T(), len(participationsWithResolution.Participations), 0, "Expected participations for the course phase")
 	for _, participation := range participationsWithResolution.Participations {

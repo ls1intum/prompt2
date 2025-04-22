@@ -118,7 +118,7 @@ func main() {
 	coursePhaseType.InitCoursePhaseTypeModule(api, *query, conn, isDevEnvironment)
 
 	coreHost := utils.GetEnv("CORE_HOST", "localhost:8080")
-	resolution.InitResolutionModule(*query, conn, coreHost)
+	resolution.InitResolutionModule(coreHost)
 
 	coursePhaseAuth.InitCoursePhaseAuthModule(api, *query, conn)
 	initMailing(api, *query, conn)

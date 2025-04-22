@@ -60,14 +60,7 @@ func getParticipationsForCoursePhase(c *gin.Context) {
 		return
 	}
 
-	// Get resolveLocally Flag from query params
-	resolveLocallyParam := c.Query("resolveLocally")
-	resolveLocally := false
-	if resolveLocallyParam == "true" {
-		resolveLocally = true
-	}
-
-	courseParticipations, err := GetAllParticipationsForCoursePhase(c, id, resolveLocally)
+	courseParticipations, err := GetAllParticipationsForCoursePhase(c, id)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

@@ -43,7 +43,7 @@ func (suite *RouterTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CoursePhaseServiceSingleton = &suite.coursePhaseService
-	resolution.InitResolutionModule(*testDB.Queries, testDB.Conn, "localhost:8080")
+	resolution.InitResolutionModule("localhost:8080")
 
 	suite.router = setupRouter()
 }
