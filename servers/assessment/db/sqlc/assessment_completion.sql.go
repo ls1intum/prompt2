@@ -99,10 +99,10 @@ INSERT INTO assessment_completion (
 `
 
 type MarkAssessmentAsFinishedParams struct {
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CompletedAt           pgtype.Timestamp `json:"completed_at"`
-	Author                string           `json:"author"`
+	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
+	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
+	Author                string             `json:"author"`
 }
 
 func (q *Queries) MarkAssessmentAsFinished(ctx context.Context, arg MarkAssessmentAsFinishedParams) error {

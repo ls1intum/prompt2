@@ -13,10 +13,8 @@ import (
 )
 
 const getAllScoreLevels = `-- name: GetAllScoreLevels :many
-SELECT
-    course_participation_id,
-    score_level
-FROM score_level_categories
+SELECT course_participation_id, score_level
+FROM completed_score_levels
 WHERE course_phase_id = $1
 `
 
@@ -46,9 +44,8 @@ func (q *Queries) GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID
 }
 
 const getScoreLevelByCourseParticipationID = `-- name: GetScoreLevelByCourseParticipationID :one
-SELECT
-    score_level
-FROM score_level_categories
+SELECT score_level
+FROM completed_score_levels
 WHERE course_phase_id = $1
   AND course_participation_id = $2
 `

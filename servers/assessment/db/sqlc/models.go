@@ -57,21 +57,21 @@ func (ns NullScoreLevel) Value() (driver.Value, error) {
 }
 
 type Assessment struct {
-	ID                    uuid.UUID        `json:"id"`
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CompetencyID          uuid.UUID        `json:"competency_id"`
-	Score                 ScoreLevel       `json:"score"`
-	Comment               pgtype.Text      `json:"comment"`
-	AssessedAt            pgtype.Timestamp `json:"assessed_at"`
-	Author                string           `json:"author"`
+	ID                    uuid.UUID          `json:"id"`
+	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
+	CompetencyID          uuid.UUID          `json:"competency_id"`
+	Score                 ScoreLevel         `json:"score"`
+	Comment               pgtype.Text        `json:"comment"`
+	AssessedAt            pgtype.Timestamptz `json:"assessed_at"`
+	Author                string             `json:"author"`
 }
 
 type AssessmentCompletion struct {
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CompletedAt           pgtype.Timestamp `json:"completed_at"`
-	Author                string           `json:"author"`
+	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
+	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
+	Author                string             `json:"author"`
 }
 
 type Category struct {
@@ -91,6 +91,12 @@ type Competency struct {
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
 	Weight       int32       `json:"weight"`
+}
+
+type CompletedScoreLevel struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	ScoreLevel            string    `json:"score_level"`
 }
 
 type ScoreLevelCategory struct {
