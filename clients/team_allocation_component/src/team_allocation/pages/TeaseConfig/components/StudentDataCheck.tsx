@@ -48,7 +48,8 @@ export const StudentDataCheck = (): JSX.Element => {
         highLevelCategory,
       }) => {
         const validStudents = students.filter((s) => !isEmpty(extractor(s)))
-        const completionRate = Math.round((validStudents.length / students.length) * 100)
+        const completionRate =
+          students.length > 0 ? Math.round((validStudents.length / students.length) * 100) : 0
         const allValid = completionRate === 100
         const noneValid = completionRate === 0
 
