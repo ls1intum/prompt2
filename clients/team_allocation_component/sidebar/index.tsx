@@ -17,6 +17,11 @@ const sidebarItems: SidebarMenuItemProps = {
       goToPath: '/tease_config',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
+    {
+      title: 'Allocations',
+      goToPath: '/allocations',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
   ],
 }
 
