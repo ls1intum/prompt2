@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, X, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
 
 import {
@@ -21,7 +21,6 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { TriangleAlert } from 'lucide-react'
 
 interface StudentTableProps {
   students: TeaseStudent[]
@@ -30,11 +29,57 @@ interface StudentTableProps {
 export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
   const [selectedStudent, setSelectedStudent] = useState<TeaseStudent | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [sortConfig, setSortConfig] = useState<{
+    key: 'firstName' | 'lastName' | 'email' | 'surveyCompleted'
+    direction: 'ascending' | 'descending'
+  } | null>(null)
 
   const handleStudentClick = (student: TeaseStudent) => {
     setSelectedStudent(student)
     setIsDialogOpen(true)
   }
+
+  const requestSort = (key: 'firstName' | 'lastName' | 'email' | 'surveyCompleted') => {
+    let direction: 'ascending' | 'descending' = 'ascending'
+
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending'
+    }
+
+    setSortConfig({ key, direction })
+  }
+
+  const getSortedStudents = () => {
+    if (!sortConfig) return students
+
+    return [...students].sort((a, b) => {
+      if (sortConfig.key === 'surveyCompleted') {
+        const aHasSubmitted = a.projectPreferences.length > 0
+        const bHasSubmitted = b.projectPreferences.length > 0
+
+        if (aHasSubmitted === bHasSubmitted) return 0
+
+        if (sortConfig.direction === 'ascending') {
+          return aHasSubmitted ? -1 : 1
+        } else {
+          return aHasSubmitted ? 1 : -1
+        }
+      }
+
+      const aValue = a[sortConfig.key]
+      const bValue = b[sortConfig.key]
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'ascending' ? -1 : 1
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'ascending' ? 1 : -1
+      }
+      return 0
+    })
+  }
+
+  const sortedStudents = getSortedStudents()
 
   return (
     <>
@@ -42,14 +87,66 @@ export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>First Name</TableHead>
-              <TableHead>Last Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Survey Completed</TableHead>
+              <TableHead className='cursor-pointer' onClick={() => requestSort('firstName')}>
+                <div className='flex items-center'>
+                  First Name
+                  {sortConfig?.key === 'firstName' ? (
+                    sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )
+                  ) : (
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead className='cursor-pointer' onClick={() => requestSort('lastName')}>
+                <div className='flex items-center'>
+                  Last Name
+                  {sortConfig?.key === 'lastName' ? (
+                    sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )
+                  ) : (
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead className='cursor-pointer' onClick={() => requestSort('email')}>
+                <div className='flex items-center'>
+                  Email
+                  {sortConfig?.key === 'email' ? (
+                    sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )
+                  ) : (
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead className='cursor-pointer' onClick={() => requestSort('surveyCompleted')}>
+                <div className='flex items-center'>
+                  Survey
+                  {sortConfig?.key === 'surveyCompleted' ? (
+                    sortConfig.direction === 'ascending' ? (
+                      <ArrowUp className='ml-2 h-4 w-4' />
+                    ) : (
+                      <ArrowDown className='ml-2 h-4 w-4' />
+                    )
+                  ) : (
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                  )}
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.map((student) => {
+            {sortedStudents.map((student) => {
               const hasSubmitted = student.projectPreferences.length > 0
 
               return (
@@ -66,23 +163,13 @@ export const SurveySubmissionOverview = ({ students }: StudentTableProps) => {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            {hasSubmitted ? (
-                              <div className='flex items-center'>
-                                <div className='bg-green-100 text-green-700 p-1 rounded-full'>
-                                  <Check className='h-4 w-4' />
-                                </div>
+                            <div className='flex items-center'>
+                              <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                                <Check className='h-4 w-4' />
                               </div>
-                            ) : (
-                              <div className='flex items-center'>
-                                <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
-                                  <TriangleAlert className='h-4 w-4' />
-                                </div>
-                              </div>
-                            )}
+                            </div>
                           </TooltipTrigger>
-                          <TooltipContent>
-                            {hasSubmitted ? 'Survey not submitted yet' : 'Survey submitted'}
-                          </TooltipContent>
+                          <TooltipContent>Survey submitted</TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     ) : (
