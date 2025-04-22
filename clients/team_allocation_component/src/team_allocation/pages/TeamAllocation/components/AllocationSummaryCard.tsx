@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { Allocation } from '../../../interfaces/allocation'
 
 interface AllocationSummaryCardProps {
@@ -102,10 +101,10 @@ export const AllocationSummaryCard = ({
       </CardContent>
       <CardContent className='pt-0 pb-4 flex justify-end'>
         <Button asChild>
-          <Link to={`/tease`}>
+          <a href='/tease'>
             Go to Tease
             <ArrowRight className='ml-2 h-4 w-4' />
-          </Link>
+          </a>
         </Button>
       </CardContent>
     </Card>

@@ -59,12 +59,12 @@ export const StudentDataCheck = (): JSX.Element => {
           highLevelCategory,
           completionRate,
           icon,
-          details: allValid
-            ? details
+          details: allValid ? details : noneValid ? `${details}` : undefined,
+          problemDescription: allValid
+            ? undefined
             : noneValid
-              ? `${details}`
+              ? problemDescription
               : `${validStudents.length} of ${students.length} students have provided ${missingMessage}.`,
-          problemDescription: allValid ? undefined : noneValid ? problemDescription : undefined,
         }
       },
     )
