@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import SurveySubmissionOverview from './SurveySubmissionOverview'
 
 export const StudentDataCheck = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -30,6 +31,10 @@ export const StudentDataCheck = (): JSX.Element => {
     queryKey: ['tease_students', phaseId],
     queryFn: () => getAllTeaseStudents(phaseId ?? ''),
   })
+
+  const numberOfStudentsSubmitted =
+    students?.filter((s) => s.projectPreferences.length > 0).length || 0
+  const numberOfStudents = students?.length || 0
 
   useEffect(() => {
     if (!students || students.length === 0) return
@@ -119,7 +124,6 @@ export const StudentDataCheck = (): JSX.Element => {
   const commentChecks = checks.filter((check) => check.category === 'comments')
   const scoreChecks = checks.filter((check) => check.category === 'score')
   const languageChecks = checks.filter((check) => check.category === 'language')
-  const surveyChecks = checks.filter((check) => check.category === 'survey')
 
   return (
     <div className='space-y-6'>
@@ -163,10 +167,13 @@ export const StudentDataCheck = (): JSX.Element => {
         </TabsContent>
 
         <TabsContent value='survey' className='space-y-6'>
-          <div className='space-y-6'>
-            {surveyChecks.map((check, index) => (
-              <CheckItem key={index} check={check} />
-            ))}
+          <div className='mb-4'>
+            <h3 className='text-lg font-medium mb-2'>Survey Submission Status</h3>
+            <p className='text-sm text-muted-foreground mb-4'>
+              {numberOfStudentsSubmitted} of {numberOfStudents} students have submitted their survey
+              ({Math.round((numberOfStudentsSubmitted / numberOfStudents) * 100)}%)
+            </p>
+            <SurveySubmissionOverview students={students || []} />
           </div>
         </TabsContent>
       </Tabs>
