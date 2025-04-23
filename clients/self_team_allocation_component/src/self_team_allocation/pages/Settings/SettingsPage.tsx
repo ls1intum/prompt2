@@ -1,5 +1,5 @@
 import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/managementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'

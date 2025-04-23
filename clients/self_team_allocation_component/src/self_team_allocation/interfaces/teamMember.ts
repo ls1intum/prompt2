@@ -1,5 +1,4 @@
-export interface TeamAllocation {
-  projectId: string
+export interface TeamMember {
   studentName: string
   courseParticipationID: string
 }

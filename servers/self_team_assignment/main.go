@@ -19,8 +19,8 @@ import (
 func getDatabaseURL() string {
 	dbUser := promptSDK.GetEnv("DB_USER", "prompt-postgres")
 	dbPassword := promptSDK.GetEnv("DB_PASSWORD", "prompt-postgres")
-	dbHost := promptSDK.GetEnv("DB_HOST_SELF_TEAM_ASSIGNMENT", "localhost")
-	dbPort := promptSDK.GetEnv("DB_PORT_SELF_TEAM_ASSIGNMENT", "5436")
+	dbHost := promptSDK.GetEnv("DB_HOST_SELF_TEAM_ALLOCATION", "localhost")
+	dbPort := promptSDK.GetEnv("DB_PORT_SELF_TEAM_ALLOCATION", "5436")
 	dbName := promptSDK.GetEnv("DB_NAME", "prompt")
 	sslMode := promptSDK.GetEnv("SSL_MODE", "disable")
 	timeZone := promptSDK.GetEnv("DB_TIMEZONE", "Europe/Berlin") // Add a timezone parameter
@@ -76,7 +76,7 @@ func main() {
 	router := gin.Default()
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
-	api := router.Group("self-team-assignment/api/course_phase/:coursePhaseID")
+	api := router.Group("self-team-allocation/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
 	api.GET("/hello", func(c *gin.Context) {

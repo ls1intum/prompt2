@@ -2,7 +2,7 @@ import axios from 'axios'
 import { env } from '@/env'
 import { parseURL } from '@/utils/parseURL'
 
-const selfTeamAllocationServer = env.SELF_TEAM_ALLOCATION_SERVER || ''
+const selfTeamAllocationServer = env.SELF_TEAM_ALLOCATION_HOST || ''
 
 const serverBaseUrl = parseURL(selfTeamAllocationServer)
 
@@ -23,4 +23,4 @@ authenticatedAxiosInstance.interceptors.request.use((config) => {
   return config
 })
 
-export { authenticatedAxiosInstance as teamAllocationAxiosInstance }
+export { authenticatedAxiosInstance as selfTeamAllocationAxiosInstance }
