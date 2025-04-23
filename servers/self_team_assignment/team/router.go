@@ -102,7 +102,7 @@ func assignTeam(c *gin.Context) {
 		return
 	}
 
-	courseParticiatpionID, ok := c.Get("courseParticipationID")
+	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
@@ -110,13 +110,23 @@ func assignTeam(c *gin.Context) {
 	}
 
 	// TODO get the full name of the student from the token
-	studentFullName, ok := c.Get("studentFullName")
+	firstName, ok := c.Get("firstName")
 	if !ok {
-		log.Error("Error getting studentFullName from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "studentFullName not found"})
+		log.Error("Error getting student name from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "student name not found"})
 		return
 	}
-	err = AssignTeam(c, coursePhaseID, teamID, courseParticiatpionID.(uuid.UUID), studentFullName.(string))
+
+	lastName, ok := c.Get("lastName")
+	if !ok {
+		log.Error("Error getting student name from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "student name not found"})
+		return
+	}
+
+	studentFullName := firstName.(string) + " " + lastName.(string)
+
+	err = AssignTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID), studentFullName)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
