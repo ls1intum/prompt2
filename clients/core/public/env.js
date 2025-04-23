@@ -4,6 +4,7 @@ window.env = {
   INTRO_COURSE_HOST: 'http://localhost:8082',
   TEAM_ALLOCATION_HOST: 'http://localhost:8083',
   ASSESSMENT_HOST: 'http://localhost:8084',
+  SELF_TEAM_ALLOCATION_HOST: 'http://localhost:8085',
   DEVOPS_CHALLENGE_HOST: 'http://localhost:9000',
   KEYCLOAK_HOST: 'http://localhost:8081',
   KEYCLOAK_REALM_NAME: 'prompt',
