@@ -19,7 +19,7 @@ export interface TeaseStudent {
   nationality: string
   projectPreferences: Array<ProjectPreference>
   semester: number
-  skill: Array<StudentSkill>
+  skills: Array<StudentSkill>
   studentComments: Array<Comment>
   studyDegree: string
   studyProgram: string

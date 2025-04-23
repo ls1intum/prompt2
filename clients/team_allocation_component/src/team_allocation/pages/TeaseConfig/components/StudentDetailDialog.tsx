@@ -39,7 +39,7 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
 
   function getTeamNameById(teamId: string): string {
     const team = teams?.find((t) => t.id === teamId)
-    return team ? team.name : teamId // fallback to ID if name not found
+    return team ? team.name : teamId
   }
 
   if (!student) return null
@@ -86,9 +86,9 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
               <h3 className='text-lg font-medium'>Skills & Proficiency</h3>
             </div>
 
-            {student.skill && student.skill.length > 0 ? (
+            {student.skills && student.skills.length > 0 ? (
               <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                {student.skill.map((skillItem, index) => (
+                {student.skills.map((skillItem, index) => (
                   <Card key={index} className='overflow-hidden'>
                     <CardContent className='p-3'>
                       <div className='flex justify-between items-center'>
