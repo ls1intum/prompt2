@@ -28,6 +28,20 @@ import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 
+export interface ExtraParticipationColumn {
+  id: string
+  header: string
+  accessorFn: (row: CoursePhaseParticipationWithStudent) => React.ReactNode
+  enableSorting?: boolean
+  sortingFn?: (
+    rowA: CoursePhaseParticipationWithStudent,
+    rowB: CoursePhaseParticipationWithStudent,
+  ) => number
+  enableColumnFilter?: boolean
+  filterFn?: (row: CoursePhaseParticipationWithStudent, filterValue: string) => boolean
+  extraData: ExtraParticipationData[]
+}
+
 export interface ExtraParticipationData {
   courseParticipationID: string
   value: React.ReactNode
@@ -38,8 +52,7 @@ interface CoursePhaseParticipationsTablePageProps {
   prevDataKeys: string[]
   restrictedDataKeys: string[]
   studentReadableDataKeys: string[]
-  extraData?: ExtraParticipationData[]
-  extraColumnHeader?: string
+  extraColumns?: ExtraParticipationColumn[]
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
 }
 
@@ -48,45 +61,43 @@ export const CoursePhaseParticipationsTablePage = ({
   prevDataKeys = [],
   restrictedDataKeys = [],
   studentReadableDataKeys = [],
-  extraData,
-  extraColumnHeader = 'Additional',
+  extraColumns,
   onClickRowAction,
 }: Partial<CoursePhaseParticipationsTablePageProps>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string>('')
 
-  const extraDataMap = useMemo(() => {
-    if (!extraData) return new Map<string, React.ReactNode>()
-    return new Map(extraData.map((d) => [d.courseParticipationID, d.value]))
-  }, [extraData])
-
   const baseCols = useMemo(
     () => baseColumns({ prevDataKeys, restrictedDataKeys, studentReadableDataKeys }),
     [prevDataKeys, restrictedDataKeys, studentReadableDataKeys],
   )
 
+  const extraDataMaps = useMemo(() => {
+    const map: Record<string, Map<string, React.ReactNode>> = {}
+    extraColumns?.forEach((col) => {
+      map[col.id] = new Map(col.extraData.map((d) => [d.courseParticipationID, d.value]))
+    })
+    return map
+  }, [extraColumns])
+
   const tableColumns = useMemo((): ColumnDef<CoursePhaseParticipationWithStudent, unknown>[] => {
-    if (!extraData) return baseCols
+    if (!extraColumns || extraColumns.length === 0) return baseCols
 
-    const extraColumn: ColumnDef<CoursePhaseParticipationWithStudent, unknown> = {
-      id: 'extraColumn',
-      header: extraColumnHeader,
-      accessorFn: (row) =>
-        extraDataMap.get(
-          (row as unknown as { courseParticipationID: string }).courseParticipationID,
-        ) ?? '',
-      enableSorting: false,
-      enableColumnFilter: false,
-      meta: {
-        // hide completely when every cell would be empty
-        isEmpty: extraData.length === 0,
+    const extraDefs: ColumnDef<CoursePhaseParticipationWithStudent>[] = extraColumns.map((col) => ({
+      id: col.id,
+      header: col.header,
+      accessorFn: (row) => {
+        const id = (row as unknown as { courseParticipationID: string }).courseParticipationID
+        return extraDataMaps[col.id]?.get(id) ?? ''
       },
+      enableSorting: col.enableSorting ?? false,
+      enableColumnFilter: col.enableColumnFilter ?? false,
       cell: (info) => info.getValue(),
-    }
+    }))
 
-    return [...baseCols, extraColumn]
-  }, [baseCols, extraData, extraColumnHeader, extraDataMap])
+    return [...baseCols, ...extraDefs]
+  }, [baseCols, extraColumns, extraDataMaps])
 
   const table = useReactTable({
     data: participants,
