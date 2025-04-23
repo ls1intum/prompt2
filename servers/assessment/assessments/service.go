@@ -4,14 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,70 +28,71 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
+func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Assessment{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
+
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
 	}
 
-	assessment, err := qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
+	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
 		ID:                    uuid.New(),
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not create assessment: ", err)
-		return db.Assessment{}, errors.New("could not create assessment")
+		return errors.New("could not create assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment creation: ", err)
-		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	return assessment, nil
+	return nil
 }
 
-func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) (db.Assessment, error) {
+func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return db.Assessment{}, err
+		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
+
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	assessedAt := time.Now()
-	if req.AssessedAt != nil {
-		assessedAt = *req.AssessedAt
+	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
 	}
 
-	assessment, err := qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
+	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
 		Score:                 req.Score,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		AssessedAt:            pgtype.Timestamp{Time: assessedAt, Valid: true},
+		Author:                req.Author,
 	})
 	if err != nil {
 		log.Error("could not update assessment: ", err)
-		return db.Assessment{}, errors.New("could not update assessment")
+		return errors.New("could not update assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment update: ", err)
-		return db.Assessment{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
-
-	return assessment, nil
+	return nil
 }
 
 func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
@@ -95,6 +102,56 @@ func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
 		return db.Assessment{}, errors.New("could not get assessment")
 	}
 	return assessment, nil
+}
+
+func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
+	assessments, err := ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not get assessments for student in phase: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get assessments for student in phase")
+	}
+
+	remainingAssessments, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not count remaining assessments")
+	}
+
+	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
+	var level = scoreLevelDTO.StudentScore{
+		ScoreLevel: db.ScoreLevelNovice,
+		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
+	}
+	if len(assessments) > 0 {
+		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not check assessment completion existence: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
+		}
+
+		if exists {
+			dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+			if err != nil {
+				log.Error("could not get assessment completion: ", err)
+				return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
+			}
+			completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
+		}
+
+		level, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get score level: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not get score level")
+		}
+	}
+
+	return assessmentDTO.StudentAssessment{
+		CourseParticipationID: courseParticipationID,
+		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
+		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
+		AssessmentCompletion:  completion,
+		StudentScore:          level,
+	}, nil
 }
 
 func DeleteAssessment(ctx context.Context, id uuid.UUID) error {

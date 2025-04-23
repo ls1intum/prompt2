@@ -1,4 +1,11 @@
 export type SkillResponse = {
   skillID: string
-  rating: number
+  skillLevel: SkillLevel
+}
+
+export enum SkillLevel {
+  NOVICE = 'novice',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+  EXPERT = 'expert',
 }

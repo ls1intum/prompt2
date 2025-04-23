@@ -93,6 +93,13 @@ func submitSurveyResponses(c *gin.Context) {
 		return
 	}
 
+	// validate the request
+	err = ValidateStudentResponse(c, coursePhaseID, submission)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	err = SubmitSurveyResponses(c, courseParticipationID.(uuid.UUID), coursePhaseID, submission)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

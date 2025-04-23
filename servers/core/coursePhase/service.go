@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -86,6 +87,15 @@ func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUI
 		log.WithFields(log.Fields{
 			"coursePhaseID": coursePhaseID,
 		}).Error("failed to create previous course phase data DTO: ", err)
+		return coursePhaseDTO.PrevCoursePhaseData{}, err
+	}
+
+	// Replace resolution URLs with the correct host
+	prevCoursePhaseDataDTO.Resolutions, err = resolution.ReplaceResolutionURLs(ctx, prevCoursePhaseDataDTO.Resolutions)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+		}).Error("failed to replace resolution URLs: ", err)
 		return coursePhaseDTO.PrevCoursePhaseData{}, err
 	}
 

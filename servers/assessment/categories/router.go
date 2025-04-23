@@ -13,11 +13,11 @@ import (
 func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	categoryRouter := routerGroup.Group("/category")
 
-	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), getAllCategories)
-	categoryRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.PromptLecturer), createCategory)
+	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCategories)
+	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCategoriesWithCompetencies)
+	categoryRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createCategory)
 	categoryRouter.PUT("/:categoryID", authMiddleware(promptSDK.PromptAdmin), updateCategory)
 	categoryRouter.DELETE("/:categoryID", authMiddleware(promptSDK.PromptAdmin), deleteCategory)
-	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin), getCategoriesWithCompetencies)
 }
 
 func getAllCategories(c *gin.Context) {
@@ -35,12 +35,12 @@ func createCategory(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	category, err := CreateCategory(c, request.Name, request.Description)
+	err := CreateCategory(c, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, category)
+	c.Status(http.StatusCreated)
 }
 
 func updateCategory(c *gin.Context) {
@@ -57,7 +57,7 @@ func updateCategory(c *gin.Context) {
 		return
 	}
 
-	_, err = UpdateCategory(c, categoryID, request.Name, request.Description)
+	err = UpdateCategory(c, categoryID, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

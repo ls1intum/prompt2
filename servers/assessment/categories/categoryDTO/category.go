@@ -9,16 +9,18 @@ type Category struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	Weight      int32     `json:"weight"`
 }
 
 func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
 	categories := make([]Category, 0, len(dbCategories))
-	for i, c := range dbCategories {
-		categories[i] = Category{
+	for _, c := range dbCategories {
+		categories = append(categories, Category{
 			ID:          c.ID,
 			Name:        c.Name,
 			Description: c.Description.String,
-		}
+			Weight:      c.Weight,
+		})
 	}
 	return categories
 }

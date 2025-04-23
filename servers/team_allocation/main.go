@@ -14,6 +14,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
 	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
 	teams "github.com/ls1intum/prompt2/servers/team_allocation/team"
+	"github.com/ls1intum/prompt2/servers/team_allocation/tease"
 	"github.com/ls1intum/prompt2/servers/team_allocation/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -21,8 +22,8 @@ import (
 func getDatabaseURL() string {
 	dbUser := promptSDK.GetEnv("DB_USER", "prompt-postgres")
 	dbPassword := promptSDK.GetEnv("DB_PASSWORD", "prompt-postgres")
-	dbHost := promptSDK.GetEnv("DB_HOST_INTRO_COURSE", "localhost")
-	dbPort := promptSDK.GetEnv("DB_PORT_INTRO_COURSE", "5434")
+	dbHost := promptSDK.GetEnv("DB_HOST_TEAM_ALLOCATION", "localhost")
+	dbPort := promptSDK.GetEnv("DB_PORT_TEAM_ALLOCATION", "5434")
 	dbName := promptSDK.GetEnv("DB_NAME", "prompt")
 	sslMode := promptSDK.GetEnv("SSL_MODE", "disable")
 	timeZone := promptSDK.GetEnv("DB_TIMEZONE", "Europe/Berlin") // Add a timezone parameter
@@ -89,6 +90,7 @@ func main() {
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
 	survey.InitSurveyModule(api, *query, conn)
+	tease.InitTeaseModule(router.Group("team-allocation/api"), *query, conn) // some tease endpoint are coursePhase independent
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)

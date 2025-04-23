@@ -7,12 +7,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
+func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, isDevEnvironment bool) {
 
 	setupCoursePhaseTypeRouter(routerGroup)
 	CoursePhaseTypeServiceSingleton = &CoursePhaseTypeService{
-		queries: queries,
-		conn:    conn,
+		queries:          queries,
+		conn:             conn,
+		isDevEnvironment: isDevEnvironment,
 	}
 
 	// initialize course phase types
@@ -26,11 +27,6 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 		log.Fatal("failed to init matching phase type: ", err)
 	}
 
-	err = initIntroCourseDeveloper()
-	if err != nil {
-		log.Fatal("failed to init intro course developer phase type: ", err)
-	}
-
 	err = initIntroCourseTutor()
 	if err != nil {
 		log.Fatal("failed to init intro course tutor phase type: ", err)
@@ -41,8 +37,13 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 		log.Fatal("failed to init dev ops challenge phase type: ", err)
 	}
 
-	err = initAssessmentChallenge()
+	err = initAssessment()
 	if err != nil {
 		log.Fatal("failed to init assessment phase type: ", err)
+	}
+
+	err = initTeamAllocation()
+	if err != nil {
+		log.Fatal("failed to init team allocation phase type: ", err)
 	}
 }

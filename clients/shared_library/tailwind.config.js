@@ -3,7 +3,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  safelist: ['dark', 'ProseMirror'],
+  safelist: [
+    'dark',
+    'ProseMirror',
+    {
+      pattern: /^(dark:)?(bg|text|border)-[a-z]+(?:-[a-z]+)*(?:-\d{1,3})?$/,
+      variants: ['dark'],
+    },
+  ],
   theme: {
     extend: {
       colors: {

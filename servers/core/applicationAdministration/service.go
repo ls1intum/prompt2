@@ -302,11 +302,11 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	return cPhaseParticipation.CourseParticipationID, nil
 }
 
-func GetApplicationAuthenticatedByEmail(ctx context.Context, email string, coursePhaseID uuid.UUID) (applicationDTO.Application, error) {
+func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx context.Context, coursePhaseID uuid.UUID, matriculationNumber string, universityLogin string) (applicationDTO.Application, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	studentObj, err := student.GetStudentByEmail(ctxWithTimeout, email)
+	studentObj, err := student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, matriculationNumber, universityLogin)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return applicationDTO.Application{
 			Status:             applicationDTO.StatusNewUser,

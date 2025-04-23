@@ -14,4 +14,5 @@ type CreateOrUpdateAssessmentRequest struct {
 	Score                 db.ScoreLevel `json:"score"`
 	Comment               string        `json:"comment"`
 	AssessedAt            *time.Time    `json:"assessedAt,omitempty"`
+	Author                string        `json:"author"`
 }

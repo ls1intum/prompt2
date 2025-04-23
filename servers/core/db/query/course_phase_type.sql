@@ -49,7 +49,6 @@ SELECT EXISTS (
     WHERE name = 'IntroCourseDeveloper'
 ) AS does_exist;
 
-
 -- name: TestIntroCourseTutorPhaseTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -64,7 +63,6 @@ SELECT EXISTS (
     WHERE name = 'DevOpsChallenge'
 ) AS does_exist;
 
-
 -- name: TestAssessmentTypeExists :one
 SELECT EXISTS (
     SELECT 1
@@ -72,6 +70,12 @@ SELECT EXISTS (
     WHERE name = 'Assessment'
 ) AS does_exist;
 
+-- name: TestTeamAllocationTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Team Allocation'
+) AS does_exist;
 
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
@@ -85,7 +89,7 @@ VALUES ($1, $2, $3, $4);
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6);
 
--- name: CreateInterviewRequiredApplicationAnswers :exec
+-- name: CreateRequiredApplicationAnswers :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (
        gen_random_uuid(),
@@ -175,40 +179,95 @@ VALUES (
         }'::jsonb
 );
 
+-- name: CreateRequiredDevices :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'devices',
+      '{
+        "type": "array",
+        "items": {
+            "type": "string",
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
+);
 
--- name: InsertProficiencyLevelOutput :exec
+-- name: InsertProvidedOutputDevices :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
-      'proficiency',
+      'devices',
       1,
-      '/proficiency',
+      '/devices',
       '{
+        "type": "array",
+        "items": {
             "type": "string",
-            "enum": ["novice", "intermediate", "advanced", "expert"] 
-        }'::jsonb
+            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
+        }
+       }'::jsonb
 );
 
 
--- name: InsertDeveloperProfileOutput :exec
+-- name: InsertTeamAllocationOutput :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
       gen_random_uuid(),
       $1,
-      'developerProfile',
+      'teamAllocation',
       1,
-      '/developer-profile',
+      '/team-allocation',
       '{
+          "type": "string"
+        }'::jsonb
+);
+
+-- name: InsertTeamOutput :exec
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'teams',
+      1,
+      '/teams',
+      '{
+        "type": "array",
+        "items": {
             "type": "object",
             "properties": {
-                "appleID"           : {"type": "string"},
-                "gitLabID"          : {"type": "string"},
-                "macBookUUID"       : {"type": "string"},
-                "iphoneUUID"        : {"type": "string"},
-                "ipadUUID"          : {"type": "string"},
-                "appleWatchUUID"    : {"type": "string"}
+            "teamID": { "type": "string" },
+            "teamName": { "type": "string" }
             },
-            "required": ["appleID", "gitLabID"]
+            "required": ["teamID", "teamName"]
+        }
+        }'::jsonb
+);
+
+-- name: InsertAssessmentScoreOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      1,
+      '/student-assessment/scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
+        }'::jsonb
+);
+
+-- name: InsertAssessmentScoreRequiredInput :exec
+INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (
+      gen_random_uuid(),
+      $1,
+      'scoreLevel',
+      '{
+        "type": "string",
+        "enum": ["novice", "intermediate", "advanced", "expert"]
         }'::jsonb
 );

@@ -51,10 +51,6 @@ paths:
       responses:
         "201":
           description: Category created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
 
   /category/{categoryID}:
     get:
@@ -93,10 +89,6 @@ paths:
       responses:
         "200":
           description: Category updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
     delete:
       summary: Delete a category
       tags: [Category]
@@ -153,10 +145,6 @@ paths:
       responses:
         "201":
           description: Competency created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
 
   /competency/{competencyID}:
     get:
@@ -195,10 +183,6 @@ paths:
       responses:
         "200":
           description: Competency updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Competency"
     delete:
       summary: Delete a competency
       tags: [Competency]
@@ -270,10 +254,6 @@ paths:
       responses:
         "201":
           description: Assessment created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
     put:
       summary: Update an assessment
       description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
@@ -287,17 +267,13 @@ paths:
       responses:
         "200":
           description: Assessment created or updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Assessment"
 
-  /student-assessment/{assessmentID}:
+  /student-assessment/{courseParticipationID}:
     get:
-      summary: Get an assessment by ID
+      summary: Get the student assessment fo an object in a course phase
       tags: [Assessment]
       parameters:
-        - name: assessmentID
+        - name: courseParticipationID
           in: path
           required: true
           schema:
@@ -309,7 +285,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Assessment"
+                $ref: "#/components/schemas/StudentAssessment"
+
+  /student-assessment/{assessmentID}:
     delete:
       summary: Delete an assessment
       tags: [Assessment]
@@ -387,6 +365,113 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
 
+  /student-assessment/remaining/{courseParticipationID}:
+    get:
+      summary: Get count of remaining assessments for a student
+      tags: [Assessment]
+      parameters:
+        - name: coursePhaseID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Count of remaining assessments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  remainingAssessments:
+                    $ref: "#/components/schemas/RemainingAssessments"
+
+  /student-assessment/completed:
+    post:
+      summary: Mark an Assessment of a student as completed
+      tags: [Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentCompletion"
+      responses:
+        "201":
+          description: Assessment marked as completed
+
+  /student-assessment/completed/course-participation/{courseParticipationID}:
+    get:
+      summary: Get AssessmentCompletion for a student, if it exists
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: AssessmentCompletion for the specified student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentCompletion"
+    delete:
+      summary: Unmark an AssessmentCompletion of a student
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: AssessmentCompletion deleted
+
+  /student-assessment/score-level:
+    get:
+      summary: Get all score levels in a phase
+      tags: [Assessment]
+      responses:
+        "200":
+          description: List of score levels in the specified course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreLevelWithParticipation"
+
+  /student-assessment/score-level/{courseParticipationID}:
+    get:
+      summary: Get the score level for a student
+      tags: [Assessment]
+      parameters:
+        - name: courseParticipationID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The score level for the specified student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreLevelWithParticipation"
+
 components:
   schemas:
     ################################
@@ -402,6 +487,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CreateCategoryRequest:
       type: object
@@ -411,6 +498,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     UpdateCategoryRequest:
       type: object
@@ -419,6 +508,8 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
 
     CategoryWithCompetencies:
       type: object
@@ -430,10 +521,21 @@ components:
           type: string
         description:
           type: string
+        weight:
+          type: integer
         competencies:
           type: array
           items:
             $ref: "#/components/schemas/Competency"
+
+    CategoryWithRemainingAssessments:
+      type: object
+      properties:
+        categoryID:
+          type: string
+          format: uuid
+        remainingAssessments:
+          type: integer
 
     ################################
     # Competency Schemas
@@ -459,10 +561,11 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     CreateCompetencyRequest:
       type: object
-      required: [categoryID, name, novice, intermediate, advanced, expert]
       properties:
         categoryID:
           type: string
@@ -479,6 +582,8 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     UpdateCompetencyRequest:
       type: object
@@ -495,10 +600,20 @@ components:
           type: string
         expert:
           type: string
+        weight:
+          type: integer
 
     ################################
     # Assessment Schemas
     ################################
+    ScoreLevel:
+      type: string
+      enum:
+        - novice
+        - intermediate
+        - advanced
+        - expert
+
     Assessment:
       type: object
       properties:
@@ -515,20 +630,16 @@ components:
           type: string
           format: uuid
         score:
-          type: string
-          enum:
-            - novice
-            - intermediate
-            - advanced
-            - expert
+          $ref: "#/components/schemas/ScoreLevel"
         comment:
           type: string
         assessedAt:
           type: string
+        author:
+          type: string
 
     CreateOrUpdateAssessmentRequest:
       type: object
-      required: [courseParticipationID, coursePhaseID, competencyID, score]
       properties:
         courseParticipationID:
           type: string
@@ -550,3 +661,69 @@ components:
           type: string
         assessedAt:
           type: string
+        author:
+          type: string
+
+    RemainingAssessments:
+      type: object
+      properties:
+        remainingAssessments:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryWithRemainingAssessments"
+
+    AssessmentCompletion:
+      type: object
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        author:
+          type: string
+        completed:
+          type: boolean
+
+    ScoreLevelWithParticipation:
+      type: object
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+
+    StudentScore:
+      type: object
+      properties:
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+        score:
+          type: number
+
+    StudentAssessment:
+      type: object
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assessment"
+        remainingAssessments:
+          $ref: "#/components/schemas/RemainingAssessments"
+        assessmentCompletion:
+          $ref: "#/components/schemas/AssessmentCompletion"
+        studentScore:
+          $ref: "#/components/schemas/StudentScore"

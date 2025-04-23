@@ -258,11 +258,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Already
 	assert.Equal(suite.T(), ErrAlreadyApplied, err)
 }
 
-func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationAuthenticatedByEmail_NotApplied() {
-	email := "existingstudent@example.com"
+func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationAuthenticatedByMatNr_NotApplied() {
+	matrNr := "03711126"
+	universityLogin := "ge25hok"
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 
-	application, err := GetApplicationAuthenticatedByEmail(suite.ctx, email, coursePhaseID)
+	application, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(suite.ctx, coursePhaseID, matrNr, universityLogin)
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), application)
 	assert.Equal(suite.T(), applicationDTO.StatusNotApplied, application.Status)
@@ -270,10 +271,9 @@ func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationAuthenticatedBy
 }
 
 func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationAuthenticatedByEmail_Unknown() {
-	email := "newstudent@example.com"
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 
-	application, err := GetApplicationAuthenticatedByEmail(suite.ctx, email, coursePhaseID)
+	application, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(suite.ctx, coursePhaseID, "00000000", "ab12cde")
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), application)
 	assert.Equal(suite.T(), applicationDTO.StatusNewUser, application.Status)
