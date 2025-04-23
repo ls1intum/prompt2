@@ -20,9 +20,8 @@ type Assignment struct {
 }
 
 type Team struct {
-	ID                           uuid.UUID        `json:"id"`
-	Name                         string           `json:"name"`
-	CoursePhaseID                uuid.UUID        `json:"course_phase_id"`
-	CreatorCourseParticipationID uuid.UUID        `json:"creator_course_participation_id"`
-	CreatedAt                    pgtype.Timestamp `json:"created_at"`
+	ID            uuid.UUID        `json:"id"`
+	Name          string           `json:"name"`
+	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
 }

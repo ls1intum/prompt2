@@ -6,18 +6,30 @@ ORDER BY name;
 
 -- name: GetTeamsWithStudentNames :many
 SELECT
-    t.*,
-    ARRAY_AGG(a.student_full_name ORDER BY a.student_full_name)::text[] AS student_names
+  t.id,
+  t.name,
+  -- build a JSON array of {courseParticipationID, studentName}
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
 FROM
-    team t
+  team t
 LEFT JOIN
-    assignments a ON t.id = a.team_id
+  assignments a
+  ON t.id = a.team_id
 WHERE
-    t.course_phase_id = $1
+  t.course_phase_id = $1
 GROUP BY
-    t.id
+  t.id, t.name
 ORDER BY
-    t.name;
+  t.name;
 
 
 -- name: CreateTeam :exec

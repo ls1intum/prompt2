@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTeam = `-- name: CreateTeam :exec
@@ -47,7 +46,7 @@ func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 }
 
 const getTeamsByCoursePhase = `-- name: GetTeamsByCoursePhase :many
-SELECT id, name, course_phase_id, creator_course_participation_id, created_at
+SELECT id, name, course_phase_id, created_at
 FROM team
 WHERE course_phase_id = $1
 ORDER BY name
@@ -66,7 +65,6 @@ func (q *Queries) GetTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.
 			&i.ID,
 			&i.Name,
 			&i.CoursePhaseID,
-			&i.CreatorCourseParticipationID,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -81,27 +79,36 @@ func (q *Queries) GetTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.
 
 const getTeamsWithStudentNames = `-- name: GetTeamsWithStudentNames :many
 SELECT
-    t.id, t.name, t.course_phase_id, t.creator_course_participation_id, t.created_at,
-    ARRAY_AGG(a.student_full_name ORDER BY a.student_full_name)::text[] AS student_names
+  t.id,
+  t.name,
+  -- build a JSON array of {courseParticipationID, studentName}
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
 FROM
-    team t
+  team t
 LEFT JOIN
-    assignments a ON t.id = a.team_id
+  assignments a
+  ON t.id = a.team_id
 WHERE
-    t.course_phase_id = $1
+  t.course_phase_id = $1
 GROUP BY
-    t.id
+  t.id, t.name
 ORDER BY
-    t.name
+  t.name
 `
 
 type GetTeamsWithStudentNamesRow struct {
-	ID                           uuid.UUID        `json:"id"`
-	Name                         string           `json:"name"`
-	CoursePhaseID                uuid.UUID        `json:"course_phase_id"`
-	CreatorCourseParticipationID uuid.UUID        `json:"creator_course_participation_id"`
-	CreatedAt                    pgtype.Timestamp `json:"created_at"`
-	StudentNames                 []string         `json:"student_names"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
 }
 
 func (q *Queries) GetTeamsWithStudentNames(ctx context.Context, coursePhaseID uuid.UUID) ([]GetTeamsWithStudentNamesRow, error) {
@@ -113,14 +120,7 @@ func (q *Queries) GetTeamsWithStudentNames(ctx context.Context, coursePhaseID uu
 	var items []GetTeamsWithStudentNamesRow
 	for rows.Next() {
 		var i GetTeamsWithStudentNamesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.CoursePhaseID,
-			&i.CreatorCourseParticipationID,
-			&i.CreatedAt,
-			&i.StudentNames,
-		); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.TeamMembers); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

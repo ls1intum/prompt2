@@ -16,7 +16,9 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 	teamRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), getAllTeams)
 	teamRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), createTeams)
 	teamRouter.PUT("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateTeam)
-	teamRouter.PUT("/:teamID/assignment", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseStudent), assignTeam)
+	// only allowing student - as this is a self assignment
+	teamRouter.PUT("/:teamID/assignment", authMiddleware(promptSDK.CourseStudent), assignTeam)
+	teamRouter.DELETE(":teamID/assignment", authMiddleware(promptSDK.CourseStudent), leaveTeam)
 	teamRouter.DELETE("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteTeam)
 }
 
@@ -109,7 +111,6 @@ func assignTeam(c *gin.Context) {
 		return
 	}
 
-	// TODO get the full name of the student from the token
 	firstName, ok := c.Get("firstName")
 	if !ok {
 		log.Error("Error getting student name from context")
@@ -127,6 +128,36 @@ func assignTeam(c *gin.Context) {
 	studentFullName := firstName.(string) + " " + lastName.(string)
 
 	err = AssignTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID), studentFullName)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func leaveTeam(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		log.Error("Error parsing teamID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+		return
+	}
+
+	err = LeaveTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID))
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

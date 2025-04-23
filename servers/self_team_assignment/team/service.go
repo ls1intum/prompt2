@@ -76,17 +76,31 @@ func UpdateTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, newTeamNam
 	return nil
 }
 
-func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, studentID uuid.UUID, studentFullName string) error {
+func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID, studentFullName string) error {
 	err := AssignmentServiceSingleton.queries.CreateOrUpdateAssignment(ctx, db.CreateOrUpdateAssignmentParams{
-		ID:                    teamID,
+		TeamID:                teamID,
 		CoursePhaseID:         coursePhaseID,
-		CourseParticipationID: studentID,
+		CourseParticipationID: courseParticipationID,
 		StudentFullName:       studentFullName,
 	})
 
 	if err != nil {
 		log.Error("could not update the team: ", err)
 		return errors.New("could not update the team")
+	}
+	return nil
+}
+
+func LeaveTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID) error {
+	err := AssignmentServiceSingleton.queries.DeleteAssignment(ctx, db.DeleteAssignmentParams{
+		TeamID:                teamID,
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+	})
+
+	if err != nil {
+		log.Error("could not leave the team: ", err)
+		return errors.New("could not leave the team")
 	}
 	return nil
 }

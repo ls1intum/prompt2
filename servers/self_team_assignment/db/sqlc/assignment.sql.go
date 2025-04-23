@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createOrUpdateAssignment = `-- name: CreateOrUpdateAssignment :exec
@@ -55,112 +54,20 @@ func (q *Queries) CreateOrUpdateAssignment(ctx context.Context, arg CreateOrUpda
 	return err
 }
 
-const getAggregatedAssignmentsByCoursePhase = `-- name: GetAggregatedAssignmentsByCoursePhase :many
-SELECT
-    team_id,
-    array_agg(student_full_name)::text[] AS student_names
-FROM assignments
-WHERE course_phase_id = $1
-GROUP BY team_id
-ORDER BY team_id
-`
-
-type GetAggregatedAssignmentsByCoursePhaseRow struct {
-	TeamID       uuid.UUID `json:"team_id"`
-	StudentNames []string  `json:"student_names"`
-}
-
-func (q *Queries) GetAggregatedAssignmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAggregatedAssignmentsByCoursePhaseRow, error) {
-	rows, err := q.db.Query(ctx, getAggregatedAssignmentsByCoursePhase, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetAggregatedAssignmentsByCoursePhaseRow
-	for rows.Next() {
-		var i GetAggregatedAssignmentsByCoursePhaseRow
-		if err := rows.Scan(&i.TeamID, &i.StudentNames); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAssignmentForStudent = `-- name: GetAssignmentForStudent :one
-SELECT
-    id,
-    course_participation_id,
-    team_id,
-    course_phase_id,
-    created_at,
-    updated_at
-FROM assignments
+const deleteAssignment = `-- name: DeleteAssignment :exec
+DELETE FROM assignments
 WHERE course_participation_id = $1
   AND course_phase_id = $2
+  AND team_id = $3
 `
 
-type GetAssignmentForStudentParams struct {
+type DeleteAssignmentParams struct {
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	TeamID                uuid.UUID `json:"team_id"`
 }
 
-type GetAssignmentForStudentRow struct {
-	ID                    uuid.UUID        `json:"id"`
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	TeamID                uuid.UUID        `json:"team_id"`
-	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
-	CreatedAt             pgtype.Timestamp `json:"created_at"`
-	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
-}
-
-func (q *Queries) GetAssignmentForStudent(ctx context.Context, arg GetAssignmentForStudentParams) (GetAssignmentForStudentRow, error) {
-	row := q.db.QueryRow(ctx, getAssignmentForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
-	var i GetAssignmentForStudentRow
-	err := row.Scan(
-		&i.ID,
-		&i.CourseParticipationID,
-		&i.TeamID,
-		&i.CoursePhaseID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getAssignmentsByCoursePhase = `-- name: GetAssignmentsByCoursePhase :many
-SELECT a.id, a.course_participation_id, a.student_full_name, a.team_id, a.course_phase_id, a.created_at, a.updated_at
-FROM assignments a
-WHERE a.course_phase_id = $1
-`
-
-func (q *Queries) GetAssignmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Assignment, error) {
-	rows, err := q.db.Query(ctx, getAssignmentsByCoursePhase, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Assignment
-	for rows.Next() {
-		var i Assignment
-		if err := rows.Scan(
-			&i.ID,
-			&i.CourseParticipationID,
-			&i.StudentFullName,
-			&i.TeamID,
-			&i.CoursePhaseID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) DeleteAssignment(ctx context.Context, arg DeleteAssignmentParams) error {
+	_, err := q.db.Exec(ctx, deleteAssignment, arg.CourseParticipationID, arg.CoursePhaseID, arg.TeamID)
+	return err
 }

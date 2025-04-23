@@ -76,7 +76,7 @@ func main() {
 	router := gin.Default()
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
-	api := router.Group("team-assignment/api/course_phase/:coursePhaseID")
+	api := router.Group("self-team-assignment/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
 	api.GET("/hello", func(c *gin.Context) {
@@ -86,7 +86,7 @@ func main() {
 
 	teams.InitTeamModule(api, *query, conn)
 
-	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
+	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8085")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
