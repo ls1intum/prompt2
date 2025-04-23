@@ -1,11 +1,11 @@
 import { Role } from '@tumaet/prompt-shared-state'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
-import { TeamAllocationPage } from '../src/self_team_allocation/pages/TeamAllocation/TeamAllocationPage'
+import { SelfTeamAllocationPage } from '../src/self_team_allocation/pages/TeamAllocation/SelfTeamAllocationPage'
 
 const routes: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <TeamAllocationPage />,
+    element: <SelfTeamAllocationPage />,
     requiredPermissions: [
       Role.PROMPT_ADMIN,
       Role.COURSE_LECTURER,

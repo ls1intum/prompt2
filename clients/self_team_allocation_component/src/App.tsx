@@ -1,7 +1,7 @@
 export const App = (): JSX.Element => {
   return (
     <>
-      <h1>Prompt Team Allocation Component</h1>
+      <h1>Prompt Self Team Allocation Component</h1>
       <p>Please load this component from inside the Prompt Core!</p>
     </>
   )

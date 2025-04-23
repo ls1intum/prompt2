@@ -13,7 +13,7 @@ const { ModuleFederationPlugin } = webpack.container
 // ### Component specific configuration ###
 // ########################################
 const COMPONENT_NAME = 'self_team_allocation_component'
-const COMPONENT_DEV_PORT = 3010
+const COMPONENT_DEV_PORT = 3009
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
