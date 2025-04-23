@@ -1,11 +1,16 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Users, UserPlus, LogOut } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
-import { ManagementPageHeader } from '@/components/managementPageHeader'
+import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { TeamCreationDialog } from './TeamCreationDialog'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createTeamAssignment } from '../../../network/mutations/createTeamAllocation'
+import { useParams } from 'react-router-dom'
+import { deleteTeamAssignment } from '../../../network/mutations/deleteTeamAllocation'
+import { createTeam } from '../../../network/mutations/createTeam'
 
 interface Props {
   teams: Team[]
@@ -13,9 +18,48 @@ interface Props {
 }
 
 export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID }) => {
+  const { phaseId } = useParams<{ phaseId: string }>()
   const isLecturer = courseParticipationID === undefined
+  const queryClient = useQueryClient()
 
-  // find the team the current student belongs to (undefined if lecturer or unassigned student)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const joinMutation = useMutation({
+    mutationFn: (teamId: string) => createTeamAssignment(phaseId ?? '', teamId),
+    onSuccess: () => {
+      setSubmitError(null)
+      queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
+    },
+    onError: () => {
+      setSubmitError('Failed to join team. Please try again.')
+    },
+  })
+
+  const leaveMutation = useMutation({
+    mutationFn: (teamId: string) => deleteTeamAssignment(phaseId ?? '', teamId),
+    onSuccess: () => {
+      setSubmitError(null)
+      queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
+    },
+    onError: () => {
+      setSubmitError('Failed to leave team. Please try again.')
+    },
+  })
+
+  // Note: if you actually have a backend mutation to _create_ a team, import & use that here.
+  // For now this just re-uses `createTeamAssignment` as a placeholder.
+  const createMutation = useMutation({
+    mutationFn: (name: string) => createTeam(phaseId ?? '', [name]),
+    onSuccess: () => {
+      setSubmitError(null)
+      queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
+    },
+    onError: () => {
+      setSubmitError('Failed to create team. Please try again.')
+    },
+  })
+
+  // find the team the current student belongs to (undefined if lecturer or unassigned)
   const myTeam = useMemo(
     () =>
       teams.find((team) =>
@@ -24,30 +68,22 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
     [teams, courseParticipationID],
   )
 
-  // lock actions if they already have a team or if they're a lecturer
   const isLocked = Boolean(myTeam) || isLecturer
-
-  const joinTeam = (teamId: string) => {
-    // TODO: call your API to join, then update parent state
-  }
-
-  const leaveTeam = (teamId: string) => {
-    // TODO: call your API to leave, then update parent state
-  }
-
-  const createTeam = (name: string) => {
-    // network call
-  }
 
   return (
     <div className='container mx-auto py-6 space-y-8'>
       <ManagementPageHeader>Team Allocation</ManagementPageHeader>
 
+      {/* show any error */}
+      {submitError && (
+        <div className='px-4 py-2 bg-red-100 text-red-800 rounded'>{submitError}</div>
+      )}
+
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
         <div className='flex justify-end'>
           <TeamCreationDialog
             onCreate={(name: string) => {
-              createTeam(name)
+              createMutation.mutate(name)
             }}
           />
         </div>
@@ -57,7 +93,6 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
         <div className='grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {[...teams]
             .sort((a, b) => {
-              // selected team first
               if (myTeam?.id === a.id) return -1
               if (myTeam?.id === b.id) return 1
               return 0
@@ -122,7 +157,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
                       <Button
                         variant='destructive'
                         className='w-full'
-                        onClick={() => leaveTeam(team.id)}
+                        onClick={() => leaveMutation.mutate(team.id)}
                       >
                         <LogOut className='mr-2 h-4 w-4' />
                         Leave Team
@@ -130,7 +165,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
                     ) : (
                       <Button
                         className='w-full'
-                        onClick={() => joinTeam(team.id)}
+                        onClick={() => joinMutation.mutate(team.id)}
                         disabled={isLocked || full}
                         variant={full ? 'outline' : 'default'}
                       >
