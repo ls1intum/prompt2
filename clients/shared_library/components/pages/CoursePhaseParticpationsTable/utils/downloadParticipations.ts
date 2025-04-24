@@ -1,11 +1,14 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { saveAs } from 'file-saver'
+import { ExtraParticipationTableData } from '../interfaces/ExtraParticipationTableData'
 
 export const downloadParticipations = (
   data: CoursePhaseParticipationWithStudent[],
   prevDataKeys: string[],
   restrictedDataKeys: string[],
   studentReadableDataKeys: string[],
+  extraData: ExtraParticipationTableData[] = [],
+  extraColumnHeader: string | undefined,
   filename = 'participation-export.csv',
 ) => {
   if (!data || data.length === 0) {
@@ -26,6 +29,10 @@ export const downloadParticipations = (
     ...restrictedDataKeys,
     ...studentReadableDataKeys,
   ]
+
+  if (extraColumnHeader !== undefined) {
+    csvHeaders.push(extraColumnHeader ?? '')
+  }
   const csvRows = data.map((row) => {
     // Extract student data
     const student = row.student || {}
@@ -47,6 +54,12 @@ export const downloadParticipations = (
         } else if (studentReadableDataKeys.includes(header)) {
           // Fetch additional scores from the `meta_data` object
           return JSON.stringify(row.studentReadableData[header] ?? '')
+        } else if (header === extraColumnHeader) {
+          // Fetch additional scores from the `meta_data` object
+          const extraDataItem = extraData.find(
+            (item) => item.courseParticipationID === row.courseParticipationID,
+          )
+          return JSON.stringify(extraDataItem?.stringValue ?? '')
         } else {
           return JSON.stringify('')
         }

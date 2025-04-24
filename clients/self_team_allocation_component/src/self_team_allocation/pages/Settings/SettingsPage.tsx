@@ -7,6 +7,10 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { Team } from '../../interfaces/team'
+import { getAllTeams } from '../../network/queries/getAllTeams'
+import { useMemo } from 'react'
+import { ExtraParticipationTableData } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableData'
 
 export const SettingsPage = (): JSX.Element => {
   const tableWidth = useCustomElementWidth('table-view')
@@ -22,14 +26,35 @@ export const SettingsPage = (): JSX.Element => {
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
 
-  //   GET TEAM Allocations
+  const {
+    data: teams,
+    isPending: isTeamsPending,
+    isError: isTeamsError,
+    refetch: refetchTeams,
+  } = useQuery<Team[]>({
+    queryKey: ['self_team_allocations', phaseId],
+    queryFn: () => getAllTeams(phaseId ?? ''),
+  })
+
+  const extraData: ExtraParticipationTableData[] | undefined = useMemo(() => {
+    return teams
+      ?.map((team) =>
+        team.members.map((member) => ({
+          courseParticipationID: member.courseParticipationID,
+          value: team.name,
+          stringValue: team.name,
+        })),
+      )
+      .flat()
+  }, [teams])
 
   const refetch = () => {
     refetchCoursePhaseParticipations()
+    refetchTeams()
   }
 
-  const isError = isParticipationsError
-  const isPending = isCoursePhaseParticipationsPending
+  const isError = isParticipationsError || isTeamsError
+  const isPending = isCoursePhaseParticipationsPending || isTeamsPending
 
   if (isError) return <ErrorPage onRetry={refetch} description='Could not fetch scoreLevels' />
   if (isPending)
@@ -50,6 +75,7 @@ export const SettingsPage = (): JSX.Element => {
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}
           extraColumnHeader='Allocated Team'
+          extraData={extraData}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
         />

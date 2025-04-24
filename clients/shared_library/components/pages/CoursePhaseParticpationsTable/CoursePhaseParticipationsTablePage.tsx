@@ -27,18 +27,14 @@ import { Input } from '@/components/ui/input'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
-
-export interface ExtraParticipationData {
-  courseParticipationID: string
-  value: React.ReactNode
-}
+import { ExtraParticipationTableData } from './interfaces/ExtraParticipationTableData'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
   prevDataKeys: string[]
   restrictedDataKeys: string[]
   studentReadableDataKeys: string[]
-  extraData?: ExtraParticipationData[]
+  extraData?: ExtraParticipationTableData[]
   extraColumnHeader?: string
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
 }
@@ -138,6 +134,8 @@ export const CoursePhaseParticipationsTablePage = ({
                     prevDataKeys,
                     restrictedDataKeys,
                     studentReadableDataKeys,
+                    extraData,
+                    extraColumnHeader,
                   )
                   table.resetRowSelection()
                 }}
