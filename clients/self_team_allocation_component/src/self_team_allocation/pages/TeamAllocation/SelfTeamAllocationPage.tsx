@@ -11,6 +11,7 @@ import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state
 import { TeamSelection } from './components/TeamSelection'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { Team } from '../../interfaces/team'
+import { Timeframe } from 'src/self_team_allocation/interfaces/timeframe'
 
 export const SelfTeamAllocationPage = (): JSX.Element => {
   const { isStudentOfCourse } = useCourseStore()
@@ -63,7 +64,11 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
 
   const cpId = participation?.courseParticipationID
 
-  console.log('teams', teams)
+  const mockTimeframe: Timeframe = {
+    timeframeSet: true,
+    startTime: new Date('2023-10-01T00:00:00Z'),
+    endTime: new Date('2023-12-31T23:59:59Z'),
+  }
 
   return (
     <>
@@ -78,7 +83,12 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
       )}
 
       {teams && (
-        <TeamSelection teams={teams} courseParticipationID={cpId} refetchTeams={refetchTeams} />
+        <TeamSelection
+          teams={teams}
+          courseParticipationID={cpId}
+          refetchTeams={refetchTeams}
+          timeframe={mockTimeframe}
+        />
       )}
     </>
   )
