@@ -27,7 +27,7 @@ func getTimeframe(c *gin.Context) {
 	timeframe, err := GetTimeframe(c, coursePhaseID)
 	if err != nil {
 		if err.Error() == "timeframe not set" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusOK, timeframeDTO.Timeframe{TimeframeSet: false})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
