@@ -23,33 +23,34 @@ func NewConfluenceClient(baseURL, username, apiToken string) *ConfluenceClient {
 		APIToken: apiToken,
 	}
 }
-var (
-    AdminPermissions = []map[string]string{
-        {"targetType": "space", "operationKey": "read"},
-        {"targetType": "space", "operationKey": "administer"},
-        {"targetType": "space", "operationKey": "export"},
-        {"targetType": "space", "operationKey": "restrict"},
-        {"targetType": "space", "operationKey": "delete_own"},
-        {"targetType": "space", "operationKey": "delete_mail"},
-        {"targetType": "page", "operationKey": "create"},
-        {"targetType": "page", "operationKey": "delete"},
-        {"targetType": "blogpost", "operationKey": "create"},
-        {"targetType": "blogpost", "operationKey": "delete"},
-        {"targetType": "comment", "operationKey": "create"},
-        {"targetType": "comment", "operationKey": "delete"},
-        {"targetType": "attachment", "operationKey": "create"},
-        {"targetType": "attachment", "operationKey": "delete"},
-    }
 
-    UserPermissions = []map[string]string{
-        {"targetType": "space", "operationKey": "read"},
-        {"targetType": "space", "operationKey": "delete_own"},
-        {"targetType": "page", "operationKey": "create"},
-        {"targetType": "page", "operationKey": "delete"},
-        {"targetType": "blogpost", "operationKey": "create"},
-        {"targetType": "comment", "operationKey": "create"},
-        {"targetType": "attachment", "operationKey": "create"},
-    }
+var (
+	AdminPermissions = []map[string]string{
+		{"targetType": "space", "operationKey": "read"},
+		{"targetType": "space", "operationKey": "administer"},
+		{"targetType": "space", "operationKey": "export"},
+		{"targetType": "space", "operationKey": "restrict"},
+		{"targetType": "space", "operationKey": "delete_own"},
+		{"targetType": "space", "operationKey": "delete_mail"},
+		{"targetType": "page", "operationKey": "create"},
+		{"targetType": "page", "operationKey": "delete"},
+		{"targetType": "blogpost", "operationKey": "create"},
+		{"targetType": "blogpost", "operationKey": "delete"},
+		{"targetType": "comment", "operationKey": "create"},
+		{"targetType": "comment", "operationKey": "delete"},
+		{"targetType": "attachment", "operationKey": "create"},
+		{"targetType": "attachment", "operationKey": "delete"},
+	}
+
+	UserPermissions = []map[string]string{
+		{"targetType": "space", "operationKey": "read"},
+		{"targetType": "space", "operationKey": "delete_own"},
+		{"targetType": "page", "operationKey": "create"},
+		{"targetType": "page", "operationKey": "delete"},
+		{"targetType": "blogpost", "operationKey": "create"},
+		{"targetType": "comment", "operationKey": "create"},
+		{"targetType": "attachment", "operationKey": "create"},
+	}
 )
 
 // CreateSpace creates a new space in Confluence
@@ -162,44 +163,44 @@ func (c *ConfluenceClient) AddSpaceToCategory(spaceKey, category string) error {
 }
 
 func (c *ConfluenceClient) AssignGroupPermissions(spaceKey, groupName string, permissions []map[string]string) error {
-    // Check if the space exists
-    exists, err := c.SpaceExists(spaceKey)
-    if err != nil {
-        return fmt.Errorf("failed to check if space exists: %w", err)
-    }
+	// Check if the space exists
+	exists, err := c.SpaceExists(spaceKey)
+	if err != nil {
+		return fmt.Errorf("failed to check if space exists: %w", err)
+	}
 
-    if !exists {
-        return fmt.Errorf("space with key %s does not exist", spaceKey)
-    }
+	if !exists {
+		return fmt.Errorf("space with key %s does not exist", spaceKey)
+	}
 
-    // Proceed to assign permissions
-    url := fmt.Sprintf("%s/rest/api/space/%s/permissions/group/%s/grant", c.BaseURL, spaceKey, groupName)
+	// Proceed to assign permissions
+	url := fmt.Sprintf("%s/rest/api/space/%s/permissions/group/%s/grant", c.BaseURL, spaceKey, groupName)
 
-    body, err := json.Marshal(permissions)
-    if err != nil {
-        return fmt.Errorf("failed to marshal payload: %w", err)
-    }
+	body, err := json.Marshal(permissions)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
 
-    req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
-    if err != nil {
-        return fmt.Errorf("failed to create request: %w", err)
-    }
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
 
-    req.SetBasicAuth(c.Username, c.APIToken)
-    req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(c.Username, c.APIToken)
+	req.Header.Set("Content-Type", "application/json")
 
-    resp, err := http.DefaultClient.Do(req)
-    if err != nil {
-        return fmt.Errorf("failed to send request: %w", err)
-    }
-    defer resp.Body.Close()
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
 
-    respBody, _ := io.ReadAll(resp.Body)
-    if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-        log.Errorf("Failed to assign permissions. Status: %d, Response: %s", resp.StatusCode, string(respBody))
-        return fmt.Errorf("failed to assign permissions: %s", string(respBody))
-    }
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		log.Errorf("Failed to assign permissions. Status: %d, Response: %s", resp.StatusCode, string(respBody))
+		return fmt.Errorf("failed to assign permissions: %s", string(respBody))
+	}
 
-    log.Infof("Permissions assigned successfully to group %s for space %s", groupName, spaceKey)
-    return nil
+	log.Infof("Permissions assigned successfully to group %s for space %s", groupName, spaceKey)
+	return nil
 }

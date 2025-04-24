@@ -6,11 +6,10 @@ import (
 )
 
 type GitlabConfig struct {
-	AccessToken string
-	BaseURL     string
+	AccessToken   string
+	BaseURL       string
 	ParentGroupID int
 }
-	
 
 func GetClient(conf GitlabConfig) (*gitlab.Client, error) {
 	// Create a client
