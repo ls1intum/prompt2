@@ -46,4 +46,9 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 	if err != nil {
 		log.Fatal("failed to init team allocation phase type: ", err)
 	}
+
+	err = initSelfTeamAllocation()
+	if err != nil {
+		log.Fatal("failed to init self team allocation phase type: ", err)
+	}
 }
