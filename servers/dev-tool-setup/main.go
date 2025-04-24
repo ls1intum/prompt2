@@ -1,6 +1,9 @@
 package main
 
 import (
+	"strings"
+
+	confluence "github.com/ls1intum/prompt2/servers/dev-tool-setup/confluence_setup"
 	gitlab "github.com/ls1intum/prompt2/servers/dev-tool-setup/gitlab_setup"
 	jira "github.com/ls1intum/prompt2/servers/dev-tool-setup/jira_setup"
 	log "github.com/sirupsen/logrus"
@@ -9,8 +12,13 @@ import (
 )
 
 type iPraktikumTeams struct {
-	Teams             []iPraktikumTeam
-	Prefix            string
+	// The teams for the semester
+	Teams []iPraktikumTeam
+
+	// The prefix for the group names - this should be in lowercase - e.g. "ios25"
+	Prefix string
+
+	// The name of the semester group - this should be in spelled correctly  - e.g. "iOS25"
 	SemesterGroupName string
 }
 
@@ -36,12 +44,12 @@ var config = conf{
 	logLevel: "info",
 }
 
-func loadConfig() (gitlab.GitlabConfig, jira.JiraClient, error) {
+func loadConfig() (gitlab.GitlabConfig, jira.JiraClient, confluence.ConfluenceClient, error) {
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		return gitlab.GitlabConfig{}, jira.JiraClient{}, err
+		return gitlab.GitlabConfig{}, jira.JiraClient{}, confluence.ConfluenceClient{}, err
 	}
 
 	config.logLevel = viper.GetString("LOG_LEVEL")
@@ -54,15 +62,21 @@ func loadConfig() (gitlab.GitlabConfig, jira.JiraClient, error) {
 
 	jiraconf := jira.JiraClient{
 		BaseURL:  viper.GetString("JIRA_BASE_URL"),
-		Username: viper.GetString("JIRA_USERNAME"),
-		APIToken: viper.GetString("JIRA_API_TOKEN"),
+		Username: viper.GetString("ATLASSIAN_USERNAME"),
+		APIToken: viper.GetString("ATLASSIAN_API_TOKEN"),
 	}
 
-	return gitlabconf, jiraconf, nil
+	confluenceconf := confluence.ConfluenceClient{
+		BaseURL:  viper.GetString("CONFLUENCE_BASE_URL"),
+		Username: viper.GetString("ATLASSIAN_USERNAME"),
+		APIToken: viper.GetString("ATLASSIAN_API_TOKEN"),
+	}
+
+	return gitlabconf, jiraconf, confluenceconf, nil
 }
 
 func main() {
-	gitlabconfig, jiraconfig, err := loadConfig()
+	gitlabconfig, jiraconfig, confluenceconfig, err := loadConfig()
 	if err != nil {
 		log.Fatal("Failed to load configuration: ", err)
 	}
@@ -71,12 +85,13 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
+	// TODO: Add correnct input data from somewhere
 	semester := iPraktikumTeams{
 		SemesterGroupName: "iOS25",
 		Prefix:            "ios25",
 		Teams: []iPraktikumTeam{
 			{
-				Name: "mtze_test",
+				Name: "mtzetest",
 				Members: []TeamMember{
 					{GitlabUsername: "mtze", JiraUsername: "ga58roj"},
 				},
@@ -94,9 +109,58 @@ func main() {
 		},
 	}
 	_ = gitlabconfig
-	//setupGitlab(gitlabconfig, semester)
+	_ = jiraconfig
+	_ = confluenceconfig
+
+	setupGitlab(gitlabconfig, semester)
+
 	setupJira(jiraconfig, semester)
 
+	setupConfluence(confluenceconfig, semester)
+
+}
+
+func setupConfluence(client confluence.ConfluenceClient, semester iPraktikumTeams) error {
+
+	for _, team := range semester.Teams {
+		spaceKey := strings.ToUpper(semester.Prefix + team.Name)
+		spaceName := semester.SemesterGroupName + team.Name
+
+		err := client.CreateSpace(spaceKey, spaceName)
+		if err != nil {
+			log.Errorf("Error creating space: %v", err)
+		}
+
+		// Set the space label - This does not work yet. Apparently, the API does not support setting labels for spaces. -> https://jira.atlassian.com/browse/CONFSERVER-54743
+		// err = client.AddSpaceToCategory(spaceKey, "ios25")
+		// if err != nil {
+		// 	log.Errorf("Error setting space label: %v", err)
+		// }
+
+		// Grant permissions to the space
+		err = client.AssignGroupPermissions(spaceKey, strings.ToLower(semester.Prefix+team.Name), confluence.UserPermissions)
+		if err != nil {
+			log.Errorf("Error granting permissions to group: %v", err)
+		}
+		log.Debugf("Permissions granted to group %s for space %s", strings.ToLower(semester.Prefix+team.Name), spaceKey)
+
+		// Grant permissions to the coach and project lead
+		err = client.AssignGroupPermissions(spaceKey, strings.ToLower(semester.Prefix+team.Name+"-mgmt"), confluence.AdminPermissions)
+		if err != nil {
+			log.Errorf("Error granting permissions to group: %v", err)
+		}
+		log.Debugf("Permissions granted to group %s for space %s", strings.ToLower(semester.Prefix+team.Name+"-mgmt"), spaceKey)
+
+		// Grant permissions to the customers
+		err = client.AssignGroupPermissions(spaceKey, strings.ToLower(semester.Prefix+team.Name+"-customers"), confluence.UserPermissions)
+		if err != nil {
+			log.Errorf("Error granting permissions to group: %v", err)
+		}
+		log.Debugf("Permissions granted to group %s for space %s", strings.ToLower(semester.Prefix+team.Name+"-customers"), spaceKey)
+
+		// log.Infof("Space %s setup successfully", team.Name)
+	}
+	return nil
 }
 
 func setupJiraGroup(client jira.JiraClient, groupName string, Members []TeamMember) error {
@@ -131,10 +195,10 @@ func setupJira(client jira.JiraClient, semester iPraktikumTeams) error {
 	// 2. Create groups for every team and add members
 	for _, team := range semester.Teams {
 
-		// Create a group for the developers
-		_ = setupJiraGroup(client, semester.Prefix+team.Name, team.Members)
-		_ = setupJiraGroup(client, semester.Prefix+team.Name+"-mgmt", []TeamMember{team.ProjectLead, team.Coach})
-		_ = setupJiraGroup(client, semester.Prefix+team.Name+"-customers", []TeamMember{})
+		// Create a group for the developers, management, and customers
+		_ = setupJiraGroup(client, strings.ToLower(semester.Prefix+team.Name), team.Members)
+		_ = setupJiraGroup(client, strings.ToLower(semester.Prefix+team.Name+"-mgmt"), []TeamMember{team.ProjectLead, team.Coach})
+		_ = setupJiraGroup(client, strings.ToLower(semester.Prefix+team.Name+"-customers"), []TeamMember{})
 
 		log.Infof("Project groups for team %s created successfully", team.Name)
 

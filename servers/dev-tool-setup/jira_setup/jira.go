@@ -32,7 +32,7 @@ func (c *JiraClient) CreateGroup(groupName string) error {
 	}
 
 	if exists {
-		log.Debug("Group %s already exists", groupName)
+		log.Debugf("Group %s already exists", groupName)
 		return nil
 	}
 
