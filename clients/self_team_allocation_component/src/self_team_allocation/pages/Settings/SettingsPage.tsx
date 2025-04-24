@@ -66,7 +66,7 @@ export const SettingsPage = (): JSX.Element => {
 
   return (
     <div id='table-view' className='relative flex flex-col'>
-      <ManagementPageHeader>Assessment Overview</ManagementPageHeader>
+      <ManagementPageHeader>Team Allocation Overview</ManagementPageHeader>
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>

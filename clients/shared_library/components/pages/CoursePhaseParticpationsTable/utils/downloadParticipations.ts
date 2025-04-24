@@ -23,6 +23,7 @@ export const downloadParticipations = (
     'matriculationNumber',
     'universityLogin',
     'hasUniversityAccount',
+    'courseParticipationID',
     'gender',
     'passStatus',
     ...prevDataKeys,
@@ -60,6 +61,9 @@ export const downloadParticipations = (
             (item) => item.courseParticipationID === row.courseParticipationID,
           )
           return JSON.stringify(extraDataItem?.stringValue ?? '')
+        } else if (header === 'courseParticipationID') {
+          // Fetch data from the main `ApplicationParticipation` object
+          return JSON.stringify(row.courseParticipationID ?? '')
         } else {
           return JSON.stringify('')
         }
