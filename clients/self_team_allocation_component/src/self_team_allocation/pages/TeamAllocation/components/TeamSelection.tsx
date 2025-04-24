@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react'
+import type React from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, Users } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
@@ -12,7 +13,8 @@ import { createTeamAssignment } from '../../../network/mutations/createTeamAlloc
 import { deleteTeamAssignment } from '../../../network/mutations/deleteTeamAllocation'
 import { createTeam } from '../../../network/mutations/createTeam'
 import { deleteTeam } from '../../../network/mutations/deleteTeam'
-import { Timeframe } from '../../../interfaces/timeframe'
+import type { Timeframe } from '../../../interfaces/timeframe'
+import { DeadlineDisplay } from './DeadlineDisplay'
 
 interface Props {
   teams: Team[]
@@ -79,7 +81,8 @@ export const TeamSelection: React.FC<Props> = ({
     [teams, courseParticipationID],
   )
 
-  const disabled = timeframe.timeframeSet && timeframe.endTime < new Date() || timeframe.startTime > new Date()
+  const disabled =
+    timeframe.timeframeSet && (timeframe.endTime < new Date() || timeframe.startTime > new Date())
   const joiningDisabled = Boolean(myTeam) || isLecturer
 
   const sortedTeams = useMemo(
@@ -89,19 +92,28 @@ export const TeamSelection: React.FC<Props> = ({
 
   return (
     <div className='container mx-auto py-6 space-y-8'>
-      <div className='flex items-center justify-between'>
+      <div>
         <ManagementPageHeader>Team Allocation</ManagementPageHeader>
-        <Button variant='outline' onClick={refetchTeams} className='flex items-center gap-2'>
-          <RefreshCw className='h-4 w-4' />
-          Reload Teams
-        </Button>
+        {timeframe.timeframeSet && <DeadlineDisplay timeframe={timeframe} />}
       </div>
 
-      {submitError && <div className='alert-error'>{submitError}</div>}
-
       {!disabled && (
-        <div className='flex justify-end mb-6'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3'>
           <TeamCreationDialog onCreate={(name) => createMutation.mutate(name)} teams={teams} />
+          <Button
+            variant='outline'
+            onClick={refetchTeams}
+            className='flex items-center gap-2 w-full sm:w-auto order-2 sm:order-1 sm mt-4'
+          >
+            <RefreshCw className='h-4 w-4' />
+            Refresh Teams
+          </Button>
+        </div>
+      )}
+
+      {submitError && (
+        <div className='p-4 border border-red-200 bg-red-50 text-red-700 rounded-md'>
+          {submitError}
         </div>
       )}
 
@@ -127,21 +139,19 @@ export const TeamSelection: React.FC<Props> = ({
           ))}
         </div>
       ) : (
-        <div className='empty-state'>
+        <div className='flex flex-col items-center justify-center p-12 border border-dashed rounded-lg bg-muted/20'>
           <Users className='h-12 w-12 text-muted-foreground mb-4' />
-          <h3>No Teams Available</h3>
-          <p>Create a new team to get started.</p>
+          <h3 className='text-lg font-medium'>No Teams Available</h3>
+          <p className='text-muted-foreground'>Create a new team to get started.</p>
         </div>
       )}
 
-      {teamToDelete && (
-        <DeleteConfirmation
-          isOpen={deleteDialogOpen}
-          setOpen={setDeleteDialogOpen}
-          onClick={(ok) => ok && deleteMutation.mutate(teamToDelete.id)}
-          deleteMessage='Are you sure you want to delete this team?'
-        />
-      )}
+      <DeleteConfirmation
+        isOpen={deleteDialogOpen}
+        setOpen={setDeleteDialogOpen}
+        onClick={(ok) => ok && teamToDelete && deleteMutation.mutate(teamToDelete.id)}
+        deleteMessage='Are you sure you want to delete this team?'
+      />
     </div>
   )
 }
