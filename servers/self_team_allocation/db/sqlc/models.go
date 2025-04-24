@@ -25,3 +25,9 @@ type Team struct {
 	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
 	CreatedAt     pgtype.Timestamp `json:"created_at"`
 }
+
+type Timeframe struct {
+	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
+	Starttime     pgtype.Timestamp `json:"starttime"`
+	Endtime       pgtype.Timestamp `json:"endtime"`
+}

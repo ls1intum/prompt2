@@ -25,4 +25,10 @@ CREATE TABLE assignments (
     CONSTRAINT assignments_participation_phase_uk UNIQUE (course_participation_id, course_phase_id)
 );
 
+CREATE TABLE timeframe (
+    course_phase_id uuid NOT NULL PRIMARY KEY,
+    starttime TIMESTAMP NOT NULL,
+    endtime TIMESTAMP NOT NULL
+);
+
 COMMIT;
