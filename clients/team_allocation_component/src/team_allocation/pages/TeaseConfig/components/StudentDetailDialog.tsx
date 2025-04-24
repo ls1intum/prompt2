@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
 import { getAllSkills } from '../../../network/queries/getAllSkills'
 import { Team } from '../../../interfaces/team'
+import { getLevelConfig } from './ProficiencyBadge'
 
 interface StudentDetailDialogProps {
   student: TeaseStudent | null
@@ -110,7 +111,12 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                     <CardContent className='p-3'>
                       <div className='flex justify-between items-center'>
                         <div className='font-medium'>{getSkillNameById(skill.id)}</div>
-                        <ProficiencyBadge proficiency={skill.proficiency} />
+                        <Badge
+                          className={`${getLevelConfig(skill.proficiency).textColor} 
+                          ${getLevelConfig(skill.proficiency).selectedBg} hover:${getLevelConfig(skill.proficiency).selectedBg}`}
+                        >
+                          {getLevelConfig(skill.proficiency).title}
+                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -157,37 +163,5 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function ProficiencyBadge({ proficiency }: { proficiency: string }) {
-  let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'outline'
-  let color = 'text-muted-foreground'
-
-  switch (proficiency.toLowerCase()) {
-    case 'expert':
-      variant = 'default'
-      color = 'text-destructive'
-      break
-    case 'advanced':
-      variant = 'default'
-      color = 'text-primary-foreground'
-      break
-    case 'intermediate':
-      variant = 'secondary'
-      color = 'text-secondary-foreground'
-      break
-    case 'beginner':
-      variant = 'outline'
-      color = 'text-muted-foreground'
-      break
-    default:
-      break
-  }
-
-  return (
-    <Badge variant={variant} className={color}>
-      {proficiency}
-    </Badge>
   )
 }
