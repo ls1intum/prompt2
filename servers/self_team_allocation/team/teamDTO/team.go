@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/google/uuid"
-	db "github.com/ls1intum/prompt2/servers/self_team_assignment/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 )
 
 type Team struct {

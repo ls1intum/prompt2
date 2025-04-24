@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/self_team_assignment/team/teamDTO"
+	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +18,7 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 	teamRouter.PUT("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateTeam)
 	// only allowing student - as this is a self assignment
 	teamRouter.PUT("/:teamID/assignment", authMiddleware(promptSDK.CourseStudent), assignTeam)
-	teamRouter.DELETE(":teamID/assignment", authMiddleware(promptSDK.CourseStudent), leaveTeam)
+	teamRouter.DELETE("/:teamID/assignment", authMiddleware(promptSDK.CourseStudent), leaveTeam)
 	teamRouter.DELETE("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteTeam)
 }
 

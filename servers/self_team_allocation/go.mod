@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/self_team_assignment
+module github.com/ls1intum/prompt2/servers/self_team_allocation
 
 go 1.24.1
 
