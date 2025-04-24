@@ -32,7 +32,7 @@ func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (Team, error) 
 	}, nil
 }
 
-func GetTeamDTOFromTeamIDDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
+func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByIDRow) (Team, error) {
 	var members []TeamMember
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {

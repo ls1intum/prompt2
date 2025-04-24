@@ -31,6 +31,30 @@ GROUP BY
 ORDER BY
   t.name;
 
+-- name: GetTeamWithStudentNamesByID :one
+SELECT
+  t.id,
+  t.name,
+  -- build a JSON array of {courseParticipationID, studentName}
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
+FROM
+  team t
+LEFT JOIN
+  assignments a
+  ON t.id = a.team_id
+WHERE
+  t.id = $1
+GROUP BY
+  t.id, t.name;
 
 -- name: GetTeamWithStudentNamesByTeamID :one
 SELECT
