@@ -8,23 +8,16 @@ import (
 )
 
 type iPraktikumTeams struct {
-	// The teams
 	Teams []iPraktikumTeam
-	// The semester group name
 	SemesterGroupName string
 }
 
 type iPraktikumTeam struct {
-	// The team name
-	TeamName string
-	// The team members
-	TeamMembers []TeamMember
-	// The team coach
-	TeamCoach TeamMember
-	// The team product owner
-	TeamProjectLead TeamMember
+	Name string
+	Members []TeamMember
+	Coach TeamMember
+	ProjectLead TeamMember
 
-	// The team projectID
 	GitlabGroup g.Group	
 }
 
@@ -78,20 +71,20 @@ func main() {
 		SemesterGroupName: "iOS25",
 		Teams: []iPraktikumTeam{
 			{
-				TeamName: "iOS25-1",
-				TeamMembers: []TeamMember{
+				Name: "iOS25-1",
+				Members: []TeamMember{
 					{Username: "mtze"},
 				},
-				TeamCoach: TeamMember{Username: "ge25hok"},
-				TeamProjectLead: TeamMember{Username: "ge64fef"},
+				Coach: TeamMember{Username: "ge25hok"},
+				ProjectLead: TeamMember{Username: "ge64fef"},
 			},
 			{
-				TeamName: "iOS25-2",
-				TeamMembers: []TeamMember{
+				Name: "iOS25-2",
+				Members: []TeamMember{
 					{Username: "ge63sir"},
 				},
-				TeamCoach: TeamMember{Username: "ge64fef"},
-				TeamProjectLead: TeamMember{Username: "ge35qis"},
+				Coach: TeamMember{Username: "ge64fef"},
+				ProjectLead: TeamMember{Username: "ge35qis"},
 			},
 		},
 	}
@@ -110,7 +103,7 @@ func main() {
 
 	// 3. Create a group for every team
 	for i, team := range semester.Teams {
-		group, err := gitlab.CreateGroupWithParentID(gitlabClient, semesterGroup.ID, team.TeamName)
+		group, err := gitlab.CreateGroupWithParentID(gitlabClient, semesterGroup.ID, team.Name)
 		if err != nil {
 			log.Error("Failed to create group: ", err)
 		}
@@ -122,7 +115,7 @@ func main() {
 	for _, team := range semester.Teams {
 		log.Debug("Adding team members to group: ", team.GitlabGroup.Name)
 		
-		for _, member := range team.TeamMembers {
+		for _, member := range team.Members {
 			log.Debug("Searching ", member.Username, " to add to group: ", team.GitlabGroup.Name)
 			user, err := gitlab.GetUserID(gitlabClient, member.Username)
 			if err != nil {
@@ -138,25 +131,25 @@ func main() {
 		}
 
 		// 5. Add coach and PL as owners to the group
-		coach, err := gitlab.GetUserID(gitlabClient, team.TeamCoach.Username)
+		coach, err := gitlab.GetUserID(gitlabClient, team.Coach.Username)
 		if err != nil {
-			log.Error("Could not add coach for team: ", team.TeamName, " with error.")
+			log.Error("Could not add coach for team: ", team.Name, " with error.")
 		} else {
 			_ = gitlab.AddUserToGroup(gitlabClient, team.GitlabGroup, *coach, g.OwnerPermissions)
 		}
-		pl, err := gitlab.GetUserID(gitlabClient, team.TeamProjectLead.Username)
+		pl, err := gitlab.GetUserID(gitlabClient, team.ProjectLead.Username)
 		if err != nil {
-			log.Error("Could not add pl for team: ", team.TeamName, " with error.")
+			log.Error("Could not add pl for team: ", team.Name, " with error.")
 		} else {
 			_ = gitlab.AddUserToGroup(gitlabClient, team.GitlabGroup, *pl, g.OwnerPermissions)
 		}
 		// 6. Create a project for every team
 
-		err = gitlab.CreateProject(gitlabClient, team.TeamName, team.GitlabGroup)
+		err = gitlab.CreateProject(gitlabClient, team.Name, team.GitlabGroup)
 		if err != nil {
 			log.Error("Failed to create project: ", err)
 		} else {
-			log.Info("Created project: ", team.TeamName, " in group: ", team.GitlabGroup.Name)
+			log.Info("Created project: ", team.Name, " in group: ", team.GitlabGroup.Name)
 		}
 	}
 
