@@ -82,77 +82,84 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-[650px] max-h-[90vh] overflow-y-auto'>
-        <DialogHeader className='sticky top-0 bg-background z-10 pb-4'>
-          <DialogTitle className='text-xl flex items-center gap-2'>
-            <span className='font-semibold'>
-              {student.firstName} {student.lastName}
-            </span>
-            <Badge variant='outline' className='ml-2'>
-              {student.email}
-            </Badge>
-          </DialogTitle>
-          <DialogDescription>Skills and Project Preferences Details</DialogDescription>
-          <Separator className='mt-4' />
-        </DialogHeader>
+        <div className='flex flex-col h-full overflow-hidden'>
+          <DialogHeader className='sticky top-0 bg-background z-10 pb-4 pt-2 pr-8'>
+            <DialogTitle className='text-xl flex items-center gap-2'>
+              <span className='font-semibold'>
+                {student.firstName} {student.lastName}
+              </span>
+              <Badge variant='outline' className='ml-2'>
+                {student.email}
+              </Badge>
+            </DialogTitle>
+            <DialogDescription>Skills and Project Preferences Details</DialogDescription>
+          </DialogHeader>
 
-        <div className='space-y-6 py-2'>
-          <div>
-            <div className='flex items-center gap-2 mb-3'>
-              <Award className='h-5 w-5 text-primary' />
-              <h3 className='text-lg font-medium'>Skills & Proficiency</h3>
-            </div>
+          <Separator className='my-4' />
 
-            {student.skills && student.skills.length > 0 ? (
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                {student.skills.map((skill, index) => (
-                  <Card key={index} className='overflow-hidden'>
-                    <CardContent className='p-3'>
-                      <div className='flex justify-between items-center'>
-                        <div className='font-medium'>{getSkillNameById(skill.id)}</div>
-                        <Badge
-                          className={`${getLevelConfig(skill.proficiency).textColor} 
-                          ${getLevelConfig(skill.proficiency).selectedBg} hover:${getLevelConfig(skill.proficiency).selectedBg}`}
-                        >
-                          {getLevelConfig(skill.proficiency).title}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <p className='text-sm text-muted-foreground italic'>No skills provided</p>
-            )}
-          </div>
+          <div className='overflow-y-auto flex-1 pr-1'>
+            <div className='space-y-6 pt-6 py-2'>
+              <div>
+                <div className='flex items-center gap-2 mb-3'>
+                  <Award className='h-5 w-5 text-primary' />
+                  <h3 className='text-lg font-medium'>Skills & Proficiency</h3>
+                </div>
 
-          <div>
-            <div className='flex items-center gap-2 mb-3'>
-              <BookOpen className='h-5 w-5 text-primary' />
-              <h3 className='text-lg font-medium'>Project Preferences</h3>
-            </div>
-
-            {student.projectPreferences && student.projectPreferences.length > 0 ? (
-              <div className='space-y-4'>
-                {student.projectPreferences.map((preference, index) => (
-                  <Card key={index} className='overflow-hidden'>
-                    <CardContent className='p-3'>
-                      <div className='flex justify-between items-center'>
-                        <div className='flex items-center gap-2'>
-                          <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
-                            {index + 1}
+                {student.skills && student.skills.length > 0 ? (
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    {student.skills.map((skill, index) => (
+                      <Card key={index} className='overflow-hidden'>
+                        <CardContent className='p-3'>
+                          <div className='flex justify-between items-center'>
+                            <div className='font-medium'>{getSkillNameById(skill.id)}</div>
+                            <Badge
+                              className={`${getLevelConfig(skill.proficiency).textColor} 
+                              ${getLevelConfig(skill.proficiency).selectedBg} hover:${getLevelConfig(skill.proficiency).selectedBg}`}
+                            >
+                              {getLevelConfig(skill.proficiency).title}
+                            </Badge>
                           </div>
-                          <div className='font-medium'>{getTeamNameById(preference.projectId)}</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-sm text-muted-foreground italic'>No skills provided</p>
+                )}
               </div>
-            ) : (
-              <p className='text-sm text-muted-foreground italic'>
-                No project preferences submitted
-              </p>
-            )}
+
+              <div>
+                <div className='flex items-center gap-2 mb-3'>
+                  <BookOpen className='h-5 w-5 text-primary' />
+                  <h3 className='text-lg font-medium'>Project Preferences</h3>
+                </div>
+
+                {student.projectPreferences && student.projectPreferences.length > 0 ? (
+                  <div className='space-y-4'>
+                    {student.projectPreferences.map((preference, index) => (
+                      <Card key={index} className='overflow-hidden'>
+                        <CardContent className='p-3'>
+                          <div className='flex justify-between items-center'>
+                            <div className='flex items-center gap-2'>
+                              <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
+                                {index + 1}
+                              </div>
+                              <div className='font-medium'>
+                                {getTeamNameById(preference.projectId)}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-sm text-muted-foreground italic'>
+                    No project preferences submitted
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
