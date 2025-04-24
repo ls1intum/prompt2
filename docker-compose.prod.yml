@@ -421,6 +421,26 @@ services:
     networks:
       - prompt-network
 
+  client-self-team-allocation-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-self-team-allocation-component:${SELF_TEAM_ALLOCATION_IMAGE_TAG}"
+    container_name: prompt-client-self-team-allocation-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.self-team-allocation.rule=Host(`${CORE_HOST}`) && PathPrefix(`/self-team-allocation`)"
+      - "traefik.http.routers.self-team-allocation.entrypoints=websecure"
+      - "traefik.http.routers.self-team-allocation.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.self-team-allocation-strip-prefix.stripPrefix.prefixes=/self-team-allocation"
+      - "traefik.http.routers.self-team-allocation.middlewares=self-team-allocation-strip-prefix,self-team-allocation-compress"
+      - "traefik.http.middlewares.self-team-allocation-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+    networks:
+      - prompt-network
+
   client-template-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component
@@ -458,6 +478,7 @@ services:
       - DEVOPS_CHALLENGE_HOST
       - ASSESSMENT_HOST
       - TEAM_ALLOCATION_HOST
+      - SELF_TEAM_ALLOCATION_HOST
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
