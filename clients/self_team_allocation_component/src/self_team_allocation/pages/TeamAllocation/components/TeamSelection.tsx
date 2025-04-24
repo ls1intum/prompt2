@@ -221,7 +221,11 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
         <DeleteConfirmation
           isOpen={deleteDialogOpen}
           setOpen={setDeleteDialogOpen}
-          onClick={() => deleteMutation.mutate(teamToDelete.id)}
+          onClick={(confirmed) => {
+            if (confirmed) {
+              deleteMutation.mutate(teamToDelete.id)
+            }
+          }}
           deleteMessage='Are you sure you want to delete this team? This action cannot be undone and all team members will be unassigned.'
         />
       )}
