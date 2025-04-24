@@ -150,7 +150,7 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                           <div className='flex justify-between items-center'>
                             <div className='flex items-center gap-2'>
                               <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
-                                {preference.priority}
+                                {(preference.priority ?? 0) + 1}
                               </div>
                               <div className='font-medium'>
                                 {getTeamNameById(preference.projectId)}
