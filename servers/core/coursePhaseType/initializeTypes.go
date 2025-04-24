@@ -170,11 +170,15 @@ func initIntroCourseDeveloper() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/intro-course/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8082/intro-course/api"
+		}
 		newIntroCourseDeveloper := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "IntroCourseDeveloper",
 			InitialPhase: false,
-			BaseUrl:      "{CORE_HOST}/intro-course/api",
+			BaseUrl:      baseURL,
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {
