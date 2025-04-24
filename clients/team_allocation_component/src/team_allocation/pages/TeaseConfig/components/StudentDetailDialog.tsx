@@ -9,13 +9,14 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Star, Award, BookOpen, Loader2 } from 'lucide-react'
+import { Award, BookOpen, Loader2 } from 'lucide-react'
 import { ErrorPage } from '@/components/ErrorPage'
 
 import type { TeaseStudent } from '../../../interfaces/tease/student'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
+import { getAllSkills } from '../../../network/queries/getAllSkills'
 import { Team } from '../../../interfaces/team'
 
 interface StudentDetailDialogProps {
@@ -29,12 +30,22 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
 
   const {
     data: teams,
-    isPending,
-    isError,
-    refetch,
+    isPending: isTeamsPending,
+    isError: isTeamsError,
+    refetch: refetchTeams,
   } = useQuery<Team[]>({
     queryKey: ['tease_teams', phaseId],
     queryFn: () => getAllTeams(phaseId ?? ''),
+  })
+
+  const {
+    data: skills,
+    isPending: isSkillsPending,
+    isError: isSkillsError,
+    refetch: refetchSkills,
+  } = useQuery({
+    queryKey: ['tease_skills', phaseId],
+    queryFn: () => getAllSkills(phaseId ?? ''),
   })
 
   function getTeamNameById(teamId: string): string {
@@ -42,9 +53,14 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
     return team ? team.name : teamId
   }
 
+  function getSkillNameById(skillId: string): string {
+    const skill = skills?.find((s) => s.id === skillId)
+    return skill ? skill.name : skillId
+  }
+
   if (!student) return null
 
-  if (isPending) {
+  if (isTeamsPending || isSkillsPending) {
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -52,11 +68,12 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
     )
   }
 
-  if (isError) {
+  if (isTeamsError || isSkillsError) {
     return (
       <ErrorPage
         onRetry={() => {
-          refetch()
+          refetchTeams()
+          refetchSkills()
         }}
       />
     )
@@ -87,13 +104,13 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
             </div>
 
             {student.skills && student.skills.length > 0 ? (
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                {student.skills.map((skillItem, index) => (
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {student.skills.map((skill, index) => (
                   <Card key={index} className='overflow-hidden'>
                     <CardContent className='p-3'>
                       <div className='flex justify-between items-center'>
-                        <div className='font-medium'>{skillItem.id}</div>
-                        <ProficiencyBadge proficiency={skillItem.proficiency} />
+                        <div className='font-medium'>{getSkillNameById(skill.id)}</div>
+                        <ProficiencyBadge proficiency={skill.proficiency} />
                       </div>
                     </CardContent>
                   </Card>
@@ -125,7 +142,6 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                               {getTeamNameById(preference.projectId)}
                             </div>
                           </div>
-                          <PriorityBadge priority={String(preference.priority)} />
                         </div>
                       </CardContent>
                     </Card>
@@ -150,6 +166,9 @@ function ProficiencyBadge({ proficiency }: { proficiency: string }) {
 
   switch (proficiency.toLowerCase()) {
     case 'expert':
+      variant = 'default'
+      color = 'text-destructive'
+      break
     case 'advanced':
       variant = 'default'
       color = 'text-primary-foreground'
@@ -170,39 +189,5 @@ function ProficiencyBadge({ proficiency }: { proficiency: string }) {
     <Badge variant={variant} className={color}>
       {proficiency}
     </Badge>
-  )
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  let variant: 'default' | 'secondary' | 'outline' = 'outline'
-  let color = 'text-muted-foreground'
-
-  switch (priority.toLowerCase()) {
-    case 'high':
-      variant = 'default'
-      color = 'text-primary-foreground'
-      break
-    case 'medium':
-      variant = 'secondary'
-      color = 'text-secondary-foreground'
-      break
-    case 'low':
-      variant = 'outline'
-      color = 'text-muted-foreground'
-      break
-    default:
-      break
-  }
-
-  return (
-    <div className='flex items-center gap-1'>
-      <Star
-        className='h-3.5 w-3.5'
-        fill={priority.toLowerCase() === 'high' ? 'currentColor' : 'none'}
-      />
-      <Badge variant={variant} className={color}>
-        {priority}
-      </Badge>
-    </div>
   )
 }
