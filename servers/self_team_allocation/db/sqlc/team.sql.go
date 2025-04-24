@@ -45,6 +45,53 @@ func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 	return err
 }
 
+const getTeamWithStudentNamesByTeamID = `-- name: GetTeamWithStudentNamesByTeamID :one
+SELECT
+  t.id,
+  t.name,
+  -- build a JSON array of {courseParticipationID, studentName}
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
+FROM
+  team t
+LEFT JOIN
+  assignments a
+  ON t.id = a.team_id
+WHERE
+  t.course_phase_id = $1
+  AND t.id = $2
+GROUP BY
+  t.id, t.name
+ORDER BY
+  t.name
+`
+
+type GetTeamWithStudentNamesByTeamIDParams struct {
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+	ID            uuid.UUID `json:"id"`
+}
+
+type GetTeamWithStudentNamesByTeamIDRow struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
+}
+
+func (q *Queries) GetTeamWithStudentNamesByTeamID(ctx context.Context, arg GetTeamWithStudentNamesByTeamIDParams) (GetTeamWithStudentNamesByTeamIDRow, error) {
+	row := q.db.QueryRow(ctx, getTeamWithStudentNamesByTeamID, arg.CoursePhaseID, arg.ID)
+	var i GetTeamWithStudentNamesByTeamIDRow
+	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
+	return i, err
+}
+
 const getTeamsByCoursePhase = `-- name: GetTeamsByCoursePhase :many
 SELECT id, name, course_phase_id, created_at
 FROM team

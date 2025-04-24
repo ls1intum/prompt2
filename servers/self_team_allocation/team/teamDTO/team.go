@@ -32,15 +32,29 @@ func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (Team, error) 
 	}, nil
 }
 
-func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) []Team {
+func GetTeamDTOFromTeamIDDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
+	var members []TeamMember
+	// unmarshal the JSON blob into your slice of structs
+	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
+		return Team{}, err
+	}
+
+	return Team{
+		ID:      dbTeam.ID,
+		Name:    dbTeam.Name,
+		Members: members,
+	}, nil
+}
+
+func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) ([]Team, error) {
 	teams := make([]Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		t, err := GetTeamDTOFromDBModel(dbTeam)
 		if err != nil {
-			// handle or log error; skip or abort as you prefer
-			continue
+			// handle or log error; skip or abort as you preferable
+			return nil, err
 		}
 		teams = append(teams, t)
 	}
-	return teams
+	return teams, nil
 }

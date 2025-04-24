@@ -33,7 +33,29 @@ func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, 
 		log.Error("could not get the teams from the database: ", err)
 		return nil, errors.New("could not get the teams from the database")
 	}
-	return teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams), nil
+	dtos, err := teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams)
+	if err != nil {
+		log.Error("could not get the teams from the database: ", err)
+		return nil, errors.New("could not get the teams from the database")
+	}
+	return dtos, nil
+}
+
+func GetTeamByID(ctx context.Context, coursePhaseID uuid.UUID, teamID uuid.UUID) (teamDTO.Team, error) {
+	dbTeam, err := TeamsServiceSingleton.queries.GetTeamWithStudentNamesByTeamID(ctx, db.GetTeamWithStudentNamesByTeamIDParams{
+		ID:            teamID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not get the teams from the database: ", err)
+		return teamDTO.Team{}, errors.New("could not get the teams from the database")
+	}
+	dto, err := teamDTO.GetTeamDTOFromTeamIDDBModel(dbTeam)
+	if err != nil {
+		log.Error("could not get the teams from the database: ", err)
+		return teamDTO.Team{}, errors.New("could not get the teams from the database")
+	}
+	return dto, nil
 }
 
 func CreateNewTeams(ctx context.Context, teamNames []string, coursePhaseID uuid.UUID) error {
