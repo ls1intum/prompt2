@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import type React from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Users, UserPlus, LogOut } from 'lucide-react'
+import { Users, UserPlus, LogOut, RefreshCw } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { TeamCreationDialog } from './TeamCreationDialog'
@@ -15,9 +16,10 @@ import { createTeam } from '../../../network/mutations/createTeam'
 interface Props {
   teams: Team[]
   courseParticipationID?: string
+  refetchTeams: () => void
 }
 
-export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID }) => {
+export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, refetchTeams }) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const isLecturer = courseParticipationID === undefined
   const queryClient = useQueryClient()
@@ -46,8 +48,6 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
     },
   })
 
-  // Note: if you actually have a backend mutation to _create_ a team, import & use that here.
-  // For now this just re-uses `createTeamAssignment` as a placeholder.
   const createMutation = useMutation({
     mutationFn: (name: string) => createTeam(phaseId ?? '', [name]),
     onSuccess: () => {
@@ -59,7 +59,6 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
     },
   })
 
-  // find the team the current student belongs to (undefined if lecturer or unassigned)
   const myTeam = useMemo(
     () =>
       teams.find((team) =>
@@ -72,22 +71,29 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
 
   return (
     <div className='container mx-auto py-6 space-y-8'>
-      <ManagementPageHeader>Team Allocation</ManagementPageHeader>
+      <div className='flex items-center justify-between'>
+        <ManagementPageHeader>Team Allocation</ManagementPageHeader>
+        <Button
+          variant='outline'
+          onClick={() => refetchTeams?.()}
+          className='flex items-center gap-2'
+        >
+          <RefreshCw className='h-4 w-4' />
+          Reload Teams
+        </Button>
+      </div>
 
-      {/* show any error */}
       {submitError && (
         <div className='px-4 py-2 bg-red-100 text-red-800 rounded'>{submitError}</div>
       )}
 
-      <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
-        <div className='flex justify-end'>
-          <TeamCreationDialog
-            onCreate={(name: string) => {
-              createMutation.mutate(name)
-            }}
-            teams={teams}
-          />
-        </div>
+      <div className='flex justify-end mb-6'>
+        <TeamCreationDialog
+          onCreate={(name: string) => {
+            createMutation.mutate(name)
+          }}
+          teams={teams}
+        />
       </div>
 
       {teams.length > 0 ? (

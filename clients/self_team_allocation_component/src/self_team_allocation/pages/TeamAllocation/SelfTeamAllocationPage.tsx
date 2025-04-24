@@ -77,7 +77,9 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
         </Alert>
       )}
 
-      {teams && <TeamSelection teams={teams} courseParticipationID={cpId} />}
+      {teams && (
+        <TeamSelection teams={teams} courseParticipationID={cpId} refetchTeams={refetchTeams} />
+      )}
     </>
   )
 }
