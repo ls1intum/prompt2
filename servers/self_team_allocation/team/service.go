@@ -37,6 +37,13 @@ func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, 
 }
 
 func CreateNewTeams(ctx context.Context, teamNames []string, coursePhaseID uuid.UUID) error {
+	// Validate team names
+	for _, name := range teamNames {
+		if name == "" {
+			return errors.New("team name cannot be empty")
+		}
+	}
+
 	tx, err := TeamsServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -78,6 +85,7 @@ func UpdateTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, newTeamNam
 
 func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID, studentFullName string) error {
 	err := AssignmentServiceSingleton.queries.CreateOrUpdateAssignment(ctx, db.CreateOrUpdateAssignmentParams{
+		ID:                    uuid.New(),
 		TeamID:                teamID,
 		CoursePhaseID:         coursePhaseID,
 		CourseParticipationID: courseParticipationID,
@@ -85,8 +93,8 @@ func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, coursePart
 	})
 
 	if err != nil {
-		log.Error("could not update the team: ", err)
-		return errors.New("could not update the team")
+		log.Error("could not assign student to team: ", err)
+		return errors.New("could not assign student to team")
 	}
 	return nil
 }
