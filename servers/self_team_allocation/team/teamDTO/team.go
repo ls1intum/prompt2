@@ -46,15 +46,15 @@ func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByI
 	}, nil
 }
 
-func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) []Team {
+func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) ([]Team, error) {
 	teams := make([]Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		t, err := GetTeamDTOFromDBModel(dbTeam)
 		if err != nil {
-			// handle or log error; skip or abort as you prefer
-			continue
+			// handle or log error; skip or abort as you preferable
+			return nil, err
 		}
 		teams = append(teams, t)
 	}
-	return teams
+	return teams, nil
 }

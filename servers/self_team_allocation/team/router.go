@@ -22,6 +22,9 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 	teamRouter.PUT("/:teamID/assignment", authMiddleware(promptSDK.CourseStudent), assignTeam)
 	teamRouter.DELETE("/:teamID/assignment", authMiddleware(promptSDK.CourseStudent), leaveTeam)
 	teamRouter.DELETE("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteTeam)
+
+	// this is required to comply with the inter phase communication protocol
+	teamRouter.GET("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeamByID)
 }
 
 func getAllTeams(c *gin.Context) {
@@ -38,6 +41,29 @@ func getAllTeams(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, teams)
+}
+
+func getTeamByID(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		log.Error("Error parsing teamID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	team, err := GetTeamByID(c, coursePhaseID, teamID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, team)
 }
 
 func createTeams(c *gin.Context) {

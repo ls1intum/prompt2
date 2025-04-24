@@ -365,3 +365,62 @@ func initTeamAllocation() error {
 
 	return nil
 }
+
+func initSelfTeamAllocation() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestSelfTeamAllocationTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if self team allocation phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer utils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
+		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/self-team-allocation/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8085/self-team-allocation/api"
+		}
+
+		newTeamAllocation := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "Self Team Allocation",
+			InitialPhase: false,
+			BaseUrl:      baseURL,
+		}
+		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
+		if err != nil {
+			log.Error("failed to create assessment module: ", err)
+			return err
+		}
+
+		// 2.) Provided Output
+		err = qtx.InsertTeamAllocationOutput(ctx, newTeamAllocation.ID)
+		if err != nil {
+			log.Error("failed to create required provided team allocation: ", err)
+			return err
+		}
+
+		err = qtx.InsertTeamOutput(ctx, newTeamAllocation.ID)
+		if err != nil {
+			log.Error("failed to create required provided teams: ", err)
+			return err
+		}
+
+		// 3.) Commit the transaction
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
+
+	} else {
+		log.Debug("team allocation module already exists")
+	}
+
+	return nil
+}

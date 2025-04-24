@@ -124,23 +124,22 @@ export const CoursePhaseParticipationsTablePage = ({
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-            {table.getSelectedRowModel().rows.length > 0 && (
-              <GroupActionsMenu
-                selectedRows={table.getSelectedRowModel()}
-                onClose={() => table.resetRowSelection()}
-                onExport={() => {
-                  downloadParticipations(
-                    table.getSelectedRowModel().rows.map((row) => row.original),
-                    prevDataKeys,
-                    restrictedDataKeys,
-                    studentReadableDataKeys,
-                    extraData,
-                    extraColumnHeader,
-                  )
-                  table.resetRowSelection()
-                }}
-              />
-            )}
+            <GroupActionsMenu
+              disabled={table.getSelectedRowModel().rows.length === 0}
+              selectedRows={table.getSelectedRowModel()}
+              onClose={() => table.resetRowSelection()}
+              onExport={() => {
+                downloadParticipations(
+                  table.getSelectedRowModel().rows.map((row) => row.original),
+                  prevDataKeys,
+                  restrictedDataKeys,
+                  studentReadableDataKeys,
+                  extraData,
+                  extraColumnHeader,
+                )
+                table.resetRowSelection()
+              }}
+            />
           </div>
         </div>
       </div>
