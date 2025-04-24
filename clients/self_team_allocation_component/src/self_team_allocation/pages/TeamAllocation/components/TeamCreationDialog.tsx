@@ -11,15 +11,20 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { PlusCircle } from 'lucide-react'
+import { Team } from '../../../interfaces/team'
 
 interface Props {
   disabled?: boolean
+  teams: Team[]
   onCreate: (name: string) => void
 }
 
-export const TeamCreationDialog = ({ disabled, onCreate }: Props) => {
+export const TeamCreationDialog = ({ disabled, teams, onCreate }: Props) => {
   const [name, setName] = useState('')
   const [open, setOpen] = useState(false) // Manage dialog open state
+
+  // Check if the entered name already exists (case-insensitive)
+  const nameExists = teams.some((team) => team.name.toLowerCase() === name.trim().toLowerCase())
 
   const handleCreate = (newName: string) => {
     onCreate(newName)
@@ -39,8 +44,9 @@ export const TeamCreationDialog = ({ disabled, onCreate }: Props) => {
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            if (!name.trim()) return
-            handleCreate(name.trim()) // Call the handleCreate function to submit
+            const trimmedName = name.trim()
+            if (!trimmedName || nameExists) return
+            handleCreate(trimmedName)
           }}
         >
           <DialogHeader>
@@ -51,14 +57,19 @@ export const TeamCreationDialog = ({ disabled, onCreate }: Props) => {
           <Input
             id='teamName'
             placeholder='Enter team name'
-            className='my-4'
+            className={`my-4 ${
+              nameExists ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+            }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={disabled}
           />
+          {nameExists && (
+            <p className='text-sm text-red-600'>A team with this name already exists.</p>
+          )}
 
           <DialogFooter>
-            <Button type='submit' disabled={!name.trim() || disabled}>
+            <Button type='submit' disabled={!name.trim() || nameExists || disabled}>
               Create team
             </Button>
           </DialogFooter>

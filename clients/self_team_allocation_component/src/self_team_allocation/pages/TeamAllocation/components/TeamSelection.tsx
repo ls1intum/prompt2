@@ -85,6 +85,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID })
             onCreate={(name: string) => {
               createMutation.mutate(name)
             }}
+            teams={teams}
           />
         </div>
       </div>
