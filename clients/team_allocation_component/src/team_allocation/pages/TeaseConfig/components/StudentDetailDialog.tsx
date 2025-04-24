@@ -115,8 +115,8 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                     {student.skills.map((skill, index) => (
                       <Card key={index} className='overflow-hidden'>
                         <CardContent className='p-3'>
-                          <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2'>
-                            <div className='font-medium truncate max-w-full'>
+                          <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3'>
+                            <div className='font-medium break-words w-full'>
                               {getSkillNameById(skill.id)}
                             </div>
                             <Badge
