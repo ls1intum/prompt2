@@ -153,12 +153,12 @@ func initMatching() error {
 	return nil
 }
 
-func initIntroCourseTutor() error {
+func initIntroCourseDeveloper() error {
 	ctx := context.Background()
-	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseTutorPhaseTypeExists(ctx)
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestIntroCourseDeveloperPhaseTypeExists(ctx)
 
 	if err != nil {
-		log.Error("failed to check if intro course tutor phase type exists: ", err)
+		log.Error("failed to check if intro course developer phase type exists: ", err)
 		return err
 	}
 	if !exists {
@@ -170,26 +170,26 @@ func initIntroCourseTutor() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
-		baseURL := "{CORE_HOST}/intro-course/api"
-		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
-			baseURL = "http://localhost:8082/intro-course/api"
-		}
-
-		newIntroCourseTutor := db.CreateCoursePhaseTypeParams{
+		newIntroCourseDeveloper := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
-			Name:         "IntroCourseTutor",
+			Name:         "IntroCourseDeveloper",
 			InitialPhase: false,
-			BaseUrl:      baseURL,
+			BaseUrl:      "{CORE_HOST}/intro-course/api",
 		}
-		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseTutor)
+		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {
 			log.Error("failed to create intro course developer module: ", err)
 			return err
 		}
 
-		// No requires inputs and no provided outputs
+		// 2.) Provided Output
+		err = qtx.InsertProvidedOutputDevices(ctx, newIntroCourseDeveloper.ID)
+		if err != nil {
+			log.Error("failed to create required application answers output: ", err)
+			return err
+		}
 
-		// 2.) Commit the transaction
+		// 3.) Commit the transaction
 		if err := tx.Commit(ctx); err != nil {
 			return fmt.Errorf("failed to commit transaction: %w", err)
 		}
