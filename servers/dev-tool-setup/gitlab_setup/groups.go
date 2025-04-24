@@ -14,7 +14,7 @@ func CreateGroupWithParentGroup(client *gitlab.Client, parentGroup gitlab.Group,
 func CreateGroupWithParentID(client *gitlab.Client, parentGroupID int, groupName string) (*gitlab.Group, error) {
 	exists, group, err := CheckIfSubGroupExists(client, groupName, parentGroupID)
 	if err != nil {
-		log.Error("failed to create course iteration group: ", err)
+		log.Error("Failed to create course iteration group: ", err)
 		return nil, err
 	}
 
@@ -32,7 +32,7 @@ func CreateGroupWithParentID(client *gitlab.Client, parentGroupID int, groupName
 	})
 
 	if err != nil {
-		log.Error("failed to create developer group: ", err)
+		log.Error("Failed to create developer group: ", err)
 		return nil, err
 	}
 
@@ -45,12 +45,12 @@ func CheckIfSubGroupExists(client *gitlab.Client, groupName string, parentGroupI
 		AllAvailable: gitlab.Ptr(true),
 	})
 	if err != nil {
-		log.Error("failed to get group: ", err)
+		log.Error("Failed to get group: ", err)
 		return false, nil, err
 	}
 
 	for _, group := range groups {
-		log.Info("group: ", group.Name, " parent: ", group.ParentID)
+		log.Debug("Found group: ", group.Name, " parent: ", group.ParentID)
 		if group.Name == groupName && group.ParentID == parentGroupID {
 			return true, group, nil
 		}
@@ -59,12 +59,14 @@ func CheckIfSubGroupExists(client *gitlab.Client, groupName string, parentGroupI
 }
 
 func AddUserToGroup(client *gitlab.Client, group gitlab.Group, user gitlab.User, accessLevel gitlab.AccessLevelValue) error {
+	log.Debug("Adding user: ", user.Username, " to group: ", group.Name, " with access level: ", accessLevel)
+
 	_, _, err := client.GroupMembers.AddGroupMember(group.ID, &gitlab.AddGroupMemberOptions{
 		UserID:      gitlab.Ptr(user.ID),
 		AccessLevel: gitlab.Ptr(accessLevel),
 	})
 	if err != nil {
-		log.Error("failed to add user: ", user.Username, " to group: ", group.Name, " due to failed client creation")
+		log.Error("Failed to add user: ", user.Username, " to group: ", group.Name, " with error: ", err)
 		return err
 	}
 
@@ -78,12 +80,12 @@ func GetUserID(client *gitlab.Client, username string) (*gitlab.User, error) {
 
 	users, _, err := client.Users.ListUsers(userOpts)
 	if err != nil {
-		log.Error("failed to get user with username : ", username, ", error: ", err)
+		log.Error("Failed to get user with username : ", username, ", error: ", err)
 		return nil, err
 	}
 
 	if len(users) != 1 || users[0] == nil {
-		log.Error("failed to get user id: user not found")
+		log.Error("Failed to get user id for user: ", username, " user not found")
 		return nil, errors.New("user not found")
 	}
 	return users[0], nil
