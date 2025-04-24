@@ -1,35 +1,28 @@
 package main
 
 import (
-	"github.com/spf13/viper"
-	g "gitlab.com/gitlab-org/api/client-go"
 	gitlab "github.com/ls1intum/prompt2/servers/dev-tool-setup/gitlab_setup"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	g "gitlab.com/gitlab-org/api/client-go"
 )
 
 type iPraktikumTeams struct {
-	Teams []iPraktikumTeam
+	Teams             []iPraktikumTeam
 	SemesterGroupName string
 }
 
 type iPraktikumTeam struct {
-	Name string
-	Members []TeamMember
-	Coach TeamMember
+	Name        string
+	Members     []TeamMember
+	Coach       TeamMember
 	ProjectLead TeamMember
 
-	GitlabGroup g.Group	
+	GitlabGroup g.Group
 }
 
 type TeamMember struct {
-	// The username of the team member
 	Username string
-}
-
-type gitlabUser struct {
-	TeamMember
-	// The GitLab user ID
-	UserID int
 }
 
 type conf struct {
@@ -41,27 +34,27 @@ var config = conf{
 }
 
 func loadConfig() (gitlab.GitlabConfig, error) {
-    viper.SetConfigFile(".env")
-    viper.AutomaticEnv()
+	viper.SetConfigFile(".env")
+	viper.AutomaticEnv()
 
-    if err := viper.ReadInConfig(); err != nil {
-        return gitlab.GitlabConfig{}, err
-    }
+	if err := viper.ReadInConfig(); err != nil {
+		return gitlab.GitlabConfig{}, err
+	}
 
 	config.logLevel = viper.GetString("LOG_LEVEL")
 
-    return gitlab.GitlabConfig{
-        AccessToken:    viper.GetString("GITLAB_ACCESS_TOKEN"),
-        BaseURL:        viper.GetString("GITLAB_BASE_URL"),
-        ParentGroupID:  viper.GetInt("GITLAB_PARENT_GROUP_ID"),
-    }, nil
+	return gitlab.GitlabConfig{
+		AccessToken:   viper.GetString("GITLAB_ACCESS_TOKEN"),
+		BaseURL:       viper.GetString("GITLAB_BASE_URL"),
+		ParentGroupID: viper.GetInt("GITLAB_PARENT_GROUP_ID"),
+	}, nil
 }
 
 func main() {
-    gitlabconfig, err := loadConfig()
-    if err != nil {
-        log.Fatal("Failed to load configuration: ", err)
-    }
+	gitlabconfig, err := loadConfig()
+	if err != nil {
+		log.Fatal("Failed to load configuration: ", err)
+	}
 
 	if config.logLevel == "debug" {
 		log.SetLevel(log.DebugLevel)
@@ -75,7 +68,7 @@ func main() {
 				Members: []TeamMember{
 					{Username: "mtze"},
 				},
-				Coach: TeamMember{Username: "ge25hok"},
+				Coach:       TeamMember{Username: "ge25hok"},
 				ProjectLead: TeamMember{Username: "ge64fef"},
 			},
 			{
@@ -83,7 +76,7 @@ func main() {
 				Members: []TeamMember{
 					{Username: "ge63sir"},
 				},
-				Coach: TeamMember{Username: "ge64fef"},
+				Coach:       TeamMember{Username: "ge64fef"},
 				ProjectLead: TeamMember{Username: "ge35qis"},
 			},
 		},
@@ -114,7 +107,7 @@ func main() {
 	// 4. Add team members as developers to the group
 	for _, team := range semester.Teams {
 		log.Debug("Adding team members to group: ", team.GitlabGroup.Name)
-		
+
 		for _, member := range team.Members {
 			log.Debug("Searching ", member.Username, " to add to group: ", team.GitlabGroup.Name)
 			user, err := gitlab.GetUserID(gitlabClient, member.Username)
@@ -143,8 +136,8 @@ func main() {
 		} else {
 			_ = gitlab.AddUserToGroup(gitlabClient, team.GitlabGroup, *pl, g.OwnerPermissions)
 		}
-		// 6. Create a project for every team
 
+		// 6. Create a project for every team
 		err = gitlab.CreateProject(gitlabClient, team.Name, team.GitlabGroup)
 		if err != nil {
 			log.Error("Failed to create project: ", err)
