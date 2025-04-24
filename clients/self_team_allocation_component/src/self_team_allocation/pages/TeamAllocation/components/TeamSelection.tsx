@@ -3,15 +3,17 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Users, UserPlus, LogOut, RefreshCw } from 'lucide-react'
+import { Users, UserPlus, LogOut, RefreshCw, Trash2 } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { TeamCreationDialog } from './TeamCreationDialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createTeamAssignment } from '../../../network/mutations/createTeamAllocation'
-import { useParams } from 'react-router-dom'
 import { deleteTeamAssignment } from '../../../network/mutations/deleteTeamAllocation'
 import { createTeam } from '../../../network/mutations/createTeam'
+import { deleteTeam } from '../../../network/mutations/deleteTeam'
+import { useParams } from 'react-router-dom'
+import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
 
 interface Props {
   teams: Team[]
@@ -25,6 +27,8 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
   const queryClient = useQueryClient()
 
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
 
   const joinMutation = useMutation({
     mutationFn: (teamId: string) => createTeamAssignment(phaseId ?? '', teamId),
@@ -32,9 +36,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
       setSubmitError(null)
       queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
     },
-    onError: () => {
-      setSubmitError('Failed to join team. Please try again.')
-    },
+    onError: () => setSubmitError('Failed to join team. Please try again.'),
   })
 
   const leaveMutation = useMutation({
@@ -43,9 +45,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
       setSubmitError(null)
       queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
     },
-    onError: () => {
-      setSubmitError('Failed to leave team. Please try again.')
-    },
+    onError: () => setSubmitError('Failed to leave team. Please try again.'),
   })
 
   const createMutation = useMutation({
@@ -54,9 +54,16 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
       setSubmitError(null)
       queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
     },
-    onError: () => {
-      setSubmitError('Failed to create team. Please try again.')
+    onError: () => setSubmitError('Failed to create team. Please try again.'),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (teamId: string) => deleteTeam(phaseId ?? '', teamId),
+    onSuccess: () => {
+      setSubmitError(null)
+      queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
     },
+    onError: () => setSubmitError('Failed to delete team. Please try again.'),
   })
 
   const myTeam = useMemo(
@@ -89,9 +96,7 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
 
       <div className='flex justify-end mb-6'>
         <TeamCreationDialog
-          onCreate={(name: string) => {
-            createMutation.mutate(name)
-          }}
+          onCreate={(name: string) => createMutation.mutate(name)}
           teams={teams}
         />
       </div>
@@ -159,25 +164,42 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
                     )}
                   </CardContent>
 
-                  <CardFooter className='pt-2 pb-4'>
-                    {isMember ? (
+                  <CardFooter className='pt-2 pb-4 space-y-2'>
+                    {/* Join/Leave */}
+                    {!isLecturer &&
+                      (isMember ? (
+                        <Button
+                          variant='destructive'
+                          className='w-full'
+                          onClick={() => leaveMutation.mutate(team.id)}
+                        >
+                          <LogOut className='mr-2 h-4 w-4' />
+                          Leave Team
+                        </Button>
+                      ) : (
+                        <Button
+                          className='w-full'
+                          onClick={() => joinMutation.mutate(team.id)}
+                          disabled={isLocked || full}
+                          variant={full ? 'outline' : 'default'}
+                        >
+                          <UserPlus className='mr-2 h-4 w-4' />
+                          {full ? 'Team Full' : 'Join Team'}
+                        </Button>
+                      ))}
+
+                    {/* Delete (lecturers only) */}
+                    {isLecturer && (
                       <Button
                         variant='destructive'
-                        className='w-full'
-                        onClick={() => leaveMutation.mutate(team.id)}
+                        className='w-full flex items-center justify-center gap-2'
+                        onClick={() => {
+                          setTeamToDelete(team)
+                          setDeleteDialogOpen(true)
+                        }}
                       >
-                        <LogOut className='mr-2 h-4 w-4' />
-                        Leave Team
-                      </Button>
-                    ) : (
-                      <Button
-                        className='w-full'
-                        onClick={() => joinMutation.mutate(team.id)}
-                        disabled={isLocked || full}
-                        variant={full ? 'outline' : 'default'}
-                      >
-                        <UserPlus className='mr-2 h-4 w-4' />
-                        {full ? 'Team Full' : 'Join Team'}
+                        <Trash2 className='h-4 w-4' />
+                        Delete Team
                       </Button>
                     )}
                   </CardFooter>
@@ -193,6 +215,15 @@ export const TeamSelection: React.FC<Props> = ({ teams, courseParticipationID, r
             Create a new team to get started with team allocation.
           </p>
         </div>
+      )}
+      {/* Delete Confirmation Dialog */}
+      {teamToDelete && (
+        <DeleteConfirmation
+          isOpen={deleteDialogOpen}
+          setOpen={setDeleteDialogOpen}
+          onClick={() => deleteMutation.mutate(teamToDelete.id)}
+          deleteMessage='Are you sure you want to delete this team? This action cannot be undone and all team members will be unassigned.'
+        />
       )}
     </div>
   )
