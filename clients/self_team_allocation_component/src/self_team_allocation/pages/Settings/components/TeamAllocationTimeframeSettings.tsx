@@ -66,7 +66,7 @@ export const TeamAllocationTimeframeSettings = ({
     mutationFn: ({ start, end }: { start: Date; end: Date }) =>
       updateTimeframe(phaseId ?? '', start, end),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team_allocation_survey_timeframe', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['timeframe', phaseId] })
       setError(null)
     },
     onError: () => {

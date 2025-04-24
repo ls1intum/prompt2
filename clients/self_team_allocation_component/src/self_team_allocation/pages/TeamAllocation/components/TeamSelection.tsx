@@ -139,8 +139,8 @@ export const TeamSelection: React.FC<Props> = ({
           ))}
         </div>
       ) : (
-        <div className='flex flex-col items-center justify-center p-12 border border-dashed rounded-lg bg-muted/20'>
-          <Users className='h-12 w-12 text-muted-foreground mb-4' />
+        <div className='flex flex-col items-center justify-center p-12 border rounded-lg'>
+          <Users className='h-12 w-12 text-muted-foreground mb-4 mt-4' />
           <h3 className='text-lg font-medium'>No Teams Available</h3>
           <p className='text-muted-foreground'>Create a new team to get started.</p>
         </div>

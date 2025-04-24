@@ -12,6 +12,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 	teams "github.com/ls1intum/prompt2/servers/self_team_allocation/team"
+	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/utils"
 
 	log "github.com/sirupsen/logrus"
@@ -86,6 +87,7 @@ func main() {
 	})
 
 	teams.InitTeamModule(api, *query, conn)
+	timeframe.InitTimeframeModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8085")
 	err = router.Run(serverAddress)

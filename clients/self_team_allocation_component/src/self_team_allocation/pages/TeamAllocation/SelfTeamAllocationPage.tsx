@@ -11,7 +11,8 @@ import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state
 import { TeamSelection } from './components/TeamSelection'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { Team } from '../../interfaces/team'
-import { Timeframe } from 'src/self_team_allocation/interfaces/timeframe'
+import { Timeframe } from '../../interfaces/timeframe'
+import { getTimeframe } from '../../network/queries/getSurveyTimeframe'
 
 export const SelfTeamAllocationPage = (): JSX.Element => {
   const { isStudentOfCourse } = useCourseStore()
@@ -40,11 +41,22 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId),
   })
 
-  const isError = isParticipationsError || isTeamsError
-  const isPending = isParticipationsPending || isTeamsPending
+  const {
+    data: timeframe,
+    isPending: isTimeframePending,
+    isError: isTimeframeError,
+    refetch: refetchTimeframe,
+  } = useQuery<Timeframe>({
+    queryKey: ['timeframe', phaseId],
+    queryFn: () => getTimeframe(phaseId),
+  })
+
+  const isError = isParticipationsError || isTeamsError || isTimeframeError
+  const isPending = isParticipationsPending || isTeamsPending || isTimeframePending
   const refetch = () => {
     refetchCoursePhaseParticipations()
     refetchTeams()
+    refetchTimeframe()
   }
 
   if (isTeamsPending || (isStudent && isPending)) {
@@ -64,12 +76,6 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
 
   const cpId = participation?.courseParticipationID
 
-  const mockTimeframe: Timeframe = {
-    timeframeSet: true,
-    startTime: new Date('2023-10-01T00:00:00Z'),
-    endTime: new Date('2025-10-31T23:59:59Z'),
-  }
-
   return (
     <>
       {!isStudent && (
@@ -82,12 +88,12 @@ export const SelfTeamAllocationPage = (): JSX.Element => {
         </Alert>
       )}
 
-      {teams && (
+      {teams && timeframe && (
         <TeamSelection
           teams={teams}
           courseParticipationID={cpId}
           refetchTeams={refetchTeams}
-          timeframe={mockTimeframe}
+          timeframe={timeframe}
         />
       )}
     </>

@@ -166,7 +166,7 @@ func assignTeam(c *gin.Context) {
 	}
 
 	// Check if the team has already 3 members
-	team, err := GetTeam(c, teamID)
+	team, err := GetTeamByID(c, coursePhaseID, teamID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
