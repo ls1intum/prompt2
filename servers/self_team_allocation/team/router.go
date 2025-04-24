@@ -2,11 +2,13 @@ package teams
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
+	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,6 +48,17 @@ func createTeams(c *gin.Context) {
 		return
 	}
 
+	// Check if the timeframe is set and if the current time is within the timeframe
+	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var request teamDTO.CreateTeamsRequest
 	if err := c.BindJSON(&request); err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -64,6 +77,17 @@ func updateTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// Check if the timeframe is set and if the current time is within the timeframe
+	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -97,10 +121,33 @@ func assignTeam(c *gin.Context) {
 		return
 	}
 
+	// Check if the timeframe is set and if the current time is within the timeframe
+	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	teamID, err := uuid.Parse(c.Param("teamID"))
 	if err != nil {
 		log.Error("Error parsing teamID: ", err)
 		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// Check if the team has already 3 members
+	team, err := GetTeam(c, teamID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	// TODO remove magic number here
+	if len(team.Members) >= 3 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Team is already full"})
 		return
 	}
 

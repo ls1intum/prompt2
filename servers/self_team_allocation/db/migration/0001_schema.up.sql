@@ -3,7 +3,7 @@ BEGIN;
 -- no creator ID as also instructors shall be able to create teams (they do not have a creator ID)
 CREATE TABLE team (
     id uuid NOT NULL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     course_phase_id uuid NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_course_phase_team UNIQUE (course_phase_id, name),

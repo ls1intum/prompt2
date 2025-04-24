@@ -36,6 +36,15 @@ func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, 
 	return teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams), nil
 }
 
+func GetTeam(ctx context.Context, teamID uuid.UUID) (teamDTO.Team, error) {
+	dbTeam, err := TeamsServiceSingleton.queries.GetTeamWithStudentNamesByID(ctx, teamID)
+	if err != nil {
+		log.Error("could not get the team from the database: ", err)
+		return teamDTO.Team{}, errors.New("could not get the team from the database")
+	}
+	return teamDTO.GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam)
+}
+
 func CreateNewTeams(ctx context.Context, teamNames []string, coursePhaseID uuid.UUID) error {
 	// Validate team names
 	for _, name := range teamNames {
