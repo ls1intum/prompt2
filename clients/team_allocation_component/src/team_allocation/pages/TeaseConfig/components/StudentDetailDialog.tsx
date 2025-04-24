@@ -1,4 +1,3 @@
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
 import { getAllSkills } from '../../../network/queries/getAllSkills'
-import { Team } from '../../../interfaces/team'
+import type { Team } from '../../../interfaces/team'
 import { getLevelConfig } from './ProficiencyBadge'
 
 interface StudentDetailDialogProps {
@@ -82,8 +81,8 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[650px] max-h-[90vh] overflow-hidden'>
-        <DialogHeader>
+      <DialogContent className='sm:max-w-[650px] max-h-[90vh] overflow-y-auto'>
+        <DialogHeader className='sticky top-0 bg-background z-10 pb-4'>
           <DialogTitle className='text-xl flex items-center gap-2'>
             <span className='font-semibold'>
               {student.firstName} {student.lastName}
@@ -93,11 +92,10 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
             </Badge>
           </DialogTitle>
           <DialogDescription>Skills and Project Preferences Details</DialogDescription>
+          <Separator className='mt-4' />
         </DialogHeader>
 
-        <Separator />
-
-        <div className='space-y-6 overflow-auto'>
+        <div className='space-y-6 py-2'>
           <div>
             <div className='flex items-center gap-2 mb-3'>
               <Award className='h-5 w-5 text-primary' />
@@ -134,26 +132,22 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
             </div>
 
             {student.projectPreferences && student.projectPreferences.length > 0 ? (
-              <ScrollArea className='h-[250px] rounded-md border'>
-                <div className='p-4 space-y-4'>
-                  {student.projectPreferences.map((preference, index) => (
-                    <Card key={index} className='overflow-hidden'>
-                      <CardContent className='p-3'>
-                        <div className='flex justify-between items-center'>
-                          <div className='flex items-center gap-2'>
-                            <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
-                              {index + 1}
-                            </div>
-                            <div className='font-medium'>
-                              {getTeamNameById(preference.projectId)}
-                            </div>
+              <div className='space-y-4'>
+                {student.projectPreferences.map((preference, index) => (
+                  <Card key={index} className='overflow-hidden'>
+                    <CardContent className='p-3'>
+                      <div className='flex justify-between items-center'>
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
+                            {index + 1}
                           </div>
+                          <div className='font-medium'>{getTeamNameById(preference.projectId)}</div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             ) : (
               <p className='text-sm text-muted-foreground italic'>
                 No project preferences submitted
