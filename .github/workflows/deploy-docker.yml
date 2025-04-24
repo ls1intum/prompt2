@@ -48,6 +48,9 @@ on:
       team_allocation_image_tag:
         required: true
         type: string
+      self_team_allocation_image_tag:
+        required: true
+        type: string
 
     secrets:
       VM_SSH_PRIVATE_KEY:

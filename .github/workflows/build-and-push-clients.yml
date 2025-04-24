@@ -38,6 +38,9 @@ on:
       team_allocation_image_tag:
         description: "The tag of the team allocation image that was built"
         value: ${{ jobs.team-allocation.outputs.image_tag }}
+      self_team_allocation_image_tag:
+        description: "The tag of the self team allocation image that was built"
+        value: ${{ jobs.self-team-allocation.outputs.image_tag }}
 
 jobs:
   clients-base:
