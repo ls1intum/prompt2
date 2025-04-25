@@ -103,7 +103,7 @@ export const TeamSelection: React.FC<Props> = ({
           <TeamCreationDialog
             onCreate={(name) => createMutation.mutate(name)}
             teams={teams}
-            disabled={myTeam?.id !== undefined}
+            disabled={myTeam?.id !== undefined || isLecturer}
           />
           <Button
             variant='outline'
