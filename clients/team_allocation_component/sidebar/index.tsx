@@ -22,6 +22,11 @@ const sidebarItems: SidebarMenuItemProps = {
       goToPath: '/allocations',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
+    {
+      title: 'Participants',
+      goToPath: '/participants',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
   ],
 }
 
