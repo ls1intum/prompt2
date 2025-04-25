@@ -44,7 +44,7 @@ CREATE TABLE student (
 --
 
 INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
-VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'John', 'Doe', 'existingstudent@example.com', '03711126', 'ge25hok', true, 'male');
+VALUES ('3a774200-39a7-4656-bafb-92b7210a93c1', 'John', 'Doe', 'existingstudent@example.com', '03711111', 'ab12cde', true, 'male');
 
 INSERT INTO student (id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender)
 VALUES ('b1f97ee7-fd11-4556-8c75-d0c2714e7082', 'Test', 'Student', 'test@example.com', '03788888', 'ab12cde', true, 'male');
