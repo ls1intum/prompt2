@@ -115,17 +115,19 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                     {student.skills.map((skill, index) => (
                       <Card key={index} className='overflow-hidden'>
                         <CardContent className='p-3'>
-                          <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3'>
-                            <div className='font-medium break-words w-full'>
-                              {getSkillNameById(skill.id)}
+                          <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
+                            <div className='font-medium'>{getSkillNameById(skill.id)}</div>
+                            <div className='w-auto'>
+                              <Badge
+                                className={`
+                                  ${getLevelConfig(skill.proficiency).textColor} 
+                                  ${getLevelConfig(skill.proficiency).selectedBg} 
+                                  hover:${getLevelConfig(skill.proficiency).selectedBg}
+                                `}
+                              >
+                                {getLevelConfig(skill.proficiency).title}
+                              </Badge>
                             </div>
-                            <Badge
-                              className={`${getLevelConfig(skill.proficiency).textColor} 
-                              ${getLevelConfig(skill.proficiency).selectedBg} 
-                              hover:${getLevelConfig(skill.proficiency).selectedBg} whitespace-nowrap flex-shrink-0`}
-                            >
-                              {getLevelConfig(skill.proficiency).title}
-                            </Badge>
                           </div>
                         </CardContent>
                       </Card>
