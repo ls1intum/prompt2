@@ -57,7 +57,8 @@ export const AllocationParticipants = (): JSX.Element => {
   const isError = isParticipationsError || isTeamsError
   const isPending = isCoursePhaseParticipationsPending || isTeamsPending
 
-  if (isError) return <ErrorPage onRetry={refetch} description='Could not fetch scoreLevels' />
+  if (isError)
+    return <ErrorPage onRetry={refetch} description='Could not fetch participants or teams' />
   if (isPending)
     return (
       <div className='flex justify-center items-center h-64'>
@@ -69,7 +70,7 @@ export const AllocationParticipants = (): JSX.Element => {
     <div id='table-view' className='relative flex flex-col'>
       <ManagementPageHeader>Team Allocation Participants</ManagementPageHeader>
       <p className='text-sm text-muted-foreground mb-4'>
-        Click on a participant to view/edit their assessment.
+        This table shows all participants and their allocated teams.
       </p>
       <div style={{ width: `${tableWidth}px` }}>
         <CoursePhaseParticipationsTablePage

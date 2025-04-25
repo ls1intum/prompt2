@@ -6,6 +6,12 @@ const sidebarItems: SidebarMenuItemProps = {
   title: 'Team Allocation',
   icon: <Users2 />,
   goToPath: '',
+  requiredPermissions: [
+    Role.PROMPT_ADMIN,
+    Role.COURSE_LECTURER,
+    Role.COURSE_EDITOR,
+    Role.COURSE_STUDENT,
+  ],
   subitems: [
     {
       title: 'Survey Participants',
