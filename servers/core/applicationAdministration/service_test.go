@@ -259,8 +259,8 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationExtern_Already
 }
 
 func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationAuthenticatedByMatNr_NotApplied() {
-	matrNr := "03711126"
-	universityLogin := "ge25hok"
+	matrNr := "03711111"
+	universityLogin := "ab12cde"
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 
 	application, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(suite.ctx, coursePhaseID, matrNr, universityLogin)
