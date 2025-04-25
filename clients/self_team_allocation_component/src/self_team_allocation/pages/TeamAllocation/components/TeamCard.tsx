@@ -55,7 +55,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
       </CardDescription>
     </CardHeader>
 
-    <CardContent className='pb-4 flex-1'>
+    <CardContent className='pb-2 flex-1'>
       {team.members.length > 0 ? (
         <ul className='space-y-2 h-[120px] overflow-y-auto'>
           {team.members.map((m, idx) => {
@@ -63,7 +63,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
             return (
               <li
                 key={idx}
-                className={`flex items-center gap-2 p-2 rounded-md ${
+                className={`flex items-center gap-2 p-1 rounded-md ${
                   isCurrent ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground'
                 }`}
               >
