@@ -20,12 +20,14 @@ interface GroupActionsMenuProps {
   selectedRows: RowModel<CoursePhaseParticipationWithStudent>
   onClose: () => void
   onExport: () => void
+  disabled?: boolean
 }
 
 export const GroupActionsMenu = ({
   selectedRows,
   onClose,
   onExport,
+  disabled = false,
 }: GroupActionsMenuProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [isOpen, setIsOpen] = useState(false)
@@ -49,7 +51,7 @@ export const GroupActionsMenu = ({
     <>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button>
+          <Button disabled={disabled}>
             <MoreHorizontal className='h-4 w-4' />
             Actions
           </Button>

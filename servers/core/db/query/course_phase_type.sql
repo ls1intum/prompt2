@@ -77,6 +77,14 @@ SELECT EXISTS (
     WHERE name = 'Team Allocation'
 ) AS does_exist;
 
+-- name: TestSelfTeamAllocationTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Self Team Allocation'
+) AS does_exist;
+
+
 -- name: CreateCoursePhaseType :exec
 INSERT INTO course_phase_type (id, name, initial_phase, base_url)
 VALUES ($1, $2, $3, $4);
@@ -211,7 +219,7 @@ VALUES (
        }'::jsonb
 );
 
-
+-- This returns the teamID for a given courseParticipationID, to which the user is assigned
 -- name: InsertTeamAllocationOutput :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
 VALUES (
@@ -219,7 +227,7 @@ VALUES (
       $1,
       'teamAllocation',
       1,
-      '/team-allocation',
+      '/allocation',
       '{
           "type": "string"
         }'::jsonb
@@ -232,16 +240,16 @@ VALUES (
       $1,
       'teams',
       1,
-      '/teams',
+      '/team',
       '{
         "type": "array",
         "items": {
             "type": "object",
             "properties": {
-            "teamID": { "type": "string" },
-            "teamName": { "type": "string" }
+            "id": { "type": "string" },
+            "name": { "type": "string" }
             },
-            "required": ["teamID", "teamName"]
+            "required": ["id", "name"]
         }
         }'::jsonb
 );

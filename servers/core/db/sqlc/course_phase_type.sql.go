@@ -435,13 +435,14 @@ VALUES (
       $1,
       'teamAllocation',
       1,
-      '/team-allocation',
+      '/allocation',
       '{
           "type": "string"
         }'::jsonb
 )
 `
 
+// This returns the teamID for a given courseParticipationID, to which the user is assigned
 func (q *Queries) InsertTeamAllocationOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, insertTeamAllocationOutput, coursePhaseTypeID)
 	return err
@@ -454,16 +455,16 @@ VALUES (
       $1,
       'teams',
       1,
-      '/teams',
+      '/team',
       '{
         "type": "array",
         "items": {
             "type": "object",
             "properties": {
-            "teamID": { "type": "string" },
-            "teamName": { "type": "string" }
+            "id": { "type": "string" },
+            "name": { "type": "string" }
             },
-            "required": ["teamID", "teamName"]
+            "required": ["id", "name"]
         }
         }'::jsonb
 )
@@ -574,6 +575,21 @@ SELECT EXISTS (
 
 func (q *Queries) TestMatchingPhaseTypeExists(ctx context.Context) (bool, error) {
 	row := q.db.QueryRow(ctx, testMatchingPhaseTypeExists)
+	var does_exist bool
+	err := row.Scan(&does_exist)
+	return does_exist, err
+}
+
+const testSelfTeamAllocationTypeExists = `-- name: TestSelfTeamAllocationTypeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM course_phase_type
+    WHERE name = 'Self Team Allocation'
+) AS does_exist
+`
+
+func (q *Queries) TestSelfTeamAllocationTypeExists(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, testSelfTeamAllocationTypeExists)
 	var does_exist bool
 	err := row.Scan(&does_exist)
 	return does_exist, err
