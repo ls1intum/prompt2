@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/csv"
+	"fmt"
+	"os"
 	"strings"
 
 	confluence "github.com/ls1intum/prompt2/servers/dev-tool-setup/confluence_setup"
@@ -85,39 +88,98 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	// TODO: Add correnct input data from somewhere
-	semester := iPraktikumTeams{
-		SemesterGroupName: "iOS25",
-		Prefix:            "ios25",
-		Teams: []iPraktikumTeam{
-			{
-				Name: "mtzetest",
-				Members: []TeamMember{
-					{GitlabUsername: "mtze", JiraUsername: "ga58roj"},
-				},
-				Coach:       TeamMember{GitlabUsername: "ge25hok", JiraUsername: "ge25hok"},
-				ProjectLead: TeamMember{GitlabUsername: "ge64fef", JiraUsername: "ge64fef"},
-			},
-			// {
-			// 	Name: "iOS25-2",
-			// 	Members: []TeamMember{
-			// 		{GitlabUsername: "ge63sir"},
-			// 	},
-			// 	Coach:       TeamMember{GitlabUsername: "ge64fef"},
-			// 	ProjectLead: TeamMember{GitlabUsername: "ge35qis"},
-			// },
-		},
+	semester, err := loadTeamsFromCSV("participation-export.csv", "developer_profiles.csv")
+	if err != nil {
+		log.Fatal("Failed to load teams: ", err)
 	}
 	_ = gitlabconfig
 	_ = jiraconfig
 	_ = confluenceconfig
 
-	setupGitlab(gitlabconfig, semester)
+	if err := setupGitlab(gitlabconfig, semester); err != nil {
+		log.Error("Error setting up GitLab: ", err)
+	}
 
-	setupJira(jiraconfig, semester)
+	// if err := setupJira(jiraconfig, semester); err != nil {
+	// 	log.Error("Error setting up Jira: ", err)
+	// }
 
-	setupConfluence(confluenceconfig, semester)
+	// if err := setupConfluence(confluenceconfig, semester); err != nil {
+	// 	log.Error("Error setting up Confluence: ", err)
+	// }
 
+}
+
+func loadTeamsFromCSV(participationPath string, devProfilesPath string) (iPraktikumTeams, error) {
+	participationFile, err := os.Open(participationPath)
+	if err != nil {
+		return iPraktikumTeams{}, fmt.Errorf("could not open participation file: %v", err)
+	}
+	defer participationFile.Close()
+
+	devProfilesFile, err := os.Open(devProfilesPath)
+	if err != nil {
+		return iPraktikumTeams{}, fmt.Errorf("could not open developer profiles file: %v", err)
+	}
+	defer devProfilesFile.Close()
+
+	participationReader := csv.NewReader(participationFile)
+	participationReader.Comma = ';'
+	participationRecords, err := participationReader.ReadAll()
+	if err != nil {
+		return iPraktikumTeams{}, fmt.Errorf("error reading participation CSV: %v", err)
+	}
+
+	devProfilesReader := csv.NewReader(devProfilesFile)
+	devProfilesRecords, err := devProfilesReader.ReadAll()
+	if err != nil {
+		return iPraktikumTeams{}, fmt.Errorf("error reading developer profiles CSV: %v", err)
+	}
+
+	tumToGitlab := make(map[string]string)
+	for i, row := range devProfilesRecords {
+		if i == 0 {
+			continue // skip header
+		}
+		tumID := row[2]
+		gitlabID := row[len(row)-1]
+		tumToGitlab[tumID] = gitlabID
+	}
+
+	teamsMap := make(map[string][]TeamMember)
+	for i, row := range participationRecords {
+		if i == 0 {
+			continue // skip header
+		}
+		tumID := row[4]
+		teamName := row[len(row)-1]
+		gitlabID, ok := tumToGitlab[tumID]
+		if !ok {
+			log.Warnf("No GitLab ID found for TUM-ID %s", tumID)
+			continue
+		}
+		member := TeamMember{
+			GitlabUsername: gitlabID,
+			JiraUsername:   tumID,
+		}
+		teamsMap[teamName] = append(teamsMap[teamName], member)
+	}
+
+	var teams []iPraktikumTeam
+	for name, members := range teamsMap {
+		teams = append(teams, iPraktikumTeam{
+			Name:        name,
+			Members:     members,
+			Coach:       TeamMember{},
+			ProjectLead: TeamMember{},
+		})
+	}
+
+	return iPraktikumTeams{
+		SemesterGroupName: "iOS25",
+		Prefix:            "ios25",
+		Teams:             teams,
+	}, nil
 }
 
 func setupConfluence(client confluence.ConfluenceClient, semester iPraktikumTeams) error {
@@ -157,6 +219,13 @@ func setupConfluence(client confluence.ConfluenceClient, semester iPraktikumTeam
 			log.Errorf("Error granting permissions to group: %v", err)
 		}
 		log.Debugf("Permissions granted to group %s for space %s", strings.ToLower(semester.Prefix+team.Name+"-customers"), spaceKey)
+
+		// Grant permissions to the instructors
+		err = client.AssignGroupPermissions(spaceKey, strings.ToLower(semester.Prefix+"pm"), confluence.AdminPermissions)
+		if err != nil {
+			log.Errorf("Error granting permissions to group: %v", err)
+		}
+		log.Debugf("Permissions granted to group %s for space %s", strings.ToLower(semester.Prefix+"pm"), spaceKey)
 
 		// log.Infof("Space %s setup successfully", team.Name)
 	}
@@ -214,7 +283,7 @@ func setupGitlab(gitlabconfig gitlab.GitlabConfig, semester iPraktikumTeams) err
 	}
 
 	// 2. Ensure that the semester group exists
-	semesterGroup, err := gitlab.CreateGroupWithParentID(gitlabClient, gitlabconfig.ParentGroupID, semester.SemesterGroupName)
+	semesterGroup, err := gitlab.CreateGroupWithParentID(gitlabClient, gitlabconfig.ParentGroupID, "Projects")
 	if err != nil {
 		log.Error("Failed to create semester group: ", err)
 		return err
@@ -236,15 +305,19 @@ func setupGitlab(gitlabconfig gitlab.GitlabConfig, semester iPraktikumTeams) err
 
 		for _, member := range team.Members {
 			log.Debug("Searching ", member.GitlabUsername, " to add to group: ", team.GitlabGroup.Name)
-			user, err := gitlab.GetUserID(gitlabClient, member.GitlabUsername)
+			user, err := gitlab.GetUserID(gitlabClient, strings.TrimSpace(member.GitlabUsername))
 			if err != nil {
 				log.Error("Failed to get user: ", err)
-				break
+				continue
 			}
 			log.Debug("Found user: ", user.Username, " with ID: ", user.ID)
 
 			log.Debug("Adding user: ", user.Username, " to group: ", team.GitlabGroup.Name)
-			_ = gitlab.AddUserToGroup(gitlabClient, team.GitlabGroup, *user, g.DeveloperPermissions)
+			err = gitlab.AddUserToGroup(gitlabClient, team.GitlabGroup, *user, g.DeveloperPermissions)
+			if err != nil {
+				log.Error("Failed to add user: ", err)
+				continue
+			}
 
 			log.Info("Added user: ", user.Username, " to group: ", team.GitlabGroup.Name)
 		}
