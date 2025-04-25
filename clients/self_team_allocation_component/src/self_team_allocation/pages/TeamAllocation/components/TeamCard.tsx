@@ -1,5 +1,12 @@
-import React from 'react'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import type React from 'react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Users, UserPlus, LogOut, Trash2 } from 'lucide-react'
@@ -36,12 +43,14 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     }`}
   >
     <CardHeader className='pb-3'>
-      <div className='flex justify-between items-center'>
-        <CardTitle className='text-lg font-semibold truncate'>{team.name}</CardTitle>
-        <Badge variant={full ? 'destructive' : 'secondary'} className='ml-2 whitespace-nowrap'>
+      <CardTitle className={`font-semibold truncate ${team.name.length > 20 ? 'text-base' : ''}`}>
+        {team.name}
+      </CardTitle>
+      <CardDescription className='flex items-center mt-1'>
+        <Badge variant={full ? 'destructive' : 'secondary'} className='whitespace-nowrap text-sm'>
           {team.members.length}/3 Members
         </Badge>
-      </div>
+      </CardDescription>
     </CardHeader>
 
     <CardContent className='pb-4 flex-1'>

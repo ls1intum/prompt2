@@ -42,6 +42,7 @@ export const TeamSelection: React.FC<Props> = ({
     onSuccess: () => {
       setSubmitError(null)
       queryClient.invalidateQueries({ queryKey: ['self_team_allocations', phaseId] })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     },
     onError: () => setSubmitError('Failed to join team. Please try again.'),
   })
@@ -99,7 +100,11 @@ export const TeamSelection: React.FC<Props> = ({
 
       {!disabled && (
         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3'>
-          <TeamCreationDialog onCreate={(name) => createMutation.mutate(name)} teams={teams} />
+          <TeamCreationDialog
+            onCreate={(name) => createMutation.mutate(name)}
+            teams={teams}
+            disabled={myTeam?.id !== undefined}
+          />
           <Button
             variant='outline'
             onClick={refetchTeams}
