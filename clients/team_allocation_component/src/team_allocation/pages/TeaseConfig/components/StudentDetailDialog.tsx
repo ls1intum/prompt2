@@ -86,9 +86,9 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[650px] max-h-[90vh] overflow-y-auto p-6'>
-        <div className='flex flex-col h-full overflow-hidden'>
-          <DialogHeader className='sticky top-0 bg-background z-5 pb-2'>
+      <DialogContent className=''>
+        <div className='flex flex-col h-full p-6 sm:max-w-[650px] max-h-[90vh] overflow-hidden'>
+          <DialogHeader className='bg-background z-5 pb-2'>
             <DialogTitle className='text-xl flex items-center gap-2'>
               <span className='font-semibold'>
                 {student.firstName} {student.lastName}
@@ -100,10 +100,10 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
             <DialogDescription>Skills and Project Preferences Details</DialogDescription>
           </DialogHeader>
 
-          <Separator className='mt-2 mb-4' />
+          <Separator className='mt-2' />
 
-          <div className='overflow-y-auto flex-1 pr-1'>
-            <div className='space-y-6'>
+          <div className='flex-1 pr-1 overflow-y-auto'>
+            <div className='space-y-6 pr-2 mt-4'>
               <div>
                 <div className='flex items-center gap-2 mb-3'>
                   <Award className='h-5 w-5 text-primary' />
