@@ -25,8 +25,6 @@ export const useDownloadDeveloperProfiles = () => {
         .map(({ participation, devProfile }) => {
           const firstName = escapeCsv(participation.student.firstName)
           const lastName = escapeCsv(participation.student.lastName)
-          const tumID = escapeCsv(participation.student.tumId)
-          const matriculationNumber = escapeCsv(participation.student.matriculationNumber)
           const appleID = escapeCsv(devProfile?.appleID || '')
           const macBook = devProfile?.hasMacBook ? 'true' : 'false'
           const iPhone = escapeCsv(devProfile?.iPhoneUDID || '')
