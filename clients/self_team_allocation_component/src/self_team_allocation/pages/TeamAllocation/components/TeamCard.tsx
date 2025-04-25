@@ -43,10 +43,12 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     }`}
   >
     <CardHeader className='pb-3'>
-      <CardTitle className={`font-semibold truncate ${team.name.length > 20 ? 'text-base' : ''}`}>
+      <CardTitle
+        className={`font-semibold truncate pb-2 ${team.name.length > 20 ? 'text-base' : ''}`}
+      >
         {team.name}
       </CardTitle>
-      <CardDescription className='flex items-center mt-1'>
+      <CardDescription className='flex items-center'>
         <Badge variant={full ? 'destructive' : 'secondary'} className='whitespace-nowrap text-sm'>
           {team.members.length}/3 Members
         </Badge>
