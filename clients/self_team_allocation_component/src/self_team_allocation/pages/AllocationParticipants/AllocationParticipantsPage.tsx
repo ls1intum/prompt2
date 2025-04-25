@@ -37,8 +37,9 @@ export const AllocationParticipants = (): JSX.Element => {
   })
 
   const extraData: ExtraParticipationTableData[] | undefined = useMemo(() => {
+    if (!teams) return undefined
     return teams
-      ?.map((team) =>
+      .map((team) =>
         team.members.map((member) => ({
           courseParticipationID: member.courseParticipationID,
           value: team.name,

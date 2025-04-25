@@ -34,7 +34,7 @@ func GetTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (timeframeDTO.Ti
 
 func SetTimeframe(ctx context.Context, coursePhaseID uuid.UUID, startTime, endTime time.Time) error {
 	if !startTime.Before(endTime) {
-		return errors.New("survey start must be before survey deadline")
+		return errors.New("team allocation end date must be before start date")
 	}
 
 	var startTimestamp, deadlineTimestamp pgtype.Timestamp

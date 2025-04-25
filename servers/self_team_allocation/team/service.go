@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
+	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -145,4 +147,22 @@ func DeleteTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID) error {
 		return errors.New("could not delete the team")
 	}
 	return nil
+}
+
+func ValidateTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	timeframeDTO, err := timeframe.GetTimeframe(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get the timeframe: ", err)
+		return false, errors.New("could not get the timeframe")
+	}
+
+	if !timeframeDTO.TimeframeSet {
+		log.Warn("timeframe not set")
+		return true, nil
+	}
+
+	if time.Now().Before(timeframeDTO.StartTime) || time.Now().After(timeframeDTO.EndTime) {
+		return false, errors.New("request is outside the allowed timeframe")
+	}
+	return true, nil
 }

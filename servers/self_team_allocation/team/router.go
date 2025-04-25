@@ -2,13 +2,11 @@ package teams
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
-	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -74,13 +72,12 @@ func createTeams(c *gin.Context) {
 		return
 	}
 
-	// Check if the timeframe is set and if the current time is within the timeframe
-	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	allowed, err := ValidateTimeframe(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
+	if !allowed {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -107,13 +104,12 @@ func updateTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the timeframe is set and if the current time is within the timeframe
-	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	allowed, err := ValidateTimeframe(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
+	if !allowed {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -147,13 +143,12 @@ func assignTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the timeframe is set and if the current time is within the timeframe
-	timeframedto, err := timeframe.GetTimeframe(c, coursePhaseID)
+	allowed, err := ValidateTimeframe(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	if time.Now().Before(timeframedto.StartTime) || time.Now().After(timeframedto.EndTime) {
+	if !allowed {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -227,6 +222,16 @@ func leaveTeam(c *gin.Context) {
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+		return
+	}
+
+	allowed, err := ValidateTimeframe(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !allowed {
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
