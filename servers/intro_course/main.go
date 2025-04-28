@@ -82,7 +82,10 @@ func main() {
 	tutor.InitTutorModule(api, *query, conn)
 	seatPlan.InitSeatPlanModule(api, *query, conn)
 
-	developerAccountSetup.InitDeveloperAccountSetupModule(api, *query, conn)
+	issuerID := utils.GetEnv("APPLE_ISSUER_ID", "")
+	keyID := utils.GetEnv("APPLE_KEY_ID", "")
+	privateKey := utils.GetEnv("APPLE_PRIVATE_KEY", "")
+	developerAccountSetup.InitDeveloperAccountSetupModule(api, *query, conn, issuerID, keyID, privateKey)
 
 	// Infrastructure Setup
 	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")

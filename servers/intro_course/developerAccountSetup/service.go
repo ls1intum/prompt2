@@ -14,40 +14,36 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
 
 type DeveloperAccountSetupService struct {
-	queries db.Queries
-	conn    *pgxpool.Pool
+	queries    db.Queries
+	conn       *pgxpool.Pool
+	issuerID   string
+	keyID      string
+	privateKey string
 }
 
 var DeveloperAccountSetupServiceSingleton *DeveloperAccountSetupService
-
-var (
-	issuerID   = utils.GetEnv("APPLE_ISSUER_ID", "")
-	keyID      = utils.GetEnv("APPLE_KEY_ID", "")
-	privateKey = utils.GetEnv("APPLE_PRIVATE_KEY", "")
-)
 
 // GenerateJWT creates a JWT token required for Apple API authentication.
 func GenerateJWT() (string, error) {
 	now := time.Now()
 
-	key, err := jwt.ParseECPrivateKeyFromPEM([]byte(privateKey))
+	key, err := jwt.ParseECPrivateKeyFromPEM([]byte(DeveloperAccountSetupServiceSingleton.privateKey))
 	if err != nil {
 		return "", fmt.Errorf("error parsing private key: %w", err)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"iss": issuerID,
+		"iss": DeveloperAccountSetupServiceSingleton.issuerID,
 		"exp": now.Add(5 * time.Minute).Unix(),
 		"aud": "appstoreconnect-v1",
 		"iat": now.Unix(),
 	})
 
-	token.Header["kid"] = keyID
+	token.Header["kid"] = DeveloperAccountSetupServiceSingleton.keyID
 	signedToken, err := token.SignedString(key)
 	if err != nil {
 		return "", err
