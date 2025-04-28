@@ -1,36 +1,27 @@
 package coreRequests
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"net/http"
-
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests/coreRequestDTOs"
+	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
+	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
 
-func SendGetStudent(authHeader string, coursePhaseID uuid.UUID) (*coreRequestDTOs.GetStudent, error) {
-	path := "/api/course_phases/" + coursePhaseID.String() + "/participations/self"
-
-	// Send the request with the payload attached
-	resp, err := sendRequest("GET", path, authHeader, bytes.NewBuffer([]byte{}))
+func SendGetStudent(authHeader string, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (*promptTypes.Student, error) {
+	coreURL := utils.GetCoreUrl()
+	resp, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
 	if err != nil {
+		log.Error("Error fetching student data: ", err)
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Error("Received non-OK response:", resp.Status)
-		return nil, errors.New("non-OK response received")
-	}
-
-	// Decode the response body into a Student struct
-	var student coreRequestDTOs.GetStudent
-	if err := json.NewDecoder(resp.Body).Decode(&student); err != nil {
-		log.Error("Failed to decode response body:", err)
-		return nil, err
+	var student promptTypes.Student
+	for _, s := range resp {
+		if s.CourseParticipationID == courseParticipationID {
+			student = s.Student
+			break
+		}
 	}
 
 	return &student, nil

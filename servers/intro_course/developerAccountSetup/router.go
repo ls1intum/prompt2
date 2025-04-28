@@ -37,28 +37,27 @@ func inviteUserHandler(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	cpID := courseParticipationID.(uuid.UUID)
 
-	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
 		return
 	}
 
-	devProfile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, cpID)
+	devProfile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		log.Error("Error getting developer profile: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
 		return
 	}
 
-	err = InviteUser(c, coursePhaseID, cpID, devProfile.AppleID, student.FirstName, student.LastName)
+	err = InviteUser(c, coursePhaseID, courseParticipationID, devProfile.AppleID, student.FirstName, student.LastName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user: " + err.Error()})
 		return
@@ -129,21 +128,21 @@ func registerDevicesHandler(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		log.Error("Error getting developer profile: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
 		return
 	}
 
-	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
 		return
@@ -185,7 +184,7 @@ func registerDevicesHandler(c *gin.Context) {
 		if deviceUDIDValid {
 			deviceUDID := device.UDID.String
 			platform := "IOS"
-			err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, deviceUDID, platform)
+			err = RegisterDevice(c, coursePhaseID, courseParticipationID, deviceName, deviceUDID, platform)
 			if err != nil {
 				results = append(results, struct {
 					DeviceName   string `json:"deviceName"`
@@ -217,21 +216,21 @@ func registerIPhoneHandler(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		log.Error("Error getting developer profile: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
 		return
 	}
 
-	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
 		return
@@ -253,7 +252,7 @@ func registerIPhoneHandler(c *gin.Context) {
 	deviceName := semesterTag + "-" + studentLastName + "-" + "iPhone"
 	platform := "IOS"
 
-	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, iPhoneUDID.String, platform)
+	err = RegisterDevice(c, coursePhaseID, courseParticipationID, deviceName, iPhoneUDID.String, platform)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register iPhone"})
@@ -275,21 +274,21 @@ func registerIPadHandler(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		log.Error("Error getting developer profile: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
 		return
 	}
 
-	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
 		return
@@ -311,7 +310,7 @@ func registerIPadHandler(c *gin.Context) {
 	deviceName := semesterTag + "-" + studentLastName + "-" + "iPad"
 	platform := "IOS"
 
-	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, iPadUDID.String, platform)
+	err = RegisterDevice(c, coursePhaseID, courseParticipationID, deviceName, iPadUDID.String, platform)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register iPad"})
 		return
@@ -332,21 +331,21 @@ func registerAppleWatchHandler(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Missing courseParticipationID"})
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		log.Error("Error parsing courseParticipationID: ", err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	developerprofile, err := developerProfile.GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID)
 	if err != nil {
 		log.Error("Error getting developer profile: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get developer profile"})
 		return
 	}
 
-	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID)
+	student, err := coreRequests.SendGetStudent(authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student details"})
 		return
@@ -368,11 +367,15 @@ func registerAppleWatchHandler(c *gin.Context) {
 	deviceName := semesterTag + "-" + studentLastName + "Apple Watch"
 	platform := "IOS"
 
-	err = RegisterDevice(c, coursePhaseID, courseParticipationID.(uuid.UUID), deviceName, appleWatchUDID.String, platform)
+	err = RegisterDevice(c, coursePhaseID, courseParticipationID, deviceName, appleWatchUDID.String, platform)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register Apple Watch"})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Apple Watch registered successfully"})
+}
+
+func handleError(c *gin.Context, statusCode int, err error) {
+	c.JSON(statusCode, gin.H{"error": err.Error()})
 }
