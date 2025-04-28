@@ -10,7 +10,7 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 import { Team } from '../../interfaces/team'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableData } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableData'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
 
@@ -48,15 +48,13 @@ export const ParticipantsPage = (): JSX.Element => {
     queryFn: () => getTeamAllocations(phaseId ?? ''),
   })
 
-  const extraData: ExtraParticipationTableData[] | undefined = useMemo<
-    ExtraParticipationTableData[]
-  >(() => {
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
     // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
-    return teamAllocations.flatMap(({ projectId, students }) => {
+    const teamNameExtraData = teamAllocations.flatMap(({ projectId, students }) => {
       const teamName = teamNameById.get(projectId) ?? 'No Team'
 
       return students.map((courseParticipationID) => ({
@@ -65,6 +63,14 @@ export const ParticipantsPage = (): JSX.Element => {
         stringValue: teamName,
       }))
     })
+
+    return [
+      {
+        id: 'allocatedTeam',
+        header: 'Allocated Team',
+        extraData: teamNameExtraData,
+      },
+    ]
   }, [teams, teamAllocations])
 
   const refetch = () => {
@@ -95,10 +101,9 @@ export const ParticipantsPage = (): JSX.Element => {
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}
-          extraColumnHeader='Allocated Team'
-          extraData={extraData}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
+          extraColumns={extraColumns}
         />
       </div>
     </div>

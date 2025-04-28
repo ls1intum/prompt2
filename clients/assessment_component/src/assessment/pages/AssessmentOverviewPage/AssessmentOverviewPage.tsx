@@ -1,10 +1,8 @@
 import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import {
-  CoursePhaseParticipationsTablePage,
-  ExtraParticipationColumn,
-} from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { ErrorPage } from '@/components/ErrorPage'
@@ -30,7 +28,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     refetchScoreLevels()
   }
 
-  const extraColumns: ExtraParticipationColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
 
     return [
