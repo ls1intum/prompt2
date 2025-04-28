@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -51,37 +52,13 @@ func GenerateJWT() (string, error) {
 	return signedToken, nil
 }
 
-type InviteRequest struct {
-	Data struct {
-		Type       string `json:"type"`
-		Attributes struct {
-			Email               string   `json:"email"`
-			FirstName           string   `json:"firstName"`
-			LastName            string   `json:"lastName"`
-			Roles               []string `json:"roles"`
-			ProvisioningAllowed bool     `json:"provisioningAllowed"`
-		} `json:"attributes"`
-	} `json:"data"`
-}
-
-type DeviceRequest struct {
-	Data struct {
-		Type       string `json:"type"`
-		Attributes struct {
-			Name     string `json:"name"`
-			UDID     string `json:"udid"`
-			Platform string `json:"platform"`
-		} `json:"attributes"`
-	} `json:"data"`
-}
-
 func InviteUser(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, appleID, firstName, lastName string) error {
 	token, err := GenerateJWT()
 	if err != nil {
 		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("JWT generation failed: %w", err))
 	}
 
-	requestBody := InviteRequest{
+	requestBody := developerAccountSetupDTO.InviteRequest{
 		Data: struct {
 			Type       string `json:"type"`
 			Attributes struct {
@@ -143,7 +120,7 @@ func RegisterDevice(ctx context.Context, coursePhaseID, courseParticipationID uu
 		return storeAppleError(ctx, coursePhaseID, courseParticipationID, fmt.Errorf("JWT generation failed: %w", err))
 	}
 
-	requestBody := DeviceRequest{
+	requestBody := developerAccountSetupDTO.DeviceRequest{
 		Data: struct {
 			Type       string `json:"type"`
 			Attributes struct {
