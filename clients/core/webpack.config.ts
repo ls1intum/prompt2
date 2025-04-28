@@ -34,6 +34,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
   const devopsChallengURL = IS_DEV ? `http://localhost:3006` : `/devops-challenge`
   const assessmentURL = IS_DEV ? `http://localhost:3007` : `/assessment`
   const teamAllocationURL = IS_DEV ? `http://localhost:3008` : `/team-allocation`
+  const selfTeamAllocationURL = IS_DEV ? `http://localhost:3009` : `/self-team-allocation`
 
   return {
     target: 'web',
@@ -102,6 +103,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           assessment_component: `assessment_component@${assessmentURL}/remoteEntry.js?${Date.now()}`,
           devops_challenge_component: `devops_challenge_component@${devopsChallengURL}/remoteEntry.js?${Date.now()}`,
           team_allocation_component: `team_allocation_component@${teamAllocationURL}/remoteEntry.js?${Date.now()}`,
+          self_team_allocation_component: `self_team_allocation_component@${selfTeamAllocationURL}/remoteEntry.js?${Date.now()}`,
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

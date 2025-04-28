@@ -12,6 +12,7 @@ import (
 )
 
 const createTeam = `-- name: CreateTeam :exec
+
 INSERT INTO team (id, name, course_phase_id)
 VALUES ($1, $2, $3)
 `
@@ -22,6 +23,7 @@ type CreateTeamParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
+// ensuring to get only teams in the authenticated course_phase
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
 	_, err := q.db.Exec(ctx, createTeam, arg.ID, arg.Name, arg.CoursePhaseID)
 	return err
@@ -43,6 +45,30 @@ type DeleteTeamParams struct {
 func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 	_, err := q.db.Exec(ctx, deleteTeam, arg.ID, arg.CoursePhaseID)
 	return err
+}
+
+const getTeamByCoursePhaseAndTeamID = `-- name: GetTeamByCoursePhaseAndTeamID :one
+SELECT id, name, course_phase_id, created_at
+FROM team
+WHERE id = $1
+AND course_phase_id = $2
+`
+
+type GetTeamByCoursePhaseAndTeamIDParams struct {
+	ID            uuid.UUID `json:"id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetTeamByCoursePhaseAndTeamID(ctx context.Context, arg GetTeamByCoursePhaseAndTeamIDParams) (Team, error) {
+	row := q.db.QueryRow(ctx, getTeamByCoursePhaseAndTeamID, arg.ID, arg.CoursePhaseID)
+	var i Team
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CoursePhaseID,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getTeamsByCoursePhase = `-- name: GetTeamsByCoursePhase :many

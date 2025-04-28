@@ -27,9 +27,9 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 		log.Fatal("failed to init matching phase type: ", err)
 	}
 
-	err = initIntroCourseTutor()
+	err = initIntroCourseDeveloper()
 	if err != nil {
-		log.Fatal("failed to init intro course tutor phase type: ", err)
+		log.Fatal("failed to init intro course developer phase type: ", err)
 	}
 
 	err = initDevOpsChallenge()
@@ -45,5 +45,10 @@ func InitCoursePhaseTypeModule(routerGroup *gin.RouterGroup, queries db.Queries,
 	err = initTeamAllocation()
 	if err != nil {
 		log.Fatal("failed to init team allocation phase type: ", err)
+	}
+
+	err = initSelfTeamAllocation()
+	if err != nil {
+		log.Fatal("failed to init self team allocation phase type: ", err)
 	}
 }

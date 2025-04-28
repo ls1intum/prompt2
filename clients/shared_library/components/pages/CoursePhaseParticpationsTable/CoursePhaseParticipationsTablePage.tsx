@@ -28,31 +28,14 @@ import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 
-export interface ExtraParticipationColumn {
-  id: string
-  header: string
-  accessorFn: (row: CoursePhaseParticipationWithStudent) => React.ReactNode
-  enableSorting?: boolean
-  sortingFn?: (
-    rowA: CoursePhaseParticipationWithStudent,
-    rowB: CoursePhaseParticipationWithStudent,
-  ) => number
-  enableColumnFilter?: boolean
-  filterFn?: (row: CoursePhaseParticipationWithStudent, filterValue: string) => boolean
-  extraData: ExtraParticipationData[]
-}
-
-export interface ExtraParticipationData {
-  courseParticipationID: string
-  value: React.ReactNode
-}
+import { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
   prevDataKeys: string[]
   restrictedDataKeys: string[]
   studentReadableDataKeys: string[]
-  extraColumns?: ExtraParticipationColumn[]
+  extraColumns?: ExtraParticipationTableColumn[]
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
 }
 
@@ -139,21 +122,20 @@ export const CoursePhaseParticipationsTablePage = ({
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
             <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
-            {table.getSelectedRowModel().rows.length > 0 && (
-              <GroupActionsMenu
-                selectedRows={table.getSelectedRowModel()}
-                onClose={() => table.resetRowSelection()}
-                onExport={() => {
-                  downloadParticipations(
-                    table.getSelectedRowModel().rows.map((row) => row.original),
-                    prevDataKeys,
-                    restrictedDataKeys,
-                    studentReadableDataKeys,
-                  )
-                  table.resetRowSelection()
-                }}
-              />
-            )}
+            <GroupActionsMenu
+              disabled={table.getSelectedRowModel().rows.length === 0}
+              selectedRows={table.getSelectedRowModel()}
+              onClose={() => table.resetRowSelection()}
+              onExport={() => {
+                downloadParticipations(
+                  table.getSelectedRowModel().rows.map((row) => row.original),
+                  prevDataKeys,
+                  restrictedDataKeys,
+                  studentReadableDataKeys,
+                )
+                table.resetRowSelection()
+              }}
+            />
           </div>
         </div>
       </div>

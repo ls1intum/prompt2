@@ -33,6 +33,9 @@ on:
       server_team_allocation_image_tag:
         required: true
         type: string
+      server_self_team_allocation_image_tag:
+        required: true
+        type: string
       server_assessment_image_tag:
         required: true
         type: string
@@ -43,6 +46,9 @@ on:
         required: true
         type: string
       team_allocation_image_tag:
+        required: true
+        type: string
+      self_team_allocation_image_tag:
         required: true
         type: string
 
@@ -144,6 +150,7 @@ jobs:
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_HOST=${{ vars.DEVOPS_CHALLENGE_HOST }}" >> .env.prod
             echo "TEAM_ALLOCATION_HOST=${{ vars.TEAM_ALLOCATION_HOST }}" >> .env.prod
+            echo "SELF_TEAM_ALLOCATION_HOST=${{ vars.SELF_TEAM_ALLOCATION_HOST }}" >> .env.prod
             echo "ASSESSMENT_HOST=${{ vars.ASSESSMENT_HOST }}" >> .env.prod
             echo "CHAIR_NAME_SHORT=${{ vars.CHAIR_NAME_SHORT }}" >> .env.prod
             echo "CHAIR_NAME_LONG=${{ vars.CHAIR_NAME_LONG }}" >> .env.prod
@@ -159,6 +166,8 @@ jobs:
             echo "DB_PORT_INTRO_COURSE=${{ vars.DB_PORT_INTRO_COURSE }}" >> .env.prod
             echo "DB_HOST_TEAM_ALLOCATION=${{ vars.DB_HOST_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_PORT_TEAM_ALLOCATION=${{ vars.DB_PORT_TEAM_ALLOCATION }}" >> .env.prod
+            echo "DB_HOST_SELF_TEAM_ALLOCATION=${{ vars.DB_HOST_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "DB_PORT_SELF_TEAM_ALLOCATION=${{ vars.DB_PORT_SELF_TEAM_ALLOCATION }}" >> .env.prod
 
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
@@ -173,6 +182,8 @@ jobs:
             echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
             echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
+            echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
+
             echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
@@ -182,6 +193,8 @@ jobs:
             echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_IMAGE_TAG=${{ inputs.devops_challenge_image_tag }}" >> .env.prod
             echo "TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.team_allocation_image_tag }}" >> .env.prod
+            echo "SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.self_team_allocation_image_tag }}" >> .env.prod
+
 
             echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL_ADDRESS }}" >> .env.prod
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
