@@ -10,6 +10,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
+	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -79,7 +80,8 @@ func inviteUsersHandler(c *gin.Context) {
 		return
 	}
 
-	participations, err := coreRequests.SendGetCoursePhaseParticipations(authHeader, coursePhaseID)
+	coreURL := utils.GetCoreUrl()
+	participations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get course phase participations"})
 		return
