@@ -87,7 +87,7 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className=''>
-        <div className='flex flex-col h-full p-6 sm:max-w-[650px] max-h-[90vh] overflow-hidden'>
+        <div className='flex flex-col h-full sm:max-w-[650px] max-h-[90vh] overflow-hidden'>
           <DialogHeader className='bg-background z-5 pb-2'>
             <DialogTitle className='text-xl flex items-center gap-2'>
               <span className='font-semibold'>
