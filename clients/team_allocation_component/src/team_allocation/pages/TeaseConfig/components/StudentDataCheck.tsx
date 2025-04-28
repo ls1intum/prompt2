@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Loader2, Users, ArrowRight } from 'lucide-react'
+import { Loader2, Users, ArrowRight } from 'lucide-react'
 
 import { getAllTeaseStudents } from '../../../network/queries/getAllTeaseStudents'
 import type { TeaseStudent } from '../../../interfaces/tease/student'
@@ -10,11 +10,11 @@ import DataCompletionSummary from './DataCompletionSummary'
 import { CheckItem } from './CheckItem'
 import { checksConfig } from './ChecksConfig'
 
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import SurveySubmissionOverview from './SurveySubmissionOverview'
+import { ErrorPage } from '@/components/ErrorPage'
 
 export const StudentDataCheck = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -74,31 +74,19 @@ export const StudentDataCheck = (): JSX.Element => {
 
   if (isPending) {
     return (
-      <div className='flex flex-col items-center justify-center h-64 space-y-4'>
-        <Loader2 className='h-10 w-10 animate-spin text-primary' />
-        <p className='text-muted-foreground'>Loading student data...</p>
-        <div className='w-full max-w-md'>
-          <Skeleton className='h-4 w-full mb-2' />
-          <Skeleton className='h-4 w-3/4' />
-        </div>
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <Card className='border-red-200 bg-red-50'>
-        <CardContent className='flex flex-col items-center justify-center p-6 text-center'>
-          <AlertCircle className='h-12 w-12 text-red-500 mb-4' />
-          <h3 className='text-lg font-medium mb-2'>Failed to load student data</h3>
-          <p className='text-muted-foreground mb-4'>
-            There was an error retrieving the student information. Please try again.
-          </p>
-          <Button onClick={() => refetch()} variant='outline'>
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
+      <ErrorPage
+        onRetry={() => {
+          refetch()
+        }}
+      />
     )
   }
 

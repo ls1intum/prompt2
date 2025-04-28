@@ -38,6 +38,9 @@ on:
       team_allocation_image_tag:
         description: "The tag of the team allocation image that was built"
         value: ${{ jobs.team-allocation.outputs.image_tag }}
+      self_team_allocation_image_tag:
+        description: "The tag of the self team allocation image that was built"
+        value: ${{ jobs.self-team-allocation.outputs.image_tag }}
 
 jobs:
   clients-base:
@@ -174,3 +177,16 @@ jobs:
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
     secrets: inherit
+
+  self-team-allocation:
+      needs: clients-base
+      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+      with:
+        image-name: ghcr.io/ls1intum/prompt2/prompt-clients-self-team-allocation-component
+        docker-file: clients/self_team_allocation_component/Dockerfile # Defaults to Dockerfile
+        docker-context: ./clients/self_team_allocation_component
+        tags: ${{ inputs.release_tag }}
+        build-args: |
+          "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+          "CORE_HOST=${{ vars.CORE_HOST }}"
+      secrets: inherit

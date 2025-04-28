@@ -14100,6 +14100,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"self_team_allocation_component@workspace:self_team_allocation_component":
+  version: 0.0.0-use.local
+  resolution: "self_team_allocation_component@workspace:self_team_allocation_component"
+  dependencies:
+    webpack: "npm:^5.91.0"
+    webpack-cli: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
+
 "selfsigned@npm:^2.4.1":
   version: 2.4.1
   resolution: "selfsigned@npm:2.4.1"

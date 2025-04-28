@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import type { DeveloperProfile } from '../../../interfaces/DeveloperProfile'
 import { GitlabStatus } from '../../../interfaces/GitlabStatus'
+import translations from '@/lib/translations.json'
 
 export type ParticipantWithProfile = {
   participation: CoursePhaseParticipationWithStudent
@@ -20,17 +21,20 @@ export const useDownloadDeveloperProfiles = () => {
         return value
       }
 
-      const header = 'First Name,Last Name,Apple ID,MacBook,iPhone,iPad,Apple Watch\n'
+      const header = `First Name,Last Name,${translations.university['login-name']},Matriculation,Apple ID,MacBook,iPhone,iPad,Apple Watch,GitlabID\n`
       const rows = participants
         .map(({ participation, devProfile }) => {
           const firstName = escapeCsv(participation.student.firstName)
           const lastName = escapeCsv(participation.student.lastName)
+          const universityLogin = escapeCsv(participation.student.universityLogin || '')
+          const matriculationNumber = escapeCsv(participation.student.matriculationNumber || '')
           const appleID = escapeCsv(devProfile?.appleID || '')
           const macBook = devProfile?.hasMacBook ? 'true' : 'false'
           const iPhone = escapeCsv(devProfile?.iPhoneUDID || '')
           const iPad = escapeCsv(devProfile?.iPadUDID || '')
           const appleWatch = escapeCsv(devProfile?.appleWatchUDID || '')
-          return `${firstName},${lastName},${appleID},${macBook},${iPhone},${iPad},${appleWatch}`
+          const gitlabUsername = escapeCsv(devProfile?.gitLabUsername || '')
+          return `${firstName},${lastName},${universityLogin},${matriculationNumber},${appleID},${macBook},${iPhone},${iPad},${appleWatch}, ${gitlabUsername}`
         })
         .join('\n')
       const csvContent = header + rows

@@ -4,6 +4,7 @@ import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { StudentSurveyPage } from '../src/team_allocation/pages/StudentSurvey/StudentSurveyPage'
 import { TeamAllocationPage } from '../src/team_allocation/pages/TeamAllocation/TeamAllocationPage'
 import { TeaseConfigPage } from '../src/team_allocation/pages/TeaseConfig/TeaseConfigPage'
+import { ParticipantsPage } from '../src/team_allocation/pages/Participants/ParticipantsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
@@ -29,6 +30,11 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '/allocations',
     element: <TeamAllocationPage />,
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/participants',
+    element: <ParticipantsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
 ]

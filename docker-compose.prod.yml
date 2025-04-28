@@ -132,6 +132,36 @@ services:
     networks:
       - prompt-network
 
+  server-self-team-allocation:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-self-team-allocation:${SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG}"
+    container_name: prompt-server-self-team-allocation
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-self-team-allocation.rule=Host(`${CORE_HOST}`) && PathPrefix(`/self-team-allocation/api`)"
+      - "traefik.http.services.server-self-team-allocation.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-self-team-allocation.entrypoints=websecure"
+      - "traefik.http.routers.server-self-team-allocation.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server-self-team-allocation.middlewares=api-ratelimit"
+    depends_on:
+      db-self-team-allocation:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST_SELF_TEAM_ALLOCATION
+      - DB_PORT_SELF_TEAM_ALLOCATION
+      - DB_NAME
+      - DB_PASSWORD
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+    networks:
+      - prompt-network
+
   server-assessment:
     image: "ghcr.io/ls1intum/prompt2/prompt-server-assessment:${SERVER_ASSESSMENT_IMAGE_TAG}"
     container_name: prompt-server-assessment
@@ -208,6 +238,24 @@ services:
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_team_allocation_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prompt-network
+    
+  db-self-team-allocation:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-self-team-allocation
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_self_team_allocation_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -377,6 +425,26 @@ services:
     networks:
       - prompt-network
 
+  client-self-team-allocation-component:
+    image: "ghcr.io/ls1intum/prompt2/prompt-clients-self-team-allocation-component:${SELF_TEAM_ALLOCATION_IMAGE_TAG}"
+    container_name: prompt-client-self-team-allocation-component
+    environment:
+      - TZ=Europe/Berlin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.self-team-allocation.rule=Host(`${CORE_HOST}`) && PathPrefix(`/self-team-allocation`)"
+      - "traefik.http.routers.self-team-allocation.entrypoints=websecure"
+      - "traefik.http.routers.self-team-allocation.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.self-team-allocation-strip-prefix.stripPrefix.prefixes=/self-team-allocation"
+      - "traefik.http.routers.self-team-allocation.middlewares=self-team-allocation-strip-prefix,self-team-allocation-compress"
+      - "traefik.http.middlewares.self-team-allocation-compress.compress=true"
+    expose:
+      - "80"
+    depends_on:
+      - server-core
+    networks:
+      - prompt-network
+
   client-template-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-template-component:${TEMPLATE_IMAGE_TAG}"
     container_name: prompt-client-template-component
@@ -414,6 +482,7 @@ services:
       - DEVOPS_CHALLENGE_HOST
       - ASSESSMENT_HOST
       - TEAM_ALLOCATION_HOST
+      - SELF_TEAM_ALLOCATION_HOST
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
