@@ -45,6 +45,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
           value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
+          stringValue: s.scoreLevel,
         })),
       },
     ]
