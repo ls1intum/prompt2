@@ -17,19 +17,6 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/prompt-shared-state'
 import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 
-import { ErrorPage } from '@/components/ErrorPage'
-import { Button } from '@/components/ui/button'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-
 import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
 import { FilterMenu } from './components/FilterMenu'
@@ -37,6 +24,19 @@ import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { SelectStudentsDialog } from './components/SelectStudentsDialog'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { columns } from './columns'
+import {
+  ErrorPage,
+  Button,
+  ScrollArea,
+  ScrollBar,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  ManagementPageHeader,
+} from '@tumaet/prompt-ui-components'
 
 export const ResultsOverviewPage = (): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([])
