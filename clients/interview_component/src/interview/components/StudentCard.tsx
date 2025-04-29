@@ -1,16 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GraduationCap, BookOpen, Mic, FileUserIcon } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Avatar,
+  AvatarFallback,
+  Separator,
+  Badge,
+} from '@tumaet/prompt-ui-components'
+import { AvatarImage } from '@radix-ui/react-avatar'
 import {
   getStudyDegreeString,
   CoursePhaseParticipationWithStudent,
 } from '@tumaet/prompt-shared-state'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { AvatarImage } from '@radix-ui/react-avatar'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 import { getStatusColor } from '@/lib/getStatusColor'
-import { Separator } from '@/components/ui/separator'
 import { InterviewSlot } from '../interfaces/InterviewSlots'
-import { Badge } from '@/components/ui/badge'
 
 interface StudentCardProps {
   participation: CoursePhaseParticipationWithStudent
