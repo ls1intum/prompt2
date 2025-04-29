@@ -4640,9 +4640,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-ui-components@npm:^0.0.12":
-  version: 0.0.12
-  resolution: "@tumaet/prompt-ui-components@npm:0.0.12"
+"@tumaet/prompt-ui-components@npm:^0.0.13":
+  version: 0.0.13
+  resolution: "@tumaet/prompt-ui-components@npm:0.0.13"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -4701,7 +4701,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.15"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/52557deedd49adb6f19a1487feb2470f5b0beaf5d7ed60bce5d094c9d992704b2e4a479a95d61d669b70606dd301517b29bbbe3dcbc8790d187a0fbf1604bba7
+  checksum: 10c0/a62843def06cec327534059e644f4b9f118e5f473bdeff30f160b5f00f5c6bbfd9764ccf02836d16f3a218a1affc7f0c4a7fe35403a7a364d8e1f03344f14aa7
   languageName: node
   linkType: hard
 
@@ -10145,15 +10145,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"intro_course_tutor_component@workspace:intro_course_tutor_component":
-  version: 0.0.0-use.local
-  resolution: "intro_course_tutor_component@workspace:intro_course_tutor_component"
-  dependencies:
-    webpack: "npm:^5.91.0"
-    webpack-cli: "npm:^5.1.4"
-  languageName: unknown
-  linkType: soft
-
 "invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
@@ -14108,7 +14099,7 @@ __metadata:
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
     "@tumaet/prompt-shared-state": "npm:^0.0.21"
-    "@tumaet/prompt-ui-components": "npm:^0.0.12"
+    "@tumaet/prompt-ui-components": "npm:^0.0.13"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"

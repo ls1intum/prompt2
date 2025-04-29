@@ -6,8 +6,7 @@ import {
   getStudyDegreeString,
 } from '@tumaet/prompt-shared-state'
 import { Mail, Flag, Book, GraduationCap, Calendar, Hash, Users, KeyRound } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
 import { getCountryName } from '@/lib/getCountries'
 import translations from '@/lib/translations.json'
 import { AvatarImage } from '@radix-ui/react-avatar'

@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
-import { Label } from '@/components/ui/label'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import MailingTiptapEditor from '@/components/minimal-tiptap/mailing-tiptap'
+import {
+  Label,
+  TooltipProvider,
+  Input,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  MailingTiptapEditor,
+} from '@tumaet/prompt-ui-components'
 
 interface EmailTemplateEditorProps {
   subject: string
