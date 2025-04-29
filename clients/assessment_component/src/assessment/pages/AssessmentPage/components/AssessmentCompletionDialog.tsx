@@ -1,13 +1,14 @@
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
+  Button,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 
 import { format } from 'date-fns'
 
