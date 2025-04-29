@@ -29,6 +29,7 @@ import {
   TooltipTrigger,
   TooltipContent,
   Button,
+  useCustomElementWidth,
 } from '@tumaet/prompt-ui-components'
 import type { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
@@ -45,7 +46,6 @@ import { GitlabStatus } from '../../interfaces/GitlabStatus'
 import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
 import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
 import { CreateGitlabReposDialog } from './components/CreateGitlabReposDialog'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog

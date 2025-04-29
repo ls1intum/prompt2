@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
   Input,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 import {
   CourseType,
@@ -33,7 +34,6 @@ import {
 } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
-import { useToast } from '@/hooks/use-toast'
 
 interface CourseEditDialogProps {
   isOpen: boolean

@@ -36,7 +36,7 @@ import { DeleteConfirmation } from '../components/DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 import { checkCheckBoxQuestion } from '@core/publicPages/application/pages/ApplicationForm/utils/CheckBoxRequirements'
-import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
+import { DescriptionMinimalTiptapEditor } from '@tumaet/prompt-ui-components'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {

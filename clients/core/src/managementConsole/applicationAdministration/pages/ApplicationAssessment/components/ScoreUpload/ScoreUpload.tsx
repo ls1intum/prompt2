@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 import { AssessmentScoreUploadPage1, Page1Ref } from './components/AssessmentScoreUploadPage1'
 import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentScoreUploadPage2'
@@ -17,7 +18,6 @@ import { ApplicationParticipation } from '../../../../interfaces/applicationPart
 import { AdditionalScoreUpload } from '../../../../interfaces/additionalScore/additionalScoreUpload'
 import { IndividualScore } from '../../../../interfaces/additionalScore/individualScore'
 import { postAdditionalScore } from '@core/network/mutations/postAdditionalScore'
-import { useToast } from '@/hooks/use-toast'
 import { matchStudents } from './utils/matchStudents'
 
 interface AssessmentScoreUploadProps {

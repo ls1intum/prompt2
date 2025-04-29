@@ -15,7 +15,6 @@ import {
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { CoursePhaseParticipationsWithResolution, PassStatus } from '@tumaet/prompt-shared-state'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 
 import { DeveloperWithInfo } from '../../interfaces/DeveloperWithInfo'
 import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
@@ -36,6 +35,7 @@ import {
   TableHeader,
   TableRow,
   ManagementPageHeader,
+  useCustomElementWidth,
 } from '@tumaet/prompt-ui-components'
 
 export const ResultsOverviewPage = (): JSX.Element => {

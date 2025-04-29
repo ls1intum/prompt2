@@ -1,10 +1,15 @@
-import { Button } from '@/components/ui/button'
 import { Send } from 'lucide-react'
 import { PassStatus, CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { ConfirmSendEmailDialog } from './ConfirmSendEmailDialog'
-import { Label } from '@/components/ui/label'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Button,
+  Label,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 
 interface ManualMailSendingProps {

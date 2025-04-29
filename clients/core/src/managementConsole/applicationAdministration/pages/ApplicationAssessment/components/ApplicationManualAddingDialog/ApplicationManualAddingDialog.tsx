@@ -14,8 +14,8 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  useToast,
 } from '@tumaet/prompt-ui-components'
-import { useToast } from '@/hooks/use-toast'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { UniversitySelection } from './components/UniversitySelection'
