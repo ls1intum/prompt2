@@ -1,11 +1,9 @@
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { Separator } from '@/components/ui/separator'
 import { KeycloakGroupCreation } from './components/KeycloakGroupCreation'
 import { TutorImportDialog } from './components/TutorImportDialog'
 import { TutorTable } from './components/TutorTable'
 import { useGetCoursePhase } from '@/hooks/useGetCoursePhase'
 import { Loader2 } from 'lucide-react'
-import { ErrorPage } from '@/components/ErrorPage'
+import { ManagementPageHeader, ErrorPage, Separator } from '@tumaet/prompt-ui-components'
 
 export const TutorImportPage = () => {
   const {

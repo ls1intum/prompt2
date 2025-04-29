@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { Laptop, Smartphone, Tablet, Watch, AlertTriangle, CheckCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -9,20 +11,17 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Laptop, Smartphone, Tablet, Watch, AlertTriangle, CheckCircle } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
-import {
+  Button,
+  Input,
+  Checkbox,
+  Separator,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from '@tumaet/prompt-ui-components'
 import { updateDeveloperProfile } from '../../../network/mutations/updateDeveloperProfile'
 import type { PostDeveloperProfile } from '../../../interfaces/PostDeveloperProfile'
 import {
@@ -31,7 +30,6 @@ import {
 } from '../../../validations/instructorDevProfile'
 import type { ParticipationWithDevProfiles } from '../interfaces/pariticipationWithDevProfiles'
 import { updateGitLabStatusCreated } from '../../../network/mutations/updateGitlabStatus'
-import { useState } from 'react'
 
 interface ProfileDetailsDialogProps {
   participantWithProfile: ParticipationWithDevProfiles

@@ -1,7 +1,7 @@
 import { DeveloperProfileForm } from './DeveloperProfileForm'
 import { useIntroCourseStore } from '../../zustand/useIntroCourseStore'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postDeveloperProfile } from '../../network/mutations/postDeveloperProfile'

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { Smartphone, Laptop, HelpCircle } from 'lucide-react'
 
 export default function IOSUDIDDialog() {

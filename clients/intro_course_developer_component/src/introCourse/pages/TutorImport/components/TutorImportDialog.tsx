@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { Loader2, UserPlus } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCourseStore, Student } from '@tumaet/prompt-shared-state'
+import { getStudentsOfCoursePhase } from '../../../network/queries/getStudentsOfCoursePhase'
+import { importTutors } from '../../../network/mutations/importTutors'
+import { StudentSelection } from './StudentSelection'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -8,23 +15,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Loader2, UserPlus } from 'lucide-react'
-import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getStudentsOfCoursePhase } from '../../../network/queries/getStudentsOfCoursePhase'
-import { StudentSelection } from './StudentSelection'
-import { Student } from '@tumaet/prompt-shared-state'
-import { Label } from '@/components/ui/label'
-import { importTutors } from '../../../network/mutations/importTutors'
-import { useParams } from 'react-router-dom'
+  Label,
+} from '@tumaet/prompt-ui-components'
 
 export function TutorImportDialog() {
   // Destination course/phase come from URL parameters.

@@ -1,12 +1,6 @@
 import { useState } from 'react'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { useQuery } from '@tanstack/react-query'
-import type { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
-import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
-import type { DeveloperProfile } from '../../interfaces/DeveloperProfile'
-import { ErrorPage } from '@/components/ErrorPage'
+import { useQuery } from '@tanstack/react-query'
 import {
   Laptop,
   Loader2,
@@ -21,15 +15,25 @@ import {
   Download,
   TriangleAlert,
 } from 'lucide-react'
-
 import {
+  ManagementPageHeader,
+  ErrorPage,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+  Button,
+} from '@tumaet/prompt-ui-components'
+import type { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
+import { getAllDeveloperProfiles } from '../../network/queries/getAllDeveloperProfiles'
+import type { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 import { ProfileDetailsDialog } from './components/ProfileDetailsDialog'
 import { useGetParticipationsWithProfiles } from './hooks/useGetParticipationsWithProfiles'
 import { useGetSortedParticipations } from './hooks/useGetSortedParticipations'
@@ -40,8 +44,6 @@ import { useDownloadDeveloperProfiles } from './hooks/useDownloadDeveloperProfil
 import { GitlabStatus } from '../../interfaces/GitlabStatus'
 import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
 import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
 import { CreateGitlabReposDialog } from './components/CreateGitlabReposDialog'
 import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 

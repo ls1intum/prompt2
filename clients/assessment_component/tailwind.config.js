@@ -4,5 +4,5 @@ import sharedConfig from '@tumaet/prompt-ui-components/tailwind-config'
 export const presets = [sharedConfig]
 export const content = [
   'src/**/*.{ts,tsx}',
-  '../node_modules/tumaet/prompt-ui-components/dist/**/*.{ts,tsx}',
+  '../node_modules/@tumaet/prompt-ui-components/dist/**/*.{ts,tsx}',
 ]
