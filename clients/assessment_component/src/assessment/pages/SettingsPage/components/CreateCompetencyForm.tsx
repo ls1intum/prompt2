@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { AlertCircle } from 'lucide-react'
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
 import type { CreateCompetencyRequest } from '../../../interfaces/competency'
