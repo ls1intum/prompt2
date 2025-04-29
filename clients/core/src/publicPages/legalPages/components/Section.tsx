@@ -1,4 +1,4 @@
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@tumaet/prompt-ui-components'
 
 export const Section = ({
   title,

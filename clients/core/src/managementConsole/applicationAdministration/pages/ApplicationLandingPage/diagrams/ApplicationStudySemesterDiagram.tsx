@@ -1,11 +1,15 @@
 import { Bar, BarChart, XAxis, YAxis } from 'recharts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { useMemo } from 'react'
 

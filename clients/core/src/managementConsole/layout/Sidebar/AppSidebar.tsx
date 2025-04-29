@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Sidebar } from '@/components/ui/sidebar'
+import { Sidebar } from '@tumaet/prompt-ui-components'
 import { InsideSidebar } from './InsideSidebar/InsideSidebar'
 import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
 

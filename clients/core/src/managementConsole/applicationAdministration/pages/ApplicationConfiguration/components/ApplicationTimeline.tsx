@@ -1,5 +1,5 @@
 import { differenceInDays, format } from 'date-fns'
-import { Progress } from '@/components/ui/progress'
+import { Progress } from '@tumaet/prompt-ui-components'
 
 interface ApplicationTimelineProps {
   startDate: Date | undefined
