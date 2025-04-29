@@ -1,9 +1,16 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Github, ExternalLink, Clipboard, Check, AlertCircle } from 'lucide-react'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@tumaet/prompt-ui-components'
+import { Github, ExternalLink, Clipboard, Check, AlertCircle } from 'lucide-react'
 
 export const RepositoryInformation = (): JSX.Element => {
   const developerQuery = useGetDeveloperProfile()
