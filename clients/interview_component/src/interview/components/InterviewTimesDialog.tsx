@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Clock, Plus, Trash } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -6,23 +7,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Clock, Plus, Trash } from 'lucide-react'
-import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
-import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
-import { useParticipationStore } from '../zustand/useParticipationStore'
-import { Input } from '@/components/ui/input'
-import {
+  Button,
+  Separator,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  ScrollArea,
+} from '@tumaet/prompt-ui-components'
+import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
+import { useParticipationStore } from '../zustand/useParticipationStore'
 import { InterviewSlot } from '../interfaces/InterviewSlots'
+import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
 
 export const InterviewTimesDialog = () => {
   const { coursePhase } = useCoursePhaseStore()
