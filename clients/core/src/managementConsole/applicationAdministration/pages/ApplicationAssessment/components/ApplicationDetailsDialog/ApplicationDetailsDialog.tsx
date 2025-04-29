@@ -1,25 +1,24 @@
+import { useQuery } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+  ErrorPage,
+} from '@tumaet/prompt-ui-components'
 import { GetApplication } from '@core/interfaces/application/getApplication'
-import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
 import { getApplicationAssessment } from '@core/network/queries/applicationAssessment'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { MissingUniversityData } from './components/MissingUniversityData'
-import { Loader2 } from 'lucide-react'
-import { ErrorPage } from '@/components/ErrorPage'
 import { getStatusBadge } from '../../utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-
 import { AssessmentCard } from './components/AssessmentCard'
-import { StudentProfile } from '@/components/StudentProfile'
 import { ApplicationAnswersTable } from '../table/ApplicationAnswersTable'
+import { StudentProfile } from '@/components/StudentProfile'
 
 interface ApplicationDetailsDialogProps {
   courseParticipationID: string

@@ -8,9 +8,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+  Input,
+  Textarea,
+} from '@tumaet/prompt-ui-components'
 import { QuestionTextFormRef } from '../../utils/QuestionTextFormRef'
 import { createValidationSchema } from './validationSchema'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'

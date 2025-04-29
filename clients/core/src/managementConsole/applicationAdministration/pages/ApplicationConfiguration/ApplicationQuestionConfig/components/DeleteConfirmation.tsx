@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@tumaet/prompt-ui-components'
 import { AlertTriangle } from 'lucide-react'
 
 interface DeleteConfirmationProps {

@@ -1,13 +1,18 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
+import { useState } from 'react'
+import { Send, Trash2 } from 'lucide-react'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Separator,
+  Textarea,
+} from '@tumaet/prompt-ui-components'
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 import { InstructorComment } from '../../../../../interfaces/instructorComment'
-import { Send, Trash2 } from 'lucide-react'
-import { useState } from 'react'
 import { useModifyAssessment } from '../hooks/mutateAssessment'
 import { ApplicationAssessment } from '@core/managementConsole/applicationAdministration/interfaces/applicationAssessment'
 

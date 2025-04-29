@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@tumaet/prompt-ui-components'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { X } from 'lucide-react'
 

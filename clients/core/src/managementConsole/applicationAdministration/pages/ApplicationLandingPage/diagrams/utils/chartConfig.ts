@@ -1,4 +1,4 @@
-import { ChartConfig } from '@/components/ui/chart'
+import { ChartConfig } from '@tumaet/prompt-ui-components'
 
 export const chartConfig: ChartConfig = {
   notAssessed: {

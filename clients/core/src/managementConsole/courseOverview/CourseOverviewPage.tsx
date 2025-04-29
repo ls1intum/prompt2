@@ -5,7 +5,13 @@ import {
   useCourseStore,
 } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@tumaet/prompt-ui-components'
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { EditCourseDropdown } from './components/EditCourseDropdown'

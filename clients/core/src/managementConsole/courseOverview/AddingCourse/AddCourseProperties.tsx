@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
+  Button,
+  Input,
   Form,
   FormControl,
   FormDescription,
@@ -9,18 +9,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { courseFormSchema, CourseFormValues } from '@core/validations/course'
-import { DatePickerWithRange } from '@/components/DateRangePicker'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import {
+  DatePickerWithRange,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@tumaet/prompt-ui-components'
+import { courseFormSchema, CourseFormValues } from '@core/validations/course'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 import { CourseType, CourseTypeDetails } from '@tumaet/prompt-shared-state'
 
 interface AddCoursePropertiesProps {
