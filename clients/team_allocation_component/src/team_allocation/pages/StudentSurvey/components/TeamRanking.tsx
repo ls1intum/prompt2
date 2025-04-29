@@ -1,5 +1,11 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { ClipboardList, GripVertical } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'

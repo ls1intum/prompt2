@@ -1,6 +1,4 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge, Button, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
