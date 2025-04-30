@@ -7,7 +7,7 @@ export const contributorMapping: {
 } = {
   Mtze: {
     name: 'Matthias Linhuber',
-    contribution: 'Project Manager',
+    contribution: 'Project Manager, Architect',
     position: 1,
   },
   niclasheun: {
@@ -27,12 +27,12 @@ export const contributorMapping: {
   },
   rappm: {
     name: 'Maximilian Rapp',
-    contribution: 'Grading',
+    contribution: 'Assessment',
     position: 5,
   },
   phnagy: {
     name: 'Philipp Nagy',
-    contribution: 'TEASE',
+    contribution: 'TEASE - Team Allocation Decision Support System',
     position: 6,
   },
   robertjndw: {
