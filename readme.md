@@ -21,7 +21,7 @@ PROMPT 2.0 is designed around the principle that a course consists of a sequence
 
 ### Additional Components
 - **Authentication:** Uses Keycloak for identity management.
-- **Database:** Postgresql is used for the database service.
+- **Database:** PostgreSQL is used for the database service.
 
 ---
 
