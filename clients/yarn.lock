@@ -4640,9 +4640,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-ui-components@npm:^0.0.14":
-  version: 0.0.14
-  resolution: "@tumaet/prompt-ui-components@npm:0.0.14"
+"@tumaet/prompt-ui-components@npm:^0.0.15":
+  version: 0.0.15
+  resolution: "@tumaet/prompt-ui-components@npm:0.0.15"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -4701,7 +4701,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.15"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/f5110de606d3a5849a14fa149b1bbf604cc8e565bd6e10f2c659e1e1d440a427d58bac621223a4374d84f7ac7d56e6772dcaa988c0d62781079b8ad85813292a
+  checksum: 10c0/8a23c8e3aab12a5901091409f869d019e373faf9eb7617924d373cb796455097b9901d9b8805c35f78ca949814481234dbc665f63da16d5e16b5b25f69dd5cbe
   languageName: node
   linkType: hard
 
@@ -14099,7 +14099,7 @@ __metadata:
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
     "@tumaet/prompt-shared-state": "npm:^0.0.21"
-    "@tumaet/prompt-ui-components": "npm:^0.0.14"
+    "@tumaet/prompt-ui-components": "npm:^0.0.15"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"

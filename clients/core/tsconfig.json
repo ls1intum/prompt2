@@ -20,5 +20,5 @@
       "@managementConsole/*": ["src/managementConsole/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/index.js", "tailwind.config.js", "postcss.config.js"],
+  "include": ["**/*.ts", "**/*.tsx", "src/index.js", "tailwind.config.js"],
 }

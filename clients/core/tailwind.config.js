@@ -3,7 +3,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  safelist: ['dark', 'ProseMirror'],
+  safelist: [
+    'dark',
+    'ProseMirror',
+    {
+      pattern: /^(dark:)?(bg|text|border)-[a-z]+(?:-[a-z]+)*(?:-\d{1,3})?$/,
+      variants: ['dark'],
+    },
+  ],
   theme: {
     extend: {
       colors: {
@@ -60,7 +67,7 @@ module.exports = {
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
   content: [
-    'src/**/*.{ts,tsx}',
-    '../node_modules/@tumaet/prompt-ui-components/dist/components/**/*.{ts,tsx}',
+    './src/**/*.{js,ts,jsx,tsx}',
+    '../node_modules/@tumaet/prompt-ui-components/dist/**/*.{js,ts,jsx,tsx}',
   ],
 }
