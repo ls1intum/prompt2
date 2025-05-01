@@ -10,6 +10,7 @@ module.exports = {
       pattern: /^(dark:)?(bg|text|border)-[a-z]+(?:-[a-z]+)*(?:-\d{1,3})?$/,
       variants: ['dark'],
     },
+    'grid-cols-2',
   ],
   theme: {
     extend: {
