@@ -69,12 +69,25 @@ func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uu
 		},
 	}
 
-	bodyBytes, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", "https://api.appstoreconnect.apple.com/v1/userInvitations", bytes.NewBuffer(bodyBytes))
+	bodyBytes, err := json.Marshal(payload)
+	if err != nil {
+		return storeAppleError(ctx, coursePhaseID, participationID,
+			fmt.Errorf("failed to marshal invite payload: %w", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx,
+		"POST",
+		"https://api.appstoreconnect.apple.com/v1/userInvitations",
+		bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return storeAppleError(ctx, coursePhaseID, participationID,
+			fmt.Errorf("failed to create HTTP request: %w", err))
+	}
+
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("request failed: %w", err))
 	}
