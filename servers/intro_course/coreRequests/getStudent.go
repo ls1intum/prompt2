@@ -1,6 +1,8 @@
 package coreRequests
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
@@ -16,13 +18,10 @@ func SendGetStudent(authHeader string, coursePhaseID uuid.UUID, courseParticipat
 		return nil, err
 	}
 
-	var student promptTypes.Student
 	for _, s := range resp {
 		if s.CourseParticipationID == courseParticipationID {
-			student = s.Student
-			break
+			return &s.Student, nil
 		}
 	}
-
-	return &student, nil
+	return nil, fmt.Errorf("student with participation %s not found", courseParticipationID)
 }
