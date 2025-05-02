@@ -92,18 +92,18 @@ func registerDevicesHandler(c *gin.Context) {
 }
 
 func registerIPhoneHandler(c *gin.Context) {
-	handleSingleDevice(c, "iPhone")
+	registerSingleDeviceHandler(c, "iPhone")
 }
 
 func registerIPadHandler(c *gin.Context) {
-	handleSingleDevice(c, "iPad")
+	registerSingleDeviceHandler(c, "iPad")
 }
 
 func registerAppleWatchHandler(c *gin.Context) {
-	handleSingleDevice(c, "Apple Watch")
+	registerSingleDeviceHandler(c, "Apple Watch")
 }
 
-func handleSingleDevice(c *gin.Context, deviceType string) {
+func registerSingleDeviceHandler(c *gin.Context, deviceType string) {
 	coursePhaseID, err1 := uuid.Parse(c.Param("coursePhaseID"))
 	courseParticipationID, err2 := uuid.Parse(c.Param("courseParticipationID"))
 	authHeader := c.GetHeader("Authorization")
