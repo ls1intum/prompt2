@@ -13,8 +13,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -50,6 +52,34 @@ func GenerateJWT() (string, error) {
 		return "", err
 	}
 	return signedToken, nil
+}
+func InviteUsers(ctx context.Context, coursePhaseID uuid.UUID, participations []promptTypes.CoursePhaseParticipationWithStudent) ([]map[string]string, error) {
+	results := []map[string]string{}
+	for _, p := range participations {
+		devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, p.CoursePhaseID, p.CourseParticipationID)
+		if err != nil {
+			log.Error("DevProfile error for student ", p.Student.ID, ": ", err)
+			results = append(results, map[string]string{
+				"appleID": p.Student.Email,
+				"status":  "Failed to get developer profile",
+			})
+			continue
+		}
+
+		err = InviteUser(ctx, p.CoursePhaseID, p.CourseParticipationID, devProfile.AppleID, p.Student.FirstName, p.Student.LastName)
+		if err != nil {
+			results = append(results, map[string]string{
+				"appleID": devProfile.AppleID,
+				"status":  "Failed: " + err.Error(),
+			})
+		} else {
+			results = append(results, map[string]string{
+				"appleID": devProfile.AppleID,
+				"status":  "Success",
+			})
+		}
+	}
+	return results, nil
 }
 
 func InviteUser(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, appleID, firstName, lastName string) error {

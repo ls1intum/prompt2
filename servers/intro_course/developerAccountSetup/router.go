@@ -86,30 +86,10 @@ func inviteUsersHandler(c *gin.Context) {
 		return
 	}
 
-	var results []map[string]string
-	for _, p := range participations {
-		devProfile, err := developerProfile.GetOwnDeveloperProfile(c, p.CoursePhaseID, p.CourseParticipationID)
-		if err != nil {
-			log.Error("DevProfile error for student ", p.Student.ID, ": ", err)
-			results = append(results, map[string]string{
-				"appleID": p.Student.Email,
-				"status":  "Failed to get developer profile",
-			})
-			continue
-		}
-
-		err = InviteUser(c, p.CoursePhaseID, p.CourseParticipationID, devProfile.AppleID, p.Student.FirstName, p.Student.LastName)
-		if err != nil {
-			results = append(results, map[string]string{
-				"appleID": devProfile.AppleID,
-				"status":  "Failed: " + err.Error(),
-			})
-		} else {
-			results = append(results, map[string]string{
-				"appleID": devProfile.AppleID,
-				"status":  "Success",
-			})
-		}
+	results, err := InviteUsers(c, coursePhaseID, participations)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite users"})
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"results": results})
