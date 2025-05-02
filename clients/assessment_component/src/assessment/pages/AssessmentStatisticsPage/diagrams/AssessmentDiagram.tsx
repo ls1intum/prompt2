@@ -103,7 +103,7 @@ export const AssessmentDiagram = ({
                           y={(viewBox.cy || 0) + 24}
                           className='fill-muted-foreground'
                         >
-                          Applications
+                          Assessments
                         </tspan>
                       </text>
                     )
