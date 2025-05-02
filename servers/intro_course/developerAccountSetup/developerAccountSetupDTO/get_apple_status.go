@@ -9,7 +9,7 @@ import (
 type AppleStatus struct {
 	CoursePhaseID         uuid.UUID        `json:"coursePhaseID"`
 	CourseParticipationID uuid.UUID        `json:"courseParticipationID"`
-	GitlabSuccess         bool             `json:"gitlabSuccess"`
+	AppleSuccess          bool             `json:"appleSuccess"`
 	ErrorMessage          string           `json:"errorMessage"`
 	CreatedAt             pgtype.Timestamp `json:"createdAt"`
 	UpdatedAt             pgtype.Timestamp `json:"updatedAt"`
@@ -19,7 +19,7 @@ func getAppleStatusDTOFromModel(model db.StudentAppleProcess) AppleStatus {
 	return AppleStatus{
 		CoursePhaseID:         model.CoursePhaseID,
 		CourseParticipationID: model.CourseParticipationID,
-		GitlabSuccess:         model.AppleSuccess,
+		AppleSuccess:          model.AppleSuccess,
 		ErrorMessage:          model.ErrorMessage.String,
 		CreatedAt:             model.CreatedAt,
 		UpdatedAt:             model.UpdatedAt,
