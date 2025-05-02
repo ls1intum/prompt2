@@ -27,7 +27,7 @@ type DeveloperAccountSetupService struct {
 
 var DeveloperAccountSetupServiceSingleton *DeveloperAccountSetupService
 
-func InviteUsers(ctx context.Context, coursePhaseID uuid.UUID, participations []promptTypes.CoursePhaseParticipationWithStudent) ([]map[string]string, error) {
+func InviteUsers(ctx context.Context, participations []promptTypes.CoursePhaseParticipationWithStudent) ([]map[string]string, error) {
 	results := []map[string]string{}
 	for _, p := range participations {
 		devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, p.CoursePhaseID, p.CourseParticipationID)
@@ -75,7 +75,7 @@ func InviteAllUsers(ctx context.Context, authHeader string, coursePhaseID uuid.U
 	if err != nil {
 		return nil, fmt.Errorf("failed to get course phase participations: %w", err)
 	}
-	return InviteUsers(ctx, coursePhaseID, participations)
+	return InviteUsers(ctx, participations)
 }
 
 func RegisterAllDevices(ctx context.Context, authHeader string, coursePhaseID, courseParticipationID uuid.UUID, semesterTag string) ([]map[string]string, error) {
