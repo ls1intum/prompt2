@@ -13,6 +13,7 @@ import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
 
 import { AssessmentDiagram } from './diagrams/AssessmentDiagram'
+import { AssessmentScoreLevelDiagram } from './diagrams/AssessmentScoreLevelDiagram'
 
 export const AssessmentStatisticsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -53,8 +54,10 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Statistics</ManagementPageHeader>
 
-      <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
-      {/* Add your statistics components here */}
+      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6'>
+        <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
+        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+      </div>
     </div>
   )
 }
