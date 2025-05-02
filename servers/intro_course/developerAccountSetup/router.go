@@ -12,12 +12,12 @@ import (
 
 func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	accountSetup := router.Group("/developer_account")
-	accountSetup.POST("/invite/:coursePhaseID/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
-	accountSetup.POST("/invite_all/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
-	accountSetup.POST("/register_devices/:coursePhaseID/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerDevicesHandler)
-	accountSetup.POST("/register_iphone/:coursePhaseID/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPhoneHandler)
-	accountSetup.POST("/register_ipad/:coursePhaseID/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPadHandler)
-	accountSetup.POST("/register_apple_watch/:coursePhaseID/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerAppleWatchHandler)
+	accountSetup.POST("/invite/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
+	accountSetup.POST("/invite-all", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
+	accountSetup.POST("/register-devices/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerDevicesHandler)
+	accountSetup.POST("/register-iphone/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPhoneHandler)
+	accountSetup.POST("/register-ipad/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPadHandler)
+	accountSetup.POST("/register-apple-watch/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerAppleWatchHandler)
 }
 
 func inviteUserHandler(c *gin.Context) {
