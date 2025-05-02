@@ -30,12 +30,12 @@ type Seat struct {
 }
 
 type StudentAppleProcess struct {
-	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
-	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
-	AppleSuccess          pgtype.Bool        `json:"apple_success"`
-	ErrorMessage          pgtype.Text        `json:"error_message"`
-	CreatedAt             pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	AppleSuccess          bool             `json:"apple_success"`
+	ErrorMessage          pgtype.Text      `json:"error_message"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
 }
 
 type StudentGitlabProcess struct {

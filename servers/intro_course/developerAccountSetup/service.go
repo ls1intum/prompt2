@@ -11,8 +11,10 @@ import (
 	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/intro_course/coreRequests"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	"github.com/ls1intum/prompt2/servers/intro_course/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type DeveloperAccountSetupService struct {
@@ -136,4 +138,15 @@ func RegisterSingleDevice(ctx context.Context, authHeader string, coursePhaseID,
 
 	deviceName := semesterTag + "-" + student.LastName + "-" + deviceType
 	return registerDeviceWithApple(ctx, coursePhaseID, courseParticipationID, deviceName, udid.String, "IOS")
+}
+
+func GetAllStudentAppleStatus(c context.Context, coursePhaseID uuid.UUID) ([]developerAccountSetupDTO.AppleStatus, error) {
+	gitlabStatuses, err := DeveloperAccountSetupServiceSingleton.queries.GetAllAppleStatus(c, coursePhaseID)
+	if err != nil {
+		log.Error("Failed to get gitlab statuses: ", err)
+		return nil, err
+	}
+
+	return developerAccountSetupDTO.GetAppleStatusDTOsFromModels(gitlabStatuses), nil
+
 }

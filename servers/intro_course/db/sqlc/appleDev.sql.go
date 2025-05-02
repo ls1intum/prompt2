@@ -83,26 +83,3 @@ func (q *Queries) GetAllAppleStatus(ctx context.Context, coursePhaseID uuid.UUID
 	}
 	return items, nil
 }
-
-const getAppleStatus = `-- name: GetAppleStatus :one
-SELECT course_phase_id, course_participation_id, apple_success, error_message, created_at, updated_at FROM student_apple_processes WHERE course_phase_id = $1 AND course_participation_id = $2
-`
-
-type GetAppleStatusParams struct {
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-}
-
-func (q *Queries) GetAppleStatus(ctx context.Context, arg GetAppleStatusParams) (StudentAppleProcess, error) {
-	row := q.db.QueryRow(ctx, getAppleStatus, arg.CoursePhaseID, arg.CourseParticipationID)
-	var i StudentAppleProcess
-	err := row.Scan(
-		&i.CoursePhaseID,
-		&i.CourseParticipationID,
-		&i.AppleSuccess,
-		&i.ErrorMessage,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}

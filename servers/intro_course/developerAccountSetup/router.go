@@ -8,16 +8,22 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup/developerAccountSetupDTO"
+	log "github.com/sirupsen/logrus"
 )
 
 func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	accountSetup := router.Group("/developer_account")
+
 	accountSetup.POST("/invite/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUserHandler)
 	accountSetup.POST("/invite-all", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), inviteUsersHandler)
+
 	accountSetup.POST("/register-devices/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerDevicesHandler)
+
 	accountSetup.POST("/register-iphone/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPhoneHandler)
 	accountSetup.POST("/register-ipad/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerIPadHandler)
 	accountSetup.POST("/register-apple-watch/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerAppleWatchHandler)
+
+	accountSetup.GET("/status", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllStudentAppleStatus)
 }
 
 func inviteUserHandler(c *gin.Context) {
@@ -25,18 +31,22 @@ func inviteUserHandler(c *gin.Context) {
 	courseParticipationID, err2 := uuid.Parse(c.Param("courseParticipationID"))
 	authHeader := c.GetHeader("Authorization")
 
-	if err1 != nil || err2 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID or courseParticipationID"})
+	if err1 != nil {
+		handleError(c, http.StatusBadRequest, err1)
+		return
+	}
+	if err2 != nil {
+		handleError(c, http.StatusBadRequest, err2)
 		return
 	}
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		handleError(c, http.StatusUnauthorized, fmt.Errorf("missing Authorization header"))
 		return
 	}
 
 	err := HandleInviteUser(c, authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "User invited successfully"})
@@ -47,17 +57,17 @@ func inviteUsersHandler(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID"})
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		handleError(c, http.StatusUnauthorized, fmt.Errorf("missing Authorization header"))
 		return
 	}
 
 	results, err := InviteAllUsers(c, authHeader, coursePhaseID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"results": results})
@@ -68,24 +78,28 @@ func registerDevicesHandler(c *gin.Context) {
 	courseParticipationID, err2 := uuid.Parse(c.Param("courseParticipationID"))
 	authHeader := c.GetHeader("Authorization")
 
-	if err1 != nil || err2 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID or courseParticipationID"})
+	if err1 != nil {
+		handleError(c, http.StatusBadRequest, err1)
+		return
+	}
+	if err2 != nil {
+		handleError(c, http.StatusBadRequest, err2)
 		return
 	}
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		handleError(c, http.StatusUnauthorized, fmt.Errorf("missing Authorization header"))
 		return
 	}
 
 	var req developerAccountSetupDTO.AddDeviceRequest
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	results, err := RegisterAllDevices(c, authHeader, coursePhaseID, courseParticipationID, req.SemesterTag)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"results": results})
@@ -108,25 +122,50 @@ func registerSingleDeviceHandler(c *gin.Context, deviceType string) {
 	courseParticipationID, err2 := uuid.Parse(c.Param("courseParticipationID"))
 	authHeader := c.GetHeader("Authorization")
 
-	if err1 != nil || err2 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid coursePhaseID or courseParticipationID"})
+	if err1 != nil {
+		handleError(c, http.StatusBadRequest, err1)
+		return
+	}
+	if err2 != nil {
+		handleError(c, http.StatusBadRequest, err2)
 		return
 	}
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
+		handleError(c, http.StatusUnauthorized, fmt.Errorf("missing Authorization header"))
 		return
 	}
 
 	var req developerAccountSetupDTO.AddDeviceRequest
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err := RegisterSingleDevice(c, authHeader, coursePhaseID, courseParticipationID, req.SemesterTag, deviceType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to register %s: %v", deviceType, err)})
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": fmt.Sprintf("%s registered successfully", deviceType)})
+}
+
+func getAllStudentAppleStatus(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	studentAppleStatus, err := GetAllStudentAppleStatus(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, studentAppleStatus)
+}
+
+func handleError(c *gin.Context, statusCode int, err error) {
+	c.JSON(statusCode, gin.H{"error": err.Error()})
 }

@@ -18,6 +18,3 @@ DO UPDATE SET
 
 -- name: GetAllAppleStatus :many
 SELECT * FROM student_apple_processes WHERE course_phase_id = $1;
-
--- name: GetAppleStatus :one
-SELECT * FROM student_apple_processes WHERE course_phase_id = $1 AND course_participation_id = $2;
