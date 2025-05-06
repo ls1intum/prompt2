@@ -99,7 +99,16 @@ func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.
 
 func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
 	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
-	studentByEmail, err := GetStudentByMatriculationNumberAndUniversityLogin(ctx, studentObj.MatriculationNumber, studentObj.UniversityLogin)
+
+	var studentByEmail studentDTO.Student
+	var err error
+	if !studentObj.HasUniversityAccount {
+		// Student added by lecturer but without university account
+		studentByEmail, err = GetStudentByEmail(ctx, studentObj.Email)
+	} else {
+		studentByEmail, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, studentObj.MatriculationNumber, studentObj.UniversityLogin)
+	}
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return CreateStudent(ctx, &queries, studentObj)
 	}
