@@ -19,7 +19,9 @@ export function StatisticalTooltipContent(props: any) {
         </div>
         <div className='grid grid-cols-2 gap-x-3'>
           <span className='text-muted-foreground'>Median:</span>
-          <span className='font-medium'>{data.median.toFixed(1)}</span>
+          <span className='font-medium'>
+            {data.median.charAt(0).toUpperCase() + data.median.slice(1)}
+          </span>
         </div>
         <div className='grid grid-cols-2 gap-x-3'>
           <span className='text-muted-foreground'>Lower Quartile:</span>

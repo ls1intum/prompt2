@@ -4,5 +4,4 @@ export interface DataPoint {
   rejected?: number
   notAssessed?: number
   total: number
-  // other keys if needed
 }
