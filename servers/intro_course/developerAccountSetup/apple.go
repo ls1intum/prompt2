@@ -38,7 +38,8 @@ func generateJWT() (string, error) {
 func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uuid.UUID, appleID, firstName, lastName string) error {
 	token, err := generateJWT()
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("JWT generation failed: %w", err))
+		_ = storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("JWT generation failed: %w", err))
+		return err
 	}
 
 	payload := developerAccountSetupDTO.InviteRequest{
@@ -71,8 +72,7 @@ func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uu
 
 	bodyBytes, err := json.Marshal(payload)
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID,
-			fmt.Errorf("failed to marshal invite payload: %w", err))
+		return err
 	}
 
 	req, err := http.NewRequestWithContext(ctx,
@@ -80,8 +80,9 @@ func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uu
 		"https://api.appstoreconnect.apple.com/v1/userInvitations",
 		bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID,
+		_ = storeAppleError(ctx, coursePhaseID, participationID,
 			fmt.Errorf("failed to create HTTP request: %w", err))
+		return err
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -89,13 +90,15 @@ func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uu
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("request failed: %w", err))
+		_ = storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("request failed: %w", err))
+		return err
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode != 201 {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body)))
+	if resp.StatusCode != http.StatusCreated {
+		_ = storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body)))
+		return fmt.Errorf("failed to invite user: %s, details: %s", resp.Status, string(body))
 	}
 
 	log.Infof("User invited to Apple Developer account: %s", appleID)
@@ -105,7 +108,8 @@ func inviteToAppleAccount(ctx context.Context, coursePhaseID, participationID uu
 func registerDeviceWithApple(ctx context.Context, coursePhaseID, participationID uuid.UUID, name, udid, platform string) error {
 	token, err := generateJWT()
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("JWT generation failed: %w", err))
+		_ = storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("JWT generation failed: %w", err))
+		return err
 	}
 
 	payload := developerAccountSetupDTO.DeviceRequest{
@@ -137,18 +141,21 @@ func registerDeviceWithApple(ctx context.Context, coursePhaseID, participationID
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("request failed: %w", err))
+		_ = storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("request failed: %w", err))
+		return err
 	}
 	defer resp.Body.Close()
 
 	body, readErr := io.ReadAll(resp.Body)
 	if readErr != nil {
-		return storeAppleError(ctx, coursePhaseID, participationID,
+		_ = storeAppleError(ctx, coursePhaseID, participationID,
 			fmt.Errorf("failed to read Apple response body: %w", readErr))
+		return readErr
 	}
 	if resp.StatusCode != http.StatusCreated {
 		apiErr := fmt.Errorf("failed to register device: %s, details: %s", resp.Status, string(body))
-		return storeAppleError(ctx, coursePhaseID, participationID, apiErr)
+		_ = storeAppleError(ctx, coursePhaseID, participationID, apiErr)
+		return apiErr
 	}
 
 	log.Infof("Device registered with Apple Developer account: %s", name)
