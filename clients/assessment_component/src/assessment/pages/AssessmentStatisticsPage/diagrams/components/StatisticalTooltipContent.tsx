@@ -1,5 +1,4 @@
-'use client'
-import type { SkillCounts } from './StatisticalBarChart'
+import { SkillCounts } from '../../interfaces/StatisticalDataPoint'
 
 export function StatisticalTooltipContent(props: any) {
   if (!props.active || !props.payload || !props.payload[0]) {

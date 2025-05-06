@@ -4,6 +4,8 @@ import { ChartContainer, ChartTooltip } from '@tumaet/prompt-ui-components'
 import { StatisticalTooltipContent } from './StatisticalTooltipContent'
 import { chartConfig } from '../utils/chartConfig'
 
+import { StatisticalDataPoint } from '../../interfaces/StatisticalDataPoint'
+
 // Get color based on average value
 export function getBarColor(average: number): string {
   if (average < 1.5) {
@@ -15,22 +17,6 @@ export function getBarColor(average: number): string {
   } else {
     return 'var(--color-expert)' // Expert color
   }
-}
-
-export interface SkillCounts {
-  novice: number
-  intermediate: number
-  advanced: number
-  expert: number
-}
-
-export interface StatisticalDataPoint {
-  name: string
-  average: number
-  lowerQuartile: number
-  median: number
-  upperQuartile: number
-  counts: SkillCounts
 }
 
 interface StatisticalBarChartProps {
