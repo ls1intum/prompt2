@@ -1,3 +1,5 @@
+import { ScoreLevel } from '../../../interfaces/scoreLevel'
+
 export interface SkillCounts {
   novice: number
   intermediate: number
@@ -9,7 +11,7 @@ export interface StatisticalDataPoint {
   name: string
   average: number
   lowerQuartile: number
-  median: number
+  median: ScoreLevel
   upperQuartile: number
   counts: SkillCounts
 }
