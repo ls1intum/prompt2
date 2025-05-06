@@ -4,22 +4,24 @@ import { Loader2 } from 'lucide-react'
 
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
-import { Assessment } from '../../interfaces/assessment'
+import { Assessment, AssessmentCompletion } from '../../interfaces/assessment'
 
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
+import { getAllAssessmentCompletionsinPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
 import { AssessmentDiagram } from './diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from './diagrams/AssessmentScoreLevelDiagram'
+import { GenderDiagram } from './diagrams/GenderDiagram'
+
+import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
 
 export const AssessmentStatisticsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { participations } = useParticipationStore()
-  const { categories } = useCategoryStore()
   const { scoreLevels } = useScoreLevelStore()
 
   const {
@@ -31,6 +33,21 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     queryKey: ['assessments', phaseId],
     queryFn: () => getAllAssessmentsInPhase(phaseId ?? ''),
   })
+
+  const {
+    data: assessmentCompletions,
+    isPending: isAssessmentCompletionsPending,
+    isError: isAssessmentCompletionsError,
+    refetch: refetchAssessmentCompletions,
+  } = useQuery<AssessmentCompletion[]>({
+    queryKey: ['assessmentCompletions', phaseId],
+    queryFn: () => getAllAssessmentCompletionsinPhase(phaseId ?? ''),
+  })
+
+  const participationsWithAssessments = useGetParticipantionsWithAssessment(
+    participations || [],
+    scoreLevels || [],
+  )
 
   const isError = isAssessmentsError
   const isPending = isAssessmentsPending
@@ -57,6 +74,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
       <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6'>
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
   )
