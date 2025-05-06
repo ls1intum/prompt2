@@ -37,7 +37,7 @@ func CreateDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID, course
 
 }
 
-func GetOwnDeveloperProfile(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (developerProfileDTO.DeveloperProfile, error) {
+func GetDeveloperProfileByCourseParticipationID(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (developerProfileDTO.DeveloperProfile, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 

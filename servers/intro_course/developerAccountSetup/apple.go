@@ -143,7 +143,9 @@ func registerDeviceWithApple(ctx context.Context, coursePhaseID, participationID
 
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 201 {
-		return storeAppleError(ctx, coursePhaseID, participationID, fmt.Errorf("failed to register device: %s, details: %s", resp.Status, string(body)))
+		err := fmt.Errorf("failed to register device: %s, details: %s", resp.Status, string(body))
+		storeAppleError(ctx, coursePhaseID, participationID, err)
+		return err
 	}
 
 	log.Infof("Device registered with Apple Developer account: %s", name)
@@ -159,8 +161,9 @@ func storeAppleError(ctx context.Context, coursePhaseID, participationID uuid.UU
 	})
 	if dbErr != nil {
 		log.Error("Failed to store Apple error in DB: ", dbErr)
+		return err
 	}
-	return err
+	return nil
 }
 
 func storeAppleSuccess(ctx context.Context, coursePhaseID, participationID uuid.UUID) error {

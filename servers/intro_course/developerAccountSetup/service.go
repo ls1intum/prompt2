@@ -30,7 +30,7 @@ var DeveloperAccountSetupServiceSingleton *DeveloperAccountSetupService
 func InviteUsers(ctx context.Context, participations []promptTypes.CoursePhaseParticipationWithStudent) ([]map[string]string, error) {
 	results := []map[string]string{}
 	for _, p := range participations {
-		devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, p.CoursePhaseID, p.CourseParticipationID)
+		devProfile, err := developerProfile.GetDeveloperProfileByCourseParticipationID(ctx, p.CoursePhaseID, p.CourseParticipationID)
 		if err != nil {
 			results = append(results, map[string]string{
 				"appleID": p.Student.Email,
@@ -61,7 +61,7 @@ func HandleInviteUser(ctx context.Context, authHeader string, coursePhaseID, cou
 		return fmt.Errorf("failed to get student details: %w", err)
 	}
 
-	devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, coursePhaseID, courseParticipationID)
+	devProfile, err := developerProfile.GetDeveloperProfileByCourseParticipationID(ctx, coursePhaseID, courseParticipationID)
 	if err != nil {
 		return fmt.Errorf("failed to get developer profile: %w", err)
 	}
@@ -79,7 +79,7 @@ func InviteAllUsers(ctx context.Context, authHeader string, coursePhaseID uuid.U
 }
 
 func RegisterAllDevices(ctx context.Context, authHeader string, coursePhaseID, courseParticipationID uuid.UUID, semesterTag string) ([]map[string]string, error) {
-	devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, coursePhaseID, courseParticipationID)
+	devProfile, err := developerProfile.GetDeveloperProfileByCourseParticipationID(ctx, coursePhaseID, courseParticipationID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get developer profile: %w", err)
 	}
@@ -116,7 +116,7 @@ func RegisterAllDevices(ctx context.Context, authHeader string, coursePhaseID, c
 }
 
 func RegisterSingleDevice(ctx context.Context, authHeader string, coursePhaseID, courseParticipationID uuid.UUID, semesterTag string, deviceType string) error {
-	devProfile, err := developerProfile.GetOwnDeveloperProfile(ctx, coursePhaseID, courseParticipationID)
+	devProfile, err := developerProfile.GetDeveloperProfileByCourseParticipationID(ctx, coursePhaseID, courseParticipationID)
 	if err != nil {
 		return fmt.Errorf("failed to get developer profile: %w", err)
 	}

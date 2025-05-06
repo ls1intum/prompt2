@@ -79,7 +79,7 @@ func getOwnDeveloperProfile(c *gin.Context) {
 		return
 	}
 
-	developerProfile, err := GetOwnDeveloperProfile(c, coursePhaseID, courseParticipationID.(uuid.UUID))
+	developerProfile, err := GetDeveloperProfileByCourseParticipationID(c, coursePhaseID, courseParticipationID.(uuid.UUID))
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
