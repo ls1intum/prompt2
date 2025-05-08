@@ -35,3 +35,11 @@ yarn install
 yarn run dev
 # Add any other necessary steps
 ```
+
+## ✅ PR Checklist
+
+- [ ] Tested locally or on the dev environment
+- [ ] Code is clean, readable, and documented
+- [ ] Tests added or updated (if needed)
+- [ ] Screenshots attached for UI changes (if any)
+- [ ] Documentation updated (if relevant)
