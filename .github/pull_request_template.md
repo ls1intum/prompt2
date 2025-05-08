@@ -1,4 +1,8 @@
-# ✨ What is the change?
+# 📝 Pull Request Template
+
+Use this template to provide all necessary information for reviewing and testing your changes.
+
+## ✨ What is the change?
 
 <!-- Briefly describe what has been changed or added in this PR. -->
 
@@ -6,7 +10,7 @@
 
 <!-- Explain why this change was made. Optionally include a link to the relevant issue or ticket. -->
 
-## 🧪 Steps to test
+## 🧪 How to Test Functionality
 
 <!-- List the steps someone should follow to test this PR. -->
 
@@ -21,13 +25,13 @@
 | -------------- | ------------- |
 | ![before](url) | ![after](url) |
 
-## ⚙️ Quick guide to test
+## ⚙️ Setup / Dev Environment Instructions
 
 <!-- Describe how to run or test the added functionality locally or on the dev environment. -->
 
 ```bash
 # Example commands
-npm install
-npm run dev
+yarn install
+yarn run dev
 # Add any other necessary steps
 ```
