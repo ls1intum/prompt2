@@ -114,7 +114,11 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   }
 
   if (isLoading || !keycloak) {
-    return <LoadingPage />
+    return (
+      <DarkModeProvider>
+        <LoadingPage />
+      </DarkModeProvider>
+    )
   }
 
   // Check if the user has at least some Prompt rights

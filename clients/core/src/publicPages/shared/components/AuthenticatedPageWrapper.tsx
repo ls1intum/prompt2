@@ -12,6 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
@@ -32,7 +33,11 @@ export const AuthenticatedPageWrapper = ({
   const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
 
   if (!keycloak) {
-    return <LoadingPage />
+    return (
+      <DarkModeProvider>
+        <LoadingPage />
+      </DarkModeProvider>
+    )
   }
   return (
     <div className='min-h-screen bg-white flex flex-col'>
