@@ -17,7 +17,7 @@ Use this template to provide all necessary information for reviewing and testing
 1. Step 1
 2. ...
 
-## 🖼️ Meaningful Screenshots (if UI changes are included)
+## 🖼️ Screenshots (if UI changes are included)
 
 <!-- Include before/after screenshots if this PR involves any visual changes. -->
 
