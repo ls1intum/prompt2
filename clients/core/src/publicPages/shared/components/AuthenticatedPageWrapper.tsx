@@ -8,16 +8,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-<<<<<<< HEAD
   LoadingPage,
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 
-=======
-} from '@/components/ui/dialog'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
->>>>>>> main
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
