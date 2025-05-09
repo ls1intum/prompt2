@@ -10,12 +10,13 @@ Use this template to provide all necessary information for reviewing and testing
 
 <!-- Explain why this change was made. Optionally include a link to the relevant issue or ticket. -->
 
-## 🧪 How to Test Functionality
+## 🧪 How to Test
 
 <!-- List the steps someone should follow to test this PR. -->
 
 1. Step 1
-2. ...
+2. Step 2
+3. ...
 
 ## 🖼️ Screenshots (if UI changes are included)
 
@@ -24,17 +25,6 @@ Use this template to provide all necessary information for reviewing and testing
 | Before         | After         |
 | -------------- | ------------- |
 | ![before](url) | ![after](url) |
-
-## ⚙️ Setup / Dev Environment Instructions
-
-<!-- Describe how to run or test the added functionality locally or on the dev environment. -->
-
-```bash
-# Example commands
-yarn install
-yarn run dev
-# Add any other necessary steps
-```
 
 ## ✅ PR Checklist
 
