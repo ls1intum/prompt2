@@ -169,6 +169,10 @@ jobs:
             echo "DB_HOST_SELF_TEAM_ALLOCATION=${{ vars.DB_HOST_SELF_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_PORT_SELF_TEAM_ALLOCATION=${{ vars.DB_PORT_SELF_TEAM_ALLOCATION }}" >> .env.prod
 
+            echo "APPLE_ISSUER_ID=${{ vars.APPLE_ISSUER_ID }}" >> .env.prod  
+            echo "APPLE_KEY_ID=${{ vars.APPLE_KEY_ID }}" >> .env.prod  
+            echo "APPLE_PRIVATE_KEY=${{ vars.APPLE_PRIVATE_KEY }}" >> .env.prod 
+
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
             echo "KEYCLOAK_CLIENT_ID=${{ vars.KEYCLOAK_CLIENT_ID }}" >> .env.prod
