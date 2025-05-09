@@ -1,22 +1,20 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Equal } from 'lucide-react'
 import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Equal } from 'lucide-react'
-import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@tumaet/prompt-ui-components'
 import translations from '@/lib/translations.json'
 
 export interface Page2Ref {

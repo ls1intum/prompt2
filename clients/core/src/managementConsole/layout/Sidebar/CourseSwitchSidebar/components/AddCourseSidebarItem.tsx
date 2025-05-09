@@ -1,4 +1,4 @@
-import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+import { SidebarMenuButton, SidebarMenuItem } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
 import { AddCourseDialog } from '../../../../courseOverview/AddingCourse/AddCourseDialog'
 

@@ -1,8 +1,7 @@
 import { useIntroCourseStore } from '../../zustand/useIntroCourseStore'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Monitor, User } from 'lucide-react'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
-import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage, Badge } from '@tumaet/prompt-ui-components'
 
 export type SeatAssignment = {
   seatName: string

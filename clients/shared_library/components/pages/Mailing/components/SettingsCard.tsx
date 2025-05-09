@@ -1,5 +1,11 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { ManualMailSending } from './ManualMailSending'
 import { CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 import { Info } from 'lucide-react'

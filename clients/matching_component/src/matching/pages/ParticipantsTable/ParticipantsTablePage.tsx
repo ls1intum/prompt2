@@ -1,11 +1,10 @@
-import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
-import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
-import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
+import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
 export const ParticipantsTablePage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

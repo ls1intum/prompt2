@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 import { LogIn, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { env } from '@/env'

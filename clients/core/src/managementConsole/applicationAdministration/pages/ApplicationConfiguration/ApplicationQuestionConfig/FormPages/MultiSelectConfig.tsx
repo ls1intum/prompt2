@@ -1,19 +1,20 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
+  Card,
+  CardContent,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+  Input,
+} from '@tumaet/prompt-ui-components'
 import { GripVertical, MinusIcon, PlusIcon } from 'lucide-react'
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
 import { QuestionConfigFormDataMultiSelect } from '@core/validations/questionConfig'
 import { motion } from 'framer-motion'
-import { Card, CardContent } from '@/components/ui/card'
 
 export function MultiSelectConfig({
   form,

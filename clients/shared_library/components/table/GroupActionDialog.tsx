@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@tumaet/prompt-ui-components'
 
 interface ActionDialogProps {
   title: string

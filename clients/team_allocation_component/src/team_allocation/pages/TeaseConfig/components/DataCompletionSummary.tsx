@@ -1,4 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@tumaet/prompt-ui-components'
 import { ValidationResult } from '../../../interfaces/validationResult'
 import { ClipboardCheck, FileText, BarChart3 } from 'lucide-react'
 import type { TeaseStudent } from '../../../interfaces/tease/student'

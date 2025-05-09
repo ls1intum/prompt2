@@ -1,5 +1,4 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@tumaet/prompt-ui-components'
 
 export type QuestionStatus = 'new' | 'modified' | 'saved'
 

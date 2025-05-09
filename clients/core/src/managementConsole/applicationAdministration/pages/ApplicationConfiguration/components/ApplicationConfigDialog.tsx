@@ -1,4 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { format, set, parse, formatISO } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
+import { AlertCircle } from 'lucide-react'
+import type { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
+import type { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import {
   Dialog,
   DialogContent,
@@ -6,22 +13,15 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import type { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
-import { DatePicker } from '@/components/DatePicker'
-import { format, set, parse, formatISO } from 'date-fns'
-import { toZonedTime } from 'date-fns-tz'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
+  Button,
+  Label,
+  Switch,
+  DatePicker,
+  Input,
+} from '@tumaet/prompt-ui-components'
 import { updateCoursePhase } from '@core/network/mutations/updateCoursePhase'
-import { useParams } from 'react-router-dom'
-import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
-import { AlertCircle } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 import { ApplicationConfigDialogError } from './ApplicationConfigDialogError'
+import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 
 interface ApplicationConfigDialogProps {
   isOpen: boolean

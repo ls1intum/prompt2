@@ -1,16 +1,20 @@
 import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import UnauthorizedPage from '@/components/UnauthorizedPage'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
 import { WelcomePage } from './shared/components/WelcomePage'
-import { LoadingPage } from '@/components/LoadingPage'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+  LoadingPage,
+  ErrorPage,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Course } from '@tumaet/prompt-shared-state'
 import { getAllCourses } from '../network/queries/course'
-import { ErrorPage } from '@/components/ErrorPage'
-import { Separator } from '@/components/ui/separator'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CourseNotFound from './shared/components/CourseNotFound'

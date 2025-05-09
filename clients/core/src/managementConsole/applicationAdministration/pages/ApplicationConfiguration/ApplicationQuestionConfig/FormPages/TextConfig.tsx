@@ -1,12 +1,12 @@
-import { Input } from '@/components/ui/input'
 import {
+  Input,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
   FormDescription,
-} from '@/components/ui/form'
+} from '@tumaet/prompt-ui-components'
 import { UseFormReturn } from 'react-hook-form'
 import { QuestionConfigFormDataText } from '@core/validations/questionConfig'
 

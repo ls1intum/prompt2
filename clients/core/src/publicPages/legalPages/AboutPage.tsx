@@ -1,5 +1,12 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import {
   ArrowLeft,
   Bug,
@@ -17,7 +24,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { ContributorList } from './components/ContributorList'
 import { env } from '@/env'
-import { Separator } from '@/components/ui/separator'
 
 export default function AboutPage() {
   const navigate = useNavigate()

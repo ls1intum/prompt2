@@ -1,12 +1,13 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+  Input,
+} from '@tumaet/prompt-ui-components'
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ParticipationWithDevProfiles } from '../interfaces/pariticipationWithDevProfiles'
@@ -18,7 +19,6 @@ import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { createIntroCourseGitlabInfrastructure } from '../../../network/mutations/createIntroCourseGitlabInfrastructure'
 import { useGetCoursePhase } from '@/hooks/useGetCoursePhase'
 import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
-import { Input } from '@/components/ui/input' // make sure you have an Input component
 
 interface CreateGitlabReposDialogProps {
   participantsWithDevProfiles: ParticipationWithDevProfiles[]

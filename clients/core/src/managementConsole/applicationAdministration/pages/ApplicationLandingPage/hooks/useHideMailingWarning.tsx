@@ -1,4 +1,4 @@
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@tumaet/prompt-ui-components'
 import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
 import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'

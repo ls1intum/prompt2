@@ -1,6 +1,6 @@
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { CourseCard } from './components/CourseCard'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@tumaet/prompt-ui-components'
 import { useQuery } from '@tanstack/react-query'
 import { OpenApplicationDetails } from '@core/interfaces/application/openApplicationDetails'
 import { getAllOpenApplications } from '@core/network/queries/openApplications'

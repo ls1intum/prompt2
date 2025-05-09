@@ -1,12 +1,14 @@
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarMenuAction,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'

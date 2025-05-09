@@ -1,7 +1,6 @@
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { TeamAllocationTimeframeSettings } from './components/TeamAllocationTimeframeSettings'
 import { Timeframe } from '../../interfaces/timeframe'
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { Loader2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { getTimeframe } from '../../network/queries/getSurveyTimeframe'

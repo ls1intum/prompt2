@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 
 export const SortableHeader = ({ column, title }: { column: any; title: string }) => {
   return (

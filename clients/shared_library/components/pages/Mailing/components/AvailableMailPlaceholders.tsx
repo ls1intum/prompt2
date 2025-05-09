@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import {
+  Collapsible,
+  CollapsibleContent,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@tumaet/prompt-ui-components'
 import translations from '@/lib/translations.json'
 
 interface AvailableMailPlaceholdersProps {

@@ -1,4 +1,4 @@
-import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '@/components/ui/sidebar'
+import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '@tumaet/prompt-ui-components'
 import { Gauge } from 'lucide-react'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
 

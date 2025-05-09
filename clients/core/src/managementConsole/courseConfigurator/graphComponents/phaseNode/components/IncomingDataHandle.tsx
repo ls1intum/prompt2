@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react'
 import { schemaFulfills } from './utils/compareSchema'
 import { useCourseConfigurationState } from '@core/managementConsole/courseConfigurator/zustand/useCourseConfigurationStore'
 import { CircleCheckBig, OctagonX, TriangleAlert } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 
 interface IncomingDataHandleProps {
   phaseID: string

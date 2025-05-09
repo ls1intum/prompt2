@@ -1,11 +1,18 @@
 import { useState, type ChangeEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, AlertCircle, User, ExternalLink } from 'lucide-react'
 import { useCreateRepository } from '../pages/hooks/useCreateRepository'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Button,
+  Input,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+} from '@tumaet/prompt-ui-components'
+import { Loader2, AlertCircle, User, ExternalLink } from 'lucide-react'
 
 export const GithubUsernameInput = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)

@@ -6,7 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+} from '@tumaet/prompt-ui-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 

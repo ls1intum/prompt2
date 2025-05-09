@@ -10,11 +10,17 @@ import DataCompletionSummary from './DataCompletionSummary'
 import { CheckItem } from './CheckItem'
 import { checksConfig } from './ChecksConfig'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import SurveySubmissionOverview from './SurveySubmissionOverview'
-import { ErrorPage } from '@/components/ErrorPage'
+import {
+  Card,
+  CardContent,
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  ErrorPage,
+} from '@tumaet/prompt-ui-components'
 
 export const StudentDataCheck = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

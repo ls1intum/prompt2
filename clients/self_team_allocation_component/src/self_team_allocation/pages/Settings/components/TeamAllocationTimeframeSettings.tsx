@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import type { Timeframe } from '../../../interfaces/timeframe'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CalendarIcon, AlertCircle, Loader2 } from 'lucide-react'
+import type { Timeframe } from '../../../interfaces/timeframe'
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Label,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@tumaet/prompt-ui-components'
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'

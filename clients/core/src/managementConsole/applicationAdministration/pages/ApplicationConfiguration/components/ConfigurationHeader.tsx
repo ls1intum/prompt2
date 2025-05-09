@@ -1,5 +1,12 @@
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationStatusBadge } from '../../../components/ApplicationStatusBadge'
 
 interface ApplicationConfigurationHeaderProps {

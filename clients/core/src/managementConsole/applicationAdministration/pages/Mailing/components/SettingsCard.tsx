@@ -1,12 +1,21 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import type { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
-import { Switch } from '@/components/ui/switch'
-import { ManualMailSending } from '@/components/pages/Mailing/components/ManualMailSending'
-import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 import { Info } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import type { ApplicationMailingMetaData } from '../../../interfaces/applicationMailingMetaData'
+import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  Label,
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
+import { ManualMailSending } from '@/components/pages/Mailing/components/ManualMailSending'
 
 interface SettingsCardProps {
   applicationMailingMetaData: ApplicationMailingMetaData

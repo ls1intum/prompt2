@@ -1,12 +1,18 @@
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
 import { AlertCircle, ClipboardCheck, LockIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import {
+  Textarea,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  cn,
+} from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 
 import { getLevelConfig } from '../../utils/getLevelConfig'
 

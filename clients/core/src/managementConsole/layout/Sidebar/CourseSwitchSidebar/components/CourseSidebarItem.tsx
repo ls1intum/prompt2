@@ -1,4 +1,4 @@
-import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
+import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@tumaet/prompt-ui-components'
 import { Course } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useMemo } from 'react'

@@ -1,4 +1,4 @@
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
 
 export const WelcomePage = () => {
   return (

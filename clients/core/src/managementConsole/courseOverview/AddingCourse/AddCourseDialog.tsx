@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@tumaet/prompt-ui-components'
 import { CourseFormValues } from '@core/validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'

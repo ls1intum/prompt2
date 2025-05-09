@@ -51,16 +51,13 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         },
         {
           test: /\.css$/i,
-          include: [
-            path.resolve(__dirname, 'src'),
-            path.resolve(__dirname, '../shared_library/src'),
-            path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
-          ],
-          use: [
-            'style-loader', // Injects styles into DOM
-            'css-loader', // Resolves CSS imports
-            'postcss-loader', // Processes Tailwind and other PostCSS plugins
-          ],
+          use: ['style-loader', 'css-loader', 'postcss-loader'],
+          exclude: /node_modules/, // 🛠 Only apply postcss-loader to your src/
+        },
+        {
+          test: /\.css$/i,
+          include: /node_modules/, // 🛠 Load node_modules CSS without postcss-loader
+          use: ['style-loader', 'css-loader'],
         },
       ],
     },

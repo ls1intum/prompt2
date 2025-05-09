@@ -1,4 +1,3 @@
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -6,8 +5,13 @@ import {
   TableHeader,
   TableHead,
   TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+  ScrollArea,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { UploadedStudent } from '../../../interfaces/UploadedStudent'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 

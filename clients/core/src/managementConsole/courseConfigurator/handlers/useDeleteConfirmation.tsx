@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
+import { DeleteConfirmation } from '@tumaet/prompt-ui-components'
 import { CoursePhaseWithPosition } from '../interfaces/coursePhaseWithPosition'
 
 interface DeleteConfirmationReturn {

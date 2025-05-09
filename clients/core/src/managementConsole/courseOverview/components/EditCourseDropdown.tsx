@@ -1,19 +1,19 @@
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
+  DeleteConfirmation,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
 import { deleteCourse } from '@core/network/mutations/deleteCourse'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
 import { EditCourseDialog } from './EditCourseDialog'
 
 export const EditCourseDropdown = (): JSX.Element => {

@@ -3,23 +3,25 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import type * as z from 'zod'
 import { Mail, Copy, EyeOff, Save, Plus, Trash2, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { useParams } from 'react-router-dom'
 import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+  Input,
+  Separator,
+  ManagementPageHeader,
+} from '@tumaet/prompt-ui-components'
 import { useCourseStore, CourseMailingSettings } from '@tumaet/prompt-shared-state'
 import { type CourseMailingFormValues, courseMailingSchema } from '@core/validations/courseMailing'
 import { useSaveMailingData } from './hooks/useSaveMailingData'
-import { useParams } from 'react-router-dom'
 
 export const MailingConfigPage = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@tumaet/prompt-ui-components'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 import { ScoreLevel } from '../../interfaces/scoreLevel'

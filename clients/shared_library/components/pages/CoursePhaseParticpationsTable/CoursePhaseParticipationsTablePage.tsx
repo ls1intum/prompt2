@@ -1,4 +1,3 @@
-import { ScrollBar } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
@@ -6,7 +5,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+  ScrollBar,
+  Input,
+} from '@tumaet/prompt-ui-components'
 import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { SearchIcon } from 'lucide-react'
 
@@ -23,7 +24,6 @@ import {
 import { useMemo, useState } from 'react'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { columns as baseColumns } from './components/columns'
-import { Input } from '@/components/ui/input'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'

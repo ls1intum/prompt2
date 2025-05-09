@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@tumaet/prompt-ui-components'
 import { QuestionMultiSelectFormRef } from '../../utils/QuestionMultiSelectFormRef'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { createValidationSchema } from './validationSchema'

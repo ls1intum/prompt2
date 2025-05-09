@@ -1,7 +1,8 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
+
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'

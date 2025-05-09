@@ -1,25 +1,26 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AlertCircle, XCircle } from 'lucide-react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  Alert,
+  AlertDescription,
+  Button,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { AlertCircle, XCircle } from 'lucide-react'
-import { zodResolver } from '@hookform/resolvers/zod'
+  Input,
+} from '@tumaet/prompt-ui-components'
 import {
   UniversityDataFormValues,
   formSchemaUniversityData,
 } from '@core/validations/universityData'
 import { Student } from '@tumaet/prompt-shared-state'
 import { updateStudent } from '@core/network/mutations/updateStudent'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import translations from '@/lib/translations.json'
 
 interface MissingUniversityDataProps {

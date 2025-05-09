@@ -1,6 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Separator } from '@/components/ui/separator'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  RadioGroup,
+  RadioGroupItem,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { Star } from 'lucide-react'
 import { Skill } from '../../../interfaces/skill'
 import { SkillLevel } from '../../../interfaces/skillResponse'

@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/card'
+} from '@tumaet/prompt-ui-components'
 import { useNavigate } from 'react-router-dom'
 
 interface CourseNotFoundProps {

@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@tumaet/prompt-ui-components'
 import { AlertCircle } from 'lucide-react'
 
 interface LoadingErrorProps {

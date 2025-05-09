@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { differenceInDays, format } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
 import { ApplicationStatusBadge } from '../../../components/ApplicationStatusBadge'
 import { getApplicationStatus } from '../../../utils/getApplicationStatus'
 import { ApplicationMetaData } from '../../../interfaces/applicationMetaData'

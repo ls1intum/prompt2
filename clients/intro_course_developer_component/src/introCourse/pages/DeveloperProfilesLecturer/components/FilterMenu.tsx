@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { Filter, Laptop, Smartphone, Tablet, Watch } from 'lucide-react'
 import { DevProfileFilter } from '../interfaces/devProfileFilter'
 

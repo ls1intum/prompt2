@@ -1,5 +1,11 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from '@tumaet/prompt-ui-components'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 
 export const ErrorState = ({ error, onBack }: { error: Error; onBack: () => void }) => {

@@ -2,17 +2,20 @@ import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, Plus, AlertCircle, ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+  ScrollArea,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { UniversitySelection } from './components/UniversitySelection'
@@ -21,7 +24,6 @@ import { StudentSearch } from './components/StudentSearch'
 import { Student } from '@tumaet/prompt-shared-state'
 import { postNewApplicationManual } from '@core/network/mutations/postApplicationManual'
 import { PostApplication } from '@core/interfaces/application/postApplication'
-import { useToast } from '@/hooks/use-toast'
 import { CreateApplicationAnswerText } from '@core/interfaces/application/applicationAnswer/text/createApplicationAnswerText'
 import { CreateApplicationAnswerMultiSelect } from '@core/interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
 import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'

@@ -1,18 +1,24 @@
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { UploadButton } from './components/UploadButton'
+import { useEffect } from 'react'
 import { ClipboardList, FileUp, Loader2, UserRoundCheck } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { useQuery } from '@tanstack/react-query'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useMatchingStore } from './zustand/useMatchingStore'
-import { useEffect } from 'react'
-import { ErrorPage } from '@/components/ErrorPage'
+import { UploadButton } from './components/UploadButton'
 import { useUploadAndParseXLSX } from './hooks/useUploadAndParseXLSX'
 import { useUploadAndParseCSV } from './hooks/useUploadAndParseCSV'
-import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ManagementPageHeader,
+  ErrorPage,
+  Separator,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 
 export const MatchingOverviewPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

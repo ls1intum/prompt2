@@ -8,8 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { AlertCircle } from 'lucide-react'
 import { useDeleteCategory } from '../hooks/useDeleteCategory'
 import { useDeleteCompetency } from '../hooks/useDeleteCompetency'

@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Loader2, Plus, GripVertical, Trash2 } from 'lucide-react'
 import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { DeleteConfirmation } from '@/components/DeleteConfirmationDialog'
+import {
+  DeleteConfirmation,
+  Input,
+  Button,
+  ManagementPageHeader,
+} from '@tumaet/prompt-ui-components'
 
 export const QuestionConfiguration = () => {
   const { coursePhase } = useCoursePhaseStore()

@@ -10,36 +10,33 @@ import { StudentComponentRef } from '../../utils/StudentComponentRef'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  Button,
+  Input,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { studentSchema, StudentFormValues } from '@core/validations/student'
-import translations from '@/lib/translations.json'
-
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { Check, ChevronDown } from 'lucide-react'
-import {
+  cn,
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@tumaet/prompt-ui-components'
+import { studentSchema, StudentFormValues } from '@core/validations/student'
+import translations from '@/lib/translations.json'
+import { Check, ChevronDown } from 'lucide-react'
 import { countriesArr } from '@/lib/getCountries'
 
 const studyPrograms = translations.university.studyPrograms.concat('Other')

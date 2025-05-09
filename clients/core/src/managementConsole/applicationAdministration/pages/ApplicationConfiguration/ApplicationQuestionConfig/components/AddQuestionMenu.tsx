@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
 import { Plus } from 'lucide-react'

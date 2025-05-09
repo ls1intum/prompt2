@@ -5,7 +5,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import translations from '@/lib/translations.json'
 

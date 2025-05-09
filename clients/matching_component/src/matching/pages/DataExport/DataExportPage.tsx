@@ -1,10 +1,9 @@
-import { Button } from '@/components/ui/button'
+import { Button, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { ChevronLeft, X } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMatchingStore } from '../../zustand/useMatchingStore'
 import { useStudentMatching } from './hooks/useStudentMatching'
 import MatchingResults from './components/MatchingResults'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useState } from 'react'
 import { RankingOptions } from './components/RankingOptions'
 

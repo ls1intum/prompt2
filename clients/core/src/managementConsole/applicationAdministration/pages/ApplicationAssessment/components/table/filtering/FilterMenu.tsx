@@ -1,17 +1,17 @@
-import { Button } from '@/components/ui/button'
 import {
+  Input,
+  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { PassStatus, Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { getStatusBadge } from '../../../utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { Filter } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState

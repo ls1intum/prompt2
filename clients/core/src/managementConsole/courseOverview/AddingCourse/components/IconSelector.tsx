@@ -1,4 +1,4 @@
-import { SelectContent, SelectItem } from '@/components/ui/select'
+import { SelectContent, SelectItem } from '@tumaet/prompt-ui-components'
 import {
   Book,
   Cpu,

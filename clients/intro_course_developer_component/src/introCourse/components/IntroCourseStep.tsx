@@ -1,9 +1,14 @@
 import * as React from 'react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import {
+  Card,
+  CardContent,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  cn,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { CheckCircle, ChevronDown, ChevronUp, Lock } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import { Separator } from '@/components/ui/separator'
 
 interface CourseStepProps {
   number: number

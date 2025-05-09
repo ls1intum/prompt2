@@ -3,12 +3,12 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Card } from '@/components/ui/card'
+  Card,
+  Button,
+} from '@tumaet/prompt-ui-components'
 import { Edit, Trash2 } from 'lucide-react'
 import { CreateCompetencyForm } from './CreateCompetencyForm'
 import { useCategoryStore } from '../../../zustand/useCategoryStore'
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { EditCategoryDialog } from './EditCategoryDialog'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'

@@ -1,6 +1,8 @@
-import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
+import {
+  ErrorPage,
+  ManagementPageHeader,
+  useCustomElementWidth,
+} from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'

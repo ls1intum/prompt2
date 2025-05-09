@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Settings } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button, Card, CardContent } from '@tumaet/prompt-ui-components'
 
 import { ApplicationTimeline } from './components/ApplicationTimeline'
 import { ApplicationConfigurationHeader } from './components/ConfigurationHeader'

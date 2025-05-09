@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { Column } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'

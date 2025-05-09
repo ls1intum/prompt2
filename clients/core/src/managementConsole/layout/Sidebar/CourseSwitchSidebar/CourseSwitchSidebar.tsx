@@ -5,7 +5,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { NavUserMenu } from './components/NavUserMenu'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'

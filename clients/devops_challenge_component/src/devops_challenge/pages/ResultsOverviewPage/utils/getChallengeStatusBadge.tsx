@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge'
 import { ChallengeStatus } from '../interfaces/challengeStatus'
+import { Badge } from '@tumaet/prompt-ui-components'
 
 export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   switch (status) {

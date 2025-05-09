@@ -1,5 +1,4 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
 import { type ReactNode, useRef, useState } from 'react'
 import { UploadCloud, Loader2 } from 'lucide-react'
 import { useMatchingStore } from '../zustand/useMatchingStore'

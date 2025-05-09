@@ -1,18 +1,18 @@
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { Eye } from 'lucide-react'
+import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
+import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
+import { Student } from '@tumaet/prompt-shared-state'
+import { ApplicationFormView } from '../ApplicationForm/ApplicationFormView'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
-import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
-import { Student } from '@tumaet/prompt-shared-state'
-import { Eye } from 'lucide-react'
-import { useState } from 'react'
-import { ApplicationFormView } from '../ApplicationForm/ApplicationFormView'
-import { ScrollArea } from '@/components/ui/scroll-area'
+  ScrollArea,
+} from '@tumaet/prompt-ui-components'
 
 interface ApplicationPreviewProps {
   questionsText: ApplicationQuestionText[]

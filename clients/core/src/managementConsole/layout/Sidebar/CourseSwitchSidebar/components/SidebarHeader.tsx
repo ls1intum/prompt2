@@ -5,7 +5,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { HomeIcon } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 

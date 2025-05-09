@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { MessageSquare, User } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { MinimalTiptapEditor } from '@/components/minimal-tiptap/minimal-tiptap'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Separator,
+  TooltipProvider,
+  MinimalTiptapEditor,
+  Input,
+  Label,
+} from '@tumaet/prompt-ui-components'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
 import { useParticipationStore } from '../zustand/useParticipationStore'
-import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
 import type { InterviewQuestion } from '../interfaces/InterviewQuestion'
 import type { InterviewAnswer } from '../interfaces/InterviewAnswer'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
+import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
 
 export const InterviewCard = (): JSX.Element => {
   const { studentId } = useParams<{ studentId: string }>()

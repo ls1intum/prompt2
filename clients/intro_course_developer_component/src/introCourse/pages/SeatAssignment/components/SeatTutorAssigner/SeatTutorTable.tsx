@@ -1,28 +1,26 @@
-import { Checkbox } from '@/components/ui/checkbox'
+import { useEffect, useState } from 'react'
+import { SearchIcon } from 'lucide-react'
+import { Seat } from '../../../../interfaces/Seat'
+import { Tutor } from '../../../../interfaces/Tutor'
+import { TutorAssignmentFilterOptions } from '../../interfaces/TutorAssignmentFilterOptions'
+import { TutorAssignmentFilter } from './TutorAssignmentFilter'
+import { useGetFilteredSeats } from '../../hooks/useGetFilteredSeats'
 import {
+  Checkbox,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Seat } from '../../../../interfaces/Seat'
-import { Tutor } from '../../../../interfaces/Tutor'
-import { useEffect, useState } from 'react'
-import { SearchIcon } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { TutorAssignmentFilter } from './TutorAssignmentFilter'
-import { useGetFilteredSeats } from '../../hooks/useGetFilteredSeats'
-import { TutorAssignmentFilterOptions } from '../../interfaces/TutorAssignmentFilterOptions'
+  Badge,
+  Input,
+} from '@tumaet/prompt-ui-components'
 
 interface SeatTutorTableProps {
   allSeats: Seat[]

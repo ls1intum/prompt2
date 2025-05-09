@@ -1,23 +1,26 @@
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle, UserCheck, X, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Seat } from '../../../../interfaces/Seat'
 import type { Tutor } from '../../../../interfaces/Tutor'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { JSX } from 'react/jsx-runtime'
+import { SeatTutorTable } from './SeatTutorTable'
+import { useUpdateSeats } from '../../hooks/useUpdateSeats'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Alert,
+  AlertDescription,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-
-import { AlertCircle, UserCheck, X, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react'
-
-import { Badge } from '@/components/ui/badge'
-import type { JSX } from 'react/jsx-runtime'
-import { SeatTutorTable } from './SeatTutorTable'
-import { Button } from '@/components/ui/button'
-import { useUpdateSeats } from '../../hooks/useUpdateSeats'
+  Badge,
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 interface SeatTutorAssignerProps {
   seats: Seat[]

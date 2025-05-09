@@ -1,5 +1,4 @@
-import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'

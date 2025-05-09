@@ -1,15 +1,15 @@
 import { ExportedApplicationAnswer } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
 import {
+  Badge,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@tumaet/prompt-ui-components'
 import { AlignLeft, CheckSquare } from 'lucide-react'
-import { Badge } from './ui/badge'
 
 interface ExportedApplicationAnswerTableProps {
   applicationAnswers: ExportedApplicationAnswer[]

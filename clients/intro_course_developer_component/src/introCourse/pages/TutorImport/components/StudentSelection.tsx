@@ -1,6 +1,4 @@
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { Button, Checkbox, Label } from '@tumaet/prompt-ui-components'
 import { Student } from '@tumaet/prompt-shared-state'
 
 interface StudentSelectionProps {

@@ -1,5 +1,11 @@
 import { useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { StackedBarChartWithPassStatus } from './StackedBarChartWithPassStatus'

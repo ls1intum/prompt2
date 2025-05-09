@@ -1,4 +1,4 @@
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseMailing } from '@/components/pages/Mailing/CoursePhaseMailing'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 
