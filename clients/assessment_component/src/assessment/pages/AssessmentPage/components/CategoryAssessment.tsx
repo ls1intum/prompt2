@@ -42,6 +42,7 @@ export const CategoryAssessment = ({
         <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
         <AssessmentStatusBadge
           remainingAssessments={category.competencies.length - assessments.length}
+          isFinalized={completed}
         />
       </div>
 
