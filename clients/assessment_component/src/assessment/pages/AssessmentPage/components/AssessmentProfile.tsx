@@ -71,7 +71,13 @@ export const AssessmentProfile = ({
       <Card className='relative overflow-hidden'>
         <CardHeader className='relative'>
           <div className='absolute top-4 right-4'>
-            <Button size='sm' disabled={remainingAssessments > 0} onClick={handleButtonClick}>
+            <Button
+              size='sm'
+              disabled={
+                !studentAssessment.assessmentCompletion.completed && remainingAssessments > 0
+              }
+              onClick={handleButtonClick}
+            >
               {studentAssessment.assessmentCompletion.completed ? (
                 <span className='flex items-center gap-1'>
                   <Unlock className='h-3.5 w-3.5' />
