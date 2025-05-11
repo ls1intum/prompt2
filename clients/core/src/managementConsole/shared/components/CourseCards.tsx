@@ -1,10 +1,16 @@
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
+import { useNavigate } from 'react-router-dom'
 
 export const CourseCards = (): JSX.Element => {
   const { courses } = useCourseStore()
+  const navigate = useNavigate()
+
+  const handleCourseClick = (courseId: string) => {
+    navigate(`/management/course/${courseId}`)
+  }
 
   const formatDate = (dateString: string): string => {
     const [year, month, date] = dateString.split('-')
@@ -17,12 +23,24 @@ export const CourseCards = (): JSX.Element => {
         const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
         return (
-          <Card key={course.id} className='shadow-lg'>
+          <Card
+            key={course.id}
+            className='shadow-lg hover:shadow-2xl transition-shadow cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
+            onClick={() => handleCourseClick(course.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleCourseClick(course.id)
+              }
+            }}
+            tabIndex={0}
+            role='button'
+            aria-label={`View details for course: ${course.name}`}
+          >
             <CardHeader className={`rounded-t-lg ${bgColor}`}>
               <div className='flex justify-between items-center'>
                 <div>
                   <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
-                  <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
                 </div>
               </div>
             </CardHeader>
