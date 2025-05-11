@@ -13,6 +13,7 @@ import {
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 
+import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
@@ -33,7 +34,11 @@ export const AuthenticatedPageWrapper = ({
   const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
 
   if (!keycloak) {
-    return <LoadingPage />
+    return (
+      <DarkModeProvider>
+        <LoadingPage />
+      </DarkModeProvider>
+    )
   }
   return (
     <div className='min-h-screen bg-white flex flex-col'>
