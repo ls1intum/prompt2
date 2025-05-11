@@ -30,7 +30,7 @@ func listAssessmentCompletionsByCoursePhase(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, completions)
+	c.JSON(http.StatusOK, assessmentCompletionDTO.GetAssessmentCompletionDTOsFromDBModels(completions))
 }
 
 func markAssessmenTAsComplete(c *gin.Context) {
