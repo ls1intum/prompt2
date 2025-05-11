@@ -6,7 +6,15 @@ export const createStatisticalDataPoint = (
   name: string,
   participations: ParticipationWithAssessment[],
 ): StatisticalDataPoint => {
-  if (participations.length === 0) {
+  const scoreLevels = participations
+    .filter((p) => p.scoreLevel)
+    .sort((a, b) => {
+      const scoreA = mapScoreLevelToNumber({ score: a.scoreLevel ?? ScoreLevel.Novice })
+      const scoreB = mapScoreLevelToNumber({ score: b.scoreLevel ?? ScoreLevel.Novice })
+      return scoreA - scoreB
+    })
+
+  if (scoreLevels.length === 0) {
     return {
       name,
       average: 0,
@@ -21,14 +29,6 @@ export const createStatisticalDataPoint = (
       },
     }
   }
-
-  const scoreLevels = participations
-    .filter((p) => p.scoreLevel)
-    .sort((a, b) => {
-      const scoreA = mapScoreLevelToNumber({ score: a.scoreLevel ?? ScoreLevel.Novice })
-      const scoreB = mapScoreLevelToNumber({ score: b.scoreLevel ?? ScoreLevel.Novice })
-      return scoreA - scoreB
-    })
 
   const average =
     scoreLevels.reduce((sum, p) => {
