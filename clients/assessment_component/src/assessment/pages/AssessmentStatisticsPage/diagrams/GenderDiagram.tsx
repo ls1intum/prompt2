@@ -10,6 +10,7 @@ import {
 import { StatisticalBarChart } from './components/StatisticalBarChart'
 
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { createStatisticalDataPoint } from './utils/createStatisticalDataPoint'
 
@@ -20,17 +21,20 @@ interface GenderDiagramProps {
 export const GenderDiagram = ({
   participationsWithAssessment,
 }: GenderDiagramProps): JSX.Element => {
-  const females = participationsWithAssessment.filter(
-    (p) => p.participation.student.gender === Gender.FEMALE,
-  )
-  const males = participationsWithAssessment.filter(
-    (p) => p.participation.student.gender === Gender.MALE,
-  )
-  const diverse = participationsWithAssessment.filter(
-    (p) =>
-      p.participation.student.gender === Gender.DIVERSE ||
-      p.participation.student.gender === Gender.PREFER_NOT_TO_SAY,
-  )
+  const groupByGender = (gender: Gender | Gender[]) =>
+    participationsWithAssessment
+      .filter((p) =>
+        Array.isArray(gender)
+          ? p.participation.student.gender !== undefined &&
+            gender.includes(p.participation.student.gender)
+          : p.participation.student.gender === gender,
+      )
+      .map((p) => p.scoreLevel)
+      .filter((scoreLevel): scoreLevel is ScoreLevel => scoreLevel !== undefined)
+
+  const females = groupByGender(Gender.FEMALE)
+  const males = groupByGender(Gender.MALE)
+  const diverse = groupByGender([Gender.DIVERSE, Gender.PREFER_NOT_TO_SAY])
 
   const data = [
     createStatisticalDataPoint('Females', females),
