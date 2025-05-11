@@ -6,21 +6,25 @@ import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { Assessment, AssessmentCompletion } from '../../interfaces/assessment'
 
+import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
 import { getAllAssessmentCompletionsinPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
+import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
+
 import { AssessmentDiagram } from './diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from './diagrams/AssessmentScoreLevelDiagram'
 import { GenderDiagram } from './diagrams/GenderDiagram'
-
-import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
+import { AuthorDiagram } from './diagrams/AuthorDiagram'
+import { CategoryDiagram } from './diagrams/CategoryDiagram'
 
 export const AssessmentStatisticsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
+  const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const { scoreLevels } = useScoreLevelStore()
 
@@ -47,13 +51,17 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
   const participationsWithAssessments = useGetParticipantionsWithAssessment(
     participations || [],
     scoreLevels || [],
+    assessmentCompletions || [],
   )
 
-  const isError = isAssessmentsError
-  const isPending = isAssessmentsPending
+  console.log('participationsWithAssessments', participationsWithAssessments)
+
+  const isError = isAssessmentsError || isAssessmentCompletionsError
+  const isPending = isAssessmentsPending || isAssessmentCompletionsPending
 
   const refetch = () => {
     refetchAssessments()
+    refetchAssessmentCompletions()
   }
 
   if (isError) {
@@ -75,6 +83,10 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
+      </div>
+      <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
+        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
+        <CategoryDiagram categories={categories} assessments={assessments} />
       </div>
     </div>
   )
