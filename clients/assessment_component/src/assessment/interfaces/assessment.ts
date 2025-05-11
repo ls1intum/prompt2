@@ -20,16 +20,6 @@ export type CreateOrUpdateAssessmentRequest = {
   author: string
 }
 
-export type CategoryWithRemainingAssessments = {
-  categoryID: string
-  remainingAssessments: number
-}
-
-export type RemainingAssessmentsForStudent = {
-  remainingAssessments: number
-  categories: CategoryWithRemainingAssessments[]
-}
-
 export type AssessmentCompletion = {
   coursePhaseID: string // UUID
   courseParticipationID: string // UUID
