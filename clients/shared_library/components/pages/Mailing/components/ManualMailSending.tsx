@@ -44,7 +44,7 @@ export const ManualMailSending = ({
   return (
     <>
       <TooltipProvider>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
           <div className='space-y-0.5'>
             <Label>Manual Acceptance Emails</Label>
             <p className='text-sm text-muted-foreground'>
@@ -70,7 +70,7 @@ export const ManualMailSending = ({
             {isDisabled(PassStatus.PASSED) && <TooltipContent>{tooltipMessage} </TooltipContent>}
           </Tooltip>
         </div>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
           <div className='space-y-0.5'>
             <Label>Manual Rejection Emails</Label>
             <p className='text-sm text-muted-foreground'>
