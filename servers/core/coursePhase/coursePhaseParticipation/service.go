@@ -78,23 +78,36 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 	}, nil
 }
 
-func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
-	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipation(ctx, db.GetCoursePhaseParticipationParams{
-		CoursePhaseID:         coursePhaseID,
+func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution, error) {
+	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetSingleCoursePhaseParticipationIncludingPrevious(ctx, db.GetSingleCoursePhaseParticipationIncludingPreviousParams{
+		ToCoursePhaseID:       coursePhaseID,
 		CourseParticipationID: courseParticipationID,
 	})
 	if err != nil {
-		log.Error(err)
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to get course phase participation")
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
 	}
 
-	participationDTO, err := coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(coursePhaseParticipation)
+	participationDTO, err := coursePhaseParticipationDTO.GetCPPForCoursePhaseDTOFromDBModel(coursePhaseParticipation)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
+	}
+
+	resolutions, err := CoursePhaseParticipationServiceSingleton.queries.GetResolutionsForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
+	}
+
+	resolutionDTOs := resolutionDTO.GetParticipationResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs)
 	if err != nil {
 		log.Error(err)
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create DTO from DB model")
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, errors.New("failed to replace resolution URLs")
 	}
 
-	return participationDTO, nil
+	return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{
+		Participation: participationDTO,
+		Resolutions:   resolutionDTOs,
+	}, nil
 }
 
 func CreateOrUpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, newCoursePhaseParticipation coursePhaseParticipationDTO.CreateCoursePhaseParticipation) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {

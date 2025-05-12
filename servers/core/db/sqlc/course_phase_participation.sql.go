@@ -655,6 +655,279 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 	return i, err
 }
 
+const getSingleCoursePhaseParticipationIncludingPrevious = `-- name: GetSingleCoursePhaseParticipationIncludingPrevious :one
+WITH 
+  -----------------------------------------------------------------------
+  -- A) Phases a student must have passed (per course_phase_graph)
+  -----------------------------------------------------------------------
+  direct_predecessor_for_pass AS (
+      SELECT cpg.from_course_phase_id AS phase_id
+      FROM course_phase_graph cpg
+      WHERE cpg.to_course_phase_id = $1
+  ),
+  
+  -----------------------------------------------------------------------
+  -- B) Predecessor phases from which we pull meta data via participation_data_dependency_graph.
+  -- Only include those whose course_phase_type has url = 'core'
+  -----------------------------------------------------------------------
+  direct_predecessors_for_meta AS (
+    SELECT 
+      cpt.name                      AS from_course_phase_type_name,
+      cpt.id                        AS from_course_phase_type_id,
+      mdg.from_course_phase_id      AS from_course_phase_id,
+      cp.restricted_data            AS course_phase_restricted_data,
+      array_agg(po.dto_name)        AS from_dto_names
+    FROM participation_data_dependency_graph mdg
+    JOIN course_phase cp 
+        ON cp.id = mdg.from_course_phase_id
+    JOIN course_phase_type cpt
+        ON cpt.id = cp.course_phase_type_id
+    JOIN course_phase_type_participation_provided_output_dto po 
+      ON po.id = mdg.from_course_phase_DTO_id
+    JOIN course_phase_type_participation_required_input_dto ri
+      ON ri.id = mdg.to_course_phase_DTO_id
+    WHERE mdg.to_course_phase_id = $1
+      AND po.endpoint_path = 'core'
+    GROUP BY 
+      cpt.name,
+      cpt.id,
+      mdg.from_course_phase_id,
+      cp.restricted_data
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 1) Existing participant in the current phase
+  -----------------------------------------------------------------------
+  current_phase_participations AS (
+      SELECT
+          cpp.course_phase_id,
+          cpp.course_participation_id,
+          cpp.pass_status,
+          cpp.restricted_data,
+          cpp.student_readable_data,
+          s.id                           AS student_id,
+          s.first_name,
+          s.last_name,
+          s.email,
+          s.matriculation_number,
+          s.university_login,
+          s.has_university_account,
+          s.gender,
+          s.nationality,
+          s.study_degree,
+          s.study_program,
+          s.current_semester
+      FROM course_phase_participation cpp
+      JOIN course_participation cp 
+        ON cpp.course_participation_id = cp.id
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE cpp.course_phase_id = $1
+        AND cpp.course_participation_id = $2
+  ),
+  
+  -----------------------------------------------------------------------
+  -- 2) Qualified non-participant:
+  --    Only one candidate matched by ID.
+  -----------------------------------------------------------------------
+  qualified_non_participant AS (
+      SELECT
+          $1::uuid                     AS course_phase_id,
+          cp.id                        AS course_participation_id,
+          'not_assessed'::pass_status  AS pass_status,
+          '{}'::jsonb                  AS restricted_data,
+          '{}'::jsonb                  AS student_readable_data,
+          s.id                         AS student_id,
+          s.first_name,
+          s.last_name,
+          s.email,
+          s.matriculation_number,
+          s.university_login,
+          s.has_university_account,
+          s.gender,
+          s.nationality,
+          s.study_degree,
+          s.study_program,
+          s.current_semester
+      FROM course_participation cp
+      JOIN student s 
+        ON cp.student_id = s.id
+      WHERE cp.id = $2
+        AND NOT EXISTS (
+            SELECT 1
+            FROM course_phase_participation new_cpp
+            WHERE new_cpp.course_phase_id = $1
+              AND new_cpp.course_participation_id = cp.id
+        )
+        AND EXISTS (
+            SELECT 1
+            FROM direct_predecessor_for_pass dpp
+            JOIN course_phase_participation pcpp
+              ON pcpp.course_phase_id = dpp.phase_id
+             AND pcpp.course_participation_id = cp.id
+            WHERE pcpp.pass_status = 'passed'
+        )
+  )
+  
+SELECT
+    main.course_phase_id, main.course_participation_id, main.pass_status, main.restricted_data, main.student_readable_data, main.student_id, main.first_name, main.last_name, main.email, main.matriculation_number, main.university_login, main.has_university_account, main.gender, main.nationality, main.study_degree, main.study_program, main.current_semester,
+    (COALESCE(      
+      (
+        SELECT jsonb_object_agg(each.key, each.value)
+        FROM direct_predecessors_for_meta dpm
+        JOIN course_phase_participation pcpp
+          ON pcpp.course_phase_id = dpm.from_course_phase_id
+         AND pcpp.course_participation_id = main.course_participation_id
+        CROSS JOIN LATERAL (
+          SELECT key, value
+          FROM (
+            SELECT (jsonb_each(pcpp.student_readable_data)).key   AS key,
+                   (jsonb_each(pcpp.student_readable_data)).value AS value
+            UNION
+            SELECT (jsonb_each(pcpp.restricted_data)).key   AS key,
+                   (jsonb_each(pcpp.restricted_data)).value AS value
+          ) sub
+        ) AS each
+        WHERE dpm.from_course_phase_type_name <> 'Application'
+          AND each.key = ANY(dpm.from_dto_names)
+      ),
+      '{}'::jsonb
+    )::jsonb ||
+    COALESCE(
+      (
+        SELECT appdata.obj
+        FROM direct_predecessors_for_meta dpm
+        JOIN course_phase_participation pcpp
+          ON pcpp.course_phase_id = dpm.from_course_phase_id
+         AND pcpp.course_participation_id = main.course_participation_id
+        JOIN course_phase_type cpt
+          ON cpt.id = dpm.from_course_phase_type_id
+         AND cpt.name = 'Application'
+        CROSS JOIN LATERAL (
+           SELECT jsonb_strip_nulls(
+              jsonb_build_object(
+                 'score', CASE 
+                     WHEN 'score' = ANY(dpm.from_dto_names) THEN 
+                       (SELECT to_jsonb(aasm.score)
+                        FROM application_assessment aasm
+                        WHERE aasm.course_phase_id = pcpp.course_phase_id AND aasm.course_participation_id = pcpp.course_participation_id)
+                     ELSE NULL 
+                 END,
+                 'additionalScores', CASE 
+                     WHEN 'additionalScores' = ANY(dpm.from_dto_names) THEN 
+                       (SELECT jsonb_agg(
+                              jsonb_build_object(
+                                'key', question_config->>'key',
+                                'answer', pcpp.restricted_data -> (question_config->>'key')
+                              )
+                       )
+                        FROM jsonb_array_elements(dpm.course_phase_restricted_data->'additionalScores') question_config)
+                     ELSE NULL 
+                 END,
+                 'applicationAnswers', CASE 
+                     WHEN 'applicationAnswers' = ANY(dpm.from_dto_names) THEN 
+                       (SELECT jsonb_agg(answer_obj)
+                        FROM (
+                           SELECT jsonb_build_object(
+                              'key', qt.access_key,
+                              'answer', to_jsonb(aat.answer),
+                              'order_num', qt.order_num, 
+                              'type', 'text'
+                           ) AS answer_obj
+                           FROM application_question_text qt
+                           JOIN application_answer_text aat
+                             ON aat.application_question_id = qt.id
+                            AND aat.course_participation_id = pcpp.course_participation_id
+                           WHERE qt.course_phase_id = dpm.from_course_phase_id
+                             AND qt.accessible_for_other_phases = true
+                             AND qt.access_key IS NOT NULL
+                             AND qt.access_key <> ''
+                           UNION ALL
+                           SELECT jsonb_build_object(
+                              'key', qm.access_key,
+                              'answer', to_jsonb(aams.answer),
+                              'order_num', qm.order_num, 
+                              'type', 'multiselect'
+                           ) AS answer_obj
+                           FROM application_question_multi_select qm
+                           JOIN application_answer_multi_select aams
+                             ON aams.application_question_id = qm.id
+                            AND aams.course_participation_id = pcpp.course_participation_id
+                           WHERE qm.course_phase_id = dpm.from_course_phase_id
+                             AND qm.accessible_for_other_phases = true
+                             AND qm.access_key IS NOT NULL
+                             AND qm.access_key <> ''
+                        ) answer_union)
+                     ELSE NULL 
+                 END
+              )
+           ) AS obj
+        ) appdata
+      ),
+      '{}'::jsonb
+    )::jsonb)::jsonb AS prev_data
+FROM (
+    SELECT course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM current_phase_participations
+    UNION
+    SELECT course_phase_id, course_participation_id, pass_status, restricted_data, student_readable_data, student_id, first_name, last_name, email, matriculation_number, university_login, has_university_account, gender, nationality, study_degree, study_program, current_semester FROM qualified_non_participant
+) AS main
+`
+
+type GetSingleCoursePhaseParticipationIncludingPreviousParams struct {
+	ToCoursePhaseID       uuid.UUID `json:"to_course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+}
+
+type GetSingleCoursePhaseParticipationIncludingPreviousRow struct {
+	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	PassStatus            NullPassStatus `json:"pass_status"`
+	RestrictedData        []byte         `json:"restricted_data"`
+	StudentReadableData   []byte         `json:"student_readable_data"`
+	StudentID             uuid.UUID      `json:"student_id"`
+	FirstName             pgtype.Text    `json:"first_name"`
+	LastName              pgtype.Text    `json:"last_name"`
+	Email                 pgtype.Text    `json:"email"`
+	MatriculationNumber   pgtype.Text    `json:"matriculation_number"`
+	UniversityLogin       pgtype.Text    `json:"university_login"`
+	HasUniversityAccount  pgtype.Bool    `json:"has_university_account"`
+	Gender                Gender         `json:"gender"`
+	Nationality           pgtype.Text    `json:"nationality"`
+	StudyDegree           StudyDegree    `json:"study_degree"`
+	StudyProgram          pgtype.Text    `json:"study_program"`
+	CurrentSemester       pgtype.Int4    `json:"current_semester"`
+	PrevData              []byte         `json:"prev_data"`
+}
+
+// ---------------------------------------------------------------------
+// 3) Final SELECT: Merge the participant and meta data from all predecessors
+// ---------------------------------------------------------------------
+func (q *Queries) GetSingleCoursePhaseParticipationIncludingPrevious(ctx context.Context, arg GetSingleCoursePhaseParticipationIncludingPreviousParams) (GetSingleCoursePhaseParticipationIncludingPreviousRow, error) {
+	row := q.db.QueryRow(ctx, getSingleCoursePhaseParticipationIncludingPrevious, arg.ToCoursePhaseID, arg.CourseParticipationID)
+	var i GetSingleCoursePhaseParticipationIncludingPreviousRow
+	err := row.Scan(
+		&i.CoursePhaseID,
+		&i.CourseParticipationID,
+		&i.PassStatus,
+		&i.RestrictedData,
+		&i.StudentReadableData,
+		&i.StudentID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.MatriculationNumber,
+		&i.UniversityLogin,
+		&i.HasUniversityAccount,
+		&i.Gender,
+		&i.Nationality,
+		&i.StudyDegree,
+		&i.StudyProgram,
+		&i.CurrentSemester,
+		&i.PrevData,
+	)
+	return i, err
+}
+
 const getStudentsOfCoursePhase = `-- name: GetStudentsOfCoursePhase :many
 WITH 
   -----------------------------------------------------------------------

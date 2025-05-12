@@ -266,6 +266,23 @@ func (q *Queries) GetResolutionsForCoursePhase(ctx context.Context, toCoursePhas
 	return items, nil
 }
 
+const getResolutionsForCoursePhaseByCourseParticipationID = `-- name: GetResolutionsForCoursePhaseByCourseParticipationID :one
+SELECT jsonb_object_agg(po.dto_name, cp.student_data -> po.dto_name) AS resolved_dto_objects
+FROM course_participation cp
+JOIN course_phase p ON cp.course_id = p.course_id
+JOIN participation_data_dependency_graph mdg ON mdg.to_course_phase_id = p.id
+JOIN course_phase_type_participation_provided_output_dto po ON po.id = mdg.from_course_phase_DTO_id
+  WHERE cp.id = $1
+  AND po.endpoint_path <> 'core'
+`
+
+func (q *Queries) GetResolutionsForCoursePhaseByCourseParticipationID(ctx context.Context, id uuid.UUID) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getResolutionsForCoursePhaseByCourseParticipationID, id)
+	var resolved_dto_objects []byte
+	err := row.Scan(&resolved_dto_objects)
+	return resolved_dto_objects, err
+}
+
 const updateCoursePhase = `-- name: UpdateCoursePhase :exec
 UPDATE course_phase
 SET 
