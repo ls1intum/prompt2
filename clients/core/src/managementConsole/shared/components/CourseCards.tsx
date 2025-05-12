@@ -18,7 +18,13 @@ export const CourseCards = (): JSX.Element => {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8 grid gap-8'>
+    <div
+      className={`container mx-auto px-4 py-8 ${
+        courses.length === 1
+          ? 'max-w-md mx-auto' // Center a single card with appropriate max width
+          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'
+      }`}
+    >
       {courses.map((course) => {
         const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
@@ -40,25 +46,25 @@ export const CourseCards = (): JSX.Element => {
             <CardHeader className={`rounded-t-lg ${bgColor}`}>
               <div className='flex justify-between items-center'>
                 <div>
-                  <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
+                  <CardTitle className='text-2xl font-bold text-black'>{course.name}</CardTitle>
                 </div>
               </div>
             </CardHeader>
             <CardContent className='p-6'>
-              <div className='grid md:grid-cols-2 gap-6'>
+              <div className='grid grid-cols-1 gap-4'>
                 <div className='space-y-4'>
                   <div className='flex items-center space-x-3'>
-                    <CalendarDays className='w-6 h-6' />
+                    <CalendarDays className='w-5 h-5' />
                     <div>
                       <p className='text-secondary-foreground'>Semester</p>
-                      <p className='text-lg'>{course.semesterTag}</p>
+                      <p className='text-base'>{course.semesterTag}</p>
                     </div>
                   </div>
                   <div className='flex items-center space-x-3'>
-                    <Calendar className='w-6 h-6' />
+                    <Calendar className='w-5 h-5' />
                     <div>
                       <p className='text-secondary-foreground'>Duration</p>
-                      <p className='text-lg'>
+                      <p className='text-base'>
                         {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
                       </p>
                     </div>
@@ -66,17 +72,17 @@ export const CourseCards = (): JSX.Element => {
                 </div>
                 <div className='space-y-4'>
                   <div className='flex items-center space-x-3'>
-                    <GraduationCap className='w-6 h-6' />
+                    <GraduationCap className='w-5 h-5' />
                     <div>
                       <p className='text-secondary-foreground'>Course Type</p>
-                      <p className='text-lg'>{CourseTypeDetails[course.courseType].name}</p>
+                      <p className='text-base'>{CourseTypeDetails[course.courseType].name}</p>
                     </div>
                   </div>
                   <div className='flex items-center space-x-3'>
-                    <Clock className='w-6 h-6' />
+                    <Clock className='w-5 h-5' />
                     <div>
                       <p className='text-secondary-foreground'>ECTS</p>
-                      <p className='text-lg'>{course.ects}</p>
+                      <p className='text-base'>{course.ects}</p>
                     </div>
                   </div>
                 </div>
