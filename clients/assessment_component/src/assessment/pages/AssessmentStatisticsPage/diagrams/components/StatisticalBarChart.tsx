@@ -9,28 +9,14 @@ import {
   Tooltip as ChartTooltip,
 } from 'recharts'
 import { ChartContainer } from '@tumaet/prompt-ui-components'
-import { StatisticalTooltipContent } from './StatisticalTooltipContent'
-import { chartConfig } from '../utils/chartConfig'
 import { StatisticalDataPoint } from '../../interfaces/StatisticalDataPoint'
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+
+import { chartConfig, getBarColor } from '../utils/chartConfig'
+
+import { StatisticalTooltipContent } from './StatisticalTooltipContent'
 
 export interface StatisticalBarChartProps {
   data: StatisticalDataPoint[]
-}
-
-export function getBarColor(scoreLevel: ScoreLevel): string {
-  switch (scoreLevel) {
-    case ScoreLevel.Novice:
-      return 'var(--color-novice)' // Novice color
-    case ScoreLevel.Intermediate:
-      return 'var(--color-intermediate)' // Intermediate color
-    case ScoreLevel.Advanced:
-      return 'var(--color-advanced)' // Advanced color
-    case ScoreLevel.Expert:
-      return 'var(--color-expert)' // Expert color
-    default:
-      return 'var(--color-default)' // Default color
-  }
 }
 
 // Custom bar shape that shows a rectangle from lower quartile to upper quartile with median indicator
@@ -42,7 +28,6 @@ const CustomBar = (props: any) => {
   const upperQuartileY = y + height * (1 - payload.upperQuartile / 4)
   const averageY = y + height * (1 - payload.average / 4)
 
-  // Get color based on average value
   const barColor = getBarColor(payload.median)
 
   // Height of the rectangle is the difference between upper and lower quartile positions
@@ -50,7 +35,6 @@ const CustomBar = (props: any) => {
 
   return (
     <g>
-      {/* Rectangle from lower quartile to upper quartile */}
       <Rectangle
         x={x}
         y={upperQuartileY}
@@ -60,7 +44,6 @@ const CustomBar = (props: any) => {
         radius={[4, 4, 4, 4]}
       />
 
-      {/* Median indicator */}
       <line
         x1={x}
         y1={averageY}
