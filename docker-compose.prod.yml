@@ -340,27 +340,6 @@ services:
     networks:
       - prompt-network
 
-  client-intro-course-tutor-component:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-tutor-component:${INTRO_COURSE_TUTOR_IMAGE_TAG}"
-    container_name: prompt-client-intro-course-tutor-component
-    environment:
-      - TZ=Europe/Berlin
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.intro-course-tutor.rule=Host(`${CORE_HOST}`) && PathPrefix(`/intro-course-tutor`)"
-      - "traefik.http.routers.intro-course-tutor.entrypoints=websecure"
-      - "traefik.http.routers.intro-course-tutor.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.intro-course-tutor-strip-prefix.stripPrefix.prefixes=/intro-course-tutor"
-      - "traefik.http.routers.intro-course-tutor.middlewares=intro-course-tutor-strip-prefix,intro-course-tutor-compress"
-      - "traefik.http.middlewares.intro-course-tutor-compress.compress=true"
-    expose:
-      - "80"
-    depends_on:
-      - server-core
-      - server-intro-course
-    networks:
-      - prompt-network
-
   client-interview-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
     container_name: prompt-client-interview-component

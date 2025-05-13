@@ -1,5 +1,5 @@
 import { ColumnFiltersState } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@tumaet/prompt-ui-components'
 import { PassStatus, Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { getStatusString } from '../../../utils/getStatusBadge'
 import { X } from 'lucide-react'

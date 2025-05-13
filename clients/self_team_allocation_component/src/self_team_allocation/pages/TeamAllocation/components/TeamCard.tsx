@@ -1,4 +1,6 @@
 import type React from 'react'
+import { Users, UserPlus, LogOut, Trash2 } from 'lucide-react'
+import type { Team } from '../../../interfaces/team'
 import {
   Card,
   CardContent,
@@ -6,11 +8,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Users, UserPlus, LogOut, Trash2 } from 'lucide-react'
-import type { Team } from '../../../interfaces/team'
+  Badge,
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 export interface TeamCardProps {
   team: Team

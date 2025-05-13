@@ -1,3 +1,9 @@
+import { Filter } from 'lucide-react'
+import { ColumnFiltersState } from '@tanstack/react-table'
+import { PassStatus } from '@tumaet/prompt-shared-state'
+import { getChallengeStatusBadge } from '../utils/getChallengeStatusBadge'
+import { ChallengeStatus } from '../interfaces/challengeStatus'
+import { getStatusBadge } from '@/utils/getStatusBadge'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -5,17 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
-import { Filter } from 'lucide-react'
-import { ColumnFiltersState } from '@tanstack/react-table'
-
-import { PassStatus } from '@tumaet/prompt-shared-state'
-
-import { Button } from '@/components/ui/button'
-import { getStatusBadge } from '@/utils/getStatusBadge'
-
-import { getChallengeStatusBadge } from '../utils/getChallengeStatusBadge'
-import { ChallengeStatus } from '../interfaces/challengeStatus'
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState

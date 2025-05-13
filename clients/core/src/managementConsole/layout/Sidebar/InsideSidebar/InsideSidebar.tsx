@@ -1,4 +1,4 @@
-import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarHeader } from '@tumaet/prompt-ui-components'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useLocation, useParams } from 'react-router-dom'
 import { InsideCourseSidebar } from './InsideCourseSidebar'

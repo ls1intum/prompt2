@@ -1,15 +1,16 @@
+import { Award, BookOpen, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Award, BookOpen, Loader2 } from 'lucide-react'
-import { ErrorPage } from '@/components/ErrorPage'
+  Badge,
+  Card,
+  CardContent,
+  Separator,
+  ErrorPage,
+} from '@tumaet/prompt-ui-components'
 
 import type { TeaseStudent } from '../../../interfaces/tease/student'
 import { useParams } from 'react-router-dom'

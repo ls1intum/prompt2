@@ -1,9 +1,13 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  Input,
+  Label,
+  Switch,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@tumaet/prompt-ui-components'
 
 export interface Page1Ref {
   validate: () => boolean

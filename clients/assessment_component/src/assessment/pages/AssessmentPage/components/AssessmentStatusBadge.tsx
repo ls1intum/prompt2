@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, CircleCheck } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@tumaet/prompt-ui-components'
 
 interface AssessmentStatusBadgeProps {
   remainingAssessments: number

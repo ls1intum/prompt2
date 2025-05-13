@@ -1,10 +1,27 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown, ChevronUp, GripVertical, Trash2 } from 'lucide-react'
+import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Input,
+  Checkbox,
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+  Button,
+  TooltipProvider,
+  Switch,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
 import {
@@ -15,25 +32,11 @@ import {
 } from '@core/validations/questionConfig'
 import { MultiSelectConfig } from './MultiSelectConfig'
 import { TextConfig } from './TextConfig'
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from '@/components/ui/form'
-import { Button } from '@/components/ui/button'
 import { DeleteConfirmation } from '../components/DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 import { checkCheckBoxQuestion } from '@core/publicPages/application/pages/ApplicationForm/utils/CheckBoxRequirements'
-import { DescriptionMinimalTiptapEditor } from '@/components/minimal-tiptap/form-description-tiptap'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
-import { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
+import { DescriptionMinimalTiptapEditor } from '@tumaet/prompt-ui-components'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
