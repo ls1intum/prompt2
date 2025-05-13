@@ -144,7 +144,7 @@ export const AssessmentForm = ({
                         'resize-none text-xs h-full',
                         form.formState.errors.comment &&
                           'border border-destructive focus-visible:ring-destructive',
-                        completed && 'bg-gray-100 cursor-not-allowed opacity-80',
+                        completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
                       )}
                       disabled={completed}
                       readOnly={completed}
