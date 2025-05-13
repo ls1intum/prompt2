@@ -3,7 +3,7 @@ import translations from '@/lib/translations.json'
 import { SortableHeader } from '@/components/table/SortableHeader'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@tumaet/prompt-ui-components'
 
 interface ColumnDefProps {
   prevDataKeys: string[]

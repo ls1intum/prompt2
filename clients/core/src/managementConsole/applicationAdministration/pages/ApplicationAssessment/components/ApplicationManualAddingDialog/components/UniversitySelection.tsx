@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 import { School, UserPlus } from 'lucide-react'
 
 interface UniversitySelectionProps {

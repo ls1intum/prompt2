@@ -1,12 +1,14 @@
 import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import {
+  ErrorPage,
+  ManagementPageHeader,
+  useCustomElementWidth,
+} from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-import { ErrorPage } from '@/components/ErrorPage'
 import StudentScoreBadge from '../components/StudentScoreBadge'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
 import { useMemo } from 'react'
 
 export const AssessmentOverviewPage = (): JSX.Element => {

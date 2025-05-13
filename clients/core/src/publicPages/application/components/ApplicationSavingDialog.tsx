@@ -1,14 +1,14 @@
 import { AlertCircle, CheckCircle, Loader2, XCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+  cn,
+} from '@tumaet/prompt-ui-components'
 
 interface ApplicationSavingDialogProps {
   showDialog: 'saving' | 'success' | 'error' | null

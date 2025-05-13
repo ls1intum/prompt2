@@ -1,20 +1,26 @@
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/button'
+import { AlertTriangle, Download } from 'lucide-react'
+import { useDataDownload } from '../../../hooks/useDataDownload'
+import { UploadedStudent } from '../../../interfaces/UploadedStudent'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import {
+  ScrollArea,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableHead,
   TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useDataDownload } from '../../../hooks/useDataDownload'
-import { UploadedStudent } from '../../../interfaces/UploadedStudent'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { AlertTriangle, Download } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Badge,
+} from '@tumaet/prompt-ui-components'
 
 interface MatchingResultsProps {
   matchedByMatriculation: UploadedStudent[]

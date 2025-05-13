@@ -1,15 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  ErrorPage,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { Loader2, AlertTriangle, AlertCircle } from 'lucide-react'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import type { SurveyForm } from '../../interfaces/surveyForm'
 import type { SurveyResponse } from '../../interfaces/surveyResponse'
 import { getSurveyForm } from '../../network/queries/getSurveyForm'
 import { getSurveyOwnResponse } from '../../network/queries/getSurveyOwnResponse'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SurveyFormComponent } from './components/SurveyForm'
-import { ErrorPage } from '@/components/ErrorPage'
 
 export const StudentSurveyPage = (): JSX.Element => {
   const { isStudentOfCourse } = useCourseStore()

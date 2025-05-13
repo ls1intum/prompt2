@@ -1,9 +1,7 @@
-import { CardTitle } from '@/components/ui/card'
 import { CoursePhaseWithPosition } from '@core/managementConsole/courseConfigurator/interfaces/coursePhaseWithPosition'
 import { useCourseConfigurationState } from '@core/managementConsole/courseConfigurator/zustand/useCourseConfigurationStore'
 import { Pen } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Button, Input, CardTitle } from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {

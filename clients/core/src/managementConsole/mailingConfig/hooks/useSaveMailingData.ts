@@ -1,4 +1,4 @@
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@tumaet/prompt-ui-components'
 import { UpdateCourseData } from '@tumaet/prompt-shared-state'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'

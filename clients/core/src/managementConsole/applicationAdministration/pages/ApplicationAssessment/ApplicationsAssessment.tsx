@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { SearchIcon } from 'lucide-react'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 
 import {
@@ -18,22 +20,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+  Input,
+  ScrollArea,
+  ScrollBar,
+  ManagementPageHeader,
+  useCustomElementWidth,
+} from '@tumaet/prompt-ui-components'
+
 import { columns } from './components/table/columns'
-import { useEffect, useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { SearchIcon } from 'lucide-react'
 import { FilterMenu } from './components/table/filtering/FilterMenu'
 import { VisibilityMenu } from './components/table/menus/VisibilityMenu'
 import { FilterBadges } from './components/table/filtering/FilterBadges'
 import { ApplicationDetailsDialog } from './components/ApplicationDetailsDialog/ApplicationDetailsDialog'
 import { GroupActionsMenu } from './components/table/menus/GroupActionsMenu'
-import { downloadApplications } from './utils/downloadApplications'
 import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
+import { downloadApplications } from './utils/downloadApplications'
 import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 import { useDeleteApplications } from './hooks/useDeleteApplications'
 

@@ -1,16 +1,29 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useTriggerAssessment } from '../pages/hooks/useTriggerAssessment'
 import { useGetDeveloperProfile } from '../pages/hooks/useGetDeveloperProfile'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
+import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
+import {
+  Button,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  cn,
+} from '@tumaet/prompt-ui-components'
+import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import {
   RefreshCw,
   CheckCircle,
@@ -24,14 +37,6 @@ import {
   SearchCode,
   AlertTriangle,
 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 
 export const Assessment = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null)

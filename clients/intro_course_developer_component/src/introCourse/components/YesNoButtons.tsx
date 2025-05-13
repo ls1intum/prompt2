@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 
 export const YesNoButtons = ({
   value,

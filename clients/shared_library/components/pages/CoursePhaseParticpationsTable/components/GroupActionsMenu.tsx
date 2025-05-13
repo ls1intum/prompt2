@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { MoreHorizontal, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import { ActionDialog } from '@/components/table/GroupActionDialog'
 import { RowModel } from '@tanstack/react-table'

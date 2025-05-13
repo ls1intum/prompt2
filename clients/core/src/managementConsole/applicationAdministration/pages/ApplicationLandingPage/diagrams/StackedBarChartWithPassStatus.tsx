@@ -1,4 +1,4 @@
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@tumaet/prompt-ui-components'
 import { BarChart, Bar, LabelList, XAxis, YAxis, Rectangle } from 'recharts'
 import { chartConfig } from './utils/chartConfig'
 import { getCornerRadius } from './utils/getCornerRadius'
