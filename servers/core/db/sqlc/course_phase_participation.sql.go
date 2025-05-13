@@ -759,13 +759,16 @@ WITH
             WHERE new_cpp.course_phase_id = $1
               AND new_cpp.course_participation_id = cp.id
         )
-        AND EXISTS (
+        AND (  
+          NOT EXISTS (SELECT 1 FROM direct_predecessor_for_pass)  -- no predecessor ⇒ always qualified  
+          OR EXISTS (
             SELECT 1
             FROM direct_predecessor_for_pass dpp
             JOIN course_phase_participation pcpp
               ON pcpp.course_phase_id = dpp.phase_id
              AND pcpp.course_participation_id = cp.id
             WHERE pcpp.pass_status = 'passed'
+          )
         )
   )
   
