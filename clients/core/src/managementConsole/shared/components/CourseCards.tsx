@@ -52,7 +52,7 @@ export const CourseCards = (): JSX.Element => {
               <CardHeader className={`rounded-t-lg ${bgColor} py-6 px-6 border-b`}>
                 <div className='flex items-center gap-4'>
                   <div className='size-6'>
-                    <DynamicIcon name={course.studentReadableData?.['icon'] || 'graduation-cap'} />
+                    <DynamicIcon name={course.studentReadableData?.['icon'] || 'graduation-cap'} color='black'/>
                   </div>
                   <CardTitle className='text-2xl font-bold text-gray-900 leading-tight'>
                     {course.name}
@@ -108,7 +108,7 @@ export const CourseCards = (): JSX.Element => {
                 </div>
               </CardContent>
 
-              <CardFooter className='px-6 py-4 bg-gray-50 border-t flex justify-end'>
+              <CardFooter className='px-6 py-4 border-t flex justify-end'>
                 <div className='text-sm font-medium text-primary flex items-center'>
                   Go to course <ChevronRight className='ml-1 h-4 w-4' />
                 </div>

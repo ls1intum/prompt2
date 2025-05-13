@@ -11,6 +11,7 @@ module.exports = {
       variants: ['dark'],
     },
     'grid-cols-2',
+    'w-[120px]',
   ],
   theme: {
     extend: {
