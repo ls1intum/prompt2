@@ -1,17 +1,18 @@
 import { Footer } from './Footer'
 import { Header } from './Header'
-import { LoadingPage } from '@/components/LoadingPage'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+  LoadingPage,
+} from '@tumaet/prompt-ui-components'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
+import { useState } from 'react'
+
 import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 

@@ -1,12 +1,10 @@
-'use client'
-
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { Loader2, Trophy, Users, AlertCircle } from 'lucide-react'
 import { getPassedStudentsCount } from '../network/queries/getPassedStudentsCount'
 import type { JSX } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@tumaet/prompt-ui-components'
+import { Loader2, Trophy, Users, AlertCircle } from 'lucide-react'
 
 export const PassCountIndicator = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

@@ -1,9 +1,15 @@
 import { Canvas } from './Canvas'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ErrorPage } from '@/components/ErrorPage'
 import { Loader2 } from 'lucide-react'
 import { useCourseConfiguratorDataSetup } from './handlers/useCourseConfiguratorDataSetup'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  ManagementPageHeader,
+  ErrorPage,
+} from '@tumaet/prompt-ui-components'
 
 export default function CourseConfiguratorPage() {
   const { courseId, isError, isPending, error, finishedSetup, refetchAll } =

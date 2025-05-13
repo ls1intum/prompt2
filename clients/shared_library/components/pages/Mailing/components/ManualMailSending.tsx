@@ -1,10 +1,15 @@
-import { Button } from '@/components/ui/button'
 import { Send } from 'lucide-react'
 import { PassStatus, CoursePhaseMailingConfigData } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { ConfirmSendEmailDialog } from './ConfirmSendEmailDialog'
-import { Label } from '@/components/ui/label'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Button,
+  Label,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'
 
 interface ManualMailSendingProps {
@@ -39,7 +44,7 @@ export const ManualMailSending = ({
   return (
     <>
       <TooltipProvider>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
           <div className='space-y-0.5'>
             <Label>Manual Acceptance Emails</Label>
             <p className='text-sm text-muted-foreground'>
@@ -65,7 +70,7 @@ export const ManualMailSending = ({
             {isDisabled(PassStatus.PASSED) && <TooltipContent>{tooltipMessage} </TooltipContent>}
           </Tooltip>
         </div>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2'>
+        <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
           <div className='space-y-0.5'>
             <Label>Manual Rejection Emails</Label>
             <p className='text-sm text-muted-foreground'>

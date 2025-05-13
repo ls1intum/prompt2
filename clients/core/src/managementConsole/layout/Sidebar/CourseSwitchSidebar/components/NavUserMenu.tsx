@@ -7,13 +7,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { NavAvatar } from './NavAvatar'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
