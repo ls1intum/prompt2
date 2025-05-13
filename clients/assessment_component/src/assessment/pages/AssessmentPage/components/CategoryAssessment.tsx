@@ -9,14 +9,12 @@ import AssessmentStatusBadge from './AssessmentStatusBadge'
 
 interface CategoryAssessmentProps {
   category: CategoryWithCompetencies
-  remainingAssessments: number
   assessments: Assessment[]
   completed: boolean
 }
 
 export const CategoryAssessment = ({
   category,
-  remainingAssessments,
   assessments,
   completed,
 }: CategoryAssessmentProps): JSX.Element => {
@@ -42,7 +40,10 @@ export const CategoryAssessment = ({
           {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
         </button>
         <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
-        <AssessmentStatusBadge remainingAssessments={remainingAssessments} />
+        <AssessmentStatusBadge
+          remainingAssessments={category.competencies.length - assessments.length}
+          isFinalized={completed}
+        />
       </div>
 
       {isExpanded && (

@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+import { useMemo } from 'react'
 
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 
@@ -25,6 +26,14 @@ export const AssessmentPage = (): JSX.Element => {
     refetch: refetchStudentAssessment,
   } = useGetStudentAssessment()
 
+  const remainingAssessments = useMemo(() => {
+    return (
+      categories.reduce((acc, category) => {
+        return acc + category.competencies.length
+      }, 0) - (studentAssessment?.assessments?.length || 0)
+    )
+  }, [categories, studentAssessment?.assessments?.length])
+
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
     return (
@@ -47,19 +56,22 @@ export const AssessmentPage = (): JSX.Element => {
       <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
 
       {participant && (
-        <AssessmentProfile participant={participant} studentAssessment={studentAssessment} />
+        <AssessmentProfile
+          participant={participant}
+          studentAssessment={studentAssessment}
+          remainingAssessments={remainingAssessments}
+        />
       )}
 
       {categories.map((category) => (
         <CategoryAssessment
           key={category.id}
           category={category}
-          remainingAssessments={
-            studentAssessment.remainingAssessments?.categories?.find(
-              (item) => item.categoryID === category.id,
-            )?.remainingAssessments ?? 0
-          }
-          assessments={studentAssessment.assessments}
+          assessments={studentAssessment.assessments.filter((assessment) =>
+            category.competencies
+              .map((competency) => competency.id)
+              .includes(assessment.competencyID),
+          )}
           completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}

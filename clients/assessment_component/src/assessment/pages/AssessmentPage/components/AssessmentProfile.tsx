@@ -23,11 +23,13 @@ import { AssessmentCompletionDialog } from './AssessmentCompletionDialog'
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
   studentAssessment: StudentAssessment
+  remainingAssessments: number
 }
 
 export const AssessmentProfile = ({
   participant,
   studentAssessment,
+  remainingAssessments,
 }: AssessmentProfileProps): JSX.Element => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -77,7 +79,9 @@ export const AssessmentProfile = ({
           <div className='absolute top-4 right-4'>
             <Button
               size='sm'
-              disabled={studentAssessment.remainingAssessments.remainingAssessments > 0}
+              disabled={
+                !studentAssessment.assessmentCompletion.completed && remainingAssessments > 0
+              }
               onClick={handleButtonClick}
             >
               {studentAssessment.assessmentCompletion.completed ? (
@@ -100,7 +104,7 @@ export const AssessmentProfile = ({
                   {participant.student.firstName} {participant.student.lastName}
                 </h1>
                 <AssessmentStatusBadge
-                  remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
+                  remainingAssessments={remainingAssessments}
                   isFinalized={studentAssessment.assessmentCompletion.completed}
                 />
                 {studentAssessment.assessments.length > 0 && (

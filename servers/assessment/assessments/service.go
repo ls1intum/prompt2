@@ -12,8 +12,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments/remainingAssessmentsDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
@@ -111,12 +109,6 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		return assessmentDTO.StudentAssessment{}, errors.New("could not get assessments for student in phase")
 	}
 
-	remainingAssessments, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not count remaining assessments: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not count remaining assessments")
-	}
-
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
 	var level = scoreLevelDTO.StudentScore{
 		ScoreLevel: db.ScoreLevelNovice,
@@ -148,7 +140,6 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	return assessmentDTO.StudentAssessment{
 		CourseParticipationID: courseParticipationID,
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
-		RemainingAssessments:  remainingAssessmentsDTO.MapToRemainingAssessmentsDTO(remainingAssessments),
 		AssessmentCompletion:  completion,
 		StudentScore:          level,
 	}, nil
