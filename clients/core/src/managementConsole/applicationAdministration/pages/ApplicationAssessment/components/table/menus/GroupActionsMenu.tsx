@@ -1,20 +1,20 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Trash2, FileDown, CheckCircle, XCircle } from 'lucide-react'
-import { ActionDialog } from '@/components/table/GroupActionDialog'
+} from '@tumaet/prompt-ui-components'
 import { RowModel } from '@tanstack/react-table'
 import { ApplicationParticipation } from '../../../../../interfaces/applicationParticipation'
 import { useApplicationStatusUpdate } from '../../../hooks/useApplicationStatusUpdate'
 import { useDeleteApplications } from '../../../hooks/useDeleteApplications'
 import { PassStatus } from '@tumaet/prompt-shared-state'
+import { ActionDialog } from '@/components/table/GroupActionDialog'
 
 interface GroupActionsMenuProps {
   selectedRows: RowModel<ApplicationParticipation>

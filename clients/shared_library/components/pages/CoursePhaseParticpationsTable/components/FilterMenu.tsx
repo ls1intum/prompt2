@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'

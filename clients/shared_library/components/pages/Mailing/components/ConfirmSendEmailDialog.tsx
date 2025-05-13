@@ -1,4 +1,8 @@
 import { Send, Loader2, AlertCircle, CheckCircle, X } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
+import { SendStatusMail, PassStatus } from '@tumaet/prompt-shared-state'
+import { sendStatusMail } from '@/network/mutations/sendStatusMail'
 import {
   Dialog,
   DialogContent,
@@ -6,13 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { useMutation } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
-import { SendStatusMail, PassStatus } from '@tumaet/prompt-shared-state'
-import { sendStatusMail } from '@/network/mutations/sendStatusMail'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+  Button,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@tumaet/prompt-ui-components'
 
 interface ConfirmSendEmailDialogProps {
   isOpen: boolean

@@ -1,12 +1,18 @@
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
 import { AlertCircle, ClipboardCheck, LockIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import {
+  Textarea,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  cn,
+} from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 
 import { getLevelConfig } from '../../utils/getLevelConfig'
 
@@ -138,7 +144,7 @@ export const AssessmentForm = ({
                         'resize-none text-xs h-full',
                         form.formState.errors.comment &&
                           'border border-destructive focus-visible:ring-destructive',
-                        completed && 'bg-gray-100 cursor-not-allowed opacity-80',
+                        completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
                       )}
                       disabled={completed}
                       readOnly={completed}

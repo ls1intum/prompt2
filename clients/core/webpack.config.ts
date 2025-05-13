@@ -62,11 +62,11 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
           exclude: /node_modules/,
         },
         {
-          test: /\.css$/i,
+          test: /\.css$/,
           include: [
             path.resolve(__dirname, 'src'),
-            path.resolve(__dirname, '../shared_library/src'),
             path.resolve(__dirname, '../node_modules/@xyflow/react/dist/style.css'),
+            path.resolve(__dirname, '../node_modules/@tumaet/prompt-ui-components/dist'),
             path.resolve(__dirname, '../shared_library/components/minimal-tiptap/styles/index.css'),
           ],
           use: [

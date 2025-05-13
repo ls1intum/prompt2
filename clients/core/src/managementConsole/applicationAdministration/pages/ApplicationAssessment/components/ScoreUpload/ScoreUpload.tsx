@@ -1,23 +1,23 @@
 import React, { useCallback, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Upload } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { AssessmentScoreUploadPage1, Page1Ref } from './components/AssessmentScoreUploadPage1'
 import { AssessmentScoreUploadPage2, Page2Ref } from './components/AssessmentScoreUploadPage2'
 import { AssessmentScoreUploadPage3 } from './components/AssessmentScoreUploadPage3'
 import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
 import { AdditionalScoreUpload } from '../../../../interfaces/additionalScore/additionalScoreUpload'
 import { IndividualScore } from '../../../../interfaces/additionalScore/individualScore'
-import { Upload } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postAdditionalScore } from '@core/network/mutations/postAdditionalScore'
-import { useParams } from 'react-router-dom'
-import { useToast } from '@/hooks/use-toast'
 import { matchStudents } from './utils/matchStudents'
 
 interface AssessmentScoreUploadProps {

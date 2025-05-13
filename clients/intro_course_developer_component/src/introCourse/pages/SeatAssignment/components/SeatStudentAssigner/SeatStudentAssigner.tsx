@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Seat } from '../../../../interfaces/Seat'
-import { useUpdateSeats } from '../../hooks/useUpdateSeats'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { JSX } from 'react/jsx-runtime'
 import {
   ChevronDown,
   ChevronUp,
@@ -11,23 +9,30 @@ import {
   Users,
   Laptop,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Seat } from '../../../../interfaces/Seat'
+import { DeveloperWithProfile } from '../../interfaces/DeveloperWithProfile'
+import { Tutor } from '../../../../interfaces/Tutor'
+import { useUpdateSeats } from '../../hooks/useUpdateSeats'
+import { useAssignStudents } from '../../hooks/useAssignStudents'
+import { useDownloadAssignment } from '../../hooks/useDownloadAssignment'
+import { ResetSeatAssignmentDialog } from './ResetSeatAssignmentDialog'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Button,
+  Alert,
+  AlertDescription,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { JSX } from 'react/jsx-runtime'
-import { ResetSeatAssignmentDialog } from './ResetSeatAssignmentDialog'
-import { useAssignStudents } from '../../hooks/useAssignStudents'
-import { useDownloadAssignment } from '../../hooks/useDownloadAssignment'
-import { DeveloperWithProfile } from '../../interfaces/DeveloperWithProfile'
-import { Tutor } from '../../../../interfaces/Tutor'
+  Badge,
+} from '@tumaet/prompt-ui-components'
 
 interface SeatStudentAssignerProps {
   seats: Seat[]

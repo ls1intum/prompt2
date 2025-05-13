@@ -3,7 +3,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { Gauge } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'

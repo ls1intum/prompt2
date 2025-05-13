@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import StudentScoreBadge from '../../components/StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
+
+import {
+  Alert,
+  AlertDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'

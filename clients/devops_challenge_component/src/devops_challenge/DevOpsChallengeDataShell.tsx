@@ -1,15 +1,13 @@
-import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, TriangleAlert } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
-import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { useEffect, useState } from 'react'
+import { useCourseStore, CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
-import { ErrorPage } from '@/components/ErrorPage'
 import { useGetDeveloperProfile } from './pages/hooks/useGetDeveloperProfile'
+import UnauthorizedPage from '@/components/UnauthorizedPage'
+import { Alert, AlertDescription, AlertTitle, ErrorPage } from '@tumaet/prompt-ui-components'
 
 interface DevOpsChallengeDataShellProps {
   children: React.ReactNode

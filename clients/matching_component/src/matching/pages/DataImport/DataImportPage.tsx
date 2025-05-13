@@ -1,13 +1,17 @@
-import { Button } from '@/components/ui/button'
 import { AlertCircle, Check, ChevronLeft, X } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useMatchingStore } from '../../zustand/useMatchingStore'
 import MatchingResults from './components/MatchingResults'
 import { useStudentImportMatching } from './hooks/useStudentImportMatching'
-import { PassStatus, UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
 import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { PassStatus, UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
+import {
+  Button,
+  ManagementPageHeader,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@tumaet/prompt-ui-components'
 
 export const DataImportPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

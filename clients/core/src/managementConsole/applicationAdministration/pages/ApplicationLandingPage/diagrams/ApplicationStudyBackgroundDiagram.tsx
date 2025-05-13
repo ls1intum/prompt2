@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 import { useMemo } from 'react'
 import translations from '@/lib/translations.json'

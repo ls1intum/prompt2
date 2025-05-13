@@ -1,4 +1,4 @@
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CategoryList } from './components/CategoryList'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
 

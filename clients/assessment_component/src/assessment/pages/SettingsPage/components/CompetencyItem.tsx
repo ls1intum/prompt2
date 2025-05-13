@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight, Edit, Trash2 } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 
 import { EditCompetencyDialog } from './EditCompetencyDialog'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'

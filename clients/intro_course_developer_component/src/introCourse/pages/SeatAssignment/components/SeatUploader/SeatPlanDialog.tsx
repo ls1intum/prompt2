@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@tumaet/prompt-ui-components'
 import { Eye } from 'lucide-react'
 import { useState } from 'react'
 import { Seat } from '../../../../interfaces/Seat'

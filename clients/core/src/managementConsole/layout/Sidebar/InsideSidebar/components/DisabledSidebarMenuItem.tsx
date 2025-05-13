@@ -1,7 +1,13 @@
 import React from 'react'
 import { AlertTriangle } from 'lucide-react'
-import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  SidebarMenuItem,
+  SidebarMenuButton,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 
 interface DisabledSidebarMenuItemProps {
   title: string
