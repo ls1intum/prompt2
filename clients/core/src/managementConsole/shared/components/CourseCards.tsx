@@ -1,8 +1,10 @@
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { Card, CardContent, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
-import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
+import { CalendarDays, GraduationCap, Clock, Calendar, ChevronRight } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import DynamicIcon from '@/components/DynamicIcon'
 
 export const CourseCards = (): JSX.Element => {
   const { courses } = useCourseStore()
@@ -19,74 +21,100 @@ export const CourseCards = (): JSX.Element => {
 
   return (
     <div
-      className={`w-full px-4 py-8 ${
-        courses.length === 1 ? 'max-w-md' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'
+      className={`container mx-auto px-4 py-8 ${
+        courses.length === 1
+          ? 'max-w-md mx-auto' // Center a single card with appropriate max width
+          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start justify-start'
       }`}
     >
       {courses.map((course) => {
         const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
         return (
-          <Card
+          <motion.div
             key={course.id}
-            className='shadow-lg hover:shadow-2xl transition-shadow cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
-            onClick={() => handleCourseClick(course.id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleCourseClick(course.id)
-              }
-            }}
-            tabIndex={0}
-            role='button'
-            aria-label={`View details for course: ${course.name}`}
+            whileHover={{ y: -5 }}
+            transition={{ type: 'spring', stiffness: 300 }}
           >
-            <CardHeader className={`rounded-t-lg ${bgColor}`}>
-              <div className='flex justify-between items-center'>
-                <div>
-                  <CardTitle className='text-2xl font-bold text-black'>{course.name}</CardTitle>
+            <Card
+              className='overflow-hidden border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none h-full flex flex-col'
+              onClick={() => handleCourseClick(course.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleCourseClick(course.id)
+                }
+              }}
+              tabIndex={0}
+              role='button'
+              aria-label={`View details for course: ${course.name}`}
+            >
+              <CardHeader className={`rounded-t-lg ${bgColor} py-6 px-6 border-b`}>
+                <div className='flex items-center gap-4'>
+                  <div className='size-6'>
+                    <DynamicIcon name={course.studentReadableData?.['icon'] || 'graduation-cap'} />
+                  </div>
+                  <CardTitle className='text-2xl font-bold text-gray-900 leading-tight'>
+                    {course.name}
+                  </CardTitle>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className='p-6'>
-              <div className='grid grid-cols-1 gap-4'>
-                <div className='space-y-4'>
-                  <div className='flex items-center space-x-3'>
-                    <CalendarDays className='w-5 h-5' />
+              </CardHeader>
+
+              <CardContent className='p-6 flex-grow'>
+                <div className='space-y-5'>
+                  <div className='flex items-center gap-3'>
+                    <div className='bg-gray-100 p-2 rounded-full'>
+                      <CalendarDays className='w-5 h-5 text-gray-700' />
+                    </div>
                     <div>
-                      <p className='text-secondary-foreground'>Semester</p>
-                      <p className='text-base'>{course.semesterTag}</p>
+                      <p className='text-sm font-medium text-gray-500'>Semester</p>
+                      <p className='text-base font-semibold'>{course.semesterTag}</p>
                     </div>
                   </div>
-                  <div className='flex items-center space-x-3'>
-                    <Calendar className='w-5 h-5' />
+
+                  <div className='flex items-center gap-3'>
+                    <div className='bg-gray-100 p-2 rounded-full'>
+                      <Calendar className='w-5 h-5 text-gray-700' />
+                    </div>
                     <div>
-                      <p className='text-secondary-foreground'>Duration</p>
-                      <p className='text-base'>
+                      <p className='text-sm font-medium text-gray-500'>Duration</p>
+                      <p className='text-base font-semibold'>
                         {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
                       </p>
                     </div>
                   </div>
-                </div>
-                <div className='space-y-4'>
-                  <div className='flex items-center space-x-3'>
-                    <GraduationCap className='w-5 h-5' />
+
+                  <div className='flex items-center gap-3'>
+                    <div className='bg-gray-100 p-2 rounded-full'>
+                      <GraduationCap className='w-5 h-5 text-gray-700' />
+                    </div>
                     <div>
-                      <p className='text-secondary-foreground'>Course Type</p>
-                      <p className='text-base'>{CourseTypeDetails[course.courseType].name}</p>
+                      <p className='text-sm font-medium text-gray-500'>Course Type</p>
+                      <p className='text-base font-semibold'>
+                        {CourseTypeDetails[course.courseType].name}
+                      </p>
                     </div>
                   </div>
-                  <div className='flex items-center space-x-3'>
-                    <Clock className='w-5 h-5' />
+
+                  <div className='flex items-center gap-3'>
+                    <div className='bg-gray-100 p-2 rounded-full'>
+                      <Clock className='w-5 h-5 text-gray-700' />
+                    </div>
                     <div>
-                      <p className='text-secondary-foreground'>ECTS</p>
-                      <p className='text-base'>{course.ects}</p>
+                      <p className='text-sm font-medium text-gray-500'>ECTS</p>
+                      <p className='text-base font-semibold'>{course.ects}</p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+
+              <CardFooter className='px-6 py-4 bg-gray-50 border-t flex justify-end'>
+                <div className='text-sm font-medium text-primary flex items-center'>
+                  Go to course <ChevronRight className='ml-1 h-4 w-4' />
+                </div>
+              </CardFooter>
+            </Card>
+          </motion.div>
         )
       })}
     </div>
