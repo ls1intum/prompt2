@@ -1,5 +1,5 @@
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { useNavigate } from 'react-router-dom'
@@ -19,10 +19,8 @@ export const CourseCards = (): JSX.Element => {
 
   return (
     <div
-      className={`container mx-auto px-4 py-8 ${
-        courses.length === 1
-          ? 'max-w-md mx-auto' // Center a single card with appropriate max width
-          : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'
+      className={`w-full px-4 py-8 ${
+        courses.length === 1 ? 'max-w-md' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'
       }`}
     >
       {courses.map((course) => {
