@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+import { useMemo } from 'react'
 
 import { ErrorPage } from '@/components/ErrorPage'
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
@@ -24,10 +25,13 @@ export const AssessmentPage = (): JSX.Element => {
     refetch: refetchStudentAssessment,
   } = useGetStudentAssessment()
 
-  const remainingAssessments =
-    categories.reduce((acc, category) => {
-      return acc + category.competencies.length
-    }, 0) - (studentAssessment?.assessments?.length || 0)
+  const remainingAssessments = useMemo(() => {
+    return (
+      categories.reduce((acc, category) => {
+        return acc + category.competencies.length
+      }, 0) - (studentAssessment?.assessments?.length || 0)
+    )
+  }, [categories, studentAssessment?.assessments?.length])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
