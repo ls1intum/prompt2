@@ -289,13 +289,19 @@ func deleteCourse(c *gin.Context) {
 func copyCourse(c *gin.Context) {
 	userID := c.GetString("userID")
 
+	courseVariables := courseDTO.CopyCourse{}
+	if err := c.BindJSON(&courseVariables); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	originalCourseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	newCourse, err := CopyCourse(c, originalCourseID, userID)
+	newCourse, err := CopyCourse(c, originalCourseID, courseVariables, userID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to copy course"))

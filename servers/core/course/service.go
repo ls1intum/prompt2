@@ -385,7 +385,7 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	return nil
 }
 
-func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID string) (courseDTO.Course, error) {
+func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourse, requesterID string) (courseDTO.Course, error) {
 	// Fetch source course
 	sourceCourse, err := CourseServiceSingleton.queries.GetCourse(ctx, sourceCourseID)
 	if err != nil {
@@ -401,17 +401,12 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID strin
 		return courseDTO.Course{}, fmt.Errorf("failed to parse source course student readable data: %w", err)
 	}
 
-	name, err := GenerateUniqueCourseNameGlobal(ctx, sourceCourse.Name+" (Copy)")
-	if err != nil {
-		return courseDTO.Course{}, fmt.Errorf("failed to generate unique name: %w", err)
-	}
-
 	// Build CreateCourseParams from source, overriding with input fields if provided
 	newCourse := courseDTO.CreateCourse{
-		Name:                name,
+		Name:                courseVariables.Name,
 		StartDate:           sourceCourse.StartDate,
 		EndDate:             sourceCourse.EndDate,
-		SemesterTag:         sourceCourse.SemesterTag,
+		SemesterTag:         courseVariables.SemesterTag,
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
 		CourseType:          sourceCourse.CourseType,
@@ -524,28 +519,4 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID strin
 	}
 
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
-}
-
-func GenerateUniqueCourseNameGlobal(ctx context.Context, baseName string) (string, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
-	defer cancel()
-
-	suffix := ""
-	attempt := 1
-	maxAttempts := 100
-
-	for attempt <= maxAttempts {
-		candidate := baseName + suffix
-		exists, err := CourseServiceSingleton.queries.CheckCourseExistsByName(ctxWithTimeout, candidate)
-		if err != nil {
-			return "", fmt.Errorf("failed to check for existing course name: %w", err)
-		}
-		if !exists {
-			return candidate, nil
-		}
-		attempt++
-		suffix = fmt.Sprintf(" (%d)", attempt)
-	}
-
-	return "", fmt.Errorf("could not generate unique course name after %d attempts", maxAttempts)
 }
