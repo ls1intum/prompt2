@@ -29,6 +29,8 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/self", getOwnCourses)
 
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
+
+	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
 }
 
 func getOwnCourses(c *gin.Context) {
@@ -282,6 +284,31 @@ func deleteCourse(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func copyCourse(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	originalCourseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var oldCourse courseDTO.CreateCourse
+	if err := c.BindJSON(&oldCourse); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	newCourse, err := CopyCourse(c, originalCourseID, oldCourse, userID)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to copy course"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, newCourse)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

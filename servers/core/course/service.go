@@ -11,6 +11,7 @@ import (
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/niclasheun/prompt2.0/meta"
 	"github.com/niclasheun/prompt2.0/permissionValidation"
 	"github.com/niclasheun/prompt2.0/utils"
 	log "github.com/sirupsen/logrus"
@@ -381,4 +382,67 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, input courseDTO.CreateCourse, requesterID string) (courseDTO.Course, error) {
+	// Fetch source course
+	sourceCourse, err := CourseServiceSingleton.queries.GetCourse(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch source course: %w", err)
+	}
+
+	restrictedData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.RestrictedData)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to parse source course restricted data: %w", err)
+	}
+	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.StudentReadableData)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to parse source course student readable data: %w", err)
+	}
+
+	// Build CreateCourseParams from source, overriding with input fields if provided
+	newCourse := courseDTO.CreateCourse{
+		Name:                sourceCourse.Name,
+		StartDate:           sourceCourse.StartDate,
+		EndDate:             sourceCourse.EndDate,
+		SemesterTag:         sourceCourse.SemesterTag,
+		RestrictedData:      restrictedData,
+		StudentReadableData: studentReadableData,
+		CourseType:          sourceCourse.CourseType,
+		Ects:                sourceCourse.Ects,
+	}
+
+	// start transaction
+	tx, err := CourseServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+	defer utils.DeferRollback(tx, ctx)
+	qtx := CourseServiceSingleton.queries.WithTx(tx)
+
+	// transform to DB model
+	createCourseParams, err := newCourse.GetDBModel()
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+	createCourseParams.ID = uuid.New() // new ID for copied course
+
+	// create course in DB
+	createdCourse, err := qtx.CreateCourse(ctx, createCourseParams)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+
+	// set up keycloak roles
+	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
+	if err != nil {
+		log.Error("Failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
 }
