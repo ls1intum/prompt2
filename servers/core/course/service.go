@@ -520,10 +520,10 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 	for _, item := range phaseDataGraph {
 		newFromID, ok1 := phaseIDMap[item.FromCoursePhaseID]
 		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
-		newFromDtoID, ok3 := phaseIDMap[item.FromCoursePhaseDtoID]
-		newToDtoID, ok4 := phaseIDMap[item.ToCoursePhaseDtoID]
+		newFromDtoID := item.FromCoursePhaseDtoID
+		newToDtoID := item.ToCoursePhaseDtoID
 
-		if !ok1 || !ok2 || !ok3 || !ok4 {
+		if !ok1 || !ok2 {
 			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during phase data graph copy")
 		}
 
@@ -538,6 +538,36 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 	err = UpdatePhaseDataGraph(ctx, createdCourse.ID, updatedPhaseDataGraph)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to update phase data graph for new course: %w", err)
+	}
+
+	// Copy participation data graph
+	participationDataGraph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch participation data graph: %w", err)
+	}
+
+	var updatedParticipationDataGraph []courseDTO.MetaDataGraphItem
+	for _, item := range participationDataGraph {
+		newFromID, ok1 := phaseIDMap[item.FromCoursePhaseID]
+		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
+		newFromDtoID := item.FromCoursePhaseDtoID
+		newToDtoID := item.ToCoursePhaseDtoID
+
+		if !ok1 || !ok2 {
+			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during participation data graph copy")
+		}
+
+		updatedParticipationDataGraph = append(updatedParticipationDataGraph, courseDTO.MetaDataGraphItem{
+			FromCoursePhaseID:    newFromID,
+			ToCoursePhaseID:      newToID,
+			FromCoursePhaseDtoID: newFromDtoID,
+			ToCoursePhaseDtoID:   newToDtoID,
+		})
+	}
+
+	err = UpdateParticipationDataGraph(ctx, createdCourse.ID, updatedParticipationDataGraph)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to update participation data graph for new course: %w", err)
 	}
 
 	// set up keycloak roles
