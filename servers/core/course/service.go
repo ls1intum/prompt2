@@ -439,6 +439,11 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase sequence: %w", err)
 	}
 
+	allPhases, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch all phases: %w", err)
+	}
+
 	coursePhaseGraph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, sourceCourseID)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase graph: %w", err)
@@ -447,8 +452,38 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 	// Create a map to store the mapping of old phase IDs to new phase IDs
 	phaseIDMap := make(map[uuid.UUID]uuid.UUID)
 
-	// Copy course phases
-	for _, phase := range coursePhaseSequence {
+	// // Copy course phases
+	// for _, phase := range coursePhaseSequence {
+	// 	coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, phase.ID)
+	// 	if err != nil {
+	// 		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase: %w", err)
+	// 	}
+
+	// 	newPhase := coursePhaseDTO.CreateCoursePhase{
+	// 		Name:                coursePhase.Name,
+	// 		IsInitialPhase:      coursePhase.IsInitialPhase,
+	// 		CourseID:            createdCourse.ID,
+	// 		CoursePhaseTypeID:   coursePhase.CoursePhaseTypeID,
+	// 		RestrictedData:      coursePhase.RestrictedData,
+	// 		StudentReadableData: coursePhase.StudentReadableData,
+	// 	}
+	// 	newPhaseParams, err := newPhase.GetDBModel()
+	// 	if err != nil {
+	// 		return courseDTO.Course{}, fmt.Errorf("failed to transform new course phase: %w", err)
+	// 	}
+
+	// 	newPhaseParams.ID = uuid.New()
+	// 	_, err = qtx.CreateCoursePhase(ctx, newPhaseParams)
+	// 	if err != nil {
+	// 		return courseDTO.Course{}, fmt.Errorf("failed to create course phase: %w", err)
+	// 	}
+
+	// 	// Store the mapping of old phase ID to new phase ID
+	// 	phaseIDMap[phase.ID] = newPhaseParams.ID
+	// }
+
+	// Copy all phases that are not in the sequence
+	for _, phase := range allPhases {
 		coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, phase.ID)
 		if err != nil {
 			return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase: %w", err)
@@ -552,6 +587,9 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
 		newFromDtoID, ok3 := phaseIDMap[item.FromCoursePhaseDtoID]
 		newToDtoID, ok4 := phaseIDMap[item.ToCoursePhaseDtoID]
+
+		log.Warnf("MISSING MAPPING: fromPhaseID=%v (ok1=%v), toPhaseID=%v (ok2=%v), fromDtoID=%v (ok3=%v), toDtoID=%v (ok4=%v)",
+			item.FromCoursePhaseID, ok1, item.ToCoursePhaseID, ok2, item.FromCoursePhaseDtoID, ok3, item.ToCoursePhaseDtoID, ok4)
 
 		if !ok1 || !ok2 || !ok3 || !ok4 {
 			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during participation data graph copy")
