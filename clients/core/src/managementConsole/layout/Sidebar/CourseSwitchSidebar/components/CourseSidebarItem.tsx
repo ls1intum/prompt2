@@ -64,10 +64,6 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
     )
   }, [iconName])
 
-  const handleItemClick = () => {
-    navigate(`/courses/${course.id}`)
-  }
-
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
     setContextMenuPosition({ x: e.clientX, y: e.clientY })
@@ -101,7 +97,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
 
   return (
     <>
-      <SidebarMenuItem key={course.id} onClick={handleItemClick} onContextMenu={handleContextMenu}>
+      <SidebarMenuItem key={course.id} onContextMenu={handleContextMenu}>
         <SidebarMenuButton
           size='lg'
           tooltip={{
