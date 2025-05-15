@@ -520,10 +520,10 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 	for _, item := range phaseDataGraph {
 		newFromID, ok1 := phaseIDMap[item.FromCoursePhaseID]
 		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
-		newFromDtoID := item.FromCoursePhaseDtoID
-		newToDtoID := item.ToCoursePhaseDtoID
+		newFromDtoID, ok3 := phaseIDMap[item.FromCoursePhaseDtoID]
+		newToDtoID, ok4 := phaseIDMap[item.ToCoursePhaseDtoID]
 
-		if !ok1 || !ok2 {
+		if !ok1 || !ok2 || !ok3 || !ok4 {
 			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during phase data graph copy")
 		}
 
@@ -550,10 +550,10 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 	for _, item := range participationDataGraph {
 		newFromID, ok1 := phaseIDMap[item.FromCoursePhaseID]
 		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
-		newFromDtoID := item.FromCoursePhaseDtoID
-		newToDtoID := item.ToCoursePhaseDtoID
+		newFromDtoID, ok3 := phaseIDMap[item.FromCoursePhaseDtoID]
+		newToDtoID, ok4 := phaseIDMap[item.ToCoursePhaseDtoID]
 
-		if !ok1 || !ok2 {
+		if !ok1 || !ok2 || !ok3 || !ok4 {
 			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during participation data graph copy")
 		}
 
