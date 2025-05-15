@@ -516,26 +516,28 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch phase data graph: %w", err)
 	}
 
+	var updatedPhaseDataGraph []courseDTO.MetaDataGraphItem
 	for _, item := range phaseDataGraph {
-		newFromID, okFrom := phaseIDMap[item.FromCoursePhaseID]
-		newToID, okTo := phaseIDMap[item.ToCoursePhaseID]
-		newFromDTOID, okFromDTO := phaseIDMap[item.FromCoursePhaseDtoID]
-		newToDTOID, okToDTO := phaseIDMap[item.ToCoursePhaseDtoID]
+		newFromID, ok1 := phaseIDMap[item.FromCoursePhaseID]
+		newToID, ok2 := phaseIDMap[item.ToCoursePhaseID]
+		newFromDtoID, ok3 := phaseIDMap[item.FromCoursePhaseDtoID]
+		newToDtoID, ok4 := phaseIDMap[item.ToCoursePhaseDtoID]
 
-		if !okFrom || !okTo || !okFromDTO || !okToDTO {
-			return courseDTO.Course{}, fmt.Errorf("missing mapping for phase data graph connection: %v", item)
+		if !ok1 || !ok2 || !ok3 || !ok4 {
+			return courseDTO.Course{}, fmt.Errorf("invalid phase ID mapping during phase data graph copy")
 		}
 
-		err := qtx.CreatePhaseDataConnection(ctx, db.CreatePhaseDataConnectionParams{
+		updatedPhaseDataGraph = append(updatedPhaseDataGraph, courseDTO.MetaDataGraphItem{
 			FromCoursePhaseID:    newFromID,
 			ToCoursePhaseID:      newToID,
-			FromCoursePhaseDtoID: newFromDTOID,
-			ToCoursePhaseDtoID:   newToDTOID,
+			FromCoursePhaseDtoID: newFromDtoID,
+			ToCoursePhaseDtoID:   newToDtoID,
 		})
-		if err != nil {
-			log.Error("Error creating phase data graph connection: ", err)
-			return courseDTO.Course{}, fmt.Errorf("failed to create phase data graph connection: %w", err)
-		}
+	}
+
+	err = UpdatePhaseDataGraph(ctx, createdCourse.ID, updatedPhaseDataGraph)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to update phase data graph for new course: %w", err)
 	}
 
 	// set up keycloak roles
