@@ -510,6 +510,34 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 		}
 	}
 
+	// Copy phase data graph
+	phaseDataGraph, err := CourseServiceSingleton.queries.GetPhaseDataGraph(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch phase data graph: %w", err)
+	}
+
+	for _, item := range phaseDataGraph {
+		newFromID, okFrom := phaseIDMap[item.FromCoursePhaseID]
+		newToID, okTo := phaseIDMap[item.ToCoursePhaseID]
+		newFromDTOID, okFromDTO := phaseIDMap[item.FromCoursePhaseDtoID]
+		newToDTOID, okToDTO := phaseIDMap[item.ToCoursePhaseDtoID]
+
+		if !okFrom || !okTo || !okFromDTO || !okToDTO {
+			return courseDTO.Course{}, fmt.Errorf("missing mapping for phase data graph connection: %v", item)
+		}
+
+		err := qtx.CreatePhaseDataConnection(ctx, db.CreatePhaseDataConnectionParams{
+			FromCoursePhaseID:    newFromID,
+			ToCoursePhaseID:      newToID,
+			FromCoursePhaseDtoID: newFromDTOID,
+			ToCoursePhaseDtoID:   newToDTOID,
+		})
+		if err != nil {
+			log.Error("Error creating phase data graph connection: ", err)
+			return courseDTO.Course{}, fmt.Errorf("failed to create phase data graph connection: %w", err)
+		}
+	}
+
 	// set up keycloak roles
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
