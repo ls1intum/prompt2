@@ -12,6 +12,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCourseExistsByName = `-- name: CheckCourseExistsByName :one
+SELECT EXISTS (
+  SELECT 1 FROM course
+  WHERE name = $1
+)
+`
+
+func (q *Queries) CheckCourseExistsByName(ctx context.Context, name string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCourseExistsByName, name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const checkCoursePhasesBelongToCourse = `-- name: CheckCoursePhasesBelongToCourse :one
 WITH matched_phases AS (
   SELECT id

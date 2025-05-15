@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/niclasheun/prompt2.0/course/courseDTO"
+	"github.com/niclasheun/prompt2.0/coursePhase"
 	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
 	db "github.com/niclasheun/prompt2.0/db/sqlc"
 	"github.com/niclasheun/prompt2.0/meta"
@@ -400,9 +401,14 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID strin
 		return courseDTO.Course{}, fmt.Errorf("failed to parse source course student readable data: %w", err)
 	}
 
+	name, err := GenerateUniqueCourseNameGlobal(ctx, sourceCourse.Name+" (Copy)")
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to generate unique name: %w", err)
+	}
+
 	// Build CreateCourseParams from source, overriding with input fields if provided
 	newCourse := courseDTO.CreateCourse{
-		Name:                sourceCourse.Name + " (Copy)",
+		Name:                name,
 		StartDate:           sourceCourse.StartDate,
 		EndDate:             sourceCourse.EndDate,
 		SemesterTag:         sourceCourse.SemesterTag,
@@ -433,6 +439,79 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID strin
 		return courseDTO.Course{}, err
 	}
 
+	coursePhaseSequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase sequence: %w", err)
+	}
+
+	coursePhaseGraph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase graph: %w", err)
+	}
+
+	phaseIDMap := make(map[uuid.UUID]uuid.UUID)
+
+	for _, phase := range coursePhaseSequence {
+		coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, phase.ID)
+		if err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase: %w", err)
+		}
+
+		newPhase := coursePhaseDTO.CreateCoursePhase{
+			Name:                coursePhase.Name,
+			IsInitialPhase:      coursePhase.IsInitialPhase,
+			CourseID:            createdCourse.ID,
+			CoursePhaseTypeID:   coursePhase.CoursePhaseTypeID,
+			RestrictedData:      coursePhase.RestrictedData,
+			StudentReadableData: coursePhase.StudentReadableData,
+		}
+		newPhaseParams, err := newPhase.GetDBModel()
+		if err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to transform new course phase: %w", err)
+		}
+
+		newPhaseParams.ID = uuid.New()
+		_, err = qtx.CreateCoursePhase(ctx, newPhaseParams)
+		if err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to create course phase: %w", err)
+		}
+
+		// Store the mapping
+		phaseIDMap[phase.ID] = newPhaseParams.ID
+	}
+
+	for _, graphItem := range coursePhaseGraph {
+		newFrom, okFrom := phaseIDMap[graphItem.FromCoursePhaseID]
+		newTo, okTo := phaseIDMap[graphItem.ToCoursePhaseID]
+
+		if !okFrom || !okTo {
+			return courseDTO.Course{}, fmt.Errorf("missing mapping for graph edge: %v -> %v", graphItem.FromCoursePhaseID, graphItem.ToCoursePhaseID)
+		}
+
+		err := qtx.CreateCourseGraphConnection(ctx, db.CreateCourseGraphConnectionParams{
+			FromCoursePhaseID: newFrom,
+			ToCoursePhaseID:   newTo,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return courseDTO.Course{}, fmt.Errorf("failed to create course phase graph connection: %w", err)
+		}
+	}
+
+	for oldID, newID := range phaseIDMap {
+		for _, p := range coursePhaseSequence {
+			if p.ID == oldID && p.IsInitialPhase {
+				err := qtx.UpdateInitialCoursePhase(ctx, db.UpdateInitialCoursePhaseParams{
+					CourseID: createdCourse.ID,
+					ID:       newID,
+				})
+				if err != nil {
+					return courseDTO.Course{}, fmt.Errorf("failed to set initial phase: %w", err)
+				}
+			}
+		}
+	}
+
 	// set up keycloak roles
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
@@ -445,4 +524,28 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID strin
 	}
 
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
+}
+
+func GenerateUniqueCourseNameGlobal(ctx context.Context, baseName string) (string, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	suffix := ""
+	attempt := 1
+	maxAttempts := 100
+
+	for attempt <= maxAttempts {
+		candidate := baseName + suffix
+		exists, err := CourseServiceSingleton.queries.CheckCourseExistsByName(ctxWithTimeout, candidate)
+		if err != nil {
+			return "", fmt.Errorf("failed to check for existing course name: %w", err)
+		}
+		if !exists {
+			return candidate, nil
+		}
+		attempt++
+		suffix = fmt.Sprintf(" (%d)", attempt)
+	}
+
+	return "", fmt.Errorf("could not generate unique course name after %d attempts", maxAttempts)
 }
