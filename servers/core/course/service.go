@@ -384,7 +384,7 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	return nil
 }
 
-func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, input courseDTO.CreateCourse, requesterID string) (courseDTO.Course, error) {
+func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, requesterID string) (courseDTO.Course, error) {
 	// Fetch source course
 	sourceCourse, err := CourseServiceSingleton.queries.GetCourse(ctx, sourceCourseID)
 	if err != nil {
@@ -402,7 +402,7 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, input courseDTO.C
 
 	// Build CreateCourseParams from source, overriding with input fields if provided
 	newCourse := courseDTO.CreateCourse{
-		Name:                sourceCourse.Name,
+		Name:                sourceCourse.Name + " (Copy)",
 		StartDate:           sourceCourse.StartDate,
 		EndDate:             sourceCourse.EndDate,
 		SemesterTag:         sourceCourse.SemesterTag,

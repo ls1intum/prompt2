@@ -295,13 +295,7 @@ func copyCourse(c *gin.Context) {
 		return
 	}
 
-	var oldCourse courseDTO.CreateCourse
-	if err := c.BindJSON(&oldCourse); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	newCourse, err := CopyCourse(c, originalCourseID, oldCourse, userID)
+	newCourse, err := CopyCourse(c, originalCourseID, userID)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("failed to copy course"))
