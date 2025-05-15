@@ -9,8 +9,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DeleteConfirmation,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
+import type React from 'react'
+import { Edit, Trash2, Copy } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { EditCourseDialog } from '@core/managementConsole/courseOverview/components/EditCourseDialog'
+import { deleteCourse } from '@core/network/mutations/deleteCourse'
 
 // Todo move somewhere else
 const subtleColors = [
@@ -36,8 +45,12 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const { courseId } = useParams<{ courseId: string }>()
 
   const [showCopyDialog, setShowCopyDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const isActive = course.id === courseId
   const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-grey-100']
@@ -61,9 +74,29 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
     setIsContextMenuOpen(true)
   }
 
-  const handleCopyCourse = () => {
+  const { mutate: mutateDeleteCourse } = useMutation({
+    mutationFn: () => deleteCourse(course.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
+      toast({
+        title: 'Course Deleted',
+        description: `${course.name} has been successfully deleted.`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Failed to Delete Course',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const handleDelete = (deleteConfirmed: boolean) => {
+    if (deleteConfirmed) {
+      mutateDeleteCourse()
+    }
     setIsContextMenuOpen(false)
-    setShowCopyDialog(true)
   }
 
   return (
@@ -102,7 +135,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <DropdownMenu open={isContextMenuOpen} onOpenChange={setIsContextMenuOpen}>
+      <DropdownMenu open={isContextMenuOpen} onOpenChange={setIsContextMenuOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <div
             style={{
@@ -115,19 +148,54 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
             }}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={handleCopyCourse}>Copy Course</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate(`/courses/${course.id}/edit`)}>
-            Edit Course
+        <DropdownMenuContent align='start'>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => {
+              setIsContextMenuOpen(false)
+              setShowEditDialog(true)
+            }}
+          >
+            <Edit className='mr-2 h-4 w-4' />
+            <span>Edit Course</span>
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => navigate(`/courses/${course.id}/settings`)}
-            className='text-destructive'
+            onClick={() => {
+              setIsContextMenuOpen(false)
+              setShowCopyDialog(true)
+            }}
           >
-            Delete Course
+            <Copy className='mr-2 h-4 w-4' />
+            <span>Copy Course</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className='text-destructive'
+            onClick={() => {
+              setIsContextMenuOpen(false)
+              setDeleteDialogOpen(true)
+            }}
+          >
+            <Trash2 className='mr-2 h-4 w-4' />
+            <span>Delete Course</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {deleteDialogOpen && (
+        <DeleteConfirmation
+          isOpen={deleteDialogOpen}
+          setOpen={setDeleteDialogOpen}
+          deleteMessage={`Are you sure you want to delete ${course.name}?`}
+          customWarning={`This action cannot be undone. All student associations with this course will be lost. 
+            If you want to keep the course data, consider archiving it instead.`}
+          onClick={handleDelete}
+        />
+      )}
+
+      {showEditDialog && (
+        <EditCourseDialog isOpen={showEditDialog} onClose={() => setShowEditDialog(false)} />
+      )}
 
       {showCopyDialog && (
         <CopyCourseDialog isOpen={showCopyDialog} onClose={() => setShowCopyDialog(false)} />
