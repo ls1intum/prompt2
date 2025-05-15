@@ -118,9 +118,3 @@ JOIN student s ON cp.student_id = s.id
 WHERE
     s.matriculation_number = $1
 AND s.university_login = $2;
-
--- name: CheckCourseExistsByName :one
-SELECT EXISTS (
-  SELECT 1 FROM course
-  WHERE name = $1
-);
