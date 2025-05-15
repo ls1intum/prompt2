@@ -444,8 +444,10 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase graph: %w", err)
 	}
 
+	// Create a map to store the mapping of old phase IDs to new phase IDs
 	phaseIDMap := make(map[uuid.UUID]uuid.UUID)
 
+	// Copy course phases
 	for _, phase := range coursePhaseSequence {
 		coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, phase.ID)
 		if err != nil {
@@ -471,10 +473,11 @@ func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables c
 			return courseDTO.Course{}, fmt.Errorf("failed to create course phase: %w", err)
 		}
 
-		// Store the mapping
+		// Store the mapping of old phase ID to new phase ID
 		phaseIDMap[phase.ID] = newPhaseParams.ID
 	}
 
+	// Copy course participation graph
 	for _, graphItem := range coursePhaseGraph {
 		newFrom, okFrom := phaseIDMap[graphItem.FromCoursePhaseID]
 		newTo, okTo := phaseIDMap[graphItem.ToCoursePhaseID]
