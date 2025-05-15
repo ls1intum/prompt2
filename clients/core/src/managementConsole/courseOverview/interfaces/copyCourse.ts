@@ -1,4 +1,4 @@
 export interface CopyCourse {
-  courseName: string
+  name: string
   semesterTag: string
 }

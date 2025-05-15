@@ -41,7 +41,7 @@ export const CopyCourseDialog = ({ isOpen, onClose }: CourseCopyDialogProps): JS
   const form = useForm<CopyCourseFormValues>({
     resolver: zodResolver(copyCourseSchema),
     defaultValues: {
-      courseName: `${course?.name} (Copy)`,
+      name: '',
       semesterTag: '',
     },
   })
@@ -68,7 +68,7 @@ export const CopyCourseDialog = ({ isOpen, onClose }: CourseCopyDialogProps): JS
 
   const onSubmit = (data: CopyCourseFormValues) => {
     const copyData: CopyCourse = {
-      courseName: data.courseName,
+      name: data.name,
       semesterTag: data.semesterTag,
     }
     mutateCopyCourse(copyData)
@@ -88,7 +88,7 @@ export const CopyCourseDialog = ({ isOpen, onClose }: CourseCopyDialogProps): JS
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             <FormField
               control={form.control}
-              name='courseName'
+              name='name'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Course Name</FormLabel>
