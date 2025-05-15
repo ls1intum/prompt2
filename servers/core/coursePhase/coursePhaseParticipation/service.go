@@ -85,12 +85,17 @@ func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, c
 		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
 	}
 
+	found := false
 	coursePhaseParticipation := db.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow{}
 	for _, participation := range coursePhaseParticipations {
 		if participation.CourseParticipationID == courseParticipationID {
 			coursePhaseParticipation = participation
+			found = true
 			break
 		}
+	}
+	if !found {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, errors.New("course phase participation not found")
 	}
 
 	participationDTO, err := coursePhaseParticipationDTO.GetAllCPPsForCoursePhaseDTOFromDBModel(coursePhaseParticipation)
