@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation/courseParticipationDTO"
 	log "github.com/sirupsen/logrus"
 )
 

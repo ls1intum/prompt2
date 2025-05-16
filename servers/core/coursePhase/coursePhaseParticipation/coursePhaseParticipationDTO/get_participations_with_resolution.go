@@ -1,6 +1,6 @@
 package coursePhaseParticipationDTO
 
-import "github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
+import "github.com/ls1intum/prompt2/servers/core/coursePhase/resolution/resolutionDTO"
 
 type CoursePhaseParticipationsWithResolutions struct {
 	Participations []GetAllCPPsForCoursePhase `json:"participations"`
