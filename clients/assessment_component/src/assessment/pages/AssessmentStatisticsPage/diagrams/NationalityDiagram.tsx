@@ -41,7 +41,7 @@ export const NationalityDiagram = ({
   return (
     <Card className='flex flex-col'>
       <CardHeader className='items-center pb-0'>
-        <CardTitle>Author Distribution</CardTitle>
+        <CardTitle>Nationality Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
