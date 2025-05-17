@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/niclasheun/prompt2.0/student/studentDTO"
-	"github.com/niclasheun/prompt2.0/testutils"
+	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
+	"github.com/ls1intum/prompt2/servers/core/testutils"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

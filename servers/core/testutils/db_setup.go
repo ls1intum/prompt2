@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )

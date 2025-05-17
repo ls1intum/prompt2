@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
 func setupCoursePhaseAuthRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {

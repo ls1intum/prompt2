@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 	"github.com/stretchr/testify/assert"
 )
 

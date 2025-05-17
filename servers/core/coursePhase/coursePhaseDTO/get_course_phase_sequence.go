@@ -2,7 +2,7 @@ package coursePhaseDTO
 
 import (
 	"github.com/google/uuid"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 )
 
 type CoursePhaseSequence struct {

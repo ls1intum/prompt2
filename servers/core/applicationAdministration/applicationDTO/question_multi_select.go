@@ -3,7 +3,7 @@ package applicationDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 )
 
 type QuestionMultiSelect struct {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/niclasheun/prompt2.0/coursePhaseAuth/coursePhaseAuthDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/coursePhaseAuth/coursePhaseAuthDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
 

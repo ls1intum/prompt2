@@ -11,8 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/testutils"
+	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation/courseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

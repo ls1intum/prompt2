@@ -3,9 +3,9 @@ package courseDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 	log "github.com/sirupsen/logrus"
 )
 

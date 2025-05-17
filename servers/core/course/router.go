@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 

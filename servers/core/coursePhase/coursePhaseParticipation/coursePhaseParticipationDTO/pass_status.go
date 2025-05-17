@@ -1,6 +1,6 @@
 package coursePhaseParticipationDTO
 
-import db "github.com/niclasheun/prompt2.0/db/sqlc"
+import db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 
 func GetPassStatusString(passStatus db.NullPassStatus) string {
 	if passStatus.Valid {

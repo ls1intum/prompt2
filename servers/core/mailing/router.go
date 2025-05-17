@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/mailing/mailingDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/mailing/mailingDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
 func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {

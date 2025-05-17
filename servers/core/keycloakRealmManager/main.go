@@ -5,9 +5,9 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
 type KeycloakRealmService struct {
