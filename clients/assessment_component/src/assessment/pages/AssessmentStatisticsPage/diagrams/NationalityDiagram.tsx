@@ -26,10 +26,10 @@ export const NationalityDiagram = ({
     const nationality =
       getCountryName(p.participation.student.nationality ?? '') ?? 'Unknown Nationality'
 
-    if (!nationalityMap.has(nationality)) {
-      nationalityMap.set(nationality, [])
-    }
     if (p.scoreLevel !== undefined) {
+      if (!nationalityMap.has(nationality)) {
+        nationalityMap.set(nationality, [])
+      }
       nationalityMap.get(nationality)?.push(p.scoreLevel)
     }
   })

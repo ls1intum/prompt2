@@ -15,6 +15,7 @@ import { StatisticalDataPoint } from '../../interfaces/StatisticalDataPoint'
 import { chartConfig, getBarColor } from '../utils/chartConfig'
 
 import { StatisticalTooltipContent } from './StatisticalTooltipContent'
+import { mapNumberToScoreLevel, ScoreLevel } from '../../../../interfaces/scoreLevel'
 
 export interface StatisticalBarChartProps {
   data: StatisticalDataPoint[]
@@ -22,16 +23,15 @@ export interface StatisticalBarChartProps {
 
 // Custom bar shape that shows a rectangle from lower quartile to upper quartile with median indicator
 const CustomBar = (props: any) => {
-  const { x, y, width, height, payload } = props
+  const { x = 0, y = 0, width = 0, height = 0, payload } = props
 
-  // Calculate positions for quartile and median indicators
-  const lowerQuartileY = y + height * (1 - (payload.lowerQuartile - 1) / 3)
-  const upperQuartileY = y + height * (1 - (payload.upperQuartile - 1) / 3)
-  const averageY = y + height * (1 - payload.average / 4)
+  const scale = height / (Object.keys(ScoreLevel).length - 1)
+  const lowerQuartileY = y + height - (payload.lowerQuartile - 1) * scale
+  const upperQuartileY = y + height - (payload.upperQuartile - 1) * scale
+  const averageY = y + height - (payload.average - 1) * scale
 
-  const barColor = getBarColor(payload.median)
+  const barColor = getBarColor(mapNumberToScoreLevel(payload.average))
 
-  // Height of the rectangle is the difference between upper and lower quartile positions
   const minRectHeight = 8
   const rectHeight = Math.max(lowerQuartileY - upperQuartileY, minRectHeight)
 
@@ -45,7 +45,6 @@ const CustomBar = (props: any) => {
         fill={barColor}
         radius={[4, 4, 4, 4]}
       />
-
       <line
         x1={x}
         y1={averageY}
@@ -82,7 +81,32 @@ export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
           opacity={1}
         />
 
-        <XAxis dataKey='name' axisLine={false} tickLine={false} interval={0} />
+        <XAxis
+          dataKey='name'
+          axisLine={false}
+          tickLine={false}
+          interval={0}
+          height={80}
+          tick={({ x, y, payload }) => {
+            const lines = String(payload.value).split(' ')
+            return (
+              <text
+                x={x}
+                y={y + 10}
+                textAnchor='start'
+                fontSize={12}
+                fill='#a3a3a3'
+                transform={`rotate(90, ${x}, ${y + 10})`}
+              >
+                {lines.map((line, i) => (
+                  <tspan x={x} dy={i === 0 ? 0 : 14} key={i}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+            )
+          }}
+        />
         <YAxis
           axisLine={false}
           tickLine={false}

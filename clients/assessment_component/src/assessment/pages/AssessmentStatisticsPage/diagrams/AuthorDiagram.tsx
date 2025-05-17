@@ -23,10 +23,11 @@ export const AuthorDiagram = ({
   const authorsMap = new Map<string, ScoreLevel[]>()
   participationsWithAssessment.forEach((p) => {
     const author = p.assessmentCompletion?.author ?? 'Unknown Author'
-    if (!authorsMap.has(author)) {
-      authorsMap.set(author, [])
-    }
+
     if (p.scoreLevel !== undefined) {
+      if (!authorsMap.has(author)) {
+        authorsMap.set(author, [])
+      }
       authorsMap.get(author)?.push(p.scoreLevel)
     }
   })
