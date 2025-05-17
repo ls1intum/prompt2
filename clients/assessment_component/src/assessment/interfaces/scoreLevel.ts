@@ -5,8 +5,8 @@ export enum ScoreLevel {
   Expert = 'expert',
 }
 
-export function mapScoreLevelToNumber(assessment: { score: ScoreLevel }): number {
-  switch (assessment.score) {
+export function mapScoreLevelToNumber(scoreLevel: ScoreLevel): number {
+  switch (scoreLevel) {
     case ScoreLevel.Expert:
       return 1
     case ScoreLevel.Advanced:

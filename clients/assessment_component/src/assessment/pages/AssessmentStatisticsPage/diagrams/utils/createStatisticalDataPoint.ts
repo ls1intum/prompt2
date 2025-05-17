@@ -6,8 +6,8 @@ export const createStatisticalDataPoint = (
   scoreLevels: ScoreLevel[],
 ): StatisticalDataPoint => {
   scoreLevels = scoreLevels.sort((a, b) => {
-    const scoreA = mapScoreLevelToNumber({ score: a })
-    const scoreB = mapScoreLevelToNumber({ score: b })
+    const scoreA = mapScoreLevelToNumber(a)
+    const scoreB = mapScoreLevelToNumber(b)
     return scoreA - scoreB
   })
 
@@ -29,7 +29,7 @@ export const createStatisticalDataPoint = (
 
   const average =
     scoreLevels.reduce((sum, scoreLevel) => {
-      const score = mapScoreLevelToNumber({ score: scoreLevel })
+      const score = mapScoreLevelToNumber(scoreLevel)
       return sum + score
     }, 0) / scoreLevels.length
 
@@ -38,11 +38,9 @@ export const createStatisticalDataPoint = (
     const base = Math.floor(pos)
     const rest = pos - base
 
-    const scoreBase = mapScoreLevelToNumber({
-      score: sortedScores[base],
-    })
+    const scoreBase = mapScoreLevelToNumber(sortedScores[base])
     const scoreNext = sortedScores[base + 1]
-      ? mapScoreLevelToNumber({ score: sortedScores[base + 1] })
+      ? mapScoreLevelToNumber(sortedScores[base + 1])
       : scoreBase
 
     return scoreBase + rest * (scoreNext - scoreBase)
