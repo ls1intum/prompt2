@@ -21,8 +21,8 @@ export function mapScoreLevelToNumber(scoreLevel: ScoreLevel): number {
 }
 
 export function mapNumberToScoreLevel(number: number): ScoreLevel {
-  if (number < 1.5) return ScoreLevel.Expert
+  if (number < 1.75) return ScoreLevel.Expert
   if (number < 2.5) return ScoreLevel.Advanced
-  if (number < 3.5) return ScoreLevel.Intermediate
+  if (number < 3.25) return ScoreLevel.Intermediate
   return ScoreLevel.Novice
 }
