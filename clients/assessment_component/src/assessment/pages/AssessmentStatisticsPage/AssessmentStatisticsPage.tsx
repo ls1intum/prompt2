@@ -20,6 +20,7 @@ import { AssessmentScoreLevelDiagram } from './diagrams/AssessmentScoreLevelDiag
 import { GenderDiagram } from './diagrams/GenderDiagram'
 import { AuthorDiagram } from './diagrams/AuthorDiagram'
 import { CategoryDiagram } from './diagrams/CategoryDiagram'
+import { NationalityDiagram } from './diagrams/NationalityDiagram'
 
 export const AssessmentStatisticsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -83,10 +84,9 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
-      </div>
-      <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6'>
         <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
+        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
   )
