@@ -83,13 +83,15 @@ export const AssessmentProfile = ({
                   {participant.student.firstName} {participant.student.lastName}
                 </h1>
 
-                <AssessmentStatusBadge
-                  remainingAssessments={remainingAssessments}
-                  isFinalized={studentAssessment.assessmentCompletion.completed}
-                />
-                {studentAssessment.assessments.length > 0 && (
-                  <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
-                )}
+                <div className='flex items-center gap-1'>
+                  <AssessmentStatusBadge
+                    remainingAssessments={remainingAssessments}
+                    isFinalized={studentAssessment.assessmentCompletion.completed}
+                  />
+                  {studentAssessment.assessments.length > 0 && (
+                    <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
+                  )}
+                </div>
               </div>
             </div>
             <div className='flex flex-col items-end'>
