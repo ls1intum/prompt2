@@ -21,7 +21,6 @@ export interface StatisticalBarChartProps {
   data: StatisticalDataPoint[]
 }
 
-// Custom bar shape that shows a rectangle from lower quartile to upper quartile with median indicator
 const CustomBar = (props: any) => {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props
 
@@ -59,7 +58,6 @@ const CustomBar = (props: any) => {
 }
 
 export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
-  // Transform data for the chart
   const chartData = data.map((item) => ({
     name: item.name,
     value: 4, // Use the range as the value for sizing
@@ -77,7 +75,7 @@ export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
           horizontal={true}
           vertical={false}
           strokeDasharray='4 4'
-          stroke='#e5e7eb' // light grey
+          stroke='#e5e7eb'
           opacity={1}
         />
 
@@ -114,7 +112,7 @@ export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
           domain={[1, 4]}
           ticks={[1, 2, 3, 4]}
         >
-          <Label value='Score Level' angle={-90} position='insideLeft' offset={10} fill='#a3a3a3' />
+          <Label value='Score Level' angle={-90} position='insideLeft' fill='#a3a3a3' />
         </YAxis>
         <ChartTooltip cursor={false} content={<StatisticalTooltipContent />} />
         <Bar dataKey='value' shape={<CustomBar />}>

@@ -99,7 +99,7 @@ type CompletedScoreLevel struct {
 	ScoreLevel            string    `json:"score_level"`
 }
 
-type ScoreLevelCategory struct {
+type ParticipantScoreLevel struct {
 	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
 	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
