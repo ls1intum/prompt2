@@ -85,18 +85,12 @@ export const AssessmentForm = ({
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
-        <div>
+        <div className='relative'>
           <div className='flex items-center gap-2 mb-2 pr-8'>
             <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
             <h3 className='text-base font-medium'>{competency.name}</h3>
           </div>
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
-          {completed && (
-            <div className='flex items-center gap-1 mt-2 text-xs text-muted-foreground'>
-              <LockIcon className='h-3 w-3' />
-              <span>Assessment completed</span>
-            </div>
-          )}
         </div>
 
         <div className='col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1'>
@@ -121,7 +115,14 @@ export const AssessmentForm = ({
               >
                 <div className='flex justify-between mb-1'>
                   <span className='font-semibold'>{config.title}</span>
-                  <span>{config.icon}</span>
+                  <div>
+                    <span className='flex items-center gap-1'>
+                      {completed && isSelected && (
+                        <LockIcon className='h-4 w-4 text-muted-foreground' />
+                      )}
+                      {config.icon}
+                    </span>
+                  </div>
                 </div>
 
                 <p className='line-clamp-3 text-muted-foreground'>{competency[level]}</p>
