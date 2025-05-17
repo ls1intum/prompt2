@@ -9,17 +9,19 @@ import {
   DeleteConfirmation,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
+import { Edit, MoreHorizontal, Trash2, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { deleteCourse } from '@core/network/mutations/deleteCourse'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { EditCourseDialog } from './EditCourseDialog'
+import { CopyCourseDialog } from './CopyCourseDialog'
 
 export const EditCourseDropdown = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editCourseDialogOpen, setEditCourseDialogOpen] = useState(false)
+  const [copyCourseDialogOpen, setCopyCourseDialogOpen] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -60,6 +62,10 @@ export const EditCourseDropdown = (): JSX.Element => {
             <Edit className='mr-2 h-4 w-4' />
             <span>Edit Course</span>
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setCopyCourseDialogOpen(true)}>
+            <Copy className='mr-2 h-4 w-4' />
+            <span>Copy Course</span>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className='text-destructive' onClick={() => setDeleteDialogOpen(true)}>
             <Trash2 className='mr-2 h-4 w-4' />
@@ -83,6 +89,13 @@ export const EditCourseDropdown = (): JSX.Element => {
         <EditCourseDialog
           isOpen={editCourseDialogOpen}
           onClose={() => setEditCourseDialogOpen(false)}
+        />
+      )}
+
+      {copyCourseDialogOpen && (
+        <CopyCourseDialog
+          isOpen={copyCourseDialogOpen}
+          onClose={() => setCopyCourseDialogOpen(false)}
         />
       )}
     </>
