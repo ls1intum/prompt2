@@ -6,12 +6,12 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { StatisticalBarChart } from './components/StatisticalBarChart'
-
-import { createStatisticalDataPoint } from './utils/createStatisticalDataPoint'
 import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
+
+import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
+import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 interface CategoryDiagramProps {
   categories: CategoryWithCompetencies[]
@@ -32,7 +32,7 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
     categoryMap.get(category.name)?.push(...categoryAssessments)
   })
   const data = Array.from(categoryMap.entries()).map(([category, scores]) =>
-    createStatisticalDataPoint(category, scores),
+    createScoreDistributionDataPoint(category, scores),
   )
 
   return (
@@ -42,7 +42,7 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <StatisticalBarChart data={data} />
+        <ScoreDistributionBarChart data={data} />
       </CardContent>
     </Card>
   )

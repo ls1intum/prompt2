@@ -6,12 +6,11 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { StatisticalBarChart } from './components/StatisticalBarChart'
-
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
-import { createStatisticalDataPoint } from './utils/createStatisticalDataPoint'
+import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
+import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 interface AuthorDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
@@ -33,7 +32,7 @@ export const AuthorDiagram = ({
   })
 
   const data = Array.from(authorsMap.entries()).map(([author, participations]) =>
-    createStatisticalDataPoint(author, participations),
+    createScoreDistributionDataPoint(author, participations),
   )
 
   return (
@@ -43,7 +42,7 @@ export const AuthorDiagram = ({
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <StatisticalBarChart data={data} />
+        <ScoreDistributionBarChart data={data} />
       </CardContent>
     </Card>
   )

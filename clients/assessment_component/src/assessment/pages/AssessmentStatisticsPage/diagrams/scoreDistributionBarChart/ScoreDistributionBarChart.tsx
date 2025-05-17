@@ -5,59 +5,24 @@ import {
   YAxis,
   LabelList,
   Label,
-  Rectangle,
   Tooltip as ChartTooltip,
   CartesianGrid,
 } from 'recharts'
 import { ChartContainer } from '@tumaet/prompt-ui-components'
-import { StatisticalDataPoint } from '../../interfaces/StatisticalDataPoint'
 
-import { chartConfig, getBarColor } from '../utils/chartConfig'
+import { ScoreDistributionDataPoint } from './interfaces/ScoreDistributionDataPoint'
 
-import { StatisticalTooltipContent } from './StatisticalTooltipContent'
-import { mapNumberToScoreLevel, ScoreLevel } from '../../../../interfaces/scoreLevel'
+import { chartConfig } from '../utils/chartConfig'
 
-export interface StatisticalBarChartProps {
-  data: StatisticalDataPoint[]
+import { ScoreDistributionTooltipContent } from './components/ScoreDistributionTooltipContent'
+import { ScoreDistributionBar } from './components/ScoreDistributionBar'
+import { ScoreDistributionLabel } from './components/ScoreDistributionLabel'
+
+export interface ScoreDistributionBarChartProps {
+  data: ScoreDistributionDataPoint[]
 }
 
-const CustomBar = (props: any) => {
-  const { x = 0, y = 0, width = 0, height = 0, payload } = props
-
-  const scale = height / (Object.keys(ScoreLevel).length - 1)
-  const lowerQuartileY = y + height - (payload.lowerQuartile - 1) * scale
-  const upperQuartileY = y + height - (payload.upperQuartile - 1) * scale
-  const averageY = y + height - (payload.average - 1) * scale
-
-  const barColor = getBarColor(mapNumberToScoreLevel(payload.average))
-
-  const minRectHeight = 8
-  const rectHeight = Math.max(lowerQuartileY - upperQuartileY, minRectHeight)
-
-  return (
-    <g>
-      <Rectangle
-        x={x}
-        y={upperQuartileY}
-        width={width}
-        height={rectHeight}
-        fill={barColor}
-        radius={[4, 4, 4, 4]}
-      />
-      <line
-        x1={x}
-        y1={averageY}
-        x2={x + width}
-        y2={averageY}
-        stroke='#ffffff'
-        strokeWidth={2}
-        strokeOpacity={0.8}
-      />
-    </g>
-  )
-}
-
-export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
+export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartProps) {
   const chartData = data.map((item) => ({
     name: item.name,
     value: 4, // Use the range as the value for sizing
@@ -114,16 +79,9 @@ export function StatisticalBarChart({ data }: StatisticalBarChartProps) {
         >
           <Label value='Score Level' angle={-90} position='insideLeft' fill='#a3a3a3' />
         </YAxis>
-        <ChartTooltip cursor={false} content={<StatisticalTooltipContent />} />
-        <Bar dataKey='value' shape={<CustomBar />}>
-          <LabelList
-            dataKey='average'
-            position='top'
-            formatter={(value: number) => value.toFixed(1)}
-            offset={10}
-            className='fill-[#a3a3a3]'
-            fontSize={12}
-          />
+        <ChartTooltip cursor={false} content={<ScoreDistributionTooltipContent />} />
+        <Bar dataKey='value' shape={<ScoreDistributionBar />}>
+          <LabelList dataKey='average' content={<ScoreDistributionLabel />} />
         </Bar>
       </BarChart>
     </ChartContainer>

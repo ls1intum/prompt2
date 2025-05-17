@@ -1,10 +1,11 @@
-import { ScoreLevel, mapScoreLevelToNumber } from '../../../../interfaces/scoreLevel'
-import { StatisticalDataPoint } from '../../interfaces/StatisticalDataPoint'
+import { ScoreLevel, mapScoreLevelToNumber } from '../../../../../interfaces/scoreLevel'
 
-export const createStatisticalDataPoint = (
+import { ScoreDistributionDataPoint } from '../interfaces/ScoreDistributionDataPoint'
+
+export const createScoreDistributionDataPoint = (
   name: string,
   scoreLevels: ScoreLevel[],
-): StatisticalDataPoint => {
+): ScoreDistributionDataPoint => {
   scoreLevels = scoreLevels.sort((a, b) => {
     const scoreA = mapScoreLevelToNumber(a)
     const scoreB = mapScoreLevelToNumber(b)

@@ -7,12 +7,11 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { StatisticalBarChart } from './components/StatisticalBarChart'
-
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
-import { createStatisticalDataPoint } from './utils/createStatisticalDataPoint'
+import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
+import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 interface GenderDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
@@ -37,9 +36,9 @@ export const GenderDiagram = ({
   const diverse = groupByGender([Gender.DIVERSE, Gender.PREFER_NOT_TO_SAY])
 
   const data = [
-    createStatisticalDataPoint('Females', females),
-    createStatisticalDataPoint('Males', males),
-    createStatisticalDataPoint('Diverse', diverse),
+    createScoreDistributionDataPoint('Female', females),
+    createScoreDistributionDataPoint('Male', males),
+    createScoreDistributionDataPoint('Diverse', diverse),
   ]
 
   return (
@@ -49,7 +48,7 @@ export const GenderDiagram = ({
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <StatisticalBarChart data={data} />
+        <ScoreDistributionBarChart data={data} />
       </CardContent>
     </Card>
   )

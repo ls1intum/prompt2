@@ -1,6 +1,6 @@
-import { SkillCounts } from '../../interfaces/StatisticalDataPoint'
+import { SkillCounts } from '../interfaces/ScoreDistributionDataPoint'
 
-export function StatisticalTooltipContent(props: any) {
+export function ScoreDistributionTooltipContent(props: any) {
   if (!props.active || !props.payload || !props.payload[0]) {
     return null
   }

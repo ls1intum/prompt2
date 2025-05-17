@@ -7,12 +7,12 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { getCountryName } from '@/lib/getCountries'
 
-import { StatisticalBarChart } from './components/StatisticalBarChart'
+import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
-import { createStatisticalDataPoint } from './utils/createStatisticalDataPoint'
+import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 interface NationalityDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
@@ -35,7 +35,7 @@ export const NationalityDiagram = ({
   })
 
   const data = Array.from(nationalityMap.entries()).map(([nationality, participations]) =>
-    createStatisticalDataPoint(nationality, participations),
+    createScoreDistributionDataPoint(nationality, participations),
   )
 
   return (
@@ -45,7 +45,7 @@ export const NationalityDiagram = ({
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <StatisticalBarChart data={data} />
+        <ScoreDistributionBarChart data={data} />
       </CardContent>
     </Card>
   )

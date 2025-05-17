@@ -1,4 +1,4 @@
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 export interface SkillCounts {
   novice: number
@@ -7,7 +7,7 @@ export interface SkillCounts {
   expert: number
 }
 
-export interface StatisticalDataPoint {
+export interface ScoreDistributionDataPoint {
   name: string
   average: number
   lowerQuartile: number
