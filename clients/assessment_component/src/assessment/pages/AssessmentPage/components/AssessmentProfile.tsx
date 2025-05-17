@@ -108,10 +108,7 @@ export const AssessmentProfile = ({
                   isFinalized={studentAssessment.assessmentCompletion.completed}
                 />
                 {studentAssessment.assessments.length > 0 && (
-                  <StudentScoreBadge
-                    scoreLevel={studentAssessment.studentScore.scoreLevel}
-                    score={studentAssessment.studentScore.score}
-                  />
+                  <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
                 )}
               </div>
             </div>
