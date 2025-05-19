@@ -94,6 +94,7 @@ export const EditCourseDropdown = (): JSX.Element => {
 
       {copyCourseDialogOpen && (
         <CopyCourseDialog
+          courseId={courseId ?? ''}
           isOpen={copyCourseDialogOpen}
           onClose={() => setCopyCourseDialogOpen(false)}
         />

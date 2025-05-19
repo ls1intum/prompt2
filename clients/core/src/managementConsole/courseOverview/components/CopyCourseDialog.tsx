@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -26,12 +25,16 @@ import { useNavigate } from 'react-router-dom'
 import type { CopyCourse } from '../interfaces/copyCourse'
 
 interface CourseCopyDialogProps {
+  courseId: string
   isOpen: boolean
   onClose: () => void
 }
 
-export const CopyCourseDialog = ({ isOpen, onClose }: CourseCopyDialogProps): JSX.Element => {
-  const { courseId } = useParams<{ courseId: string }>()
+export const CopyCourseDialog = ({
+  courseId,
+  isOpen,
+  onClose,
+}: CourseCopyDialogProps): JSX.Element => {
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)
   const { toast } = useToast()

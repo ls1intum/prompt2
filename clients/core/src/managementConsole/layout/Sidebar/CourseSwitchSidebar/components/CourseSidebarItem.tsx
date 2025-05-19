@@ -194,7 +194,11 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
       )}
 
       {showCopyDialog && (
-        <CopyCourseDialog isOpen={showCopyDialog} onClose={() => setShowCopyDialog(false)} />
+        <CopyCourseDialog
+          courseId={course.id}
+          isOpen={showCopyDialog}
+          onClose={() => setShowCopyDialog(false)}
+        />
       )}
     </>
   )
