@@ -78,7 +78,7 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 		return courseDTO.Course{}, err
 	}
 
-	err = copyMetaGraphs(ctx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
+	err = copyMetaGraphs(ctx, qtx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
@@ -140,35 +140,6 @@ func copyCoursePhases(ctx context.Context, qtx *db.Queries, sourceID, targetID u
 		mapping[oldID] = dbModel.ID
 	}
 	return mapping, nil
-
-	// for _, phase := range coursePhaseSequence {
-	// 	coursePhase, err := coursePhase.GetCoursePhaseByID(ctx, phase.ID)
-	// 	if err != nil {
-	// 		return courseDTO.Course{}, fmt.Errorf("failed to fetch course phase: %w", err)
-	// 	}
-
-	// 	newPhase := coursePhaseDTO.CreateCoursePhase{
-	// 		Name:                coursePhase.Name,
-	// 		IsInitialPhase:      coursePhase.IsInitialPhase,
-	// 		CourseID:            createdCourse.ID,
-	// 		CoursePhaseTypeID:   coursePhase.CoursePhaseTypeID,
-	// 		RestrictedData:      coursePhase.RestrictedData,
-	// 		StudentReadableData: coursePhase.StudentReadableData,
-	// 	}
-	// 	newPhaseParams, err := newPhase.GetDBModel()
-	// 	if err != nil {
-	// 		return courseDTO.Course{}, fmt.Errorf("failed to transform new course phase: %w", err)
-	// 	}
-
-	// 	newPhaseParams.ID = uuid.New()
-	// 	_, err = qtx.CreateCoursePhase(ctx, newPhaseParams)
-	// 	if err != nil {
-	// 		return courseDTO.Course{}, fmt.Errorf("failed to create course phase: %w", err)
-	// 	}
-
-	// 	// Store the mapping of old phase ID to new phase ID
-	// 	phaseIDMap[phase.ID] = newPhaseParams.ID
-	// }
 }
 
 func copyCoursePhaseGraph(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap map[uuid.UUID]uuid.UUID) error {
@@ -270,7 +241,7 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 	return dtoIDMap, nil
 }
 
-func copyMetaGraphs(ctx context.Context, sourceID, targetID uuid.UUID, phaseMap, dtoMap map[uuid.UUID]uuid.UUID) error {
+func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap, dtoMap map[uuid.UUID]uuid.UUID) error {
 	// Phase Data Graph
 	phaseGraph, err := CourseServiceSingleton.queries.GetPhaseDataGraph(ctx, sourceID)
 	if err != nil {
@@ -292,7 +263,7 @@ func copyMetaGraphs(ctx context.Context, sourceID, targetID uuid.UUID, phaseMap,
 			ToCoursePhaseDtoID:   toD,
 		})
 	}
-	if err := UpdatePhaseDataGraph(ctx, targetID, converted); err != nil {
+	if err := UpdatePhaseDataGraphHelper(ctx, qtx, targetID, converted); err != nil {
 		return err
 	}
 
@@ -317,5 +288,54 @@ func copyMetaGraphs(ctx context.Context, sourceID, targetID uuid.UUID, phaseMap,
 			ToCoursePhaseDtoID:   toD,
 		})
 	}
-	return UpdateParticipationDataGraph(ctx, targetID, converted)
+
+	return UpdateParticipationDataGraphHelper(ctx, qtx, targetID, converted)
+}
+
+func UpdateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	// delete all previous connections
+	err := qtx.DeleteParticipationDataGraphConnections(ctx, courseID)
+	if err != nil {
+		return err
+	}
+
+	// create new connections
+	for _, graphItem := range graphUpdate {
+		err = qtx.CreateParticipationDataConnection(ctx, db.CreateParticipationDataConnectionParams{
+			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
+			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   graphItem.ToCoursePhaseDtoID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
+		}
+	}
+	return nil
+
+}
+
+func UpdatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	// delete all previous connections
+	err := qtx.DeletePhaseDataGraphConnections(ctx, courseID)
+	if err != nil {
+		return err
+	}
+
+	// create new connections
+	for _, graphItem := range graphUpdate {
+		err = qtx.CreatePhaseDataConnection(ctx, db.CreatePhaseDataConnectionParams{
+			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
+			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
+			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   graphItem.ToCoursePhaseDtoID,
+		})
+		if err != nil {
+			log.Error("Error creating graph connection: ", err)
+			return err
+		}
+	}
+	return nil
+
 }
