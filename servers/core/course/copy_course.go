@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -95,7 +96,7 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 		return courseDTO.Course{}, err
 	}
 
-	err = copyApplicationForm(ctx, sourceAplicationPhaseID, targetApplicationPhaseID)
+	err = copyApplicationForm(ctx, qtx, sourceAplicationPhaseID, targetApplicationPhaseID)
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
@@ -293,7 +294,7 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 	return UpdateParticipationDataGraphHelper(ctx, qtx, targetID, converted)
 }
 
-func copyApplicationForm(ctx context.Context, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
+func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
 	applicationForm, err := applicationAdministration.GetApplicationForm(ctx, sourceCoursePhaseID)
 	log.Info("Copying application form: ", applicationForm)
 	if err != nil {
@@ -303,7 +304,7 @@ func copyApplicationForm(ctx context.Context, sourceCoursePhaseID, targetCourseP
 	createQuestionsText := make([]applicationDTO.CreateQuestionText, 0, len(applicationForm.QuestionsText))
 	for _, question := range applicationForm.QuestionsText {
 		createQuestionsText = append(createQuestionsText, applicationDTO.CreateQuestionText{
-			CoursePhaseID:            question.CoursePhaseID,
+			CoursePhaseID:            targetCoursePhaseID,
 			Title:                    question.Title,
 			Description:              question.Description,
 			Placeholder:              question.Placeholder,
@@ -320,7 +321,7 @@ func copyApplicationForm(ctx context.Context, sourceCoursePhaseID, targetCourseP
 	createQuestionsMultiSelect := make([]applicationDTO.CreateQuestionMultiSelect, 0, len(applicationForm.QuestionsMultiSelect))
 	for _, question := range applicationForm.QuestionsMultiSelect {
 		createQuestionsMultiSelect = append(createQuestionsMultiSelect, applicationDTO.CreateQuestionMultiSelect{
-			CoursePhaseID:            question.CoursePhaseID,
+			CoursePhaseID:            targetCoursePhaseID,
 			Title:                    question.Title,
 			Description:              question.Description,
 			Placeholder:              question.Placeholder,
@@ -344,7 +345,7 @@ func copyApplicationForm(ctx context.Context, sourceCoursePhaseID, targetCourseP
 		UpdateQuestionsText:        []applicationDTO.QuestionText{},
 		UpdateQuestionsMultiSelect: []applicationDTO.QuestionMultiSelect{},
 	}
-	err = applicationAdministration.UpdateApplicationForm(ctx, sourceCoursePhaseID, newApplicationForm)
+	err = UpdateApplicationFormHelper(ctx, qtx, targetCoursePhaseID, newApplicationForm)
 	if err != nil {
 		return err
 	}
@@ -406,4 +407,82 @@ func UpdatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID u
 	}
 	return nil
 
+}
+
+func UpdateApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseId uuid.UUID, form applicationDTO.UpdateForm) error {
+	// Check if course phase is application phase
+	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseId)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	if !isApplicationPhase {
+		return errors.New("course phase is not an application phase")
+	}
+
+	// Delete all questions to be deleted
+	for _, questionID := range form.DeleteQuestionsMultiSelect {
+		err := qtx.DeleteApplicationQuestionMultiSelect(ctx, questionID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not delete question")
+		}
+	}
+
+	for _, questionID := range form.DeleteQuestionsText {
+		err := qtx.DeleteApplicationQuestionText(ctx, questionID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not delete question")
+		}
+	}
+
+	// Create all questions to be created
+	for _, question := range form.CreateQuestionsText {
+		questionDBModel := question.GetDBModel()
+		questionDBModel.ID = uuid.New()
+		// force ensuring right course phase id -> but also checked in validation
+		questionDBModel.CoursePhaseID = coursePhaseId
+
+		err = qtx.CreateApplicationQuestionText(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not create question")
+		}
+	}
+
+	for _, question := range form.CreateQuestionsMultiSelect {
+		questionDBModel := question.GetDBModel()
+		questionDBModel.ID = uuid.New()
+		// force ensuring right course phase id -> but also checked in validation
+		questionDBModel.CoursePhaseID = coursePhaseId
+
+		err = qtx.CreateApplicationQuestionMultiSelect(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not create question")
+		}
+	}
+
+	// Update the rest
+	for _, question := range form.UpdateQuestionsMultiSelect {
+		questionDBModel := question.GetDBModel()
+		err = qtx.UpdateApplicationQuestionMultiSelect(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update question")
+		}
+	}
+
+	for _, question := range form.UpdateQuestionsText {
+		questionDBModel := question.GetDBModel()
+		err = qtx.UpdateApplicationQuestionText(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update question")
+		}
+	}
+
+	return nil
 }
