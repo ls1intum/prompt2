@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/coursePhase"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
-	"github.com/niclasheun/prompt2.0/utils"
+	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
