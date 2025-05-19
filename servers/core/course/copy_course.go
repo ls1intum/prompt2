@@ -97,11 +97,11 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 }
 
 func copyCoursePhases(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
-	sequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, sourceID)
+	sequence, err := qtx.GetCoursePhaseSequence(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
-	unordered, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, sourceID)
+	unordered, err := qtx.GetNotOrderedCoursePhases(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func copyCoursePhases(ctx context.Context, qtx *db.Queries, sourceID, targetID u
 }
 
 func copyCoursePhaseGraph(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap map[uuid.UUID]uuid.UUID) error {
-	graph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(ctx, sourceID)
+	graph, err := qtx.GetCoursePhaseGraph(ctx, sourceID)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func copyCoursePhaseGraph(ctx context.Context, qtx *db.Queries, sourceID, target
 }
 
 func setInitialPhase(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap map[uuid.UUID]uuid.UUID) error {
-	sequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, sourceID)
+	sequence, err := qtx.GetCoursePhaseSequence(ctx, sourceID)
 	if err != nil {
 		return err
 	}
@@ -183,11 +183,11 @@ func setInitialPhase(ctx context.Context, qtx *db.Queries, sourceID, targetID uu
 }
 
 func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
-	unordered, err := CourseServiceSingleton.queries.GetNotOrderedCoursePhases(ctx, sourceID)
+	unordered, err := qtx.GetNotOrderedCoursePhases(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
-	sequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, sourceID)
+	sequence, err := qtx.GetCoursePhaseSequence(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 
 func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap, dtoMap map[uuid.UUID]uuid.UUID) error {
 	// Phase Data Graph
-	phaseGraph, err := CourseServiceSingleton.queries.GetPhaseDataGraph(ctx, sourceID)
+	phaseGraph, err := qtx.GetPhaseDataGraph(ctx, sourceID)
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 	}
 
 	// Participation Data Graph
-	participationGraph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(ctx, sourceID)
+	participationGraph, err := qtx.GetParticipationDataGraph(ctx, sourceID)
 	if err != nil {
 		return err
 	}
