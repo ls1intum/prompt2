@@ -73,15 +73,15 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 		return courseDTO.Course{}, err
 	}
 
-	// dtoIDMap, err := copyDTOs(ctx, qtx, sourceCourseID)
-	// if err != nil {
-	// 	return courseDTO.Course{}, err
-	// }
+	dtoIDMap, err := copyDTOs(ctx, qtx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
 
-	// err = copyMetaGraphs(ctx, qtx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
-	// if err != nil {
-	// 	return courseDTO.Course{}, err
-	// }
+	err = copyMetaGraphs(ctx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
 
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
@@ -263,7 +263,7 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 	return dtoIDMap, nil
 }
 
-func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap, dtoMap map[uuid.UUID]uuid.UUID) error {
+func copyMetaGraphs(ctx context.Context, sourceID, targetID uuid.UUID, phaseMap, dtoMap map[uuid.UUID]uuid.UUID) error {
 	// Phase Data Graph
 	phaseGraph, err := CourseServiceSingleton.queries.GetPhaseDataGraph(ctx, sourceID)
 	if err != nil {
@@ -273,8 +273,8 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 	for _, i := range phaseGraph {
 		fromP, ok1 := phaseMap[i.FromCoursePhaseID]
 		toP, ok2 := phaseMap[i.ToCoursePhaseID]
-		fromD, ok3 := phaseMap[i.FromCoursePhaseDtoID]
-		toD, ok4 := phaseMap[i.ToCoursePhaseDtoID]
+		fromD, ok3 := dtoMap[i.FromCoursePhaseDtoID]
+		toD, ok4 := dtoMap[i.ToCoursePhaseDtoID]
 		if !ok1 || !ok2 || !ok3 || !ok4 {
 			return fmt.Errorf("invalid mapping in phase data graph")
 		}
