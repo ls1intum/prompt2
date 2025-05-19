@@ -216,9 +216,16 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 	if err != nil {
 		return nil, err
 	}
+	sequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(ctx, sourceID)
+	if err != nil {
+		return nil, err
+	}
 
 	uniqueTypes := make(map[uuid.UUID]struct{})
 	for _, p := range unordered {
+		uniqueTypes[p.CoursePhaseTypeID] = struct{}{}
+	}
+	for _, p := range sequence {
 		uniqueTypes[p.CoursePhaseTypeID] = struct{}{}
 	}
 
