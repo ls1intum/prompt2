@@ -79,7 +79,7 @@ export const CopyCourseDialog = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} aria-hidden='true'>
+    <Dialog open={isOpen} onOpenChange={() => onClose()} aria-hidden='true'>
       <DialogContent className='max-w-md'>
         <DialogHeader>
           <DialogTitle>Copy {course?.name}</DialogTitle>
