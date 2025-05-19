@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
+	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
@@ -79,6 +81,21 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 	}
 
 	err = copyMetaGraphs(ctx, qtx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+
+	sourceAplicationPhaseID, err := getApplicationPhaseID(ctx, qtx, sourceCourseID)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+
+	targetApplicationPhaseID, err := getApplicationPhaseID(ctx, qtx, createdCourse.ID)
+	if err != nil {
+		return courseDTO.Course{}, err
+	}
+
+	err = copyApplicationForm(ctx, sourceAplicationPhaseID, targetApplicationPhaseID)
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
@@ -276,6 +293,64 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 	return UpdateParticipationDataGraphHelper(ctx, qtx, targetID, converted)
 }
 
+func copyApplicationForm(ctx context.Context, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
+	applicationForm, err := applicationAdministration.GetApplicationForm(ctx, sourceCoursePhaseID)
+	log.Info("Copying application form: ", applicationForm)
+	if err != nil {
+		return err
+	}
+
+	createQuestionsText := make([]applicationDTO.CreateQuestionText, 0, len(applicationForm.QuestionsText))
+	for _, question := range applicationForm.QuestionsText {
+		createQuestionsText = append(createQuestionsText, applicationDTO.CreateQuestionText{
+			CoursePhaseID:            question.CoursePhaseID,
+			Title:                    question.Title,
+			Description:              question.Description,
+			Placeholder:              question.Placeholder,
+			ValidationRegex:          question.ValidationRegex,
+			ErrorMessage:             question.ErrorMessage,
+			IsRequired:               question.IsRequired,
+			AllowedLength:            question.AllowedLength,
+			OrderNum:                 question.OrderNum,
+			AccessibleForOtherPhases: question.AccessibleForOtherPhases,
+			AccessKey:                question.AccessKey,
+		})
+	}
+
+	createQuestionsMultiSelect := make([]applicationDTO.CreateQuestionMultiSelect, 0, len(applicationForm.QuestionsMultiSelect))
+	for _, question := range applicationForm.QuestionsMultiSelect {
+		createQuestionsMultiSelect = append(createQuestionsMultiSelect, applicationDTO.CreateQuestionMultiSelect{
+			CoursePhaseID:            question.CoursePhaseID,
+			Title:                    question.Title,
+			Description:              question.Description,
+			Placeholder:              question.Placeholder,
+			ErrorMessage:             question.ErrorMessage,
+			IsRequired:               question.IsRequired,
+			MinSelect:                question.MinSelect,
+			MaxSelect:                question.MaxSelect,
+			Options:                  question.Options,
+			OrderNum:                 question.OrderNum,
+			AccessibleForOtherPhases: question.AccessibleForOtherPhases,
+			AccessKey:                question.AccessKey,
+		})
+	}
+
+	// Copy the application form
+	newApplicationForm := applicationDTO.UpdateForm{
+		DeleteQuestionsText:        []uuid.UUID{},
+		DeleteQuestionsMultiSelect: []uuid.UUID{},
+		CreateQuestionsText:        createQuestionsText,
+		CreateQuestionsMultiSelect: createQuestionsMultiSelect,
+		UpdateQuestionsText:        []applicationDTO.QuestionText{},
+		UpdateQuestionsMultiSelect: []applicationDTO.QuestionMultiSelect{},
+	}
+	err = applicationAdministration.UpdateApplicationForm(ctx, sourceCoursePhaseID, newApplicationForm)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func UpdateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
 	// delete all previous connections
 	err := qtx.DeleteParticipationDataGraphConnections(ctx, courseID)
@@ -298,6 +373,15 @@ func UpdateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, co
 	}
 	return nil
 
+}
+
+func getApplicationPhaseID(ctx context.Context, qtx *db.Queries, courseID uuid.UUID) (uuid.UUID, error) {
+	applicationPhaseID, err := qtx.GetApplicationPhaseIDForCourse(ctx, courseID)
+	log.Info("Application phase: ", applicationPhaseID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return applicationPhaseID, nil
 }
 
 func UpdatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
