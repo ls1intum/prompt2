@@ -192,6 +192,7 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 		return nil, err
 	}
 
+	// Collect all unique CoursePhaseTypeIDs
 	uniqueTypes := make(map[uuid.UUID]struct{})
 	for _, p := range unordered {
 		uniqueTypes[p.CoursePhaseTypeID] = struct{}{}
@@ -201,43 +202,26 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 	}
 
 	dtoIDMap := make(map[uuid.UUID]uuid.UUID)
+
 	for tID := range uniqueTypes {
 		outputs, err := qtx.GetCoursePhaseProvidedParticipationOutputs(ctx, tID)
 		if err != nil {
 			return nil, err
 		}
 		for _, o := range outputs {
-			newID := uuid.New()
-			if err := qtx.CreateCoursePhaseTypeProvidedOutput(ctx, db.CreateCoursePhaseTypeProvidedOutputParams{
-				ID:                newID,
-				CoursePhaseTypeID: o.CoursePhaseTypeID,
-				DtoName:           o.DtoName,
-				VersionNumber:     o.VersionNumber,
-				EndpointPath:      o.EndpointPath,
-				Specification:     o.Specification,
-			}); err != nil {
-				return nil, err
-			}
-			dtoIDMap[o.ID] = newID
+			dtoIDMap[o.ID] = o.ID
 		}
 
+		// Get inputs
 		inputs, err := qtx.GetCoursePhaseRequiredParticipationInputs(ctx, tID)
 		if err != nil {
 			return nil, err
 		}
 		for _, i := range inputs {
-			newID := uuid.New()
-			if err := qtx.CreateCoursePhaseTypeRequiredInput(ctx, db.CreateCoursePhaseTypeRequiredInputParams{
-				ID:                newID,
-				CoursePhaseTypeID: i.CoursePhaseTypeID,
-				DtoName:           i.DtoName,
-				Specification:     i.Specification,
-			}); err != nil {
-				return nil, err
-			}
-			dtoIDMap[i.ID] = newID
+			dtoIDMap[i.ID] = i.ID
 		}
 	}
+
 	return dtoIDMap, nil
 }
 
