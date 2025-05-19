@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/applicationAdministration/applicationDTO"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/mailing"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/mailing"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 

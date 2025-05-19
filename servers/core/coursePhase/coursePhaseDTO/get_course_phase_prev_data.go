@@ -1,9 +1,9 @@
 package coursePhaseDTO
 
 import (
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution/resolutionDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 )
 
 type PrevCoursePhaseData struct {

@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/niclasheun/prompt2.0/coursePhaseAuth/coursePhaseAuthDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
-	"github.com/niclasheun/prompt2.0/testutils"
+	"github.com/ls1intum/prompt2/servers/core/coursePhaseAuth/coursePhaseAuthDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/testutils"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )

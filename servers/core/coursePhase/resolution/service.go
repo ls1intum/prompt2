@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution/resolutionDTO"
 )
 
 type ResolutionService struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
