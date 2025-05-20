@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/intro_course/developerAccountSetup"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan"
@@ -80,6 +81,11 @@ func main() {
 	developerProfile.InitDeveloperProfileModule(api, *query, conn)
 	tutor.InitTutorModule(api, *query, conn)
 	seatPlan.InitSeatPlanModule(api, *query, conn)
+
+	issuerID := utils.GetEnv("APPLE_ISSUER_ID", "")
+	keyID := utils.GetEnv("APPLE_KEY_ID", "")
+	privateKey := utils.GetEnv("APPLE_PRIVATE_KEY", "")
+	developerAccountSetup.InitDeveloperAccountSetupModule(api, *query, conn, issuerID, keyID, privateKey)
 
 	// Infrastructure Setup
 	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")
