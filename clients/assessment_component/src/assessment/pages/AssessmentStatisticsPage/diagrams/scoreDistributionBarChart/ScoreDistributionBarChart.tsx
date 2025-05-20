@@ -11,6 +11,7 @@ import {
 import { ChartContainer } from '@tumaet/prompt-ui-components'
 
 import { ScoreDistributionDataPoint } from './interfaces/ScoreDistributionDataPoint'
+import { wrapLabel } from './utils/wrapLabel'
 
 import { chartConfig } from '../utils/chartConfig'
 
@@ -51,7 +52,9 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
           interval={0}
           height={80}
           tick={({ x, y, payload }) => {
-            const lines = String(payload.value).split(' ')
+            const label = String(payload.value)
+            const maxLineLength = 12
+            const lines = wrapLabel(label, maxLineLength)
             return (
               <text
                 x={x}
