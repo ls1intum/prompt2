@@ -86,14 +86,14 @@ export const AssessmentForm = ({
         )}
       >
         <div className='relative'>
-          <div className='flex items-center gap-2 mb-2 pr-8'>
+          <div className='flex items-center gap-2 mb-2'>
             <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
             <h3 className='text-base font-medium'>{competency.name}</h3>
           </div>
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
 
-        <div className='col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1'>
+        <div className='md:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1'>
           {Object.values(ScoreLevel).map((level) => {
             const config = getLevelConfig(level)
             const isSelected = selectedScore === level

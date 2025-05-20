@@ -14,6 +14,10 @@ module.exports = {
       pattern: /^grid-cols-\d+$/,
       variants: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
+    {
+      pattern: /^col-span-\d+$/,
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'],
+    },
     'w-[120px]',
   ],
   theme: {
