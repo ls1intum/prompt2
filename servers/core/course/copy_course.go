@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
@@ -295,7 +294,7 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 }
 
 func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
-	applicationForm, err := applicationAdministration.GetApplicationForm(ctx, sourceCoursePhaseID)
+	applicationForm, err := GetApplicationFormHelper(ctx, qtx, sourceCoursePhaseID)
 	log.Info("Copying application form: ", applicationForm)
 	if err != nil {
 		return err
@@ -485,4 +484,32 @@ func UpdateApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePha
 	}
 
 	return nil
+}
+
+func GetApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return applicationDTO.Form{}, err
+	}
+
+	if !isApplicationPhase {
+		return applicationDTO.Form{}, errors.New("course phase is not an application phase")
+	}
+
+	applicationQuestionsText, err := qtx.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return applicationDTO.Form{}, err
+	}
+
+	applicationQuestionsMultiSelect, err := qtx.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return applicationDTO.Form{}, err
+	}
+
+	applicationFormDTO := applicationDTO.GetFormDTOFromDBModel(applicationQuestionsText, applicationQuestionsMultiSelect)
+
+	return applicationFormDTO, nil
 }
