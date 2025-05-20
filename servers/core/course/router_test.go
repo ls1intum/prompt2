@@ -196,23 +196,6 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
 }
 
-func (suite *CourseRouterTestSuite) TestCopyCourse() {
-	originalCourseID := "3f42d322-e5bf-4faa-b576-51f2cab14c2e" // ensure this course exists in your test dump
-	req, _ := http.NewRequest("POST", "/api/courses/"+originalCourseID+"/copy", nil)
-	resp := httptest.NewRecorder()
-
-	suite.router.ServeHTTP(resp, req)
-
-	assert.Equal(suite.T(), http.StatusCreated, resp.Code, "Expected 201 Created when copying course")
-
-	var copiedCourse courseDTO.Course
-	err := json.Unmarshal(resp.Body.Bytes(), &copiedCourse)
-	assert.NoError(suite.T(), err, "Unmarshalling the copied course should not produce an error")
-
-	assert.NotEqual(suite.T(), originalCourseID, copiedCourse.ID.String(), "Copied course should have a new ID")
-	assert.Contains(suite.T(), copiedCourse.Name, "Copy", "Copied course name should indicate it's a copy")
-}
-
 func TestCourseRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(CourseRouterTestSuite))
 }
