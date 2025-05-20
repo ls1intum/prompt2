@@ -12,7 +12,7 @@ module.exports = {
     },
     {
       pattern: /^grid-cols-\d+$/,
-      variants: ['xl', '2xl'],
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
     'w-[120px]',
   ],

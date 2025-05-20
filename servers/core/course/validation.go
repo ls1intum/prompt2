@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseDTO"
-	"github.com/niclasheun/prompt2.0/coursePhase"
+	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	log "github.com/sirupsen/logrus"
 )
 
