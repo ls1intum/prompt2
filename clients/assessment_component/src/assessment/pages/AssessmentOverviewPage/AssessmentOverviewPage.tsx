@@ -6,7 +6,7 @@ import {
   useCustomElementWidth,
 } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
-import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
+import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import StudentScoreBadge from '../components/StudentScoreBadge'
 import { useMemo } from 'react'
