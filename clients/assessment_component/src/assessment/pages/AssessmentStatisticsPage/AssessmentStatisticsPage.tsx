@@ -83,10 +83,14 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
-        <CategoryDiagram categories={categories} assessments={assessments} />
+        <div className='2xl:col-span-2'>
+          <CategoryDiagram categories={categories} assessments={assessments} />
+        </div>
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
-        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
+        <div className='2xl:col-span-2'>
+          <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
+        </div>
       </div>
     </div>
   )
