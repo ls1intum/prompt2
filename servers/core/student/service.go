@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/student/studentDTO"
-	"github.com/niclasheun/prompt2.0/utils"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 )
 
 type StudentService struct {

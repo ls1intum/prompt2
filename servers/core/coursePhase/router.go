@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	"github.com/niclasheun/prompt2.0/meta"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	"github.com/ls1intum/prompt2/servers/core/meta"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 
