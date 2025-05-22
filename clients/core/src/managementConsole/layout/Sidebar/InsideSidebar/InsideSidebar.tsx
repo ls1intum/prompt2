@@ -18,7 +18,7 @@ export const InsideSidebar = (): JSX.Element => {
           <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
             PROMPT
           </span>
-          <sup className='ml-1 text-xs font-normal text-gray-400 align-super'>{version}</sup>
+          <span className='ml-1 text-xs font-normal text-gray-400'>{version}</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
