@@ -29,8 +29,8 @@ func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.Handl
 // @Param coursePhaseID path string true "Course Phase UUID"
 // @Param mailingInfo body mailingDTO.SendStatusMail true "Mailing info"
 // @Success 200 {object} mailingDTO.MailingReport
-// @Failure 400 {object} string
-// @Failure 500 {object} string
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /mailing/{coursePhaseID} [put]
 func sendStatusMailManualTrigger(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
