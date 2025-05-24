@@ -4,18 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Separator,
 } from '@tumaet/prompt-ui-components'
-import {
-  HelpCircle,
-  Lightbulb,
-  MousePointer,
-  Settings,
-  Sidebar,
-  PaintbrushIcon as Canvas,
-  Link,
-  ArrowRight,
-} from 'lucide-react'
+import { HelpCircle, Lightbulb, MousePointer, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 
 export const HelpDialog = (): JSX.Element => {
