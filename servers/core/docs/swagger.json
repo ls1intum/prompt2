@@ -9,6 +9,860 @@
     "host": "localhost:8080",
     "basePath": "/api/",
     "paths": {
+        "/applications/{coursePhaseID}": {
+            "post": {
+                "description": "Post an application for a student (manual, authenticated)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Manually post an application",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Application to post",
+                        "name": "application",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.PostApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete applications for a course phase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Delete applications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course Participation UUIDs to delete",
+                        "name": "courseParticipationIDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/assessment": {
+            "put": {
+                "description": "Batch update the status of multiple applications",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Update applications status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status update",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/form": {
+            "get": {
+                "description": "Get the application form for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get application form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.Form"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the application form for a course phase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Update application form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated application form",
+                        "name": "updatedApplicationForm",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.UpdateForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/participations": {
+            "get": {
+                "description": "Get all participations for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get all application participations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/applicationDTO.ApplicationParticipation"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/score": {
+            "get": {
+                "description": "Get additional scores for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get additional scores",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/applicationDTO.AdditionalScore"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Upload an additional score for a course phase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Upload additional score",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Additional score to upload",
+                        "name": "additionalScore",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.AdditionalScoreUpload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/{courseParticipationID}": {
+            "get": {
+                "description": "Get an application by course phase ID and course participation ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get application by course phase and participation ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Participation UUID",
+                        "name": "courseParticipationID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.Application"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{coursePhaseID}/{courseParticipationID}/assessment": {
+            "put": {
+                "description": "Update the assessment for an application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Update application assessment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Participation UUID",
+                        "name": "courseParticipationID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Assessment to update",
+                        "name": "assessment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.PutAssessment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/apply": {
+            "get": {
+                "description": "Get all open application phases",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get all open applications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/applicationDTO.OpenApplication"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/apply/authenticated/{coursePhaseID}": {
+            "get": {
+                "description": "Get the application form for an authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get authenticated application form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.Application"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Post an application for a student (authenticated)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Post an application (authenticated)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Application to post",
+                        "name": "application",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.PostApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/apply/{coursePhaseID}": {
+            "get": {
+                "description": "Get the application form and course details for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Get application form with course details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.FormWithDetails"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Post an application for a student (external, unauthenticated)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Post an application (external)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Application to post",
+                        "name": "application",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationDTO.PostApplication"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Method Not Allowed",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/course_phase/{coursePhaseID}/is_student": {
+            "get": {
+                "description": "Check if the user is a student of the course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_auth"
+                ],
+                "summary": "Get course phase participation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseAuthDTO.GetCoursePhaseParticipation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/course_phase/{coursePhaseID}/roles": {
+            "get": {
+                "description": "Get the role mapping for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_auth"
+                ],
+                "summary": "Get course phase roles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseAuthDTO.GetCourseRoles"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/course_phase_types": {
             "get": {
                 "description": "Get a list of all available course phase types",
@@ -27,6 +881,1187 @@
                             "items": {
                                 "$ref": "#/definitions/coursePhaseTypeDTO.CoursePhaseType"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/course/{courseID}": {
+            "post": {
+                "description": "Create a new course phase for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Create a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "courseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course phase to create",
+                        "name": "newCoursePhase",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseDTO.CreateCoursePhase"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseDTO.CoursePhase"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}": {
+            "get": {
+                "description": "Get a course phase by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Get course phase by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseDTO.CoursePhase"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing course phase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Update a course phase",
+                "parameters": [
+                    {
+                        "description": "Course phase to update",
+                        "name": "updatedCoursePhase",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseDTO.UpdateCoursePhase"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a course phase by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Delete a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}/course_phase_data": {
+            "get": {
+                "description": "Get data from previous phases for a given course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Get previous phase data by course phase ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseDTO.PrevCoursePhaseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}/participations": {
+            "get": {
+                "description": "Get all participations for a given course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Get all participations for a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update multiple course phase participations at once",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Batch update course phase participations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Participations to update",
+                        "name": "updatedCourseParticipationRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}/participations/self": {
+            "get": {
+                "description": "Get the participation of the current user in a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Get own course phase participation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.CoursePhaseParticipationStudent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}/participations/students": {
+            "get": {
+                "description": "Get all students of a given course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Get students of a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.Student"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course_phases/{uuid}/participations/{course_participation_id}": {
+            "get": {
+                "description": "Get a specific participation by course phase and participation ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Get a specific participation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Participation UUID",
+                        "name": "course_participation_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.GetCoursePhaseParticipation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a specific course phase participation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_participation"
+                ],
+                "summary": "Update a course phase participation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Participation UUID",
+                        "name": "course_participation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Participation to update",
+                        "name": "newCourseParticipation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.CreateCoursePhaseParticipation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseParticipationDTO.GetCoursePhaseParticipation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/": {
+            "get": {
+                "description": "Get all courses accessible to the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get all courses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.CourseWithPhases"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Create a course",
+                "parameters": [
+                    {
+                        "description": "Course to create",
+                        "name": "newCourse",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CreateCourse"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/self": {
+            "get": {
+                "description": "Get the course IDs for the current user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get own courses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}": {
+            "get": {
+                "description": "Get a course by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get course by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CourseWithPhases"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the data for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update course data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course data update",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.UpdateCourseData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a course by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Delete a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/participation_data_graph": {
+            "get": {
+                "description": "Get the participation data graph for a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get participation data graph",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.MetaDataGraphItem"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the participation data graph for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update participation data graph",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Participation data graph update",
+                        "name": "newGraph",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.MetaDataGraphItem"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/participations": {
+            "get": {
+                "description": "Get all participations for a given course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_participation"
+                ],
+                "summary": "Get all participations for a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseParticipationDTO.GetCourseParticipation"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/participations/enroll": {
+            "post": {
+                "description": "Enroll a user in a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_participation"
+                ],
+                "summary": "Enroll in a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Participation to create",
+                        "name": "newCourseParticipation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseParticipationDTO.CreateCourseParticipation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/courseParticipationDTO.GetCourseParticipation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/participations/self": {
+            "get": {
+                "description": "Get the participation of the current user in a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_participation"
+                ],
+                "summary": "Get own course participation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/courseParticipationDTO.GetOwnCourseParticipation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/phase_data_graph": {
+            "get": {
+                "description": "Get the phase data graph for a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get phase data graph",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.MetaDataGraphItem"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the phase data graph for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update phase data graph",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Phase data graph update",
+                        "name": "newGraph",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.MetaDataGraphItem"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/phase_graph": {
+            "get": {
+                "description": "Get the phase graph for a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get course phase graph",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.CoursePhaseGraph"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the phase order for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update course phase order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Phase graph update",
+                        "name": "graphUpdate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.UpdateCoursePhaseGraph"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
@@ -82,13 +2117,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }
@@ -135,13 +2170,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }
@@ -186,13 +2221,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }
@@ -244,13 +2279,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }
@@ -514,6 +2549,980 @@
         }
     },
     "definitions": {
+        "applicationDTO.AdditionalScore": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.AdditionalScoreUpload": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scores": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.IndividualScore"
+                    }
+                },
+                "threshold": {
+                    "type": "number"
+                },
+                "thresholdActive": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "applicationDTO.AnswerMultiSelect": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "applicationQuestionID": {
+                    "type": "string"
+                },
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.AnswerText": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "applicationQuestionID": {
+                    "type": "string"
+                },
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.Application": {
+            "type": "object",
+            "properties": {
+                "answersMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.AnswerMultiSelect"
+                    }
+                },
+                "answersText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.AnswerText"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/applicationDTO.StatusEnum"
+                },
+                "student": {
+                    "$ref": "#/definitions/studentDTO.Student"
+                }
+            }
+        },
+        "applicationDTO.ApplicationParticipation": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "student": {
+                    "$ref": "#/definitions/studentDTO.Student"
+                }
+            }
+        },
+        "applicationDTO.CreateAnswerMultiSelect": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "applicationQuestionID": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.CreateAnswerText": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "applicationQuestionID": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.CreateQuestionMultiSelect": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "description": "using pgtype as this allows for optional values",
+                    "type": "boolean"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "maxSelect": {
+                    "type": "integer"
+                },
+                "minSelect": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.CreateQuestionText": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "description": "using pgtype as this allows for optional values",
+                    "type": "boolean"
+                },
+                "allowedLength": {
+                    "type": "integer"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "validationRegex": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.Form": {
+            "type": "object",
+            "properties": {
+                "questionsMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionMultiSelect"
+                    }
+                },
+                "questionsText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionText"
+                    }
+                }
+            }
+        },
+        "applicationDTO.FormWithDetails": {
+            "type": "object",
+            "properties": {
+                "applicationPhase": {
+                    "$ref": "#/definitions/applicationDTO.OpenApplication"
+                },
+                "questionsMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionMultiSelect"
+                    }
+                },
+                "questionsText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionText"
+                    }
+                }
+            }
+        },
+        "applicationDTO.IndividualScore": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                }
+            }
+        },
+        "applicationDTO.OpenApplication": {
+            "type": "object",
+            "properties": {
+                "applicationDeadline": {
+                    "type": "string"
+                },
+                "courseName": {
+                    "type": "string"
+                },
+                "courseType": {
+                    "type": "string"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "externalStudentsAllowed": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "universityLoginAvailable": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "applicationDTO.PostApplication": {
+            "type": "object",
+            "properties": {
+                "answersMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateAnswerMultiSelect"
+                    }
+                },
+                "answersText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateAnswerText"
+                    }
+                },
+                "student": {
+                    "description": "should be able to handle either a new student or an existing dependent on ID",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/studentDTO.CreateStudent"
+                        }
+                    ]
+                }
+            }
+        },
+        "applicationDTO.PutAssessment": {
+            "type": "object",
+            "properties": {
+                "passStatus": {
+                    "$ref": "#/definitions/db.PassStatus"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "applicationDTO.QuestionMultiSelect": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "description": "using pgtype as this allows for optional values",
+                    "type": "boolean"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "maxSelect": {
+                    "type": "integer"
+                },
+                "minSelect": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.QuestionText": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "description": "using pgtype as this allows for optional values",
+                    "type": "boolean"
+                },
+                "allowedLength": {
+                    "type": "integer"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "validationRegex": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationDTO.StatusEnum": {
+            "type": "string",
+            "enum": [
+                "not_applied",
+                "applied",
+                "new_user"
+            ],
+            "x-enum-varnames": [
+                "StatusNotApplied",
+                "StatusApplied",
+                "StatusNewUser"
+            ]
+        },
+        "applicationDTO.UpdateForm": {
+            "type": "object",
+            "properties": {
+                "createQuestionsMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateQuestionMultiSelect"
+                    }
+                },
+                "createQuestionsText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateQuestionText"
+                    }
+                },
+                "deleteQuestionsMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "deleteQuestionsText": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updateQuestionsMultiSelect": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionMultiSelect"
+                    }
+                },
+                "updateQuestionsText": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionText"
+                    }
+                }
+            }
+        },
+        "courseDTO.Course": {
+            "type": "object",
+            "properties": {
+                "courseType": {
+                    "type": "string"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "semesterTag": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "courseDTO.CoursePhaseGraph": {
+            "type": "object",
+            "properties": {
+                "fromCoursePhaseID": {
+                    "type": "string"
+                },
+                "toCoursePhaseID": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseDTO.CourseWithPhases": {
+            "type": "object",
+            "properties": {
+                "coursePhases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseDTO.CoursePhaseSequence"
+                    }
+                },
+                "courseType": {
+                    "$ref": "#/definitions/db.CourseType"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "semesterTag": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "courseDTO.CreateCourse": {
+            "type": "object",
+            "properties": {
+                "courseType": {
+                    "$ref": "#/definitions/db.CourseType"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "semesterTag": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "courseDTO.MetaDataGraphItem": {
+            "type": "object",
+            "properties": {
+                "fromCoursePhaseDtoID": {
+                    "type": "string"
+                },
+                "fromCoursePhaseID": {
+                    "type": "string"
+                },
+                "toCoursePhaseDtoID": {
+                    "type": "string"
+                },
+                "toCoursePhaseID": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseDTO.UpdateCourseData": {
+            "type": "object",
+            "properties": {
+                "courseType": {
+                    "type": "string"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "courseDTO.UpdateCoursePhaseGraph": {
+            "type": "object",
+            "properties": {
+                "coursePhaseGraph": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/courseDTO.CoursePhaseGraph"
+                    }
+                },
+                "initialPhase": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseParticipationDTO.CreateCourseParticipation": {
+            "type": "object",
+            "properties": {
+                "courseID": {
+                    "type": "string"
+                },
+                "studentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseParticipationDTO.GetCourseParticipation": {
+            "type": "object",
+            "properties": {
+                "courseID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "studentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseParticipationDTO.GetOwnCourseParticipation": {
+            "type": "object",
+            "properties": {
+                "activeCoursePhases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "courseID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isStudentOfCourse": {
+                    "type": "boolean"
+                },
+                "studentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "coursePhaseAuthDTO.GetCoursePhaseParticipation": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "isStudentOfCoursePhase": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "coursePhaseAuthDTO.GetCourseRoles": {
+            "type": "object",
+            "properties": {
+                "courseEditorRole": {
+                    "type": "string"
+                },
+                "courseLecturerRole": {
+                    "type": "string"
+                },
+                "customRolePrefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "coursePhaseDTO.CoursePhase": {
+            "type": "object",
+            "properties": {
+                "courseID": {
+                    "type": "string"
+                },
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "coursePhaseTypeName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isInitialPhase": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseDTO.CoursePhaseSequence": {
+            "type": "object",
+            "properties": {
+                "courseID": {
+                    "type": "string"
+                },
+                "coursePhaseType": {
+                    "type": "string"
+                },
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isInitialPhase": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sequenceOrder": {
+                    "type": "integer"
+                }
+            }
+        },
+        "coursePhaseDTO.CreateCoursePhase": {
+            "type": "object",
+            "properties": {
+                "courseID": {
+                    "type": "string"
+                },
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "isInitialPhase": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseDTO.PrevCoursePhaseData": {
+            "type": "object",
+            "properties": {
+                "prevData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "resolutions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resolutionDTO.Resolution"
+                    }
+                }
+            }
+        },
+        "coursePhaseDTO.UpdateCoursePhase": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "use pgtype to handle null values",
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.CoursePhaseParticipationStudent": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "student": {
+                    "$ref": "#/definitions/studentDTO.Student"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions": {
+            "type": "object",
+            "properties": {
+                "participations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseParticipationDTO.GetAllCPPsForCoursePhase"
+                    }
+                },
+                "resolutions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/resolutionDTO.Resolution"
+                    }
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.CreateCoursePhaseParticipation": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "$ref": "#/definitions/db.PassStatus"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.GetAllCPPsForCoursePhase": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "type": "string"
+                },
+                "prevData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "student": {
+                    "$ref": "#/definitions/studentDTO.Student"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.GetCoursePhaseParticipation": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "type": "string"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest": {
+            "type": "object",
+            "properties": {
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "description": "for individual updates, the courseParticipation is in the url\nfor batch updates, the ID is in the body",
+                    "type": "string"
+                },
+                "passStatus": {
+                    "$ref": "#/definitions/db.PassStatus"
+                },
+                "restrictedData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                },
+                "studentReadableData": {
+                    "$ref": "#/definitions/meta.MetaData"
+                }
+            }
+        },
+        "coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus": {
+            "type": "object",
+            "properties": {
+                "courseParticipationIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "passStatus": {
+                    "$ref": "#/definitions/db.PassStatus"
+                }
+            }
+        },
         "coursePhaseTypeDTO.CoursePhaseType": {
             "type": "object",
             "properties": {
@@ -655,6 +3664,19 @@
                 }
             }
         },
+        "db.CourseType": {
+            "type": "string",
+            "enum": [
+                "lecture",
+                "seminar",
+                "practical course"
+            ],
+            "x-enum-varnames": [
+                "CourseTypeLecture",
+                "CourseTypeSeminar",
+                "CourseTypePracticalcourse"
+            ]
+        },
         "db.Gender": {
             "type": "string",
             "enum": [
@@ -792,6 +3814,23 @@
         "meta.MetaData": {
             "type": "object",
             "additionalProperties": true
+        },
+        "resolutionDTO.Resolution": {
+            "type": "object",
+            "properties": {
+                "baseURL": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "dtoName": {
+                    "type": "string"
+                },
+                "endpointPath": {
+                    "type": "string"
+                }
+            }
         },
         "studentDTO.CreateStudent": {
             "type": "object",

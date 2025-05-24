@@ -170,7 +170,7 @@ func getStudentsInGroup(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": utils.ErrorResponse{
+	c.JSON(statusCode, utils.ErrorResponse{
 		Error: err.Error(),
-	}})
+	})
 }

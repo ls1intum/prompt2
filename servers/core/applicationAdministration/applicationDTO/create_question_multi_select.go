@@ -18,8 +18,8 @@ type CreateQuestionMultiSelect struct {
 	Options       []string  `json:"options"`
 	OrderNum      int       `json:"orderNum"`
 	// using pgtype as this allows for optional values
-	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases"`
-	AccessKey                pgtype.Text `json:"accessKey"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases" swaggertype:"boolean"`
+	AccessKey                pgtype.Text `json:"accessKey" swaggertype:"string"`
 }
 
 func (a CreateQuestionMultiSelect) GetDBModel() db.CreateApplicationQuestionMultiSelectParams {

@@ -25,8 +25,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/student"
 	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/swaggo/gin-swagger"
 )
 
 func getDatabaseURL() string {

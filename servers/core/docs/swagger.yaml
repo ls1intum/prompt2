@@ -1,5 +1,645 @@
 basePath: /api/
 definitions:
+  applicationDTO.AdditionalScore:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+    type: object
+  applicationDTO.AdditionalScoreUpload:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+      scores:
+        items:
+          $ref: '#/definitions/applicationDTO.IndividualScore'
+        type: array
+      threshold:
+        type: number
+      thresholdActive:
+        type: boolean
+    type: object
+  applicationDTO.AnswerMultiSelect:
+    properties:
+      answer:
+        items:
+          type: string
+        type: array
+      applicationQuestionID:
+        type: string
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      id:
+        type: string
+    type: object
+  applicationDTO.AnswerText:
+    properties:
+      answer:
+        type: string
+      applicationQuestionID:
+        type: string
+      courseParticipationID:
+        type: string
+      id:
+        type: string
+    type: object
+  applicationDTO.Application:
+    properties:
+      answersMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.AnswerMultiSelect'
+        type: array
+      answersText:
+        items:
+          $ref: '#/definitions/applicationDTO.AnswerText'
+        type: array
+      status:
+        $ref: '#/definitions/applicationDTO.StatusEnum'
+      student:
+        $ref: '#/definitions/studentDTO.Student'
+    type: object
+  applicationDTO.ApplicationParticipation:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      passStatus:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      score:
+        type: integer
+      student:
+        $ref: '#/definitions/studentDTO.Student'
+    type: object
+  applicationDTO.CreateAnswerMultiSelect:
+    properties:
+      answer:
+        items:
+          type: string
+        type: array
+      applicationQuestionID:
+        type: string
+    type: object
+  applicationDTO.CreateAnswerText:
+    properties:
+      answer:
+        type: string
+      applicationQuestionID:
+        type: string
+    type: object
+  applicationDTO.CreateQuestionMultiSelect:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        description: using pgtype as this allows for optional values
+        type: boolean
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      errorMessage:
+        type: string
+      isRequired:
+        type: boolean
+      maxSelect:
+        type: integer
+      minSelect:
+        type: integer
+      options:
+        items:
+          type: string
+        type: array
+      orderNum:
+        type: integer
+      placeholder:
+        type: string
+      title:
+        type: string
+    type: object
+  applicationDTO.CreateQuestionText:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        description: using pgtype as this allows for optional values
+        type: boolean
+      allowedLength:
+        type: integer
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      errorMessage:
+        type: string
+      isRequired:
+        type: boolean
+      orderNum:
+        type: integer
+      placeholder:
+        type: string
+      title:
+        type: string
+      validationRegex:
+        type: string
+    type: object
+  applicationDTO.Form:
+    properties:
+      questionsMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionMultiSelect'
+        type: array
+      questionsText:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionText'
+        type: array
+    type: object
+  applicationDTO.FormWithDetails:
+    properties:
+      applicationPhase:
+        $ref: '#/definitions/applicationDTO.OpenApplication'
+      questionsMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionMultiSelect'
+        type: array
+      questionsText:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionText'
+        type: array
+    type: object
+  applicationDTO.IndividualScore:
+    properties:
+      courseParticipationID:
+        type: string
+      score:
+        type: number
+    type: object
+  applicationDTO.OpenApplication:
+    properties:
+      applicationDeadline:
+        type: string
+      courseName:
+        type: string
+      courseType:
+        type: string
+      ects:
+        type: integer
+      endDate:
+        type: string
+      externalStudentsAllowed:
+        type: boolean
+      id:
+        type: string
+      startDate:
+        type: string
+      universityLoginAvailable:
+        type: boolean
+    type: object
+  applicationDTO.PostApplication:
+    properties:
+      answersMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.CreateAnswerMultiSelect'
+        type: array
+      answersText:
+        items:
+          $ref: '#/definitions/applicationDTO.CreateAnswerText'
+        type: array
+      student:
+        allOf:
+        - $ref: '#/definitions/studentDTO.CreateStudent'
+        description: should be able to handle either a new student or an existing
+          dependent on ID
+    type: object
+  applicationDTO.PutAssessment:
+    properties:
+      passStatus:
+        $ref: '#/definitions/db.PassStatus'
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      score:
+        type: integer
+    type: object
+  applicationDTO.QuestionMultiSelect:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        description: using pgtype as this allows for optional values
+        type: boolean
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      errorMessage:
+        type: string
+      id:
+        type: string
+      isRequired:
+        type: boolean
+      maxSelect:
+        type: integer
+      minSelect:
+        type: integer
+      options:
+        items:
+          type: string
+        type: array
+      orderNum:
+        type: integer
+      placeholder:
+        type: string
+      title:
+        type: string
+    type: object
+  applicationDTO.QuestionText:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        description: using pgtype as this allows for optional values
+        type: boolean
+      allowedLength:
+        type: integer
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      errorMessage:
+        type: string
+      id:
+        type: string
+      isRequired:
+        type: boolean
+      orderNum:
+        type: integer
+      placeholder:
+        type: string
+      title:
+        type: string
+      validationRegex:
+        type: string
+    type: object
+  applicationDTO.StatusEnum:
+    enum:
+    - not_applied
+    - applied
+    - new_user
+    type: string
+    x-enum-varnames:
+    - StatusNotApplied
+    - StatusApplied
+    - StatusNewUser
+  applicationDTO.UpdateForm:
+    properties:
+      createQuestionsMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.CreateQuestionMultiSelect'
+        type: array
+      createQuestionsText:
+        items:
+          $ref: '#/definitions/applicationDTO.CreateQuestionText'
+        type: array
+      deleteQuestionsMultiSelect:
+        items:
+          type: string
+        type: array
+      deleteQuestionsText:
+        items:
+          type: string
+        type: array
+      updateQuestionsMultiSelect:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionMultiSelect'
+        type: array
+      updateQuestionsText:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionText'
+        type: array
+    type: object
+  courseDTO.Course:
+    properties:
+      courseType:
+        type: string
+      ects:
+        type: integer
+      endDate:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      semesterTag:
+        type: string
+      startDate:
+        type: string
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  courseDTO.CoursePhaseGraph:
+    properties:
+      fromCoursePhaseID:
+        type: string
+      toCoursePhaseID:
+        type: string
+    type: object
+  courseDTO.CourseWithPhases:
+    properties:
+      coursePhases:
+        items:
+          $ref: '#/definitions/coursePhaseDTO.CoursePhaseSequence'
+        type: array
+      courseType:
+        $ref: '#/definitions/db.CourseType'
+      ects:
+        type: integer
+      endDate:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      semesterTag:
+        type: string
+      startDate:
+        type: string
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  courseDTO.CreateCourse:
+    properties:
+      courseType:
+        $ref: '#/definitions/db.CourseType'
+      ects:
+        type: integer
+      endDate:
+        type: string
+      name:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      semesterTag:
+        type: string
+      startDate:
+        type: string
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  courseDTO.MetaDataGraphItem:
+    properties:
+      fromCoursePhaseDtoID:
+        type: string
+      fromCoursePhaseID:
+        type: string
+      toCoursePhaseDtoID:
+        type: string
+      toCoursePhaseID:
+        type: string
+    type: object
+  courseDTO.UpdateCourseData:
+    properties:
+      courseType:
+        type: string
+      ects:
+        type: integer
+      endDate:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      startDate:
+        type: string
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  courseDTO.UpdateCoursePhaseGraph:
+    properties:
+      coursePhaseGraph:
+        items:
+          $ref: '#/definitions/courseDTO.CoursePhaseGraph'
+        type: array
+      initialPhase:
+        type: string
+    type: object
+  courseParticipationDTO.CreateCourseParticipation:
+    properties:
+      courseID:
+        type: string
+      studentID:
+        type: string
+    type: object
+  courseParticipationDTO.GetCourseParticipation:
+    properties:
+      courseID:
+        type: string
+      id:
+        type: string
+      studentID:
+        type: string
+    type: object
+  courseParticipationDTO.GetOwnCourseParticipation:
+    properties:
+      activeCoursePhases:
+        items:
+          type: string
+        type: array
+      courseID:
+        type: string
+      id:
+        type: string
+      isStudentOfCourse:
+        type: boolean
+      studentID:
+        type: string
+    type: object
+  coursePhaseAuthDTO.GetCoursePhaseParticipation:
+    properties:
+      courseParticipationID:
+        type: string
+      isStudentOfCoursePhase:
+        type: boolean
+    type: object
+  coursePhaseAuthDTO.GetCourseRoles:
+    properties:
+      courseEditorRole:
+        type: string
+      courseLecturerRole:
+        type: string
+      customRolePrefix:
+        type: string
+    type: object
+  coursePhaseDTO.CoursePhase:
+    properties:
+      courseID:
+        type: string
+      coursePhaseTypeID:
+        type: string
+      coursePhaseTypeName:
+        type: string
+      id:
+        type: string
+      isInitialPhase:
+        type: boolean
+      name:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseDTO.CoursePhaseSequence:
+    properties:
+      courseID:
+        type: string
+      coursePhaseType:
+        type: string
+      coursePhaseTypeID:
+        type: string
+      id:
+        type: string
+      isInitialPhase:
+        type: boolean
+      name:
+        type: string
+      sequenceOrder:
+        type: integer
+    type: object
+  coursePhaseDTO.CreateCoursePhase:
+    properties:
+      courseID:
+        type: string
+      coursePhaseTypeID:
+        type: string
+      isInitialPhase:
+        type: boolean
+      name:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseDTO.PrevCoursePhaseData:
+    properties:
+      prevData:
+        $ref: '#/definitions/meta.MetaData'
+      resolutions:
+        items:
+          $ref: '#/definitions/resolutionDTO.Resolution'
+        type: array
+    type: object
+  coursePhaseDTO.UpdateCoursePhase:
+    properties:
+      id:
+        type: string
+      name:
+        description: use pgtype to handle null values
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.CoursePhaseParticipationStudent:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      student:
+        $ref: '#/definitions/studentDTO.Student'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions:
+    properties:
+      participations:
+        items:
+          $ref: '#/definitions/coursePhaseParticipationDTO.GetAllCPPsForCoursePhase'
+        type: array
+      resolutions:
+        items:
+          $ref: '#/definitions/resolutionDTO.Resolution'
+        type: array
+    type: object
+  coursePhaseParticipationDTO.CreateCoursePhaseParticipation:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      passStatus:
+        $ref: '#/definitions/db.PassStatus'
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.GetAllCPPsForCoursePhase:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      passStatus:
+        type: string
+      prevData:
+        $ref: '#/definitions/meta.MetaData'
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      student:
+        $ref: '#/definitions/studentDTO.Student'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.GetCoursePhaseParticipation:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        type: string
+      passStatus:
+        type: string
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest:
+    properties:
+      courseParticipationID:
+        type: string
+      coursePhaseID:
+        description: |-
+          for individual updates, the courseParticipation is in the url
+          for batch updates, the ID is in the body
+        type: string
+      passStatus:
+        $ref: '#/definitions/db.PassStatus'
+      restrictedData:
+        $ref: '#/definitions/meta.MetaData'
+      studentReadableData:
+        $ref: '#/definitions/meta.MetaData'
+    type: object
+  coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus:
+    properties:
+      courseParticipationIDs:
+        items:
+          type: string
+        type: array
+      passStatus:
+        $ref: '#/definitions/db.PassStatus'
+    type: object
   coursePhaseTypeDTO.CoursePhaseType:
     properties:
       baseUrl:
@@ -87,6 +727,16 @@ definitions:
       versionNumber:
         type: integer
     type: object
+  db.CourseType:
+    enum:
+    - lecture
+    - seminar
+    - practical course
+    type: string
+    x-enum-varnames:
+    - CourseTypeLecture
+    - CourseTypeSeminar
+    - CourseTypePracticalcourse
   db.Gender:
     enum:
     - male
@@ -181,6 +831,17 @@ definitions:
   meta.MetaData:
     additionalProperties: true
     type: object
+  resolutionDTO.Resolution:
+    properties:
+      baseURL:
+        type: string
+      coursePhaseID:
+        type: string
+      dtoName:
+        type: string
+      endpointPath:
+        type: string
+    type: object
   studentDTO.CreateStudent:
     properties:
       currentSemester:
@@ -251,6 +912,574 @@ info:
   title: PROMPT Core API
   version: "1.0"
 paths:
+  /applications/{coursePhaseID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete applications for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Course Participation UUIDs to delete
+        in: body
+        name: courseParticipationIDs
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete applications
+      tags:
+      - applications
+    post:
+      consumes:
+      - application/json
+      description: Post an application for a student (manual, authenticated)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Application to post
+        in: body
+        name: application
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.PostApplication'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Manually post an application
+      tags:
+      - applications
+  /applications/{coursePhaseID}/{courseParticipationID}:
+    get:
+      description: Get an application by course phase ID and course participation
+        ID
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Course Participation UUID
+        in: path
+        name: courseParticipationID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/applicationDTO.Application'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get application by course phase and participation ID
+      tags:
+      - applications
+  /applications/{coursePhaseID}/{courseParticipationID}/assessment:
+    put:
+      consumes:
+      - application/json
+      description: Update the assessment for an application
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Course Participation UUID
+        in: path
+        name: courseParticipationID
+        required: true
+        type: string
+      - description: Assessment to update
+        in: body
+        name: assessment
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.PutAssessment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update application assessment
+      tags:
+      - applications
+  /applications/{coursePhaseID}/assessment:
+    put:
+      consumes:
+      - application/json
+      description: Batch update the status of multiple applications
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Status update
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/coursePhaseParticipationDTO.UpdateCoursePhaseParticipationStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update applications status
+      tags:
+      - applications
+  /applications/{coursePhaseID}/form:
+    get:
+      description: Get the application form for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/applicationDTO.Form'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get application form
+      tags:
+      - applications
+    put:
+      consumes:
+      - application/json
+      description: Update the application form for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Updated application form
+        in: body
+        name: updatedApplicationForm
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.UpdateForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update application form
+      tags:
+      - applications
+  /applications/{coursePhaseID}/participations:
+    get:
+      description: Get all participations for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/applicationDTO.ApplicationParticipation'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all application participations
+      tags:
+      - applications
+  /applications/{coursePhaseID}/score:
+    get:
+      description: Get additional scores for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/applicationDTO.AdditionalScore'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get additional scores
+      tags:
+      - applications
+    post:
+      consumes:
+      - application/json
+      description: Upload an additional score for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Additional score to upload
+        in: body
+        name: additionalScore
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.AdditionalScoreUpload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Upload additional score
+      tags:
+      - applications
+  /apply:
+    get:
+      description: Get all open application phases
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/applicationDTO.OpenApplication'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all open applications
+      tags:
+      - applications
+  /apply/{coursePhaseID}:
+    get:
+      description: Get the application form and course details for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/applicationDTO.FormWithDetails'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get application form with course details
+      tags:
+      - applications
+    post:
+      consumes:
+      - application/json
+      description: Post an application for a student (external, unauthenticated)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Application to post
+        in: body
+        name: application
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.PostApplication'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Post an application (external)
+      tags:
+      - applications
+  /apply/authenticated/{coursePhaseID}:
+    get:
+      description: Get the application form for an authenticated user
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/applicationDTO.Application'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get authenticated application form
+      tags:
+      - applications
+    post:
+      consumes:
+      - application/json
+      description: Post an application for a student (authenticated)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Application to post
+        in: body
+        name: application
+        required: true
+        schema:
+          $ref: '#/definitions/applicationDTO.PostApplication'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Post an application (authenticated)
+      tags:
+      - applications
+  /auth/course_phase/{coursePhaseID}/is_student:
+    get:
+      description: Check if the user is a student of the course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseAuthDTO.GetCoursePhaseParticipation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course phase participation
+      tags:
+      - course_phase_auth
+  /auth/course_phase/{coursePhaseID}/roles:
+    get:
+      description: Get the role mapping for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseAuthDTO.GetCourseRoles'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course phase roles
+      tags:
+      - course_phase_auth
   /course_phase_types:
     get:
       description: Get a list of all available course phase types
@@ -270,6 +1499,789 @@ paths:
       summary: Get all course phase types
       tags:
       - course_phase_types
+  /course_phases/{uuid}:
+    delete:
+      description: Delete a course phase by UUID
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a course phase
+      tags:
+      - course_phases
+    get:
+      description: Get a course phase by UUID
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseDTO.CoursePhase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course phase by ID
+      tags:
+      - course_phases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing course phase
+      parameters:
+      - description: Course phase to update
+        in: body
+        name: updatedCoursePhase
+        required: true
+        schema:
+          $ref: '#/definitions/coursePhaseDTO.UpdateCoursePhase'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a course phase
+      tags:
+      - course_phases
+  /course_phases/{uuid}/course_phase_data:
+    get:
+      description: Get data from previous phases for a given course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseDTO.PrevCoursePhaseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get previous phase data by course phase ID
+      tags:
+      - course_phases
+  /course_phases/{uuid}/participations:
+    get:
+      description: Get all participations for a given course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all participations for a course phase
+      tags:
+      - course_phase_participation
+    put:
+      consumes:
+      - application/json
+      description: Update multiple course phase participations at once
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Participations to update
+        in: body
+        name: updatedCourseParticipationRequest
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Batch update course phase participations
+      tags:
+      - course_phase_participation
+  /course_phases/{uuid}/participations/{course_participation_id}:
+    get:
+      description: Get a specific participation by course phase and participation
+        ID
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Course Participation UUID
+        in: path
+        name: course_participation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseParticipationDTO.GetCoursePhaseParticipation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get a specific participation
+      tags:
+      - course_phase_participation
+    put:
+      consumes:
+      - application/json
+      description: Update a specific course phase participation
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Course Participation UUID
+        in: path
+        name: course_participation_id
+        required: true
+        type: string
+      - description: Participation to update
+        in: body
+        name: newCourseParticipation
+        required: true
+        schema:
+          $ref: '#/definitions/coursePhaseParticipationDTO.CreateCoursePhaseParticipation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/coursePhaseParticipationDTO.GetCoursePhaseParticipation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a course phase participation
+      tags:
+      - course_phase_participation
+  /course_phases/{uuid}/participations/self:
+    get:
+      description: Get the participation of the current user in a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseParticipationDTO.CoursePhaseParticipationStudent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get own course phase participation
+      tags:
+      - course_phase_participation
+  /course_phases/{uuid}/participations/students:
+    get:
+      description: Get all students of a given course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studentDTO.Student'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get students of a course phase
+      tags:
+      - course_phase_participation
+  /course_phases/course/{courseID}:
+    post:
+      consumes:
+      - application/json
+      description: Create a new course phase for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: courseID
+        required: true
+        type: string
+      - description: Course phase to create
+        in: body
+        name: newCoursePhase
+        required: true
+        schema:
+          $ref: '#/definitions/coursePhaseDTO.CreateCoursePhase'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/coursePhaseDTO.CoursePhase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a course phase
+      tags:
+      - course_phases
+  /courses/:
+    get:
+      description: Get all courses accessible to the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseDTO.CourseWithPhases'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Create a new course
+      parameters:
+      - description: Course to create
+        in: body
+        name: newCourse
+        required: true
+        schema:
+          $ref: '#/definitions/courseDTO.CreateCourse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/courseDTO.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a course
+      tags:
+      - courses
+  /courses/{uuid}:
+    delete:
+      description: Delete a course by UUID
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a course
+      tags:
+      - courses
+    get:
+      description: Get a course by UUID
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/courseDTO.CourseWithPhases'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course by ID
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update the data for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Course data update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/courseDTO.UpdateCourseData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update course data
+      tags:
+      - courses
+  /courses/{uuid}/participation_data_graph:
+    get:
+      description: Get the participation data graph for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseDTO.MetaDataGraphItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get participation data graph
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update the participation data graph for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Participation data graph update
+        in: body
+        name: newGraph
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/courseDTO.MetaDataGraphItem'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update participation data graph
+      tags:
+      - courses
+  /courses/{uuid}/participations:
+    get:
+      description: Get all participations for a given course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseParticipationDTO.GetCourseParticipation'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all participations for a course
+      tags:
+      - course_participation
+  /courses/{uuid}/participations/enroll:
+    post:
+      consumes:
+      - application/json
+      description: Enroll a user in a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Participation to create
+        in: body
+        name: newCourseParticipation
+        required: true
+        schema:
+          $ref: '#/definitions/courseParticipationDTO.CreateCourseParticipation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/courseParticipationDTO.GetCourseParticipation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Enroll in a course
+      tags:
+      - course_participation
+  /courses/{uuid}/participations/self:
+    get:
+      description: Get the participation of the current user in a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/courseParticipationDTO.GetOwnCourseParticipation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get own course participation
+      tags:
+      - course_participation
+  /courses/{uuid}/phase_data_graph:
+    get:
+      description: Get the phase data graph for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseDTO.MetaDataGraphItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get phase data graph
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update the phase data graph for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Phase data graph update
+        in: body
+        name: newGraph
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/courseDTO.MetaDataGraphItem'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update phase data graph
+      tags:
+      - courses
+  /courses/{uuid}/phase_graph:
+    get:
+      description: Get the phase graph for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseDTO.CoursePhaseGraph'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course phase graph
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update the phase order for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Phase graph update
+        in: body
+        name: graphUpdate
+        required: true
+        schema:
+          $ref: '#/definitions/courseDTO.UpdateCoursePhaseGraph'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update course phase order
+      tags:
+      - courses
+  /courses/self:
+    get:
+      description: Get the course IDs for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get own courses
+      tags:
+      - courses
   /keycloak/{courseID}/group:
     put:
       consumes:
@@ -299,11 +2311,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Create a custom group
       tags:
       - keycloak
@@ -333,11 +2345,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Get students in a group
       tags:
       - keycloak
@@ -372,11 +2384,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Add students to a custom group
       tags:
       - keycloak
@@ -407,11 +2419,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Add students to the editor group
       tags:
       - keycloak

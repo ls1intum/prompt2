@@ -28,7 +28,7 @@ func setupCoursePhaseAuthRouter(router *gin.RouterGroup, authMiddleware func() g
 // @Tags course_phase_auth
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} coursePhaseAuthDTO.GetCourseRoles
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /auth/course_phase/{coursePhaseID}/roles [get]
@@ -55,7 +55,7 @@ func getCoursePhaseAuthRoles(c *gin.Context) {
 // @Tags course_phase_auth
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} coursePhaseAuthDTO.GetCoursePhaseParticipation
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /auth/course_phase/{coursePhaseID}/is_student [get]

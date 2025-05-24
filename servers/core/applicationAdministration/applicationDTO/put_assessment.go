@@ -7,7 +7,7 @@ import (
 )
 
 type PutAssessment struct {
-	Score          pgtype.Int4    `json:"score"`
+	Score          pgtype.Int4    `json:"score" swaggertype:"integer"`
 	RestrictedData meta.MetaData  `json:"restrictedData"`
 	PassStatus     *db.PassStatus `json:"passStatus"`
 }
