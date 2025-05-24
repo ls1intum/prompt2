@@ -124,10 +124,10 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 	result, err := GetCoursePhaseParticipation(suite.ctx, coursePhaseID, courseParticipationID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.CourseParticipationID, "Participation ID should match")
-	assert.Equal(suite.T(), "passed", result.PassStatus, "PassStatus should match")
-	assert.Equal(suite.T(), updatedParticipation.RestrictedData["other-value"], result.RestrictedData["other-value"], "New Meta data should match")
-	assert.Equal(suite.T(), updatedParticipation.StudentReadableData["other-value"], result.StudentReadableData["other-value"], "New Meta data should match")
+	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.Participation.CourseParticipationID, "Participation ID should match")
+	assert.Equal(suite.T(), "passed", result.Participation.PassStatus, "PassStatus should match")
+	assert.Equal(suite.T(), updatedParticipation.RestrictedData["other-value"], result.Participation.RestrictedData["other-value"], "New Meta data should match")
+	assert.Equal(suite.T(), updatedParticipation.StudentReadableData["other-value"], result.Participation.StudentReadableData["other-value"], "New Meta data should match")
 
 }
 
@@ -159,13 +159,13 @@ func (suite *CoursePhaseParticipationTestSuite) TestUpdateCoursePhaseParticipati
 	assert.NoError(suite.T(), err)
 	result, err := GetCoursePhaseParticipation(suite.ctx, coursePhaseID, courseParticipationID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.CourseParticipationID, "Participation ID should match")
-	assert.Equal(suite.T(), BeforeResult.PassStatus, result.PassStatus, "PassStatus should match")
+	assert.Equal(suite.T(), updatedParticipation.CourseParticipationID, result.Participation.CourseParticipationID, "Participation ID should match")
+	assert.Equal(suite.T(), BeforeResult.Participation.PassStatus, result.Participation.PassStatus, "PassStatus should match")
 	for key, value := range updatedParticipation.RestrictedData {
-		assert.Equal(suite.T(), result.RestrictedData[key], value, "Updated Meta data should be stored")
+		assert.Equal(suite.T(), result.Participation.RestrictedData[key], value, "Updated Meta data should be stored")
 	}
 	for key, value := range updatedParticipation.StudentReadableData {
-		assert.Equal(suite.T(), result.StudentReadableData[key], value, "Updated Meta data should be stored")
+		assert.Equal(suite.T(), result.Participation.StudentReadableData[key], value, "Updated Meta data should be stored")
 	}
 }
 
