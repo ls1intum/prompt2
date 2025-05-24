@@ -298,3 +298,11 @@ WHERE course_phase_id = $1
     FROM course_phase
     WHERE id = $1
   ) = true;
+
+-- name: GetApplicationPhaseIDForCourse :one
+SELECT cp.id
+FROM course_phase cp
+JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.course_id = $1
+  AND cpt.name = 'Application'
+LIMIT 1;
