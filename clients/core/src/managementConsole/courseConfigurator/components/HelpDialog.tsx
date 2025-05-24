@@ -53,7 +53,7 @@ export const HelpDialog = (): JSX.Element => {
             <p className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed'>
               The configurator lets you build and customize your course using drag-and-drop. A
               course consists of multiple phases that you can arrange and connect to control both
-              participation and data flow.
+              student and data flow.
             </p>
           </div>
 
