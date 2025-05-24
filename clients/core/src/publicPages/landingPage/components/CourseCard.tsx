@@ -7,7 +7,7 @@ import {
   CardContent,
 } from '@tumaet/prompt-ui-components'
 import { DeadlineInfo } from './DeadlineInfo'
-import { BookOpen, ArrowRight, PlayCircle, StopCircle, Calendar } from 'lucide-react'
+import { BookOpen, ArrowRight, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import type { OpenApplicationDetails } from '@core/interfaces/application/openApplicationDetails'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
@@ -66,7 +66,8 @@ export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
 
         {/* Apply Button */}
         <Button
-          className='w-full bg-blue-800 hover:bg-blue-800 text-white font-semibold py-3 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] group/button mt-2'
+          className={`w-full bg-blue-800 hover:bg-blue-800 text-white font-semibold py-3 transition-all 
+            duration-200 transform hover:scale-[1.02] active:scale-[0.98] group/button mt-2`}
           onClick={() => navigate(`/apply/${courseDetails.id}`)}
         >
           <span className='flex items-center justify-center gap-2'>
