@@ -4,11 +4,9 @@ import { Sidebar } from '@tumaet/prompt-ui-components'
 import { InsideSidebar } from './InsideSidebar/InsideSidebar'
 import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  onLogout: () => void
-}
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
-export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element {
+export function AppSidebar({ ...props }: AppSidebarProps): JSX.Element {
   return (
     <Sidebar
       collapsible='icon'
@@ -16,7 +14,7 @@ export function AppSidebar({ onLogout, ...props }: AppSidebarProps): JSX.Element
       {...props}
     >
       {/* This is the first sidebar */}
-      <CourseSwitchSidebar onLogout={onLogout} />
+      <CourseSwitchSidebar />
       <InsideSidebar />
     </Sidebar>
   )
