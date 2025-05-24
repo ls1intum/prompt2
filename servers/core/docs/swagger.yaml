@@ -1,0 +1,227 @@
+basePath: /api/
+definitions:
+  db.Gender:
+    enum:
+    - male
+    - female
+    - diverse
+    - prefer_not_to_say
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
+    - GenderDiverse
+    - GenderPreferNotToSay
+  db.StudyDegree:
+    enum:
+    - bachelor
+    - master
+    type: string
+    x-enum-varnames:
+    - StudyDegreeBachelor
+    - StudyDegreeMaster
+  studentDTO.CreateStudent:
+    properties:
+      currentSemester:
+        type: integer
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/db.Gender'
+      hasUniversityAccount:
+        type: boolean
+      id:
+        type: string
+      lastName:
+        type: string
+      matriculationNumber:
+        type: string
+      nationality:
+        type: string
+      studyDegree:
+        $ref: '#/definitions/db.StudyDegree'
+      studyProgram:
+        type: string
+      universityLogin:
+        type: string
+    type: object
+  studentDTO.Student:
+    properties:
+      currentSemester:
+        type: integer
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/db.Gender'
+      hasUniversityAccount:
+        type: boolean
+      id:
+        type: string
+      lastName:
+        type: string
+      matriculationNumber:
+        type: string
+      nationality:
+        type: string
+      studyDegree:
+        $ref: '#/definitions/db.StudyDegree'
+      studyProgram:
+        type: string
+      universityLogin:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      error:
+        example: Something went wrong
+        type: string
+    type: object
+externalDocs:
+  description: PROMPT Documentation
+  url: https://ls1intum.github.io/prompt2/
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a core sever of PROMPT.
+  title: PROMPT Core API
+  version: "1.0"
+paths:
+  /students/:
+    get:
+      description: Get a list of all students
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studentDTO.Student'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all students
+      tags:
+      - students
+    post:
+      consumes:
+      - application/json
+      description: Create a new student
+      parameters:
+      - description: Student to create
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/studentDTO.CreateStudent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/studentDTO.Student'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a student
+      tags:
+      - students
+  /students/{uuid}:
+    get:
+      description: Get a student by UUID
+      parameters:
+      - description: Student UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studentDTO.Student'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get student by ID
+      tags:
+      - students
+    put:
+      consumes:
+      - application/json
+      description: Update an existing student by UUID
+      parameters:
+      - description: Student UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Student to update
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/studentDTO.CreateStudent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studentDTO.Student'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a student
+      tags:
+      - students
+  /students/search/{searchString}:
+    get:
+      description: Search students by a search string
+      parameters:
+      - description: Search string
+        in: path
+        name: searchString
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studentDTO.Student'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Search students
+      tags:
+      - students
+swagger: "2.0"

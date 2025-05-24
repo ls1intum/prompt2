@@ -25,6 +25,8 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/student"
 	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/swaggo/gin-swagger"
 )
 
 func getDatabaseURL() string {
@@ -81,6 +83,15 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, senderName, senderEmail, clientURL)
 }
 
+// @title           PROMPT Core API
+// @version         1.0
+// @description     This is a core sever of PROMPT.
+
+// @host      localhost:8080
+// @BasePath  /api/
+
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()

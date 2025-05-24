@@ -1,0 +1,339 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a core sever of PROMPT.",
+        "title": "PROMPT Core API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/",
+    "paths": {
+        "/students/": {
+            "get": {
+                "description": "Get a list of all students",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all students",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.Student"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Create a student",
+                "parameters": [
+                    {
+                        "description": "Student to create",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.CreateStudent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/search/{searchString}": {
+            "get": {
+                "description": "Search students by a search string",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Search students",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search string",
+                        "name": "searchString",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.Student"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{uuid}": {
+            "get": {
+                "description": "Get a student by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get student by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing student by UUID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Update a student",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Student to update",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.CreateStudent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "db.Gender": {
+            "type": "string",
+            "enum": [
+                "male",
+                "female",
+                "diverse",
+                "prefer_not_to_say"
+            ],
+            "x-enum-varnames": [
+                "GenderMale",
+                "GenderFemale",
+                "GenderDiverse",
+                "GenderPreferNotToSay"
+            ]
+        },
+        "db.StudyDegree": {
+            "type": "string",
+            "enum": [
+                "bachelor",
+                "master"
+            ],
+            "x-enum-varnames": [
+                "StudyDegreeBachelor",
+                "StudyDegreeMaster"
+            ]
+        },
+        "studentDTO.CreateStudent": {
+            "type": "object",
+            "properties": {
+                "currentSemester": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/db.Gender"
+                },
+                "hasUniversityAccount": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "matriculationNumber": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "studyDegree": {
+                    "$ref": "#/definitions/db.StudyDegree"
+                },
+                "studyProgram": {
+                    "type": "string"
+                },
+                "universityLogin": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.Student": {
+            "type": "object",
+            "properties": {
+                "currentSemester": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/db.Gender"
+                },
+                "hasUniversityAccount": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "matriculationNumber": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "studyDegree": {
+                    "$ref": "#/definitions/db.StudyDegree"
+                },
+                "studyProgram": {
+                    "type": "string"
+                },
+                "universityLogin": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Something went wrong"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "PROMPT Documentation",
+        "url": "https://ls1intum.github.io/prompt2/"
+    }
+}
