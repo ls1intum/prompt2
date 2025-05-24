@@ -1012,6 +1012,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/coursePhaseDTO.UpdateCoursePhase"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2338,13 +2345,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }
@@ -3946,6 +3953,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is a core sever of PROMPT.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

@@ -1563,6 +1563,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/coursePhaseDTO.UpdateCoursePhase'
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2454,11 +2459,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/utils.ErrorResponse'
       summary: Manually trigger status mail for a course phase
       tags:
       - mailing

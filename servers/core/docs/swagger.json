@@ -1006,6 +1006,13 @@
                         "schema": {
                             "$ref": "#/definitions/coursePhaseDTO.UpdateCoursePhase"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2332,13 +2339,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     }
                 }

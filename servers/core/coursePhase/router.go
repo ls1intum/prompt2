@@ -129,6 +129,7 @@ func getCoursePhaseByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param updatedCoursePhase body coursePhaseDTO.UpdateCoursePhase true "Course phase to update"
+// @Param uuid path string true "Course Phase UUID"
 // @Success 200 {string} string "OK"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
