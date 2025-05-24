@@ -1,5 +1,92 @@
 basePath: /api/
 definitions:
+  coursePhaseTypeDTO.CoursePhaseType:
+    properties:
+      baseUrl:
+        type: string
+      id:
+        type: string
+      initialPhase:
+        type: boolean
+      name:
+        type: string
+      providedParticipationOutputDTOs:
+        items:
+          $ref: '#/definitions/coursePhaseTypeDTO.ParticipationOutputDTO'
+        type: array
+      providedPhaseOutputDTOs:
+        items:
+          $ref: '#/definitions/coursePhaseTypeDTO.PhaseOutputDTO'
+        type: array
+      requiredParticipationInputDTOs:
+        items:
+          $ref: '#/definitions/coursePhaseTypeDTO.ParticipationInputDTO'
+        type: array
+      requiredPhaseInputDTOs:
+        items:
+          $ref: '#/definitions/coursePhaseTypeDTO.PhaseInputDTO'
+        type: array
+    type: object
+  coursePhaseTypeDTO.ParticipationInputDTO:
+    properties:
+      coursePhaseTypeID:
+        type: string
+      dtoName:
+        type: string
+      id:
+        type: string
+      specification:
+        allOf:
+        - $ref: '#/definitions/meta.MetaData'
+        description: the specification follows the same structure as the meta.MetaData
+    type: object
+  coursePhaseTypeDTO.ParticipationOutputDTO:
+    properties:
+      coursePhaseTypeID:
+        type: string
+      dtoName:
+        type: string
+      endpointPath:
+        type: string
+      id:
+        type: string
+      specification:
+        allOf:
+        - $ref: '#/definitions/meta.MetaData'
+        description: the specification follows the same structure as the meta.MetaData
+      versionNumber:
+        type: integer
+    type: object
+  coursePhaseTypeDTO.PhaseInputDTO:
+    properties:
+      coursePhaseTypeID:
+        type: string
+      dtoName:
+        type: string
+      id:
+        type: string
+      specification:
+        allOf:
+        - $ref: '#/definitions/meta.MetaData'
+        description: the specification follows the same structure as the meta.MetaData
+    type: object
+  coursePhaseTypeDTO.PhaseOutputDTO:
+    properties:
+      coursePhaseTypeID:
+        type: string
+      dtoName:
+        type: string
+      endpointPath:
+        type: string
+      id:
+        type: string
+      specification:
+        allOf:
+        - $ref: '#/definitions/meta.MetaData'
+        description: the specification follows the same structure as the meta.MetaData
+      versionNumber:
+        type: integer
+    type: object
   db.Gender:
     enum:
     - male
@@ -12,6 +99,16 @@ definitions:
     - GenderFemale
     - GenderDiverse
     - GenderPreferNotToSay
+  db.PassStatus:
+    enum:
+    - passed
+    - failed
+    - not_assessed
+    type: string
+    x-enum-varnames:
+    - PassStatusPassed
+    - PassStatusFailed
+    - PassStatusNotAssessed
   db.StudyDegree:
     enum:
     - bachelor
@@ -20,6 +117,70 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
+  keycloakRealmDTO.AddStudentsToGroup:
+    properties:
+      studentsToAdd:
+        items:
+          type: string
+        type: array
+    type: object
+  keycloakRealmDTO.AddStudentsToGroupResponse:
+    properties:
+      failedToAddStudentIDs:
+        items:
+          type: string
+        type: array
+      succeededToAddStudentIDs:
+        items:
+          type: string
+        type: array
+    type: object
+  keycloakRealmDTO.CreateGroup:
+    properties:
+      groupName:
+        type: string
+    type: object
+  keycloakRealmDTO.GroupMembers:
+    properties:
+      nonStudents:
+        items:
+          $ref: '#/definitions/keycloakRealmDTO.KeycloakUser'
+        type: array
+      students:
+        items:
+          $ref: '#/definitions/studentDTO.Student'
+        type: array
+    type: object
+  keycloakRealmDTO.KeycloakUser:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      username:
+        type: string
+    type: object
+  mailingDTO.MailingReport:
+    properties:
+      failedEmails:
+        items:
+          type: string
+        type: array
+      successfulEmails:
+        items:
+          type: string
+        type: array
+    type: object
+  mailingDTO.SendStatusMail:
+    properties:
+      statusMailToBeSend:
+        $ref: '#/definitions/db.PassStatus'
+    type: object
+  meta.MetaData:
+    additionalProperties: true
+    type: object
   studentDTO.CreateStudent:
     properties:
       currentSemester:
@@ -90,6 +251,205 @@ info:
   title: PROMPT Core API
   version: "1.0"
 paths:
+  /course_phase_types:
+    get:
+      description: Get a list of all available course phase types
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/coursePhaseTypeDTO.CoursePhaseType'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all course phase types
+      tags:
+      - course_phase_types
+  /keycloak/{courseID}/group:
+    put:
+      consumes:
+      - application/json
+      description: Create a new custom group for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: courseID
+        required: true
+        type: string
+      - description: Group name to create
+        in: body
+        name: newGroupName
+        required: true
+        schema:
+          $ref: '#/definitions/keycloakRealmDTO.CreateGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a custom group
+      tags:
+      - keycloak
+  /keycloak/{courseID}/group/{groupName}/students:
+    get:
+      description: Get all students in a specific group for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: courseID
+        required: true
+        type: string
+      - description: Group name
+        in: path
+        name: groupName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/keycloakRealmDTO.GroupMembers'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get students in a group
+      tags:
+      - keycloak
+    put:
+      consumes:
+      - application/json
+      description: Add students to a custom group for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: courseID
+        required: true
+        type: string
+      - description: Group name
+        in: path
+        name: groupName
+        required: true
+        type: string
+      - description: Students to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/keycloakRealmDTO.AddStudentsToGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/keycloakRealmDTO.AddStudentsToGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add students to a custom group
+      tags:
+      - keycloak
+  /keycloak/{courseID}/group/editor/students:
+    put:
+      consumes:
+      - application/json
+      description: Add students to the editor group for a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: courseID
+        required: true
+        type: string
+      - description: Students to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/keycloakRealmDTO.AddStudentsToGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/keycloakRealmDTO.AddStudentsToGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add students to the editor group
+      tags:
+      - keycloak
+  /mailing/{coursePhaseID}:
+    put:
+      consumes:
+      - application/json
+      description: Sends a status mail for a given course phase ID
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Mailing info
+        in: body
+        name: mailingInfo
+        required: true
+        schema:
+          $ref: '#/definitions/mailingDTO.SendStatusMail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/mailingDTO.MailingReport'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Manually trigger status mail for a course phase
+      tags:
+      - mailing
   /students/:
     get:
       description: Get a list of all students

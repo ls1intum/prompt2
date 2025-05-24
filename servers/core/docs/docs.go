@@ -15,6 +15,306 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/course_phase_types": {
+            "get": {
+                "description": "Get a list of all available course phase types",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_types"
+                ],
+                "summary": "Get all course phase types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/coursePhaseTypeDTO.CoursePhaseType"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/keycloak/{courseID}/group": {
+            "put": {
+                "description": "Create a new custom group for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "keycloak"
+                ],
+                "summary": "Create a custom group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "courseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Group name to create",
+                        "name": "newGroupName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keycloakRealmDTO.CreateGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/keycloak/{courseID}/group/editor/students": {
+            "put": {
+                "description": "Add students to the editor group for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "keycloak"
+                ],
+                "summary": "Add students to the editor group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "courseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Students to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keycloakRealmDTO.AddStudentsToGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/keycloakRealmDTO.AddStudentsToGroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/keycloak/{courseID}/group/{groupName}/students": {
+            "get": {
+                "description": "Get all students in a specific group for a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "keycloak"
+                ],
+                "summary": "Get students in a group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "courseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Group name",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/keycloakRealmDTO.GroupMembers"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Add students to a custom group for a course",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "keycloak"
+                ],
+                "summary": "Add students to a custom group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "courseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Group name",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Students to add",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keycloakRealmDTO.AddStudentsToGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/keycloakRealmDTO.AddStudentsToGroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mailing/{coursePhaseID}": {
+            "put": {
+                "description": "Sends a status mail for a given course phase ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mailing"
+                ],
+                "summary": "Manually trigger status mail for a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Mailing info",
+                        "name": "mailingInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mailingDTO.SendStatusMail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/mailingDTO.MailingReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/students/": {
             "get": {
                 "description": "Get a list of all students",
@@ -220,6 +520,147 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "coursePhaseTypeDTO.CoursePhaseType": {
+            "type": "object",
+            "properties": {
+                "baseUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "initialPhase": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providedParticipationOutputDTOs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseTypeDTO.ParticipationOutputDTO"
+                    }
+                },
+                "providedPhaseOutputDTOs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseTypeDTO.PhaseOutputDTO"
+                    }
+                },
+                "requiredParticipationInputDTOs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseTypeDTO.ParticipationInputDTO"
+                    }
+                },
+                "requiredPhaseInputDTOs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/coursePhaseTypeDTO.PhaseInputDTO"
+                    }
+                }
+            }
+        },
+        "coursePhaseTypeDTO.ParticipationInputDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "dtoName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "specification": {
+                    "description": "the specification follows the same structure as the meta.MetaData",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/meta.MetaData"
+                        }
+                    ]
+                }
+            }
+        },
+        "coursePhaseTypeDTO.ParticipationOutputDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "dtoName": {
+                    "type": "string"
+                },
+                "endpointPath": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "specification": {
+                    "description": "the specification follows the same structure as the meta.MetaData",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/meta.MetaData"
+                        }
+                    ]
+                },
+                "versionNumber": {
+                    "type": "integer"
+                }
+            }
+        },
+        "coursePhaseTypeDTO.PhaseInputDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "dtoName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "specification": {
+                    "description": "the specification follows the same structure as the meta.MetaData",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/meta.MetaData"
+                        }
+                    ]
+                }
+            }
+        },
+        "coursePhaseTypeDTO.PhaseOutputDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseTypeID": {
+                    "type": "string"
+                },
+                "dtoName": {
+                    "type": "string"
+                },
+                "endpointPath": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "specification": {
+                    "description": "the specification follows the same structure as the meta.MetaData",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/meta.MetaData"
+                        }
+                    ]
+                },
+                "versionNumber": {
+                    "type": "integer"
+                }
+            }
+        },
         "db.Gender": {
             "type": "string",
             "enum": [
@@ -235,6 +676,19 @@ const docTemplate = `{
                 "GenderPreferNotToSay"
             ]
         },
+        "db.PassStatus": {
+            "type": "string",
+            "enum": [
+                "passed",
+                "failed",
+                "not_assessed"
+            ],
+            "x-enum-varnames": [
+                "PassStatusPassed",
+                "PassStatusFailed",
+                "PassStatusNotAssessed"
+            ]
+        },
         "db.StudyDegree": {
             "type": "string",
             "enum": [
@@ -245,6 +699,105 @@ const docTemplate = `{
                 "StudyDegreeBachelor",
                 "StudyDegreeMaster"
             ]
+        },
+        "keycloakRealmDTO.AddStudentsToGroup": {
+            "type": "object",
+            "properties": {
+                "studentsToAdd": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "keycloakRealmDTO.AddStudentsToGroupResponse": {
+            "type": "object",
+            "properties": {
+                "failedToAddStudentIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "succeededToAddStudentIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "keycloakRealmDTO.CreateGroup": {
+            "type": "object",
+            "properties": {
+                "groupName": {
+                    "type": "string"
+                }
+            }
+        },
+        "keycloakRealmDTO.GroupMembers": {
+            "type": "object",
+            "properties": {
+                "nonStudents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/keycloakRealmDTO.KeycloakUser"
+                    }
+                },
+                "students": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.Student"
+                    }
+                }
+            }
+        },
+        "keycloakRealmDTO.KeycloakUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "mailingDTO.MailingReport": {
+            "type": "object",
+            "properties": {
+                "failedEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "successfulEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "mailingDTO.SendStatusMail": {
+            "type": "object",
+            "properties": {
+                "statusMailToBeSend": {
+                    "$ref": "#/definitions/db.PassStatus"
+                }
+            }
+        },
+        "meta.MetaData": {
+            "type": "object",
+            "additionalProperties": true
         },
         "studentDTO.CreateStudent": {
             "type": "object",
