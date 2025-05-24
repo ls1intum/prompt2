@@ -8,14 +8,14 @@ import (
 type AdditionalScoreUpload struct {
 	Name            string            `json:"name"`
 	Key             string            `json:"key"`
-	Threshold       pgtype.Numeric    `json:"threshold"`
+	Threshold       pgtype.Numeric    `json:"threshold" swaggertype:"number,format=double"`
 	ThresholdActive bool              `json:"thresholdActive"`
 	Scores          []IndividualScore `json:"scores"`
 }
 
 type IndividualScore struct {
 	CourseParticipationID uuid.UUID      `json:"courseParticipationID"`
-	Score                 pgtype.Numeric `json:"score"`
+	Score                 pgtype.Numeric `json:"score" swaggertype:"number,format=double"`
 }
 
 // used to store the additional score objects in the meta data

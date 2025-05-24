@@ -1,0 +1,33 @@
+name: Generate and Release API Spec
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  generate-api-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install swag
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate API spec
+        run: |
+          cd servers/core
+          $(go env GOPATH)/bin/swag init --output docs/api --parseDependency --parseInternal
+
+      - name: Upload API spec artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-spec
+          path: servers/core/docs/api/

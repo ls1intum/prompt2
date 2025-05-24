@@ -9,13 +9,13 @@ import (
 
 type CreateCourse struct {
 	Name                string        `json:"name"`
-	StartDate           pgtype.Date   `json:"startDate"`
-	EndDate             pgtype.Date   `json:"endDate"`
-	SemesterTag         pgtype.Text   `json:"semesterTag"`
+	StartDate           pgtype.Date   `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date   `json:"endDate" swaggertype:"string"`
+	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 	CourseType          db.CourseType `json:"courseType"`
-	Ects                pgtype.Int4   `json:"ects"`
+	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 }
 
 func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {

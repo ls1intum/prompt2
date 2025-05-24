@@ -16,7 +16,7 @@ type ApplicationParticipation struct {
 	PassStatus            string             `json:"passStatus"`
 	RestrictedData        meta.MetaData      `json:"restrictedData"`
 	Student               studentDTO.Student `json:"student"`
-	Score                 pgtype.Int4        `json:"score"`
+	Score                 pgtype.Int4        `json:"score" swaggertype:"integer"`
 }
 
 func GetAllCPPsForCoursePhaseDTOFromDBModel(model db.GetAllApplicationParticipationsRow) (ApplicationParticipation, error) {

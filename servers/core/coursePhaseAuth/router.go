@@ -8,6 +8,11 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
+// setupCoursePhaseAuthRouter sets up the course phase auth endpoints
+// @Summary Course Phase Auth Endpoints
+// @Description Endpoints for course phase authentication and participation
+// @Tags course_phase_auth
+// @Security BearerAuth
 func setupCoursePhaseAuthRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhaseAuth := router.Group("/auth/course_phase/:coursePhaseID", authMiddleware())
 
@@ -17,6 +22,16 @@ func setupCoursePhaseAuthRouter(router *gin.RouterGroup, authMiddleware func() g
 	coursePhaseAuth.GET("is_student", permissionIDMiddleware(permissionValidation.CourseStudent), getCoursePhaseParticipation)
 }
 
+// getCoursePhaseAuthRoles godoc
+// @Summary Get course phase roles
+// @Description Get the role mapping for a course phase
+// @Tags course_phase_auth
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseAuthDTO.GetCourseRoles
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /auth/course_phase/{coursePhaseID}/roles [get]
 func getCoursePhaseAuthRoles(c *gin.Context) {
 	// Get the course phase ID from the URL
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -34,6 +49,16 @@ func getCoursePhaseAuthRoles(c *gin.Context) {
 	c.JSON(http.StatusOK, roleMapping)
 }
 
+// getCoursePhaseParticipation godoc
+// @Summary Get course phase participation
+// @Description Check if the user is a student of the course phase
+// @Tags course_phase_auth
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseAuthDTO.GetCoursePhaseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /auth/course_phase/{coursePhaseID}/is_student [get]
 func getCoursePhaseParticipation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

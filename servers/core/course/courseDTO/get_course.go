@@ -11,10 +11,10 @@ import (
 type Course struct {
 	ID                  uuid.UUID     `json:"id"`
 	Name                string        `json:"name"`
-	StartDate           pgtype.Date   `json:"startDate"`
-	EndDate             pgtype.Date   `json:"endDate"`
-	SemesterTag         pgtype.Text   `json:"semesterTag"`
-	Ects                pgtype.Int4   `json:"ects"`
+	StartDate           pgtype.Date   `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date   `json:"endDate" swaggertype:"string"`
+	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
+	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 	CourseType          string        `json:"courseType"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`

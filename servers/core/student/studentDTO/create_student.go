@@ -18,7 +18,7 @@ type CreateStudent struct {
 	Nationality          string         `json:"nationality"`
 	StudyDegree          db.StudyDegree `json:"studyDegree"`
 	StudyProgram         string         `json:"studyProgram"`
-	CurrentSemester      pgtype.Int4    `json:"currentSemester"`
+	CurrentSemester      pgtype.Int4    `json:"currentSemester" swaggertype:"integer"`
 }
 
 func (c CreateStudent) GetDBModel() db.CreateStudentParams {
