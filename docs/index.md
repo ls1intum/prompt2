@@ -9,9 +9,13 @@ contain the root `toctree` directive.
 ```{toctree}
 :caption: User Guide
 :includehidden:
-:maxdepth: 2
+:maxdepth: 1
 
-user/gettingStarted
+user/creating_course
+user/course_configurator
+user/application
+user/mailing
+
 ```
 
 ```{toctree}
