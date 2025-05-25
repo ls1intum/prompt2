@@ -22,6 +22,7 @@ user/gettingStarted
 contributor/guide
 contributor/setup
 contributor/new_microfrontend
+contributor/ui_guidelines
 contributor/reusable_components
 ```
 
