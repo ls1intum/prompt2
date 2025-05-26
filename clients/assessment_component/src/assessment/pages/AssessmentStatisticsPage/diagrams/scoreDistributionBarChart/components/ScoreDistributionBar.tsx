@@ -9,14 +9,26 @@ export const ScoreDistributionBar = (props: any) => {
   if (payload.lowerQuartile === 0 || payload.upperQuartile === 0) return undefined
 
   const scale = height / (Object.keys(ScoreLevel).length - 1)
-  const lowerQuartileY = y + height - (payload.lowerQuartile - 1) * scale
-  const upperQuartileY = y + height - (payload.upperQuartile - 1) * scale
-  const averageY = y + height - (payload.average - 1) * scale
-
   const barColor = getBarColor(mapNumberToScoreLevel(payload.average))
+  const upperQuartileY = y + height - (payload.upperQuartile - 1) * scale
 
-  const minRectHeight = 8
-  const rectHeight = Math.max(lowerQuartileY - upperQuartileY, minRectHeight)
+  const minHeight = 6
+  if (payload.upperQuartile - payload.lowerQuartile <= 0) {
+    return (
+      <Rectangle
+        x={x}
+        y={upperQuartileY - minHeight / 2}
+        width={width}
+        height={minHeight}
+        fill={barColor}
+        radius={[4, 4, 4, 4]}
+      />
+    )
+  }
+
+  const lowerQuartileY = y + height - (payload.lowerQuartile - 1) * scale
+  const averageY = y + height - (payload.average - 1) * scale
+  const rectHeight = lowerQuartileY - upperQuartileY
 
   return (
     <g>
@@ -33,7 +45,7 @@ export const ScoreDistributionBar = (props: any) => {
         y1={averageY}
         x2={x + width}
         y2={averageY}
-        stroke='#ffffff'
+        stroke='#ffffff' /* Light grey color */
         strokeWidth={2}
         strokeOpacity={0.8}
       />
