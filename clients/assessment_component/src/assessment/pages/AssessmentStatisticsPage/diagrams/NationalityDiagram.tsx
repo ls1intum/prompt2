@@ -14,6 +14,8 @@ import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
+import { getGridSpanClass } from './utils/getGridSpanClass'
+
 interface NationalityDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
 }
@@ -39,7 +41,7 @@ export const NationalityDiagram = ({
   )
 
   return (
-    <Card className='flex flex-col'>
+    <Card className={`flex flex-col ${getGridSpanClass(nationalityMap.size)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Nationality Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>

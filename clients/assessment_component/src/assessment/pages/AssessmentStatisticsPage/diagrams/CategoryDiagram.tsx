@@ -13,6 +13,8 @@ import { ScoreLevel } from '../../../interfaces/scoreLevel'
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
+import { getGridSpanClass } from './utils/getGridSpanClass'
+
 interface CategoryDiagramProps {
   categories: CategoryWithCompetencies[]
   assessments: Assessment[]
@@ -36,7 +38,7 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
   )
 
   return (
-    <Card className='flex flex-col'>
+    <Card className={`flex flex-col ${getGridSpanClass(categoryMap.size)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Category Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>

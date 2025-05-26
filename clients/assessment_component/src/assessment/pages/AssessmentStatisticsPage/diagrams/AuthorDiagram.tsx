@@ -12,6 +12,8 @@ import { ScoreLevel } from '../../../interfaces/scoreLevel'
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
+import { getGridSpanClass } from './utils/getGridSpanClass'
+
 interface AuthorDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
 }
@@ -36,7 +38,7 @@ export const AuthorDiagram = ({
   )
 
   return (
-    <Card className='flex flex-col'>
+    <Card className={`flex flex-col ${getGridSpanClass(authorsMap.size)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Author Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
