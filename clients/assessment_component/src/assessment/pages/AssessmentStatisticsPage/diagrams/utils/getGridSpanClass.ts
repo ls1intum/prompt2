@@ -18,15 +18,7 @@ export function getGridSpanClass(colCount: number): string {
   }
 
   if (colCount <= 12) {
-    return 'col-span-1 lg:col-span-2'
-  }
-
-  if (colCount <= 16) {
     return 'col-span-1 lg:col-span-2 xl:col-span-3'
-  }
-
-  if (colCount <= 20) {
-    return 'col-span-1 lg:col-span-2 xl:col-span-3 2xl:col-span-4'
   }
 
   return 'col-span-1 lg:col-span-2 xl:col-span-3 2xl:col-span-4'
