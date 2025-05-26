@@ -55,8 +55,6 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     assessmentCompletions || [],
   )
 
-  console.log('participationsWithAssessments', participationsWithAssessments)
-
   const isError = isAssessmentsError || isAssessmentCompletionsError
   const isPending = isAssessmentsPending || isAssessmentCompletionsPending
 
@@ -83,14 +81,10 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
-        <div className='2xl:col-span-2'>
-          <CategoryDiagram categories={categories} assessments={assessments} />
-        </div>
+        <CategoryDiagram categories={categories} assessments={assessments} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
-        <div className='2xl:col-span-2'>
-          <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
-        </div>
+        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
   )
