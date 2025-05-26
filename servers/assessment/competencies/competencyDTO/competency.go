@@ -9,6 +9,7 @@ type Competency struct {
 	ID           uuid.UUID `json:"id"`
 	CategoryID   uuid.UUID `json:"categoryID"`
 	Name         string    `json:"name"`
+	ShortName    string    `json:"shortName"`
 	Description  string    `json:"description"`
 	Novice       string    `json:"novice"`
 	Intermediate string    `json:"intermediate"`
@@ -24,6 +25,7 @@ func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency 
 			ID:           c.ID,
 			CategoryID:   c.CategoryID,
 			Name:         c.Name,
+			ShortName:    c.ShortName.String,
 			Description:  c.Description.String,
 			Novice:       c.Novice,
 			Intermediate: c.Intermediate,

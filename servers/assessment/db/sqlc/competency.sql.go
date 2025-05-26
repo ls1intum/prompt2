@@ -14,16 +14,17 @@ import (
 
 const createCompetency = `-- name: CreateCompetency :exec
 INSERT INTO competency (
-    id, category_id, name, description, novice,
+    id, category_id, name, short_name, description, novice,
     intermediate, advanced, expert, weight
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 `
 
 type CreateCompetencyParams struct {
 	ID           uuid.UUID   `json:"id"`
 	CategoryID   uuid.UUID   `json:"category_id"`
 	Name         string      `json:"name"`
+	ShortName    pgtype.Text `json:"short_name"`
 	Description  pgtype.Text `json:"description"`
 	Novice       string      `json:"novice"`
 	Intermediate string      `json:"intermediate"`
@@ -37,6 +38,7 @@ func (q *Queries) CreateCompetency(ctx context.Context, arg CreateCompetencyPara
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
+		arg.ShortName,
 		arg.Description,
 		arg.Novice,
 		arg.Intermediate,
@@ -57,7 +59,7 @@ func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
 }
 
 const getCompetency = `-- name: GetCompetency :one
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency WHERE id = $1
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight, short_name FROM competency WHERE id = $1
 `
 
 func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, error) {
@@ -73,12 +75,13 @@ func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, 
 		&i.Advanced,
 		&i.Expert,
 		&i.Weight,
+		&i.ShortName,
 	)
 	return i, err
 }
 
 const listCompetencies = `-- name: ListCompetencies :many
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight, short_name FROM competency
 `
 
 func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
@@ -100,6 +103,7 @@ func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
 			&i.Advanced,
 			&i.Expert,
 			&i.Weight,
+			&i.ShortName,
 		); err != nil {
 			return nil, err
 		}
@@ -112,7 +116,7 @@ func (q *Queries) ListCompetencies(ctx context.Context) ([]Competency, error) {
 }
 
 const listCompetenciesByCategory = `-- name: ListCompetenciesByCategory :many
-SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight FROM competency WHERE category_id = $1
+SELECT id, category_id, name, description, novice, intermediate, advanced, expert, weight, short_name FROM competency WHERE category_id = $1
 `
 
 func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]Competency, error) {
@@ -134,6 +138,7 @@ func (q *Queries) ListCompetenciesByCategory(ctx context.Context, categoryID uui
 			&i.Advanced,
 			&i.Expert,
 			&i.Weight,
+			&i.ShortName,
 		); err != nil {
 			return nil, err
 		}
@@ -149,12 +154,13 @@ const updateCompetency = `-- name: UpdateCompetency :exec
 UPDATE competency
 SET category_id = $2,
     name = $3,
-    description = $4,
-    novice = $5,
-    intermediate = $6,
-    advanced = $7,
-    expert = $8,
-    weight = $9
+    short_name = $4,
+    description = $5,
+    novice = $6,
+    intermediate = $7,
+    advanced = $8,
+    expert = $9,
+    weight = $10
 WHERE id = $1
 `
 
@@ -162,6 +168,7 @@ type UpdateCompetencyParams struct {
 	ID           uuid.UUID   `json:"id"`
 	CategoryID   uuid.UUID   `json:"category_id"`
 	Name         string      `json:"name"`
+	ShortName    pgtype.Text `json:"short_name"`
 	Description  pgtype.Text `json:"description"`
 	Novice       string      `json:"novice"`
 	Intermediate string      `json:"intermediate"`
@@ -175,6 +182,7 @@ func (q *Queries) UpdateCompetency(ctx context.Context, arg UpdateCompetencyPara
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
+		arg.ShortName,
 		arg.Description,
 		arg.Novice,
 		arg.Intermediate,

@@ -2,6 +2,7 @@ export type Competency = {
   id: string
   categoryID: string
   name: string
+  shortName: string
   description: string
   novice: string
   intermediate: string
@@ -13,6 +14,7 @@ export type Competency = {
 export type CreateCompetencyRequest = {
   categoryID: string
   name: string
+  shortName: string
   description: string
   novice: string
   intermediate: string
@@ -25,6 +27,7 @@ export type UpdateCompetencyRequest = {
   id: string
   categoryID?: string
   name?: string
+  shortName?: string
   description?: string
   novice?: string
   intermediate?: string

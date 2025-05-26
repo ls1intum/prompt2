@@ -31,6 +31,7 @@ const updateCompetencySchema = z.object({
   id: z.string(),
   categoryID: z.string(),
   name: z.string().min(1, 'Name is required'),
+  shortName: z.string().min(1, 'Short name is required'),
   description: z.string().min(1, 'Description is required'),
   novice: z.string().min(1, 'Novice level description is required'),
   intermediate: z.string().min(1, 'Intermediate level description is required'),
@@ -58,6 +59,7 @@ export function EditCompetencyDialog({
       id: competency?.id,
       categoryID: competency?.categoryID,
       name: competency?.name,
+      shortName: competency?.shortName,
       description: competency?.description,
       novice: competency?.novice,
       intermediate: competency?.intermediate,
@@ -74,6 +76,7 @@ export function EditCompetencyDialog({
         id: competency.id,
         categoryID: competency.categoryID,
         name: competency.name,
+        shortName: competency.shortName,
         description: competency.description,
         novice: competency.novice,
         intermediate: competency.intermediate,
@@ -119,6 +122,21 @@ export function EditCompetencyDialog({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='shortName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Short Competency Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter short competency name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='description'

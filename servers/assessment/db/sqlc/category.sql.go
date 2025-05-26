@@ -13,13 +13,14 @@ import (
 )
 
 const createCategory = `-- name: CreateCategory :exec
-INSERT INTO category (id, name, description, weight)
-VALUES ($1, $2, $3, $4)
+INSERT INTO category (id, name, short_name, description, weight)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateCategoryParams struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
+	ShortName   pgtype.Text `json:"short_name"`
 	Description pgtype.Text `json:"description"`
 	Weight      int32       `json:"weight"`
 }
@@ -28,6 +29,7 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 	_, err := q.db.Exec(ctx, createCategory,
 		arg.ID,
 		arg.Name,
+		arg.ShortName,
 		arg.Description,
 		arg.Weight,
 	)
@@ -45,13 +47,14 @@ func (q *Queries) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 
 const getCategoriesWithCompetencies = `-- name: GetCategoriesWithCompetencies :many
 SELECT
-    c.id, c.name, c.description, c.weight,
+    c.id, c.name, c.short_name, c.description, c.weight,
     COALESCE(
         json_agg(
             json_build_object(
                 'id', cmp.id,
                 'categoryID', cmp.category_id,
                 'name', cmp.name,
+                'shortName', cmp.short_name,
                 'description', cmp.description,
                 'novice', cmp.novice,
                 'intermediate', cmp.intermediate,
@@ -71,6 +74,7 @@ ORDER BY c.name ASC
 type GetCategoriesWithCompetenciesRow struct {
 	ID           uuid.UUID   `json:"id"`
 	Name         string      `json:"name"`
+	ShortName    pgtype.Text `json:"short_name"`
 	Description  pgtype.Text `json:"description"`
 	Weight       int32       `json:"weight"`
 	Competencies []byte      `json:"competencies"`
@@ -88,6 +92,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.ShortName,
 			&i.Description,
 			&i.Weight,
 			&i.Competencies,
@@ -103,7 +108,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, name, description, weight FROM category WHERE id = $1
+SELECT id, name, description, weight, short_name FROM category WHERE id = $1
 `
 
 func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, error) {
@@ -114,12 +119,13 @@ func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, erro
 		&i.Name,
 		&i.Description,
 		&i.Weight,
+		&i.ShortName,
 	)
 	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, description, weight FROM category
+SELECT id, name, description, weight, short_name FROM category
 ORDER BY name ASC
 `
 
@@ -137,6 +143,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 			&i.Name,
 			&i.Description,
 			&i.Weight,
+			&i.ShortName,
 		); err != nil {
 			return nil, err
 		}
@@ -150,13 +157,14 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 
 const updateCategory = `-- name: UpdateCategory :exec
 UPDATE category
-SET name = $2, description = $3, weight = $4
+SET name = $2, short_name = $3, description = $4, weight = $5
 WHERE id = $1
 `
 
 type UpdateCategoryParams struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
+	ShortName   pgtype.Text `json:"short_name"`
 	Description pgtype.Text `json:"description"`
 	Weight      int32       `json:"weight"`
 }
@@ -165,6 +173,7 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 	_, err := q.db.Exec(ctx, updateCategory,
 		arg.ID,
 		arg.Name,
+		arg.ShortName,
 		arg.Description,
 		arg.Weight,
 	)
