@@ -89,7 +89,9 @@ export const Breadcrumbs: React.FC = () => {
               {index === breadcrumbList.length - 1 ? (
                 <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink onClick={() => navigate(crumb.path)}>{crumb.title}</BreadcrumbLink>
+                <BreadcrumbLink style={{ cursor: 'pointer' }} onClick={() => navigate(crumb.path)}>
+                  {crumb.title}
+                </BreadcrumbLink>
               )}
             </BreadcrumbItem>
           </React.Fragment>

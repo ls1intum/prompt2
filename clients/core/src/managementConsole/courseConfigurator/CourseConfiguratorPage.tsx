@@ -1,38 +1,19 @@
 import { Canvas } from './Canvas'
 import { Loader2 } from 'lucide-react'
 import { useCourseConfiguratorDataSetup } from './handlers/useCourseConfiguratorDataSetup'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  ManagementPageHeader,
-  ErrorPage,
-} from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader, ErrorPage, Card } from '@tumaet/prompt-ui-components'
+import { HelpDialog } from './components/HelpDialog'
 
 export default function CourseConfiguratorPage() {
-  const { courseId, isError, isPending, error, finishedSetup, refetchAll } =
-    useCourseConfiguratorDataSetup()
+  const { isError, isPending, error, finishedSetup, refetchAll } = useCourseConfiguratorDataSetup()
 
   return (
     <>
       <div>
-        <ManagementPageHeader>Course Configurator</ManagementPageHeader>
-        <Card key={courseId}>
-          <CardHeader>
-            <CardTitle>Instructions</CardTitle>
-            <CardDescription>Follow these steps to create your course flow:</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ol className='list-decimal list-inside space-y-2'>
-              <li>Drag course phases from the sidebar onto the canvas</li>
-              <li>Connect phases by dragging from one node&apos;s handle to another</li>
-              <li>Edit phase details by clicking the &quot;Edit&quot; button on each node</li>
-              <li>Arrange your nodes to create a logical course flow</li>
-            </ol>
-          </CardContent>
-        </Card>
+        <div className='flex items-center justify-between mb-4'>
+          <ManagementPageHeader>Course Configurator</ManagementPageHeader>
+          <HelpDialog />
+        </div>
       </div>
 
       <Card>
