@@ -7,7 +7,7 @@ export const createScoreDistributionDataPoint = (
   label: string,
   scoreLevels: ScoreLevel[],
 ): ScoreDistributionDataPoint => {
-  scoreLevels = scoreLevels.sort((a, b) => {
+  const sortedScoreLevels = [...scoreLevels].sort((a, b) => {
     const scoreA = mapScoreLevelToNumber(a)
     const scoreB = mapScoreLevelToNumber(b)
     return scoreA - scoreB
@@ -31,10 +31,10 @@ export const createScoreDistributionDataPoint = (
   }
 
   const average =
-    scoreLevels.reduce((sum, scoreLevel) => {
+    sortedScoreLevels.reduce((sum, scoreLevel) => {
       const score = mapScoreLevelToNumber(scoreLevel)
       return sum + score
-    }, 0) / scoreLevels.length
+    }, 0) / sortedScoreLevels.length
 
   const computeQuartile = (sortedScores: ScoreLevel[], quartile: number): number => {
     const pos = (sortedScores.length - 1) * quartile
@@ -53,10 +53,10 @@ export const createScoreDistributionDataPoint = (
     shortLabel,
     label,
     average: average,
-    lowerQuartile: computeQuartile(scoreLevels, 0.25),
-    median: scoreLevels[Math.floor(scoreLevels.length / 2)],
-    upperQuartile: computeQuartile(scoreLevels, 0.75),
-    counts: scoreLevels.reduce(
+    lowerQuartile: computeQuartile(sortedScoreLevels, 0.25),
+    median: sortedScoreLevels[Math.floor(sortedScoreLevels.length / 2)],
+    upperQuartile: computeQuartile(sortedScoreLevels, 0.75),
+    counts: sortedScoreLevels.reduce(
       (counts, scoreLevel) => {
         switch (scoreLevel) {
           case ScoreLevel.Novice:

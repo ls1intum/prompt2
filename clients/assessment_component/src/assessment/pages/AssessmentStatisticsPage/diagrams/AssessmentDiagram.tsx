@@ -26,7 +26,7 @@ const chartConfig = {
   },
   completed: {
     label: 'Completed waiting for acceptance',
-    color: 'hsl(var(--primary))',
+    color: '#63B3ED', // Light blue
   },
   accepted: {
     label: 'Accepted',
@@ -51,7 +51,7 @@ export const AssessmentDiagram = ({
     const accepted = participations.filter((app) => app.passStatus === PassStatus.PASSED).length
     const rejected = participations.filter((app) => app.passStatus === PassStatus.FAILED).length
     const notAssessed = participations.length - scoreLevels.length
-    const completed = participations.length - notAssessed - accepted - rejected
+    const completed = Math.max(0, participations.length - notAssessed - accepted - rejected)
 
     return {
       chartData: [

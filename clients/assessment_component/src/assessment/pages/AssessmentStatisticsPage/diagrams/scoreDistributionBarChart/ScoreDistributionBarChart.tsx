@@ -23,6 +23,14 @@ export interface ScoreDistributionBarChartProps {
 }
 
 export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <ChartContainer config={chartConfig} className='w-full h-[280px]'>
+        <div className='flex items-center justify-center h-full text-muted'>No data available</div>
+      </ChartContainer>
+    )
+  }
+
   const chartData = data.map((item) => ({
     name: item.shortLabel,
     value: 4, // Use the range as the value for sizing
