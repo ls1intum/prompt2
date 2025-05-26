@@ -11,7 +11,7 @@ import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
-import { getAllAssessmentCompletionsinPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
 import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
 
@@ -46,7 +46,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     refetch: refetchAssessmentCompletions,
   } = useQuery<AssessmentCompletion[]>({
     queryKey: ['assessmentCompletions', phaseId],
-    queryFn: () => getAllAssessmentCompletionsinPhase(phaseId ?? ''),
+    queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
   })
 
   const participationsWithAssessments = useGetParticipantionsWithAssessment(

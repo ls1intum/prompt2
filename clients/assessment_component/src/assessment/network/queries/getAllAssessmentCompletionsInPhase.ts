@@ -1,7 +1,7 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
 import { AssessmentCompletion } from '../../interfaces/assessment'
 
-export const getAllAssessmentCompletionsinPhase = async (
+export const getAllAssessmentCompletionsInPhase = async (
   coursePhaseID: string,
 ): Promise<AssessmentCompletion[]> => {
   const response = await assessmentAxiosInstance.get<AssessmentCompletion[]>(
