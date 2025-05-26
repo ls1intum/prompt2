@@ -22,7 +22,10 @@ export function getCornerRadius(
     return [radius, radius, 0, 0]
   }
 
-  // Stacked logic
+  if (!dataPoint) {
+    return [0, 0, 0, 0]
+  }
+
   const activeSegments = stackKeys.filter((key) => (dataPoint[key] ?? 0) > 0)
 
   if (!activeSegments.includes(segmentKey)) {
