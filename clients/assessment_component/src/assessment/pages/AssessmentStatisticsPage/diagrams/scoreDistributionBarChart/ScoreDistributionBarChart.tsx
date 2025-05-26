@@ -32,7 +32,8 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
   }
 
   const chartData = data.map((item) => ({
-    name: item.shortLabel,
+    shortName: item.shortLabel,
+    name: item.label,
     value: 4, // Use the range as the value for sizing
     lowerQuartile: item.lowerQuartile,
     median: item.median,
@@ -52,7 +53,7 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
           opacity={1}
         />
 
-        <XAxis dataKey='name' axisLine={false} tickLine={false} interval={0} />
+        <XAxis dataKey='shortName' axisLine={false} tickLine={false} interval={0} />
         <YAxis
           axisLine={false}
           tickLine={false}
