@@ -81,7 +81,7 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 md:grid-cols-5 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-5 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
@@ -93,7 +93,7 @@ export const AssessmentForm = ({
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
 
-        <div className='md:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-1'>
+        <div className='lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-1'>
           {Object.values(ScoreLevel).map((level) => {
             const config = getLevelConfig(level)
             const isSelected = selectedScore === level
