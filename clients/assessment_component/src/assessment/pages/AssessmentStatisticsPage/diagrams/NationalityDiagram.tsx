@@ -45,7 +45,13 @@ export const NationalityDiagram = ({
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <ScoreDistributionBarChart data={data} />
+        {data.length === 0 ? (
+          <div className='flex items-center justify-center h-64 text-gray-500'>
+            <p>No nationality data available</p>
+          </div>
+        ) : (
+          <ScoreDistributionBarChart data={data} />
+        )}
       </CardContent>
     </Card>
   )
