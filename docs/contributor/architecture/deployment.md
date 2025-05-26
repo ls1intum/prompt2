@@ -1,7 +1,3 @@
-Here is the reformulated chapter as a **contributor-facing documentation page** for the PROMPT system:
-
----
-
 # 🚀 Deployment Architecture
 
 This section provides an overview of the **deployment structure** for the PROMPT 2 platform, illustrating how the system components are hosted, served, and interconnected in a production environment.
