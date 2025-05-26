@@ -59,4 +59,7 @@ WHERE
 
 DROP VIEW IF EXISTS score_level_categories;
 
+CREATE INDEX IF NOT EXISTS idx_assessment_completion_participation_phase
+ON assessment_completion (course_participation_id, course_phase_id);
+
 COMMIT;
