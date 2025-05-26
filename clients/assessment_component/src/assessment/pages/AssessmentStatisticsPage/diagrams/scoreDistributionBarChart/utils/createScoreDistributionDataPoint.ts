@@ -56,11 +56,25 @@ export const createScoreDistributionDataPoint = (
     lowerQuartile: computeQuartile(scoreLevels, 0.25),
     median: scoreLevels[Math.floor(scoreLevels.length / 2)],
     upperQuartile: computeQuartile(scoreLevels, 0.75),
-    counts: {
-      novice: scoreLevels.filter((sco) => sco === ScoreLevel.Novice).length,
-      intermediate: scoreLevels.filter((sco) => sco === ScoreLevel.Intermediate).length,
-      advanced: scoreLevels.filter((sco) => sco === ScoreLevel.Advanced).length,
-      expert: scoreLevels.filter((sco) => sco === ScoreLevel.Expert).length,
-    },
+    counts: scoreLevels.reduce(
+      (counts, scoreLevel) => {
+        switch (scoreLevel) {
+          case ScoreLevel.Novice:
+            counts.novice++
+            break
+          case ScoreLevel.Intermediate:
+            counts.intermediate++
+            break
+          case ScoreLevel.Advanced:
+            counts.advanced++
+            break
+          case ScoreLevel.Expert:
+            counts.expert++
+            break
+        }
+        return counts
+      },
+      { novice: 0, intermediate: 0, advanced: 0, expert: 0 },
+    ),
   }
 }
