@@ -6,10 +6,10 @@ WITH score_values AS (
         a.course_phase_id,
         a.course_participation_id,
         CASE a.score
-            WHEN 'novice' THEN 1
-            WHEN 'intermediate' THEN 2
-            WHEN 'advanced' THEN 3
-            WHEN 'expert' THEN 4
+            WHEN 'novice' THEN 4
+            WHEN 'intermediate' THEN 3
+            WHEN 'advanced' THEN 2
+            WHEN 'expert' THEN 1
         END AS score_numeric,
         comp.weight AS competency_weight,
         cat.weight AS category_weight

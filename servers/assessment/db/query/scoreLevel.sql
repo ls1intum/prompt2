@@ -3,14 +3,14 @@ SELECT
     course_participation_id,
     score_numeric,
     score_level
-FROM participant_score_levels
+FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2;
 
 -- name: GetScoreLevelByCourseParticipationIDNumeric :one
 SELECT
     COALESCE(score_numeric, 0) AS score_numeric
-FROM participant_score_levels
+FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2;
 
