@@ -28,14 +28,14 @@ export const chartConfig: ChartConfig = {
 export function getBarColor(scoreLevel: ScoreLevel): string {
   switch (scoreLevel) {
     case ScoreLevel.Novice:
-      return 'var(--color-novice)' // Novice color
+      return chartConfig.novice.color || '#ffffff' // Novice color
     case ScoreLevel.Intermediate:
-      return 'var(--color-intermediate)' // Intermediate color
+      return chartConfig.intermediate.color || '#ffffff' // Intermediate color
     case ScoreLevel.Advanced:
-      return 'var(--color-advanced)' // Advanced color
+      return chartConfig.advanced.color || '#ffffff' // Advanced color
     case ScoreLevel.Expert:
-      return 'var(--color-expert)' // Expert color
+      return chartConfig.expert.color || '#ffffff' // Expert color
     default:
-      return 'var(--color-default)' // Default color
+      return chartConfig.notAssessed.color || '#ffffff' // Default color
   }
 }
