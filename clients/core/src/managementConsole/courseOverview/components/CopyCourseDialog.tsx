@@ -17,6 +17,8 @@ import {
   FormMessage,
   Input,
   useToast,
+  DatePickerWithRange,
+  FormDescription,
 } from '@tumaet/prompt-ui-components'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { type CopyCourseFormValues, copyCourseSchema } from '@core/validations/copyCourse'
@@ -46,6 +48,10 @@ export const CopyCourseDialog = ({
     defaultValues: {
       name: '',
       semesterTag: '',
+      dateRange: {
+        from: undefined,
+        to: undefined,
+      },
     },
   })
 
@@ -73,6 +79,8 @@ export const CopyCourseDialog = ({
     const copyData: CopyCourse = {
       name: data.name,
       semesterTag: data.semesterTag,
+      startDate: data.dateRange.from,
+      endDate: data.dateRange.to,
     }
     mutateCopyCourse(copyData)
     onClose()
@@ -111,6 +119,22 @@ export const CopyCourseDialog = ({
                   <FormControl>
                     <Input placeholder='Enter semester tag' {...field} className='w-full' />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='dateRange'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Course Duration</FormLabel>
+                  <DatePickerWithRange
+                    date={field.value}
+                    setDate={field.onChange}
+                    className='w-full'
+                  />
+                  <FormDescription>Select the start and end dates for your course.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

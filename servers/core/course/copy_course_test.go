@@ -3,6 +3,7 @@ package course
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -55,10 +56,14 @@ func (suite *CopyCourseTestSuite) TearDownSuite() {
 func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 	newName := "Cloned Course"
 	newTag := "SS2025"
+	newStartDate := pgtype.Date{Valid: true, Time: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)}
+	newEndDate := pgtype.Date{Valid: true, Time: time.Date(2025, 6, 30, 0, 0, 0, 0, time.UTC)}
 
 	copyReq := courseDTO.CopyCourse{
 		Name:        newName,
 		SemesterTag: pgtype.Text{Valid: true, String: newTag},
+		StartDate:   newStartDate,
+		EndDate:     newEndDate,
 	}
 
 	result, err := copyCourseInternal(suite.ctx, suite.sourceCourse.ID, copyReq, "test_user")
