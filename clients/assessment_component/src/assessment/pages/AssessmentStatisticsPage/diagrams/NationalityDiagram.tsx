@@ -25,8 +25,7 @@ export const NationalityDiagram = ({
 }: NationalityDiagramProps): JSX.Element => {
   const nationalityMap = new Map<string, ScoreLevel[]>()
   participationsWithAssessment.forEach((p) => {
-    const nationality =
-      getCountryName(p.participation.student.nationality ?? '') ?? 'Unknown Nationality'
+    const nationality = p.participation.student.nationality || 'Unknown'
 
     if (p.scoreLevel !== undefined) {
       if (!nationalityMap.has(nationality)) {
@@ -37,7 +36,11 @@ export const NationalityDiagram = ({
   })
 
   const data = Array.from(nationalityMap.entries()).map(([nationality, participations]) =>
-    createScoreDistributionDataPoint(nationality, participations),
+    createScoreDistributionDataPoint(
+      nationality,
+      getCountryName(nationality) ?? 'Unknown Nationality',
+      participations,
+    ),
   )
 
   return (

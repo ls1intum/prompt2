@@ -34,7 +34,14 @@ export const AuthorDiagram = ({
   })
 
   const data = Array.from(authorsMap.entries()).map(([author, participations]) =>
-    createScoreDistributionDataPoint(author, participations),
+    createScoreDistributionDataPoint(
+      author
+        .split(' ')
+        .map((name) => name[0])
+        .join(''),
+      author,
+      participations,
+    ),
   )
 
   return (

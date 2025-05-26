@@ -50,6 +50,18 @@ export const CreateCategoryForm = () => {
           </div>
 
           <div className='space-y-2'>
+            <Label htmlFor='name' className='text-sm font-medium'>
+              Short Category Name
+            </Label>
+            <Input
+              id='name'
+              placeholder='Enter short category name'
+              className='focus-visible:ring-1'
+              {...register('shortName', { required: true })}
+            />
+          </div>
+
+          <div className='space-y-2'>
             <Label htmlFor='description' className='text-sm font-medium'>
               Description
             </Label>

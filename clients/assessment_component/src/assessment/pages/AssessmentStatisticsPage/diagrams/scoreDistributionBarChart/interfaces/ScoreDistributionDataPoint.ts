@@ -8,7 +8,8 @@ export interface SkillCounts {
 }
 
 export interface ScoreDistributionDataPoint {
-  name: string
+  shortLabel: string
+  label: string
   average: number
   lowerQuartile: number
   median: ScoreLevel

@@ -3,7 +3,8 @@ import { ScoreLevel, mapScoreLevelToNumber } from '../../../../../interfaces/sco
 import { ScoreDistributionDataPoint } from '../interfaces/ScoreDistributionDataPoint'
 
 export const createScoreDistributionDataPoint = (
-  name: string,
+  shortLabel: string,
+  label: string,
   scoreLevels: ScoreLevel[],
 ): ScoreDistributionDataPoint => {
   scoreLevels = scoreLevels.sort((a, b) => {
@@ -14,7 +15,8 @@ export const createScoreDistributionDataPoint = (
 
   if (scoreLevels.length === 0) {
     return {
-      name,
+      shortLabel,
+      label,
       average: 0,
       lowerQuartile: 0,
       median: ScoreLevel.Novice,
@@ -48,7 +50,8 @@ export const createScoreDistributionDataPoint = (
   }
 
   return {
-    name,
+    shortLabel,
+    label,
     average: average,
     lowerQuartile: computeQuartile(scoreLevels, 0.25),
     median: scoreLevels[Math.floor(scoreLevels.length / 2)],

@@ -79,6 +79,7 @@ type Category struct {
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
 	Weight      int32       `json:"weight"`
+	ShortName   pgtype.Text `json:"short_name"`
 }
 
 type Competency struct {
@@ -91,6 +92,7 @@ type Competency struct {
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
 	Weight       int32       `json:"weight"`
+	ShortName    pgtype.Text `json:"short_name"`
 }
 
 type CompletedScoreLevel struct {

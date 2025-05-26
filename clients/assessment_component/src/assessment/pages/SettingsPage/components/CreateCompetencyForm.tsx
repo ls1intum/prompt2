@@ -64,6 +64,20 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
             </div>
 
             <div className='space-y-2'>
+              <Label htmlFor='name' className='font-medium'>
+                Short Name
+              </Label>
+              <Input
+                id='name'
+                placeholder='Enter competency name'
+                className={errors.shortName ? 'border-red-500' : ''}
+                aria-invalid={errors.shortName ? 'true' : 'false'}
+                {...register('shortName', { required: true })}
+              />
+              {errors.name && <p className='text-sm text-red-500 mt-1'>Name is required</p>}
+            </div>
+
+            <div className='space-y-2'>
               <Label htmlFor='weight' className='font-medium'>
                 Weight
               </Label>

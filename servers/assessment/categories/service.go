@@ -33,6 +33,7 @@ func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) 
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
 		ID:          uuid.New(),
 		Name:        req.Name,
+		ShortName:   pgtype.Text{String: req.ShortName, Valid: true},
 		Description: pgtype.Text{String: req.Description, Valid: true},
 		Weight:      req.Weight,
 	})
@@ -71,6 +72,7 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCat
 	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
 		ID:          id,
 		Name:        req.Name,
+		ShortName:   pgtype.Text{String: req.ShortName, Valid: true},
 		Description: pgtype.Text{String: req.Description, Valid: true},
 		Weight:      req.Weight,
 	})

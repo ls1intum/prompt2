@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { CategoryWithCompetencies } from '../../../interfaces/category'
+import { Category, CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
@@ -21,20 +21,20 @@ interface CategoryDiagramProps {
 }
 
 export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProps): JSX.Element => {
-  const categoryMap = new Map<string, ScoreLevel[]>()
+  const categoryMap = new Map<Category, ScoreLevel[]>()
   categories.forEach((category) => {
     const categoryAssessments = assessments
       .filter((assessment) =>
         category.competencies.map((competency) => competency.id).includes(assessment.competencyID),
       )
       .map((assessment) => assessment.score)
-    if (!categoryMap.has(category.name)) {
-      categoryMap.set(category.name, [])
+    if (!categoryMap.has(category)) {
+      categoryMap.set(category, [])
     }
-    categoryMap.get(category.name)?.push(...categoryAssessments)
+    categoryMap.get(category)?.push(...categoryAssessments)
   })
   const data = Array.from(categoryMap.entries()).map(([category, scores]) =>
-    createScoreDistributionDataPoint(category, scores),
+    createScoreDistributionDataPoint(category.shortName, category.name, scores),
   )
 
   return (

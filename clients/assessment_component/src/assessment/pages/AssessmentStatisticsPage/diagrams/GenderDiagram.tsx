@@ -36,9 +36,9 @@ export const GenderDiagram = ({
   const diverse = groupByGender([Gender.DIVERSE, Gender.PREFER_NOT_TO_SAY])
 
   const data = [
-    createScoreDistributionDataPoint('Female', females),
-    createScoreDistributionDataPoint('Male', males),
-    createScoreDistributionDataPoint('Diverse', diverse),
+    createScoreDistributionDataPoint('Female', 'Female', females),
+    createScoreDistributionDataPoint('Male', 'Male', males),
+    createScoreDistributionDataPoint('Diverse', 'Diverse', diverse),
   ]
 
   return (

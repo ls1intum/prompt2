@@ -11,7 +11,6 @@ import {
 import { ChartContainer } from '@tumaet/prompt-ui-components'
 
 import { ScoreDistributionDataPoint } from './interfaces/ScoreDistributionDataPoint'
-import { wrapLabel } from './utils/wrapLabel'
 
 import { chartConfig } from '../utils/chartConfig'
 
@@ -25,7 +24,7 @@ export interface ScoreDistributionBarChartProps {
 
 export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartProps) {
   const chartData = data.map((item) => ({
-    name: item.name,
+    name: item.shortLabel,
     value: 4, // Use the range as the value for sizing
     lowerQuartile: item.lowerQuartile,
     median: item.median,
@@ -45,34 +44,7 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
           opacity={1}
         />
 
-        <XAxis
-          dataKey='name'
-          axisLine={false}
-          tickLine={false}
-          interval={0}
-          height={80}
-          tick={({ x, y, payload }) => {
-            const label = String(payload.value)
-            const maxLineLength = 12
-            const lines = wrapLabel(label, maxLineLength)
-            return (
-              <text
-                x={x}
-                y={y + 10}
-                textAnchor='start'
-                fontSize={12}
-                fill='#a3a3a3'
-                transform={`rotate(90, ${x}, ${y + 10})`}
-              >
-                {lines.map((line, i) => (
-                  <tspan x={x} dy={i === 0 ? 0 : 14} key={i}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
-            )
-          }}
-        />
+        <XAxis dataKey='name' axisLine={false} tickLine={false} interval={0} />
         <YAxis
           axisLine={false}
           tickLine={false}
