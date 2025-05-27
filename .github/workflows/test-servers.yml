@@ -1,4 +1,4 @@
-name: Go Test
+name: Test Go Servers
 
 on:
   pull_request:
@@ -6,11 +6,33 @@ on:
   workflow_call:
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      assessment-changed: ${{ steps.changes.outputs.assessment }}
+      core-changed: ${{ steps.changes.outputs.core }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            assessment:
+              - 'servers/assessment/**'
+            core:
+              - 'servers/core/**'
+
   test:
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.assessment-changed == 'true' || needs.detect-changes.outputs.core-changed == 'true' }}
     strategy:
       matrix:
-        directory: ["core"]
+        directory:
+          - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
+          - ${{ needs.detect-changes.outputs.core-changed == 'true' && 'core' || '' }}
+        exclude:
+          - directory: ""
 
     steps:
       - uses: actions/checkout@v4
