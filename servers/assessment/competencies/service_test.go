@@ -24,7 +24,7 @@ type CompetencyServiceTestSuite struct {
 func (suite *CompetencyServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/competencies.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/categories.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}

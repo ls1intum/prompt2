@@ -28,9 +28,8 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 			"POSTGRES_DB":       "prompt",
 		},
 		HostConfigModifier: func(hc *container.HostConfig) {
-			// allocate 2GB memory and 2 CPUs for the test container
-			hc.Resources.Memory = 2 * 1024 * 1024 * 1024
-			hc.Resources.NanoCPUs = 2 * 1000000000
+			hc.Resources.Memory = 256 * 1024 * 1024 // 256MB
+			hc.Resources.NanoCPUs = 1 * 1000000000  // 1 CPU
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForLog("database system is ready to accept connections"),
@@ -47,8 +46,16 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	}
 
 	// Get container's host and port
-	host, _ := container.Host(ctx)
-	port, _ := container.MappedPort(ctx, "5432/tcp")
+	host, err := container.Host(ctx)
+	if err != nil {
+		_ = container.Terminate(ctx)
+		return nil, nil, fmt.Errorf("could not get container host: %w", err)
+	}
+	port, err := container.MappedPort(ctx, "5432/tcp")
+	if err != nil {
+		_ = container.Terminate(ctx)
+		return nil, nil, fmt.Errorf("could not get container port: %w", err)
+	}
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
 	// Connect to the database

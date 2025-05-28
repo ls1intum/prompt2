@@ -27,7 +27,7 @@ type CompetencyRouterTestSuite struct {
 func (suite *CompetencyRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/competencies.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/categories.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
@@ -98,7 +98,15 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 	assert.NoError(suite.T(), err)
 	assert.Greater(suite.T(), len(competencies), 0, "Should have at least one competency")
 
-	competencyID := competencies[0].ID
+	// Find the created competency by unique attributes
+	var competencyID uuid.UUID
+	for _, competency := range competencies {
+		if competency.Name == "Test Competency" { // Replace with actual unique attribute
+			competencyID = competency.ID
+			break
+		}
+	}
+	assert.NotZero(suite.T(), competencyID, "Created competency not found in list")
 
 	// Now test getting the specific competency
 	req, _ = http.NewRequest("GET", "/api/competency/"+competencyID.String(), nil)
@@ -229,7 +237,15 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 	assert.NoError(suite.T(), err)
 	assert.Greater(suite.T(), len(competencies), 0, "Should have at least one competency")
 
-	competencyID := competencies[0].ID
+	// Find the created competency by unique attributes
+	var competencyID uuid.UUID
+	for _, competency := range competencies {
+		if competency.Name == "Original Competency" { // Replace with actual unique attribute
+			competencyID = competency.ID
+			break
+		}
+	}
+	assert.NotZero(suite.T(), competencyID, "Created competency not found in list")
 
 	// Now update the competency
 	updateReq := competencyDTO.UpdateCompetencyRequest{
@@ -329,7 +345,15 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 	assert.NoError(suite.T(), err)
 	assert.Greater(suite.T(), len(competencies), 0, "Should have at least one competency")
 
-	competencyID := competencies[0].ID
+	// Find the created competency by unique attributes
+	var competencyID uuid.UUID
+	for _, competency := range competencies {
+		if competency.Name == "Competency to Delete" { // Replace with actual unique attribute
+			competencyID = competency.ID
+			break
+		}
+	}
+	assert.NotZero(suite.T(), competencyID, "Created competency not found in list")
 
 	// Now delete the competency
 	req, _ = http.NewRequest("DELETE", "/api/competency/"+competencyID.String(), nil)
