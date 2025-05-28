@@ -33,6 +33,8 @@ jobs:
         directory:
           - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
           - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
+        exclude:
+          - directory: ""
 
     steps:
       - uses: actions/checkout@v4
