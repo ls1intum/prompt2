@@ -25,31 +25,51 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.assessment-changed == 'true' || needs.detect-changes.outputs.core-changed == 'true' }}
+    if: |
+      needs.detect-changes.outputs.assessment-changed == 'true' ||
+      needs.detect-changes.outputs.core-changed       == 'true'
     strategy:
       matrix:
         directory:
           - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
-          - ${{ needs.detect-changes.outputs.core-changed == 'true' && 'core' || '' }}
+          - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
         exclude:
           - directory: ""
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.22
           cache-dependency-path: "**/*.sum"
+
+      - name: Install gotestsum
+        # installs gotestsum, which can output GitHub‐Actions annotations
+        run: |
+          go install gotest.tools/gotestsum@latest
+          echo "${HOME}/go/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: cd servers/${{ matrix.directory }} && go mod download
-      - name: Test with Go
+
+      - name: Run tests with annotations
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
-        run: cd servers/${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
-      - name: Upload Go test results
+        run: |
+          cd servers/${{ matrix.directory }}
+          # --format=github-actions emits ::error/::warning annotations
+          # --junitfile produces a JUnit XML artifact if you still want one
+          gotestsum \
+            --format=github-actions \
+            --junitfile TestResults-${{ matrix.directory }}.xml \
+            -- \
+            ./...
+
+      - name: Upload JUnit XML results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Go-results-${{ matrix.directory }}
-          path: ./servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
+          name: Go-JUnit-${{ matrix.directory }}
+          path: servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.xml
