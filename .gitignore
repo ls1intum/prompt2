@@ -9,3 +9,4 @@ postgres_team_allocation_data/
 postgres_assessment_data/
 postgres_self_team_allocation_data/
 
+**/*/.DS_Store
