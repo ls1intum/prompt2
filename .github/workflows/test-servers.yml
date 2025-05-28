@@ -33,8 +33,6 @@ jobs:
         directory:
           - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
           - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
-        exclude:
-          - directory: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +44,6 @@ jobs:
           cache-dependency-path: "**/*.sum"
 
       - name: Install gotestsum
-        # installs gotestsum, which can output GitHub‐Actions annotations
         run: |
           go install gotest.tools/gotestsum@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
