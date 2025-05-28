@@ -58,8 +58,6 @@ jobs:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: |
           cd servers/${{ matrix.directory }}
-          # --format=github-actions emits ::error/::warning annotations
-          # --junitfile produces a JUnit XML artifact if you still want one
           gotestsum \
             --format=github-actions \
             --junitfile TestResults-${{ matrix.directory }}.xml \
