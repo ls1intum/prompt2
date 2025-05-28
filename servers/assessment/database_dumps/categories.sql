@@ -33,31 +33,31 @@ SET
 SET
     row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.competency
-DROP CONSTRAINT IF EXISTS competency_category_id_fkey;
+ALTER TABLE
+    IF EXISTS ONLY public.competency DROP CONSTRAINT IF EXISTS competency_category_id_fkey;
 
-ALTER TABLE IF EXISTS ONLY public.assessment
-DROP CONSTRAINT IF EXISTS assessment_competency_id_fkey;
+ALTER TABLE
+    IF EXISTS ONLY public.assessment DROP CONSTRAINT IF EXISTS assessment_competency_id_fkey;
 
 DROP INDEX IF EXISTS public.idx_assessment_completion_participation_phase;
 
-ALTER TABLE IF EXISTS ONLY public.schema_migrations
-DROP CONSTRAINT IF EXISTS schema_migrations_pkey;
+ALTER TABLE
+    IF EXISTS ONLY public.schema_migrations DROP CONSTRAINT IF EXISTS schema_migrations_pkey;
 
-ALTER TABLE IF EXISTS ONLY public.competency
-DROP CONSTRAINT IF EXISTS competency_pkey;
+ALTER TABLE
+    IF EXISTS ONLY public.competency DROP CONSTRAINT IF EXISTS competency_pkey;
 
-ALTER TABLE IF EXISTS ONLY public.category
-DROP CONSTRAINT IF EXISTS category_pkey;
+ALTER TABLE
+    IF EXISTS ONLY public.category DROP CONSTRAINT IF EXISTS category_pkey;
 
-ALTER TABLE IF EXISTS ONLY public.assessment
-DROP CONSTRAINT IF EXISTS assessment_pkey;
+ALTER TABLE
+    IF EXISTS ONLY public.assessment DROP CONSTRAINT IF EXISTS assessment_pkey;
 
-ALTER TABLE IF EXISTS ONLY public.assessment
-DROP CONSTRAINT IF EXISTS assessment_course_participation_id_course_phase_id_competen_key;
+ALTER TABLE
+    IF EXISTS ONLY public.assessment DROP CONSTRAINT IF EXISTS assessment_course_participation_id_course_phase_id_competen_key;
 
-ALTER TABLE IF EXISTS ONLY public.assessment_completion
-DROP CONSTRAINT IF EXISTS assessment_completion_pkey;
+ALTER TABLE
+    IF EXISTS ONLY public.assessment_completion DROP CONSTRAINT IF EXISTS assessment_completion_pkey;
 
 DROP TABLE IF EXISTS public.schema_migrations;
 
@@ -86,37 +86,34 @@ SET
 --
 -- Name: category; Type: TABLE; Schema: public; Owner: -
 --
-CREATE TABLE
-    public.category (
-        id uuid NOT NULL,
-        name character varying(255) NOT NULL,
-        description text,
-        weight integer DEFAULT 1 NOT NULL,
-        short_name character varying(10)
-    );
+CREATE TABLE public.category (
+    id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    weight integer DEFAULT 1 NOT NULL,
+    short_name character varying(10)
+);
 
 --
 -- Name: competency; Type: TABLE; Schema: public; Owner: -
 --
-CREATE TABLE
-    public.competency (
-        id uuid NOT NULL,
-        category_id uuid NOT NULL,
-        name character varying(255) NOT NULL,
-        description text,
-        novice text NOT NULL,
-        intermediate text NOT NULL,
-        advanced text NOT NULL,
-        expert text NOT NULL,
-        weight integer DEFAULT 1 NOT NULL,
-        short_name character varying(10)
-    );
+CREATE TABLE public.competency (
+    id uuid NOT NULL,
+    category_id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    novice text NOT NULL,
+    intermediate text NOT NULL,
+    advanced text NOT NULL,
+    expert text NOT NULL,
+    weight integer DEFAULT 1 NOT NULL,
+    short_name character varying(10)
+);
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
-CREATE TABLE
-    public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
+CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
 
 --
 -- Data for Name: category; Type: TABLE DATA; Schema: public; Owner: -
@@ -280,22 +277,34 @@ VALUES
 --
 -- Name: category category_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY public.category ADD CONSTRAINT category_pkey PRIMARY KEY (id);
+ALTER TABLE
+    ONLY public.category
+ADD
+    CONSTRAINT category_pkey PRIMARY KEY (id);
 
 --
 -- Name: competency competency_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY public.competency ADD CONSTRAINT competency_pkey PRIMARY KEY (id);
+ALTER TABLE
+    ONLY public.competency
+ADD
+    CONSTRAINT competency_pkey PRIMARY KEY (id);
 
 --
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY public.schema_migrations ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+ALTER TABLE
+    ONLY public.schema_migrations
+ADD
+    CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
 --
 -- Name: competency competency_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY public.competency ADD CONSTRAINT competency_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.category (id) ON DELETE CASCADE;
+ALTER TABLE
+    ONLY public.competency
+ADD
+    CONSTRAINT competency_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.category (id) ON DELETE CASCADE;
 
 --
 -- PostgreSQL database dump complete
