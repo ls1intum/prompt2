@@ -28,7 +28,7 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 			"POSTGRES_DB":       "prompt",
 		},
 		HostConfigModifier: func(hc *container.HostConfig) {
-			hc.Resources.Memory = 256 * 1024 * 1024 // 256MB
+			hc.Resources.Memory = 512 * 1024 * 1024 // 256MB
 			hc.Resources.NanoCPUs = 1 * 1000000000  // 1 CPU
 		},
 		WaitingFor: wait.ForAll(
