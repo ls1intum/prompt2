@@ -10,7 +10,7 @@ jobs:
     secrets: inherit
   test-servers:
     needs: lint-servers
-    uses: ./.github/workflows/go-tests.yml
+    uses: ./.github/workflows/test-servers.yml
     secrets: inherit
   lint-clients:
     uses: ./.github/workflows/lint-clients.yml
