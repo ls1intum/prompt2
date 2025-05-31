@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
@@ -53,11 +54,21 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	}
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
-	// Connect to the database
-	conn, err := pgxpool.New(ctx, dbURL)
+	/// Try a short retry loop just in case the network is slower on CI
+	var conn *pgxpool.Pool
+	for i := 0; i < 5; i++ {
+		conn, err = pgxpool.New(ctx, dbURL)
+		if err == nil {
+			if pingErr := conn.Ping(ctx); pingErr == nil {
+				break
+			}
+			conn.Close()
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 	if err != nil {
 		_ = container.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to connect to the database: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to the database after retries: %w", err)
 	}
 
 	// Run the SQL dump
