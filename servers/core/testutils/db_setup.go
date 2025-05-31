@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/testcontainers/testcontainers-go"
@@ -28,10 +26,6 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 			"POSTGRES_USER":     "testuser",
 			"POSTGRES_PASSWORD": "testpass",
 			"POSTGRES_DB":       "prompt",
-		},
-		HostConfigModifier: func(hc *container.HostConfig) {
-			hc.Resources.Memory = 512 * 1024 * 1024 // 512MB
-			hc.Resources.NanoCPUs = 1 * 1000000000  // 1 CPU
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForLog("database system is ready to accept connections"),
