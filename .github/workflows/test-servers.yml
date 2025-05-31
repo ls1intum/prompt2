@@ -35,38 +35,22 @@ jobs:
           - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
         exclude:
           - directory: ""
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.22
           cache-dependency-path: "**/*.sum"
-
-      - name: Install gotestsum
-        run: |
-          go install gotest.tools/gotestsum@latest
-          echo "${HOME}/go/bin" >> $GITHUB_PATH
-
       - name: Install dependencies
         run: cd servers/${{ matrix.directory }} && go mod download
-
-      - name: Run tests with annotations
+      - name: Test with Go
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
-        run: |
-          cd servers/${{ matrix.directory }}
-          gotestsum \
-            --format=github-actions \
-            --junitfile TestResults-${{ matrix.directory }}.xml \
-            -- \
-            ./...
-
-      - name: Upload JUnit XML results
+        run: cd servers/${{ matrix.directory }} && go test ./... -json > TestResults-${{ matrix.directory }}.json
+      - name: Upload Go test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Go-JUnit-${{ matrix.directory }}
-          path: servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.xml
+          name: Go-results-${{ matrix.directory }}
+          path: ./servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
