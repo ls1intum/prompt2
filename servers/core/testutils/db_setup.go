@@ -3,8 +3,10 @@ package testutils
 import (
 	"context"
 	"fmt"
-	"github.com/docker/docker/api/types/container"
 	"os"
+	"time"
+
+	"github.com/docker/docker/api/types/container"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
@@ -29,7 +31,7 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 		},
 		HostConfigModifier: func(hc *container.HostConfig) {
 			hc.Resources.Memory = 512 * 1024 * 1024 // 512MB
-			hc.Resources.NanoCPUs = 2 * 1000000000  // 1 CPU
+			hc.Resources.NanoCPUs = 1 * 1000000000  // 1 CPU
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForLog("database system is ready to accept connections"),
@@ -50,11 +52,21 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	port, _ := container.MappedPort(ctx, "5432/tcp")
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
-	// Connect to the database
-	conn, err := pgxpool.New(ctx, dbURL)
+	/// Try a short retry loop just in case the network is slower on CI
+	var conn *pgxpool.Pool
+	for i := 0; i < 5; i++ {
+		conn, err = pgxpool.New(ctx, dbURL)
+		if err == nil {
+			if pingErr := conn.Ping(ctx); pingErr == nil {
+				break
+			}
+			conn.Close()
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 	if err != nil {
 		_ = container.Terminate(ctx)
-		return nil, nil, fmt.Errorf("failed to connect to the database: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to the database after retries: %w", err)
 	}
 
 	// Run the SQL dump
