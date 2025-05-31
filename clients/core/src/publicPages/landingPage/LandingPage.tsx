@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query'
 import { OpenApplicationDetails } from '@core/interfaces/application/openApplicationDetails'
 import { getAllOpenApplications } from '@core/network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../shared/components/NonAuthenticatedPageWrapper'
-import { env } from '@/env'
 
 export function LandingPage(): JSX.Element {
   const {
@@ -20,17 +19,19 @@ export function LandingPage(): JSX.Element {
   return (
     <NonAuthenticatedPageWrapper>
       <section className='text-center mb-16'>
-        <h2 className='text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl mb-4'>
+        <h2 className='text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl mb-4'>
           Course Application Portal
         </h2>
         <p className='text-xl text-gray-600 max-w-4xl mx-auto mb-8'>
-          Welcome to the {env.CHAIR_NAME_LONG}&apos; official platform for course and seminar
-          applications.
+          Welcome! You’ll find all courses currently open for applications below—you can apply by
+          selecting the course you are interested in.
         </p>
       </section>
 
       <section className='mb-16'>
-        <h3 className='text-2xl font-semibold text-gray-800 mb-6'>Available Courses</h3>
+        <h3 className='text-2xl font-semibold text-gray-800 mb-6'>
+          Available Courses for Application
+        </h3>
         {isPending ? (
           <div className='flex justify-center items-center h-64'>
             <Loader2 className='h-8 w-8 animate-spin text-primary' />
