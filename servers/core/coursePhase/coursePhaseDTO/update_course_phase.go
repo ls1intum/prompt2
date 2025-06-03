@@ -9,7 +9,7 @@ import (
 
 type UpdateCoursePhase struct {
 	ID                  uuid.UUID     `json:"id"`
-	Name                pgtype.Text   `json:"name"` // use pgtype to handle null values
+	Name                pgtype.Text   `json:"name" swaggertype:"string"` // use pgtype to handle null values
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }

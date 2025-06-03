@@ -9,9 +9,15 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
 	"github.com/ls1intum/prompt2/servers/core/meta"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
+// setupCoursePhaseRouter sets up the course phase endpoints
+// @Summary Course Phase Endpoints
+// @Description Endpoints for managing course phases
+// @Tags course_phases
+// @Security BearerAuth
 func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware, permissionCourseIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	coursePhase := router.Group("/course_phases", authMiddleware())
 	coursePhase.GET("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getCoursePhaseByID)
@@ -23,6 +29,18 @@ func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	coursePhase.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCoursePhase)
 }
 
+// createCoursePhase godoc
+// @Summary Create a course phase
+// @Description Create a new course phase for a course
+// @Tags course_phases
+// @Accept json
+// @Produce json
+// @Param courseID path string true "Course UUID"
+// @Param newCoursePhase body coursePhaseDTO.CreateCoursePhase true "Course phase to create"
+// @Success 201 {object} coursePhaseDTO.CoursePhase
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/course/{courseID} [post]
 func createCoursePhase(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("courseID"))
 	if err != nil {
@@ -56,6 +74,16 @@ func createCoursePhase(c *gin.Context) {
 
 }
 
+// getCoursePhaseByID godoc
+// @Summary Get course phase by ID
+// @Description Get a course phase by UUID
+// @Tags course_phases
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseDTO.CoursePhase
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid} [get]
 func getCoursePhaseByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -94,6 +122,18 @@ func getCoursePhaseByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, coursePhase)
 }
 
+// updateCoursePhase godoc
+// @Summary Update a course phase
+// @Description Update an existing course phase
+// @Tags course_phases
+// @Accept json
+// @Produce json
+// @Param updatedCoursePhase body coursePhaseDTO.UpdateCoursePhase true "Course phase to update"
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid} [put]
 func updateCoursePhase(c *gin.Context) {
 	var updatedCoursePhase coursePhaseDTO.UpdateCoursePhase
 	if err := c.BindJSON(&updatedCoursePhase); err != nil {
@@ -115,6 +155,16 @@ func updateCoursePhase(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteCoursePhase godoc
+// @Summary Delete a course phase
+// @Description Delete a course phase by UUID
+// @Tags course_phases
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid} [delete]
 func deleteCoursePhase(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -131,6 +181,16 @@ func deleteCoursePhase(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getPrevPhaseDataByCoursePhaseID godoc
+// @Summary Get previous phase data by course phase ID
+// @Description Get data from previous phases for a given course phase
+// @Tags course_phases
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseDTO.PrevCoursePhaseData
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/course_phase_data [get]
 func getPrevPhaseDataByCoursePhaseID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -154,5 +214,7 @@ func hasRestrictedDataAccess(userRolesMap map[string]bool, courseTokenIdentifier
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
+	})
 }
