@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -42,8 +42,16 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	}
 
 	// Get container's host and port
-	host, _ := container.Host(ctx)
-	port, _ := container.MappedPort(ctx, "5432/tcp")
+	host, err := container.Host(ctx)
+	if err != nil {
+		_ = container.Terminate(ctx)
+		return nil, nil, fmt.Errorf("could not get container host: %w", err)
+	}
+	port, err := container.MappedPort(ctx, "5432/tcp")
+	if err != nil {
+		_ = container.Terminate(ctx)
+		return nil, nil, fmt.Errorf("could not get container port: %w", err)
+	}
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
 	/// Try a short retry loop just in case the network is slower on CI
