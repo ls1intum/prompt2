@@ -12,8 +12,8 @@ import (
 type CourseWithPhases struct {
 	ID                  uuid.UUID                            `json:"id"`
 	Name                string                               `json:"name"`
-	StartDate           pgtype.Date                          `json:"startDate"`
-	EndDate             pgtype.Date                          `json:"endDate"`
+	StartDate           pgtype.Date                          `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date                          `json:"endDate" swaggertype:"string"`
 	SemesterTag         string                               `json:"semesterTag"`
 	CourseType          db.CourseType                        `json:"courseType"`
 	ECTS                int                                  `json:"ects"`
