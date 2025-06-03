@@ -46,7 +46,7 @@ export const CopyCourseDialog = ({
   const form = useForm<CopyCourseFormValues>({
     resolver: zodResolver(copyCourseSchema),
     defaultValues: {
-      name: '',
+      name: course?.name,
       semesterTag: '',
       dateRange: {
         from: undefined,
