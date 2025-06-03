@@ -53,6 +53,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     participations || [],
     scoreLevels || [],
     assessmentCompletions || [],
+    assessments || [],
   )
 
   const isError = isAssessmentsError || isAssessmentCompletionsError
@@ -83,7 +84,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
-        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
+        <AuthorDiagram assessments={assessments} />
         <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>

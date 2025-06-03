@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { Assessment } from '../../../interfaces/assessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
@@ -15,21 +15,19 @@ import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/ut
 import { getGridSpanClass } from './utils/getGridSpanClass'
 
 interface AuthorDiagramProps {
-  participationsWithAssessment: ParticipationWithAssessment[]
+  assessments: Assessment[]
 }
 
-export const AuthorDiagram = ({
-  participationsWithAssessment,
-}: AuthorDiagramProps): JSX.Element => {
+export const AuthorDiagram = ({ assessments }: AuthorDiagramProps): JSX.Element => {
   const authorsMap = new Map<string, ScoreLevel[]>()
-  participationsWithAssessment.forEach((p) => {
-    const author = p.assessmentCompletion?.author ?? 'Unknown Author'
+  assessments.forEach((ass) => {
+    const author = ass.author ?? 'Unknown Author'
 
-    if (p.scoreLevel !== undefined) {
+    if (ass.score !== undefined) {
       if (!authorsMap.has(author)) {
         authorsMap.set(author, [])
       }
-      authorsMap.get(author)?.push(p.scoreLevel)
+      authorsMap.get(author)?.push(ass.score)
     }
   })
 

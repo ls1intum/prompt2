@@ -8,7 +8,6 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
@@ -28,8 +27,8 @@ export const GenderDiagram = ({
             gender.includes(p.participation.student.gender)
           : p.participation.student.gender === gender,
       )
-      .map((p) => p.scoreLevel)
-      .filter((scoreLevel): scoreLevel is ScoreLevel => scoreLevel !== undefined)
+      .map((p) => p.assessments.map((a) => a.score))
+      .flat()
 
   const females = groupByGender(Gender.FEMALE)
   const males = groupByGender(Gender.MALE)
