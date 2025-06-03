@@ -9,9 +9,11 @@ import { ErrorPage } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
 import { useGetAllCategoriesWithCompetencies } from './hooks/useGetAllCategoriesWithCompetencies'
+import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 
 import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useCategoryStore } from '../zustand/useCategoryStore'
+import { useScoreLevelStore } from '../zustand/useScoreLevelStore'
 
 interface AssessmentDataShellProps {
   children: React.ReactNode
@@ -21,6 +23,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { setParticipations } = useParticipationStore()
   const { setCategories } = useCategoryStore()
+  const { setScoreLevels } = useScoreLevelStore()
 
   const {
     data: coursePhaseParticipations,
@@ -39,12 +42,21 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetch: refetchCategories,
   } = useGetAllCategoriesWithCompetencies()
 
-  const isError = isParticipationsError || isCategoriesError
-  const isPending = isCoursePhaseParticipationsPending || isCategoriesPending
+  const {
+    data: scoreLevels,
+    isPending: isScoreLevelsPending,
+    isError: isScoreLevelsError,
+    refetch: refetchScoreLevels,
+  } = useGetAllScoreLevels()
+
+  const isError = isParticipationsError || isCategoriesError || isScoreLevelsError
+  const isPending =
+    isCoursePhaseParticipationsPending || isCategoriesPending || isScoreLevelsPending
 
   const refetch = () => {
     refetchCoursePhaseParticipations()
     refetchCategories()
+    refetchScoreLevels()
   }
 
   useEffect(() => {
@@ -58,6 +70,12 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
       setCategories(categories)
     }
   }, [categories, setCategories])
+
+  useEffect(() => {
+    if (scoreLevels) {
+      setScoreLevels(scoreLevels)
+    }
+  }, [scoreLevels, setScoreLevels])
 
   return (
     <>

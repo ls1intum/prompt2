@@ -8,6 +8,7 @@ import (
 type Category struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
+	ShortName   string    `json:"shortName"`
 	Description string    `json:"description"`
 	Weight      int32     `json:"weight"`
 }
@@ -18,6 +19,7 @@ func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
 		categories = append(categories, Category{
 			ID:          c.ID,
 			Name:        c.Name,
+			ShortName:   c.ShortName.String,
 			Description: c.Description.String,
 			Weight:      c.Weight,
 		})

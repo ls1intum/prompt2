@@ -15670,6 +15670,7 @@ __metadata:
     class-variance-authority: "npm:^0.7.0"
     cmdk: "npm:1.0.0"
     date-fns: "npm:^4.1.0"
+    i18n-iso-countries: "npm:^7.13.0"
     react-day-picker: "npm:8.10.1"
     react-hook-form: "npm:^7.53.2"
     recharts: "npm:^2.15.0"
