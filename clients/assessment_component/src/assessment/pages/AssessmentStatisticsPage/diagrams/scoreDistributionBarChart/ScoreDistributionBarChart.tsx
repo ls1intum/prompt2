@@ -26,7 +26,9 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
   if (!data || data.length === 0) {
     return (
       <ChartContainer config={chartConfig} className='w-full h-[280px]'>
-        <div className='flex items-center justify-center h-full text-muted'>No data available</div>
+        <div className='flex items-center justify-center h-64 text-gray-500'>
+          <p>No nationality data available</p>
+        </div>
       </ChartContainer>
     )
   }
