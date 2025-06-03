@@ -8,10 +8,10 @@ import (
 )
 
 type UpdateCourseData struct {
-	StartDate           pgtype.Date   `json:"startDate"`
-	EndDate             pgtype.Date   `json:"endDate"`
-	Ects                pgtype.Int4   `json:"ects"`
-	CourseType          pgtype.Text   `json:"courseType"`
+	StartDate           pgtype.Date   `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date   `json:"endDate" swaggertype:"string"`
+	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
+	CourseType          pgtype.Text   `json:"courseType" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }

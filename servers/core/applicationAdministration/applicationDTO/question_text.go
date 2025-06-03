@@ -18,8 +18,8 @@ type QuestionText struct {
 	AllowedLength   int       `json:"allowedLength"`
 	OrderNum        int       `json:"orderNum"`
 	// using pgtype as this allows for optional values
-	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases"`
-	AccessKey                pgtype.Text `json:"accessKey"`
+	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases" swaggertype:"boolean"`
+	AccessKey                pgtype.Text `json:"accessKey" swaggertype:"string"`
 }
 
 func (a QuestionText) GetDBModel() db.UpdateApplicationQuestionTextParams {

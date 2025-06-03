@@ -16,12 +16,13 @@ user/gettingStarted
 
 ```{toctree}
 :caption: Contributor Guide
-:includehidden:
 :maxdepth: 2
 
+contributor/architecture
 contributor/guide
 contributor/setup
 contributor/new_microfrontend
+contributor/ui_guidelines
 contributor/reusable_components
 ```
 

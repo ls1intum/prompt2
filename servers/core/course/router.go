@@ -8,11 +8,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
 // Id Middleware for all routes with a course id
 // Role middleware for all without id -> possible additional filtering in subroutes required
+// setupCourseRouter sets up the course endpoints
+// @Summary Course Endpoints
+// @Description Endpoints for managing courses and course graphs
+// @Tags courses
+// @Security BearerAuth
 func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
 	course.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getAllCourses)
@@ -33,6 +39,13 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
 }
 
+// getOwnCourses godoc
+// @Summary Get own courses
+// @Description Get the course IDs for the current user
+// @Tags courses
+// @Produce json
+// @Success 200 {array} uuid.UUID
+// @Router /courses/self [get]
 func getOwnCourses(c *gin.Context) {
 	matriculationNumber := c.GetString("matriculationNumber")
 	universityLogin := c.GetString("universityLogin")
@@ -54,6 +67,15 @@ func getOwnCourses(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courseIDs)
 }
 
+// getAllCourses godoc
+// @Summary Get all courses
+// @Description Get all courses accessible to the user
+// @Tags courses
+// @Produce json
+// @Success 200 {array} courseDTO.CourseWithPhases
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/ [get]
 func getAllCourses(c *gin.Context) {
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
@@ -72,6 +94,16 @@ func getAllCourses(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courses)
 }
 
+// getCourseByID godoc
+// @Summary Get course by ID
+// @Description Get a course by UUID
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {object} courseDTO.CourseWithPhases
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid} [get]
 func getCourseByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -89,6 +121,17 @@ func getCourseByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, course)
 }
 
+// createCourse godoc
+// @Summary Create a course
+// @Description Create a new course
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param newCourse body courseDTO.CreateCourse true "Course to create"
+// @Success 201 {object} courseDTO.Course
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/ [post]
 func createCourse(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -112,6 +155,16 @@ func createCourse(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, course)
 }
 
+// getCoursePhaseGraph godoc
+// @Summary Get course phase graph
+// @Description Get the phase graph for a course
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {array} courseDTO.CoursePhaseGraph
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/phase_graph [get]
 func getCoursePhaseGraph(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -128,6 +181,16 @@ func getCoursePhaseGraph(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, graph)
 }
 
+// getParticipationDataGraph godoc
+// @Summary Get participation data graph
+// @Description Get the participation data graph for a course
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {array} courseDTO.MetaDataGraphItem
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/participation_data_graph [get]
 func getParticipationDataGraph(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -144,6 +207,16 @@ func getParticipationDataGraph(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, graph)
 }
 
+// getPhaseDataGraph godoc
+// @Summary Get phase data graph
+// @Description Get the phase data graph for a course
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {array} courseDTO.MetaDataGraphItem
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/phase_data_graph [get]
 func getPhaseDataGraph(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -160,6 +233,18 @@ func getPhaseDataGraph(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, graph)
 }
 
+// updateCoursePhaseOrder godoc
+// @Summary Update course phase order
+// @Description Update the phase order for a course
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param graphUpdate body courseDTO.UpdateCoursePhaseGraph true "Phase graph update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/phase_graph [put]
 func updateCoursePhaseOrder(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -188,6 +273,18 @@ func updateCoursePhaseOrder(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// updateParticipationDataGraph godoc
+// @Summary Update participation data graph
+// @Description Update the participation data graph for a course
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param newGraph body []courseDTO.MetaDataGraphItem true "Participation data graph update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/participation_data_graph [put]
 func updateParticipationDataGraph(c *gin.Context) {
 	newGraph, courseID, err := parseAndValidateMetaDataGraph(c)
 	if err != nil {
@@ -205,6 +302,18 @@ func updateParticipationDataGraph(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// updatePhaseDataGraph godoc
+// @Summary Update phase data graph
+// @Description Update the phase data graph for a course
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param newGraph body []courseDTO.MetaDataGraphItem true "Phase data graph update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/phase_data_graph [put]
 func updatePhaseDataGraph(c *gin.Context) {
 	newGraph, courseID, err := parseAndValidateMetaDataGraph(c)
 	if err != nil {
@@ -240,6 +349,18 @@ func parseAndValidateMetaDataGraph(c *gin.Context) ([]courseDTO.MetaDataGraphIte
 	return newGraph, courseID, nil
 }
 
+// updateCourseData godoc
+// @Summary Update course data
+// @Description Update the data for a course
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param update body courseDTO.UpdateCourseData true "Course data update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid} [put]
 func updateCourseData(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -269,6 +390,16 @@ func updateCourseData(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteCourse godoc
+// @Summary Delete a course
+// @Description Delete a course by UUID
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid} [delete]
 func deleteCourse(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -312,5 +443,7 @@ func copyCourse(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
+	})
 }

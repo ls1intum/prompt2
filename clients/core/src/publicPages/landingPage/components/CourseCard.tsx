@@ -7,47 +7,73 @@ import {
   CardContent,
 } from '@tumaet/prompt-ui-components'
 import { DeadlineInfo } from './DeadlineInfo'
-import { Calendar } from 'lucide-react'
+import { BookOpen, ArrowRight, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
-import { OpenApplicationDetails } from '@core/interfaces/application/openApplicationDetails'
+import type { OpenApplicationDetails } from '@core/interfaces/application/openApplicationDetails'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { useNavigate } from 'react-router-dom'
 
-// todo fix this in the data model and import an actual course here!!
 interface CourseCardProps {
   courseDetails: OpenApplicationDetails
 }
 
 export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
   const navigate = useNavigate()
+
   return (
-    <Card key={courseDetails.id}>
-      <CardHeader>
-        <CardTitle>{courseDetails.courseName}</CardTitle>
+    <Card
+      key={courseDetails.id}
+      className='group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card'
+    >
+      <CardHeader className='relative pb-3'>
+        <div className='flex items-start justify-between gap-3'>
+          <CardTitle className='text-xl font-bold leading-tight transition-colors duration-200'>
+            {courseDetails.courseName}
+          </CardTitle>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className='flex flex-col space-y-2 mb-4'>
-          <div className='flex justify-between items-center'>
-            <Badge variant={'secondary'}>{CourseTypeDetails[courseDetails.courseType].name}</Badge>
-            <span className='text-sm font-medium'>{courseDetails.ects} ECTS</span>
+
+      <CardContent className='relative space-y-4'>
+        {/* Course Type and ECTS Badges */}
+        <div className='flex items-center justify-between gap-3'>
+          <Badge variant='secondary' className='text-sm font-medium'>
+            {CourseTypeDetails[courseDetails.courseType].name}
+          </Badge>
+          <div className='flex items-center gap-2 text-sm font-medium px-3 py-1 rounded-full border'>
+            <BookOpen className='h-4 w-4' />
+            {courseDetails.ects} ECTS
           </div>
-          <div className='text-sm text-gray-600 space-y-1'>
-            <div className='flex items-center space-x-2'>
-              <Calendar className='h-4 w-4 flex-shrink-0' />
-              <p>
-                {format(courseDetails.startDate, 'MMM d, yyyy')} -{' '}
-                {format(courseDetails.endDate, 'MMM d, yyyy')}
-              </p>
+        </div>
+
+        <div className='p-3 space-y-4'>
+          <div className='flex items-center space-x-2'>
+            <Calendar className='h-4 w-4 flex-shrink-0' />
+            <div className='flex gap-4 flex-1 text-sm font-medium text-gray-600'>
+              <div className='flex-1'>
+                <span className='font-semibold text-slate-600'>Course Start</span>
+                <div className='text-slate-900'>
+                  {format(courseDetails.startDate, 'MMM d, yyyy')}
+                </div>
+              </div>
+              <div className='flex-1'>
+                <span className='font-semibold text-slate-600'>Course End</span>
+                <div className='text-slate-900'>{format(courseDetails.endDate, 'MMM d, yyyy')}</div>
+              </div>
             </div>
           </div>
           <DeadlineInfo deadline={courseDetails.applicationDeadline} />
         </div>
+
+        {/* Apply Button */}
         <Button
-          variant='secondary'
-          className='w-full'
+          className={`w-full bg-blue-800 hover:bg-blue-800 text-white font-semibold py-3 transition-all 
+            duration-200 transform hover:scale-[1.02] active:scale-[0.98] group/button mt-2`}
           onClick={() => navigate(`/apply/${courseDetails.id}`)}
         >
-          Apply Now
+          <span className='flex items-center justify-center gap-2'>
+            Apply Now
+            <ArrowRight className='h-4 w-4 transition-transform duration-200 group-hover/button:translate-x-1' />
+          </span>
         </Button>
       </CardContent>
     </Card>

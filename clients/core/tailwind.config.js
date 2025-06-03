@@ -10,7 +10,14 @@ module.exports = {
       pattern: /^(dark:)?(bg|text|border)-[a-z]+(?:-[a-z]+)*(?:-\d{1,3})?$/,
       variants: ['dark'],
     },
-    'grid-cols-2',
+    {
+      pattern: /^grid-cols-\d+$/,
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'],
+    },
+    {
+      pattern: /^col-span-\d+$/,
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'],
+    },
     'w-[120px]',
   ],
   theme: {
@@ -65,6 +72,13 @@ module.exports = {
         md: `calc(var(--radius) - 2px)`,
         sm: 'calc(var(--radius) - 4px)',
       },
+    },
+    screens: {
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
