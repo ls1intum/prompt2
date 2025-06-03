@@ -6,28 +6,42 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { Assessment } from '../../../interfaces/assessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
+import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
 
 interface AuthorDiagramProps {
-  assessments: Assessment[]
+  participationsWithAssessment: ParticipationWithAssessment[]
 }
 
-export const AuthorDiagram = ({ assessments }: AuthorDiagramProps): JSX.Element => {
-  const authorsMap = new Map<string, ScoreLevel[]>()
-  assessments.forEach((ass) => {
-    const author = ass.author ?? 'Unknown Author'
+export const AuthorDiagram = ({
+  participationsWithAssessment,
+}: AuthorDiagramProps): JSX.Element => {
+  const authorsMap = new Map<string, { scores: ScoreLevel[]; scoreLevels: ScoreLevel[] }>()
+  participationsWithAssessment.forEach((p) => {
+    if (p.assessmentCompletion?.author !== undefined) {
+      const author = p.assessmentCompletion?.author ?? 'Unknown Author'
 
-    if (ass.score !== undefined) {
-      if (!authorsMap.has(author)) {
-        authorsMap.set(author, [])
+      if (p.scoreLevel !== undefined) {
+        if (!authorsMap.has(author)) {
+          authorsMap.set(author, { scores: [], scoreLevels: [] })
+        }
+        authorsMap.get(author)?.scores.push(...p.assessments.map((a) => a.score))
+        authorsMap.get(author)?.scoreLevels.push(p.scoreLevel)
       }
-      authorsMap.get(author)?.push(ass.score)
+    } else {
+      p.assessments.forEach((assessment) => {
+        const author = assessment.author ?? 'Unknown Author'
+
+        if (!authorsMap.has(author)) {
+          authorsMap.set(author, { scores: [], scoreLevels: [] })
+        }
+        authorsMap.get(author)?.scores.push(assessment.score)
+      })
     }
   })
 
@@ -38,7 +52,8 @@ export const AuthorDiagram = ({ assessments }: AuthorDiagramProps): JSX.Element 
         .map((name) => name[0])
         .join(''),
       author,
-      participations,
+      participations.scores,
+      participations.scoreLevels,
     ),
   )
 

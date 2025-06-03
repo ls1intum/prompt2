@@ -5,9 +5,10 @@ import { ScoreDistributionDataPoint } from '../interfaces/ScoreDistributionDataP
 export const createScoreDistributionDataPoint = (
   shortLabel: string,
   label: string,
+  scores: ScoreLevel[],
   scoreLevels: ScoreLevel[],
 ): ScoreDistributionDataPoint => {
-  const sortedScoreLevels = [...scoreLevels].sort((a, b) => {
+  const sortedScores = [...scores].sort((a, b) => {
     const scoreA = mapScoreLevelToNumber(a)
     const scoreB = mapScoreLevelToNumber(b)
     return scoreA - scoreB
@@ -31,20 +32,18 @@ export const createScoreDistributionDataPoint = (
   }
 
   const average =
-    sortedScoreLevels.reduce((sum, scoreLevel) => {
+    sortedScores.reduce((sum, scoreLevel) => {
       const score = mapScoreLevelToNumber(scoreLevel)
       return sum + score
-    }, 0) / sortedScoreLevels.length
+    }, 0) / sortedScores.length
 
-  const computeQuartile = (sortedScores: ScoreLevel[], quartile: number): number => {
-    const pos = (sortedScores.length - 1) * quartile
+  const computeQuartile = (sortedSco: ScoreLevel[], quartile: number): number => {
+    const pos = (sortedSco.length - 1) * quartile
     const base = Math.floor(pos)
     const rest = pos - base
 
-    const scoreBase = mapScoreLevelToNumber(sortedScores[base])
-    const scoreNext = sortedScores[base + 1]
-      ? mapScoreLevelToNumber(sortedScores[base + 1])
-      : scoreBase
+    const scoreBase = mapScoreLevelToNumber(sortedSco[base])
+    const scoreNext = sortedSco[base + 1] ? mapScoreLevelToNumber(sortedSco[base + 1]) : scoreBase
 
     return scoreBase + rest * (scoreNext - scoreBase)
   }
@@ -53,10 +52,10 @@ export const createScoreDistributionDataPoint = (
     shortLabel,
     label,
     average: average,
-    lowerQuartile: computeQuartile(sortedScoreLevels, 0.25),
-    median: sortedScoreLevels[Math.floor(sortedScoreLevels.length / 2)],
-    upperQuartile: computeQuartile(sortedScoreLevels, 0.75),
-    counts: sortedScoreLevels.reduce(
+    lowerQuartile: computeQuartile(sortedScores, 0.25),
+    median: sortedScores[Math.floor(sortedScores.length / 2)],
+    upperQuartile: computeQuartile(sortedScores, 0.75),
+    counts: scoreLevels.reduce(
       (counts, scoreLevel) => {
         switch (scoreLevel) {
           case ScoreLevel.Novice:

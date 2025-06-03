@@ -34,7 +34,7 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
     categoryMap.get(category)?.push(...categoryAssessments)
   })
   const data = Array.from(categoryMap.entries()).map(([category, scores]) =>
-    createScoreDistributionDataPoint(category.shortName, category.name, scores),
+    createScoreDistributionDataPoint(category.shortName, category.name, scores, scores),
   )
 
   return (

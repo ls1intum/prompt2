@@ -23,15 +23,16 @@ interface NationalityDiagramProps {
 export const NationalityDiagram = ({
   participationsWithAssessment,
 }: NationalityDiagramProps): JSX.Element => {
-  const nationalityMap = new Map<string, ScoreLevel[]>()
+  const nationalityMap = new Map<string, { scores: ScoreLevel[]; scoreLevels: ScoreLevel[] }>()
   participationsWithAssessment.forEach((p) => {
     const nationality = p.participation.student.nationality || 'Unknown'
 
     if (p.scoreLevel !== undefined) {
       if (!nationalityMap.has(nationality)) {
-        nationalityMap.set(nationality, [])
+        nationalityMap.set(nationality, { scores: [], scoreLevels: [] })
       }
-      nationalityMap.get(nationality)?.push(...p.assessments.map((a) => a.score))
+      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.score))
+      nationalityMap.get(nationality)?.scoreLevels.push(p.scoreLevel)
     }
   })
 
@@ -39,7 +40,8 @@ export const NationalityDiagram = ({
     createScoreDistributionDataPoint(
       nationality,
       getCountryName(nationality) ?? 'Unknown Nationality',
-      participations,
+      participations.scores,
+      participations.scoreLevels,
     ),
   )
 

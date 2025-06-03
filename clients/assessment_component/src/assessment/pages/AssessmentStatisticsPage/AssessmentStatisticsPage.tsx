@@ -84,7 +84,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
-        <AuthorDiagram assessments={assessments} />
+        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
         <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
