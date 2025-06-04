@@ -1,0 +1,17 @@
+name: Lint and Test Prod
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  lint-servers:
+    uses: ./.github/workflows/lint-servers.yml
+    secrets: inherit
+  test-servers:
+    needs: lint-servers
+    uses: ./.github/workflows/test-servers.yml
+    secrets: inherit
+  lint-clients:
+    uses: ./.github/workflows/lint-clients.yml
+    secrets: inherit
