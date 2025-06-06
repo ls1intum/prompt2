@@ -29,7 +29,7 @@ export const GenderDiagram = ({
 
     return {
       scores: participationsWithAssessmentFiltered
-        .map((p) => p.assessments.map((a) => a.score))
+        .map((p) => p.assessments.map((a) => a.scoreLevel))
         .flat(),
       scoreLevels: participationsWithAssessmentFiltered
         .map((p) => p.scoreLevel)

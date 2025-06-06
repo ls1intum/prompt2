@@ -11,7 +11,7 @@ type Competency struct {
 	Name                string    `json:"name"`
 	ShortName           string    `json:"shortName"`
 	Description         string    `json:"description"`
-	DescriotionVeryBad  string    `json:"descriptionVeryBad"`
+	DescriptionVeryBad  string    `json:"descriptionVeryBad"`
 	DescriptionBad      string    `json:"descriptionBad"`
 	DescriptionOk       string    `json:"descriptionOk"`
 	DescriptionGood     string    `json:"descriptionGood"`
@@ -28,7 +28,7 @@ func GetCompetencyDTOsFromDBModels(dbCompetencies []db.Competency) []Competency 
 			Name:                c.Name,
 			ShortName:           c.ShortName.String,
 			Description:         c.Description.String,
-			DescriotionVeryBad:  c.DescriptionVeryBad,
+			DescriptionVeryBad:  c.DescriptionVeryBad,
 			DescriptionBad:      c.DescriptionBad,
 			DescriptionOk:       c.DescriptionOk,
 			DescriptionGood:     c.DescriptionGood,

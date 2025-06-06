@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
@@ -28,7 +29,7 @@ func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
 			CourseParticipationID: a.CourseParticipationID,
 			CoursePhaseID:         a.CoursePhaseID,
 			CompetencyID:          a.CompetencyID,
-			ScoreLevel:            a.ScoreLevel,
+			ScoreLevel:            db.ScoreLevel(scoreLevelDTO.MapDBScoreLevelToDTO(a.ScoreLevel)),
 			Comment:               a.Comment.String,
 			AssessedAt:            a.AssessedAt.Time,
 			Author:                a.Author,

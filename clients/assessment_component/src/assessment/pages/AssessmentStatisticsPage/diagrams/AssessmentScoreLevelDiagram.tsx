@@ -24,19 +24,21 @@ export const AssessmentScoreLevelDiagram = ({
   scoreLevels,
 }: AssessmentScoreLevelDiagramProps): JSX.Element => {
   const chartData = useMemo(() => {
-    const novice = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Novice).length
-    const intermediate = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Intermediate).length
-    const advanced = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Advanced).length
-    const expert = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Expert).length
+    const veryBad = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.VeryBad).length
+    const bad = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Bad).length
+    const ok = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Ok).length
+    const good = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.Good).length
+    const veryGood = scoreLevels.filter((s) => s.scoreLevel === ScoreLevel.VeryGood).length
     const notAssessed = participations.length - scoreLevels.length
 
     return [
       {
         dataKey: 'Assessments',
-        novice,
-        intermediate,
-        advanced,
-        expert,
+        veryBad,
+        bad,
+        ok,
+        good,
+        veryGood,
         notAssessed,
         total: participations.length,
       },

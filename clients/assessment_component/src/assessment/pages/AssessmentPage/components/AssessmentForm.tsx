@@ -46,7 +46,7 @@ export const AssessmentForm = ({
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
-      score: assessment?.score,
+      scoreLevel: assessment?.scoreLevel,
       comment: assessment ? assessment.comment : '',
       author: userName,
     },
@@ -55,7 +55,7 @@ export const AssessmentForm = ({
   const updateAssessment = useUpdateAssessment(setError)
   const createAssessment = useCreateAssessment(setError)
   const { mutate } = assessment ? updateAssessment : createAssessment
-  const selectedScore = form.watch('score')
+  const selectedScore = form.watch('scoreLevel')
 
   useEffect(() => {
     if (completed) return
@@ -74,7 +74,7 @@ export const AssessmentForm = ({
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
-    form.setValue('score', value, { shouldValidate: true })
+    form.setValue('scoreLevel', value, { shouldValidate: true })
   }
 
   return (

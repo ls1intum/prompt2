@@ -8,7 +8,7 @@ import {
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-import StudentScoreBadge from '../components/StudentScoreBadge'
+import { StudentScoreBadge } from '../components/StudentScoreBadge'
 import { useMemo } from 'react'
 
 export const AssessmentOverviewPage = (): JSX.Element => {

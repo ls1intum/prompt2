@@ -36,7 +36,7 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
   const chartData = data.map((item) => ({
     shortName: item.shortLabel,
     name: item.label,
-    value: 4, // Use the range as the value for sizing
+    value: 5, // Use the range as the value for sizing
     lowerQuartile: item.lowerQuartile,
     median: item.median,
     upperQuartile: item.upperQuartile,
@@ -50,7 +50,7 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
         <CartesianGrid
           horizontal={true}
           vertical={false}
-          strokeDasharray='4 4'
+          strokeDasharray='5 5'
           stroke='#e5e7eb'
           opacity={1}
         />
@@ -60,8 +60,8 @@ export function ScoreDistributionBarChart({ data }: ScoreDistributionBarChartPro
           axisLine={false}
           tickLine={false}
           tick={{ fontSize: 12, fill: '#a3a3a3' }} // light grey ticks
-          domain={[1, 4]}
-          ticks={[1, 2, 3, 4]}
+          domain={[1, 5]}
+          ticks={[1, 2, 3, 4, 5]}
         >
           <Label value='Score Level' angle={-90} position='insideLeft' fill='#a3a3a3' />
         </YAxis>

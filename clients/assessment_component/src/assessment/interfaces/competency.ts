@@ -4,10 +4,11 @@ export type Competency = {
   name: string
   shortName: string
   description: string
-  novice: string
-  intermediate: string
-  advanced: string
-  expert: string
+  descriptionVeryBad: string
+  descriptionBad: string
+  descriptionOk: string
+  descriptionGood: string
+  descriptionVeryGood: string
   weight: number
 }
 
@@ -16,10 +17,11 @@ export type CreateCompetencyRequest = {
   name: string
   shortName: string
   description: string
-  novice: string
-  intermediate: string
-  advanced: string
-  expert: string
+  descriptionVeryBad: string
+  descriptionBad: string
+  descriptionOk: string
+  descriptionGood: string
+  descriptionVeryGood: string
   weight: number
 }
 
@@ -29,9 +31,10 @@ export type UpdateCompetencyRequest = {
   name?: string
   shortName?: string
   description?: string
-  novice?: string
-  intermediate?: string
-  advanced?: string
-  expert?: string
+  descriptionVeryBad?: string
+  descriptionBad?: string
+  descriptionOk?: string
+  descriptionGood?: string
+  descriptionVeryGood?: string
   weight?: number
 }

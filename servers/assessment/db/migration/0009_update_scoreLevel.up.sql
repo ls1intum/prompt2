@@ -103,19 +103,19 @@ SELECT course_phase_id,
         WHEN ROUND(
             (weighted_score_sum / NULLIF(total_weight, 0))::numeric,
             2
-        ) < 1.25 THEN 'very_good'
+        ) <= 1.5 THEN 'very_good'
         WHEN ROUND(
             (weighted_score_sum / NULLIF(total_weight, 0))::numeric,
             2
-        ) < 1.75 THEN 'good'
+        ) <= 2.5 THEN 'good'
         WHEN ROUND(
             (weighted_score_sum / NULLIF(total_weight, 0))::numeric,
             2
-        ) < 2.5 THEN 'ok'
+        ) <= 3.5 THEN 'ok'
         WHEN ROUND(
             (weighted_score_sum / NULLIF(total_weight, 0))::numeric,
             2
-        ) < 3.25 THEN 'bad'
+        ) <= 4.5 THEN 'bad'
         ELSE 'very_bad'
     END AS score_level
 FROM weighted_scores;

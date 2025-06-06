@@ -5,7 +5,7 @@ export type Assessment = {
   courseParticipationID: string // UUID
   coursePhaseID: string // UUID
   competencyID: string // UUID
-  score: ScoreLevel
+  scoreLevel: ScoreLevel
   comment: string
   assessedAt: string // ISO 8601 date string
   author: string
@@ -15,7 +15,7 @@ export type CreateOrUpdateAssessmentRequest = {
   courseParticipationID: string // UUID
   coursePhaseID: string // UUID
   competencyID: string // UUID
-  score: ScoreLevel
+  scoreLevel: ScoreLevel
   comment: string
   author: string
 }
