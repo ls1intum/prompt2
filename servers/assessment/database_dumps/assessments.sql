@@ -66,7 +66,7 @@ CREATE TABLE public.assessment (
     course_participation_id uuid NOT NULL,
     course_phase_id uuid NOT NULL,
     competency_id uuid NOT NULL,
-    score public.score_level NOT NULL,
+    score_level public.score_level NOT NULL,
     COMMENT text,
     assessed_at timestamp WITH time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     author text DEFAULT ''::text NOT NULL
@@ -105,7 +105,7 @@ CREATE VIEW public.weighted_participant_scores AS WITH score_values AS (
     SELECT a.course_phase_id,
         a.course_participation_id,
         CASE
-            a.score
+            a.score_level
             WHEN 'very_bad' THEN 5::integer
             WHEN 'bad' THEN 4::integer
             WHEN 'ok' THEN 3::integer
