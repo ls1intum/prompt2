@@ -8,8 +8,12 @@ jobs:
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml
     secrets: inherit
-  build-servers:
+  test-servers:
     needs: lint-servers
+    uses: ./.github/workflows/test-servers.yml
+    secrets: inherit
+  build-servers:
+    needs: test-servers
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   lint-clients:
