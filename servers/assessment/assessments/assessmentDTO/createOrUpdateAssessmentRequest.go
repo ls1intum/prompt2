@@ -11,7 +11,7 @@ type CreateOrUpdateAssessmentRequest struct {
 	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
 	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
 	CompetencyID          uuid.UUID     `json:"competencyID"`
-	Score                 db.ScoreLevel `json:"score"`
+	ScoreLevel            db.ScoreLevel `json:"scoreLevel"`
 	Comment               string        `json:"comment"`
 	AssessedAt            *time.Time    `json:"assessedAt,omitempty"`
 	Author                string        `json:"author"`

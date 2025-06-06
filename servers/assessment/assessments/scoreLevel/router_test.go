@@ -89,7 +89,7 @@ func (suite *ScoreLevelRouterTestSuite) TestGetScoreLevelByCourseParticipationID
 	var lvl db.ScoreLevel
 	err := json.Unmarshal(resp.Body.Bytes(), &lvl)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), db.ScoreLevelNovice, lvl)
+	assert.Equal(suite.T(), db.ScoreLevelVeryBad, lvl)
 }
 
 func (suite *ScoreLevelRouterTestSuite) TestGetScoreLevelInvalidParticipationID() {

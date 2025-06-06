@@ -18,7 +18,7 @@ SELECT EXISTS (
     FROM assessment_completion
     WHERE course_participation_id = $1
       AND course_phase_id = $2
-)
+  )
 `
 
 type CheckAssessmentCompletionExistsParams struct {
@@ -34,7 +34,10 @@ func (q *Queries) CheckAssessmentCompletionExists(ctx context.Context, arg Check
 }
 
 const getAssessmentCompletion = `-- name: GetAssessmentCompletion :one
-SELECT course_participation_id, course_phase_id, completed_at, author
+SELECT course_participation_id,
+  course_phase_id,
+  completed_at,
+  author
 FROM assessment_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -58,7 +61,8 @@ func (q *Queries) GetAssessmentCompletion(ctx context.Context, arg GetAssessment
 }
 
 const getAssessmentCompletionsByCoursePhase = `-- name: GetAssessmentCompletionsByCoursePhase :many
-SELECT course_participation_id, course_phase_id, completed_at, author FROM assessment_completion
+SELECT course_participation_id, course_phase_id, completed_at, author
+FROM assessment_completion
 WHERE course_phase_id = $1
 `
 
@@ -93,9 +97,8 @@ INSERT INTO assessment_completion (
     course_phase_id,
     completed_at,
     author
-) VALUES (
-    $1, $2, $3, $4
-)
+  )
+VALUES ($1, $2, $3, $4)
 `
 
 type MarkAssessmentAsFinishedParams struct {

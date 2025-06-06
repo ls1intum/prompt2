@@ -35,7 +35,7 @@ func GetScoreLevelByCourseParticipationID(ctx context.Context, courseParticipati
 	})
 	if err != nil {
 		log.Error("Error fetching score level from database: ", err)
-		return db.ScoreLevelNovice, err
+		return db.ScoreLevelVeryBad, err
 	}
 
 	return db.ScoreLevel(dbScoreLevel), nil

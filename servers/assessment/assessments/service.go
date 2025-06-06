@@ -45,7 +45,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		Score:                 req.Score,
+		ScoreLevel:            req.ScoreLevel,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})
@@ -78,7 +78,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		Score:                 req.Score,
+		ScoreLevel:            req.ScoreLevel,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})
@@ -111,7 +111,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
 	var level = scoreLevelDTO.StudentScore{
-		ScoreLevel: db.ScoreLevelNovice,
+		ScoreLevel: db.ScoreLevelVeryBad,
 		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
 	}
 	if len(assessments) > 0 {

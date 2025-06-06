@@ -13,7 +13,7 @@ type Assessment struct {
 	CourseParticipationID uuid.UUID     `json:"courseParticipationID"`
 	CoursePhaseID         uuid.UUID     `json:"coursePhaseID"`
 	CompetencyID          uuid.UUID     `json:"competencyID"`
-	Score                 db.ScoreLevel `json:"score"`
+	ScoreLevel            db.ScoreLevel `json:"scoreLevel"`
 	Comment               string        `json:"comment"`
 	AssessedAt            time.Time     `json:"assessedAt"`
 	Author                string        `json:"author"`
@@ -28,7 +28,7 @@ func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
 			CourseParticipationID: a.CourseParticipationID,
 			CoursePhaseID:         a.CoursePhaseID,
 			CompetencyID:          a.CompetencyID,
-			Score:                 a.Score,
+			ScoreLevel:            a.ScoreLevel,
 			Comment:               a.Comment.String,
 			AssessedAt:            a.AssessedAt.Time,
 			Author:                a.Author,

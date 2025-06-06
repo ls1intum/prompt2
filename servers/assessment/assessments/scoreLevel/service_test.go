@@ -55,7 +55,7 @@ func (suite *ScoreLevelServiceTestSuite) TestGetScoreLevelByCourseParticipationI
 	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
 	lvl, err := GetScoreLevelByCourseParticipationID(suite.suiteCtx, partID, phaseID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), db.ScoreLevelNovice, lvl, "Expected novice level")
+	assert.Equal(suite.T(), db.ScoreLevelVeryBad, lvl, "Expected novice level")
 }
 
 func (suite *ScoreLevelServiceTestSuite) TestGetScoreLevelByCourseParticipationIDNotFound() {
@@ -70,7 +70,7 @@ func (suite *ScoreLevelServiceTestSuite) TestGetStudentScore() {
 	partID := uuid.MustParse("e482ab63-c1c0-4943-9221-989b0c257559")
 	score, err := GetStudentScore(suite.suiteCtx, partID, phaseID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), db.ScoreLevelAdvanced, score.ScoreLevel, "Expected advanced level for student score")
+	assert.Equal(suite.T(), db.ScoreLevelBad, score.ScoreLevel, "Expected bad level")
 	assert.GreaterOrEqual(suite.T(), score.Score.Float64, float64(1), "Score should be >= 1")
 	assert.LessOrEqual(suite.T(), score.Score.Float64, float64(4), "Score should be <= 4")
 }
