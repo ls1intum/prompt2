@@ -57,7 +57,7 @@ func GetStudentScore(ctx context.Context, courseParticipationID, coursePhaseID u
 	}
 
 	return scoreLevelDTO.StudentScore{
-		ScoreLevel: db.ScoreLevel(studentScoreWithLevel.ScoreLevel),
+		ScoreLevel: scoreLevelDTO.MapDBScoreLevelToDTO(db.ScoreLevel(studentScoreWithLevel.ScoreLevel)),
 		Score:      score,
 	}, nil
 }

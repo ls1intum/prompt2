@@ -52,13 +52,5 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         icon: '🔵',
         border: 'border-blue-300',
       }
-    default:
-      return {
-        title: 'Unknown',
-        textColor: 'text-gray-700',
-        selectedBg: 'bg-gray-100',
-        icon: '⚪',
-        border: 'border-gray-300',
-      }
   }
 }

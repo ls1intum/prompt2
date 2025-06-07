@@ -126,7 +126,7 @@ export const AssessmentForm = ({
                 </div>
 
                 <p className='line-clamp-3 text-muted-foreground'>
-                  {competency['description' + [level.charAt(0).toUpperCase() + level.slice(1)]]}
+                  {competency['description' + level.charAt(0).toUpperCase() + level.slice(1)]}
                 </p>
               </button>
             )

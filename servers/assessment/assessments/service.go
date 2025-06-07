@@ -111,7 +111,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
 	var level = scoreLevelDTO.StudentScore{
-		ScoreLevel: db.ScoreLevelVeryBad,
+		ScoreLevel: scoreLevelDTO.ScoreLevelVeryBad,
 		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
 	}
 	if len(assessments) > 0 {

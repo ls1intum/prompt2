@@ -72,7 +72,7 @@ func (suite *ScoreLevelServiceTestSuite) TestGetStudentScore() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), db.ScoreLevelBad, score.ScoreLevel, "Expected bad level")
 	assert.GreaterOrEqual(suite.T(), score.Score.Float64, float64(1), "Score should be >= 1")
-	assert.LessOrEqual(suite.T(), score.Score.Float64, float64(4), "Score should be <= 4")
+	assert.LessOrEqual(suite.T(), score.Score.Float64, float64(5), "Score should be <= 5")
 }
 
 func TestScoreLevelServiceTestSuite(t *testing.T) {

@@ -74,7 +74,7 @@ INSERT INTO assessment (
     course_phase_id,
     competency_id,
     score_level,
-    COMMENT,
+    comment,
     assessed_at,
     author
   )
@@ -307,7 +307,7 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 const updateAssessment = `-- name: UpdateAssessment :exec
 UPDATE assessment
 SET score_level = $4,
-  COMMENT = $5,
+  comment = $5,
   assessed_at = CURRENT_TIMESTAMP,
   author = $6
 WHERE course_participation_id = $1
