@@ -1,6 +1,10 @@
 package scoreLevelDTO
 
-import db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+import (
+	"log"
+
+	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+)
 
 type ScoreLevel string
 
@@ -10,6 +14,7 @@ const (
 	ScoreLevelOk       ScoreLevel = "ok"
 	ScoreLevelGood     ScoreLevel = "good"
 	ScoreLevelVeryGood ScoreLevel = "veryGood"
+	ScoreLevelUnknown  ScoreLevel = "unknown"
 )
 
 func MapDBScoreLevelToDTO(scoreLevel db.ScoreLevel) ScoreLevel {
@@ -25,6 +30,7 @@ func MapDBScoreLevelToDTO(scoreLevel db.ScoreLevel) ScoreLevel {
 	case "very_good":
 		return ScoreLevelVeryGood
 	default:
-		return ""
+		log.Printf("Unknown score level received: %s", scoreLevel)
+		return ScoreLevelUnknown
 	}
 }
