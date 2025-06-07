@@ -43,7 +43,9 @@ import { DevProfileFilter } from './interfaces/devProfileFilter'
 import { useGetFilteredParticipations } from './hooks/useGetFilteredParticipations'
 import { useDownloadDeveloperProfiles } from './hooks/useDownloadDeveloperProfiles'
 import { GitlabStatus } from '../../interfaces/GitlabStatus'
+import { AppleStatus } from '../../interfaces/AppleStatus'
 import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
+import { getAppleStatuses } from '../../network/queries/getAppleStatuses'
 import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
 import { CreateGitlabReposDialog } from './components/CreateGitlabReposDialog'
 
@@ -76,6 +78,7 @@ export const DeveloperProfilesLecturerPage = () => {
       noDevices: false,
     },
     gitlabNotCreated: false,
+    appleNotCreated: false,
   })
 
   // Get the developer profile and course phase participations
@@ -111,14 +114,33 @@ export const DeveloperProfilesLecturerPage = () => {
     queryFn: () => getGitlabStatuses(phaseId ?? ''),
   })
 
-  const isError = isParticipationsError || isDeveloperProfileError || isGitlabStatusesError
+  // getting the Apple Statuses
+  const {
+    data: appleStatuses,
+    isPending: isAppleStatusesPending,
+    isError: isAppleStatusesError,
+    refetch: refetchAppleStatuses,
+  } = useQuery<AppleStatus[]>({
+    queryKey: ['apple_statuses', phaseId],
+    queryFn: () => getAppleStatuses(phaseId ?? ''),
+  })
+
+  const isError =
+    isParticipationsError ||
+    isDeveloperProfileError ||
+    isGitlabStatusesError ||
+    isAppleStatusesError
   const isPending =
-    isCoursePhaseParticipationsPending || isDeveloperProfilesPending || isGitlabStatusesPending
+    isCoursePhaseParticipationsPending ||
+    isDeveloperProfilesPending ||
+    isGitlabStatusesPending ||
+    isAppleStatusesPending
 
   const handleRefresh = () => {
     refetchCoursePhaseParticipations()
     refetchDeveloperProfiles()
     refetchGitlabStatuses()
+    refetchAppleStatuses()
   }
 
   const tableWidth = useCustomElementWidth('table-view', 10)
@@ -128,6 +150,7 @@ export const DeveloperProfilesLecturerPage = () => {
     coursePhaseParticipations?.participations || [],
     developerProfiles || [],
     gitlabStatuses || [],
+    appleStatuses || [],
   )
 
   // Add this sorting function before the return statement
@@ -219,117 +242,173 @@ export const DeveloperProfilesLecturerPage = () => {
                 <TableHead>Devices</TableHead>
                 <TableHead>GitLab Username</TableHead>
                 <TableHead>Apple ID</TableHead>
+                <TableHead>Apple Status</TableHead>
                 <TableHead>Gitlab Status</TableHead>
                 <TableHead className='text-right'>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredParticipants.map(({ participation, devProfile, gitlabStatus }) => (
-                <TableRow
-                  key={participation.courseParticipationID}
-                  className='cursor-pointer hover:bg-muted/50'
-                  onClick={() =>
-                    setSelectedParticipant({ participation, devProfile, gitlabStatus })
-                  }
-                >
-                  <TableCell className='font-medium'>
-                    {participation.student.firstName} {participation.student.lastName}
-                  </TableCell>
-                  <TableCell>{participation.student.email}</TableCell>
-                  <TableCell>
-                    {devProfile ? (
-                      <div className='flex items-center'>
-                        <div className='bg-green-100 text-green-700 p-1 rounded-full'>
-                          <Check className='h-4 w-4' />
+              {filteredParticipants.map(
+                ({ participation, devProfile, gitlabStatus, appleStatus }) => (
+                  <TableRow
+                    key={participation.courseParticipationID}
+                    className='cursor-pointer hover:bg-muted/50'
+                    onClick={() =>
+                      setSelectedParticipant({
+                        participation,
+                        devProfile,
+                        gitlabStatus,
+                        appleStatus,
+                      })
+                    }
+                  >
+                    <TableCell className='font-medium'>
+                      {participation.student.firstName} {participation.student.lastName}
+                    </TableCell>
+                    <TableCell>{participation.student.email}</TableCell>
+                    <TableCell>
+                      {devProfile ? (
+                        <div className='flex items-center'>
+                          <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                            <Check className='h-4 w-4' />
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className='flex items-center'>
-                        <div className='bg-red-100 text-red-700 p-1 rounded-full'>
-                          <X className='h-4 w-4' />
+                      ) : (
+                        <div className='flex items-center'>
+                          <div className='bg-red-100 text-red-700 p-1 rounded-full'>
+                            <X className='h-4 w-4' />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className='flex gap-2'>
-                      {devProfile?.hasMacBook && <Laptop className='h-5 w-5 text-slate-600' />}
-                      {devProfile?.iPhoneUDID && <Smartphone className='h-5 w-5 text-slate-600' />}
-                      {devProfile?.iPadUDID && <Tablet className='h-5 w-5 text-slate-600' />}
-                      {devProfile?.appleWatchUDID && <Watch className='h-5 w-5 text-slate-600' />}
-                      {!devProfile?.hasMacBook &&
-                        !devProfile?.iPhoneUDID &&
-                        !devProfile?.iPadUDID &&
-                        !devProfile?.appleWatchUDID && (
-                          <span className='text-muted-foreground text-sm italic'>No devices</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className='flex gap-2'>
+                        {devProfile?.hasMacBook && <Laptop className='h-5 w-5 text-slate-600' />}
+                        {devProfile?.iPhoneUDID && (
+                          <Smartphone className='h-5 w-5 text-slate-600' />
                         )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {devProfile?.gitLabUsername || (
-                      <span className='text-muted-foreground text-sm italic'>Not set</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {devProfile?.appleID || (
-                      <span className='text-muted-foreground text-sm italic'>Not set</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {gitlabStatus ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            {gitlabStatus.gitlabSuccess ? (
+                        {devProfile?.iPadUDID && <Tablet className='h-5 w-5 text-slate-600' />}
+                        {devProfile?.appleWatchUDID && <Watch className='h-5 w-5 text-slate-600' />}
+                        {!devProfile?.hasMacBook &&
+                          !devProfile?.iPhoneUDID &&
+                          !devProfile?.iPadUDID &&
+                          !devProfile?.appleWatchUDID && (
+                            <span className='text-muted-foreground text-sm italic'>No devices</span>
+                          )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {devProfile?.gitLabUsername || (
+                        <span className='text-muted-foreground text-sm italic'>Not set</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {devProfile?.appleID || (
+                        <span className='text-muted-foreground text-sm italic'>Not set</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {appleStatus ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              {appleStatus.appleSuccess ? (
+                                <div className='flex items-center'>
+                                  <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                                    <Check className='h-4 w-4' />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className='flex items-center'>
+                                  <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
+                                    <TriangleAlert className='h-4 w-4' />
+                                  </div>
+                                </div>
+                              )}
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {appleStatus.appleSuccess
+                                ? 'Apple account created successfully'
+                                : appleStatus.errorMessage}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
                               <div className='flex items-center'>
-                                <div className='bg-green-100 text-green-700 p-1 rounded-full'>
-                                  <Check className='h-4 w-4' />
+                                <div className='bg-red-100 text-red-700 p-1 rounded-full'>
+                                  <X className='h-4 w-4' />
                                 </div>
                               </div>
-                            ) : (
+                            </TooltipTrigger>
+                            <TooltipContent>Apple account not yet created</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {gitlabStatus ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              {gitlabStatus.gitlabSuccess ? (
+                                <div className='flex items-center'>
+                                  <div className='bg-green-100 text-green-700 p-1 rounded-full'>
+                                    <Check className='h-4 w-4' />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className='flex items-center'>
+                                  <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
+                                    <TriangleAlert className='h-4 w-4' />
+                                  </div>
+                                </div>
+                              )}
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {gitlabStatus.gitlabSuccess
+                                ? 'Repo created successfully'
+                                : gitlabStatus.errorMessage}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
                               <div className='flex items-center'>
-                                <div className='bg-orange-100 text-orange-700 p-1 rounded-full'>
-                                  <TriangleAlert className='h-4 w-4' />
+                                <div className='bg-red-100 text-red-700 p-1 rounded-full'>
+                                  <X className='h-4 w-4' />
                                 </div>
                               </div>
-                            )}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {gitlabStatus.gitlabSuccess
-                              ? 'Repo created successfully'
-                              : gitlabStatus.errorMessage}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className='flex items-center'>
-                              <div className='bg-red-100 text-red-700 p-1 rounded-full'>
-                                <X className='h-4 w-4' />
-                              </div>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>Repository not yet created</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </TableCell>
-                  <TableCell className='text-right'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setSelectedParticipant({ participation, devProfile, gitlabStatus })
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                            </TooltipTrigger>
+                            <TooltipContent>Repository not yet created</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </TableCell>
+                    <TableCell className='text-right'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedParticipant({
+                            participation,
+                            devProfile,
+                            gitlabStatus,
+                            appleStatus,
+                          })
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ),
+              )}
             </TableBody>
           </Table>
         </div>
