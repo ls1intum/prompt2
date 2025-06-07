@@ -14,25 +14,24 @@ const (
 	ScoreLevelOk       ScoreLevel = "ok"
 	ScoreLevelGood     ScoreLevel = "good"
 	ScoreLevelVeryGood ScoreLevel = "veryGood"
-	ScoreLevelUnknown  ScoreLevel = "unknown"
 )
 
 func MapDBScoreLevelToDTO(scoreLevel db.ScoreLevel) ScoreLevel {
 	switch scoreLevel {
-	case "very_bad":
+	case db.ScoreLevelVeryBad:
 		return ScoreLevelVeryBad
-	case "bad":
+	case db.ScoreLevelBad:
 		return ScoreLevelBad
-	case "ok":
+	case db.ScoreLevelOk:
 		return ScoreLevelOk
-	case "good":
+	case db.ScoreLevelGood:
 		return ScoreLevelGood
-	case "very_good":
+	case db.ScoreLevelVeryGood:
 		return ScoreLevelVeryGood
-	default:
-		log.Printf("Unknown score level received: %s", scoreLevel)
-		return ScoreLevelUnknown
 	}
+
+	log.Println("Warning: Unrecognized score level in MapDBScoreLevelToDTO:", scoreLevel)
+	return ScoreLevelVeryBad // Default case, should not happen
 }
 
 func MapDTOtoDBScoreLevel(scoreLevel ScoreLevel) db.ScoreLevel {
@@ -47,8 +46,8 @@ func MapDTOtoDBScoreLevel(scoreLevel ScoreLevel) db.ScoreLevel {
 		return db.ScoreLevelGood
 	case ScoreLevelVeryGood:
 		return db.ScoreLevelVeryGood
-	default:
-		log.Printf("Unknown score level received: %s", scoreLevel)
-		return db.ScoreLevelVeryBad
 	}
+
+	log.Println("Warning: Unrecognized score level in MapDTOtoDBScoreLevel:", scoreLevel)
+	return db.ScoreLevelVeryBad // Default case, should not happen
 }
