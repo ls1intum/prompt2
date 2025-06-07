@@ -57,6 +57,15 @@ func (ns NullScoreLevel) Value() (driver.Value, error) {
 	return string(ns.ScoreLevel), nil
 }
 
+type ActionItem struct {
+	ID                    uuid.UUID        `json:"id"`
+	Action                string           `json:"action"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	Author                string           `json:"author"`
+}
+
 type Assessment struct {
 	ID                    uuid.UUID          `json:"id"`
 	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
@@ -66,6 +75,7 @@ type Assessment struct {
 	AssessedAt            pgtype.Timestamptz `json:"assessed_at"`
 	Author                string             `json:"author"`
 	ScoreLevel            ScoreLevel         `json:"score_level"`
+	Examples              string             `json:"examples"`
 }
 
 type AssessmentCompletion struct {
@@ -73,6 +83,9 @@ type AssessmentCompletion struct {
 	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
 	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
 	Author                string             `json:"author"`
+	Comment               string             `json:"comment"`
+	GradeSuggestion       pgtype.Numeric     `json:"grade_suggestion"`
+	Completed             bool               `json:"completed"`
 }
 
 type Category struct {
