@@ -5,6 +5,7 @@ import "github.com/google/uuid"
 type CreateCompetencyRequest struct {
 	CategoryID   uuid.UUID `json:"categoryID"`
 	Name         string    `json:"name"`
+	ShortName    string    `json:"shortName"`
 	Description  string    `json:"description"`
 	Novice       string    `json:"novice"`
 	Intermediate string    `json:"intermediate"`

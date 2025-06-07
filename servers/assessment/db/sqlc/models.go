@@ -79,6 +79,7 @@ type Category struct {
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
 	Weight      int32       `json:"weight"`
+	ShortName   pgtype.Text `json:"short_name"`
 }
 
 type Competency struct {
@@ -91,6 +92,7 @@ type Competency struct {
 	Advanced     string      `json:"advanced"`
 	Expert       string      `json:"expert"`
 	Weight       int32       `json:"weight"`
+	ShortName    pgtype.Text `json:"short_name"`
 }
 
 type CompletedScoreLevel struct {
@@ -99,15 +101,9 @@ type CompletedScoreLevel struct {
 	ScoreLevel            string    `json:"score_level"`
 }
 
-type ScoreLevelCategory struct {
-	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
-	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
-	ScoreLevel            string         `json:"score_level"`
-}
-
 type WeightedParticipantScore struct {
 	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
 	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
+	ScoreLevel            string         `json:"score_level"`
 }

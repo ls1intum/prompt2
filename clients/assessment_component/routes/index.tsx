@@ -4,6 +4,7 @@ import { SettingsPage } from '../src/assessment/pages/SettingsPage/SettingsPage'
 import { AssessmentOverviewPage } from '../src/assessment/pages/AssessmentOverviewPage/AssessmentOverviewPage'
 import { AssessmentPage } from '../src/assessment/pages/AssessmentPage/AssessmentPage'
 import { AssessmentDataShell } from '../src/assessment/pages/AssessmentDataShell'
+import { AssessmentStatisticsPage } from '../src/assessment/pages/AssessmentStatisticsPage/AssessmentStatisticsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
@@ -23,6 +24,15 @@ const routes: ExtendedRouteObject[] = [
       </AssessmentDataShell>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
+  },
+  {
+    path: '/statistics',
+    element: (
+      <AssessmentDataShell>
+        <AssessmentStatisticsPage />
+      </AssessmentDataShell>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/settings',
