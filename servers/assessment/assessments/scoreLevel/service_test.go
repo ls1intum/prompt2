@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
@@ -70,7 +71,7 @@ func (suite *ScoreLevelServiceTestSuite) TestGetStudentScore() {
 	partID := uuid.MustParse("e482ab63-c1c0-4943-9221-989b0c257559")
 	score, err := GetStudentScore(suite.suiteCtx, partID, phaseID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), db.ScoreLevelBad, score.ScoreLevel, "Expected bad level")
+	assert.Equal(suite.T(), scoreLevelDTO.ScoreLevelBad, score.ScoreLevel, "Expected bad level")
 	assert.GreaterOrEqual(suite.T(), score.Score.Float64, float64(1), "Score should be >= 1")
 	assert.LessOrEqual(suite.T(), score.Score.Float64, float64(5), "Score should be <= 5")
 }
