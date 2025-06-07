@@ -12,12 +12,10 @@ export default function AssessmentStatusBadge({
   isFinalized,
   className,
 }: AssessmentStatusBadgeProps) {
-  // Determine status
   const isCompleted = remainingAssessments === 0
   const isInProgress = remainingAssessments > 0
   const isCompletedButNotFinalized = isCompleted && !isFinalized
 
-  // Set badge styles based on status
   const badgeStyles = cn(
     'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
     {

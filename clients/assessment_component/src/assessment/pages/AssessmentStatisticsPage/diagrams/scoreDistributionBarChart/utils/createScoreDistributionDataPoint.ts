@@ -20,7 +20,7 @@ export const createScoreDistributionDataPoint = (
       label,
       average: 0,
       lowerQuartile: 0,
-      median: ScoreLevel.Novice,
+      median: ScoreLevel.VeryBad,
       upperQuartile: 0,
       counts: {
         novice: 0,
@@ -58,22 +58,25 @@ export const createScoreDistributionDataPoint = (
     counts: scoreLevels.reduce(
       (counts, scoreLevel) => {
         switch (scoreLevel) {
-          case ScoreLevel.Novice:
-            counts.novice++
+          case ScoreLevel.VeryBad:
+            counts.veryBad++
             break
-          case ScoreLevel.Intermediate:
-            counts.intermediate++
+          case ScoreLevel.Bad:
+            counts.bad++
             break
-          case ScoreLevel.Advanced:
-            counts.advanced++
+          case ScoreLevel.Ok:
+            counts.ok++
             break
-          case ScoreLevel.Expert:
-            counts.expert++
+          case ScoreLevel.Good:
+            counts.good++
+            break
+          case ScoreLevel.VeryGood:
+            counts.veryGood++
             break
         }
         return counts
       },
-      { novice: 0, intermediate: 0, advanced: 0, expert: 0 },
+      { veryBad: 0, bad: 0, ok: 0, good: 0, veryGood: 0 } as Record<string, number>,
     ),
   }
 }

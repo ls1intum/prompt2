@@ -1,12 +1,5 @@
 import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
 
-export interface SkillCounts {
-  novice: number
-  intermediate: number
-  advanced: number
-  expert: number
-}
-
 export interface ScoreDistributionDataPoint {
   shortLabel: string
   label: string
@@ -14,5 +7,5 @@ export interface ScoreDistributionDataPoint {
   lowerQuartile: number
   median: ScoreLevel
   upperQuartile: number
-  counts: SkillCounts
+  counts: Record<string, number>
 }

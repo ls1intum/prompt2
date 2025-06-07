@@ -27,7 +27,7 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
       .filter((assessment) =>
         category.competencies.map((competency) => competency.id).includes(assessment.competencyID),
       )
-      .map((assessment) => assessment.score)
+      .map((assessment) => assessment.scoreLevel)
     if (!categoryMap.has(category)) {
       categoryMap.set(category, [])
     }

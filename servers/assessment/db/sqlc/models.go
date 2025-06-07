@@ -15,10 +15,11 @@ import (
 type ScoreLevel string
 
 const (
-	ScoreLevelNovice       ScoreLevel = "novice"
-	ScoreLevelIntermediate ScoreLevel = "intermediate"
-	ScoreLevelAdvanced     ScoreLevel = "advanced"
-	ScoreLevelExpert       ScoreLevel = "expert"
+	ScoreLevelVeryBad  ScoreLevel = "very_bad"
+	ScoreLevelBad      ScoreLevel = "bad"
+	ScoreLevelOk       ScoreLevel = "ok"
+	ScoreLevelGood     ScoreLevel = "good"
+	ScoreLevelVeryGood ScoreLevel = "very_good"
 )
 
 func (e *ScoreLevel) Scan(src interface{}) error {
@@ -61,10 +62,10 @@ type Assessment struct {
 	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
 	CompetencyID          uuid.UUID          `json:"competency_id"`
-	Score                 ScoreLevel         `json:"score"`
 	Comment               pgtype.Text        `json:"comment"`
 	AssessedAt            pgtype.Timestamptz `json:"assessed_at"`
 	Author                string             `json:"author"`
+	ScoreLevel            ScoreLevel         `json:"score_level"`
 }
 
 type AssessmentCompletion struct {
@@ -83,16 +84,17 @@ type Category struct {
 }
 
 type Competency struct {
-	ID           uuid.UUID   `json:"id"`
-	CategoryID   uuid.UUID   `json:"category_id"`
-	Name         string      `json:"name"`
-	Description  pgtype.Text `json:"description"`
-	Novice       string      `json:"novice"`
-	Intermediate string      `json:"intermediate"`
-	Advanced     string      `json:"advanced"`
-	Expert       string      `json:"expert"`
-	Weight       int32       `json:"weight"`
-	ShortName    pgtype.Text `json:"short_name"`
+	ID                  uuid.UUID   `json:"id"`
+	CategoryID          uuid.UUID   `json:"category_id"`
+	Name                string      `json:"name"`
+	Description         pgtype.Text `json:"description"`
+	Weight              int32       `json:"weight"`
+	ShortName           pgtype.Text `json:"short_name"`
+	DescriptionVeryBad  string      `json:"description_very_bad"`
+	DescriptionBad      string      `json:"description_bad"`
+	DescriptionOk       string      `json:"description_ok"`
+	DescriptionGood     string      `json:"description_good"`
+	DescriptionVeryGood string      `json:"description_very_good"`
 }
 
 type CompletedScoreLevel struct {

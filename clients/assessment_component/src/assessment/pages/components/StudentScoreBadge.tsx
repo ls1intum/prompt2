@@ -9,7 +9,7 @@ interface ScoreLevelBadgeProps {
   score?: number
 }
 
-const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
+export const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
   const config = getLevelConfig(scoreLevel)
 
   return (
@@ -18,5 +18,3 @@ const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
     </Badge>
   )
 }
-
-export default StudentScoreBadge

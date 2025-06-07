@@ -30,16 +30,17 @@ func CreateCompetency(ctx context.Context, req competencyDTO.CreateCompetencyReq
 	qtx := CompetencyServiceSingleton.queries.WithTx(tx)
 
 	err = qtx.CreateCompetency(ctx, db.CreateCompetencyParams{
-		ID:           uuid.New(),
-		CategoryID:   req.CategoryID,
-		Name:         req.Name,
-		ShortName:    pgtype.Text{String: req.ShortName, Valid: true},
-		Description:  pgtype.Text{String: req.Description, Valid: true},
-		Novice:       req.Novice,
-		Intermediate: req.Intermediate,
-		Advanced:     req.Advanced,
-		Expert:       req.Expert,
-		Weight:       req.Weight,
+		ID:                  uuid.New(),
+		CategoryID:          req.CategoryID,
+		Name:                req.Name,
+		ShortName:           pgtype.Text{String: req.ShortName, Valid: true},
+		Description:         pgtype.Text{String: req.Description, Valid: true},
+		DescriptionVeryBad:  req.DescriptionVeryBad,
+		DescriptionBad:      req.DescriptionBad,
+		DescriptionOk:       req.DescriptionOk,
+		DescriptionGood:     req.DescriptionGood,
+		DescriptionVeryGood: req.DescriptionVeryGood,
+		Weight:              req.Weight,
 	})
 	if err != nil {
 		log.Error("could not create competency: ", err)
@@ -83,16 +84,17 @@ func ListCompetenciesByCategory(ctx context.Context, categoryID uuid.UUID) ([]db
 
 func UpdateCompetency(ctx context.Context, id uuid.UUID, req competencyDTO.UpdateCompetencyRequest) error {
 	err := CompetencyServiceSingleton.queries.UpdateCompetency(ctx, db.UpdateCompetencyParams{
-		ID:           id,
-		CategoryID:   req.CategoryID,
-		Name:         req.Name,
-		ShortName:    pgtype.Text{String: req.ShortName, Valid: true},
-		Description:  pgtype.Text{String: req.Description, Valid: true},
-		Novice:       req.Novice,
-		Intermediate: req.Intermediate,
-		Advanced:     req.Advanced,
-		Expert:       req.Expert,
-		Weight:       req.Weight,
+		ID:                  id,
+		CategoryID:          req.CategoryID,
+		Name:                req.Name,
+		ShortName:           pgtype.Text{String: req.ShortName, Valid: true},
+		Description:         pgtype.Text{String: req.Description, Valid: true},
+		DescriptionVeryBad:  req.DescriptionVeryBad,
+		DescriptionBad:      req.DescriptionBad,
+		DescriptionOk:       req.DescriptionOk,
+		DescriptionGood:     req.DescriptionGood,
+		DescriptionVeryGood: req.DescriptionVeryGood,
+		Weight:              req.Weight,
 	})
 	if err != nil {
 		log.Error("could not update competency: ", err)
