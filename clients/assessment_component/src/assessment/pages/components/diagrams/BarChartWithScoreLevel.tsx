@@ -3,7 +3,7 @@ import { BarChart, Bar, LabelList, XAxis, YAxis, Rectangle } from 'recharts'
 import { useMemo } from 'react'
 import { chartConfig } from './utils/chartConfig'
 import { getCornerRadius } from './utils/getCornerRadius'
-import { DataPoint } from '../interfaces/DataPoint'
+import { DataPoint } from './interfaces/DataPoint'
 
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 

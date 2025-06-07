@@ -9,7 +9,7 @@ import { getCountryName } from '@/lib/getCountries'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'

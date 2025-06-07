@@ -1,4 +1,4 @@
-import { DataPoint } from '../../interfaces/DataPoint'
+import { DataPoint } from '../interfaces/DataPoint'
 
 type CornerRadius = [number, number, number, number]
 
