@@ -79,7 +79,7 @@ func (suite *ScoreLevelServiceTestSuite) TestGetStudentScore() {
 func (suite *ScoreLevelServiceTestSuite) TestMapDBScoreLevelToDTOIntegration() {
 	// Test that our DTO mapping works correctly within the service context
 	validLevel := scoreLevelDTO.MapDBScoreLevelToDTO("bad")
-	assert.Equal(suite.T(), scoreLevelDTO.ScoreLevelVeryBad, validLevel, "Valid score level should map correctly")
+	assert.Equal(suite.T(), scoreLevelDTO.ScoreLevelBad, validLevel, "Valid score level should map correctly")
 
 	invalidLevel := scoreLevelDTO.MapDBScoreLevelToDTO("invalid_level")
 	assert.Equal(suite.T(), scoreLevelDTO.ScoreLevelVeryBad, invalidLevel, "Invalid score level should return ScoreLevelVeryBad")
