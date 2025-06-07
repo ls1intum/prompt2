@@ -7,7 +7,7 @@ export function ScoreDistributionTooltipContent(props: any) {
   }
 
   const data = props.payload[0].payload
-  const counts: Record<string, number> = data.counts
+  const counts: Record<ScoreLevel, number> = data.counts
   const total = Object.values(counts).reduce((sum, count) => sum + count, 0)
 
   if (total === 0) {
