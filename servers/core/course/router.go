@@ -417,6 +417,16 @@ func deleteCourse(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// copyCourse godoc
+// @Summary Copy a course
+// @Description Copy a course by UUID
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/copy [post]
 func copyCourse(c *gin.Context) {
 	userID := c.GetString("userID")
 
