@@ -31,9 +31,6 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 		return courseDTO.Course{}, err
 	}
 
-	log.Info("Start date : ", courseVariables.StartDate)
-	log.Info("End date : ", courseVariables.EndDate)
-
 	newCourse := courseDTO.CreateCourse{
 		Name:                courseVariables.Name,
 		StartDate:           courseVariables.StartDate,
