@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
+import { ScoreLevelWithParticipation } from '../../../../interfaces/scoreLevelWithParticipation'
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
-import { AssessmentCompletion } from '../../../interfaces/assessment'
-import { Assessment } from '../../../interfaces/assessment'
+import { AssessmentCompletion } from '../../../../interfaces/assessment'
+import { Assessment } from '../../../../interfaces/assessment'
 
 export const useGetParticipantionsWithAssessment = (
   participants: CoursePhaseParticipationWithStudent[],

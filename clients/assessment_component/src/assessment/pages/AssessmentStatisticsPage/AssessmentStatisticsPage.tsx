@@ -13,7 +13,7 @@ import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
-import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
+import { useGetParticipantionsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
