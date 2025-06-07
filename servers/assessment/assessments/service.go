@@ -45,7 +45,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		ScoreLevel:            req.ScoreLevel,
+		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})
@@ -78,7 +78,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		ScoreLevel:            req.ScoreLevel,
+		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})

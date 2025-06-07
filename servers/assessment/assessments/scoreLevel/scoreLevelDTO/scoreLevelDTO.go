@@ -34,3 +34,21 @@ func MapDBScoreLevelToDTO(scoreLevel db.ScoreLevel) ScoreLevel {
 		return ScoreLevelUnknown
 	}
 }
+
+func MapDTOtoDBScoreLevel(scoreLevel ScoreLevel) db.ScoreLevel {
+	switch scoreLevel {
+	case ScoreLevelVeryBad:
+		return db.ScoreLevelVeryBad
+	case ScoreLevelBad:
+		return db.ScoreLevelBad
+	case ScoreLevelOk:
+		return db.ScoreLevelOk
+	case ScoreLevelGood:
+		return db.ScoreLevelGood
+	case ScoreLevelVeryGood:
+		return db.ScoreLevelVeryGood
+	default:
+		log.Printf("Unknown score level received: %s", scoreLevel)
+		return db.ScoreLevelVeryBad
+	}
+}
