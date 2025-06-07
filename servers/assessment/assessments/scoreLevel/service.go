@@ -51,7 +51,7 @@ func GetStudentScore(ctx context.Context, courseParticipationID, coursePhaseID u
 		log.Error("Error fetching student score with level from database: ", err)
 		return scoreLevelDTO.StudentScore{}, err
 	}
-	score, err := studentScoreWithLevel.ScoreNumeric.Float64Value()
+	scoreNumeric, err := studentScoreWithLevel.ScoreNumeric.Float64Value()
 	if err != nil {
 		log.Error("Error converting score to float64: ", err)
 		return scoreLevelDTO.StudentScore{}, err
@@ -63,7 +63,7 @@ func GetStudentScore(ctx context.Context, courseParticipationID, coursePhaseID u
 	}
 
 	return scoreLevelDTO.StudentScore{
-		ScoreLevel: mappedScoreLevel,
-		Score:      score,
+		ScoreLevel:   mappedScoreLevel,
+		ScoreNumeric: scoreNumeric,
 	}, nil
 }
