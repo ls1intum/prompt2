@@ -30,6 +30,7 @@ import {
 } from '../../../validations/instructorDevProfile'
 import type { ParticipationWithDevProfiles } from '../interfaces/pariticipationWithDevProfiles'
 import { updateGitLabStatusCreated } from '../../../network/mutations/updateGitlabStatus'
+import { updateAppleStatusCreated } from '../../../network/mutations/updateAppleStatus'
 
 interface ProfileDetailsDialogProps {
   participantWithProfile: ParticipationWithDevProfiles
@@ -61,6 +62,11 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
     participantWithProfile.gitlabStatus?.gitlabSuccess || false,
   )
   const gitlabStatusErrorMessage = participantWithProfile.gitlabStatus?.errorMessage || ''
+
+  const [appleSuccess, setAppleSuccess] = useState(
+    participantWithProfile.appleStatus?.appleSuccess || false,
+  )
+  const appleStatusErrorMessage = participantWithProfile.appleStatus?.errorMessage || ''
 
   const { mutate, isPending } = useMutation({
     mutationFn: (devProfile: PostDeveloperProfile) =>
@@ -99,6 +105,26 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
     onError: (error: unknown) => {
       console.error('Error updating GitLab status:', error)
       let message = 'An error occurred while updating the GitLab status.'
+      if (error instanceof Error) {
+        message = error.message
+      }
+      form.setError('root', {
+        type: 'manual',
+        message,
+      })
+    },
+  })
+
+  const updateAppleStatusMutation = useMutation({
+    mutationFn: () =>
+      updateAppleStatusCreated(phaseId, participantWithProfile.participation.courseParticipationID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apple_statuses'] })
+      setAppleSuccess(true)
+    },
+    onError: (error: unknown) => {
+      console.error('Error updating Apple status:', error)
+      let message = 'An error occurred while updating the Apple status.'
       if (error instanceof Error) {
         message = error.message
       }
@@ -267,6 +293,33 @@ export const ProfileDetailsDialog: React.FC<ProfileDetailsDialogProps> = ({
                   variant='outline'
                   onClick={() => updateGitlabStatusMutation.mutate()}
                   disabled={updateGitlabStatusMutation.isPending}
+                >
+                  Mark as Created
+                </Button>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className='space-y-4'>
+              <h3 className='text-lg font-medium'>Apple Developer Account Status</h3>
+              {appleSuccess ? (
+                <div className='text-green-600 flex items-center gap-2'>
+                  <CheckCircle />
+                  Account created successfully.
+                </div>
+              ) : (
+                <div className='text-orange-600 flex items-center gap-2'>
+                  <AlertTriangle />
+                  {appleStatusErrorMessage || 'Not created yet.'}
+                </div>
+              )}
+              {!appleSuccess && (
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => updateAppleStatusMutation.mutate()}
+                  disabled={updateAppleStatusMutation.isPending}
                 >
                   Mark as Created
                 </Button>
