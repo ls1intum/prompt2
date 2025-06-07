@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useModifyCoursePhase } from '@/hooks/useModifyCoursePhase'
-import { useToast } from '@/hooks/use-toast'
+import {
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import {
   CoursePhaseWithMetaData,
   UpdateCoursePhase,

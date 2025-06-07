@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 import { LogIn, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { env } from '@/env'
+import packageJSON from '../../../../package.json'
 
 interface HeaderProps {
   withLoginButton?: boolean
@@ -15,11 +15,17 @@ export const Header = ({
   onLogout,
 }: HeaderProps): JSX.Element => {
   const navigate = useNavigate()
+  const version = packageJSON.version
   return (
     <div className='flex flex-col sm:flex-row justify-between items-center mb-12 gap-4'>
       <div className='flex items-center space-x-4'>
-        <img src='/chair-logo.jpeg' alt='TUM Logo' className='h-12 w-12' />
-        <h1 className='text-xl'>{env.CHAIR_NAME_SHORT}</h1>
+        <img src='/prompt_logo.svg' alt='PROMPT Logo' className='h-12 w-12' />
+        <div className='relative flex items-baseline'>
+          <span className='text-2xl font-extrabold tracking-wide text-primary drop-shadow-sm'>
+            PROMPT
+          </span>
+          <span className='ml-1 text-s font-normal text-gray-400'>{version}</span>
+        </div>
       </div>
       {withLoginButton && !userName && (
         <Button

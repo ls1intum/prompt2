@@ -2,16 +2,16 @@ package courseDTO
 
 import (
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 	log "github.com/sirupsen/logrus"
 )
 
 type UpdateCourseData struct {
-	StartDate           pgtype.Date   `json:"startDate"`
-	EndDate             pgtype.Date   `json:"endDate"`
-	Ects                pgtype.Int4   `json:"ects"`
-	CourseType          pgtype.Text   `json:"courseType"`
+	StartDate           pgtype.Date   `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date   `json:"endDate" swaggertype:"string"`
+	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
+	CourseType          pgtype.Text   `json:"courseType" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }

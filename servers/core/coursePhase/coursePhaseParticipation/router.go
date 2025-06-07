@@ -7,11 +7,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
+// setupCoursePhaseParticipationRouter sets up the course phase participation endpoints
+// @Summary Course Phase Participation Endpoints
+// @Description Endpoints for managing course phase participations
+// @Tags course_phase_participation
+// @Security BearerAuth
 func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	courseParticipation := routerGroup.Group("/course_phases/:uuid/participations", authMiddleware())
 	courseParticipation.GET("/self", permissionIDMiddleware(permissionValidation.CourseStudent), getOwnCoursePhaseParticipation)
@@ -25,6 +31,18 @@ func setupCoursePhaseParticipationRouter(routerGroup *gin.RouterGroup, authMiddl
 	courseParticipation.GET("/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getStudentsOfCoursePhase)
 }
 
+// getOwnCoursePhaseParticipation godoc
+// @Summary Get own course phase participation
+// @Description Get the participation of the current user in a course phase
+// @Tags course_phase_participation
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseParticipationDTO.CoursePhaseParticipationStudent
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations/self [get]
 func getOwnCoursePhaseParticipation(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -53,6 +71,16 @@ func getOwnCoursePhaseParticipation(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, coursePhaseParticipation)
 }
 
+// getParticipationsForCoursePhase godoc
+// @Summary Get all participations for a course phase
+// @Description Get all participations for a given course phase
+// @Tags course_phase_participation
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} coursePhaseParticipationDTO.CoursePhaseParticipationsWithResolutions
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations [get]
 func getParticipationsForCoursePhase(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -69,6 +97,17 @@ func getParticipationsForCoursePhase(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courseParticipations)
 }
 
+// getParticipation godoc
+// @Summary Get a specific participation
+// @Description Get a specific participation by course phase and participation ID
+// @Tags course_phase_participation
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Param course_participation_id path string true "Course Participation UUID"
+// @Success 200 {object} coursePhaseParticipationDTO.GetCoursePhaseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations/{course_participation_id} [get]
 func getParticipation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -94,6 +133,19 @@ func getParticipation(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courseParticipation)
 }
 
+// updateCoursePhaseParticipation godoc
+// @Summary Update a course phase participation
+// @Description Update a specific course phase participation
+// @Tags course_phase_participation
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Param course_participation_id path string true "Course Participation UUID"
+// @Param newCourseParticipation body coursePhaseParticipationDTO.CreateCoursePhaseParticipation true "Participation to update"
+// @Success 201 {object} coursePhaseParticipationDTO.GetCoursePhaseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations/{course_participation_id} [put]
 func updateCoursePhaseParticipation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -129,6 +181,18 @@ func updateCoursePhaseParticipation(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, courseParticipation)
 }
 
+// updateBatchCoursePhaseParticipation godoc
+// @Summary Batch update course phase participations
+// @Description Update multiple course phase participations at once
+// @Tags course_phase_participation
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Param updatedCourseParticipationRequest body []coursePhaseParticipationDTO.UpdateCoursePhaseParticipationRequest true "Participations to update"
+// @Success 200 {array} uuid.UUID
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations [put]
 func updateBatchCoursePhaseParticipation(c *gin.Context) {
 	coursePhaseId, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -175,6 +239,16 @@ func updateBatchCoursePhaseParticipation(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, ids)
 }
 
+// getStudentsOfCoursePhase godoc
+// @Summary Get students of a course phase
+// @Description Get all students of a given course phase
+// @Tags course_phase_participation
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {array} studentDTO.Student
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participations/students [get]
 func getStudentsOfCoursePhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -192,5 +266,7 @@ func getStudentsOfCoursePhase(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
+	})
 }

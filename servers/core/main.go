@@ -9,21 +9,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/niclasheun/prompt2.0/applicationAdministration"
-	"github.com/niclasheun/prompt2.0/course"
-	"github.com/niclasheun/prompt2.0/course/courseParticipation"
-	"github.com/niclasheun/prompt2.0/coursePhase"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation"
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
-	"github.com/niclasheun/prompt2.0/coursePhaseAuth"
-	"github.com/niclasheun/prompt2.0/coursePhaseType"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloakRealmManager"
-	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
-	"github.com/niclasheun/prompt2.0/mailing"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
-	"github.com/niclasheun/prompt2.0/student"
-	"github.com/niclasheun/prompt2.0/utils"
+	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
+	"github.com/ls1intum/prompt2/servers/core/course"
+	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
+	"github.com/ls1intum/prompt2/servers/core/coursePhaseAuth"
+	"github.com/ls1intum/prompt2/servers/core/coursePhaseType"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/keycloakRealmManager"
+	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
+	"github.com/ls1intum/prompt2/servers/core/mailing"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/student"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -81,6 +81,15 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, senderName, senderEmail, clientURL)
 }
 
+// @title           PROMPT Core API
+// @version         1.0
+// @description     This is a core sever of PROMPT.
+
+// @host      localhost:8080
+// @BasePath  /api/
+
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()

@@ -1,13 +1,17 @@
 import * as React from 'react'
 import { Label, Pie, PieChart } from 'recharts'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
+} from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../interfaces/applicationParticipation'
 
 const chartConfig = {

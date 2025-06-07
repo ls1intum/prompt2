@@ -1,10 +1,15 @@
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import {
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Plus } from 'lucide-react'
 import { useCreateCategory } from '../hooks/useCreateCategory'
 import { CreateCategoryRequest } from '../../../interfaces/category'
@@ -41,6 +46,18 @@ export const CreateCategoryForm = () => {
               placeholder='Enter category name'
               className='focus-visible:ring-1'
               {...register('name', { required: true })}
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='shortName' className='text-sm font-medium'>
+              Short Category Name
+            </Label>
+            <Input
+              id='shortName'
+              placeholder='Enter short category name'
+              className='focus-visible:ring-1'
+              {...register('shortName', { required: true })}
             />
           </div>
 

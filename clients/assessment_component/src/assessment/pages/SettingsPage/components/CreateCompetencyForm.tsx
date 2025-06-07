@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Button,
+  Input,
+  Label,
+  Textarea,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { AlertCircle } from 'lucide-react'
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
 import type { CreateCompetencyRequest } from '../../../interfaces/competency'
@@ -55,6 +61,22 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
                 {...register('name', { required: true })}
               />
               {errors.name && <p className='text-sm text-red-500 mt-1'>Name is required</p>}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='shortName' className='font-medium'>
+                Short Name
+              </Label>
+              <Input
+                id='shortName'
+                placeholder='Enter short competency name'
+                className={errors.shortName ? 'border-red-500' : ''}
+                aria-invalid={errors.shortName ? 'true' : 'false'}
+                {...register('shortName', { required: true })}
+              />
+              {errors.shortName && (
+                <p className='text-sm text-red-500 mt-1'>Short Name is required</p>
+              )}
             </div>
 
             <div className='space-y-2'>

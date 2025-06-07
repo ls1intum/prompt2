@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/keycloakTokenVerifier"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
 func InitMailingModule(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, smtpHost, smtpPort, senderName, senderEmail, clientURL string) {

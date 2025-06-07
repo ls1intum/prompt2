@@ -3,17 +3,17 @@ package courseDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 	log "github.com/sirupsen/logrus"
 )
 
 type CourseWithPhases struct {
 	ID                  uuid.UUID                            `json:"id"`
 	Name                string                               `json:"name"`
-	StartDate           pgtype.Date                          `json:"startDate"`
-	EndDate             pgtype.Date                          `json:"endDate"`
+	StartDate           pgtype.Date                          `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date                          `json:"endDate" swaggertype:"string"`
 	SemesterTag         string                               `json:"semesterTag"`
 	CourseType          db.CourseType                        `json:"courseType"`
 	ECTS                int                                  `json:"ects"`

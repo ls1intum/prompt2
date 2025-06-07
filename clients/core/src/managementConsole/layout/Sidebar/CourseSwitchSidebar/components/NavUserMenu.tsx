@@ -7,13 +7,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-} from '@/components/ui/sidebar'
+} from '@tumaet/prompt-ui-components'
 import { NavAvatar } from './NavAvatar'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
@@ -22,8 +19,6 @@ interface NavUserProps {
 }
 
 export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
-  const { isMobile } = useSidebar()
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -39,7 +34,7 @@ export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className='w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg'
-            side={isMobile ? 'bottom' : 'right'}
+            side='bottom'
             align='end'
             sideOffset={4}
           >

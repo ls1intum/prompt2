@@ -3,7 +3,7 @@ package applicationDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 )
 
 type OpenApplication struct {
@@ -11,8 +11,8 @@ type OpenApplication struct {
 	CoursePhaseID            uuid.UUID   `json:"id"`
 	CourseType               string      `json:"courseType"`
 	ECTS                     int         `json:"ects"`
-	StartDate                pgtype.Date `json:"startDate"`
-	EndDate                  pgtype.Date `json:"endDate"`
+	StartDate                pgtype.Date `json:"startDate" swaggertype:"string"`
+	EndDate                  pgtype.Date `json:"endDate" swaggertype:"string"`
 	ApplicationDeadline      string      `json:"applicationDeadline"`
 	ExternalStudentsAllowed  bool        `json:"externalStudentsAllowed"`
 	UniversityLoginAvailable bool        `json:"universityLoginAvailable"`

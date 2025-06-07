@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,8 +34,20 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 	return exists, nil
 }
 
+func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (db.CountRemainingAssessmentsForStudentRow, error) {
+	remainingAssessments, err := AssessmentCompletionServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
+	}
+	return remainingAssessments, nil
+}
+
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
-	remaining, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
+	remaining, err := CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		log.Error("could not count remaining assessments: ", err)
 		return errors.New("could not count remaining assessments")

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
 import {
   CoursePhaseWithMetaData,
   CoursePhaseParticipationsWithResolution,

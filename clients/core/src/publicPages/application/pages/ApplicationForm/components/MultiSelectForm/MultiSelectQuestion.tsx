@@ -1,15 +1,15 @@
 import React from 'react'
 import { UseFormReturn } from 'react-hook-form'
-import { FormLabel } from '@/components/ui/form'
-import { MultiSelect } from '@/components/MultiSelect'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import {
+  FormLabel,
+  MultiSelect,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@tumaet/prompt-ui-components'
 import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 interface MultiSelectQuestionProps {

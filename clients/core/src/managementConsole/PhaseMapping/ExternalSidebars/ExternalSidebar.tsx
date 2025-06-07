@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom'
 import { CourseParticipation } from '@core/managementConsole/shared/interfaces/CourseParticipation'
 import { getCourseParticipation } from '@core/network/queries/courseParticipation'
 import { useQuery } from '@tanstack/react-query'
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
 
 interface ExternalSidebarProps {
   rootPath: string

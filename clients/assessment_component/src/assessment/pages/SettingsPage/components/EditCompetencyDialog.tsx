@@ -1,27 +1,26 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+  Input,
+  Textarea,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { Competency, UpdateCompetencyRequest } from '../../../interfaces/competency'
 import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
@@ -32,6 +31,7 @@ const updateCompetencySchema = z.object({
   id: z.string(),
   categoryID: z.string(),
   name: z.string().min(1, 'Name is required'),
+  shortName: z.string().min(1, 'Short name is required'),
   description: z.string().min(1, 'Description is required'),
   novice: z.string().min(1, 'Novice level description is required'),
   intermediate: z.string().min(1, 'Intermediate level description is required'),
@@ -59,6 +59,7 @@ export function EditCompetencyDialog({
       id: competency?.id,
       categoryID: competency?.categoryID,
       name: competency?.name,
+      shortName: competency?.shortName,
       description: competency?.description,
       novice: competency?.novice,
       intermediate: competency?.intermediate,
@@ -75,6 +76,7 @@ export function EditCompetencyDialog({
         id: competency.id,
         categoryID: competency.categoryID,
         name: competency.name,
+        shortName: competency.shortName,
         description: competency.description,
         novice: competency.novice,
         intermediate: competency.intermediate,
@@ -120,6 +122,21 @@ export function EditCompetencyDialog({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='shortName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Short Competency Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter short competency name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='description'

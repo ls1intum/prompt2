@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import StudentScoreBadge from '../../components/StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
+
+import {
+  Alert,
+  AlertDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 import { useCreateAssessmentCompletion } from '../hooks/useCreateAssessmentCompletion'
@@ -17,11 +23,13 @@ import { AssessmentCompletionDialog } from './AssessmentCompletionDialog'
 interface AssessmentProfileProps {
   participant: CoursePhaseParticipationWithStudent
   studentAssessment: StudentAssessment
+  remainingAssessments: number
 }
 
 export const AssessmentProfile = ({
   participant,
   studentAssessment,
+  remainingAssessments,
 }: AssessmentProfileProps): JSX.Element => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -67,43 +75,45 @@ export const AssessmentProfile = ({
   return (
     <>
       <Card className='relative overflow-hidden'>
-        <CardHeader className='relative'>
-          <div className='absolute top-4 right-4'>
-            <Button
-              size='sm'
-              disabled={studentAssessment.remainingAssessments.remainingAssessments > 0}
-              onClick={handleButtonClick}
-            >
-              {studentAssessment.assessmentCompletion.completed ? (
-                <span className='flex items-center gap-1'>
-                  <Unlock className='h-3.5 w-3.5' />
-                  Edit Assessment
-                </span>
-              ) : (
-                <span className='flex items-center gap-1'>
-                  <Lock className='h-3.5 w-3.5' />
-                  Mark Assessment as Final
-                </span>
-              )}
-            </Button>
-          </div>
-          <div className='flex flex-col sm:flex-row items-center'>
-            <div className='flex-1 text-center sm:text-left'>
-              <div className='flex flex-col sm:flex-row sm:items-center gap-1'>
+        <CardHeader>
+          <div className='flex flex-col sm:flex-row items-center gap-3'>
+            <div className='flex-1 text-left'>
+              <div className='flex flex-col sm:flex-row items-center gap-1'>
                 <h1 className='text-2xl font-bold mr-2'>
                   {participant.student.firstName} {participant.student.lastName}
                 </h1>
-                <AssessmentStatusBadge
-                  remainingAssessments={studentAssessment.remainingAssessments.remainingAssessments}
-                  isFinalized={studentAssessment.assessmentCompletion.completed}
-                />
-                {studentAssessment.assessments.length > 0 && (
-                  <StudentScoreBadge
-                    scoreLevel={studentAssessment.studentScore.scoreLevel}
-                    score={studentAssessment.studentScore.score}
+
+                <div className='flex items-center gap-1'>
+                  <AssessmentStatusBadge
+                    remainingAssessments={remainingAssessments}
+                    isFinalized={studentAssessment.assessmentCompletion.completed}
                   />
-                )}
+                  {studentAssessment.assessments.length > 0 && (
+                    <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
+                  )}
+                </div>
               </div>
+            </div>
+            <div className='flex flex-col items-end'>
+              <Button
+                size='sm'
+                disabled={
+                  !studentAssessment.assessmentCompletion.completed && remainingAssessments > 0
+                }
+                onClick={handleButtonClick}
+              >
+                {studentAssessment.assessmentCompletion.completed ? (
+                  <span className='flex items-center gap-1'>
+                    <Unlock className='h-3.5 w-3.5' />
+                    Edit Assessment
+                  </span>
+                ) : (
+                  <span className='flex items-center gap-1'>
+                    <Lock className='h-3.5 w-3.5' />
+                    Mark Assessment as Final
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
         </CardHeader>

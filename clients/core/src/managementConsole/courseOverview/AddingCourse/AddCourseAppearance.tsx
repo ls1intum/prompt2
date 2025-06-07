@@ -1,20 +1,19 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@tumaet/prompt-ui-components'
+
 import { useForm } from 'react-hook-form'
 import {
   CourseAppearanceFormValues,

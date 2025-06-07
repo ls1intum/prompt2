@@ -1,4 +1,10 @@
 import { useState } from 'react'
+import { MoreHorizontal, CheckCircle, XCircle } from 'lucide-react'
+import { RowModel } from '@tanstack/react-table'
+import { PassStatus, CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
+import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
+import { ActionDialog } from '@/components/table/GroupActionDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,18 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, CheckCircle, XCircle } from 'lucide-react'
-import { RowModel } from '@tanstack/react-table'
-
-import { PassStatus } from '@tumaet/prompt-shared-state'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
-
-import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
-import { ActionDialog } from '@/components/table/GroupActionDialog'
-import { Button } from '@/components/ui/button'
-
-import { DeveloperWithInfo } from '../../../interfaces/DeveloperWithInfo'
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 interface GroupActionsMenuProps {
   selectedRows: RowModel<{

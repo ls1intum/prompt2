@@ -1,10 +1,10 @@
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@tumaet/prompt-ui-components'
 import { Filter } from 'lucide-react'
 
 interface TutorAssignmentFilterProps {

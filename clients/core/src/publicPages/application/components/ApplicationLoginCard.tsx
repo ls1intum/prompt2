@@ -1,6 +1,11 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { GraduationCap } from 'lucide-react'
 import translations from '@/lib/translations.json'
 import { useNavigate } from 'react-router-dom'

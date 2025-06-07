@@ -3,13 +3,13 @@ package coursePhaseDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 )
 
 type UpdateCoursePhase struct {
 	ID                  uuid.UUID     `json:"id"`
-	Name                pgtype.Text   `json:"name"` // use pgtype to handle null values
+	Name                pgtype.Text   `json:"name" swaggertype:"string"` // use pgtype to handle null values
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 }

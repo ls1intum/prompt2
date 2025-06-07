@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/testutils"
+	"github.com/ls1intum/prompt2/servers/core/testutils"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )

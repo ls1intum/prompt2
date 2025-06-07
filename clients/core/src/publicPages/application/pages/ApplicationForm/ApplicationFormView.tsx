@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
 import { ApplicationAnswerText } from '@core/interfaces/application/applicationAnswer/text/applicationAnswerText'
@@ -11,10 +18,8 @@ import { StudentForm } from './components/StudentForm/StudentForm'
 import { ApplicationQuestionTextForm } from './components/TextForm/ApplicationQuestionTextForm'
 import { QuestionTextFormRef } from './utils/QuestionTextFormRef'
 import { QuestionMultiSelectFormRef } from './utils/QuestionMultiSelectFormRef'
-import { Button } from '@/components/ui/button'
 import { StudentComponentRef } from './utils/StudentComponentRef'
 import { ApplicationQuestionMultiSelectForm } from './components/MultiSelectForm/ApplicationQuestionMultiSelectForm'
-import { Separator } from '@/components/ui/separator'
 
 interface ApplicationFormProps {
   questionsText: ApplicationQuestionText[]

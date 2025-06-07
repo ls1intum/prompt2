@@ -1,8 +1,12 @@
-import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  ErrorPage,
+  ManagementPageHeader,
+} from '@tumaet/prompt-ui-components'
 import { CoursePhaseMailing } from '@/components/pages/Mailing/CoursePhaseMailing'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import { getCoursePhase } from '@/network/queries/getCoursePhase'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'

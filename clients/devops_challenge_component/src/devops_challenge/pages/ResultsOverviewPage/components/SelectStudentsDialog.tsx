@@ -1,4 +1,5 @@
 import React from 'react'
+import { Table } from '@tanstack/react-table'
 import {
   Dialog,
   DialogContent,
@@ -6,10 +7,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Table } from '@tanstack/react-table'
+  Input,
+  Button,
+} from '@tumaet/prompt-ui-components'
 
 interface SelectStudentsDialogProps {
   isOpen: boolean
