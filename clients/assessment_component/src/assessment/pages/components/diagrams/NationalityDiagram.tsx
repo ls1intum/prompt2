@@ -9,7 +9,7 @@ import { getCountryName } from '@/lib/getCountries'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
@@ -31,7 +31,7 @@ export const NationalityDiagram = ({
       if (!nationalityMap.has(nationality)) {
         nationalityMap.set(nationality, { scores: [], scoreLevels: [] })
       }
-      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.score))
+      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.scoreLevel))
       nationalityMap.get(nationality)?.scoreLevels.push(p.scoreLevel)
     }
   })

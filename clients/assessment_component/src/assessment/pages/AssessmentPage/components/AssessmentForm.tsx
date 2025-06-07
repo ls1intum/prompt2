@@ -46,7 +46,7 @@ export const AssessmentForm = ({
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
-      score: assessment?.score,
+      scoreLevel: assessment?.scoreLevel,
       comment: assessment ? assessment.comment : '',
       author: userName,
     },
@@ -55,7 +55,7 @@ export const AssessmentForm = ({
   const updateAssessment = useUpdateAssessment(setError)
   const createAssessment = useCreateAssessment(setError)
   const { mutate } = assessment ? updateAssessment : createAssessment
-  const selectedScore = form.watch('score')
+  const selectedScore = form.watch('scoreLevel')
 
   useEffect(() => {
     if (completed) return
@@ -74,7 +74,7 @@ export const AssessmentForm = ({
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
-    form.setValue('score', value, { shouldValidate: true })
+    form.setValue('scoreLevel', value, { shouldValidate: true })
   }
 
   return (
@@ -93,7 +93,7 @@ export const AssessmentForm = ({
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
 
-        <div className='lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-1'>
+        <div className='lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-1'>
           {Object.values(ScoreLevel).map((level) => {
             const config = getLevelConfig(level)
             const isSelected = selectedScore === level
@@ -125,7 +125,9 @@ export const AssessmentForm = ({
                   </div>
                 </div>
 
-                <p className='line-clamp-3 text-muted-foreground'>{competency[level]}</p>
+                <p className='line-clamp-3 text-muted-foreground'>
+                  {competency['description' + level.charAt(0).toUpperCase() + level.slice(1)]}
+                </p>
               </button>
             )
           })}

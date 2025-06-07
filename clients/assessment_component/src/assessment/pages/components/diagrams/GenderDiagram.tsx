@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
@@ -29,7 +29,7 @@ export const GenderDiagram = ({
 
     return {
       scores: participationsWithAssessmentFiltered
-        .map((p) => p.assessments.map((a) => a.score))
+        .map((p) => p.assessments.map((a) => a.scoreLevel))
         .flat(),
       scoreLevels: participationsWithAssessmentFiltered
         .map((p) => p.scoreLevel)

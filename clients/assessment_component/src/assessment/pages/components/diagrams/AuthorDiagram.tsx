@@ -12,7 +12,7 @@ import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDist
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
 interface AuthorDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
@@ -30,7 +30,7 @@ export const AuthorDiagram = ({
         if (!authorsMap.has(author)) {
           authorsMap.set(author, { scores: [], scoreLevels: [] })
         }
-        authorsMap.get(author)?.scores.push(...p.assessments.map((a) => a.score))
+        authorsMap.get(author)?.scores.push(...p.assessments.map((a) => a.scoreLevel))
         authorsMap.get(author)?.scoreLevels.push(p.scoreLevel)
       }
     } else {
@@ -40,7 +40,7 @@ export const AuthorDiagram = ({
         if (!authorsMap.has(author)) {
           authorsMap.set(author, { scores: [], scoreLevels: [] })
         }
-        authorsMap.get(author)?.scores.push(assessment.score)
+        authorsMap.get(author)?.scores.push(assessment.scoreLevel)
       })
     }
   })

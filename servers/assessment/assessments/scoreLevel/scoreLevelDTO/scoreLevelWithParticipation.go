@@ -5,8 +5,8 @@ import (
 )
 
 type ScoreLevelWithParticipation struct {
-	CourseParticipationID string        `json:"courseParticipationID"`
-	ScoreLevel            db.ScoreLevel `json:"scoreLevel"`
+	CourseParticipationID string     `json:"courseParticipationID"`
+	ScoreLevel            ScoreLevel `json:"scoreLevel"`
 }
 
 func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []ScoreLevelWithParticipation {
@@ -14,7 +14,7 @@ func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []Sc
 	for _, scoreLevel := range scoreLevels {
 		scoreLevelWithParticipation = append(scoreLevelWithParticipation, ScoreLevelWithParticipation{
 			CourseParticipationID: scoreLevel.CourseParticipationID.String(),
-			ScoreLevel:            db.ScoreLevel(scoreLevel.ScoreLevel),
+			ScoreLevel:            MapDBScoreLevelToDTO(db.ScoreLevel(scoreLevel.ScoreLevel)),
 		})
 	}
 	return scoreLevelWithParticipation
@@ -23,6 +23,6 @@ func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []Sc
 func MapToScoreLevelWithParticipation(scoreLevel db.GetAllScoreLevelsRow) ScoreLevelWithParticipation {
 	return ScoreLevelWithParticipation{
 		CourseParticipationID: scoreLevel.CourseParticipationID.String(),
-		ScoreLevel:            db.ScoreLevel(scoreLevel.ScoreLevel),
+		ScoreLevel:            MapDBScoreLevelToDTO(db.ScoreLevel(scoreLevel.ScoreLevel)),
 	}
 }

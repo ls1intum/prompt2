@@ -13,14 +13,14 @@ import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
-import { useGetParticipantionsWithAssessment } from './hooks/useGetParticipantWithAssessment'
+import { useGetParticipantionsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
 
-import { AssessmentDiagram } from './diagrams/AssessmentDiagram'
-import { AssessmentScoreLevelDiagram } from './diagrams/AssessmentScoreLevelDiagram'
-import { GenderDiagram } from './diagrams/GenderDiagram'
-import { AuthorDiagram } from './diagrams/AuthorDiagram'
-import { CategoryDiagram } from './diagrams/CategoryDiagram'
-import { NationalityDiagram } from './diagrams/NationalityDiagram'
+import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
+import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { GenderDiagram } from '../components/diagrams/GenderDiagram'
+import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
+import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
+import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
 
 export const AssessmentStatisticsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

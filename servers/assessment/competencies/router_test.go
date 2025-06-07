@@ -70,14 +70,15 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 	// First create a competency to get
 	categoryID := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
 	createReq := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Test Competency",
-		Description:  "Test Description",
-		Novice:       "Novice level description",
-		Intermediate: "Intermediate level description",
-		Advanced:     "Advanced level description",
-		Expert:       "Expert level description",
-		Weight:       10,
+		CategoryID:          categoryID,
+		Name:                "Test Competency",
+		Description:         "Test Description",
+		DescriptionVeryBad:  "Very Bad Description",
+		DescriptionBad:      "Bad Description",
+		DescriptionOk:       "Ok Description",
+		DescriptionGood:     "Good Description",
+		DescriptionVeryGood: "Very Good Description",
+		Weight:              10,
 	}
 
 	body, _ := json.Marshal(createReq)
@@ -170,14 +171,15 @@ func (suite *CompetencyRouterTestSuite) TestListCompetenciesByCategoryInvalidID(
 func (suite *CompetencyRouterTestSuite) TestCreateCompetency() {
 	categoryID := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
 	createReq := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Test Competency",
-		Description:  "Test Description",
-		Novice:       "Novice level description",
-		Intermediate: "Intermediate level description",
-		Advanced:     "Advanced level description",
-		Expert:       "Expert level description",
-		Weight:       10,
+		CategoryID:          categoryID,
+		Name:                "Test Competency",
+		Description:         "Test Description",
+		DescriptionVeryBad:  "Very Bad Description",
+		DescriptionBad:      "Bad Description",
+		DescriptionOk:       "Ok Description",
+		DescriptionGood:     "Good Description",
+		DescriptionVeryGood: "Very Good Description",
+		Weight:              10,
 	}
 
 	body, _ := json.Marshal(createReq)
@@ -209,14 +211,15 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 	// First create a competency to update
 	categoryID := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
 	createReq := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Original Competency",
-		Description:  "Original Description",
-		Novice:       "Original Novice",
-		Intermediate: "Original Intermediate",
-		Advanced:     "Original Advanced",
-		Expert:       "Original Expert",
-		Weight:       5,
+		CategoryID:          categoryID,
+		Name:                "Original Competency",
+		Description:         "Original Description",
+		DescriptionVeryBad:  "Original Very Bad Description",
+		DescriptionBad:      "Original Bad Description",
+		DescriptionOk:       "Original Ok Description",
+		DescriptionGood:     "Original Good Description",
+		DescriptionVeryGood: "Original Very Good Description",
+		Weight:              5,
 	}
 
 	body, _ := json.Marshal(createReq)
@@ -249,14 +252,15 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 
 	// Now update the competency
 	updateReq := competencyDTO.UpdateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Updated Competency",
-		Description:  "Updated Description",
-		Novice:       "Updated Novice",
-		Intermediate: "Updated Intermediate",
-		Advanced:     "Updated Advanced",
-		Expert:       "Updated Expert",
-		Weight:       15,
+		CategoryID:          categoryID,
+		Name:                "Updated Competency",
+		Description:         "Updated Description",
+		DescriptionVeryBad:  "Updated Very Bad Description",
+		DescriptionBad:      "Updated Bad Description",
+		DescriptionOk:       "Updated Ok Description",
+		DescriptionGood:     "Updated Good Description",
+		DescriptionVeryGood: "Updated Very Good Description",
+		Weight:              15,
 	}
 
 	body, _ = json.Marshal(updateReq)
@@ -271,14 +275,15 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 
 func (suite *CompetencyRouterTestSuite) TestUpdateCompetencyInvalidID() {
 	updateReq := competencyDTO.UpdateCompetencyRequest{
-		CategoryID:   uuid.New(),
-		Name:         "Updated Competency",
-		Description:  "Updated Description",
-		Novice:       "Updated Novice",
-		Intermediate: "Updated Intermediate",
-		Advanced:     "Updated Advanced",
-		Expert:       "Updated Expert",
-		Weight:       15,
+		CategoryID:          uuid.New(),
+		Name:                "Updated Competency",
+		Description:         "Updated Description",
+		DescriptionVeryBad:  "Updated Very Bad Description",
+		DescriptionBad:      "Updated Bad Description",
+		DescriptionOk:       "Updated Ok Description",
+		DescriptionGood:     "Updated Good Description",
+		DescriptionVeryGood: "Updated Very Good Description",
+		Weight:              15,
 	}
 
 	body, _ := json.Marshal(updateReq)
@@ -317,14 +322,15 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 	// First create a competency to delete
 	categoryID := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
 	createReq := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Competency to Delete",
-		Description:  "Description",
-		Novice:       "Novice",
-		Intermediate: "Intermediate",
-		Advanced:     "Advanced",
-		Expert:       "Expert",
-		Weight:       10,
+		CategoryID:          categoryID,
+		Name:                "Competency to Delete",
+		Description:         "Description",
+		DescriptionVeryBad:  "Very Bad Description",
+		DescriptionBad:      "Bad Description",
+		DescriptionOk:       "Ok Description",
+		DescriptionGood:     "Good Description",
+		DescriptionVeryGood: "Very Good Description",
+		Weight:              10,
 	}
 
 	body, _ := json.Marshal(createReq)
