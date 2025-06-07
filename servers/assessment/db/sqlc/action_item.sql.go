@@ -51,7 +51,7 @@ func (q *Queries) DeleteActionItem(ctx context.Context, id uuid.UUID) error {
 }
 
 const getActionItem = `-- name: GetActionItem :one
-SELECT id, action, course_participation_id, course_phase_id, created_at, author
+SELECT id, course_phase_id, course_participation_id, action, created_at, author
 FROM action_item
 WHERE id = $1
 `
@@ -61,17 +61,50 @@ func (q *Queries) GetActionItem(ctx context.Context, id uuid.UUID) (ActionItem, 
 	var i ActionItem
 	err := row.Scan(
 		&i.ID,
-		&i.Action,
-		&i.CourseParticipationID,
 		&i.CoursePhaseID,
+		&i.CourseParticipationID,
+		&i.Action,
 		&i.CreatedAt,
 		&i.Author,
 	)
 	return i, err
 }
 
+const listActionItemsForCoursePhase = `-- name: ListActionItemsForCoursePhase :many
+SELECT id, course_phase_id, course_participation_id, action, created_at, author
+FROM action_item
+WHERE course_phase_id = $1
+`
+
+func (q *Queries) ListActionItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]ActionItem, error) {
+	rows, err := q.db.Query(ctx, listActionItemsForCoursePhase, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ActionItem
+	for rows.Next() {
+		var i ActionItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.CoursePhaseID,
+			&i.CourseParticipationID,
+			&i.Action,
+			&i.CreatedAt,
+			&i.Author,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listActionItemsForStudentInPhase = `-- name: ListActionItemsForStudentInPhase :many
-SELECT id, action, course_participation_id, course_phase_id, created_at, author
+SELECT id, course_phase_id, course_participation_id, action, created_at, author
 FROM action_item
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -93,9 +126,9 @@ func (q *Queries) ListActionItemsForStudentInPhase(ctx context.Context, arg List
 		var i ActionItem
 		if err := rows.Scan(
 			&i.ID,
-			&i.Action,
-			&i.CourseParticipationID,
 			&i.CoursePhaseID,
+			&i.CourseParticipationID,
+			&i.Action,
 			&i.CreatedAt,
 			&i.Author,
 		); err != nil {

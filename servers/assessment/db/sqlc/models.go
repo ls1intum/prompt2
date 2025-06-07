@@ -59,9 +59,9 @@ func (ns NullScoreLevel) Value() (driver.Value, error) {
 
 type ActionItem struct {
 	ID                    uuid.UUID        `json:"id"`
-	Action                string           `json:"action"`
-	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	Action                string           `json:"action"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
 	Author                string           `json:"author"`
 }

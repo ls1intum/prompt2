@@ -11,9 +11,9 @@ ALTER TABLE assessment_completion
 CREATE TABLE action_item
 (
     id                     uuid      NOT NULL PRIMARY KEY,
-    action                  text      NOT NULL,
-    course_participation_id uuid      NOT NULL,
     course_phase_id         uuid      NOT NULL,
+    course_participation_id uuid      NOT NULL,
+    action                  text      NOT NULL,
     created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     author                  text      NOT NULL
 );

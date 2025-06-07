@@ -69,14 +69,18 @@ CREATE TABLE public.assessment (
     score_level public.score_level NOT NULL,
     COMMENT text,
     assessed_at timestamp WITH time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    author text DEFAULT ''::text NOT NULL
+    author text DEFAULT ''::text NOT NULL,
+    examples text DEFAULT '' NOT NULL
 );
 
 CREATE TABLE public.assessment_completion (
     course_participation_id uuid NOT NULL,
     course_phase_id uuid NOT NULL,
     completed_at timestamp WITH time zone NOT NULL,
-    author text NOT NULL
+    author text NOT NULL,
+    comment text DEFAULT '' NOT NULL,
+    grade_suggestion numeric(2, 1) DEFAULT 4.0 NOT NULL,
+    completed boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE public.category (
