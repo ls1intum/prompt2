@@ -48,6 +48,7 @@ import { getGitlabStatuses } from '../../network/queries/getGitlabStatuses'
 import { getAppleStatuses } from '../../network/queries/getAppleStatuses'
 import { ParticipationWithDevProfiles } from './interfaces/pariticipationWithDevProfiles'
 import { CreateGitlabReposDialog } from './components/CreateGitlabReposDialog'
+import { CreateAppleAccountDialog } from './components/CreateAppleDialog'
 
 export const DeveloperProfilesLecturerPage = () => {
   // State for the detail dialog
@@ -197,6 +198,7 @@ export const DeveloperProfilesLecturerPage = () => {
             Download Profiles
           </Button>
           <CreateGitlabReposDialog participantsWithDevProfiles={participantsWithProfiles} />
+          <CreateAppleAccountDialog participantsWithDevProfiles={participantsWithProfiles} />
           <FilterMenu filters={filters} setFilters={setFilters} />
         </div>
       </div>
