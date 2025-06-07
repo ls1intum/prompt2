@@ -5,6 +5,6 @@ import (
 )
 
 type StudentScore struct {
-	ScoreLevel ScoreLevel    `json:"scoreLevel"`
-	Score      pgtype.Float8 `json:"score"`
+	ScoreLevel   ScoreLevel    `json:"scoreLevel"`
+	ScoreNumeric pgtype.Float8 `json:"numericScore"`
 }

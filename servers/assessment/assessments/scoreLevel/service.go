@@ -2,7 +2,6 @@ package scoreLevel
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -51,19 +50,14 @@ func GetStudentScore(ctx context.Context, courseParticipationID, coursePhaseID u
 		log.Error("Error fetching student score with level from database: ", err)
 		return scoreLevelDTO.StudentScore{}, err
 	}
-	score, err := studentScoreWithLevel.ScoreNumeric.Float64Value()
+	scoreNumeric, err := studentScoreWithLevel.ScoreNumeric.Float64Value()
 	if err != nil {
 		log.Error("Error converting score to float64: ", err)
 		return scoreLevelDTO.StudentScore{}, err
 	}
 
-	mappedScoreLevel := scoreLevelDTO.MapDBScoreLevelToDTO(db.ScoreLevel(studentScoreWithLevel.ScoreLevel))
-	if mappedScoreLevel == scoreLevelDTO.ScoreLevelUnknown {
-		return scoreLevelDTO.StudentScore{}, fmt.Errorf("unknown score level: %s", studentScoreWithLevel.ScoreLevel)
-	}
-
 	return scoreLevelDTO.StudentScore{
-		ScoreLevel: mappedScoreLevel,
-		Score:      score,
+		ScoreLevel:   scoreLevelDTO.MapDBScoreLevelToDTO(db.ScoreLevel(studentScoreWithLevel.ScoreLevel)),
+		ScoreNumeric: scoreNumeric,
 	}, nil
 }
