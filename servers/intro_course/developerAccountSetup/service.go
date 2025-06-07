@@ -141,12 +141,24 @@ func RegisterSingleDevice(ctx context.Context, authHeader string, coursePhaseID,
 }
 
 func GetAllStudentAppleStatus(c context.Context, coursePhaseID uuid.UUID) ([]developerAccountSetupDTO.AppleStatus, error) {
-	gitlabStatuses, err := DeveloperAccountSetupServiceSingleton.queries.GetAllAppleStatus(c, coursePhaseID)
+	appleStatuses, err := DeveloperAccountSetupServiceSingleton.queries.GetAllAppleStatus(c, coursePhaseID)
 	if err != nil {
-		log.Error("Failed to get gitlab statuses: ", err)
+		log.Error("Failed to get apple statuses: ", err)
 		return nil, err
 	}
 
-	return developerAccountSetupDTO.GetAppleStatusDTOsFromModels(gitlabStatuses), nil
+	return developerAccountSetupDTO.GetAppleStatusDTOsFromModels(appleStatuses), nil
 
+}
+
+func ManuallyOverwriteStudentAppleStatus(c context.Context, coursePhaseID, courseParticipationID uuid.UUID) error {
+	err := DeveloperAccountSetupServiceSingleton.queries.AddAppleStatus(c, db.AddAppleStatusParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("Failed to update apple status in db: ", err)
+		return err
+	}
+	return nil
 }

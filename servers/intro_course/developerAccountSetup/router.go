@@ -24,6 +24,8 @@ func setupDeveloperAccountSetupRouter(router *gin.RouterGroup, authMiddleware fu
 	accountSetup.POST("/register-apple-watch/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), registerAppleWatchHandler)
 
 	accountSetup.GET("/status", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllStudentAppleStatus)
+
+	accountSetup.PUT("/:courseParticipationID/manual", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), manuallyOverwriteStudentAppleStatus)
 }
 
 func inviteUserHandler(c *gin.Context) {
@@ -164,6 +166,32 @@ func getAllStudentAppleStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, studentAppleStatus)
+}
+
+func manuallyOverwriteStudentAppleStatus(c *gin.Context) {
+	coursePhaseID, err1 := uuid.Parse(c.Param("coursePhaseID"))
+	courseParticipationID, err2 := uuid.Parse(c.Param("courseParticipationID"))
+	authHeader := c.GetHeader("Authorization")
+
+	if err1 != nil {
+		handleError(c, http.StatusBadRequest, err1)
+		return
+	}
+	if err2 != nil {
+		handleError(c, http.StatusBadRequest, err2)
+		return
+	}
+	if authHeader == "" {
+		handleError(c, http.StatusUnauthorized, fmt.Errorf("missing Authorization header"))
+		return
+	}
+
+	err := ManuallyOverwriteStudentAppleStatus(c, coursePhaseID, courseParticipationID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully overwritten student apple status"})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
