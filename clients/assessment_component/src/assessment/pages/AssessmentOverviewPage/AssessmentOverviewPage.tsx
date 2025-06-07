@@ -54,7 +54,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
