@@ -603,6 +603,22 @@ func (q *Queries) GetApplicationExistsForStudent(ctx context.Context, arg GetApp
 	return exists, err
 }
 
+const getApplicationPhaseIDForCourse = `-- name: GetApplicationPhaseIDForCourse :one
+SELECT cp.id
+FROM course_phase cp
+JOIN course_phase_type cpt ON cp.course_phase_type_id = cpt.id
+WHERE cp.course_id = $1
+  AND cpt.name = 'Application'
+LIMIT 1
+`
+
+func (q *Queries) GetApplicationPhaseIDForCourse(ctx context.Context, courseID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getApplicationPhaseIDForCourse, courseID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getApplicationQuestionsMultiSelectForCoursePhase = `-- name: GetApplicationQuestionsMultiSelectForCoursePhase :many
 SELECT id, course_phase_id, title, description, placeholder, error_message, is_required, min_select, max_select, options, order_num, accessible_for_other_phases, access_key FROM application_question_multi_select
 WHERE course_phase_id = $1
