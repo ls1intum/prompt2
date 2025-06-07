@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
@@ -92,6 +93,7 @@ func main() {
 	categories.InitCategoryModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 	assessmentCompletion.InitAssessmentCompletionModule(api, *query, conn)
+	actionItem.InitActionItemModule(api, *query, conn)
 	scoreLevel.InitScoreLevelModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")

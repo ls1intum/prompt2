@@ -12,6 +12,8 @@ type AssessmentCompletion struct {
 	CompletedAt           pgtype.Timestamptz `json:"completedAt"`
 	Author                string             `json:"author"`
 	Completed             bool               `json:"completed"`
+	Comment               string             `json:"comment"`
+	GradeSuggestion       pgtype.Numeric     `json:"gradeSuggestion"`
 }
 
 // GetAssessmentCompletionDTOsFromDBModels converts a slice of db.AssessmentCompletion to DTOs.
@@ -29,6 +31,8 @@ func MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessment db.Assessme
 		CoursePhaseID:         dbAssessment.CoursePhaseID,
 		CompletedAt:           dbAssessment.CompletedAt,
 		Author:                dbAssessment.Author,
-		Completed:             true,
+		Completed:             dbAssessment.Completed,
+		Comment:               dbAssessment.Comment,
+		GradeSuggestion:       dbAssessment.GradeSuggestion,
 	}
 }

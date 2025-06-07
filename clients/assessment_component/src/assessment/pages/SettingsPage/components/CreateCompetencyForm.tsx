@@ -115,68 +115,84 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
           <div className='space-y-2'>
             <h3 className='text-sm font-medium text-muted-foreground'>Proficiency Levels</h3>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='novice' className='font-medium'>
-                  Novice
+                <Label htmlFor='descriptionVeryBad' className='font-medium'>
+                  Very Bad
                 </Label>
                 <Input
-                  id='novice'
-                  placeholder='Novice level description'
-                  className={errors.novice ? 'border-red-500' : ''}
-                  aria-invalid={errors.novice ? 'true' : 'false'}
-                  {...register('novice', { required: true })}
+                  id='descriptionVeryBad'
+                  placeholder='Very bad level description'
+                  className={errors.descriptionVeryBad ? 'border-red-500' : ''}
+                  aria-invalid={errors.descriptionVeryBad ? 'true' : 'false'}
+                  {...register('descriptionVeryBad', { required: true })}
                 />
-                {errors.novice && (
-                  <p className='text-sm text-red-500 mt-1'>Novice description is required</p>
+                {errors.descriptionVeryBad && (
+                  <p className='text-sm text-red-500 mt-1'>Very bad description is required</p>
                 )}
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='intermediate' className='font-medium'>
-                  Intermediate
+                <Label htmlFor='descriptionBad' className='font-medium'>
+                  Bad
                 </Label>
                 <Input
-                  id='intermediate'
-                  placeholder='Intermediate level description'
-                  className={errors.intermediate ? 'border-red-500' : ''}
-                  aria-invalid={errors.intermediate ? 'true' : 'false'}
-                  {...register('intermediate', { required: true })}
+                  id='descriptionBad'
+                  placeholder='Bad level description'
+                  className={errors.descriptionBad ? 'border-red-500' : ''}
+                  aria-invalid={errors.descriptionBad ? 'true' : 'false'}
+                  {...register('descriptionBad', { required: true })}
                 />
-                {errors.intermediate && (
-                  <p className='text-sm text-red-500 mt-1'>Intermediate description is required</p>
+                {errors.descriptionBad && (
+                  <p className='text-sm text-red-500 mt-1'>Bad description is required</p>
                 )}
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='advanced' className='font-medium'>
-                  Advanced
+                <Label htmlFor='descriptionOk' className='font-medium'>
+                  OK
                 </Label>
                 <Input
-                  id='advanced'
-                  placeholder='Advanced level description'
-                  className={errors.advanced ? 'border-red-500' : ''}
-                  aria-invalid={errors.advanced ? 'true' : 'false'}
-                  {...register('advanced', { required: true })}
+                  id='descriptionOk'
+                  placeholder='OK level description'
+                  className={errors.descriptionOk ? 'border-red-500' : ''}
+                  aria-invalid={errors.descriptionOk ? 'true' : 'false'}
+                  {...register('descriptionOk', { required: true })}
                 />
-                {errors.advanced && (
-                  <p className='text-sm text-red-500 mt-1'>Advanced description is required</p>
+                {errors.descriptionOk && (
+                  <p className='text-sm text-red-500 mt-1'>OK description is required</p>
                 )}
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='expert' className='font-medium'>
-                  Expert
+                <Label htmlFor='descriptionGood' className='font-medium'>
+                  Good
                 </Label>
                 <Input
-                  id='expert'
-                  placeholder='Expert level description'
-                  className={errors.expert ? 'border-red-500' : ''}
-                  aria-invalid={errors.expert ? 'true' : 'false'}
-                  {...register('expert', { required: true })}
+                  id='descriptionGood'
+                  placeholder='Good level description'
+                  className={errors.descriptionGood ? 'border-red-500' : ''}
+                  aria-invalid={errors.descriptionGood ? 'true' : 'false'}
+                  {...register('descriptionGood', { required: true })}
                 />
-                {errors.expert && (
-                  <p className='text-sm text-red-500 mt-1'>Expert description is required</p>
+                {errors.descriptionGood && (
+                  <p className='text-sm text-red-500 mt-1'>Good description is required</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='descriptionVeryGood' className='font-medium'>
+                  Very Good
+                </Label>
+                <Input
+                  id='descriptionVeryGood'
+                  placeholder='Very good level description'
+                  className={errors.descriptionVeryGood ? 'border-red-500' : ''}
+                  aria-invalid={errors.descriptionVeryGood ? 'true' : 'false'}
+                  {...register('descriptionVeryGood', { required: true })}
+                />
+                {errors.descriptionVeryGood && (
+                  <p className='text-sm text-red-500 mt-1'>Very good description is required</p>
                 )}
               </div>
             </div>

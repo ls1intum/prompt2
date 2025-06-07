@@ -31,7 +31,7 @@ export const NationalityDiagram = ({
       if (!nationalityMap.has(nationality)) {
         nationalityMap.set(nationality, { scores: [], scoreLevels: [] })
       }
-      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.score))
+      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.scoreLevel))
       nationalityMap.get(nationality)?.scoreLevels.push(p.scoreLevel)
     }
   })

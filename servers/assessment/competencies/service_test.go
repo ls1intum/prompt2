@@ -66,10 +66,11 @@ func (suite *CompetencyServiceTestSuite) TestGetCompetency() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), competencyID, competency.ID, "Competency ID should match")
 	assert.Equal(suite.T(), "GitLab Project Management", competency.Name, "Competency name should match")
-	assert.NotEmpty(suite.T(), competency.Novice, "Novice description should not be empty")
-	assert.NotEmpty(suite.T(), competency.Intermediate, "Intermediate description should not be empty")
-	assert.NotEmpty(suite.T(), competency.Advanced, "Advanced description should not be empty")
-	assert.NotEmpty(suite.T(), competency.Expert, "Expert description should not be empty")
+	assert.NotEmpty(suite.T(), competency.DescriptionVeryBad, "Very Bad description should not be empty")
+	assert.NotEmpty(suite.T(), competency.DescriptionBad, "Bad description should not be empty")
+	assert.NotEmpty(suite.T(), competency.DescriptionOk, "Ok description should not be empty")
+	assert.NotEmpty(suite.T(), competency.DescriptionGood, "Good description should not be empty")
+	assert.NotEmpty(suite.T(), competency.DescriptionVeryGood, "Very Good description should not be empty")
 }
 
 func (suite *CompetencyServiceTestSuite) TestGetCompetencyNotFound() {
@@ -108,14 +109,15 @@ func (suite *CompetencyServiceTestSuite) TestCreateCompetency() {
 	categoryID := uuid.MustParse("815b159b-cab3-49b4-8060-c4722d59241d") // User Interface category
 
 	newCompetency := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Test Competency",
-		Description:  "A test competency for unit testing",
-		Novice:       "Basic understanding of test concepts",
-		Intermediate: "Can write simple tests",
-		Advanced:     "Can design comprehensive test suites",
-		Expert:       "Defines testing strategies and mentors others",
-		Weight:       5,
+		CategoryID:          categoryID,
+		Name:                "Test Competency",
+		Description:         "A test competency for unit testing",
+		DescriptionVeryBad:  "Very Bad description for testing",
+		DescriptionBad:      "Bad description for testing",
+		DescriptionOk:       "Ok description for testing",
+		DescriptionGood:     "Good description for testing",
+		DescriptionVeryGood: "Very Good description for testing",
+		Weight:              5,
 	}
 
 	err := CreateCompetency(suite.ctx, newCompetency)
@@ -130,10 +132,11 @@ func (suite *CompetencyServiceTestSuite) TestCreateCompetency() {
 		if competency.Name == newCompetency.Name && competency.CategoryID == newCompetency.CategoryID {
 			found = true
 			assert.Equal(suite.T(), newCompetency.Description, competency.Description.String)
-			assert.Equal(suite.T(), newCompetency.Novice, competency.Novice)
-			assert.Equal(suite.T(), newCompetency.Intermediate, competency.Intermediate)
-			assert.Equal(suite.T(), newCompetency.Advanced, competency.Advanced)
-			assert.Equal(suite.T(), newCompetency.Expert, competency.Expert)
+			assert.Equal(suite.T(), newCompetency.DescriptionVeryBad, competency.DescriptionVeryBad)
+			assert.Equal(suite.T(), newCompetency.DescriptionBad, competency.DescriptionBad)
+			assert.Equal(suite.T(), newCompetency.DescriptionOk, competency.DescriptionOk)
+			assert.Equal(suite.T(), newCompetency.DescriptionGood, competency.DescriptionGood)
+			assert.Equal(suite.T(), newCompetency.DescriptionVeryGood, competency.DescriptionVeryGood)
 			assert.Equal(suite.T(), newCompetency.Weight, competency.Weight)
 			break
 		}
@@ -146,14 +149,15 @@ func (suite *CompetencyServiceTestSuite) TestUpdateCompetency() {
 	categoryID := uuid.MustParse("9107c0aa-15b7-4967-bf62-6fa131f08bee") // Fundamentals in Software Engineering category
 
 	createRequest := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Competency to Update",
-		Description:  "Original description",
-		Novice:       "Original novice",
-		Intermediate: "Original intermediate",
-		Advanced:     "Original advanced",
-		Expert:       "Original expert",
-		Weight:       3,
+		CategoryID:          categoryID,
+		Name:                "Competency to Update",
+		Description:         "Original description",
+		DescriptionVeryBad:  "Original very bad description",
+		DescriptionBad:      "Original bad description",
+		DescriptionOk:       "Original ok description",
+		DescriptionGood:     "Original good description",
+		DescriptionVeryGood: "Original very good description",
+		Weight:              3,
 	}
 
 	err := CreateCompetency(suite.ctx, createRequest)
@@ -176,14 +180,15 @@ func (suite *CompetencyServiceTestSuite) TestUpdateCompetency() {
 
 	// Update the competency
 	updateRequest := competencyDTO.UpdateCompetencyRequest{
-		Name:         "Updated Competency Name",
-		CategoryID:   categoryID,
-		Description:  "Updated description",
-		Novice:       "Updated novice",
-		Intermediate: "Updated intermediate",
-		Advanced:     "Updated advanced",
-		Expert:       "Updated expert",
-		Weight:       8,
+		Name:                "Updated Competency Name",
+		CategoryID:          categoryID,
+		Description:         "Updated description",
+		DescriptionVeryBad:  "Updated very bad description",
+		DescriptionBad:      "Updated bad description",
+		DescriptionOk:       "Updated ok description",
+		DescriptionGood:     "Updated good description",
+		DescriptionVeryGood: "Updated very good description",
+		Weight:              8,
 	}
 
 	err = UpdateCompetency(suite.ctx, createdCompetency.ID, updateRequest)
@@ -194,10 +199,11 @@ func (suite *CompetencyServiceTestSuite) TestUpdateCompetency() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), updateRequest.Name, updatedCompetency.Name)
 	assert.Equal(suite.T(), updateRequest.Description, updatedCompetency.Description.String)
-	assert.Equal(suite.T(), updateRequest.Novice, updatedCompetency.Novice)
-	assert.Equal(suite.T(), updateRequest.Intermediate, updatedCompetency.Intermediate)
-	assert.Equal(suite.T(), updateRequest.Advanced, updatedCompetency.Advanced)
-	assert.Equal(suite.T(), updateRequest.Expert, updatedCompetency.Expert)
+	assert.Equal(suite.T(), updateRequest.DescriptionVeryBad, updatedCompetency.DescriptionVeryBad)
+	assert.Equal(suite.T(), updateRequest.DescriptionBad, updatedCompetency.DescriptionBad)
+	assert.Equal(suite.T(), updateRequest.DescriptionOk, updatedCompetency.DescriptionOk)
+	assert.Equal(suite.T(), updateRequest.DescriptionGood, updatedCompetency.DescriptionGood)
+	assert.Equal(suite.T(), updateRequest.DescriptionVeryGood, updatedCompetency.DescriptionVeryGood)
 	assert.Equal(suite.T(), updateRequest.Weight, updatedCompetency.Weight)
 }
 
@@ -206,14 +212,15 @@ func (suite *CompetencyServiceTestSuite) TestUpdateNonExistentCompetency() {
 	categoryID := uuid.MustParse("815b159b-cab3-49b4-8060-c4722d59241d")
 
 	updateRequest := competencyDTO.UpdateCompetencyRequest{
-		Name:         "Non-existent Competency",
-		CategoryID:   categoryID,
-		Description:  "This should not fail but affect 0 rows",
-		Novice:       "Novice",
-		Intermediate: "Intermediate",
-		Advanced:     "Advanced",
-		Expert:       "Expert",
-		Weight:       1,
+		Name:                "Non-existent Competency",
+		CategoryID:          categoryID,
+		Description:         "This should not fail but affect 0 rows",
+		DescriptionVeryBad:  "Non-existent very bad description",
+		DescriptionBad:      "Non-existent bad description",
+		DescriptionOk:       "Non-existent ok description",
+		DescriptionGood:     "Non-existent good description",
+		DescriptionVeryGood: "Non-existent very good description",
+		Weight:              1,
 	}
 
 	err := UpdateCompetency(suite.ctx, nonExistentID, updateRequest)
@@ -225,14 +232,15 @@ func (suite *CompetencyServiceTestSuite) TestDeleteCompetency() {
 	categoryID := uuid.MustParse("815b159b-cab3-49b4-8060-c4722d59241d") // User Interface category
 
 	createRequest := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   categoryID,
-		Name:         "Competency to Delete",
-		Description:  "This competency will be deleted",
-		Novice:       "Delete novice",
-		Intermediate: "Delete intermediate",
-		Advanced:     "Delete advanced",
-		Expert:       "Delete expert",
-		Weight:       2,
+		CategoryID:          categoryID,
+		Name:                "Competency to Delete",
+		Description:         "This competency will be deleted",
+		DescriptionVeryBad:  "Very Bad description for deletion",
+		DescriptionBad:      "Bad description for deletion",
+		DescriptionOk:       "Ok description for deletion",
+		DescriptionGood:     "Good description for deletion",
+		DescriptionVeryGood: "Very Good description for deletion",
+		Weight:              2,
 	}
 
 	err := CreateCompetency(suite.ctx, createRequest)
@@ -273,14 +281,15 @@ func (suite *CompetencyServiceTestSuite) TestCreateCompetencyWithInvalidCategory
 	nonExistentCategoryID := uuid.New()
 
 	invalidCompetency := competencyDTO.CreateCompetencyRequest{
-		CategoryID:   nonExistentCategoryID,
-		Name:         "Invalid Competency",
-		Description:  "This should fail due to invalid category",
-		Novice:       "Novice",
-		Intermediate: "Intermediate",
-		Advanced:     "Advanced",
-		Expert:       "Expert",
-		Weight:       1,
+		CategoryID:          nonExistentCategoryID,
+		Name:                "Invalid Competency",
+		Description:         "This should fail due to invalid category",
+		DescriptionVeryBad:  "Very Bad description for invalid category",
+		DescriptionBad:      "Bad description for invalid category",
+		DescriptionOk:       "Ok description for invalid category",
+		DescriptionGood:     "Good description for invalid category",
+		DescriptionVeryGood: "Very Good description for invalid category",
+		Weight:              1,
 	}
 
 	err := CreateCompetency(suite.ctx, invalidCompetency)

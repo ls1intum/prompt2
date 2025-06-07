@@ -1,4 +1,5 @@
-import { SkillCounts } from '../interfaces/ScoreDistributionDataPoint'
+import { getLevelConfig } from '../../../../utils/getLevelConfig'
+import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 export function ScoreDistributionTooltipContent(props: any) {
   if (!props.active || !props.payload || !props.payload[0]) {
@@ -6,8 +7,8 @@ export function ScoreDistributionTooltipContent(props: any) {
   }
 
   const data = props.payload[0].payload
-  const counts: SkillCounts = data.counts
-  const total = counts.novice + counts.intermediate + counts.advanced + counts.expert
+  const counts: Record<string, number> = data.counts
+  const total = Object.values(counts).reduce((sum, count) => sum + count, 0)
 
   if (total === 0) {
     return (
@@ -28,9 +29,7 @@ export function ScoreDistributionTooltipContent(props: any) {
         </div>
         <div className='grid grid-cols-2 gap-x-3'>
           <span className='text-muted-foreground'>Median:</span>
-          <span className='font-medium'>
-            {data.median.charAt(0).toUpperCase() + data.median.slice(1)}
-          </span>
+          <span className='font-medium'>{getLevelConfig(data.median as ScoreLevel).title}</span>
         </div>
         <div className='grid grid-cols-2 gap-x-3'>
           <span className='text-muted-foreground'>Lower Quartile:</span>
@@ -42,30 +41,16 @@ export function ScoreDistributionTooltipContent(props: any) {
         </div>
         <div className='h-px bg-border my-2'></div>
         <div className='font-medium'>Distribution</div>
-        <div className='grid grid-cols-2 gap-x-3'>
-          <span className='text-muted-foreground'>Novice:</span>
-          <span className='font-medium'>
-            {counts.novice} ({((counts.novice / total) * 100).toFixed(0)}%)
-          </span>
-        </div>
-        <div className='grid grid-cols-2 gap-x-3'>
-          <span className='text-muted-foreground'>Intermediate:</span>
-          <span className='font-medium'>
-            {counts.intermediate} ({((counts.intermediate / total) * 100).toFixed(0)}%)
-          </span>
-        </div>
-        <div className='grid grid-cols-2 gap-x-3'>
-          <span className='text-muted-foreground'>Advanced:</span>
-          <span className='font-medium'>
-            {counts.advanced} ({((counts.advanced / total) * 100).toFixed(0)}%)
-          </span>
-        </div>
-        <div className='grid grid-cols-2 gap-x-3'>
-          <span className='text-muted-foreground'>Expert:</span>
-          <span className='font-medium'>
-            {counts.expert} ({((counts.expert / total) * 100).toFixed(0)}%)
-          </span>
-        </div>
+        {Object.entries(counts).map(([key, value]) => (
+          <div key={key} className='grid grid-cols-2 gap-x-3'>
+            <span className='text-muted-foreground'>
+              {getLevelConfig(key as ScoreLevel).title}:
+            </span>
+            <span className='font-medium'>
+              {value} ({((value / total) * 100).toFixed(0)}%)
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   )
