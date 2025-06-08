@@ -9,7 +9,7 @@ import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { AssessmentProfile } from './components/AssessmentProfile'
-import { AssessmentFeedback } from './components/AssessmentFeedback'
+import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -77,7 +77,7 @@ export const AssessmentPage = (): JSX.Element => {
         />
       ))}
 
-      <AssessmentFeedback
+      <AssessmentCompletion
         studentAssessment={studentAssessment}
         deadline='19.06.2025'
         completed={studentAssessment.assessmentCompletion.completed}
