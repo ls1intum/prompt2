@@ -9,6 +9,7 @@ import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { AssessmentProfile } from './components/AssessmentProfile'
+import { AssessmentFeedback } from './components/AssessmentFeedback'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -75,6 +76,16 @@ export const AssessmentPage = (): JSX.Element => {
           completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}
+
+      <AssessmentFeedback
+        studentAssessment={studentAssessment}
+        deadline='19.06.2025'
+        completed={studentAssessment.assessmentCompletion.completed}
+        onMarkAsFinal={() => {
+          // Implement your mark as final logic here
+          console.log('Marking assessment as final')
+        }}
+      />
     </div>
   )
 }

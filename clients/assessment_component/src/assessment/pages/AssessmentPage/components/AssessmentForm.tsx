@@ -48,6 +48,7 @@ export const AssessmentForm = ({
       competencyID: competency.id,
       scoreLevel: assessment?.scoreLevel,
       comment: assessment ? assessment.comment : '',
+      examples: assessment ? assessment.examples : '',
       author: userName,
     },
   })
@@ -81,7 +82,7 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-5 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-7 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
@@ -93,7 +94,7 @@ export const AssessmentForm = ({
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
 
-        <div className='lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-1'>
+        <div className='lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-1'>
           {Object.values(ScoreLevel).map((level) => {
             const config = getLevelConfig(level)
             const isSelected = selectedScore === level
@@ -126,7 +127,11 @@ export const AssessmentForm = ({
                 </div>
 
                 <p className='line-clamp-3 text-muted-foreground'>
-                  {competency['description' + level.charAt(0).toUpperCase() + level.slice(1)]}
+                  {(() => {
+                    const key =
+                      `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency
+                    return competency[key] as string
+                  })()}
                 </p>
               </button>
             )
@@ -136,13 +141,38 @@ export const AssessmentForm = ({
         <div className='flex flex-col h-full'>
           <FormField
             control={form.control}
-            name='comment'
-            rules={{ required: 'Comment is required.' }}
+            name='examples'
             render={({ field }) => (
               <FormItem className='flex flex-col flex-grow'>
                 <FormControl className='flex-grow'>
                   <Textarea
-                    placeholder={completed ? '' : 'additional comments'}
+                    placeholder={completed ? '' : 'Example'}
+                    className={cn(
+                      'resize-none text-xs h-full',
+                      form.formState.errors.comment &&
+                        'border border-destructive focus-visible:ring-destructive',
+                      completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
+                    )}
+                    disabled={completed}
+                    readOnly={completed}
+                    {...field}
+                  />
+                </FormControl>
+                {!completed && <FormMessage />}
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className='flex flex-col h-full'>
+          <FormField
+            control={form.control}
+            name='comment'
+            render={({ field }) => (
+              <FormItem className='flex flex-col flex-grow'>
+                <FormControl className='flex-grow'>
+                  <Textarea
+                    placeholder={completed ? '' : 'Additional comments'}
                     className={cn(
                       'resize-none text-xs h-full',
                       form.formState.errors.comment &&

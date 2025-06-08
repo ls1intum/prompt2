@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import { StudentScoreBadge } from '../../components/StudentScoreBadge'
+import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
@@ -58,6 +59,8 @@ export const AssessmentProfile = ({
           await createCompletion({
             courseParticipationID: studentAssessment.courseParticipationID,
             coursePhaseID: phaseId ?? '',
+            comment: '', // TODO - add the real completion comment
+            gradeSuggestion: 5.0, // TODO - add the real grade suggestion
             author: userName,
             completedAt: new Date().toISOString(),
             completed: true,
@@ -88,6 +91,11 @@ export const AssessmentProfile = ({
                     remainingAssessments={remainingAssessments}
                     isFinalized={studentAssessment.assessmentCompletion.completed}
                   />
+                  {studentAssessment.assessmentCompletion && (
+                    <GradeSuggestionBadge
+                      gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
+                    />
+                  )}
                   {studentAssessment.assessments.length > 0 && (
                     <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
                   )}

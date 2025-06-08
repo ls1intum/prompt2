@@ -11,7 +11,7 @@ import (
 )
 
 func setupActionItemRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	actionItemRouter := routerGroup.Group("/action-item")
+	actionItemRouter := routerGroup.Group("student-assessment/action-item")
 
 	actionItemRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listActionItemsForCoursePhase)
 	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createActionItem)
