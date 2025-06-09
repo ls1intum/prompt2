@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Lock } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { Lock, Unlock } from 'lucide-react'
 
 import {
   Button,
@@ -13,10 +14,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Alert,
+  AlertDescription,
 } from '@tumaet/prompt-ui-components'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 import { StudentAssessment } from '../../../../interfaces/studentAssessment'
+
 import { ActionItemPanel } from './components/ActionItemPanel'
+import { AssessmentCompletionDialog } from './components/AssessmentCompletionDialog'
+
+import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
+import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
+import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
 
 interface AssessmentFeedbackProps {
   studentAssessment: StudentAssessment
@@ -28,12 +38,81 @@ interface AssessmentFeedbackProps {
 export function AssessmentCompletion({
   studentAssessment,
   deadline = '19.06.2025',
-  onMarkAsFinal,
   completed = false,
 }: AssessmentFeedbackProps) {
-  const [generalRemarks, setGeneralRemarks] = useState('')
+  // Initialize form fields with existing data if available
+  const [generalRemarks, setGeneralRemarks] = useState(
+    studentAssessment.assessmentCompletion?.comment || '',
+  )
+  const [gradingSuggestion, setGradingSuggestion] = useState(
+    studentAssessment.assessmentCompletion?.gradeSuggestion?.toString() || '',
+  )
 
-  const [gradingSuggestion, setGradingSuggestion] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { phaseId } = useParams<{ phaseId: string }>()
+
+  const { mutate: createOrUpdateCompletion, isPending: isCreatePending } =
+    useCreateOrUpdateAssessmentCompletion(setError)
+  const { mutate: markAsComplete, isPending: isMarkPending } = useMarkAssessmentAsComplete(setError)
+  const { mutate: unmarkAsCompleted, isPending: isUnmarkPending } =
+    useUnmarkAssessmentAsCompleted(setError)
+
+  const handleButtonClick = () => {
+    setError(null)
+    setDialogOpen(true)
+  }
+
+  const isPending = isCreatePending || isMarkPending || isUnmarkPending
+
+  const { user } = useAuthStore()
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+
+  const handleConfirm = () => {
+    const handleCompletion = async () => {
+      try {
+        if (studentAssessment.assessmentCompletion.completed) {
+          // If currently completed, unmark it
+          await unmarkAsCompleted(studentAssessment.courseParticipationID)
+        } else {
+          // If not completed, mark as complete with current form data
+          const completionData = {
+            courseParticipationID: studentAssessment.courseParticipationID,
+            coursePhaseID: phaseId ?? '',
+            comment: generalRemarks.trim(),
+            gradeSuggestion: gradingSuggestion ? parseFloat(gradingSuggestion) : undefined,
+            author: userName,
+            completed: true,
+          }
+          await markAsComplete(completionData)
+        }
+        setDialogOpen(false)
+      } catch (err) {
+        setError('An error occurred while updating the assessment completion status.')
+      }
+    }
+
+    handleCompletion()
+  }
+
+  // Save form data whenever it changes (auto-save functionality)
+  const handleSaveFormData = async () => {
+    if (generalRemarks.trim() || gradingSuggestion) {
+      try {
+        const completionData = {
+          courseParticipationID: studentAssessment.courseParticipationID,
+          coursePhaseID: phaseId ?? '',
+          comment: generalRemarks.trim(),
+          gradeSuggestion: gradingSuggestion ? parseFloat(gradingSuggestion) : undefined,
+          author: userName,
+          completed: studentAssessment.assessmentCompletion.completed,
+        }
+        await createOrUpdateCompletion(completionData)
+      } catch (err) {
+        console.error('Failed to save form data:', err)
+      }
+    }
+  }
 
   return (
     <div>
@@ -49,6 +128,7 @@ export function AssessmentCompletion({
                 className='min-h-[100px]'
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
+                onBlur={handleSaveFormData}
                 disabled={completed}
               />
             </CardContent>
@@ -56,12 +136,16 @@ export function AssessmentCompletion({
 
           <Card>
             <CardHeader>
-              <CardTitle>Grading Suggestion</CardTitle>
+              <CardTitle>Grade Suggestion</CardTitle>
             </CardHeader>
             <CardContent>
               <Select
                 value={gradingSuggestion}
-                onValueChange={setGradingSuggestion}
+                onValueChange={(value) => {
+                  setGradingSuggestion(value)
+                  // Save immediately when grade suggestion changes
+                  setTimeout(handleSaveFormData, 100)
+                }}
                 disabled={completed}
               >
                 <SelectTrigger>
@@ -90,16 +174,36 @@ export function AssessmentCompletion({
 
       <div className='flex justify-between items-center mt-8'>
         <div className='text-muted-foreground'>Deadline: {deadline}</div>
-        <Button
-          variant='default'
-          className='bg-black hover:bg-gray-800 text-white'
-          onClick={onMarkAsFinal}
-          disabled={completed}
-        >
-          <Lock className='mr-2 h-4 w-4' />
-          Mark Assessment as Final
+        <Button size='sm' disabled={isPending} onClick={handleButtonClick}>
+          {studentAssessment.assessmentCompletion.completed ? (
+            <span className='flex items-center gap-1'>
+              <Unlock className='h-3.5 w-3.5' />
+              Unmark as Final
+            </span>
+          ) : (
+            <span className='flex items-center gap-1'>
+              <Lock className='h-3.5 w-3.5' />
+              Mark Assessment as Final
+            </span>
+          )}
         </Button>
+
+        {error && !dialogOpen && (
+          <Alert variant='destructive' className='mt-4'>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
+
+      <AssessmentCompletionDialog
+        studentAssessment={studentAssessment}
+        isPending={isPending}
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+        error={error}
+        setError={setError}
+        handleConfirm={handleConfirm}
+      />
     </div>
   )
 }

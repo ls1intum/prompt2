@@ -24,11 +24,20 @@ export type CreateOrUpdateAssessmentRequest = {
 }
 
 export type AssessmentCompletion = {
-  coursePhaseID: string // UUID
   courseParticipationID: string // UUID
+  coursePhaseID: string // UUID
   completedAt: string // ISO 8601 date string
   author: string
-  comment: string
-  gradeSuggestion: number
   completed: boolean
+  comment: string
+  gradeSuggestion: number | null
+}
+
+export type CreateOrUpdateAssessmentCompletionRequest = {
+  courseParticipationID: string // UUID
+  coursePhaseID: string // UUID
+  author: string
+  comment: string
+  gradeSuggestion?: number
+  completed?: boolean
 }

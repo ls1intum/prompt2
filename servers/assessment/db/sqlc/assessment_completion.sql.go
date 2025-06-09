@@ -31,6 +31,64 @@ func (q *Queries) CheckAssessmentCompletionExists(ctx context.Context, arg Check
 	return exists, err
 }
 
+const createOrUpdateAssessmentCompletion = `-- name: CreateOrUpdateAssessmentCompletion :exec
+INSERT INTO assessment_completion (course_participation_id,
+                                   course_phase_id,
+                                   completed_at,
+                                   author,
+                                   comment,
+                                   grade_suggestion,
+                                   completed)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+ON CONFLICT (course_participation_id, course_phase_id)
+    DO UPDATE
+    SET completed_at     = EXCLUDED.completed_at,
+        author           = EXCLUDED.author,
+        comment          = EXCLUDED.comment,
+        grade_suggestion = EXCLUDED.grade_suggestion,
+        completed        = EXCLUDED.completed
+`
+
+type CreateOrUpdateAssessmentCompletionParams struct {
+	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
+	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
+	Author                string             `json:"author"`
+	Comment               string             `json:"comment"`
+	GradeSuggestion       pgtype.Numeric     `json:"grade_suggestion"`
+	Completed             bool               `json:"completed"`
+}
+
+func (q *Queries) CreateOrUpdateAssessmentCompletion(ctx context.Context, arg CreateOrUpdateAssessmentCompletionParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateAssessmentCompletion,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
+		arg.CompletedAt,
+		arg.Author,
+		arg.Comment,
+		arg.GradeSuggestion,
+		arg.Completed,
+	)
+	return err
+}
+
+const deleteAssessmentCompletion = `-- name: DeleteAssessmentCompletion :exec
+DELETE
+FROM assessment_completion
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+`
+
+type DeleteAssessmentCompletionParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) DeleteAssessmentCompletion(ctx context.Context, arg DeleteAssessmentCompletionParams) error {
+	_, err := q.db.Exec(ctx, deleteAssessmentCompletion, arg.CourseParticipationID, arg.CoursePhaseID)
+	return err
+}
+
 const getAssessmentCompletion = `-- name: GetAssessmentCompletion :one
 SELECT course_participation_id, course_phase_id, completed_at, author, comment, grade_suggestion, completed
 FROM assessment_completion
@@ -93,14 +151,12 @@ func (q *Queries) GetAssessmentCompletionsByCoursePhase(ctx context.Context, cou
 }
 
 const markAssessmentAsFinished = `-- name: MarkAssessmentAsFinished :exec
-INSERT INTO assessment_completion (course_participation_id,
-                                   course_phase_id,
-                                   completed_at,
-                                   author,
-                                   comment,
-                                   grade_suggestion,
-                                   completed)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+UPDATE assessment_completion
+SET completed    = true,
+    completed_at = $3,
+    author       = $4
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
 `
 
 type MarkAssessmentAsFinishedParams struct {
@@ -108,9 +164,6 @@ type MarkAssessmentAsFinishedParams struct {
 	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
 	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
 	Author                string             `json:"author"`
-	Comment               string             `json:"comment"`
-	GradeSuggestion       pgtype.Numeric     `json:"grade_suggestion"`
-	Completed             bool               `json:"completed"`
 }
 
 func (q *Queries) MarkAssessmentAsFinished(ctx context.Context, arg MarkAssessmentAsFinishedParams) error {
@@ -119,16 +172,13 @@ func (q *Queries) MarkAssessmentAsFinished(ctx context.Context, arg MarkAssessme
 		arg.CoursePhaseID,
 		arg.CompletedAt,
 		arg.Author,
-		arg.Comment,
-		arg.GradeSuggestion,
-		arg.Completed,
 	)
 	return err
 }
 
 const unmarkAssessmentAsFinished = `-- name: UnmarkAssessmentAsFinished :exec
-DELETE
-FROM assessment_completion
+UPDATE assessment_completion
+SET completed = false
 WHERE course_participation_id = $1
   AND course_phase_id = $2
 `

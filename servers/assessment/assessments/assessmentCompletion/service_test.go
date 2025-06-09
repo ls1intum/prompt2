@@ -2,12 +2,16 @@ package assessmentCompletion
 
 import (
 	"context"
+	"math/big"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -74,6 +78,108 @@ func (suite *AssessmentCompletionServiceTestSuite) TestGetAssessmentCompletionNo
 	partID := uuid.New()
 	_, err := GetAssessmentCompletion(suite.suiteCtx, partID, phaseID)
 	assert.Error(suite.T(), err, "Expected error for non-existent completion")
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentCompletion() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.New() // Use a new UUID to avoid conflicts
+
+	// Create test completion DTO
+	completionDTO := assessmentCompletionDTO.AssessmentCompletion{
+		CourseParticipationID: partID,
+		CoursePhaseID:         phaseID,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Author:                "Test Author",
+		Comment:               "Test comment for assessment completion",
+		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(35), Exp: -1, Valid: true}, // 3.5
+		Completed:             true,
+	}
+
+	// Test creation
+	err := CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
+	assert.NoError(suite.T(), err, "Expected no error while creating assessment completion")
+
+	// Verify creation - check existence
+	exists, err := CheckAssessmentCompletionExists(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.True(suite.T(), exists, "Expected assessment completion to exist after creation")
+
+	// Get the created completion and verify fields
+	completion, err := GetAssessmentCompletion(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), phaseID, completion.CoursePhaseID)
+	assert.Equal(suite.T(), partID, completion.CourseParticipationID)
+	assert.Equal(suite.T(), "Test Author", completion.Author)
+	assert.Equal(suite.T(), "Test comment for assessment completion", completion.Comment)
+	assert.True(suite.T(), completion.Completed)
+
+	// Test update
+	completionDTO.Comment = "Updated test comment"
+	completionDTO.Author = "Updated Author"
+	completionDTO.Completed = false
+
+	err = CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
+	assert.NoError(suite.T(), err, "Expected no error while updating assessment completion")
+
+	// Verify update
+	updatedCompletion, err := GetAssessmentCompletion(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "Updated test comment", updatedCompletion.Comment)
+	assert.Equal(suite.T(), "Updated Author", updatedCompletion.Author)
+	assert.False(suite.T(), updatedCompletion.Completed)
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestDeleteAssessmentCompletion() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.New() // Use a new UUID
+
+	// First create a completion to delete
+	completionDTO := assessmentCompletionDTO.AssessmentCompletion{
+		CourseParticipationID: partID,
+		CoursePhaseID:         phaseID,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Author:                "Test Author",
+		Comment:               "Test comment",
+		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(40), Exp: -1, Valid: true}, // 4.0
+		Completed:             true,
+	}
+
+	err := CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
+	assert.NoError(suite.T(), err)
+
+	// Verify it exists
+	exists, err := CheckAssessmentCompletionExists(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.True(suite.T(), exists, "Expected assessment completion to exist before deletion")
+
+	// Test deletion
+	err = DeleteAssessmentCompletion(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err, "Expected no error while deleting assessment completion")
+
+	// Verify deletion
+	exists, err = CheckAssessmentCompletionExists(suite.suiteCtx, partID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.False(suite.T(), exists, "Expected assessment completion to be deleted")
+
+	// Test deleting non-existent completion (should not error)
+	err = DeleteAssessmentCompletion(suite.suiteCtx, uuid.New(), phaseID)
+	assert.NoError(suite.T(), err, "Expected no error when deleting non-existent completion")
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentCompletionWithInvalidData() {
+	// Test with empty/invalid UUID
+	completionDTO := assessmentCompletionDTO.AssessmentCompletion{
+		CourseParticipationID: uuid.Nil,
+		CoursePhaseID:         uuid.Nil,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Author:                "",
+		Comment:               "",
+		GradeSuggestion:       pgtype.Numeric{},
+		Completed:             false,
+	}
+
+	err := CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
+	assert.Error(suite.T(), err, "Expected error with invalid UUIDs")
 }
 
 func TestAssessmentCompletionServiceTestSuite(t *testing.T) {

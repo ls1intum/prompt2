@@ -10,6 +10,7 @@ interface ActionItemRowProps {
   onDelete: (itemId: string) => void
   isSaving: boolean
   isPending: boolean
+  isDisabled?: boolean
 }
 
 export function ActionItemRow({
@@ -18,9 +19,12 @@ export function ActionItemRow({
   onTextChange,
   onDelete,
   isPending,
+  isDisabled = false,
 }: ActionItemRowProps) {
   return (
-    <div className='flex items-center gap-2 p-2 border rounded-md group relative'>
+    <div
+      className={`flex items-center gap-2 p-2 border rounded-md group relative ${isDisabled ? 'opacity-60' : ''}`}
+    >
       <Check className='h-5 w-5 shrink-0 text-green-600' />
 
       <div className='flex-1 relative'>
@@ -28,10 +32,14 @@ export function ActionItemRow({
           className='w-full resize-none min-h-[24px]'
           value={value}
           onChange={(e) => {
-            const cleanup = onTextChange(item.id, e.target.value)
-            return cleanup
+            if (!isDisabled) {
+              const cleanup = onTextChange(item.id, e.target.value)
+              return cleanup
+            }
           }}
-          placeholder='Enter action item...'
+          placeholder={
+            isDisabled ? 'Assessment completed - editing disabled' : 'Enter action item...'
+          }
           rows={1}
           style={{
             height: 'auto',
@@ -42,6 +50,8 @@ export function ActionItemRow({
             target.style.height = 'auto'
             target.style.height = target.scrollHeight + 'px'
           }}
+          disabled={isDisabled}
+          readOnly={isDisabled}
         />
       </div>
 
@@ -49,9 +59,9 @@ export function ActionItemRow({
         variant='ghost'
         size='icon'
         className=''
-        onClick={() => onDelete(item.id)}
-        disabled={isPending}
-        title='Delete action item'
+        onClick={() => !isDisabled && onDelete(item.id)}
+        disabled={isPending || isDisabled}
+        title={isDisabled ? 'Assessment completed - editing disabled' : 'Delete action item'}
       >
         <Trash2 className='h-4 w-4 text-destructive' />
       </Button>

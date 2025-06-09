@@ -39,6 +39,9 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | null>(null)
 
+  // Check if assessment is completed
+  const isAssessmentCompleted = studentAssessment.assessmentCompletion.completed
+
   const {
     data: actionItems = [],
     isPending: isGetActionItemsPending,
@@ -71,6 +74,8 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   }, [actionItems, itemValues])
 
   const addActionItem = () => {
+    if (isAssessmentCompleted) return
+
     const handleAddActionItem = async () => {
       try {
         await createActionItem(
@@ -97,6 +102,8 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   const debouncedSave = useCallback(
     (item: ActionItem, text: string) => {
       const timeoutId = setTimeout(() => {
+        if (isAssessmentCompleted) return
+
         if (text.trim() !== item.action.trim() && text.trim() !== '') {
           setSavingItemId(item.id)
 
@@ -122,7 +129,14 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
 
       return timeoutId
     },
-    [phaseId, studentAssessment.courseParticipationID, userName, updateActionItem, refetch],
+    [
+      phaseId,
+      studentAssessment.courseParticipationID,
+      userName,
+      updateActionItem,
+      refetch,
+      isAssessmentCompleted,
+    ],
   )
 
   const handleTextChange = (itemId: string, value: string) => {
@@ -136,8 +150,10 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   }
 
   const openDeleteDialog = (itemId: string) => {
-    setItemToDelete(itemId)
-    setDeleteDialogOpen(true)
+    if (!isAssessmentCompleted) {
+      setItemToDelete(itemId)
+      setDeleteDialogOpen(true)
+    }
   }
 
   const confirmDelete = () => {
@@ -193,6 +209,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
+              isDisabled={isAssessmentCompleted}
             />
           ))}
 
@@ -200,7 +217,12 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
             onClick={addActionItem}
-            disabled={isPending}
+            disabled={isPending || isAssessmentCompleted}
+            title={
+              isAssessmentCompleted
+                ? 'Assessment completed - cannot add new action items'
+                : 'Add new action item'
+            }
           >
             {isCreatePending ? (
               <Loader2 className='h-5 w-5 mr-2 animate-spin text-muted-foreground' />

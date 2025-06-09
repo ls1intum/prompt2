@@ -6,7 +6,7 @@ ALTER TABLE assessment
 ALTER TABLE assessment_completion
     ADD COLUMN comment          text          DEFAULT ''    NOT NULL,
     ADD COLUMN grade_suggestion numeric(2, 1) DEFAULT 6.0   NOT NULL,
-    ADD COLUMN completed        boolean       DEFAULT false NOT NULL;
+    ADD COLUMN completed        boolean       DEFAULT true NOT NULL;
 
 CREATE TABLE action_item
 (

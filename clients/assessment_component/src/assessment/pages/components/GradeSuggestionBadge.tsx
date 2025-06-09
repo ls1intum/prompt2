@@ -5,10 +5,14 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
-  gradeSuggestion: number
+  gradeSuggestion: number | null
 }
 
 export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ gradeSuggestion }) => {
+  if (gradeSuggestion === null) {
+    return null
+  }
+
   const scoreLevel =
     gradeSuggestion <= 1.5
       ? ScoreLevel.VeryGood
