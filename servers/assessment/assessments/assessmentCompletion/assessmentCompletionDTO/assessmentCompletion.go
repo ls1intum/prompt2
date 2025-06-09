@@ -1,6 +1,8 @@
 package assessmentCompletionDTO
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
@@ -13,7 +15,21 @@ type AssessmentCompletion struct {
 	Author                string             `json:"author"`
 	Completed             bool               `json:"completed"`
 	Comment               string             `json:"comment"`
-	GradeSuggestion       pgtype.Numeric     `json:"gradeSuggestion"`
+	GradeSuggestion       float64            `json:"gradeSuggestion"`
+}
+
+func MapFloat64ToNumeric(gradeSuggestion float64) pgtype.Numeric {
+	var x pgtype.Numeric
+	x.Scan(fmt.Sprintf("%v", gradeSuggestion))
+	return x
+}
+
+func MapNumericToFloat64(gradeSuggestion pgtype.Numeric) float64 {
+	x, err := gradeSuggestion.Float64Value()
+	if err != nil {
+		return 0.0 // Return an empty Float8 if conversion fails
+	}
+	return x.Float64
 }
 
 // GetAssessmentCompletionDTOsFromDBModels converts a slice of db.AssessmentCompletion to DTOs.
@@ -33,6 +49,6 @@ func MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessment db.Assessme
 		Author:                dbAssessment.Author,
 		Completed:             dbAssessment.Completed,
 		Comment:               dbAssessment.Comment,
-		GradeSuggestion:       dbAssessment.GradeSuggestion,
+		GradeSuggestion:       MapNumericToFloat64(dbAssessment.GradeSuggestion),
 	}
 }

@@ -58,10 +58,10 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 	err = qtx.CreateOrUpdateAssessmentCompletion(ctx, db.CreateOrUpdateAssessmentCompletionParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
-		CompletedAt:           req.CompletedAt,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 		Comment:               req.Comment,
-		GradeSuggestion:       req.GradeSuggestion,
+		GradeSuggestion:       assessmentCompletionDTO.MapFloat64ToNumeric(req.GradeSuggestion),
 		Completed:             req.Completed,
 	})
 	if err != nil {

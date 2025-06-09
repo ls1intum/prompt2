@@ -40,17 +40,17 @@ export function AssessmentCompletion({
   deadline = '19.06.2025',
   completed = false,
 }: AssessmentFeedbackProps) {
-  // Initialize form fields with existing data if available
+  const { phaseId } = useParams<{ phaseId: string }>()
+
   const [generalRemarks, setGeneralRemarks] = useState(
     studentAssessment.assessmentCompletion?.comment || '',
   )
-  const [gradingSuggestion, setGradingSuggestion] = useState(
+  const [gradeSuggestion, setGradeSuggestion] = useState(
     studentAssessment.assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { phaseId } = useParams<{ phaseId: string }>()
 
   const { mutate: createOrUpdateCompletion, isPending: isCreatePending } =
     useCreateOrUpdateAssessmentCompletion(setError)
@@ -67,20 +67,17 @@ export function AssessmentCompletion({
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
-
   const handleConfirm = () => {
     const handleCompletion = async () => {
       try {
         if (studentAssessment.assessmentCompletion.completed) {
-          // If currently completed, unmark it
           await unmarkAsCompleted(studentAssessment.courseParticipationID)
         } else {
-          // If not completed, mark as complete with current form data
           const completionData = {
             courseParticipationID: studentAssessment.courseParticipationID,
             coursePhaseID: phaseId ?? '',
             comment: generalRemarks.trim(),
-            gradeSuggestion: gradingSuggestion ? parseFloat(gradingSuggestion) : undefined,
+            gradeSuggestion: gradeSuggestion ? parseFloat(gradeSuggestion) : 5.0,
             author: userName,
             completed: true,
           }
@@ -95,15 +92,14 @@ export function AssessmentCompletion({
     handleCompletion()
   }
 
-  // Save form data whenever it changes (auto-save functionality)
   const handleSaveFormData = async () => {
-    if (generalRemarks.trim() || gradingSuggestion) {
+    if (generalRemarks.trim() || gradeSuggestion) {
       try {
         const completionData = {
           courseParticipationID: studentAssessment.courseParticipationID,
           coursePhaseID: phaseId ?? '',
           comment: generalRemarks.trim(),
-          gradeSuggestion: gradingSuggestion ? parseFloat(gradingSuggestion) : undefined,
+          gradeSuggestion: gradeSuggestion ? parseFloat(gradeSuggestion) : 5.0,
           author: userName,
           completed: studentAssessment.assessmentCompletion.completed,
         }
@@ -140,28 +136,27 @@ export function AssessmentCompletion({
             </CardHeader>
             <CardContent>
               <Select
-                value={gradingSuggestion}
+                value={gradeSuggestion}
                 onValueChange={(value) => {
-                  setGradingSuggestion(value)
-                  // Save immediately when grade suggestion changes
-                  setTimeout(handleSaveFormData, 100)
+                  setGradeSuggestion(value)
+                  handleSaveFormData()
                 }}
                 disabled={completed}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder='Select a Grading Suggestion for this Student ...' />
+                  <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='1.0'>1.0 - Excellent</SelectItem>
+                  <SelectItem value='1'>1.0 - Excellent</SelectItem>
                   <SelectItem value='1.3'>1.3 - Very Good</SelectItem>
                   <SelectItem value='1.7'>1.7 - Good</SelectItem>
-                  <SelectItem value='2.0'>2.0 - Good</SelectItem>
+                  <SelectItem value='2'>2.0 - Good</SelectItem>
                   <SelectItem value='2.3'>2.3 - Satisfactory</SelectItem>
                   <SelectItem value='2.7'>2.7 - Satisfactory</SelectItem>
-                  <SelectItem value='3.0'>3.0 - Satisfactory</SelectItem>
+                  <SelectItem value='3'>3.0 - Satisfactory</SelectItem>
                   <SelectItem value='3.3'>3.3 - Sufficient</SelectItem>
                   <SelectItem value='3.7'>3.7 - Sufficient</SelectItem>
-                  <SelectItem value='4.0'>4.0 - Sufficient</SelectItem>
+                  <SelectItem value='4'>4.0 - Sufficient</SelectItem>
                   <SelectItem value='5.0'>5.0 - Fail</SelectItem>
                 </SelectContent>
               </Select>

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -146,7 +145,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCo
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(35), Exp: -1, Valid: true}, // 3.5
+		GradeSuggestion:       3.5,
 		Completed:             true,
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
@@ -261,7 +260,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetAssessmentCompletionSuc
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(40), Exp: -1, Valid: true}, // 4.0
+		GradeSuggestion:       4.0,
 		Completed:             true,
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
@@ -316,7 +315,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(40), Exp: -1, Valid: true}, // 4.0
+		GradeSuggestion:       4.0,
 		Completed:             true,
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
@@ -373,7 +372,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCo
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(35), Exp: -1, Valid: true}, // 3.5
+		GradeSuggestion:       4.0,
 		Completed:             true,
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}

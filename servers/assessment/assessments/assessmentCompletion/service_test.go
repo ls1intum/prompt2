@@ -2,7 +2,6 @@ package assessmentCompletion
 
 import (
 	"context"
-	"math/big"
 	"testing"
 	"time"
 
@@ -91,7 +90,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                "Test Author",
 		Comment:               "Test comment for assessment completion",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(35), Exp: -1, Valid: true}, // 3.5
+		GradeSuggestion:       3.5,
 		Completed:             true,
 	}
 
@@ -140,7 +139,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestDeleteAssessmentCompletio
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                "Test Author",
 		Comment:               "Test comment",
-		GradeSuggestion:       pgtype.Numeric{Int: big.NewInt(40), Exp: -1, Valid: true}, // 4.0
+		GradeSuggestion:       3.5,
 		Completed:             true,
 	}
 
@@ -174,7 +173,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                "",
 		Comment:               "",
-		GradeSuggestion:       pgtype.Numeric{},
+		GradeSuggestion:       0.0,
 		Completed:             false,
 	}
 

@@ -30,7 +30,7 @@ export type AssessmentCompletion = {
   author: string
   completed: boolean
   comment: string
-  gradeSuggestion: number | null
+  gradeSuggestion: number
 }
 
 export type CreateOrUpdateAssessmentCompletionRequest = {
@@ -38,6 +38,6 @@ export type CreateOrUpdateAssessmentCompletionRequest = {
   coursePhaseID: string // UUID
   author: string
   comment: string
-  gradeSuggestion?: number
+  gradeSuggestion: number
   completed?: boolean
 }
