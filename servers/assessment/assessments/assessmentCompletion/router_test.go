@@ -67,8 +67,9 @@ func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentInvalidJSON(
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompletedReturnsError() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+	// Use random UUIDs to ensure there are remaining assessments (no data for these IDs)
+	phaseID := uuid.New()
+	partID := uuid.New()
 	// minimal JSON to bind
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,
@@ -76,12 +77,12 @@ func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompletedR
 		Author:                "tester",
 	}
 	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/mark-complete", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
-	// service returns error when assessments remain
+	// service returns error when assessments remain (or student doesn't exist)
 	assert.Equal(suite.T(), http.StatusInternalServerError, resp.Code)
 }
 
