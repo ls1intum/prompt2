@@ -48,7 +48,7 @@ export function ActionItemRow({
       <Button
         variant='ghost'
         size='icon'
-        className='opacity-0 group-hover:opacity-100 transition-opacity'
+        className=''
         onClick={() => onDelete(item.id)}
         disabled={isPending}
         title='Delete action item'
