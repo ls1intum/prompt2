@@ -3,6 +3,8 @@ package assessmentCompletionDTO
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
@@ -20,7 +22,12 @@ type AssessmentCompletion struct {
 
 func MapFloat64ToNumeric(gradeSuggestion float64) pgtype.Numeric {
 	var x pgtype.Numeric
-	x.Scan(fmt.Sprintf("%v", gradeSuggestion))
+	err := x.Scan(fmt.Sprintf("%v", gradeSuggestion))
+	if err != nil {
+		log.Printf("Error converting float64 to Numeric: %v", err)
+		// Return an empty Numeric if conversion fails
+		return pgtype.Numeric{}
+	}
 	return x
 }
 
