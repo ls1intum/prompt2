@@ -11,16 +11,9 @@ import {
   CardTitle,
   ErrorPage,
   Button,
-  Textarea,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Check, Plus, Loader2, AlertCircle, Trash2 } from 'lucide-react'
+import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
 import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
 import type { StudentAssessment } from '../../../../../interfaces/studentAssessment'
@@ -29,6 +22,8 @@ import { getAllActionItemsForStudentInPhase } from '../../../../../network/queri
 import { useCreateActionItem } from '../hooks/useCreateActionItem'
 import { useUpdateActionItem } from '../hooks/useUpdateActionItem'
 import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
+import { DeleteActionItemDialog } from './DeleteActionItemDialog'
+import { ActionItemRow } from './ActionItemRow'
 
 interface ActionItemPanelProps {
   studentAssessment: StudentAssessment
@@ -190,49 +185,15 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (
-            <div key={item.id} className='flex items-start gap-2 p-4 border rounded-md group'>
-              <Check className='h-5 w-5 mt-0.5 shrink-0' />
-
-              <div className='flex-1 relative'>
-                <Textarea
-                  className='w-full resize-none min-h-[24px]'
-                  value={itemValues[item.id] || item.action}
-                  onChange={(e) => {
-                    const cleanup = handleTextChange(item.id, e.target.value)
-                    return cleanup
-                  }}
-                  placeholder='Enter action item...'
-                  rows={1}
-                  style={{
-                    height: 'auto',
-                    minHeight: '24px',
-                  }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement
-                    target.style.height = 'auto'
-                    target.style.height = target.scrollHeight + 'px'
-                  }}
-                />
-
-                {savingItemId === item.id && (
-                  <div className='absolute top-1 right-1 flex items-center gap-1 text-xs text-muted-foreground bg-white px-1 rounded'>
-                    <Loader2 className='h-3 w-3 animate-spin' />
-                    Saving...
-                  </div>
-                )}
-              </div>
-
-              <Button
-                variant='ghost'
-                size='icon'
-                className='opacity-0 group-hover:opacity-100 transition-opacity'
-                onClick={() => openDeleteDialog(item.id)}
-                disabled={isPending}
-                title='Delete action item'
-              >
-                <Trash2 className='h-4 w-4 text-destructive' />
-              </Button>
-            </div>
+            <ActionItemRow
+              key={item.id}
+              item={item}
+              value={itemValues[item.id] || item.action}
+              onTextChange={handleTextChange}
+              onDelete={openDeleteDialog}
+              isSaving={savingItemId === item.id}
+              isPending={isPending}
+            />
           ))}
 
           <Button
@@ -258,31 +219,13 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
         </CardContent>
       </Card>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Action Item</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this action item? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant='outline' onClick={cancelDelete} disabled={isDeletePending}>
-              Cancel
-            </Button>
-            <Button variant='destructive' onClick={confirmDelete} disabled={isDeletePending}>
-              {isDeletePending ? (
-                <>
-                  <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteActionItemDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isDeleting={isDeletePending}
+      />
     </>
   )
 }

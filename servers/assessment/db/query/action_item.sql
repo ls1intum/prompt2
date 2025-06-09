@@ -28,7 +28,8 @@ WHERE id = $1;
 SELECT *
 FROM action_item
 WHERE course_participation_id = $1
-  AND course_phase_id = $2;
+  AND course_phase_id = $2
+ORDER BY created_at;
 
 -- name: ListActionItemsForCoursePhase :many
 SELECT *

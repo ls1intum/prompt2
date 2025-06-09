@@ -108,6 +108,7 @@ SELECT id, course_phase_id, course_participation_id, action, created_at, author
 FROM action_item
 WHERE course_participation_id = $1
   AND course_phase_id = $2
+ORDER BY created_at
 `
 
 type ListActionItemsForStudentInPhaseParams struct {
