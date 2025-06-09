@@ -1,4 +1,3 @@
-import { PathString } from 'react-hook-form'
 import { ScoreLevel } from './scoreLevel'
 
 export type Assessment = {
@@ -18,7 +17,7 @@ export type CreateOrUpdateAssessmentRequest = {
   coursePhaseID: string // UUID
   competencyID: string // UUID
   scoreLevel: ScoreLevel
-  examples: PathString
+  examples: string
   comment: string
   author: string
 }

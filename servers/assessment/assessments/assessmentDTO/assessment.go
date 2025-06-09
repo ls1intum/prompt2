@@ -32,6 +32,7 @@ func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
 			CompetencyID:          a.CompetencyID,
 			ScoreLevel:            scoreLevelDTO.MapDBScoreLevelToDTO(a.ScoreLevel),
 			Comment:               a.Comment.String,
+			Examples:              a.Examples,
 			AssessedAt:            a.AssessedAt.Time,
 			Author:                a.Author,
 		})
