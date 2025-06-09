@@ -92,14 +92,14 @@ export function AssessmentCompletion({
     handleCompletion()
   }
 
-  const handleSaveFormData = async () => {
-    if (generalRemarks.trim() || gradeSuggestion) {
+  const handleSaveFormData = async (newRemarks: string, newGrade: string) => {
+    if (newRemarks.trim() || newGrade) {
       try {
         const completionData = {
           courseParticipationID: studentAssessment.courseParticipationID,
           coursePhaseID: phaseId ?? '',
-          comment: generalRemarks.trim(),
-          gradeSuggestion: gradeSuggestion ? parseFloat(gradeSuggestion) : 5.0,
+          comment: newRemarks.trim(),
+          gradeSuggestion: newGrade ? parseFloat(newGrade) : 5.0,
           author: userName,
           completed: studentAssessment.assessmentCompletion.completed,
         }
@@ -124,7 +124,7 @@ export function AssessmentCompletion({
                 className='min-h-[100px]'
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
-                onBlur={handleSaveFormData}
+                onBlur={() => handleSaveFormData(generalRemarks, gradeSuggestion)}
                 disabled={completed}
               />
             </CardContent>
@@ -139,7 +139,7 @@ export function AssessmentCompletion({
                 value={gradeSuggestion}
                 onValueChange={(value) => {
                   setGradeSuggestion(value)
-                  handleSaveFormData()
+                  handleSaveFormData(generalRemarks, value)
                 }}
                 disabled={completed}
               >
@@ -157,7 +157,7 @@ export function AssessmentCompletion({
                   <SelectItem value='3.3'>3.3 - Sufficient</SelectItem>
                   <SelectItem value='3.7'>3.7 - Sufficient</SelectItem>
                   <SelectItem value='4'>4.0 - Sufficient</SelectItem>
-                  <SelectItem value='5.0'>5.0 - Fail</SelectItem>
+                  <SelectItem value='5'>5.0 - Fail</SelectItem>
                 </SelectContent>
               </Select>
             </CardContent>
