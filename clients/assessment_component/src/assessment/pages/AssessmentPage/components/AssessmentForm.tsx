@@ -106,7 +106,7 @@ export const AssessmentForm = ({
                 onClick={() => handleScoreChange(level)}
                 disabled={completed}
                 className={cn(
-                  'w-full text-sm border-2 rounded-lg p-3 transition-all text-left',
+                  'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
                   isSelected ? config.selectedBg : '',
                   isSelected && config.textColor,
                   !completed &&
