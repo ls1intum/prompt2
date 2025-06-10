@@ -1,6 +1,6 @@
 -- name: CreateCategory :exec
-INSERT INTO category (id, name, short_name, description, weight)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
+VALUES ($1, $2, $3, $4, $5, $6);
 
 -- name: GetCategory :one
 SELECT *
@@ -17,7 +17,8 @@ UPDATE category
 SET name        = $2,
     short_name  = $3,
     description = $4,
-    weight      = $5
+    weight      = $5,
+    assessment_template_id = $6
 WHERE id = $1;
 
 -- name: DeleteCategory :exec

@@ -66,7 +66,22 @@ CREATE TABLE public.category (
     name character varying(255) NOT NULL,
     description text,
     weight integer DEFAULT 1 NOT NULL,
-    short_name character varying(10)
+    short_name character varying(10),
+    assessment_template_id uuid NOT NULL
+);
+
+CREATE TABLE public.assessment_template (
+    id uuid PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE public.assessment_template_course_phase (
+    assessment_template_id uuid NOT NULL,
+    course_phase_id uuid PRIMARY KEY NOT NULL,
+    FOREIGN KEY (assessment_template_id) references assessment_template (id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.competency (
@@ -85,13 +100,22 @@ CREATE TABLE public.competency (
 
 CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
 
+-- Insert the default assessment template
+INSERT INTO public.assessment_template (id, name, description)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
+
+-- Insert some sample assessment_template_course_phase records
+INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02');
+
 INSERT INTO public.category
 VALUES (
         '25f1c984-ba31-4cf2-aa8e-5662721bf44e',
         'Version Control',
         '',
         1,
-        'Git'
+        'Git',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.category
@@ -100,7 +124,8 @@ VALUES (
         'User Interface',
         '',
         1,
-        'UI'
+        'UI',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.category
@@ -109,7 +134,8 @@ VALUES (
         'Fundamentals in Software Engineering',
         '',
         1,
-        'SE'
+        'SE',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.competency
@@ -219,6 +245,18 @@ VALUES (
 
 INSERT INTO public.schema_migrations
 VALUES (8, false);
+
+-- Add foreign key constraint for category assessment_template_id
+ALTER TABLE ONLY public.category
+ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE SET NULL;
+
+-- Create the view
+CREATE VIEW category_course_phase AS
+SELECT c.id AS category_id,
+       atcp.course_phase_id
+FROM category c
+         INNER JOIN assessment_template_course_phase atcp
+                    ON c.assessment_template_id = atcp.assessment_template_id;
 
 ALTER TABLE ONLY public.category
 ADD CONSTRAINT category_pkey PRIMARY KEY (id);

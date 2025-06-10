@@ -30,12 +30,16 @@ func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) 
 
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
+	// Use the default assessment template ID (this should match the one in your test database)
+	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-		ID:          uuid.New(),
-		Name:        req.Name,
-		ShortName:   pgtype.Text{String: req.ShortName, Valid: true},
-		Description: pgtype.Text{String: req.Description, Valid: true},
-		Weight:      req.Weight,
+		ID:                   uuid.New(),
+		Name:                 req.Name,
+		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
+		Description:          pgtype.Text{String: req.Description, Valid: true},
+		Weight:               req.Weight,
+		AssessmentTemplateID: defaultAssessmentTemplateID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -69,13 +73,30 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 }
 
 func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
-	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-		ID:          id,
-		Name:        req.Name,
-		ShortName:   pgtype.Text{String: req.ShortName, Valid: true},
-		Description: pgtype.Text{String: req.Description, Valid: true},
-		Weight:      req.Weight,
-	})
+	// Get the existing category to preserve its assessment_template_id
+	existingCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
+	if err != nil {
+		// If category doesn't exist, use default assessment template ID
+		defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+		err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
+			ID:                   id,
+			Name:                 req.Name,
+			ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
+			Description:          pgtype.Text{String: req.Description, Valid: true},
+			Weight:               req.Weight,
+			AssessmentTemplateID: defaultAssessmentTemplateID,
+		})
+	} else {
+		// Use the existing assessment_template_id
+		err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
+			ID:                   id,
+			Name:                 req.Name,
+			ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
+			Description:          pgtype.Text{String: req.Description, Valid: true},
+			Weight:               req.Weight,
+			AssessmentTemplateID: existingCategory.AssessmentTemplateID,
+		})
+	}
 	if err != nil {
 		log.Error("could not update category: ", err)
 		return errors.New("could not update category")

@@ -149,9 +149,27 @@ func (suite *CategoryServiceTestSuite) TestDeleteNonExistentCategory() {
 }
 
 func (suite *CategoryServiceTestSuite) TestGetCategoriesWithCompetencies() {
-	catsWithComp, err := GetCategoriesWithCompetencies(suite.suiteCtx)
+	// Use a known course phase ID from the test data
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase
+
+	catsWithComp, err := GetCategoriesWithCompetencies(suite.suiteCtx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(catsWithComp), 0, "Should return categories with competencies")
+
+	// Verify the structure of returned data
+	for _, cat := range catsWithComp {
+		assert.NotEmpty(suite.T(), cat.ID, "Category ID should not be empty")
+		assert.NotEmpty(suite.T(), cat.Name, "Category name should not be empty")
+		assert.GreaterOrEqual(suite.T(), cat.Weight, int32(1), "Category weight should be at least 1")
+		assert.NotNil(suite.T(), cat.Competencies, "Competencies should not be nil")
+
+		// Verify competencies structure if any exist
+		for _, comp := range cat.Competencies {
+			assert.NotEmpty(suite.T(), comp.ID, "Competency ID should not be empty")
+			assert.NotEmpty(suite.T(), comp.Name, "Competency name should not be empty")
+			assert.Equal(suite.T(), cat.ID, comp.CategoryID, "Competency should belong to the category")
+		}
+	}
 }
 
 func TestCategoryServiceTestSuite(t *testing.T) {
