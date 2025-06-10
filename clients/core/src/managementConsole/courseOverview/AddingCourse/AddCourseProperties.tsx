@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react'
+import type React from 'react'
+import { useEffect } from 'react'
 import {
   Button,
   Input,
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@tumaet/prompt-ui-components'
-import { courseFormSchema, CourseFormValues } from '@core/validations/course'
+import { courseFormSchema, type CourseFormValues } from '@core/validations/course'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { CourseType, CourseTypeDetails } from '@tumaet/prompt-shared-state'
@@ -56,6 +57,11 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
       form.setValue('ects', ectsValue as number, { shouldValidate: true })
     }
   }, [selectedCourseType, form])
+
+  const handleSemesterTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const filteredValue = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+    form.setValue('semesterTag', filteredValue, { shouldValidate: true })
+  }
 
   return (
     <Form {...form}>
@@ -142,9 +148,16 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
             <FormItem>
               <FormLabel>Semester Tag</FormLabel>
               <FormControl>
-                <Input placeholder='Enter a semester tag' {...field} className='w-full' />
+                <Input
+                  placeholder='Enter a semester tag'
+                  value={field.value}
+                  onChange={handleSemesterTagChange}
+                  className='w-full'
+                />
               </FormControl>
-              <FormDescription>e.g. ios2425 or WS24/25</FormDescription>
+              <FormDescription>
+                e.g. ios2425 or ws2425 (lowercase letters and numbers only)
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
