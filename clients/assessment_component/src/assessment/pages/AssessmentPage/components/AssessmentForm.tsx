@@ -82,7 +82,7 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-7 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
@@ -94,7 +94,7 @@ export const AssessmentForm = ({
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
 
-        <div className='lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-1'>
+        <div className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'>
           {Object.values(ScoreLevel).map((level) => {
             const config = getLevelConfig(level)
             const isSelected = selectedScore === level
@@ -112,6 +112,8 @@ export const AssessmentForm = ({
                   !completed &&
                     'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                   completed && 'opacity-80 cursor-not-allowed',
+                  // Hide non-selected items on small screens (< lg) only when a selection exists
+                  selectedScore && !isSelected && 'hidden lg:flex',
                 )}
               >
                 <div className='flex justify-between mb-1'>
