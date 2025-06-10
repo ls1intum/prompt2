@@ -88,12 +88,31 @@ type AssessmentCompletion struct {
 	Completed             bool               `json:"completed"`
 }
 
+type AssessmentTemplate struct {
+	ID          uuid.UUID        `json:"id"`
+	Name        string           `json:"name"`
+	Description pgtype.Text      `json:"description"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+}
+
+type AssessmentTemplateCoursePhase struct {
+	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
+	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
+}
+
 type Category struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
-	Weight      int32       `json:"weight"`
-	ShortName   pgtype.Text `json:"short_name"`
+	ID                   uuid.UUID   `json:"id"`
+	Name                 string      `json:"name"`
+	Description          pgtype.Text `json:"description"`
+	Weight               int32       `json:"weight"`
+	ShortName            pgtype.Text `json:"short_name"`
+	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+}
+
+type CategoryCoursePhase struct {
+	CategoryID    uuid.UUID `json:"category_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
 type Competency struct {

@@ -92,8 +92,8 @@ func DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func GetCategoriesWithCompetencies(ctx context.Context) ([]categoryDTO.CategoryWithCompetencies, error) {
-	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx)
+func GetCategoriesWithCompetencies(ctx context.Context, coursePhaseID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
+	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get categories with competencies: ", err)
 		return nil, errors.New("could not get categories with competencies")

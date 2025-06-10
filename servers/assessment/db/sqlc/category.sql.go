@@ -86,10 +86,9 @@ SELECT c.id,
        )::json AS competencies
 FROM category c
          LEFT JOIN competency cmp ON c.id = cmp.category_id
-GROUP BY c.id,
-         c.name,
-         c.description,
-         c.weight
+         INNER JOIN assessment_template_course_phase atcp ON atcp.assessment_template_id = c.assessment_template_id
+WHERE atcp.course_phase_id = $1
+GROUP BY c.id, c.name, c.short_name, c.description, c.weight
 ORDER BY c.name ASC
 `
 
@@ -102,8 +101,8 @@ type GetCategoriesWithCompetenciesRow struct {
 	Competencies []byte      `json:"competencies"`
 }
 
-func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCategoriesWithCompetenciesRow, error) {
-	rows, err := q.db.Query(ctx, getCategoriesWithCompetencies)
+func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context, coursePhaseID uuid.UUID) ([]GetCategoriesWithCompetenciesRow, error) {
+	rows, err := q.db.Query(ctx, getCategoriesWithCompetencies, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +129,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context) ([]GetCateg
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, name, description, weight, short_name
+SELECT id, name, description, weight, short_name, assessment_template_id
 FROM category
 WHERE id = $1
 `
@@ -144,12 +143,13 @@ func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, erro
 		&i.Description,
 		&i.Weight,
 		&i.ShortName,
+		&i.AssessmentTemplateID,
 	)
 	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, description, weight, short_name
+SELECT id, name, description, weight, short_name, assessment_template_id
 FROM category
 ORDER BY name ASC
 `
@@ -169,6 +169,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 			&i.Description,
 			&i.Weight,
 			&i.ShortName,
+			&i.AssessmentTemplateID,
 		); err != nil {
 			return nil, err
 		}

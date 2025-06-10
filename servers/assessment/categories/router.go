@@ -82,7 +82,13 @@ func deleteCategory(c *gin.Context) {
 }
 
 func getCategoriesWithCompetencies(c *gin.Context) {
-	result, err := GetCategoriesWithCompetencies(c)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	result, err := GetCategoriesWithCompetencies(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
