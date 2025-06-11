@@ -67,16 +67,15 @@ func (suite *CategoryServiceTestSuite) TestGetCategoryNotFound() {
 
 func (suite *CategoryServiceTestSuite) TestCreateCategory() {
 	// Use the default assessment template ID from the database dump
-	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
 
 	req := categoryDTO.CreateCategoryRequest{
-		Name:                 "Test Category",
-		ShortName:            "TC",
-		Description:          "A test category",
-		Weight:               5,
-		AssessmentTemplateID: defaultAssessmentTemplateID,
+		Name:        "Test Category",
+		ShortName:   "TC",
+		Description: "A test category",
+		Weight:      5,
 	}
-	err := CreateCategory(suite.suiteCtx, req)
+	err := CreateCategory(suite.suiteCtx, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Creating category should not produce an error")
 
 	cats, err := ListCategories(suite.suiteCtx)
@@ -96,16 +95,15 @@ func (suite *CategoryServiceTestSuite) TestCreateCategory() {
 func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
 	// use existing category from dump
 	id := uuid.MustParse("815b159b-cab3-49b4-8060-c4722d59241d")
-	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
 
 	req := categoryDTO.UpdateCategoryRequest{
-		Name:                 "Updated Category",
-		ShortName:            "UC",
-		Description:          "Updated description",
-		Weight:               2,
-		AssessmentTemplateID: defaultAssessmentTemplateID,
+		Name:        "Updated Category",
+		ShortName:   "UC",
+		Description: "Updated description",
+		Weight:      2,
 	}
-	err := UpdateCategory(suite.suiteCtx, id, req)
+	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating category should not produce an error")
 
 	c, err := GetCategory(suite.suiteCtx, id)
@@ -116,32 +114,30 @@ func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
 }
 
 func (suite *CategoryServiceTestSuite) TestUpdateNonExistentCategory() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
 	id := uuid.New()
-	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	req := categoryDTO.UpdateCategoryRequest{
-		Name:                 "Non-existent",
-		ShortName:            "NE",
-		Description:          "Should not fail",
-		Weight:               1,
-		AssessmentTemplateID: defaultAssessmentTemplateID,
+		Name:        "Non-existent",
+		ShortName:   "NE",
+		Description: "Should not fail",
+		Weight:      1,
 	}
-	err := UpdateCategory(suite.suiteCtx, id, req)
+	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating non-existent category should not error")
 }
 
 func (suite *CategoryServiceTestSuite) TestDeleteCategory() {
-	// create category to delete
-	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
 
+	// create category to delete
 	reqCreate := categoryDTO.CreateCategoryRequest{
-		Name:                 "To Delete",
-		ShortName:            "TD",
-		Description:          "To be deleted",
-		Weight:               1,
-		AssessmentTemplateID: defaultAssessmentTemplateID,
+		Name:        "To Delete",
+		ShortName:   "TD",
+		Description: "To be deleted",
+		Weight:      1,
 	}
-	err := CreateCategory(suite.suiteCtx, reqCreate)
+	err := CreateCategory(suite.suiteCtx, coursePhaseID, reqCreate)
 	assert.NoError(suite.T(), err)
 
 	cats, err := ListCategories(suite.suiteCtx)

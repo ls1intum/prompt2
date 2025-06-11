@@ -14,16 +14,19 @@ import (
 
 const createCategory = `-- name: CreateCategory :exec
 INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, $2, $3, $4, $5,
+        (SELECT assessment_template_id
+         FROM assessment_template_course_phase
+         WHERE course_phase_id = $6))
 `
 
 type CreateCategoryParams struct {
-	ID                   uuid.UUID   `json:"id"`
-	Name                 string      `json:"name"`
-	ShortName            pgtype.Text `json:"short_name"`
-	Description          pgtype.Text `json:"description"`
-	Weight               int32       `json:"weight"`
-	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+	ID            uuid.UUID   `json:"id"`
+	Name          string      `json:"name"`
+	ShortName     pgtype.Text `json:"short_name"`
+	Description   pgtype.Text `json:"description"`
+	Weight        int32       `json:"weight"`
+	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) error {
@@ -33,7 +36,7 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 		arg.ShortName,
 		arg.Description,
 		arg.Weight,
-		arg.AssessmentTemplateID,
+		arg.CoursePhaseID,
 	)
 	return err
 }
@@ -189,17 +192,19 @@ SET name                   = $2,
     short_name             = $3,
     description            = $4,
     weight                 = $5,
-    assessment_template_id = $6
+    assessment_template_id = (SELECT assessment_template_id
+                              FROM assessment_template_course_phase
+                              WHERE course_phase_id = $6)
 WHERE id = $1
 `
 
 type UpdateCategoryParams struct {
-	ID                   uuid.UUID   `json:"id"`
-	Name                 string      `json:"name"`
-	ShortName            pgtype.Text `json:"short_name"`
-	Description          pgtype.Text `json:"description"`
-	Weight               int32       `json:"weight"`
-	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+	ID            uuid.UUID   `json:"id"`
+	Name          string      `json:"name"`
+	ShortName     pgtype.Text `json:"short_name"`
+	Description   pgtype.Text `json:"description"`
+	Weight        int32       `json:"weight"`
+	CoursePhaseID uuid.UUID   `json:"course_phase_id"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
@@ -209,7 +214,7 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 		arg.ShortName,
 		arg.Description,
 		arg.Weight,
-		arg.AssessmentTemplateID,
+		arg.CoursePhaseID,
 	)
 	return err
 }

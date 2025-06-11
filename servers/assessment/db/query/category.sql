@@ -1,6 +1,9 @@
 -- name: CreateCategory :exec
 INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
-VALUES ($1, $2, $3, $4, $5, $6);
+VALUES ($1, $2, $3, $4, $5,
+        (SELECT assessment_template_id
+         FROM assessment_template_course_phase
+         WHERE course_phase_id = $6));
 
 -- name: GetCategory :one
 SELECT *
@@ -18,7 +21,9 @@ SET name                   = $2,
     short_name             = $3,
     description            = $4,
     weight                 = $5,
-    assessment_template_id = $6
+    assessment_template_id = (SELECT assessment_template_id
+                              FROM assessment_template_course_phase
+                              WHERE course_phase_id = $6)
 WHERE id = $1;
 
 -- name: DeleteCategory :exec

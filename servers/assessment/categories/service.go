@@ -21,7 +21,7 @@ type CategoryService struct {
 
 var CategoryServiceSingleton *CategoryService
 
-func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) error {
+func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDTO.CreateCategoryRequest) error {
 	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -31,12 +31,12 @@ func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) 
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-		ID:                   uuid.New(),
-		Name:                 req.Name,
-		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
-		Description:          pgtype.Text{String: req.Description, Valid: true},
-		Weight:               req.Weight,
-		AssessmentTemplateID: req.AssessmentTemplateID,
+		ID:            uuid.New(),
+		Name:          req.Name,
+		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
+		Description:   pgtype.Text{String: req.Description, Valid: true},
+		Weight:        req.Weight,
+		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -69,14 +69,14 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 	return categories, nil
 }
 
-func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
+func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
 	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-		ID:                   id,
-		Name:                 req.Name,
-		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
-		Description:          pgtype.Text{String: req.Description, Valid: true},
-		Weight:               req.Weight,
-		AssessmentTemplateID: req.AssessmentTemplateID,
+		ID:            id,
+		Name:          req.Name,
+		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
+		Description:   pgtype.Text{String: req.Description, Valid: true},
+		Weight:        req.Weight,
+		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
