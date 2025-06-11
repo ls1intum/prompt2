@@ -18,11 +18,10 @@ func SetupAssessmentTemplateRouter(routerGroup *gin.RouterGroup, authMiddleware 
 	templateRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createAssessmentTemplate)
 	templateRouter.PUT("/:templateID", authMiddleware(promptSDK.PromptAdmin), updateAssessmentTemplate)
 	templateRouter.DELETE("/:templateID", authMiddleware(promptSDK.PromptAdmin), deleteAssessmentTemplate)
+	templateRouter.GET("/current", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentTemplatesByCoursePhase)
 
-	templateRouter.GET("/course-phase/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentTemplatesByCoursePhase)
-	templateRouter.GET("/:templateID/course-phases", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCoursePhasesByAssessmentTemplate)
 	templateRouter.POST("/course-phase", authMiddleware(promptSDK.PromptAdmin), createOrUpdateAssessmentTemplateCoursePhase)
-	templateRouter.DELETE("/:templateID/course-phase/:coursePhaseID", authMiddleware(promptSDK.PromptAdmin), deleteAssessmentTemplateCoursePhase)
+	templateRouter.DELETE("/course-phase/:templateID", authMiddleware(promptSDK.PromptAdmin), deleteAssessmentTemplateCoursePhase)
 }
 
 func getAllAssessmentTemplates(c *gin.Context) {

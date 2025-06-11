@@ -19,10 +19,10 @@ type AssessmentTemplateService struct {
 
 var AssessmentTemplateServiceSingleton *AssessmentTemplateService
 
-func CreateAssessmentTemplate(ctx context.Context, req assessmentTemplateDTO.CreateAssessmentTemplateRequest) (*assessmentTemplateDTO.AssessmentTemplate, error) {
+func CreateAssessmentTemplate(ctx context.Context, req assessmentTemplateDTO.CreateAssessmentTemplateRequest) (assessmentTemplateDTO.AssessmentTemplate, error) {
 	tx, err := AssessmentTemplateServiceSingleton.conn.Begin(ctx)
 	if err != nil {
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
@@ -42,31 +42,31 @@ func CreateAssessmentTemplate(ctx context.Context, req assessmentTemplateDTO.Cre
 	})
 	if err != nil {
 		log.WithError(err).Error("Failed to create assessment template")
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 
 	// Fetch the created template
 	template, err := GetAssessmentTemplate(ctx, templateID)
 	if err != nil {
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 
 	return template, nil
 }
 
-func GetAssessmentTemplate(ctx context.Context, templateID uuid.UUID) (*assessmentTemplateDTO.AssessmentTemplate, error) {
+func GetAssessmentTemplate(ctx context.Context, templateID uuid.UUID) (assessmentTemplateDTO.AssessmentTemplate, error) {
 	template, err := AssessmentTemplateServiceSingleton.queries.GetAssessmentTemplate(ctx, templateID)
 	if err != nil {
 		log.WithError(err).Error("Failed to get assessment template")
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 
-	return mapDBAssessmentTemplateToDTO(template), nil
+	return assessmentTemplateDTO.MapDBAssessmentTemplateToDTOAssessmentTemplate(template), nil
 }
 
 func ListAssessmentTemplates(ctx context.Context) ([]assessmentTemplateDTO.AssessmentTemplate, error) {
@@ -78,7 +78,7 @@ func ListAssessmentTemplates(ctx context.Context) ([]assessmentTemplateDTO.Asses
 
 	result := make([]assessmentTemplateDTO.AssessmentTemplate, len(templates))
 	for i, template := range templates {
-		result[i] = *mapDBAssessmentTemplateToDTO(template)
+		result[i] = assessmentTemplateDTO.MapDBAssessmentTemplateToDTOAssessmentTemplate(template)
 	}
 
 	return result, nil
@@ -171,19 +171,14 @@ func DeleteAssessmentTemplateCoursePhase(ctx context.Context, assessmentTemplate
 	return tx.Commit(ctx)
 }
 
-func GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]assessmentTemplateDTO.AssessmentTemplate, error) {
-	templates, err := AssessmentTemplateServiceSingleton.queries.GetAssessmentTemplatesByCoursePhase(ctx, coursePhaseID)
+func GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (assessmentTemplateDTO.AssessmentTemplate, error) {
+	template, err := AssessmentTemplateServiceSingleton.queries.GetAssessmentTemplatesByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		log.WithError(err).Error("Failed to get assessment templates by course phase")
-		return nil, err
+		return assessmentTemplateDTO.AssessmentTemplate{}, err
 	}
 
-	result := make([]assessmentTemplateDTO.AssessmentTemplate, len(templates))
-	for i, template := range templates {
-		result[i] = *mapDBAssessmentTemplateToDTO(template)
-	}
-
-	return result, nil
+	return assessmentTemplateDTO.MapDBAssessmentTemplateToDTOAssessmentTemplate(template), nil
 }
 
 func GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
@@ -194,25 +189,4 @@ func GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplate
 	}
 
 	return coursePhaseIDs, nil
-}
-
-func mapDBAssessmentTemplateToDTO(template db.AssessmentTemplate) *assessmentTemplateDTO.AssessmentTemplate {
-	dto := &assessmentTemplateDTO.AssessmentTemplate{
-		ID:   template.ID,
-		Name: template.Name,
-	}
-
-	if template.Description.Valid {
-		dto.Description = template.Description.String
-	}
-
-	if template.CreatedAt.Valid {
-		dto.CreatedAt = template.CreatedAt.Time
-	}
-
-	if template.UpdatedAt.Valid {
-		dto.UpdatedAt = template.UpdatedAt.Time
-	}
-
-	return dto
 }

@@ -111,37 +111,24 @@ func (q *Queries) GetAssessmentTemplateByName(ctx context.Context, name string) 
 	return i, err
 }
 
-const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :many
+const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :one
 SELECT at.id, at.name, at.description, at.created_at, at.updated_at
 FROM assessment_template at
          INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
 WHERE atcp.course_phase_id = $1
 `
 
-func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]AssessmentTemplate, error) {
-	rows, err := q.db.Query(ctx, getAssessmentTemplatesByCoursePhase, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AssessmentTemplate
-	for rows.Next() {
-		var i AssessmentTemplate
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
+	row := q.db.QueryRow(ctx, getAssessmentTemplatesByCoursePhase, coursePhaseID)
+	var i AssessmentTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many

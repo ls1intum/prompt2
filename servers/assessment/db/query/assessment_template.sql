@@ -41,7 +41,7 @@ FROM assessment_template_course_phase
 WHERE assessment_template_id = $1
   AND course_phase_id = $2;
 
--- name: GetAssessmentTemplatesByCoursePhase :many
+-- name: GetAssessmentTemplatesByCoursePhase :one
 SELECT at.*
 FROM assessment_template at
          INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
