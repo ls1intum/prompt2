@@ -258,7 +258,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetAssessmentCompletionSuc
 	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
 
-	// First create an assessment completion
+	// First create an assessment completion using HTTP POST request
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,
 		CourseParticipationID: partID,
@@ -268,8 +268,21 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetAssessmentCompletionSuc
 		Completed:             true,
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
-	err := CreateOrUpdateAssessmentCompletion(suite.suiteCtx, payload)
+	body, _ := json.Marshal(payload)
+
+	// Send HTTP POST request to create the assessment completion
+	createReq, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed", bytes.NewBuffer(body))
+	createReq.Header.Set("Content-Type", "application/json")
+	createResp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(createResp, createReq)
+	assert.Equal(suite.T(), http.StatusOK, createResp.Code)
+
+	// Verify the creation response
+	var createResponse map[string]interface{}
+	err := json.Unmarshal(createResp.Body.Bytes(), &createResponse)
 	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), createResponse, "message")
 
 	// Now test GET endpoint
 	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/course-participation/"+partID.String(), nil)

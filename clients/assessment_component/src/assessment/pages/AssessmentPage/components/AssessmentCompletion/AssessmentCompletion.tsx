@@ -31,7 +31,6 @@ import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCom
 interface AssessmentFeedbackProps {
   studentAssessment: StudentAssessment
   deadline?: string
-  onMarkAsFinal?: () => void
   completed?: boolean
 }
 
@@ -67,17 +66,59 @@ export function AssessmentCompletion({
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+
+  const validGradeValues = [1, 1.3, 1.7, 2, 2.3, 2.7, 3, 3.3, 3.7, 4, 5]
+
+  const validateGrade = (
+    gradeString: string,
+  ): { isValid: boolean; value?: number; error?: string } => {
+    if (!gradeString || gradeString.trim() === '') {
+      return { isValid: true, value: 5.0 } // Default value when empty
+    }
+
+    const gradeValue = parseFloat(gradeString)
+
+    if (isNaN(gradeValue)) {
+      return { isValid: false, error: 'Grade must be a valid number' }
+    }
+
+    if (gradeValue < 1 || gradeValue > 5) {
+      return { isValid: false, error: 'Grade must be between 1.0 and 5.0' }
+    }
+
+    // Check if the grade matches one of the valid values (with small tolerance for floating point comparison)
+    const isValidValue = validGradeValues.some(
+      (validValue) => Math.abs(validValue - gradeValue) < 0.01,
+    )
+
+    if (!isValidValue) {
+      return {
+        isValid: false,
+        error: `Grade must be one of the predefined values (${validGradeValues.join(', ')})`,
+      }
+    }
+
+    return { isValid: true, value: gradeValue }
+  }
+
   const handleConfirm = () => {
     const handleCompletion = async () => {
       try {
         if (studentAssessment.assessmentCompletion.completed) {
           await unmarkAsCompleted(studentAssessment.courseParticipationID)
         } else {
+          // Validate grade before final submission
+          const gradeValidation = validateGrade(gradeSuggestion)
+          if (!gradeValidation.isValid) {
+            setError(`Cannot complete assessment: ${gradeValidation.error}`)
+            return
+          }
+
           const completionData = {
             courseParticipationID: studentAssessment.courseParticipationID,
             coursePhaseID: phaseId ?? '',
             comment: generalRemarks.trim(),
-            gradeSuggestion: gradeSuggestion ? parseFloat(gradeSuggestion) : 5.0,
+            gradeSuggestion: gradeValidation.value ?? 5.0,
             author: userName,
             completed: true,
           }
@@ -95,17 +136,28 @@ export function AssessmentCompletion({
   const handleSaveFormData = async (newRemarks: string, newGrade: string) => {
     if (newRemarks.trim() || newGrade) {
       try {
+        // Validate grade before saving
+        const gradeValidation = validateGrade(newGrade)
+        if (!gradeValidation.isValid) {
+          setError(`Failed to save: ${gradeValidation.error}`)
+          return
+        }
+
         const completionData = {
           courseParticipationID: studentAssessment.courseParticipationID,
           coursePhaseID: phaseId ?? '',
           comment: newRemarks.trim(),
-          gradeSuggestion: newGrade ? parseFloat(newGrade) : 5.0,
+          gradeSuggestion: gradeValidation.value ?? 5.0,
           author: userName,
           completed: studentAssessment.assessmentCompletion.completed,
         }
         await createOrUpdateCompletion(completionData)
+
+        // Clear any existing errors on successful save
+        setError(null)
       } catch (err) {
         console.error('Failed to save form data:', err)
+        setError('Failed to save form data. Please try again.')
       }
     }
   }

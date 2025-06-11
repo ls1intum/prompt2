@@ -48,7 +48,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
     isError,
     refetch,
   } = useQuery<ActionItem[]>({
-    queryKey: ['actionItem', phaseId, studentAssessment.courseParticipationID],
+    queryKey: ['actionItems', phaseId, studentAssessment.courseParticipationID],
     queryFn: () =>
       getAllActionItemsForStudentInPhase(phaseId ?? '', studentAssessment.courseParticipationID),
   })

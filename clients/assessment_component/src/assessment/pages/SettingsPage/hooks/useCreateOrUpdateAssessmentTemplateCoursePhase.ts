@@ -13,6 +13,7 @@ export const useCreateOrUpdateAssessmentTemplateCoursePhase = (
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessmentTemplates'] })
       queryClient.invalidateQueries({ queryKey: ['categories'] })
+      queryClient.invalidateQueries({ queryKey: ['currentAssessmentTemplate'] })
       setError(null)
     },
     onError: (error: any) => {

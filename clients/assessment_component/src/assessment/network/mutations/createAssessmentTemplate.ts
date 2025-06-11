@@ -7,7 +7,7 @@ export const createAssessmentTemplate = async (
 ): Promise<void> => {
   try {
     await assessmentAxiosInstance.post(
-      'assessment/api/course_phase/${coursePhaseID}/assessment-template',
+      `assessment/api/course_phase/${coursePhaseID}/assessment-template`,
       request,
     )
   } catch (err) {

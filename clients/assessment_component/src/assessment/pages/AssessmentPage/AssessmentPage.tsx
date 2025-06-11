@@ -81,10 +81,6 @@ export const AssessmentPage = (): JSX.Element => {
         studentAssessment={studentAssessment}
         deadline='19.06.2025'
         completed={studentAssessment.assessmentCompletion.completed}
-        onMarkAsFinal={() => {
-          // Implement your mark as final logic here
-          console.log('Marking assessment as final')
-        }}
       />
     </div>
   )

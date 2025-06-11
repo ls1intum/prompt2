@@ -61,7 +61,7 @@ func markAssessmentAsCompleted(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Assessment marked as completed successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Assessment marked as completed successfully"})
 }
 
 func deleteAssessmentCompletion(c *gin.Context) {

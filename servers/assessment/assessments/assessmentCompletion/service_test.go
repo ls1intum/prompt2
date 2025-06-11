@@ -110,11 +110,17 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	assert.Equal(suite.T(), partID, completion.CourseParticipationID)
 	assert.Equal(suite.T(), "Test Author", completion.Author)
 	assert.Equal(suite.T(), "Test comment for assessment completion", completion.Comment)
+
+	// Convert pgtype.Numeric to float64 for comparison
+	gradeSuggestionFloat, err := completion.GradeSuggestion.Float64Value()
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 3.5, gradeSuggestionFloat.Float64)
 	assert.True(suite.T(), completion.Completed)
 
 	// Test update
 	completionDTO.Comment = "Updated test comment"
 	completionDTO.Author = "Updated Author"
+	completionDTO.GradeSuggestion = 2.0
 	completionDTO.Completed = false
 
 	err = CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
@@ -125,6 +131,11 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "Updated test comment", updatedCompletion.Comment)
 	assert.Equal(suite.T(), "Updated Author", updatedCompletion.Author)
+
+	// Convert pgtype.Numeric to float64 for comparison
+	updatedGradeSuggestionFloat, err := updatedCompletion.GradeSuggestion.Float64Value()
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 2.0, updatedGradeSuggestionFloat.Float64)
 	assert.False(suite.T(), updatedCompletion.Completed)
 }
 
