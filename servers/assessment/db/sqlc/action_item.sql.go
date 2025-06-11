@@ -11,6 +11,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const countActionItemsForStudentInPhase = `-- name: CountActionItemsForStudentInPhase :one
+SELECT COUNT(*) AS action_item_count
+FROM action_item
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+`
+
+type CountActionItemsForStudentInPhaseParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) CountActionItemsForStudentInPhase(ctx context.Context, arg CountActionItemsForStudentInPhaseParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countActionItemsForStudentInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
+	var action_item_count int64
+	err := row.Scan(&action_item_count)
+	return action_item_count, err
+}
+
 const createActionItem = `-- name: CreateActionItem :exec
 INSERT INTO action_item (id,
                          course_phase_id,

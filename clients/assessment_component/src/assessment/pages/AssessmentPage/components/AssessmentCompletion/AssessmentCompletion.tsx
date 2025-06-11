@@ -219,6 +219,12 @@ export function AssessmentCompletion({
         <ActionItemPanel studentAssessment={studentAssessment} />
       </div>
 
+      {error && !dialogOpen && (
+        <Alert variant='destructive' className='mt-4'>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className='flex justify-between items-center mt-8'>
         <div className='text-muted-foreground'>Deadline: {deadline}</div>
         <Button size='sm' disabled={isPending} onClick={handleButtonClick}>
@@ -234,12 +240,6 @@ export function AssessmentCompletion({
             </span>
           )}
         </Button>
-
-        {error && !dialogOpen && (
-          <Alert variant='destructive' className='mt-4'>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
       </div>
 
       <AssessmentCompletionDialog

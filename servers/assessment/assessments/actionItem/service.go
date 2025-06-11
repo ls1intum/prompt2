@@ -74,3 +74,15 @@ func ListActionItemsForStudentInPhase(ctx context.Context, courseParticipationID
 	}
 	return actionItemDTO.GetActionItemDTOsFromDBModels(actionItems), nil
 }
+
+func CountActionItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (int64, error) {
+	count, err := ActionItemServiceSingleton.queries.CountActionItemsForStudentInPhase(ctx, db.CountActionItemsForStudentInPhaseParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not count action items for student in phase: ", err)
+		return 0, errors.New("could not count action items for student in phase")
+	}
+	return count, nil
+}

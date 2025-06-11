@@ -36,3 +36,9 @@ SELECT *
 FROM action_item
 WHERE course_phase_id = $1;
 
+-- name: CountActionItemsForStudentInPhase :one
+SELECT COUNT(*) AS action_item_count
+FROM action_item
+WHERE course_participation_id = $1
+  AND course_phase_id = $2;
+
