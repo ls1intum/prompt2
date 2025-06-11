@@ -67,9 +67,10 @@ func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentInvalidJSON(
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompletedReturnsError() {
-	// Use random UUIDs to ensure there are remaining assessments (no data for these IDs)
-	phaseID := uuid.New()
-	partID := uuid.New()
+	// Use the course phase ID from test data to ensure there are competencies,
+	// but use a random participant ID to ensure there are remaining assessments (no assessments for this participant)
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.New() // Random participant ID - no assessments for this participant
 	// minimal JSON to bind
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,
@@ -219,8 +220,10 @@ func (suite *AssessmentCompletionRouterTestSuite) TestDeleteAssessmentCompletion
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompleteEndpoint() {
-	phaseID := uuid.New()
-	partID := uuid.New()
+	// Use the course phase ID from test data to ensure there are competencies,
+	// but use a random participant ID to ensure there are remaining assessments
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.New() // Random participant ID - no assessments for this participant
 
 	// Test with valid payload but expect error due to remaining assessments
 	payload := dto.AssessmentCompletion{
@@ -396,8 +399,10 @@ func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCo
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompleteResponseFormat() {
-	phaseID := uuid.New()
-	partID := uuid.New()
+	// Use the course phase ID from test data to ensure there are competencies,
+	// but use a random participant ID to ensure there are remaining assessments
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.New() // Random participant ID - no assessments for this participant
 
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,

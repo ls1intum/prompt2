@@ -83,12 +83,27 @@ CREATE TABLE public.assessment_completion (
     completed boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE public.assessment_template (
+    id uuid PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE public.assessment_template_course_phase (
+    assessment_template_id uuid NOT NULL,
+    course_phase_id uuid PRIMARY KEY NOT NULL,
+    FOREIGN KEY (assessment_template_id) references assessment_template (id) ON DELETE CASCADE
+);
+
 CREATE TABLE public.category (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
     description text,
     weight integer DEFAULT 1 NOT NULL,
-    short_name character varying(10)
+    short_name character varying(10),
+    assessment_template_id uuid NOT NULL
 );
 
 CREATE TABLE public.competency (
@@ -214,13 +229,25 @@ VALUES (
         'Maximilian Rapp'
     );
 
+-- Insert the default assessment template
+INSERT INTO public.assessment_template (id, name, description)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
+
+-- Insert some sample assessment_template_course_phase records
+INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9');
+
+INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '319f28d4-8877-400e-9450-d49077aae7fe');
+
 INSERT INTO public.category
 VALUES (
         '25f1c984-ba31-4cf2-aa8e-5662721bf44e',
         'Version Control',
         '',
         1,
-        'Git'
+        'Git',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.category
@@ -229,7 +256,8 @@ VALUES (
         'User Interface',
         '',
         1,
-        'UI'
+        'UI',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.category
@@ -238,7 +266,8 @@ VALUES (
         'Fundamentals in Software Engineering',
         '',
         1,
-        'SE'
+        'SE',
+        '550e8400-e29b-41d4-a716-446655440000'
     );
 
 INSERT INTO public.competency
@@ -371,7 +400,21 @@ ADD CONSTRAINT competency_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.schema_migrations
 ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
+-- Create the category_course_phase view
+CREATE VIEW category_course_phase AS
+SELECT c.id AS category_id,
+       atcp.course_phase_id
+FROM category c
+         INNER JOIN assessment_template_course_phase atcp
+                    ON c.assessment_template_id = atcp.assessment_template_id;
+
 CREATE INDEX idx_assessment_completion_participation_phase ON public.assessment_completion USING btree (course_participation_id, course_phase_id);
+
+ALTER TABLE ONLY public.category
+ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.assessment_template_course_phase
+ADD CONSTRAINT assessment_template_course_phase_template_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.assessment
 ADD CONSTRAINT assessment_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency(id) ON DELETE CASCADE;
