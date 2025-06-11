@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { createAssessmentTemplate } from '../../../network/mutations/createAssessmentTemplate'
-import { CreateAssessmentTemplateRequest } from '../../../interfaces/assessmentTemplate'
+
+import { createAssessmentTemplate } from '../../../../../network/mutations/createAssessmentTemplate'
+import { CreateAssessmentTemplateRequest } from '../../../../../interfaces/assessmentTemplate'
 
 export const useCreateAssessmentTemplate = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()

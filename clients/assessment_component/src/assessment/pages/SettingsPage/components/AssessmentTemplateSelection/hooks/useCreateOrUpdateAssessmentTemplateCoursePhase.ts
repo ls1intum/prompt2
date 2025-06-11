@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createOrUpdateAssessmentTemplateCoursePhase } from '../../../network/mutations/createOrUpdateAssessmentTemplateCoursePhase'
-import { CreateOrUpdateAssessmentTemplateCoursePhaseRequest } from '../../../interfaces/assessmentTemplate'
+
+import { createOrUpdateAssessmentTemplateCoursePhase } from '../../../../../network/mutations/createOrUpdateAssessmentTemplateCoursePhase'
+import { CreateOrUpdateAssessmentTemplateCoursePhaseRequest } from '../../../../../interfaces/assessmentTemplate'
 
 export const useCreateOrUpdateAssessmentTemplateCoursePhase = (
   setError: (error: string | null) => void,

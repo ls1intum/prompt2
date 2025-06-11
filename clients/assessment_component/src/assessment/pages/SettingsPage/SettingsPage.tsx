@@ -1,5 +1,5 @@
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { AssessmentTemplateSelection } from './components/AssessmentTemplateSelection'
+import { AssessmentTemplateSelection } from './components/AssessmentTemplateSelection/AssessmentTemplateSelection'
 import { CategoryList } from './components/CategoryList'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
 
