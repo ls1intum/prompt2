@@ -118,22 +118,6 @@ func getAssessmentTemplatesByCoursePhase(c *gin.Context) {
 	c.JSON(http.StatusOK, templates)
 }
 
-func getCoursePhasesByAssessmentTemplate(c *gin.Context) {
-	templateIDStr := c.Param("templateID")
-	templateID, err := uuid.Parse(templateIDStr)
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	coursePhaseIDs, err := GetCoursePhasesByAssessmentTemplate(c, templateID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, coursePhaseIDs)
-}
-
 func createOrUpdateAssessmentTemplateCoursePhase(c *gin.Context) {
 	var request assessmentTemplateDTO.CreateOrUpdateAssessmentTemplateCoursePhaseRequest
 	if err := c.BindJSON(&request); err != nil {
