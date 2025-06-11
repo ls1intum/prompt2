@@ -57,27 +57,30 @@ WHERE c.category_id = $1
 
 -- name: CountRemainingAssessmentsForStudent :one
 WITH total_competencies AS (SELECT COUNT(*) AS total
-                            FROM competency),
+                            FROM competency c
+                                     INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
+                            WHERE ccp.course_phase_id = $2),
      assessed_competencies AS (SELECT COUNT(*) AS assessed
                                FROM assessment a
+                                        INNER JOIN competency c ON a.competency_id = c.id
+                                        INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
                                WHERE a.course_participation_id = $1
-                                 AND a.course_phase_id = $2),
+                                 AND a.course_phase_id = $2
+                                 AND ccp.course_phase_id = $2),
      remaining_per_category AS (SELECT c.category_id,
                                        COUNT(*) - COUNT(ass.id) AS remaining_assessments
                                 FROM competency c
+                                         INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
                                          LEFT JOIN assessment ass ON ass.competency_id = c.id
                                     AND ass.course_participation_id = $1
                                     AND ass.course_phase_id = $2
+                                WHERE ccp.course_phase_id = $2
                                 GROUP BY c.category_id)
-SELECT (SELECT total
-        FROM total_competencies) - (SELECT assessed
-                                    FROM assessed_competencies) AS remaining_assessments,
+SELECT (SELECT total FROM total_competencies) - (SELECT assessed FROM assessed_competencies) AS remaining_assessments,
        json_agg(
                json_build_object(
-                       'categoryID',
-                       rpc.category_id,
-                       'remainingAssessments',
-                       rpc.remaining_assessments
+                       'categoryID', rpc.category_id,
+                       'remainingAssessments', rpc.remaining_assessments
                )
-       )                                                        AS categories
+       )                                                                                     AS categories
 FROM remaining_per_category rpc;
