@@ -14,10 +14,10 @@ ORDER BY name ASC;
 
 -- name: UpdateCategory :exec
 UPDATE category
-SET name        = $2,
-    short_name  = $3,
-    description = $4,
-    weight      = $5,
+SET name                   = $2,
+    short_name             = $3,
+    description            = $4,
+    weight                 = $5,
     assessment_template_id = $6
 WHERE id = $1;
 
@@ -65,7 +65,7 @@ SELECT c.id,
        )::json AS competencies
 FROM category c
          LEFT JOIN competency cmp ON c.id = cmp.category_id
-         INNER JOIN assessment_template_course_phase atcp ON atcp.assessment_template_id = c.assessment_template_id
-WHERE atcp.course_phase_id = $1
+         INNER JOIN category_course_phase ccp ON c.id = ccp.category_id
+WHERE ccp.course_phase_id = $1
 GROUP BY c.id, c.name, c.short_name, c.description, c.weight
 ORDER BY c.name ASC;

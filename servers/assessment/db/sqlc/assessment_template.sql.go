@@ -31,9 +31,8 @@ func (q *Queries) CreateAssessmentTemplate(ctx context.Context, arg CreateAssess
 const createOrUpdateAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateAssessmentTemplateCoursePhase :exec
 INSERT INTO assessment_template_course_phase (assessment_template_id, course_phase_id)
 VALUES ($1, $2)
-ON CONFLICT (course_phase_id)
-    DO UPDATE
-    SET assessment_template_id = EXCLUDED.assessment_template_id
+ON CONFLICT (course_phase_id) 
+DO UPDATE SET assessment_template_id = EXCLUDED.assessment_template_id
 `
 
 type CreateOrUpdateAssessmentTemplateCoursePhaseParams struct {
@@ -112,24 +111,89 @@ func (q *Queries) GetAssessmentTemplateByName(ctx context.Context, name string) 
 	return i, err
 }
 
-const getAssessmentTemplateForCoursePhase = `-- name: GetAssessmentTemplateForCoursePhase :one
+const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :many
 SELECT at.id, at.name, at.description, at.created_at, at.updated_at
 FROM assessment_template at
          INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
 WHERE atcp.course_phase_id = $1
 `
 
-func (q *Queries) GetAssessmentTemplateForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
-	row := q.db.QueryRow(ctx, getAssessmentTemplateForCoursePhase, coursePhaseID)
-	var i AssessmentTemplate
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]AssessmentTemplate, error) {
+	rows, err := q.db.Query(ctx, getAssessmentTemplatesByCoursePhase, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AssessmentTemplate
+	for rows.Next() {
+		var i AssessmentTemplate
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many
+SELECT atcp.course_phase_id
+FROM assessment_template_course_phase atcp
+WHERE atcp.assessment_template_id = $1
+`
+
+func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getCoursePhasesByAssessmentTemplate, assessmentTemplateID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var course_phase_id uuid.UUID
+		if err := rows.Scan(&course_phase_id); err != nil {
+			return nil, err
+		}
+		items = append(items, course_phase_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
+SELECT assessment_template_id, course_phase_id
+FROM assessment_template_course_phase
+ORDER BY assessment_template_id, course_phase_id
+`
+
+func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context) ([]AssessmentTemplateCoursePhase, error) {
+	rows, err := q.db.Query(ctx, listAssessmentTemplateCoursePhaseMappings)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AssessmentTemplateCoursePhase
+	for rows.Next() {
+		var i AssessmentTemplateCoursePhase
+		if err := rows.Scan(&i.AssessmentTemplateID, &i.CoursePhaseID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listAssessmentTemplates = `-- name: ListAssessmentTemplates :many
@@ -157,84 +221,6 @@ func (q *Queries) ListAssessmentTemplates(ctx context.Context) ([]AssessmentTemp
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listAssessmentTemplatesWithCoursePhases = `-- name: ListAssessmentTemplatesWithCoursePhases :many
-SELECT at.id,
-       at.name,
-       at.description,
-       at.created_at,
-       at.updated_at,
-       COALESCE(
-                       json_agg(atcp.course_phase_id) FILTER (WHERE atcp.course_phase_id IS NOT NULL),
-                       '[]'
-       )::json AS course_phase_ids
-FROM assessment_template at
-         LEFT JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
-GROUP BY at.id, at.name, at.description, at.created_at, at.updated_at
-ORDER BY at.name ASC
-`
-
-type ListAssessmentTemplatesWithCoursePhasesRow struct {
-	ID             uuid.UUID        `json:"id"`
-	Name           string           `json:"name"`
-	Description    pgtype.Text      `json:"description"`
-	CreatedAt      pgtype.Timestamp `json:"created_at"`
-	UpdatedAt      pgtype.Timestamp `json:"updated_at"`
-	CoursePhaseIds []byte           `json:"course_phase_ids"`
-}
-
-func (q *Queries) ListAssessmentTemplatesWithCoursePhases(ctx context.Context) ([]ListAssessmentTemplatesWithCoursePhasesRow, error) {
-	rows, err := q.db.Query(ctx, listAssessmentTemplatesWithCoursePhases)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListAssessmentTemplatesWithCoursePhasesRow
-	for rows.Next() {
-		var i ListAssessmentTemplatesWithCoursePhasesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.CoursePhaseIds,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listCoursePhasesByAssessmentTemplate = `-- name: ListCoursePhasesByAssessmentTemplate :many
-SELECT course_phase_id
-FROM assessment_template_course_phase
-WHERE assessment_template_id = $1
-`
-
-func (q *Queries) ListCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, listCoursePhasesByAssessmentTemplate, assessmentTemplateID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uuid.UUID
-	for rows.Next() {
-		var course_phase_id uuid.UUID
-		if err := rows.Scan(&course_phase_id); err != nil {
-			return nil, err
-		}
-		items = append(items, course_phase_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

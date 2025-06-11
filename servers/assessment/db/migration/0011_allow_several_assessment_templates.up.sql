@@ -21,12 +21,17 @@ VALUES (gen_random_uuid(), 'Intro Course Assessment Template',
         'This is the default assessment template.');
 
 ALTER TABLE category
-    ADD COLUMN assessment_template_id uuid NOT NULL DEFAULT (SELECT id
-                                                             FROM assessment_template
-                                                             WHERE name = 'Intro Course Assessment Template');
+    ADD COLUMN assessment_template_id uuid;
+
+UPDATE category
+SET assessment_template_id = (SELECT id FROM assessment_template WHERE name = 'Intro Course Assessment Template')
+WHERE assessment_template_id IS NULL;
 
 ALTER TABLE category
-    ADD FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE SET NULL;
+    ALTER COLUMN assessment_template_id SET NOT NULL;
+
+ALTER TABLE category
+    ADD FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE;
 
 CREATE VIEW category_course_phase AS
 SELECT c.id AS category_id,

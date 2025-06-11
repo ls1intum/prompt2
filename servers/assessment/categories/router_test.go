@@ -65,10 +65,14 @@ func (suite *CategoryRouterTestSuite) TestGetAllCategories() {
 }
 
 func (suite *CategoryRouterTestSuite) TestCreateCategory() {
+	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
 	createReq := categoryDTO.CreateCategoryRequest{
-		Name:        "Router Test Category",
-		Description: "Testing create via router",
-		Weight:      3,
+		Name:                 "Router Test Category",
+		ShortName:            "RTC",
+		Description:          "Testing create via router",
+		Weight:               3,
+		AssessmentTemplateID: defaultAssessmentTemplateID,
 	}
 	body, _ := json.Marshal(createReq)
 	req, _ := http.NewRequest("POST", "/api/category", bytes.NewBuffer(body))
@@ -96,10 +100,14 @@ func (suite *CategoryRouterTestSuite) TestCreateCategoryInvalidJSON() {
 
 func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
 	id := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
+	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
 	updateReq := categoryDTO.UpdateCategoryRequest{
-		Name:        "Router Updated",
-		Description: "Router update description",
-		Weight:      2,
+		Name:                 "Router Updated",
+		ShortName:            "RU",
+		Description:          "Router update description",
+		Weight:               2,
+		AssessmentTemplateID: defaultAssessmentTemplateID,
 	}
 	body, _ := json.Marshal(updateReq)
 	req, _ := http.NewRequest("PUT", "/api/category/"+id.String(), bytes.NewBuffer(body))
@@ -112,10 +120,14 @@ func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
 
 func (suite *CategoryRouterTestSuite) TestDeleteCategory() {
 	// create category to delete via service
+	defaultAssessmentTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
 	createReq := categoryDTO.CreateCategoryRequest{
-		Name:        "RouterDelete",
-		Description: "To delete via router",
-		Weight:      1,
+		Name:                 "RouterDelete",
+		ShortName:            "RD",
+		Description:          "To delete via router",
+		Weight:               1,
+		AssessmentTemplateID: defaultAssessmentTemplateID,
 	}
 	err := CreateCategory(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
@@ -149,7 +161,8 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategoryInvalidID() {
 }
 
 func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
-	req, _ := http.NewRequest("GET", "/api/category/with-competencies", nil)
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+	req, _ := http.NewRequest("GET", "/api/category/with-competencies?coursePhaseID="+coursePhaseID, nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -157,7 +170,7 @@ func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 	var respBody []categoryDTO.CategoryWithCompetencies
 	err := json.Unmarshal(resp.Body.Bytes(), &respBody)
-	assert.NoError(suite.T(), err)
+	assert.NoError(suite.T(), err, "Response should unmarshal properly")
 }
 
 func TestCategoryRouterTestSuite(t *testing.T) {
