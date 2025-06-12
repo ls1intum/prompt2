@@ -23,10 +23,11 @@ export const createScoreDistributionDataPoint = (
       median: ScoreLevel.VeryBad,
       upperQuartile: 0,
       counts: {
-        novice: 0,
-        intermediate: 0,
-        advanced: 0,
-        expert: 0,
+        veryBad: 0,
+        bad: 0,
+        ok: 0,
+        good: 0,
+        veryGood: 0,
       },
     }
   }
@@ -76,7 +77,7 @@ export const createScoreDistributionDataPoint = (
         }
         return counts
       },
-      { veryBad: 0, bad: 0, ok: 0, good: 0, veryGood: 0 } as Record<string, number>,
+      { veryBad: 0, bad: 0, ok: 0, good: 0, veryGood: 0 } as Record<ScoreLevel, number>,
     ),
   }
 }

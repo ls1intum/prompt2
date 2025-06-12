@@ -12,7 +12,7 @@ import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDist
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
 interface AuthorDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]

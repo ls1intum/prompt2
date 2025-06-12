@@ -7,5 +7,5 @@ export interface ScoreDistributionDataPoint {
   lowerQuartile: number
   median: ScoreLevel
   upperQuartile: number
-  counts: Record<string, number>
+  counts: Record<ScoreLevel, number>
 }

@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
