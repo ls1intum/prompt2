@@ -5,6 +5,8 @@ import { chartConfig } from './utils/chartConfig'
 import { getCornerRadius } from './utils/getCornerRadius'
 import { DataPoint } from '../interfaces/DataPoint'
 
+import { ScoreLevel } from '../../../interfaces/scoreLevel'
+
 interface BarChartWithScoreLevelProps {
   data: DataPoint[]
 }
@@ -43,7 +45,7 @@ const createRoundedBarShape = (segmentKey: string, stackKeys?: string[]) => {
 
 export const BarChartWithScoreLevel = ({ data }: BarChartWithScoreLevelProps) => {
   const memoizedBarShapes = useMemo(() => {
-    return ['novice', 'intermediate', 'advanced', 'expert', 'notAssessed'].map((key) => ({
+    return [...Object.values(ScoreLevel), 'notAssessed'].map((key) => ({
       key,
       shape: createRoundedBarShape(key),
     }))

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Book, Calendar, GraduationCap, Lock, Unlock } from 'lucide-react'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
-import StudentScoreBadge from '../../components/StudentScoreBadge'
+import { StudentScoreBadge } from '../../components/StudentScoreBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
