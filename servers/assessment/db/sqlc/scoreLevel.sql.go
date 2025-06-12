@@ -14,7 +14,7 @@ import (
 
 const getAllScoreLevels = `-- name: GetAllScoreLevels :many
 SELECT course_participation_id,
-  score_level
+       score_level
 FROM completed_score_levels
 WHERE course_phase_id = $1
 `
@@ -84,8 +84,8 @@ func (q *Queries) GetScoreLevelByCourseParticipationIDNumeric(ctx context.Contex
 
 const getStudentScoreWithLevel = `-- name: GetStudentScoreWithLevel :one
 SELECT course_participation_id,
-  score_numeric,
-  score_level
+       score_numeric,
+       score_level
 FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2
