@@ -7,8 +7,6 @@ import { DataPoint } from './interfaces/DataPoint'
 
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
-
 interface BarChartWithScoreLevelProps {
   data: DataPoint[]
 }
