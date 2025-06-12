@@ -11,4 +11,5 @@ export type DevProfileFilter = {
     appleWatch: boolean
   }
   gitlabNotCreated: boolean
+  appleNotCreated: boolean
 }
