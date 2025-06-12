@@ -18,6 +18,10 @@ module.exports = {
       pattern: /^col-span-\d+$/,
       variants: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
+    {
+      pattern: /^flex/,
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'],
+    },
     'w-[120px]',
   ],
   theme: {

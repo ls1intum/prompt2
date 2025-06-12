@@ -16,6 +16,7 @@ type Assessment struct {
 	CompetencyID          uuid.UUID                `json:"competencyID"`
 	ScoreLevel            scoreLevelDTO.ScoreLevel `json:"scoreLevel"`
 	Comment               string                   `json:"comment"`
+	Examples              string                   `json:"examples"`
 	AssessedAt            time.Time                `json:"assessedAt"`
 	Author                string                   `json:"author"`
 }
@@ -31,6 +32,7 @@ func GetAssessmentDTOsFromDBModels(dbAssessments []db.Assessment) []Assessment {
 			CompetencyID:          a.CompetencyID,
 			ScoreLevel:            scoreLevelDTO.MapDBScoreLevelToDTO(a.ScoreLevel),
 			Comment:               a.Comment.String,
+			Examples:              a.Examples,
 			AssessedAt:            a.AssessedAt.Time,
 			Author:                a.Author,
 		})

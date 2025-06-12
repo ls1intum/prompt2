@@ -12,7 +12,7 @@ import {
 
 import { format } from 'date-fns'
 
-import { StudentAssessment } from '../../../interfaces/studentAssessment'
+import { StudentAssessment } from '../../../../../interfaces/studentAssessment'
 
 interface AssessmentCompletionDialogProps {
   studentAssessment: StudentAssessment

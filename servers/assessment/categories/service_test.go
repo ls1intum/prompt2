@@ -66,12 +66,16 @@ func (suite *CategoryServiceTestSuite) TestGetCategoryNotFound() {
 }
 
 func (suite *CategoryServiceTestSuite) TestCreateCategory() {
+	// Use the default assessment template ID from the database dump
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
+
 	req := categoryDTO.CreateCategoryRequest{
 		Name:        "Test Category",
+		ShortName:   "TC",
 		Description: "A test category",
 		Weight:      5,
 	}
-	err := CreateCategory(suite.suiteCtx, req)
+	err := CreateCategory(suite.suiteCtx, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Creating category should not produce an error")
 
 	cats, err := ListCategories(suite.suiteCtx)
@@ -91,12 +95,15 @@ func (suite *CategoryServiceTestSuite) TestCreateCategory() {
 func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
 	// use existing category from dump
 	id := uuid.MustParse("815b159b-cab3-49b4-8060-c4722d59241d")
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
+
 	req := categoryDTO.UpdateCategoryRequest{
 		Name:        "Updated Category",
+		ShortName:   "UC",
 		Description: "Updated description",
 		Weight:      2,
 	}
-	err := UpdateCategory(suite.suiteCtx, id, req)
+	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating category should not produce an error")
 
 	c, err := GetCategory(suite.suiteCtx, id)
@@ -107,24 +114,30 @@ func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
 }
 
 func (suite *CategoryServiceTestSuite) TestUpdateNonExistentCategory() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
 	id := uuid.New()
+
 	req := categoryDTO.UpdateCategoryRequest{
 		Name:        "Non-existent",
+		ShortName:   "NE",
 		Description: "Should not fail",
 		Weight:      1,
 	}
-	err := UpdateCategory(suite.suiteCtx, id, req)
+	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating non-existent category should not error")
 }
 
 func (suite *CategoryServiceTestSuite) TestDeleteCategory() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
+
 	// create category to delete
 	reqCreate := categoryDTO.CreateCategoryRequest{
 		Name:        "To Delete",
+		ShortName:   "TD",
 		Description: "To be deleted",
 		Weight:      1,
 	}
-	err := CreateCategory(suite.suiteCtx, reqCreate)
+	err := CreateCategory(suite.suiteCtx, coursePhaseID, reqCreate)
 	assert.NoError(suite.T(), err)
 
 	cats, err := ListCategories(suite.suiteCtx)
@@ -149,9 +162,27 @@ func (suite *CategoryServiceTestSuite) TestDeleteNonExistentCategory() {
 }
 
 func (suite *CategoryServiceTestSuite) TestGetCategoriesWithCompetencies() {
-	catsWithComp, err := GetCategoriesWithCompetencies(suite.suiteCtx)
+	// Use a known course phase ID from the test data
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase
+
+	catsWithComp, err := GetCategoriesWithCompetencies(suite.suiteCtx, coursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(catsWithComp), 0, "Should return categories with competencies")
+
+	// Verify the structure of returned data
+	for _, cat := range catsWithComp {
+		assert.NotEmpty(suite.T(), cat.ID, "Category ID should not be empty")
+		assert.NotEmpty(suite.T(), cat.Name, "Category name should not be empty")
+		assert.GreaterOrEqual(suite.T(), cat.Weight, int32(1), "Category weight should be at least 1")
+		assert.NotNil(suite.T(), cat.Competencies, "Competencies should not be nil")
+
+		// Verify competencies structure if any exist
+		for _, comp := range cat.Competencies {
+			assert.NotEmpty(suite.T(), comp.ID, "Competency ID should not be empty")
+			assert.NotEmpty(suite.T(), comp.Name, "Competency name should not be empty")
+			assert.Equal(suite.T(), cat.ID, comp.CategoryID, "Competency should belong to the category")
+		}
+	}
 }
 
 func TestCategoryServiceTestSuite(t *testing.T) {
