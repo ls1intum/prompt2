@@ -45,7 +45,8 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		Score:                 req.Score,
+		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
+		Examples:              req.Examples,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})
@@ -78,7 +79,8 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
-		Score:                 req.Score,
+		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
+		Examples:              req.Examples,
 		Comment:               pgtype.Text{String: req.Comment, Valid: true},
 		Author:                req.Author,
 	})
@@ -110,9 +112,9 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	}
 
 	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
-	var level = scoreLevelDTO.StudentScore{
-		ScoreLevel: db.ScoreLevelNovice,
-		Score:      pgtype.Float8{Float64: 0.0, Valid: true},
+	var studentScore = scoreLevelDTO.StudentScore{
+		ScoreLevel:   scoreLevelDTO.ScoreLevelVeryBad,
+		ScoreNumeric: pgtype.Float8{Float64: 0.0, Valid: true},
 	}
 	if len(assessments) > 0 {
 		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
@@ -130,7 +132,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 			completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
 		}
 
-		level, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
+		studentScore, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {
 			log.Error("could not get score level: ", err)
 			return assessmentDTO.StudentAssessment{}, errors.New("could not get score level")
@@ -141,7 +143,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		CourseParticipationID: courseParticipationID,
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		AssessmentCompletion:  completion,
-		StudentScore:          level,
+		StudentScore:          studentScore,
 	}, nil
 }
 

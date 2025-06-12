@@ -9,14 +9,15 @@ interface ScoreLevelBadgeProps {
   score?: number
 }
 
-const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
+export const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
   const config = getLevelConfig(scoreLevel)
 
   return (
-    <Badge className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}>
+    <Badge
+      className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}
+      style={{ whiteSpace: 'nowrap' }}
+    >
       {config.title}
     </Badge>
   )
 }
-
-export default StudentScoreBadge

@@ -37,7 +37,7 @@ func (suite *CategoryRouterTestSuite) SetupSuite() {
 	}
 	CategoryServiceSingleton = &suite.categoryService
 	suite.router = gin.Default()
-	api := suite.router.Group("/api")
+	api := suite.router.Group("/api/course_phase/:coursePhaseID")
 	testMiddleWare := func(allowedRoles ...string) gin.HandlerFunc {
 		return testutils.MockAuthMiddlewareWithEmail(allowedRoles, "existingstudent@example.com", "03711111", "ab12cde")
 	}
@@ -51,7 +51,8 @@ func (suite *CategoryRouterTestSuite) TearDownSuite() {
 }
 
 func (suite *CategoryRouterTestSuite) TestGetAllCategories() {
-	req, _ := http.NewRequest("GET", "/api/category", nil)
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -65,13 +66,16 @@ func (suite *CategoryRouterTestSuite) TestGetAllCategories() {
 }
 
 func (suite *CategoryRouterTestSuite) TestCreateCategory() {
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+
 	createReq := categoryDTO.CreateCategoryRequest{
 		Name:        "Router Test Category",
+		ShortName:   "RTC",
 		Description: "Testing create via router",
 		Weight:      3,
 	}
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/category", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+coursePhaseID+"/category", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -80,7 +84,8 @@ func (suite *CategoryRouterTestSuite) TestCreateCategory() {
 }
 
 func (suite *CategoryRouterTestSuite) TestCreateCategoryInvalidJSON() {
-	req, _ := http.NewRequest("POST", "/api/category", bytes.NewBuffer([]byte("invalid json")))
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+coursePhaseID+"/category", bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -95,14 +100,17 @@ func (suite *CategoryRouterTestSuite) TestCreateCategoryInvalidJSON() {
 }
 
 func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
 	id := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
+
 	updateReq := categoryDTO.UpdateCategoryRequest{
 		Name:        "Router Updated",
+		ShortName:   "RU",
 		Description: "Router update description",
 		Weight:      2,
 	}
 	body, _ := json.Marshal(updateReq)
-	req, _ := http.NewRequest("PUT", "/api/category/"+id.String(), bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/course_phase/"+coursePhaseID+"/category/"+id.String(), bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -111,17 +119,20 @@ func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
 }
 
 func (suite *CategoryRouterTestSuite) TestDeleteCategory() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02") // Dev Application phase from test data
+
 	// create category to delete via service
 	createReq := categoryDTO.CreateCategoryRequest{
 		Name:        "RouterDelete",
+		ShortName:   "RD",
 		Description: "To delete via router",
 		Weight:      1,
 	}
-	err := CreateCategory(suite.suiteCtx, createReq)
+	err := CreateCategory(suite.suiteCtx, coursePhaseID, createReq)
 	assert.NoError(suite.T(), err)
 
 	// find created
-	reqList, _ := http.NewRequest("GET", "/api/category", nil)
+	reqList, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID.String()+"/category", nil)
 	respList := httptest.NewRecorder()
 	suite.router.ServeHTTP(respList, reqList)
 	var cats []categoryDTO.Category
@@ -134,14 +145,15 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategory() {
 		}
 	}
 
-	reqDel, _ := http.NewRequest("DELETE", "/api/category/"+delID, nil)
+	reqDel, _ := http.NewRequest("DELETE", "/api/course_phase/"+coursePhaseID.String()+"/category/"+delID, nil)
 	respDel := httptest.NewRecorder()
 	suite.router.ServeHTTP(respDel, reqDel)
 	assert.Equal(suite.T(), http.StatusOK, respDel.Code)
 }
 
 func (suite *CategoryRouterTestSuite) TestDeleteCategoryInvalidID() {
-	req, _ := http.NewRequest("DELETE", "/api/category/invalid-uuid", nil)
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+	req, _ := http.NewRequest("DELETE", "/api/course_phase/"+coursePhaseID+"/category/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -149,7 +161,8 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategoryInvalidID() {
 }
 
 func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
-	req, _ := http.NewRequest("GET", "/api/category/with-competencies", nil)
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category/with-competencies", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -157,7 +170,7 @@ func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 	var respBody []categoryDTO.CategoryWithCompetencies
 	err := json.Unmarshal(resp.Body.Bytes(), &respBody)
-	assert.NoError(suite.T(), err)
+	assert.NoError(suite.T(), err, "Response should unmarshal properly")
 }
 
 func TestCategoryRouterTestSuite(t *testing.T) {
