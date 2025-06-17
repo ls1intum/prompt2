@@ -264,7 +264,7 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 			ToCoursePhaseDtoID:   toD,
 		})
 	}
-	if err := UpdatePhaseDataGraphHelper(ctx, qtx, targetID, converted); err != nil {
+	if err := updatePhaseDataGraphHelper(ctx, qtx, targetID, converted); err != nil {
 		return err
 	}
 
@@ -290,11 +290,11 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 		})
 	}
 
-	return UpdateParticipationDataGraphHelper(ctx, qtx, targetID, converted)
+	return updateParticipationDataGraphHelper(ctx, qtx, targetID, converted)
 }
 
 func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
-	applicationForm, err := GetApplicationFormHelper(ctx, qtx, sourceCoursePhaseID)
+	applicationForm, err := getApplicationFormHelper(ctx, qtx, sourceCoursePhaseID)
 	log.Info("Copying application form: ", applicationForm)
 	if err != nil {
 		return err
@@ -344,14 +344,14 @@ func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhase
 		UpdateQuestionsText:        []applicationDTO.QuestionText{},
 		UpdateQuestionsMultiSelect: []applicationDTO.QuestionMultiSelect{},
 	}
-	err = UpdateApplicationFormHelper(ctx, qtx, targetCoursePhaseID, newApplicationForm)
+	err = updateApplicationFormHelper(ctx, qtx, targetCoursePhaseID, newApplicationForm)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+func updateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
 	// delete all previous connections
 	err := qtx.DeleteParticipationDataGraphConnections(ctx, courseID)
 	if err != nil {
@@ -384,7 +384,7 @@ func getApplicationPhaseID(ctx context.Context, qtx *db.Queries, courseID uuid.U
 	return applicationPhaseID, nil
 }
 
-func UpdatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+func updatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
 	// delete all previous connections
 	err := qtx.DeletePhaseDataGraphConnections(ctx, courseID)
 	if err != nil {
@@ -408,7 +408,7 @@ func UpdatePhaseDataGraphHelper(ctx context.Context, qtx *db.Queries, courseID u
 
 }
 
-func UpdateApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseId uuid.UUID, form applicationDTO.UpdateForm) error {
+func updateApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseId uuid.UUID, form applicationDTO.UpdateForm) error {
 	// Check if course phase is application phase
 	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseId)
 	if err != nil {
@@ -486,7 +486,7 @@ func UpdateApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePha
 	return nil
 }
 
-func GetApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
+func getApplicationFormHelper(ctx context.Context, qtx *db.Queries, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
