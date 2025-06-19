@@ -19,7 +19,6 @@ type CoursePhaseConfigService struct {
 
 var CoursePhaseConfigSingleton *CoursePhaseConfigService
 
-// UpdateCoursePhaseDeadline updates the deadline for a specific course phase
 func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
 	params := db.UpdateCoursePhaseDeadlineParams{
 		Deadline: pgtype.Timestamptz{
@@ -32,7 +31,6 @@ func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, dea
 	return CoursePhaseConfigSingleton.queries.UpdateCoursePhaseDeadline(ctx, params)
 }
 
-// GetCoursePhaseDeadline retrieves the deadline for a specific course phase
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

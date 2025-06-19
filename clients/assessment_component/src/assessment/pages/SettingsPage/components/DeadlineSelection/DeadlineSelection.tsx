@@ -64,16 +64,15 @@ export const DeadlineSelection = (): JSX.Element => {
           </div>
         </div>
 
-        {currentDeadline && (
-          <div className='bg-blue-50 p-3 rounded-lg'>
-            <p className='text-sm text-blue-800'>
-              <strong>Current deadline:</strong>{' '}
-              {currentDeadline
-                ? format(new Date(currentDeadline), 'dd.MM.yyyy')
-                : 'No deadline set'}
+        <div className='bg-blue-50 p-3 rounded-lg'>
+          <p className='text-sm text-blue-800'>
+            <strong>Current deadline:</strong>{' '}
+            {currentDeadline ? format(new Date(currentDeadline), 'dd.MM.yyyy') : 'No deadline set'}
+            <p className='text-sm text-blue-600 mt-1'>
+              Once a deadline is set, assessors cannot unmark their assessment as final anymore.
             </p>
-          </div>
-        )}
+          </p>
+        </div>
 
         {error && <div className='text-red-600 text-sm'>{error}</div>}
 
