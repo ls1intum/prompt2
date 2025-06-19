@@ -19,6 +19,14 @@ type CoursePhaseConfigService struct {
 
 var CoursePhaseConfigSingleton *CoursePhaseConfigService
 
+// NewCoursePhaseConfigService creates a new CoursePhaseConfigService instance
+func NewCoursePhaseConfigService(queries db.Queries, conn *pgxpool.Pool) *CoursePhaseConfigService {
+	return &CoursePhaseConfigService{
+		queries: queries,
+		conn:    conn,
+	}
+}
+
 func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
 	params := db.UpdateCoursePhaseDeadlineParams{
 		Deadline: pgtype.Timestamptz{
