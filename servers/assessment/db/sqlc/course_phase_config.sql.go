@@ -66,6 +66,19 @@ func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, cours
 	return i, err
 }
 
+const getCoursePhaseDeadline = `-- name: GetCoursePhaseDeadline :one
+SELECT deadline
+FROM course_phase_config
+WHERE course_phase_id = $1
+`
+
+func (q *Queries) GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (pgtype.Timestamptz, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseDeadline, coursePhaseID)
+	var deadline pgtype.Timestamptz
+	err := row.Scan(&deadline)
+	return deadline, err
+}
+
 const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many
 SELECT course_phase_id
 FROM course_phase_config

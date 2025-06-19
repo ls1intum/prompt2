@@ -2,11 +2,11 @@ package coursePhaseConfig
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
@@ -18,14 +18,29 @@ type CoursePhaseConfigService struct {
 var CoursePhaseConfigSingleton *CoursePhaseConfigService
 
 // UpdateCoursePhaseDeadline updates the deadline for a specific course phase
-func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, request coursePhaseConfigDTO.UpdateDeadlineRequest) error {
+func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
 	params := db.UpdateCoursePhaseDeadlineParams{
 		Deadline: pgtype.Timestamptz{
-			Time:  request.Deadline,
+			Time:  deadline,
 			Valid: true,
 		},
 		CoursePhaseID: coursePhaseID,
 	}
 
 	return CoursePhaseConfigSingleton.queries.UpdateCoursePhaseDeadline(ctx, params)
+}
+
+// GetCoursePhaseDeadline retrieves the deadline for a specific course phase
+func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
+	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	var response *time.Time
+	if deadline.Valid {
+		response = &deadline.Time
+	}
+
+	return response, nil
 }

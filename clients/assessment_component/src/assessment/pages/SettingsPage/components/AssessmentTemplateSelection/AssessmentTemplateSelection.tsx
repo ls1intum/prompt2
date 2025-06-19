@@ -42,7 +42,7 @@ export const AssessmentTemplateSelection = () => {
   }
 
   return (
-    <Card className='md:col-span-2 shadow-sm transition-all hover:shadow-md'>
+    <Card className='xl:col-span-2 shadow-sm transition-all hover:shadow-md'>
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
           <FileText className='h-5 w-5' />

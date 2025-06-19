@@ -1,14 +1,10 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
-import { UpdateDeadlineRequest } from '../../interfaces/deadline'
 
-export const updateDeadline = async (
-  coursePhaseID: string,
-  request: UpdateDeadlineRequest,
-): Promise<void> => {
+export const updateDeadline = async (coursePhaseID: string, deadline: Date): Promise<void> => {
   try {
     await assessmentAxiosInstance.put(
       `assessment/api/course_phase/${coursePhaseID}/deadline`,
-      request,
+      { deadline: deadline },
       {
         headers: {
           'Content-Type': 'application/json',

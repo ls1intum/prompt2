@@ -9,7 +9,7 @@ export const SettingsPage = (): JSX.Element => {
   return (
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Settings</ManagementPageHeader>
-      <div className='grid md:grid-cols-3 gap-4'>
+      <div className='grid xl:grid-cols-3 gap-4'>
         <AssessmentTemplateSelection />
         <DeadlineSelection />
       </div>

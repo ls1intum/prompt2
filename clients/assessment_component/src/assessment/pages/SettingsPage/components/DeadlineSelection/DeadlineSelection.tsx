@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 
 import { Calendar } from 'lucide-react'
@@ -11,23 +11,34 @@ import {
   CardHeader,
   CardTitle,
   Label,
+  ErrorPage,
+  LoadingPage,
 } from '@tumaet/prompt-ui-components'
 
 import { useUpdateDeadline } from './hooks/useUpdateDeadline'
+import { useGetDeadline } from '../../../hooks/useGetDeadline'
 
 export const DeadlineSelection = (): JSX.Element => {
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
 
-  const updateDeadlineMutation = useUpdateDeadline(setError)
+  const { data: currentDeadline, isLoading, isError } = useGetDeadline()
 
+  useEffect(() => {
+    if (currentDeadline) {
+      setDeadline(new Date(currentDeadline))
+    }
+  }, [currentDeadline])
+
+  const updateDeadlineMutation = useUpdateDeadline(setError)
   const handleDeadlineUpdate = () => {
     if (deadline) {
-      updateDeadlineMutation.mutate({
-        deadline: deadline.toISOString(),
-      })
+      updateDeadlineMutation.mutate(deadline)
     }
   }
+
+  if (isError) return <ErrorPage title='Deadline Selection Unavailable' />
+  if (isLoading) return <LoadingPage />
 
   return (
     <Card>
@@ -40,6 +51,7 @@ export const DeadlineSelection = (): JSX.Element => {
       <CardContent className='space-y-4'>
         <div className='space-y-2'>
           <Label>Select Deadline Date</Label>
+
           <div className='flex items-center gap-2'>
             <DatePicker
               date={deadline}
@@ -56,6 +68,15 @@ export const DeadlineSelection = (): JSX.Element => {
             </Button>
           </div>
         </div>
+
+        {currentDeadline && (
+          <div className='bg-blue-50 p-3 rounded-lg'>
+            <p className='text-sm text-blue-800'>
+              <strong>Current deadline:</strong>{' '}
+              {currentDeadline ? format(new Date(currentDeadline), 'PPP') : 'No deadline set'}
+            </p>
+          </div>
+        )}
 
         {error && <div className='text-red-600 text-sm'>{error}</div>}
 

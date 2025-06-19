@@ -30,3 +30,8 @@ ORDER BY assessment_template_id, course_phase_id;
 UPDATE course_phase_config
 SET deadline = $1
 WHERE course_phase_id = $2;
+
+-- name: GetCoursePhaseDeadline :one
+SELECT deadline
+FROM course_phase_config
+WHERE course_phase_id = $1;
