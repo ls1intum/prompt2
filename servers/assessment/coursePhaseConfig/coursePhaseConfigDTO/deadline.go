@@ -6,8 +6,3 @@ import "time"
 type UpdateDeadlineRequest struct {
 	Deadline time.Time `json:"deadline"`
 }
-
-// UpdateDeadlineResponse represents the response after updating a course phase deadline
-type UpdateDeadlineResponse struct {
-	Message string `json:"message"`
-}

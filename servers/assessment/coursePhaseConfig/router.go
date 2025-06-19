@@ -38,8 +38,5 @@ func updateCoursePhaseDeadline(c *gin.Context) {
 		return
 	}
 
-	response := coursePhaseConfigDTO.UpdateDeadlineResponse{
-		Message: "Course phase deadline updated successfully",
-	}
-	c.JSON(http.StatusOK, response)
+	c.Status(http.StatusCreated)
 }
