@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
+import { format } from 'date-fns'
+
 import {
   Button,
   Card,
@@ -27,19 +29,20 @@ import { AssessmentCompletionDialog } from './components/AssessmentCompletionDia
 import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
+import { useDeadlineStore } from '../../../../zustand/useDeadlineStore'
 
 interface AssessmentFeedbackProps {
   studentAssessment: StudentAssessment
-  deadline?: string
   completed?: boolean
 }
 
 export function AssessmentCompletion({
   studentAssessment,
-  deadline = '19.06.2025',
   completed = false,
 }: AssessmentFeedbackProps) {
   const { phaseId } = useParams<{ phaseId: string }>()
+
+  const { deadline } = useDeadlineStore()
 
   const [generalRemarks, setGeneralRemarks] = useState(
     studentAssessment.assessmentCompletion?.comment || '',
@@ -226,7 +229,12 @@ export function AssessmentCompletion({
       )}
 
       <div className='flex justify-between items-center mt-8'>
-        <div className='text-muted-foreground'>Deadline: {deadline}</div>
+        {deadline && (
+          <div className='text-muted-foreground'>
+            Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
+          </div>
+        )}
+
         <Button size='sm' disabled={isPending} onClick={handleButtonClick}>
           {studentAssessment.assessmentCompletion.completed ? (
             <span className='flex items-center gap-1'>

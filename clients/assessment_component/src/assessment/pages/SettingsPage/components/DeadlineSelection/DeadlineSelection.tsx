@@ -11,18 +11,16 @@ import {
   CardHeader,
   CardTitle,
   Label,
-  ErrorPage,
-  LoadingPage,
 } from '@tumaet/prompt-ui-components'
 
 import { useUpdateDeadline } from './hooks/useUpdateDeadline'
-import { useGetDeadline } from '../../../hooks/useGetDeadline'
+import { useDeadlineStore } from '../../../../zustand/useDeadlineStore'
 
 export const DeadlineSelection = (): JSX.Element => {
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
 
-  const { data: currentDeadline, isLoading, isError } = useGetDeadline()
+  const { deadline: currentDeadline } = useDeadlineStore()
 
   useEffect(() => {
     if (currentDeadline) {
@@ -36,9 +34,6 @@ export const DeadlineSelection = (): JSX.Element => {
       updateDeadlineMutation.mutate(deadline)
     }
   }
-
-  if (isError) return <ErrorPage title='Deadline Selection Unavailable' />
-  if (isLoading) return <LoadingPage />
 
   return (
     <Card>
@@ -73,7 +68,9 @@ export const DeadlineSelection = (): JSX.Element => {
           <div className='bg-blue-50 p-3 rounded-lg'>
             <p className='text-sm text-blue-800'>
               <strong>Current deadline:</strong>{' '}
-              {currentDeadline ? format(new Date(currentDeadline), 'PPP') : 'No deadline set'}
+              {currentDeadline
+                ? format(new Date(currentDeadline), 'dd.MM.yyyy')
+                : 'No deadline set'}
             </p>
           </div>
         )}
