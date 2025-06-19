@@ -130,7 +130,7 @@ type CompletedScoreLevel struct {
 	ScoreLevel            string    `json:"score_level"`
 }
 
-type CoursePhaseInfo struct {
+type CoursePhaseConfig struct {
 	AssessmentTemplateID uuid.UUID          `json:"assessment_template_id"`
 	CoursePhaseID        uuid.UUID          `json:"course_phase_id"`
 	Deadline             pgtype.Timestamptz `json:"deadline"`

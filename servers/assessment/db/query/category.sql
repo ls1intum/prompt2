@@ -2,7 +2,7 @@
 INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
 VALUES ($1, $2, $3, $4, $5,
         (SELECT assessment_template_id
-         FROM course_phase_info
+         FROM course_phase_config
          WHERE course_phase_id = $6));
 
 -- name: GetCategory :one
@@ -22,7 +22,7 @@ SET name                   = $2,
     description            = $4,
     weight                 = $5,
     assessment_template_id = (SELECT assessment_template_id
-                              FROM course_phase_info
+                              FROM course_phase_config
                               WHERE course_phase_id = $6)
 WHERE id = $1;
 
