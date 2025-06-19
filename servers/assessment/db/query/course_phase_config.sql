@@ -25,3 +25,8 @@ WHERE assessment_template_id = $1;
 SELECT *
 FROM course_phase_config
 ORDER BY assessment_template_id, course_phase_id;
+
+-- name: UpdateCoursePhaseDeadline :exec
+UPDATE course_phase_config
+SET deadline = $1
+WHERE course_phase_id = $2;

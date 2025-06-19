@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createOrUpdateAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateAssessmentTemplateCoursePhase :exec
@@ -115,4 +116,20 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateCoursePhaseDeadline = `-- name: UpdateCoursePhaseDeadline :exec
+UPDATE course_phase_config
+SET deadline = $1
+WHERE course_phase_id = $2
+`
+
+type UpdateCoursePhaseDeadlineParams struct {
+	Deadline      pgtype.Timestamptz `json:"deadline"`
+	CoursePhaseID uuid.UUID          `json:"course_phase_id"`
+}
+
+func (q *Queries) UpdateCoursePhaseDeadline(ctx context.Context, arg UpdateCoursePhaseDeadlineParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhaseDeadline, arg.Deadline, arg.CoursePhaseID)
+	return err
 }
