@@ -12,6 +12,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -128,7 +129,19 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 }
 
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
-	err := AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{
+	// Check if deadline has passed
+	deadline, err := coursePhaseConfig.GetCoursePhaseDeadline(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get course phase deadline: ", err)
+		return errors.New("could not check deadline")
+	}
+
+	// If deadline exists and has passed, prevent unmarking
+	if deadline != nil && time.Now().After(*deadline) {
+		return errors.New("cannot unmark assessment as completed: deadline has passed")
+	}
+
+	err = AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})

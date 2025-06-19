@@ -67,6 +67,9 @@ export function AssessmentCompletion({
 
   const isPending = isCreatePending || isMarkPending || isUnmarkPending
 
+  // Check if deadline has passed
+  const isDeadlinePassed = deadline ? new Date() > new Date(deadline) : false
+
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
@@ -108,6 +111,11 @@ export function AssessmentCompletion({
     const handleCompletion = async () => {
       try {
         if (studentAssessment.assessmentCompletion.completed) {
+          // Check if deadline has passed before unmarking
+          if (isDeadlinePassed) {
+            setError('Cannot unmark assessment as completed: deadline has passed.')
+            return
+          }
           await unmarkAsCompleted(studentAssessment.courseParticipationID)
         } else {
           // Validate grade before final submission
@@ -229,13 +237,29 @@ export function AssessmentCompletion({
       )}
 
       <div className='flex justify-between items-center mt-8'>
-        {deadline && (
-          <div className='text-muted-foreground'>
-            Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
-          </div>
-        )}
+        <div className='flex flex-col'>
+          {deadline && (
+            <div className='text-muted-foreground'>
+              Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
+              {isDeadlinePassed && (
+                <span className='text-red-600 ml-2 font-medium'>(Deadline has passed)</span>
+              )}
+            </div>
+          )}
+          {isDeadlinePassed && studentAssessment.assessmentCompletion.completed && (
+            <div className='text-sm text-red-600 mt-1'>
+              Assessments cannot be unmarked as final after the deadline has passed.
+            </div>
+          )}
+        </div>
 
-        <Button size='sm' disabled={isPending} onClick={handleButtonClick}>
+        <Button
+          size='sm'
+          disabled={
+            isPending || (studentAssessment.assessmentCompletion.completed && isDeadlinePassed)
+          }
+          onClick={handleButtonClick}
+        >
           {studentAssessment.assessmentCompletion.completed ? (
             <span className='flex items-center gap-1'>
               <Unlock className='h-3.5 w-3.5' />
