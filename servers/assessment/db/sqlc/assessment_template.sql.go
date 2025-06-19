@@ -29,7 +29,7 @@ func (q *Queries) CreateAssessmentTemplate(ctx context.Context, arg CreateAssess
 }
 
 const createOrUpdateAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateAssessmentTemplateCoursePhase :exec
-INSERT INTO assessment_template_course_phase (assessment_template_id, course_phase_id)
+INSERT INTO course_phase_info (assessment_template_id, course_phase_id)
 VALUES ($1, $2)
 ON CONFLICT (course_phase_id) 
 DO UPDATE SET assessment_template_id = EXCLUDED.assessment_template_id
@@ -58,7 +58,7 @@ func (q *Queries) DeleteAssessmentTemplate(ctx context.Context, id uuid.UUID) er
 
 const deleteAssessmentTemplateCoursePhase = `-- name: DeleteAssessmentTemplateCoursePhase :exec
 DELETE
-FROM assessment_template_course_phase
+FROM course_phase_info
 WHERE assessment_template_id = $1
   AND course_phase_id = $2
 `
@@ -114,8 +114,8 @@ func (q *Queries) GetAssessmentTemplateByName(ctx context.Context, name string) 
 const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :one
 SELECT at.id, at.name, at.description, at.created_at, at.updated_at
 FROM assessment_template at
-         INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
-WHERE atcp.course_phase_id = $1
+         INNER JOIN course_phase_info cpi ON at.id = cpi.assessment_template_id
+WHERE cpi.course_phase_id = $1
 `
 
 func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
@@ -132,9 +132,9 @@ func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, cours
 }
 
 const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many
-SELECT atcp.course_phase_id
-FROM assessment_template_course_phase atcp
-WHERE atcp.assessment_template_id = $1
+SELECT course_phase_id
+FROM course_phase_info
+WHERE assessment_template_id = $1
 `
 
 func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
@@ -158,21 +158,21 @@ func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, asses
 }
 
 const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT assessment_template_id, course_phase_id
-FROM assessment_template_course_phase
+SELECT assessment_template_id, course_phase_id, deadline
+FROM course_phase_info
 ORDER BY assessment_template_id, course_phase_id
 `
 
-func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context) ([]AssessmentTemplateCoursePhase, error) {
+func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context) ([]CoursePhaseInfo, error) {
 	rows, err := q.db.Query(ctx, listAssessmentTemplateCoursePhaseMappings)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []AssessmentTemplateCoursePhase
+	var items []CoursePhaseInfo
 	for rows.Next() {
-		var i AssessmentTemplateCoursePhase
-		if err := rows.Scan(&i.AssessmentTemplateID, &i.CoursePhaseID); err != nil {
+		var i CoursePhaseInfo
+		if err := rows.Scan(&i.AssessmentTemplateID, &i.CoursePhaseID, &i.Deadline); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
