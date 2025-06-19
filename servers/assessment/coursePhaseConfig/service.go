@@ -2,6 +2,8 @@ package coursePhaseConfig
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,7 +35,10 @@ func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, dea
 // GetCoursePhaseDeadline retrieves the deadline for a specific course phase
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
-	if err != nil {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No deadline found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
 
