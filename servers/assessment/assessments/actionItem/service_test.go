@@ -92,6 +92,7 @@ func (suite *ActionItemServiceTestSuite) TestUpdateActionItem() {
 	}
 
 	err = UpdateActionItem(suite.suiteCtx, updateRequest)
+	assert.NoError(suite.T(), err, "Should be able to update action item")
 	// This might fail if the ID doesn't exist, which is expected
 	// The test verifies the function doesn't panic
 	assert.NotPanics(suite.T(), func() {
