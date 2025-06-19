@@ -81,22 +81,34 @@ func (suite *ActionItemServiceTestSuite) TestUpdateActionItem() {
 	err := CreateActionItem(suite.suiteCtx, createRequest)
 	assert.NoError(suite.T(), err)
 
-	// For update, we need to use an existing ID
-	// Since we can't easily get the ID from create, we'll use a known ID
+	// Get the created action item by listing items for the student in this phase
+	actionItems, err := ListActionItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
+	assert.NoError(suite.T(), err, "Should be able to list action items to find created item")
+	assert.Greater(suite.T(), len(actionItems), 0, "Should have at least one action item")
+
+	// Find the action item we just created
+	var createdActionItemID uuid.UUID
+	for _, item := range actionItems {
+		if item.Action == "Original action" && item.Author == "original.author@example.com" {
+			createdActionItemID = item.ID
+			break
+		}
+	}
+	assert.NotEqual(suite.T(), uuid.Nil, createdActionItemID, "Should have found the created action item")
+
+	// Now update the action item using the actual ID
 	updateRequest := actionItemDTO.UpdateActionItemRequest{
-		ID:                    suite.testActionItemID,
+		ID:                    createdActionItemID,
 		CoursePhaseID:         suite.testCoursePhaseID,
 		CourseParticipationID: suite.testCourseParticipationID,
 		Action:                "Updated action",
 		Author:                "updated.author@example.com",
 	}
 
-	err = UpdateActionItem(suite.suiteCtx, updateRequest)
-	assert.NoError(suite.T(), err, "Should be able to update action item")
-	// This might fail if the ID doesn't exist, which is expected
-	// The test verifies the function doesn't panic
+	// Test the update operation with proper error handling
 	assert.NotPanics(suite.T(), func() {
-		UpdateActionItem(suite.suiteCtx, updateRequest)
+		err := UpdateActionItem(suite.suiteCtx, updateRequest)
+		assert.NoError(suite.T(), err, "Should be able to update existing action item")
 	}, "Should not panic when updating action item")
 }
 
@@ -107,7 +119,7 @@ func (suite *ActionItemServiceTestSuite) TestDeleteActionItem() {
 	// This might fail if the ID doesn't exist, which is expected
 	// The test verifies the function doesn't panic
 	assert.NotPanics(suite.T(), func() {
-		DeleteActionItem(suite.suiteCtx, testID)
+		_ = DeleteActionItem(suite.suiteCtx, testID)
 	}, "Should not panic when deleting action item")
 }
 
@@ -119,7 +131,7 @@ func (suite *ActionItemServiceTestSuite) TestDeleteActionItemNonExistent() {
 	// This is because DELETE operations are idempotent in SQL
 	// We just verify it doesn't panic
 	assert.NotPanics(suite.T(), func() {
-		DeleteActionItem(suite.suiteCtx, nonExistentID)
+		_ = DeleteActionItem(suite.suiteCtx, nonExistentID)
 	}, "Should not panic when deleting non-existent action item")
 }
 

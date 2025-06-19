@@ -84,7 +84,7 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineInv
 	// We expect either an error or successful execution
 	// The exact assertion would depend on your database schema
 	assert.NotPanics(suite.T(), func() {
-		UpdateCoursePhaseDeadline(suite.suiteCtx, emptyID, testDeadline)
+		_ = UpdateCoursePhaseDeadline(suite.suiteCtx, emptyID, testDeadline)
 	}, "Should not panic with empty UUID")
 }
 

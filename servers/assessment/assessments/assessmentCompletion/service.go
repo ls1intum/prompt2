@@ -17,6 +17,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ErrDeadlinePassed represents an error when trying to perform an action after the deadline has passed
+var ErrDeadlinePassed = errors.New("cannot unmark assessment as completed: deadline has passed")
+
 type AssessmentCompletionService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
@@ -138,7 +141,7 @@ func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, cou
 
 	// If deadline exists and has passed, prevent unmarking
 	if deadline != nil && time.Now().After(*deadline) {
-		return errors.New("cannot unmark assessment as completed: deadline has passed")
+		return ErrDeadlinePassed
 	}
 
 	err = AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{
