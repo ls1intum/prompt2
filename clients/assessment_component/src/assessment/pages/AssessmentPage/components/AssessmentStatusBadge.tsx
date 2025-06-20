@@ -7,7 +7,7 @@ interface AssessmentStatusBadgeProps {
   className?: string
 }
 
-export default function AssessmentStatusBadge({
+export function AssessmentStatusBadge({
   remainingAssessments,
   isFinalized,
   className,
