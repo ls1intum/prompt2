@@ -111,14 +111,14 @@ func getParticipationsForCoursePhase(c *gin.Context) {
 func getParticipation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		log.Error(err)
+		log.Error("Error parsing course phase ID: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	courseParticipationID, err := uuid.Parse(c.Param("course_participation_id"))
 	if err != nil {
-		log.Error(err)
+		log.Error("Error parsing course participation ID: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
