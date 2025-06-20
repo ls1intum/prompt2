@@ -34,7 +34,8 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 }
 
 const createCoursePhaseTypeProvidedOutput = `-- name: CreateCoursePhaseTypeProvidedOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
 VALUES ($1, $2, $3, $4, $5, $6)
 `
 
@@ -83,38 +84,71 @@ func (q *Queries) CreateCoursePhaseTypeRequiredInput(ctx context.Context, arg Cr
 
 const createRequiredApplicationAnswers = `-- name: CreateRequiredApplicationAnswers :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
-VALUES (
-       gen_random_uuid(),
-       $1,
-       'applicationAnswers',    
-       '{
-            "type": "array",
-            "items": {
-                "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "string"                    },
-                    "key"      : { "type": "string"                    },
-                    "order_num": { "type": "integer"                   },
-                    "type"     : { "type": "string" , "enum": ["text"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
+VALUES (gen_random_uuid(),
+        $1,
+        'applicationAnswers',
+        '{
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "order_num": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text"
+                    ]
+                  }
                 },
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "array", "items": {"type": "string"} },
-                    "key"      : {"type": "string"}                              ,
-                    "order_num": {"type": "integer"}                             ,
-                    "type"     : { "type": "string", "enum": ["multiselect"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                }
+                "required": [
+                  "answer",
+                  "key",
+                  "order_num",
+                  "type"
                 ]
-            }
-       }'::jsonb
-)
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "order_num": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "multiselect"
+                    ]
+                  }
+                },
+                "required": [
+                  "answer",
+                  "key",
+                  "order_num",
+                  "type"
+                ]
+              }
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) CreateRequiredApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -124,18 +158,21 @@ func (q *Queries) CreateRequiredApplicationAnswers(ctx context.Context, coursePh
 
 const createRequiredDevices = `-- name: CreateRequiredDevices :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'devices',
-      '{
-        "type": "array",
-        "items": {
+VALUES (gen_random_uuid(),
+        $1,
+        'devices',
+        '{
+          "type": "array",
+          "items": {
             "type": "string",
-            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
-        }
-       }'::jsonb
-)
+            "enum": [
+              "IPhone",
+              "IPad",
+              "MacBook",
+              "AppleWatch"
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) CreateRequiredDevices(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -144,7 +181,8 @@ func (q *Queries) CreateRequiredDevices(ctx context.Context, coursePhaseTypeID u
 }
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
-SELECT id, name, initial_phase, base_url FROM course_phase_type
+SELECT id, name, initial_phase, base_url
+FROM course_phase_type
 `
 
 func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType, error) {
@@ -301,18 +339,23 @@ func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, courseP
 }
 
 const insertAssessmentScoreOutput = `-- name: InsertAssessmentScoreOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'scoreLevel',
-      1,
-      '/student-assessment/scoreLevel',
-      '{
-        "type": "string",
-        "enum": ["novice", "intermediate", "advanced", "expert"]
-        }'::jsonb
-)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'scoreLevel',
+        1,
+        '/student-assessment/scoreLevel',
+        '{
+          "type": "string",
+          "enum": [
+            "veryBad",
+            "Bad",
+            "Ok",
+            "Good",
+            "VeryGood"
+          ]
+        }'::jsonb)
 `
 
 func (q *Queries) InsertAssessmentScoreOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -322,15 +365,19 @@ func (q *Queries) InsertAssessmentScoreOutput(ctx context.Context, coursePhaseTy
 
 const insertAssessmentScoreRequiredInput = `-- name: InsertAssessmentScoreRequiredInput :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'scoreLevel',
-      '{
-        "type": "string",
-        "enum": ["novice", "intermediate", "advanced", "expert"]
-        }'::jsonb
-)
+VALUES (gen_random_uuid(),
+        $1,
+        'scoreLevel',
+        '{
+          "type": "string",
+          "enum": [
+            "veryBad",
+            "Bad",
+            "Ok",
+            "Good",
+            "VeryGood"
+          ]
+        }'::jsonb)
 `
 
 func (q *Queries) InsertAssessmentScoreRequiredInput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -339,22 +386,31 @@ func (q *Queries) InsertAssessmentScoreRequiredInput(ctx context.Context, course
 }
 
 const insertCourseProvidedAdditionalScores = `-- name: InsertCourseProvidedAdditionalScores :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'additionalScores',
-      1,
-      'core',
-      '{
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": { "score": {"type": "number"}, "key": {"type": "string"} },
-                "required": ["score", "key"]
-            }
-        }'::jsonb
-)
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'additionalScores',
+        1,
+        'core',
+        '{
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "score": {
+                "type": "number"
+              },
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "score",
+              "key"
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) InsertCourseProvidedAdditionalScores(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -363,41 +419,75 @@ func (q *Queries) InsertCourseProvidedAdditionalScores(ctx context.Context, cour
 }
 
 const insertCourseProvidedApplicationAnswers = `-- name: InsertCourseProvidedApplicationAnswers :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'applicationAnswers',
-      1,
-      'core',
-      '{
-            "type": "array",
-            "items": {
-                "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "string"                    },
-                    "key"      : { "type": "string"                    },
-                    "order_num": { "type": "integer"                   },
-                    "type"     : { "type": "string" , "enum": ["text"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'applicationAnswers',
+        1,
+        'core',
+        '{
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "order_num": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text"
+                    ]
+                  }
                 },
-                {
-                    "type": "object",
-                    "properties": {
-                    "answer"   : { "type": "array", "items": {"type": "string"} },
-                    "key"      : {"type": "string"}                              ,
-                    "order_num": {"type": "integer"}                             ,
-                    "type"     : { "type": "string", "enum": ["multiselect"] }
-                    },
-                    "required": ["answer", "key", "order_num", "type"]
-                }
+                "required": [
+                  "answer",
+                  "key",
+                  "order_num",
+                  "type"
                 ]
-            }
-       }'::jsonb
-)
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "answer": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "order_num": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "multiselect"
+                    ]
+                  }
+                },
+                "required": [
+                  "answer",
+                  "key",
+                  "order_num",
+                  "type"
+                ]
+              }
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -406,21 +496,25 @@ func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, co
 }
 
 const insertProvidedOutputDevices = `-- name: InsertProvidedOutputDevices :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'devices',
-      1,
-      '/devices',
-      '{
-        "type": "array",
-        "items": {
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'devices',
+        1,
+        '/devices',
+        '{
+          "type": "array",
+          "items": {
             "type": "string",
-            "enum": ["IPhone", "IPad", "MacBook", "AppleWatch"]
-        }
-       }'::jsonb
-)
+            "enum": [
+              "IPhone",
+              "IPad",
+              "MacBook",
+              "AppleWatch"
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) InsertProvidedOutputDevices(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -429,17 +523,16 @@ func (q *Queries) InsertProvidedOutputDevices(ctx context.Context, coursePhaseTy
 }
 
 const insertTeamAllocationOutput = `-- name: InsertTeamAllocationOutput :exec
-INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'teamAllocation',
-      1,
-      '/allocation',
-      '{
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'teamAllocation',
+        1,
+        '/allocation',
+        '{
           "type": "string"
-        }'::jsonb
-)
+        }'::jsonb)
 `
 
 // This returns the teamID for a given courseParticipationID, to which the user is assigned
@@ -448,26 +541,47 @@ func (q *Queries) InsertTeamAllocationOutput(ctx context.Context, coursePhaseTyp
 	return err
 }
 
+const insertTeamAllocationRequiredInput = `-- name: InsertTeamAllocationRequiredInput :exec
+INSERT INTO course_phase_type_participation_required_input_dto(id, course_phase_type_id, dto_name, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'teamAllocation',
+        '{
+          "type": "string"
+        }'::jsonb)
+`
+
+func (q *Queries) InsertTeamAllocationRequiredInput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertTeamAllocationRequiredInput, coursePhaseTypeID)
+	return err
+}
+
 const insertTeamOutput = `-- name: InsertTeamOutput :exec
-INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number, endpoint_path, specification)
-VALUES (
-      gen_random_uuid(),
-      $1,
-      'teams',
-      1,
-      '/team',
-      '{
-        "type": "array",
-        "items": {
+INSERT INTO course_phase_type_phase_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                         endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'teams',
+        1,
+        '/team',
+        '{
+          "type": "array",
+          "items": {
             "type": "object",
             "properties": {
-            "id": { "type": "string" },
-            "name": { "type": "string" }
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
             },
-            "required": ["id", "name"]
-        }
-        }'::jsonb
-)
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }'::jsonb)
 `
 
 func (q *Queries) InsertTeamOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
@@ -475,12 +589,40 @@ func (q *Queries) InsertTeamOutput(ctx context.Context, coursePhaseTypeID uuid.U
 	return err
 }
 
+const insertTeamRequiredInput = `-- name: InsertTeamRequiredInput :exec
+INSERT INTO course_phase_type_phase_required_input_dto (id, course_phase_type_id, dto_name, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'team',
+        '{
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }'::jsonb)
+`
+
+func (q *Queries) InsertTeamRequiredInput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertTeamRequiredInput, coursePhaseTypeID)
+	return err
+}
+
 const testApplicationPhaseTypeExists = `-- name: TestApplicationPhaseTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Application'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Application') AS does_exist
 `
 
 func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, error) {
@@ -491,11 +633,9 @@ func (q *Queries) TestApplicationPhaseTypeExists(ctx context.Context) (bool, err
 }
 
 const testAssessmentTypeExists = `-- name: TestAssessmentTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Assessment'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Assessment') AS does_exist
 `
 
 func (q *Queries) TestAssessmentTypeExists(ctx context.Context) (bool, error) {
@@ -506,11 +646,9 @@ func (q *Queries) TestAssessmentTypeExists(ctx context.Context) (bool, error) {
 }
 
 const testDevOpsChallengeTypeExists = `-- name: TestDevOpsChallengeTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'DevOpsChallenge'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'DevOpsChallenge') AS does_exist
 `
 
 func (q *Queries) TestDevOpsChallengeTypeExists(ctx context.Context) (bool, error) {
@@ -521,11 +659,9 @@ func (q *Queries) TestDevOpsChallengeTypeExists(ctx context.Context) (bool, erro
 }
 
 const testInterviewPhaseTypeExists = `-- name: TestInterviewPhaseTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Interview'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Interview') AS does_exist
 `
 
 func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error) {
@@ -536,11 +672,9 @@ func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error
 }
 
 const testIntroCourseDeveloperPhaseTypeExists = `-- name: TestIntroCourseDeveloperPhaseTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'IntroCourseDeveloper'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'IntroCourseDeveloper') AS does_exist
 `
 
 func (q *Queries) TestIntroCourseDeveloperPhaseTypeExists(ctx context.Context) (bool, error) {
@@ -551,11 +685,9 @@ func (q *Queries) TestIntroCourseDeveloperPhaseTypeExists(ctx context.Context) (
 }
 
 const testIntroCourseTutorPhaseTypeExists = `-- name: TestIntroCourseTutorPhaseTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'IntroCourseTutor'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'IntroCourseTutor') AS does_exist
 `
 
 func (q *Queries) TestIntroCourseTutorPhaseTypeExists(ctx context.Context) (bool, error) {
@@ -566,11 +698,9 @@ func (q *Queries) TestIntroCourseTutorPhaseTypeExists(ctx context.Context) (bool
 }
 
 const testMatchingPhaseTypeExists = `-- name: TestMatchingPhaseTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Matching'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Matching') AS does_exist
 `
 
 func (q *Queries) TestMatchingPhaseTypeExists(ctx context.Context) (bool, error) {
@@ -581,11 +711,9 @@ func (q *Queries) TestMatchingPhaseTypeExists(ctx context.Context) (bool, error)
 }
 
 const testSelfTeamAllocationTypeExists = `-- name: TestSelfTeamAllocationTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Self Team Allocation'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Self Team Allocation') AS does_exist
 `
 
 func (q *Queries) TestSelfTeamAllocationTypeExists(ctx context.Context) (bool, error) {
@@ -596,11 +724,9 @@ func (q *Queries) TestSelfTeamAllocationTypeExists(ctx context.Context) (bool, e
 }
 
 const testTeamAllocationTypeExists = `-- name: TestTeamAllocationTypeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM course_phase_type
-    WHERE name = 'Team Allocation'
-) AS does_exist
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Team Allocation') AS does_exist
 `
 
 func (q *Queries) TestTeamAllocationTypeExists(ctx context.Context) (bool, error) {
