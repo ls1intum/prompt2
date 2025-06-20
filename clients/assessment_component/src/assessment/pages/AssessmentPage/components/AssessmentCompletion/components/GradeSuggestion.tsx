@@ -33,7 +33,7 @@ export const GradeSuggestion = ({
         <CardTitle>Grade Suggestion</CardTitle>
         <div className='flex flex-row items-center gap-2'>
           <p className='text-sm text-muted-foreground'>
-            Platform suggestion based on current performance:
+            Platform suggestion based on assessment results:
           </p>
           <StudentScoreBadge
             scoreLevel={studentScore.scoreLevel}

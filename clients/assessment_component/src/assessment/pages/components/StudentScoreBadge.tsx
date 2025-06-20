@@ -24,8 +24,8 @@ export const StudentScoreBadge = ({ scoreLevel, scoreNumeric }: ScoreLevelBadgeP
       style={{ whiteSpace: 'nowrap' }}
     >
       {scoreLevel ? config.title : ''}
-      {scoreLevel && scoreNumeric ? ' — ' : ''}
-      {scoreNumeric ? `${scoreNumeric.toFixed(1)}` : ''}
+      {scoreLevel && scoreNumeric ? ` (${scoreNumeric.toFixed(1)})` : ''}
+      {!scoreLevel && scoreNumeric ? `${scoreNumeric.toFixed(1)}` : ''}
     </Badge>
   )
 }
