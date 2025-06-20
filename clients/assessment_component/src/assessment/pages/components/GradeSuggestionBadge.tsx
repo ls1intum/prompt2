@@ -1,5 +1,11 @@
 import React from 'react'
-import { Badge } from '@tumaet/prompt-ui-components'
+import {
+  Badge,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 import { mapNumberToScoreLevel } from '../../interfaces/scoreLevel'
@@ -14,10 +20,22 @@ export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ grad
   }
 
   const config = getLevelConfig(mapNumberToScoreLevel(gradeSuggestion))
+  const tooltipText = 'This is the grade you propose to the course instructor.'
 
   return (
-    <Badge className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}>
-      Grade Suggestion: {gradeSuggestion.toFixed(1)}
-    </Badge>
+    <TooltipProvider delayDuration={250}>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge
+            className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
+          >
+            Grade Suggestion: {gradeSuggestion.toFixed(1)}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side='top'>
+          <p className='max-w-lg text-center'>{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
