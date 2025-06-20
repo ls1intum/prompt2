@@ -34,11 +34,11 @@ interface AssessmentFeedbackProps {
   completed?: boolean
 }
 
-export function AssessmentCompletion({
+export const AssessmentCompletion = ({
   studentAssessment,
-  deadline = '19.06.2025',
+  deadline,
   completed = false,
-}: AssessmentFeedbackProps) {
+}: AssessmentFeedbackProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const [generalRemarks, setGeneralRemarks] = useState(
