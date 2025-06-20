@@ -6,10 +6,10 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface ScoreLevelBadgeProps {
   scoreLevel: ScoreLevel
-  score?: number
+  scoreNumeric?: number
 }
 
-export const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
+export const StudentScoreBadge = ({ scoreLevel, scoreNumeric }: ScoreLevelBadgeProps) => {
   const config = getLevelConfig(scoreLevel)
 
   return (
@@ -17,7 +17,7 @@ export const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }
       className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}
       style={{ whiteSpace: 'nowrap' }}
     >
-      {config.title}
+      {config.title} {scoreNumeric?.toFixed(1) || ''}
     </Badge>
   )
 }

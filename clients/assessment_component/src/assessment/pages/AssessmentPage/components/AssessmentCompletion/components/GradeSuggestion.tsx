@@ -10,13 +10,19 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 
+import { StudentScore } from '../../../../../interfaces/studentScore'
+
+import { StudentScoreBadge } from '../../../../components/StudentScoreBadge'
+
 interface GradeSuggestionProps {
+  studentScore: StudentScore
   gradeSuggestion: string
   onGradeSuggestionChange: (value: string) => void
   disabled?: boolean
 }
 
 export const GradeSuggestion = ({
+  studentScore,
   gradeSuggestion,
   onGradeSuggestionChange,
   disabled = false,
@@ -25,6 +31,15 @@ export const GradeSuggestion = ({
     <Card>
       <CardHeader>
         <CardTitle>Grade Suggestion</CardTitle>
+        <div className='flex flex-row items-center gap-2'>
+          <p className='text-sm text-muted-foreground'>
+            Platform suggestion based on current performance:
+          </p>
+          <StudentScoreBadge
+            scoreLevel={studentScore.scoreLevel}
+            scoreNumeric={studentScore.scoreNumeric}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Select value={gradeSuggestion} onValueChange={onGradeSuggestionChange} disabled={disabled}>

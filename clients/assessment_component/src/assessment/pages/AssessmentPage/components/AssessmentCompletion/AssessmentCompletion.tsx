@@ -146,6 +146,7 @@ export const AssessmentCompletion = ({
           </Card>
 
           <GradeSuggestion
+            studentScore={studentAssessment.studentScore}
             gradeSuggestion={gradeSuggestion}
             onGradeSuggestionChange={(value) => {
               setGradeSuggestion(value)
