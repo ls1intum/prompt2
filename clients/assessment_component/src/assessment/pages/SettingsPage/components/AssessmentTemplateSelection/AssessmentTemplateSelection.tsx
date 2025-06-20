@@ -42,11 +42,11 @@ export const AssessmentTemplateSelection = () => {
   }
 
   return (
-    <Card className='shadow-sm transition-all hover:shadow-md'>
-      <CardHeader className='pb-4'>
+    <Card className='xl:col-span-2 shadow-sm transition-all hover:shadow-md'>
+      <CardHeader>
         <CardTitle className='flex items-center gap-2'>
           <FileText className='h-5 w-5' />
-          Assessment Template
+          Template
         </CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>

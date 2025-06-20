@@ -78,10 +78,11 @@ CREATE TABLE public.assessment_template (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE public.assessment_template_course_phase (
+CREATE TABLE public.course_phase_config (
     assessment_template_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
-    FOREIGN KEY (assessment_template_id) references assessment_template (id) ON DELETE CASCADE
+    deadline timestamp with time zone DEFAULT NULL,
+    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.competency (
@@ -104,8 +105,8 @@ CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NO
 INSERT INTO public.assessment_template (id, name, description)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
 
--- Insert some sample assessment_template_course_phase records
-INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+-- Insert some sample course_phase_config records
+INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02');
 
 INSERT INTO public.category
@@ -253,10 +254,10 @@ ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_temp
 -- Create the view
 CREATE VIEW category_course_phase AS
 SELECT c.id AS category_id,
-       atcp.course_phase_id
+       cpc.course_phase_id
 FROM category c
-         INNER JOIN assessment_template_course_phase atcp
-                    ON c.assessment_template_id = atcp.assessment_template_id;
+         INNER JOIN course_phase_config cpc
+                    ON c.assessment_template_id = cpc.assessment_template_id;
 
 ALTER TABLE ONLY public.category
 ADD CONSTRAINT category_pkey PRIMARY KEY (id);

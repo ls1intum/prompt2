@@ -22,6 +22,7 @@ interface AssessmentCompletionDialogProps {
   error: string | null
   setError: (error: string | null) => void
   handleConfirm: () => void
+  isDeadlinePassed?: boolean
 }
 
 export function AssessmentCompletionDialog({
@@ -32,6 +33,7 @@ export function AssessmentCompletionDialog({
   error,
   setError,
   handleConfirm,
+  isDeadlinePassed = false,
 }: AssessmentCompletionDialogProps) {
   return (
     <div>
@@ -61,8 +63,19 @@ export function AssessmentCompletionDialog({
                   Are you sure you want to reopen this assessment for editing? This will allow you
                   to make changes to the assessment.
                 </>
+              ) : !isDeadlinePassed ? (
+                <>
+                  <strong>Are you sure you want to mark this assessment as final?</strong>
+                  <br />
+                  You can still unmark and edit it until the deadline. After the deadline, the
+                  assessment will be locked permanently and no further changes will be possible.
+                </>
               ) : (
-                'Are you sure you want to mark this assessment as final? This will lock the assessment and prevent further changes.'
+                <>
+                  <strong>Are you sure you want to mark this assessment as final?</strong>
+                  <br />
+                  This will lock the assessment permanently and prevent further changes.
+                </>
               )}
             </DialogDescription>
           </DialogHeader>

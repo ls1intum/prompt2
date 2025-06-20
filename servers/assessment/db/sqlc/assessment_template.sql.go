@@ -28,23 +28,6 @@ func (q *Queries) CreateAssessmentTemplate(ctx context.Context, arg CreateAssess
 	return err
 }
 
-const createOrUpdateAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateAssessmentTemplateCoursePhase :exec
-INSERT INTO assessment_template_course_phase (assessment_template_id, course_phase_id)
-VALUES ($1, $2)
-ON CONFLICT (course_phase_id) 
-DO UPDATE SET assessment_template_id = EXCLUDED.assessment_template_id
-`
-
-type CreateOrUpdateAssessmentTemplateCoursePhaseParams struct {
-	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
-	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdateAssessmentTemplateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, createOrUpdateAssessmentTemplateCoursePhase, arg.AssessmentTemplateID, arg.CoursePhaseID)
-	return err
-}
-
 const deleteAssessmentTemplate = `-- name: DeleteAssessmentTemplate :exec
 DELETE
 FROM assessment_template
@@ -53,23 +36,6 @@ WHERE id = $1
 
 func (q *Queries) DeleteAssessmentTemplate(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteAssessmentTemplate, id)
-	return err
-}
-
-const deleteAssessmentTemplateCoursePhase = `-- name: DeleteAssessmentTemplateCoursePhase :exec
-DELETE
-FROM assessment_template_course_phase
-WHERE assessment_template_id = $1
-  AND course_phase_id = $2
-`
-
-type DeleteAssessmentTemplateCoursePhaseParams struct {
-	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
-	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) DeleteAssessmentTemplateCoursePhase(ctx context.Context, arg DeleteAssessmentTemplateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, deleteAssessmentTemplateCoursePhase, arg.AssessmentTemplateID, arg.CoursePhaseID)
 	return err
 }
 
@@ -109,78 +75,6 @@ func (q *Queries) GetAssessmentTemplateByName(ctx context.Context, name string) 
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :one
-SELECT at.id, at.name, at.description, at.created_at, at.updated_at
-FROM assessment_template at
-         INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
-WHERE atcp.course_phase_id = $1
-`
-
-func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
-	row := q.db.QueryRow(ctx, getAssessmentTemplatesByCoursePhase, coursePhaseID)
-	var i AssessmentTemplate
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many
-SELECT atcp.course_phase_id
-FROM assessment_template_course_phase atcp
-WHERE atcp.assessment_template_id = $1
-`
-
-func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, getCoursePhasesByAssessmentTemplate, assessmentTemplateID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uuid.UUID
-	for rows.Next() {
-		var course_phase_id uuid.UUID
-		if err := rows.Scan(&course_phase_id); err != nil {
-			return nil, err
-		}
-		items = append(items, course_phase_id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT assessment_template_id, course_phase_id
-FROM assessment_template_course_phase
-ORDER BY assessment_template_id, course_phase_id
-`
-
-func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context) ([]AssessmentTemplateCoursePhase, error) {
-	rows, err := q.db.Query(ctx, listAssessmentTemplateCoursePhaseMappings)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AssessmentTemplateCoursePhase
-	for rows.Next() {
-		var i AssessmentTemplateCoursePhase
-		if err := rows.Scan(&i.AssessmentTemplateID, &i.CoursePhaseID); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const listAssessmentTemplates = `-- name: ListAssessmentTemplates :many
