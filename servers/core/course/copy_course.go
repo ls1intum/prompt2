@@ -295,7 +295,6 @@ func copyMetaGraphs(ctx context.Context, qtx *db.Queries, sourceID, targetID uui
 
 func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
 	applicationForm, err := getApplicationFormHelper(ctx, qtx, sourceCoursePhaseID)
-	log.Info("Copying application form: ", applicationForm)
 	if err != nil {
 		return err
 	}
@@ -377,7 +376,6 @@ func updateParticipationDataGraphHelper(ctx context.Context, qtx *db.Queries, co
 
 func getApplicationPhaseID(ctx context.Context, qtx *db.Queries, courseID uuid.UUID) (uuid.UUID, error) {
 	applicationPhaseID, err := qtx.GetApplicationPhaseIDForCourse(ctx, courseID)
-	log.Info("Application phase: ", applicationPhaseID)
 	if err != nil {
 		return uuid.Nil, err
 	}
