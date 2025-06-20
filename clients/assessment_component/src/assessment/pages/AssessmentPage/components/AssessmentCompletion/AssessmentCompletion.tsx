@@ -282,6 +282,7 @@ export function AssessmentCompletion({
         error={error}
         setError={setError}
         handleConfirm={handleConfirm}
+        isDeadlinePassed={isDeadlinePassed}
       />
     </div>
   )
