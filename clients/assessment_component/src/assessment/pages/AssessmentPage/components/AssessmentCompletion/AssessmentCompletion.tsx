@@ -28,6 +28,8 @@ import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdate
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
 
+import { validateGrade } from './utils/validateGrade'
+
 interface AssessmentFeedbackProps {
   studentAssessment: StudentAssessment
   deadline?: string
@@ -66,40 +68,6 @@ export const AssessmentCompletion = ({
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
-
-  const validGradeValues = [1, 1.3, 1.7, 2, 2.3, 2.7, 3, 3.3, 3.7, 4, 5]
-
-  const validateGrade = (
-    gradeString: string,
-  ): { isValid: boolean; value?: number; error?: string } => {
-    if (!gradeString || gradeString.trim() === '') {
-      return { isValid: true, value: 5.0 } // Default value when empty
-    }
-
-    const gradeValue = parseFloat(gradeString)
-
-    if (isNaN(gradeValue)) {
-      return { isValid: false, error: 'Grade must be a valid number' }
-    }
-
-    if (gradeValue < 1 || gradeValue > 5) {
-      return { isValid: false, error: 'Grade must be between 1.0 and 5.0' }
-    }
-
-    // Check if the grade matches one of the valid values (with small tolerance for floating point comparison)
-    const isValidValue = validGradeValues.some(
-      (validValue) => Math.abs(validValue - gradeValue) < 0.01,
-    )
-
-    if (!isValidValue) {
-      return {
-        isValid: false,
-        error: `Grade must be one of the predefined values (${validGradeValues.join(', ')})`,
-      }
-    }
-
-    return { isValid: true, value: gradeValue }
-  }
 
   const handleConfirm = () => {
     const handleCompletion = async () => {
@@ -143,15 +111,14 @@ export const AssessmentCompletion = ({
           return
         }
 
-        const completionData = {
+        await createOrUpdateCompletion({
           courseParticipationID: studentAssessment.courseParticipationID,
           coursePhaseID: phaseId ?? '',
           comment: newRemarks.trim(),
           gradeSuggestion: gradeValidation.value ?? 5.0,
           author: userName,
           completed: studentAssessment.assessmentCompletion.completed,
-        }
-        await createOrUpdateCompletion(completionData)
+        })
 
         // Clear any existing errors on successful save
         setError(null)
