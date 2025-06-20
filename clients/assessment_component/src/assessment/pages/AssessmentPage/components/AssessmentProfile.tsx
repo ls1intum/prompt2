@@ -1,7 +1,6 @@
 import { Book, Calendar, GraduationCap } from 'lucide-react'
 import AssessmentStatusBadge from './AssessmentStatusBadge'
 import { StudentScoreBadge } from '../../components/StudentScoreBadge'
-import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 
 import { Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
@@ -36,8 +35,8 @@ export const AssessmentProfile = ({
                     isFinalized={studentAssessment.assessmentCompletion.completed}
                   />
                   {studentAssessment.assessmentCompletion && (
-                    <GradeSuggestionBadge
-                      gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
+                    <StudentScoreBadge
+                      scoreNumeric={studentAssessment.assessmentCompletion.gradeSuggestion}
                     />
                   )}
                   {studentAssessment.assessments.length > 0 && (
