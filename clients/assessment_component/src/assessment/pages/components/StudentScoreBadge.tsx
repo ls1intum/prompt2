@@ -10,6 +10,10 @@ interface ScoreLevelBadgeProps {
 }
 
 export const StudentScoreBadge = ({ scoreLevel, scoreNumeric }: ScoreLevelBadgeProps) => {
+  if (!scoreLevel && !scoreNumeric) {
+    return undefined // No score provided, nothing to display
+  }
+
   const config = getLevelConfig(
     scoreLevel
       ? scoreLevel
