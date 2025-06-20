@@ -5,11 +5,11 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { mapNumberToScoreLevel } from '../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
-  gradeSuggestion: number | undefined
+  gradeSuggestion?: number
 }
 
 export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ gradeSuggestion }) => {
-  if (gradeSuggestion === undefined) {
+  if (!gradeSuggestion) {
     return undefined
   }
 

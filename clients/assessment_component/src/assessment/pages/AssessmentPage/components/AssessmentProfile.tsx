@@ -43,7 +43,10 @@ export const AssessmentProfile = ({
                     />
                   )}
                   {studentAssessment.assessments.length > 0 && (
-                    <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
+                    <StudentScoreBadge
+                      scoreLevel={studentAssessment.studentScore.scoreLevel}
+                      scoreNumeric={studentAssessment.studentScore.scoreNumeric}
+                    />
                   )}
                 </div>
               </div>

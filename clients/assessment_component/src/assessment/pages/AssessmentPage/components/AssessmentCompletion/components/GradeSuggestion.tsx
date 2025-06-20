@@ -39,7 +39,7 @@ export const GradeSuggestion = ({
               scoreNumeric={studentScore.scoreNumeric}
             />
           </div>
-        ) : null}
+        ) : undefined}
       </CardHeader>
       <CardContent>
         <Select value={gradeSuggestion} onValueChange={onGradeSuggestionChange} disabled={disabled}>
