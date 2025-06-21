@@ -72,7 +72,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadline() {
 	assert.NoError(suite.T(), err)
 
 	// Test GET request
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -92,7 +92,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineNonExis
 	nonExistentID := uuid.New()
 
 	// Test GET request for non-existent course phase
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", nonExistentID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", nonExistentID.String())
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -109,7 +109,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineNonExis
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineInvalidID() {
 	// Test GET request with invalid UUID
-	url := "/api/course_phase/invalid-uuid/deadline"
+	url := "/api/course_phase/invalid-uuid/config/deadline"
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -134,7 +134,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadline() {
 	assert.NoError(suite.T(), err)
 
 	// Test PUT request
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonBody))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -161,7 +161,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 	assert.NoError(suite.T(), err)
 
 	// Test PUT request with invalid UUID
-	url := "/api/course_phase/invalid-uuid/deadline"
+	url := "/api/course_phase/invalid-uuid/config/deadline"
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonBody))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -179,7 +179,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInvalidBody() {
 	// Test PUT request with invalid JSON body
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte("invalid json")))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -197,7 +197,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineEmptyBody() {
 	// Test PUT request with empty body
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte("{}")))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
