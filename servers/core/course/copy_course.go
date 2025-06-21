@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
@@ -86,18 +87,19 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 	}
 
 	sourceAplicationPhaseID, err := getApplicationPhaseID(ctx, qtx, sourceCourseID)
-	if err != nil {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return courseDTO.Course{}, err
 	}
 
 	targetApplicationPhaseID, err := getApplicationPhaseID(ctx, qtx, createdCourse.ID)
-	if err != nil {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return courseDTO.Course{}, err
 	}
 
-	err = copyApplicationForm(ctx, qtx, sourceAplicationPhaseID, targetApplicationPhaseID)
-	if err != nil {
-		return courseDTO.Course{}, err
+	if sourceAplicationPhaseID != uuid.Nil && targetApplicationPhaseID != uuid.Nil {
+		if err = copyApplicationForm(ctx, qtx, sourceAplicationPhaseID, targetApplicationPhaseID); err != nil {
+			return courseDTO.Course{}, err
+		}
 	}
 
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
