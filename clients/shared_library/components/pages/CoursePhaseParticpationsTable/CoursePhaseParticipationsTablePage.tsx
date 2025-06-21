@@ -9,7 +9,7 @@ import {
   Input,
 } from '@tumaet/prompt-ui-components'
 import { ScrollArea } from '@radix-ui/react-scroll-area'
-import { SearchIcon } from 'lucide-react'
+import { SearchIcon, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 
 import {
   ColumnDef,
@@ -148,9 +148,31 @@ export const CoursePhaseParticipationsTablePage = ({
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id} className='whitespace-nowrap'>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={
+                            header.column.getCanSort()
+                              ? 'cursor-pointer select-none flex items-center'
+                              : ''
+                          }
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+
+                          {/* Only add arrows if header is a string (i.e. no custom component already rendering them) */}
+                          {typeof header.column.columnDef.header === 'string' &&
+                            header.column.getCanSort() && (
+                              <span className='ml-2'>
+                                {{
+                                  asc: <ArrowUp className='h-4 w-4' />,
+                                  desc: <ArrowDown className='h-4 w-4' />,
+                                }[header.column.getIsSorted() as string] ?? (
+                                  <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
+                                )}
+                              </span>
+                            )}
+                        </div>
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
