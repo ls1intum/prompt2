@@ -38,17 +38,30 @@ export const AllocationParticipants = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraData: ExtraParticipationTableData[] | undefined = useMemo(() => {
-    if (!teams) return undefined
-    return teams
-      .map((team) =>
-        team.members.map((member) => ({
-          courseParticipationID: member.courseParticipationID,
-          value: team.name,
-          stringValue: team.name,
-        })),
-      )
-      .flat()
+  const extraColumns = useMemo(() => {
+    if (!teams) return []
+
+    const data: ExtraParticipationTableData[] = teams.flatMap((team) =>
+      team.members.map((member) => ({
+        courseParticipationID: member.courseParticipationID,
+        value: team.name,
+        stringValue: team.name,
+      })),
+    )
+
+    return [
+      {
+        id: 'allocatedTeam',
+        header: 'Allocated Team',
+        extraData: data,
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.getValue('allocatedTeam') as string
+          const b = rowB.getValue('allocatedTeam') as string
+          return a.localeCompare(b)
+        },
+      },
+    ]
   }, [teams])
 
   const refetch = () => {
@@ -78,10 +91,9 @@ export const AllocationParticipants = (): JSX.Element => {
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}
-          extraColumnHeader='Allocated Team'
-          extraData={extraData}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
+          extraColumns={extraColumns}
         />
       </div>
     </div>
