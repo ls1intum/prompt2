@@ -25,15 +25,15 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
-import { getLevelConfig } from '../../utils/getLevelConfig'
+import { getLevelConfig } from '../../../utils/getLevelConfig'
 
-import { useUpdateAssessment } from '../hooks/useUpdateAssessment'
-import { useCreateAssessment } from '../hooks/useCreateAssessment'
-import { useDeleteAssessment } from '../hooks/useDeleteAssessment'
+import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
+import { Competency } from '../../../../interfaces/competency'
+import { ScoreLevel } from '../../../../interfaces/scoreLevel'
 
-import type { Assessment, CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
-import type { Competency } from '../../../interfaces/competency'
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { useUpdateAssessment } from './hooks/useUpdateAssessment'
+import { useCreateAssessment } from './hooks/useCreateAssessment'
+import { useDeleteAssessment } from './hooks/useDeleteAssessment'
 
 interface AssessmentFormProps {
   courseParticipationID: string

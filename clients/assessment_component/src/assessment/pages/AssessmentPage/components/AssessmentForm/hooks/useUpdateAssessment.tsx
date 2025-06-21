@@ -1,15 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { createAssessment } from '../../../network/mutations/createOrUpdateAssessment'
-import { CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
+import { updateAssessment } from '../../../../../network/mutations/createOrUpdateAssessment'
+import { CreateOrUpdateAssessmentRequest } from '../../../../../interfaces/assessment'
 
-export const useCreateAssessment = (setError: (error: string | null) => void) => {
+export const useUpdateAssessment = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (assessment: CreateOrUpdateAssessmentRequest) => {
-      return createAssessment({ ...assessment, coursePhaseID: phaseId ?? '' })
+      return updateAssessment({
+        ...assessment,
+        coursePhaseID: phaseId ?? '',
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
