@@ -1,4 +1,5 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { Row } from '@tanstack/react-table'
 
 import { ExtraParticipationTableData } from './ExtraParticipationTableData'
 
@@ -9,8 +10,8 @@ export interface ExtraParticipationTableColumn {
   accessorFn?: (row: CoursePhaseParticipationWithStudent) => React.ReactNode
   enableSorting?: boolean
   sortingFn?: (
-    rowA: CoursePhaseParticipationWithStudent,
-    rowB: CoursePhaseParticipationWithStudent,
+    rowA: Row<CoursePhaseParticipationWithStudent>,
+    rowB: Row<CoursePhaseParticipationWithStudent>,
   ) => number
   enableColumnFilter?: boolean
   filterFn?: (row: CoursePhaseParticipationWithStudent, filterValue: string) => boolean
