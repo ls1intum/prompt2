@@ -77,6 +77,7 @@ export const CoursePhaseParticipationsTablePage = ({
       enableSorting: col.enableSorting ?? false,
       enableColumnFilter: col.enableColumnFilter ?? false,
       sortingFn: col.sortingFn,
+      filterFn: col.filterFn,
       cell: (info) => info.getValue(),
     }))
 

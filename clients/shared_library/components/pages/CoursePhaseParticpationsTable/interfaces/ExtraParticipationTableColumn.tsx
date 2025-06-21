@@ -14,5 +14,5 @@ export interface ExtraParticipationTableColumn {
     rowB: Row<CoursePhaseParticipationWithStudent>,
   ) => number
   enableColumnFilter?: boolean
-  filterFn?: (row: CoursePhaseParticipationWithStudent, filterValue: string) => boolean
+  filterFn?: (row: Row<CoursePhaseParticipationWithStudent>, filterValue: string) => boolean
 }
