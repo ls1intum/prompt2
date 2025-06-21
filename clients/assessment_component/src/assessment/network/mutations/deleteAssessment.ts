@@ -5,7 +5,7 @@ export const deleteAssessment = async (
   assessmentID: string,
 ): Promise<void> => {
   try {
-    return await assessmentAxiosInstance.delete(
+    await assessmentAxiosInstance.delete(
       `assessment/api/course_phase/${coursePhaseID}/student-assessment/${assessmentID}`,
       {
         headers: {
