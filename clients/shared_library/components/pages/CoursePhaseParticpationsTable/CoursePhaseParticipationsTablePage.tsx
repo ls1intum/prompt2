@@ -111,9 +111,9 @@ export const CoursePhaseParticipationsTablePage = ({
 
   return (
     <div>
-      <div className='space-y-4 mb-2'>
-        <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
-          <div className='relative flex-grow max-w-md w-full'>
+      <div className='space-y-4 mb-2 w-full'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:space-x-4 w-full'>
+          <div className='relative flex-grow w-full'>
             <Input
               placeholder='Search participants...'
               value={globalFilter}
