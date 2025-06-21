@@ -1,8 +1,4 @@
-import {
-  ErrorPage,
-  ManagementPageHeader,
-  useCustomElementWidth,
-} from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
@@ -17,7 +13,6 @@ import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
 
 export const ParticipantsPage = (): JSX.Element => {
-  const tableWidth = useCustomElementWidth('table-view')
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -105,7 +100,7 @@ export const ParticipantsPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         This table shows all participants and their allocated teams.
       </p>
-      <div style={{ width: `${tableWidth}px` }}>
+      <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}

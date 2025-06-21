@@ -1,10 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import {
-  ErrorPage,
-  ManagementPageHeader,
-  useCustomElementWidth,
-} from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
@@ -18,7 +14,6 @@ import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentSc
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
   const path = useLocation().pathname
-  const tableWidth = useCustomElementWidth('table-view')
 
   const { participations } = useParticipationStore()
 
@@ -75,7 +70,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
-      <div style={{ width: `${tableWidth}px` }}>
+      <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={participations ?? []}
           prevDataKeys={[]}
