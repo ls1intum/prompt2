@@ -233,7 +233,6 @@ export const CoursePhaseParticipationsTablePage = ({
         </ScrollArea>
       </div>
 
-      {/* Pagination Controls */}
       <div className='pt-4 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
         <div className='flex items-center space-x-2'>
           <p className='text-sm font-medium'>Rows per page</p>
