@@ -71,6 +71,12 @@ export const ParticipantsPage = (): JSX.Element => {
         id: 'allocatedTeam',
         header: 'Allocated Team',
         extraData: teamNameExtraData,
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.getValue('allocatedTeam') as string
+          const b = rowB.getValue('allocatedTeam') as string
+          return a.localeCompare(b)
+        },
       },
     ]
   }, [teams, teamAllocations])
