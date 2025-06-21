@@ -51,10 +51,12 @@ export const CreateAppleAccountDialog = ({
     onError: (error) => setLogs((prev) => [...prev, `❌ Developer accounts setup error: ${error}`]),
   })
 
-  const participationsReadyForApple = participantsWithDevProfiles.filter(
-    (participation) =>
-      participation.devProfile?.appleID && !participation.appleStatus?.appleSuccess,
-  )
+  const participationsReadyForApple = participantsWithDevProfiles
+
+  // const participationsReadyForDevices = participantsWithDevProfiles.filter(
+  //   (participation) =>
+  //     participation.devProfile?.appleID && !participation.appleStatus?.appleSuccess,
+  // )
 
   const triggerCreateAccounts = async () => {
     setIsCreatingAccounts(true)
