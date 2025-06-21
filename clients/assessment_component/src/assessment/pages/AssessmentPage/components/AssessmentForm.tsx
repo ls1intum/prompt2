@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, ClipboardCheck, LockIcon } from 'lucide-react'
+import { AlertCircle, ClipboardCheck, LockIcon, Trash2, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,6 +11,17 @@ import {
   FormItem,
   FormMessage,
   cn,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
@@ -18,6 +29,7 @@ import { getLevelConfig } from '../../utils/getLevelConfig'
 
 import { useUpdateAssessment } from '../hooks/useUpdateAssessment'
 import { useCreateAssessment } from '../hooks/useCreateAssessment'
+import { useDeleteAssessment } from '../hooks/useDeleteAssessment'
 
 import type { Assessment, CreateOrUpdateAssessmentRequest } from '../../../interfaces/assessment'
 import type { Competency } from '../../../interfaces/competency'
@@ -37,6 +49,7 @@ export const AssessmentForm = ({
   completed = false,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
@@ -55,6 +68,7 @@ export const AssessmentForm = ({
 
   const updateAssessment = useUpdateAssessment(setError)
   const createAssessment = useCreateAssessment(setError)
+  const deleteAssessment = useDeleteAssessment(setError)
   const { mutate } = assessment ? updateAssessment : createAssessment
   const selectedScore = form.watch('scoreLevel')
 
@@ -78,18 +92,53 @@ export const AssessmentForm = ({
     form.setValue('scoreLevel', value, { shouldValidate: true })
   }
 
+  const handleDelete = () => {
+    if (assessment?.id) {
+      deleteAssessment.mutate(assessment.id, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false)
+
+          form.reset({
+            courseParticipationID,
+            competencyID: competency.id,
+            scoreLevel: undefined,
+            comment: '',
+            examples: '',
+            author: userName,
+          })
+        },
+      })
+    }
+  }
+
   return (
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
-        <div className='relative'>
-          <div className='flex items-center gap-2 mb-2'>
-            <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-            <h3 className='text-base font-medium'>{competency.name}</h3>
+        <div className='lg:col-span-2 2xl:col-span-1'>
+          <div className='flex items-center justify-between mb-2'>
+            <div className='flex items-center gap-2'>
+              <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
+              <h3 className='text-base font-medium'>{competency.name}</h3>
+            </div>
+            {assessment && !completed && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant='ghost' size='sm' onClick={() => setDeleteDialogOpen(true)}>
+                      <RotateCcw className='h-4 w-4' />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Reset this assessment</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
           <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
         </div>
@@ -207,6 +256,34 @@ export const AssessmentForm = ({
             </div>
           )}
         </div>
+
+        {assessment && (
+          <div className='col-span-full'>
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Assessment</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this assessment? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant='outline'
+                    onClick={() => setDeleteDialogOpen(false)}
+                    className='mr-2'
+                  >
+                    Cancel
+                  </Button>
+                  <Button variant='destructive' onClick={handleDelete}>
+                    <Trash2 className='w-4 h-4 mr-2' />
+                    Delete Assessment
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
       </div>
     </Form>
   )
