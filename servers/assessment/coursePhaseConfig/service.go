@@ -9,7 +9,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type CoursePhaseConfigService struct {
@@ -54,4 +58,28 @@ func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time
 	}
 
 	return response, nil
+}
+
+func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
+	// fetch all Teams
+	coreURL := utils.GetCoreUrl()
+	cpWithResoultion, err := promptSDK.FetchAndMergeCoursePhaseWithResolution(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.Error("could not fetch course phase with resolution: ", err)
+		return nil, errors.New("could not fetch course phase with resolution")
+	}
+	log.Infof("Fetched course phase with resolution: %+v", cpWithResoultion)
+
+	// Extract teams from the fetched course phase resolution
+	teams := make([]coursePhaseConfigDTO.Team, 0)
+	for _, teamData := range cpWithResoultion["teams"].([]interface{}) {
+		teamMap := teamData.(map[string]interface{})
+		team := coursePhaseConfigDTO.Team{
+			ID:   uuid.MustParse(teamMap["id"].(string)),
+			Name: teamMap["name"].(string),
+		}
+		teams = append(teams, team)
+	}
+
+	return teams, nil
 }

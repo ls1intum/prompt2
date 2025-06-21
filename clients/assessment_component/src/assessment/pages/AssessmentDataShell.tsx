@@ -7,11 +7,13 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { ErrorPage, LoadingPage } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
+import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetAllCategoriesWithCompetencies } from './hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useGetDeadline } from './hooks/useGetDeadline'
 
 import { useParticipationStore } from '../zustand/useParticipationStore'
+import { useTeamStore } from '../zustand/useTeamStore'
 import { useCategoryStore } from '../zustand/useCategoryStore'
 import { useScoreLevelStore } from '../zustand/useScoreLevelStore'
 import { useDeadlineStore } from '../zustand/useDeadlineStore'
@@ -23,6 +25,7 @@ interface AssessmentDataShellProps {
 export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { setParticipations } = useParticipationStore()
+  const { setTeams } = useTeamStore()
   const { setCategories } = useCategoryStore()
   const { setScoreLevels } = useScoreLevelStore()
   const { setDeadline } = useDeadlineStore()
@@ -36,6 +39,13 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
   })
+
+  const {
+    data: teams,
+    isPending: isTeamsPending,
+    isError: isTeamsError,
+    refetch: refetchTeams,
+  } = useGetAllTeams()
 
   const {
     data: categories,
@@ -59,14 +69,20 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   } = useGetDeadline()
 
   const isError =
-    isParticipationsError || isCategoriesError || isScoreLevelsError || isDeadlineError
+    isParticipationsError ||
+    isTeamsError ||
+    isCategoriesError ||
+    isScoreLevelsError ||
+    isDeadlineError
   const isPending =
     isCoursePhaseParticipationsPending ||
+    isTeamsPending ||
     isCategoriesPending ||
     isScoreLevelsPending ||
     isDeadlinePending
 
   const refetch = () => {
+    refetchTeams()
     refetchCoursePhaseParticipations()
     refetchCategories()
     refetchScoreLevels()
@@ -78,6 +94,12 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
       setParticipations(coursePhaseParticipations.participations)
     }
   }, [coursePhaseParticipations, setParticipations])
+
+  useEffect(() => {
+    if (teams) {
+      setTeams(teams)
+    }
+  }, [teams, setTeams])
 
   useEffect(() => {
     if (categories) {
