@@ -23,6 +23,7 @@ export const ScoreLevelSelector = ({
       {Object.values(ScoreLevel).map((level) => {
         const config = getLevelConfig(level)
         const isSelected = selectedScore === level
+        const descriptionId = `score-level-${level}-description`
 
         return (
           <button
@@ -30,6 +31,10 @@ export const ScoreLevelSelector = ({
             type='button'
             onClick={() => onScoreChange(level)}
             disabled={completed}
+            aria-pressed={isSelected}
+            aria-disabled={completed}
+            aria-label={`Select ${config.title} score level`}
+            aria-describedby={descriptionId}
             className={cn(
               'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
               isSelected ? config.selectedBg : '',
@@ -53,7 +58,7 @@ export const ScoreLevelSelector = ({
               </div>
             </div>
 
-            <p className='line-clamp-3 text-muted-foreground'>
+            <p id={descriptionId} className='line-clamp-3 text-muted-foreground'>
               {(() => {
                 const key =
                   `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency
