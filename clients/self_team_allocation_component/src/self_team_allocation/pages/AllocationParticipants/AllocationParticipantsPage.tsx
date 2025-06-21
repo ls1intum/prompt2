@@ -12,7 +12,7 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 import { Team } from '../../interfaces/team'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableData } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableData'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
 export const AllocationParticipants = (): JSX.Element => {
   const tableWidth = useCustomElementWidth('table-view')
@@ -38,22 +38,27 @@ export const AllocationParticipants = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraColumns = useMemo(() => {
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!teams) return []
 
-    const data: ExtraParticipationTableData[] = teams.flatMap((team) =>
-      team.members.map((member) => ({
+    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
+    const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
+
+    const teamNameExtraData = teams.flatMap(({ id, members }) => {
+      const teamName = teamNameById.get(id) ?? 'No Team'
+
+      return members.map((member) => ({
         courseParticipationID: member.courseParticipationID,
-        value: team.name,
-        stringValue: team.name,
-      })),
-    )
+        value: teamName,
+        stringValue: teamName,
+      }))
+    })
 
     return [
       {
         id: 'allocatedTeam',
         header: 'Allocated Team',
-        extraData: data,
+        extraData: teamNameExtraData,
         enableSorting: true,
         sortingFn: (rowA, rowB) => {
           const a = rowA.getValue('allocatedTeam') as string
