@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, ClipboardCheck, LockIcon, RotateCcw } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,15 +11,8 @@ import {
   FormItem,
   FormMessage,
   cn,
-  Button,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-
-import { getLevelConfig } from '../../../utils/getLevelConfig'
 
 import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
 import { Competency } from '../../../../interfaces/competency'
@@ -29,6 +22,8 @@ import { useUpdateAssessment } from './hooks/useUpdateAssessment'
 import { useCreateAssessment } from './hooks/useCreateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
 import { DeleteAssessmentDialog } from './components/DeleteAssessmentDialog'
+import { ScoreLevelSelector } from './components/ScoreLevelSelector'
+import { CompetencyHeader } from './components/CompetencyHeader'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -114,75 +109,19 @@ export const AssessmentForm = ({
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
-        <div className='lg:col-span-2 2xl:col-span-1'>
-          <div className='flex items-center justify-between mb-2'>
-            <div className='flex items-center gap-2'>
-              <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-              <h3 className='text-base font-medium'>{competency.name}</h3>
-            </div>
-            {assessment && !completed && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant='ghost' size='sm' onClick={() => setDeleteDialogOpen(true)}>
-                      <RotateCcw className='h-4 w-4' />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Reset this assessment</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-          <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
-        </div>
+        <CompetencyHeader
+          competency={competency}
+          assessment={assessment}
+          completed={completed}
+          onResetClick={() => setDeleteDialogOpen(true)}
+        />
 
-        <div className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'>
-          {Object.values(ScoreLevel).map((level) => {
-            const config = getLevelConfig(level)
-            const isSelected = selectedScore === level
-
-            return (
-              <button
-                key={level}
-                type='button'
-                onClick={() => handleScoreChange(level)}
-                disabled={completed}
-                className={cn(
-                  'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
-                  isSelected ? config.selectedBg : '',
-                  isSelected && config.textColor,
-                  !completed &&
-                    'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
-                  completed && 'opacity-80 cursor-not-allowed',
-                  // Hide non-selected items on small screens (< lg) only when a selection exists
-                  selectedScore && !isSelected && 'hidden lg:flex',
-                )}
-              >
-                <div className='flex justify-between mb-1'>
-                  <span className='font-semibold'>{config.title}</span>
-                  <div>
-                    <span className='flex items-center gap-1'>
-                      {completed && isSelected && (
-                        <LockIcon className='h-4 w-4 text-muted-foreground' />
-                      )}
-                      {config.icon}
-                    </span>
-                  </div>
-                </div>
-
-                <p className='line-clamp-3 text-muted-foreground'>
-                  {(() => {
-                    const key =
-                      `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency
-                    return competency[key] as string
-                  })()}
-                </p>
-              </button>
-            )
-          })}
-        </div>
+        <ScoreLevelSelector
+          competency={competency}
+          selectedScore={selectedScore}
+          onScoreChange={handleScoreChange}
+          completed={completed}
+        />
 
         <div className='flex flex-col h-full'>
           <FormField
