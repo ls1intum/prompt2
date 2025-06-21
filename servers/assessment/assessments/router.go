@@ -77,7 +77,8 @@ func getStudentAssessment(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	studentAssessment, err := GetStudentAssessment(c, coursePhaseID, courseParticipationID)
+	authHeader := c.GetHeader("Authorization")
+	studentAssessment, err := GetStudentAssessment(c, authHeader, coursePhaseID, courseParticipationID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

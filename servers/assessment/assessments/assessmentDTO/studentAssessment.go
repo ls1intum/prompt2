@@ -8,6 +8,7 @@ import (
 
 type StudentAssessment struct {
 	CourseParticipationID uuid.UUID                                    `json:"courseParticipationID"`
+	TeamID                *uuid.UUID                                   `json:"teamID,omitempty"`
 	Assessments           []Assessment                                 `json:"assessments"`
 	AssessmentCompletion  assessmentCompletionDTO.AssessmentCompletion `json:"assessmentCompletion"`
 	StudentScore          scoreLevelDTO.StudentScore                   `json:"studentScore"`

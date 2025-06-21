@@ -9,12 +9,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
@@ -104,7 +106,7 @@ func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
 	return assessment, nil
 }
 
-func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
+func GetStudentAssessment(ctx context.Context, authHeader string, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
 	assessments, err := ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
 		log.Error("could not get assessments for student in phase: ", err)
@@ -139,11 +141,40 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		}
 	}
 
+	// fetch the teamID
+	coreURL := utils.GetCoreUrl()
+	cppsWithResolution, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.Error("could not fetch course participation with resolution: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not fetch course participation with resolution")
+	}
+	// TODO Replace with fetch single course participation with resolution
+	var cppWithResolution promptTypes.CoursePhaseParticipationWithStudent
+	for _, cpp := range cppsWithResolution {
+		if cpp.CourseParticipationID == courseParticipationID {
+			cppWithResolution = cpp
+			break
+		}
+	}
+
 	return assessmentDTO.StudentAssessment{
 		CourseParticipationID: courseParticipationID,
-		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
-		AssessmentCompletion:  completion,
-		StudentScore:          studentScore,
+		TeamID: func() *uuid.UUID {
+			teamIDStr, ok := cppWithResolution.PrevData["teamAllocation"].(string)
+			if !ok {
+				log.Error("teamAllocation is not a valid string")
+				return nil
+			}
+			teamID, err := uuid.Parse(teamIDStr)
+			if err != nil {
+				log.Error("could not parse teamAllocation to UUID: ", err)
+				return nil
+			}
+			return &teamID
+		}(),
+		Assessments:          assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
+		AssessmentCompletion: completion,
+		StudentScore:         studentScore,
 	}, nil
 }
 
