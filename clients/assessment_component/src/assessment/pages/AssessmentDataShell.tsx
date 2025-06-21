@@ -1,12 +1,8 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
 
-import { useQuery } from '@tanstack/react-query'
-
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { ErrorPage, LoadingPage } from '@tumaet/prompt-ui-components'
-import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
+import { useGetCoursePhaseParticipations } from './hooks/useGetCoursePhaseParticipations'
 import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetAllCategoriesWithCompetencies } from './hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
@@ -23,7 +19,6 @@ interface AssessmentDataShellProps {
 }
 
 export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
-  const { phaseId } = useParams<{ phaseId: string }>()
   const { setParticipations } = useParticipationStore()
   const { setTeams } = useTeamStore()
   const { setCategories } = useCategoryStore()
@@ -35,10 +30,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isPending: isCoursePhaseParticipationsPending,
     isError: isParticipationsError,
     refetch: refetchCoursePhaseParticipations,
-  } = useQuery<CoursePhaseParticipationsWithResolution>({
-    queryKey: ['participants', phaseId],
-    queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
-  })
+  } = useGetCoursePhaseParticipations()
 
   const {
     data: teams,
@@ -91,7 +83,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
 
   useEffect(() => {
     if (coursePhaseParticipations) {
-      setParticipations(coursePhaseParticipations.participations)
+      setParticipations(coursePhaseParticipations)
     }
   }, [coursePhaseParticipations, setParticipations])
 

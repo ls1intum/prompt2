@@ -16,6 +16,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	coursePhaseRouter.GET("deadline", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCoursePhaseDeadline)
 	coursePhaseRouter.PUT("deadline", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateCoursePhaseDeadline)
 
+	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getTeamsForCoursePhase)
 }
 
@@ -60,6 +61,25 @@ func updateCoursePhaseDeadline(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+func getParticipationsForCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	participations, err := GetParticipationsForCoursePhase(c, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get participations for course phase")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, participations)
 }
 
 func getTeamsForCoursePhase(c *gin.Context) {

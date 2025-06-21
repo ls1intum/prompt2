@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
@@ -58,6 +59,18 @@ func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time
 	}
 
 	return response, nil
+}
+
+func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]promptTypes.CoursePhaseParticipationWithStudent, error) {
+	coreURL := utils.GetCoreUrl()
+	participations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.Error("could not fetch course phase participations with students: ", err)
+		return nil, errors.New("could not fetch course phase participations with students")
+	}
+	log.Infof("Fetched participations for course phase %s: %+v", coursePhaseID, participations)
+
+	return participations, nil
 }
 
 func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
