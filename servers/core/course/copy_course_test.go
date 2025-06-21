@@ -59,7 +59,7 @@ func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 	newStartDate := pgtype.Date{Valid: true, Time: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)}
 	newEndDate := pgtype.Date{Valid: true, Time: time.Date(2025, 6, 30, 0, 0, 0, 0, time.UTC)}
 
-	copyReq := courseDTO.CopyCourse{
+	copyReq := courseDTO.CopyCourseRequest{
 		Name:        newName,
 		SemesterTag: pgtype.Text{Valid: true, String: newTag},
 		StartDate:   newStartDate,

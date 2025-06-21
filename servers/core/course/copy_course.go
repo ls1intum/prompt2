@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourse, requesterID string) (courseDTO.Course, error) {
+func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
 	sourceCourse, err := CourseServiceSingleton.queries.GetCourse(ctx, sourceCourseID)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch source course: %w", err)

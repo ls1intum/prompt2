@@ -199,7 +199,7 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 func (suite *CourseRouterTestSuite) TestCopyCourse() {
 	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
 
-	copyCourseRequest := courseDTO.CopyCourse{
+	copyCourseRequest := courseDTO.CopyCourseRequest{
 		Name:        "Copied Course",
 		SemesterTag: pgtype.Text{String: "ws2425", Valid: true},
 		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},

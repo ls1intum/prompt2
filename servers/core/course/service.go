@@ -383,6 +383,6 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	return nil
 }
 
-func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourse, requesterID string) (courseDTO.Course, error) {
+func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
 	return copyCourseInternal(ctx, sourceCourseID, courseVariables, requesterID)
 }

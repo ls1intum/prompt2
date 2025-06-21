@@ -430,7 +430,7 @@ func deleteCourse(c *gin.Context) {
 func copyCourse(c *gin.Context) {
 	userID := c.GetString("userID")
 
-	courseVariables := courseDTO.CopyCourse{}
+	courseVariables := courseDTO.CopyCourseRequest{}
 	if err := c.BindJSON(&courseVariables); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
