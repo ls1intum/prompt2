@@ -6,10 +6,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/keycloakRealmManager/keycloakRealmDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/keycloakRealmManager/keycloakRealmDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 )
 
+// setupKeycloakRouter sets up the keycloak endpoints
+// @Summary Keycloak Endpoints
+// @Description Endpoints for managing Keycloak groups and students
+// @Tags keycloak
+// @Security BearerAuth
 func setupKeycloakRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	keycloak := router.Group("/keycloak/:courseID", authMiddleware())
 	keycloak.PUT("/group", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCustomGroup)
@@ -20,6 +26,18 @@ func setupKeycloakRouter(router *gin.RouterGroup, authMiddleware func() gin.Hand
 	keycloak.PUT("/group/:groupName/students", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), addStudentsToGroup)
 }
 
+// createCustomGroup godoc
+// @Summary Create a custom group
+// @Description Create a new custom group for a course
+// @Tags keycloak
+// @Accept json
+// @Produce json
+// @Param courseID path string true "Course UUID"
+// @Param newGroupName body keycloakRealmDTO.CreateGroup true "Group name to create"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /keycloak/{courseID}/group [put]
 func createCustomGroup(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("courseID"))
 	if err != nil {
@@ -42,6 +60,19 @@ func createCustomGroup(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"id": id})
 }
 
+// addStudentsToGroup godoc
+// @Summary Add students to a custom group
+// @Description Add students to a custom group for a course
+// @Tags keycloak
+// @Accept json
+// @Produce json
+// @Param courseID path string true "Course UUID"
+// @Param groupName path string true "Group name"
+// @Param request body keycloakRealmDTO.AddStudentsToGroup true "Students to add"
+// @Success 200 {object} keycloakRealmDTO.AddStudentsToGroupResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /keycloak/{courseID}/group/{groupName}/students [put]
 func addStudentsToGroup(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("courseID"))
 	if err != nil {
@@ -70,6 +101,18 @@ func addStudentsToGroup(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, addingReport)
 }
 
+// addStudentsToEditorGroup godoc
+// @Summary Add students to the editor group
+// @Description Add students to the editor group for a course
+// @Tags keycloak
+// @Accept json
+// @Produce json
+// @Param courseID path string true "Course UUID"
+// @Param request body keycloakRealmDTO.AddStudentsToGroup true "Students to add"
+// @Success 200 {object} keycloakRealmDTO.AddStudentsToGroupResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /keycloak/{courseID}/group/editor/students [put]
 func addStudentsToEditorGroup(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("courseID"))
 	if err != nil {
@@ -92,6 +135,17 @@ func addStudentsToEditorGroup(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, addingReport)
 }
 
+// getStudentsInGroup godoc
+// @Summary Get students in a group
+// @Description Get all students in a specific group for a course
+// @Tags keycloak
+// @Produce json
+// @Param courseID path string true "Course UUID"
+// @Param groupName path string true "Group name"
+// @Success 200 {array} keycloakRealmDTO.GroupMembers
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /keycloak/{courseID}/group/{groupName}/students [get]
 func getStudentsInGroup(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("courseID"))
 	if err != nil {
@@ -116,5 +170,7 @@ func getStudentsInGroup(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
+	})
 }

@@ -3,7 +3,7 @@ import { create } from 'zustand'
 
 export interface CategoryStore {
   categories: CategoryWithCompetencies[]
-  setCategories: (participations: CategoryWithCompetencies[]) => void
+  setCategories: (categories: CategoryWithCompetencies[]) => void
 }
 
 export const useCategoryStore = create<CategoryStore>((set) => ({

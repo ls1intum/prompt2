@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight, Edit, Trash2 } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@tumaet/prompt-ui-components'
 
 import { EditCompetencyDialog } from './EditCompetencyDialog'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
@@ -50,22 +50,26 @@ export const CompetencyItem = ({ competency, categoryID }: CompetencyItemProps) 
           {competency.name}
         </div>
         <div className='text-sm text-muted-foreground mb-3'>{competency.description}</div>
-        <div className='text-xs grid grid-cols-4 gap-x-2'>
+        <div className='text-xs grid grid-cols-5 gap-x-2'>
           <div className='space-y-1'>
-            <div className='font-semibold'>Novice</div>
-            <div>{competency.novice}</div>
+            <div className='font-semibold'>Very Bad</div>
+            <div>{competency.descriptionVeryBad}</div>
           </div>
           <div className='space-y-1'>
-            <div className='font-semibold'>Intermediate</div>
-            <div>{competency.intermediate}</div>
+            <div className='font-semibold'>Bad</div>
+            <div>{competency.descriptionBad}</div>
           </div>
           <div className='space-y-1'>
-            <div className='font-semibold'>Advanced</div>
-            <div>{competency.advanced}</div>
+            <div className='font-semibold'>OK</div>
+            <div>{competency.descriptionOk}</div>
           </div>
           <div className='space-y-1'>
-            <div className='font-semibold'>Expert</div>
-            <div>{competency.expert}</div>
+            <div className='font-semibold'>Good</div>
+            <div>{competency.descriptionGood}</div>
+          </div>
+          <div className='space-y-1'>
+            <div className='font-semibold'>Very Good</div>
+            <div>{competency.descriptionVeryGood}</div>
           </div>
         </div>
       </div>

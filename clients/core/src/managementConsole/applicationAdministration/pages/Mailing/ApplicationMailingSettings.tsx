@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ApplicationMailingMetaData } from '../../interfaces/applicationMailingMetaData'
 import { parseApplicationMailingMetaData } from './utils/parseApplicaitonMailingMetaData'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useModifyCoursePhase } from '../../hooks/useModifyCoursePhase'
-import { useToast } from '@/hooks/use-toast'
 import { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import {
@@ -12,7 +9,15 @@ import {
   CustomApplicationPlaceHolder,
 } from './components/CustomApplicationPlaceHolder'
 import { EmailTemplateEditor } from '@/components/pages/Mailing/components/MailingEditor'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import {
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  ManagementPageHeader,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { SettingsCard } from './components/SettingsCard'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 import { useGetMailingIsConfigured } from '@/hooks/useGetMailingIsConfigured'

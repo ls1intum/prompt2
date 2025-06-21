@@ -3,18 +3,18 @@ package courseDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/meta"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/meta"
 	log "github.com/sirupsen/logrus"
 )
 
 type Course struct {
 	ID                  uuid.UUID     `json:"id"`
 	Name                string        `json:"name"`
-	StartDate           pgtype.Date   `json:"startDate"`
-	EndDate             pgtype.Date   `json:"endDate"`
-	SemesterTag         pgtype.Text   `json:"semesterTag"`
-	Ects                pgtype.Int4   `json:"ects"`
+	StartDate           pgtype.Date   `json:"startDate" swaggertype:"string"`
+	EndDate             pgtype.Date   `json:"endDate" swaggertype:"string"`
+	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
+	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 	CourseType          string        `json:"courseType"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`

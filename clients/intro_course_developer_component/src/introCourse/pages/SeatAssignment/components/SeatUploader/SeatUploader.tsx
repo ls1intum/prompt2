@@ -1,20 +1,28 @@
 import { useState, useRef, useCallback, type ChangeEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react'
+import type { JSX } from 'react/jsx-runtime'
 import type { Seat } from '../../../../interfaces/Seat'
 import { createSeatPlan } from '../../../../network/mutations/createSeatPlan'
 import { deleteSeatPlan } from '../../../../network/mutations/deleteSeatPlan'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react'
-import type { JSX } from 'react/jsx-runtime'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
 import { RECHNERHALLE_SEATS } from '../../utils/rechnerHalle'
 import { readCSVFile } from '../../utils/fileUpload'
 import { SeatPlanDialog } from './SeatPlanDialog'
 import { ResetSeatPlanDialog } from './ResetSeatPlanDialog'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Alert,
+  AlertDescription,
+  RadioGroup,
+  RadioGroupItem,
+  Label,
+} from '@tumaet/prompt-ui-components'
 
 interface SeatUploaderProps {
   existingSeats: Seat[]

@@ -1,12 +1,15 @@
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+import { useMemo } from 'react'
 
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
+
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { AssessmentProfile } from './components/AssessmentProfile'
+import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -23,6 +26,14 @@ export const AssessmentPage = (): JSX.Element => {
     isError: isStudentAssessmentError,
     refetch: refetchStudentAssessment,
   } = useGetStudentAssessment()
+
+  const remainingAssessments = useMemo(() => {
+    return (
+      categories.reduce((acc, category) => {
+        return acc + category.competencies.length
+      }, 0) - (studentAssessment?.assessments?.length || 0)
+    )
+  }, [categories, studentAssessment?.assessments?.length])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
@@ -46,22 +57,31 @@ export const AssessmentPage = (): JSX.Element => {
       <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
 
       {participant && (
-        <AssessmentProfile participant={participant} studentAssessment={studentAssessment} />
+        <AssessmentProfile
+          participant={participant}
+          studentAssessment={studentAssessment}
+          remainingAssessments={remainingAssessments}
+        />
       )}
 
       {categories.map((category) => (
         <CategoryAssessment
           key={category.id}
           category={category}
-          remainingAssessments={
-            studentAssessment.remainingAssessments?.categories?.find(
-              (item) => item.categoryID === category.id,
-            )?.remainingAssessments ?? 0
-          }
-          assessments={studentAssessment.assessments}
+          assessments={studentAssessment.assessments.filter((assessment) =>
+            category.competencies
+              .map((competency) => competency.id)
+              .includes(assessment.competencyID),
+          )}
           completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}
+
+      <AssessmentCompletion
+        studentAssessment={studentAssessment}
+        deadline='19.06.2025'
+        completed={studentAssessment.assessmentCompletion.completed}
+      />
     </div>
   )
 }

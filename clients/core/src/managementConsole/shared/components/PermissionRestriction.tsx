@@ -6,7 +6,7 @@ import { useKeycloak } from '@core/keycloak/useKeycloak'
 import { getCourseParticipation } from '@core/network/queries/courseParticipation'
 import { CourseParticipation } from '../interfaces/CourseParticipation'
 import { useQuery } from '@tanstack/react-query'
-import { ErrorPage } from '@/components/ErrorPage'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
 
 interface PermissionRestrictionProps {
   requiredPermissions: Role[]

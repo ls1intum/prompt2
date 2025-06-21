@@ -1,27 +1,26 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+  Input,
+  Textarea,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { CategoryWithCompetencies, UpdateCategoryRequest } from '../../../interfaces/category'
 import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
@@ -31,6 +30,7 @@ import * as z from 'zod'
 const updateCategorySchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'Name is required'),
+  shortName: z.string().min(1, 'Short name is required'),
   description: z.string().optional(),
   weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
 })
@@ -49,6 +49,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
     defaultValues: {
       id: category?.id,
       name: category?.name,
+      shortName: category?.shortName,
       description: category?.description,
       weight: category?.weight,
     },
@@ -60,6 +61,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
       form.reset({
         id: category.id,
         name: category.name,
+        shortName: category.shortName,
         description: category.description || '',
         weight: category.weight,
       })
@@ -96,6 +98,19 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
                   <FormLabel>Category Name</FormLabel>
                   <FormControl>
                     <Input placeholder='Enter category name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='shortName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Short Category Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter short category name' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

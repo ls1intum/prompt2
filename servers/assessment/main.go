@@ -10,9 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentTemplates"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
@@ -91,9 +92,10 @@ func main() {
 
 	competencies.InitCompetencyModule(api, *query, conn)
 	categories.InitCategoryModule(api, *query, conn)
+	assessmentTemplates.InitAssessmentTemplateModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 	assessmentCompletion.InitAssessmentCompletionModule(api, *query, conn)
-	remainingAssessments.InitRemainingAssessmentsModule(api, *query, conn)
+	actionItem.InitActionItemModule(api, *query, conn)
 	scoreLevel.InitScoreLevelModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")

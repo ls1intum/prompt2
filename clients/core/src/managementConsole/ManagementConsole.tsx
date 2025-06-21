@@ -1,21 +1,27 @@
 import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import UnauthorizedPage from '@/components/UnauthorizedPage'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
 import { WelcomePage } from './shared/components/WelcomePage'
-import { LoadingPage } from '@/components/LoadingPage'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+  LoadingPage,
+  ErrorPage,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Course } from '@tumaet/prompt-shared-state'
 import { getAllCourses } from '../network/queries/course'
-import { ErrorPage } from '@/components/ErrorPage'
-import { Separator } from '@/components/ui/separator'
 import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CourseNotFound from './shared/components/CourseNotFound'
 import { Breadcrumbs } from './layout/Breadcrumbs/Breadcrumbs'
 import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
+import { NavUserMenu } from './layout/Sidebar/CourseSwitchSidebar/components/NavUserMenu'
+import { Footer } from '@core/publicPages/shared/components/Footer'
 
 export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
   const { keycloak, logout } = useKeycloak()
@@ -114,7 +120,11 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   }
 
   if (isLoading || !keycloak) {
-    return <LoadingPage />
+    return (
+      <DarkModeProvider>
+        <LoadingPage />
+      </DarkModeProvider>
+    )
   }
 
   // Check if the user has at least some Prompt rights
@@ -125,20 +135,24 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
   return (
     <DarkModeProvider>
       <SidebarProvider>
-        <AppSidebar onLogout={() => logout()} />
+        <AppSidebar />
         <SidebarInset>
           {courseId && !courseExists && <CourseNotFound courseId={courseId || ''} />}
-          <header className='fixed w-full top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background'>
+          <header className='fixed top-0 z-10 flex h-14 w-full shrink-0 items-center gap-2 border-b bg-background px-4'>
             <SidebarTrigger className='-ml-1' />
             <Separator orientation='vertical' className='mr-2 h-4' />
             <Breadcrumbs />
           </header>
+          <div className='fixed top-0 right-0 z-20 flex h-14 items-center pr-4'>
+            <NavUserMenu onLogout={() => logout()} />
+          </div>
           <div
             id='management-children'
             className='flex flex-1 flex-col gap-4 p-6 pt-20 overflow-auto'
           >
             {hasChildren ? children : <WelcomePage />}
           </div>
+          <Footer />
         </SidebarInset>
       </SidebarProvider>
     </DarkModeProvider>

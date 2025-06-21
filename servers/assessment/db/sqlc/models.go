@@ -15,10 +15,11 @@ import (
 type ScoreLevel string
 
 const (
-	ScoreLevelNovice       ScoreLevel = "novice"
-	ScoreLevelIntermediate ScoreLevel = "intermediate"
-	ScoreLevelAdvanced     ScoreLevel = "advanced"
-	ScoreLevelExpert       ScoreLevel = "expert"
+	ScoreLevelVeryBad  ScoreLevel = "very_bad"
+	ScoreLevelBad      ScoreLevel = "bad"
+	ScoreLevelOk       ScoreLevel = "ok"
+	ScoreLevelGood     ScoreLevel = "good"
+	ScoreLevelVeryGood ScoreLevel = "very_good"
 )
 
 func (e *ScoreLevel) Scan(src interface{}) error {
@@ -56,15 +57,25 @@ func (ns NullScoreLevel) Value() (driver.Value, error) {
 	return string(ns.ScoreLevel), nil
 }
 
+type ActionItem struct {
+	ID                    uuid.UUID        `json:"id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	Action                string           `json:"action"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	Author                string           `json:"author"`
+}
+
 type Assessment struct {
 	ID                    uuid.UUID          `json:"id"`
 	CourseParticipationID uuid.UUID          `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
 	CompetencyID          uuid.UUID          `json:"competency_id"`
-	Score                 ScoreLevel         `json:"score"`
 	Comment               pgtype.Text        `json:"comment"`
 	AssessedAt            pgtype.Timestamptz `json:"assessed_at"`
 	Author                string             `json:"author"`
+	ScoreLevel            ScoreLevel         `json:"score_level"`
+	Examples              string             `json:"examples"`
 }
 
 type AssessmentCompletion struct {
@@ -72,25 +83,50 @@ type AssessmentCompletion struct {
 	CoursePhaseID         uuid.UUID          `json:"course_phase_id"`
 	CompletedAt           pgtype.Timestamptz `json:"completed_at"`
 	Author                string             `json:"author"`
+	Comment               string             `json:"comment"`
+	GradeSuggestion       pgtype.Numeric     `json:"grade_suggestion"`
+	Completed             bool               `json:"completed"`
+}
+
+type AssessmentTemplate struct {
+	ID          uuid.UUID        `json:"id"`
+	Name        string           `json:"name"`
+	Description pgtype.Text      `json:"description"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+}
+
+type AssessmentTemplateCoursePhase struct {
+	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
+	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
 }
 
 type Category struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
-	Weight      int32       `json:"weight"`
+	ID                   uuid.UUID   `json:"id"`
+	Name                 string      `json:"name"`
+	Description          pgtype.Text `json:"description"`
+	Weight               int32       `json:"weight"`
+	ShortName            pgtype.Text `json:"short_name"`
+	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+}
+
+type CategoryCoursePhase struct {
+	CategoryID    uuid.UUID `json:"category_id"`
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
 type Competency struct {
-	ID           uuid.UUID   `json:"id"`
-	CategoryID   uuid.UUID   `json:"category_id"`
-	Name         string      `json:"name"`
-	Description  pgtype.Text `json:"description"`
-	Novice       string      `json:"novice"`
-	Intermediate string      `json:"intermediate"`
-	Advanced     string      `json:"advanced"`
-	Expert       string      `json:"expert"`
-	Weight       int32       `json:"weight"`
+	ID                  uuid.UUID   `json:"id"`
+	CategoryID          uuid.UUID   `json:"category_id"`
+	Name                string      `json:"name"`
+	Description         pgtype.Text `json:"description"`
+	Weight              int32       `json:"weight"`
+	ShortName           pgtype.Text `json:"short_name"`
+	DescriptionVeryBad  string      `json:"description_very_bad"`
+	DescriptionBad      string      `json:"description_bad"`
+	DescriptionOk       string      `json:"description_ok"`
+	DescriptionGood     string      `json:"description_good"`
+	DescriptionVeryGood string      `json:"description_very_good"`
 }
 
 type CompletedScoreLevel struct {
@@ -99,15 +135,9 @@ type CompletedScoreLevel struct {
 	ScoreLevel            string    `json:"score_level"`
 }
 
-type ScoreLevelCategory struct {
-	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
-	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
-	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
-	ScoreLevel            string         `json:"score_level"`
-}
-
 type WeightedParticipantScore struct {
 	CoursePhaseID         uuid.UUID      `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
 	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
+	ScoreLevel            string         `json:"score_level"`
 }

@@ -11,13 +11,17 @@ import type { Allocation } from '../../interfaces/allocation'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
-
-import { ErrorPage } from '@/components/ErrorPage'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { AllocationSummaryCard } from './components/AllocationSummaryCard'
+
+import {
+  ErrorPage,
+  ManagementPageHeader,
+  Card,
+  CardContent,
+  CardHeader,
+  Badge,
+  Separator,
+} from '@tumaet/prompt-ui-components'
 
 export const TeamAllocationPage: React.FC = () => {
   const { phaseId } = useParams<{ phaseId: string }>()

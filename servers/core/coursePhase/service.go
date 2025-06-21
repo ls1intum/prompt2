@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseDTO"
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )

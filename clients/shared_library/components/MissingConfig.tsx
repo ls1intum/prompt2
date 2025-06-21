@@ -1,6 +1,13 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@tumaet/prompt-ui-components'
 import { AlertTriangle } from 'lucide-react'
 import { ElementType } from 'react'
 import { useNavigate } from 'react-router-dom'

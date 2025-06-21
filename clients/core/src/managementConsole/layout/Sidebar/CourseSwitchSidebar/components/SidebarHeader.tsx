@@ -5,8 +5,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
-} from '@/components/ui/sidebar'
-import { HomeIcon } from 'lucide-react'
+} from '@tumaet/prompt-ui-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const SidebarHeaderComponent = () => {
@@ -44,11 +43,11 @@ const SidebarHeaderComponent = () => {
             >
               <div
                 className={`
-                  flex aspect-square items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground 
+                  flex aspect-square items-center justify-center rounded-lg bg-sidebar-secondary text-sidebar-primary-foreground 
                   ${isActive ? 'size-12' : 'size-10'}
                   `}
               >
-                <HomeIcon className='size-6' />
+                <img src='/prompt_logo.svg' alt='Home' className='size-10' />
               </div>
             </div>
           </SidebarMenuButton>

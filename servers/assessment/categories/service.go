@@ -21,7 +21,7 @@ type CategoryService struct {
 
 var CategoryServiceSingleton *CategoryService
 
-func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) error {
+func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDTO.CreateCategoryRequest) error {
 	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -31,10 +31,12 @@ func CreateCategory(ctx context.Context, req categoryDTO.CreateCategoryRequest) 
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-		ID:          uuid.New(),
-		Name:        req.Name,
-		Description: pgtype.Text{String: req.Description, Valid: true},
-		Weight:      req.Weight,
+		ID:            uuid.New(),
+		Name:          req.Name,
+		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
+		Description:   pgtype.Text{String: req.Description, Valid: true},
+		Weight:        req.Weight,
+		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -67,12 +69,14 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 	return categories, nil
 }
 
-func UpdateCategory(ctx context.Context, id uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
+func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
 	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-		ID:          id,
-		Name:        req.Name,
-		Description: pgtype.Text{String: req.Description, Valid: true},
-		Weight:      req.Weight,
+		ID:            id,
+		Name:          req.Name,
+		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
+		Description:   pgtype.Text{String: req.Description, Valid: true},
+		Weight:        req.Weight,
+		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
@@ -90,8 +94,8 @@ func DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func GetCategoriesWithCompetencies(ctx context.Context) ([]categoryDTO.CategoryWithCompetencies, error) {
-	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx)
+func GetCategoriesWithCompetencies(ctx context.Context, coursePhaseID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
+	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get categories with competencies: ", err)
 		return nil, errors.New("could not get categories with competencies")

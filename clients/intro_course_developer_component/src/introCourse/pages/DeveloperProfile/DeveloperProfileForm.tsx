@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { PostDeveloperProfile } from '../../interfaces/PostDeveloperProfile'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Form,
   FormControl,
   FormDescription,
@@ -10,14 +10,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+  Input,
+  useScreenSize,
+} from '@tumaet/prompt-ui-components'
 import { YesNoButtons } from '../../components/YesNoButtons'
 import { developerFormSchema, type DeveloperFormValues } from '../../validations/developerProfile'
 import { GitLabHelperDialog } from './components/GitLabHelperDialog'
 import { AppleIDHelperDialog } from './components/AppleIDHelperDialog'
 import IOSUDIDDialog from './components/IOSUDIDDialog'
-import { useScreenSize } from '@/hooks/useScreenSize'
 import { DeveloperProfile } from '../../interfaces/DeveloperProfile'
 
 interface DeveloperProfileFormProps {

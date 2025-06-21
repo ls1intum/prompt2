@@ -13,7 +13,8 @@ import (
 )
 
 const getAllScoreLevels = `-- name: GetAllScoreLevels :many
-SELECT course_participation_id, score_level
+SELECT course_participation_id,
+       score_level
 FROM completed_score_levels
 WHERE course_phase_id = $1
 `
@@ -63,8 +64,7 @@ func (q *Queries) GetScoreLevelByCourseParticipationID(ctx context.Context, arg 
 }
 
 const getScoreLevelByCourseParticipationIDNumeric = `-- name: GetScoreLevelByCourseParticipationIDNumeric :one
-SELECT
-    COALESCE(score_numeric, 0) AS score_numeric
+SELECT COALESCE(score_numeric, 0) AS score_numeric
 FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2
@@ -83,15 +83,9 @@ func (q *Queries) GetScoreLevelByCourseParticipationIDNumeric(ctx context.Contex
 }
 
 const getStudentScoreWithLevel = `-- name: GetStudentScoreWithLevel :one
-SELECT
-    course_participation_id,
-    score_numeric,
-    CASE
-        WHEN score_numeric < 1.5 THEN 'novice'
-        WHEN score_numeric < 2.5 THEN 'intermediate'
-        WHEN score_numeric < 3.5 THEN 'advanced'
-        ELSE 'expert'
-    END AS score_level
+SELECT course_participation_id,
+       score_numeric,
+       score_level
 FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2

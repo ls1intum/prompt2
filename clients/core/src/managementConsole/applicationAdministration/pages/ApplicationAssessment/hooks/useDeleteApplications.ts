@@ -1,4 +1,4 @@
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@tumaet/prompt-ui-components'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { deleteApplications } from '@core/network/mutations/deleteApplications'

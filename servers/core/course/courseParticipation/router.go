@@ -5,10 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/niclasheun/prompt2.0/course/courseParticipation/courseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation/courseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 )
 
+// setupCourseParticipationRouter sets up the course participation endpoints
+// @Summary Course Participation Endpoints
+// @Description Endpoints for managing course participations
+// @Tags course_participation
+// @Security BearerAuth
 func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	// incoming path should be /course/:uuid/
 	courseParticipation := router.Group("/courses/:uuid/participations", authMiddleware())
@@ -17,6 +23,16 @@ func setupCourseParticipationRouter(router *gin.RouterGroup, authMiddleware func
 	courseParticipation.GET("/self", getOwnCourseParticipation)
 }
 
+// getOwnCourseParticipation godoc
+// @Summary Get own course participation
+// @Description Get the participation of the current user in a course
+// @Tags course_participation
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {object} courseParticipationDTO.GetOwnCourseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/participations/self [get]
 func getOwnCourseParticipation(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -45,6 +61,16 @@ func getOwnCourseParticipation(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courseParticipation)
 }
 
+// getCourseParticipationsForCourse godoc
+// @Summary Get all participations for a course
+// @Description Get all participations for a given course
+// @Tags course_participation
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {array} courseParticipationDTO.GetCourseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/participations [get]
 func getCourseParticipationsForCourse(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -61,6 +87,18 @@ func getCourseParticipationsForCourse(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courseParticipations)
 }
 
+// createCourseParticipation godoc
+// @Summary Enroll in a course
+// @Description Enroll a user in a course
+// @Tags course_participation
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param newCourseParticipation body courseParticipationDTO.CreateCourseParticipation true "Participation to create"
+// @Success 200 {object} courseParticipationDTO.GetCourseParticipation
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/participations/enroll [post]
 func createCourseParticipation(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -92,5 +130,7 @@ func createCourseParticipation(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
+	})
 }

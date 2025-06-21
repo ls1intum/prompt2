@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { AlertCircle, Info } from 'lucide-react'
 
 interface InfoBannerProps {
@@ -25,14 +25,18 @@ export const InfoBanner: React.FC<InfoBannerProps> = ({ status }) => {
     <div
       className={`border-l-4 p-4 mb-4 ${
         isApplied
-          ? 'bg-yellow-100 border-yellow-500 text-yellow-700'
-          : 'bg-gray-50 border-gray-200 text-gray-600'
+          ? 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-500 text-yellow-700 dark:text-yellow-300'
+          : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
       }`}
       role='alert'
     >
       <div className='flex items-center'>
-        {isApplied ? <AlertCircle className='h-5 w-5 mr-2' /> : <Info className='h-5 w-5 mr-2' />}
-        <p className={isApplied ? 'font-medium' : 'font-normal'}>{message}</p>
+        {isApplied ? (
+          <AlertCircle className='h-5 w-5 mr-2 text-yellow-600 dark:text-yellow-400' />
+        ) : (
+          <Info className='h-5 w-5 mr-2 text-gray-500 dark:text-gray-400' />
+        )}
+        <p className={`${isApplied ? 'font-medium' : 'font-normal'}`}>{message}</p>
       </div>
     </div>
   )

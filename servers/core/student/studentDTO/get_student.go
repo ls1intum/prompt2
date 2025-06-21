@@ -3,7 +3,7 @@ package studentDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 )
 
 type Student struct {
@@ -18,7 +18,7 @@ type Student struct {
 	Nationality          string         `json:"nationality"`
 	StudyDegree          db.StudyDegree `json:"studyDegree"`
 	StudyProgram         string         `json:"studyProgram"`
-	CurrentSemester      pgtype.Int4    `json:"currentSemester"`
+	CurrentSemester      pgtype.Int4    `json:"currentSemester" swaggertype:"integer"`
 }
 
 func GetStudentDTOFromDBModel(model db.Student) Student {

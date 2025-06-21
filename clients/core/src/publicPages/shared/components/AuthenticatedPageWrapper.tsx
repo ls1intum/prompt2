@@ -1,17 +1,19 @@
 import { Footer } from './Footer'
 import { Header } from './Header'
-import { LoadingPage } from '@/components/LoadingPage'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+  LoadingPage,
+} from '@tumaet/prompt-ui-components'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
+import { useState } from 'react'
+
+import DarkModeProvider from '@/contexts/DarkModeProvider'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 interface NonAuthenticatedPageWrapper {
@@ -32,10 +34,14 @@ export const AuthenticatedPageWrapper = ({
   const closeLogoutDialog = () => setIsLogoutDialogOpen(false)
 
   if (!keycloak) {
-    return <LoadingPage />
+    return (
+      <DarkModeProvider>
+        <LoadingPage />
+      </DarkModeProvider>
+    )
   }
   return (
-    <div className='min-h-screen bg-white flex flex-col'>
+    <div className='min-h-screen flex flex-col'>
       <main className='flex-grow w-full px-4 sm:px-6 lg:px-8 py-12'>
         <div className='max-w-[1400px] mx-auto'>
           <Header

@@ -1,12 +1,12 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
-import { AssessmentCompletion } from '../../interfaces/assessment'
+import { CreateOrUpdateAssessmentCompletionRequest } from '../../interfaces/assessment'
 
-export const createAssessmentCompletion = async (
+export const createOrUpdateAssessmentCompletion = async (
   coursePhaseID: string,
-  assessmentCompletion: AssessmentCompletion,
+  assessmentCompletion: CreateOrUpdateAssessmentCompletionRequest,
 ): Promise<void> => {
   try {
-    await assessmentAxiosInstance.post<AssessmentCompletion>(
+    await assessmentAxiosInstance.post(
       `assessment/api/course_phase/${coursePhaseID}/student-assessment/completed`,
       assessmentCompletion,
       {

@@ -1,15 +1,16 @@
+import { Award, BookOpen, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Award, BookOpen, Loader2 } from 'lucide-react'
-import { ErrorPage } from '@/components/ErrorPage'
+  Badge,
+  Card,
+  CardContent,
+  Separator,
+  ErrorPage,
+} from '@tumaet/prompt-ui-components'
 
 import type { TeaseStudent } from '../../../interfaces/tease/student'
 import { useParams } from 'react-router-dom'
@@ -79,11 +80,16 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
     )
   }
 
+  // Sort project preferences by priority (assuming lower number means higher priority)
+  const sortedPreferences = [...(student.projectPreferences || [])].sort(
+    (a, b) => (a.priority || 0) - (b.priority || 0),
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[650px] max-h-[90vh] overflow-y-auto p-6'>
-        <div className='flex flex-col h-full overflow-hidden'>
-          <DialogHeader className='sticky top-0 bg-background z-10 pb-2'>
+      <DialogContent className=''>
+        <div className='flex flex-col h-full sm:max-w-[650px] max-h-[90vh] overflow-hidden'>
+          <DialogHeader className='bg-background z-5 pb-2'>
             <DialogTitle className='text-xl flex items-center gap-2'>
               <span className='font-semibold'>
                 {student.firstName} {student.lastName}
@@ -95,10 +101,10 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
             <DialogDescription>Skills and Project Preferences Details</DialogDescription>
           </DialogHeader>
 
-          <Separator className='mt-2 mb-4' />
+          <Separator className='mt-2' />
 
-          <div className='overflow-y-auto flex-1 pr-1'>
-            <div className='space-y-6'>
+          <div className='flex-1 pr-1 overflow-y-auto'>
+            <div className='space-y-6 pr-2 mt-4'>
               <div>
                 <div className='flex items-center gap-2 mb-3'>
                   <Award className='h-5 w-5 text-primary' />
@@ -106,18 +112,23 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                 </div>
 
                 {student.skills && student.skills.length > 0 ? (
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className='space-y-4'>
                     {student.skills.map((skill, index) => (
                       <Card key={index} className='overflow-hidden'>
                         <CardContent className='p-3'>
-                          <div className='flex justify-between items-center'>
+                          <div className='flex flex-col sm:flex-row sm:items-center gap-2'>
                             <div className='font-medium'>{getSkillNameById(skill.id)}</div>
-                            <Badge
-                              className={`${getLevelConfig(skill.proficiency).textColor} 
-                              ${getLevelConfig(skill.proficiency).selectedBg} hover:${getLevelConfig(skill.proficiency).selectedBg}`}
-                            >
-                              {getLevelConfig(skill.proficiency).title}
-                            </Badge>
+                            <div className='w-auto'>
+                              <Badge
+                                className={`
+                                  ${getLevelConfig(skill.proficiency).textColor} 
+                                  ${getLevelConfig(skill.proficiency).selectedBg} 
+                                  hover:${getLevelConfig(skill.proficiency).selectedBg}
+                                `}
+                              >
+                                {getLevelConfig(skill.proficiency).title}
+                              </Badge>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -134,15 +145,15 @@ export function StudentDetailDialog({ student, open, onOpenChange }: StudentDeta
                   <h3 className='text-lg font-medium'>Project Preferences</h3>
                 </div>
 
-                {student.projectPreferences && student.projectPreferences.length > 0 ? (
+                {sortedPreferences.length > 0 ? (
                   <div className='space-y-4'>
-                    {student.projectPreferences.map((preference, index) => (
-                      <Card key={index} className='overflow-hidden'>
+                    {sortedPreferences.map((preference) => (
+                      <Card key={preference.projectId} className='overflow-hidden'>
                         <CardContent className='p-3'>
                           <div className='flex justify-between items-center'>
                             <div className='flex items-center gap-2'>
                               <div className='bg-muted w-7 h-7 rounded-full flex items-center justify-center font-medium text-sm'>
-                                {index + 1}
+                                {(preference.priority ?? 0) + 1}
                               </div>
                               <div className='font-medium'>
                                 {getTeamNameById(preference.projectId)}

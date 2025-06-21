@@ -1,4 +1,4 @@
-import { FormDescription } from '@/components/ui/form'
+import { FormDescription } from '@tumaet/prompt-ui-components'
 import DOMPurify from 'dompurify'
 
 interface FormDescriptionHTMLProps {

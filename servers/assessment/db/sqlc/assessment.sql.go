@@ -13,32 +13,33 @@ import (
 )
 
 const countRemainingAssessmentsForStudent = `-- name: CountRemainingAssessmentsForStudent :one
-WITH total_competencies AS (
-  SELECT COUNT(*) AS total FROM competency
-),
-assessed_competencies AS (
-  SELECT COUNT(*) AS assessed
-  FROM assessment a
-  WHERE a.course_participation_id = $1
-    AND a.course_phase_id = $2
-),
-remaining_per_category AS (
-  SELECT
-    c.category_id,
-    COUNT(*) - COUNT(ass.id) AS remaining_assessments
-  FROM competency c
-  LEFT JOIN assessment ass
-    ON ass.competency_id = c.id
-    AND ass.course_participation_id = $1
-    AND ass.course_phase_id = $2
-  GROUP BY c.category_id
-)
-SELECT
-  (SELECT total FROM total_competencies) - (SELECT assessed FROM assessed_competencies) AS remaining_assessments,
-  json_agg(json_build_object(
-    'categoryID', rpc.category_id,
-    'remainingAssessments', rpc.remaining_assessments
-  )) AS categories
+WITH total_competencies AS (SELECT COUNT(*) AS total
+                            FROM competency c
+                                     INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
+                            WHERE ccp.course_phase_id = $2),
+     assessed_competencies AS (SELECT COUNT(*) AS assessed
+                               FROM assessment a
+                                        INNER JOIN competency c ON a.competency_id = c.id
+                                        INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
+                               WHERE a.course_participation_id = $1
+                                 AND a.course_phase_id = $2
+                                 AND ccp.course_phase_id = $2),
+     remaining_per_category AS (SELECT c.category_id,
+                                       COUNT(*) - COUNT(ass.id) AS remaining_assessments
+                                FROM competency c
+                                         INNER JOIN category_course_phase ccp ON c.category_id = ccp.category_id
+                                         LEFT JOIN assessment ass ON ass.competency_id = c.id
+                                    AND ass.course_participation_id = $1
+                                    AND ass.course_phase_id = $2
+                                WHERE ccp.course_phase_id = $2
+                                GROUP BY c.category_id)
+SELECT (SELECT total FROM total_competencies) - (SELECT assessed FROM assessed_competencies) AS remaining_assessments,
+       json_agg(
+               json_build_object(
+                       'categoryID', rpc.category_id,
+                       'remainingAssessments', rpc.remaining_assessments
+               )
+       )                                                                                     AS categories
 FROM remaining_per_category rpc
 `
 
@@ -60,11 +61,16 @@ func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg C
 }
 
 const createAssessment = `-- name: CreateAssessment :exec
-INSERT INTO assessment (
-    id, course_participation_id, course_phase_id, competency_id,
-    score, comment, assessed_at, author
-)
-VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7)
+INSERT INTO assessment (id,
+                        course_participation_id,
+                        course_phase_id,
+                        competency_id,
+                        score_level,
+                        comment,
+                        assessed_at,
+                        author,
+                        examples)
+VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8)
 `
 
 type CreateAssessmentParams struct {
@@ -72,9 +78,10 @@ type CreateAssessmentParams struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CompetencyID          uuid.UUID   `json:"competency_id"`
-	Score                 ScoreLevel  `json:"score"`
+	ScoreLevel            ScoreLevel  `json:"score_level"`
 	Comment               pgtype.Text `json:"comment"`
 	Author                string      `json:"author"`
+	Examples              string      `json:"examples"`
 }
 
 func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) error {
@@ -83,15 +90,18 @@ func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentPara
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
-		arg.Score,
+		arg.ScoreLevel,
 		arg.Comment,
 		arg.Author,
+		arg.Examples,
 	)
 	return err
 }
 
 const deleteAssessment = `-- name: DeleteAssessment :exec
-DELETE FROM assessment WHERE id = $1
+DELETE
+FROM assessment
+WHERE id = $1
 `
 
 func (q *Queries) DeleteAssessment(ctx context.Context, id uuid.UUID) error {
@@ -100,7 +110,9 @@ func (q *Queries) DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAssessment = `-- name: GetAssessment :one
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author FROM assessment WHERE id = $1
+SELECT id, course_participation_id, course_phase_id, competency_id, comment, assessed_at, author, score_level, examples
+FROM assessment
+WHERE id = $1
 `
 
 func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, error) {
@@ -111,18 +123,19 @@ func (q *Queries) GetAssessment(ctx context.Context, id uuid.UUID) (Assessment, 
 		&i.CourseParticipationID,
 		&i.CoursePhaseID,
 		&i.CompetencyID,
-		&i.Score,
 		&i.Comment,
 		&i.AssessedAt,
 		&i.Author,
+		&i.ScoreLevel,
+		&i.Examples,
 	)
 	return i, err
 }
 
 const listAssessmentsByCategoryInPhase = `-- name: ListAssessmentsByCategoryInPhase :many
-SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.score, a.comment, a.assessed_at, a.author
+SELECT a.id, a.course_participation_id, a.course_phase_id, a.competency_id, a.comment, a.assessed_at, a.author, a.score_level, a.examples
 FROM assessment a
-JOIN competency c ON a.competency_id = c.id
+         JOIN competency c ON a.competency_id = c.id
 WHERE c.category_id = $1
   AND a.course_phase_id = $2
 `
@@ -146,10 +159,11 @@ func (q *Queries) ListAssessmentsByCategoryInPhase(ctx context.Context, arg List
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
 			&i.CompetencyID,
-			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
 			&i.Author,
+			&i.ScoreLevel,
+			&i.Examples,
 		); err != nil {
 			return nil, err
 		}
@@ -162,9 +176,9 @@ func (q *Queries) ListAssessmentsByCategoryInPhase(ctx context.Context, arg List
 }
 
 const listAssessmentsByCompetencyInPhase = `-- name: ListAssessmentsByCompetencyInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author 
-FROM assessment 
-WHERE competency_id = $1 
+SELECT id, course_participation_id, course_phase_id, competency_id, comment, assessed_at, author, score_level, examples
+FROM assessment
+WHERE competency_id = $1
   AND course_phase_id = $2
 `
 
@@ -187,10 +201,11 @@ func (q *Queries) ListAssessmentsByCompetencyInPhase(ctx context.Context, arg Li
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
 			&i.CompetencyID,
-			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
 			&i.Author,
+			&i.ScoreLevel,
+			&i.Examples,
 		); err != nil {
 			return nil, err
 		}
@@ -203,7 +218,9 @@ func (q *Queries) ListAssessmentsByCompetencyInPhase(ctx context.Context, arg Li
 }
 
 const listAssessmentsByCoursePhase = `-- name: ListAssessmentsByCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author FROM assessment WHERE course_phase_id = $1
+SELECT id, course_participation_id, course_phase_id, competency_id, comment, assessed_at, author, score_level, examples
+FROM assessment
+WHERE course_phase_id = $1
 `
 
 func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Assessment, error) {
@@ -220,10 +237,11 @@ func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseI
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
 			&i.CompetencyID,
-			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
 			&i.Author,
+			&i.ScoreLevel,
+			&i.Examples,
 		); err != nil {
 			return nil, err
 		}
@@ -236,7 +254,7 @@ func (q *Queries) ListAssessmentsByCoursePhase(ctx context.Context, coursePhaseI
 }
 
 const listAssessmentsByStudentInPhase = `-- name: ListAssessmentsByStudentInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score, comment, assessed_at, author
+SELECT id, course_participation_id, course_phase_id, competency_id, comment, assessed_at, author, score_level, examples
 FROM assessment
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -261,10 +279,11 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 			&i.CourseParticipationID,
 			&i.CoursePhaseID,
 			&i.CompetencyID,
-			&i.Score,
 			&i.Comment,
 			&i.AssessedAt,
 			&i.Author,
+			&i.ScoreLevel,
+			&i.Examples,
 		); err != nil {
 			return nil, err
 		}
@@ -278,11 +297,11 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 
 const updateAssessment = `-- name: UpdateAssessment :exec
 UPDATE assessment
-SET
-  score = $4,
-  comment = $5,
-  assessed_at = CURRENT_TIMESTAMP,
-  author = $6
+SET score_level = $4,
+    comment     = $5,
+    assessed_at = CURRENT_TIMESTAMP,
+    author      = $6,
+    examples    = $7
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND competency_id = $3
@@ -292,9 +311,10 @@ type UpdateAssessmentParams struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CompetencyID          uuid.UUID   `json:"competency_id"`
-	Score                 ScoreLevel  `json:"score"`
+	ScoreLevel            ScoreLevel  `json:"score_level"`
 	Comment               pgtype.Text `json:"comment"`
 	Author                string      `json:"author"`
+	Examples              string      `json:"examples"`
 }
 
 func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) error {
@@ -302,9 +322,10 @@ func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentPara
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
-		arg.Score,
+		arg.ScoreLevel,
 		arg.Comment,
 		arg.Author,
+		arg.Examples,
 	)
 	return err
 }

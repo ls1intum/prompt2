@@ -1,23 +1,17 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-} from '@/components/ui/sidebar'
-import { NavUserMenu } from './components/NavUserMenu'
+} from '@tumaet/prompt-ui-components'
 import SidebarHeaderComponent from './components/SidebarHeader'
 import { CourseSidebarItem } from './components/CourseSidebarItem'
 import { AddCourseButton } from './components/AddCourseSidebarItem'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import { Role } from '@tumaet/prompt-shared-state'
 
-interface CourseSwitchSidebarProps {
-  onLogout: () => void
-}
-
-export const CourseSwitchSidebar = ({ onLogout }: CourseSwitchSidebarProps): JSX.Element => {
+export const CourseSwitchSidebar = (): JSX.Element => {
   const { courses } = useCourseStore()
   const { permissions } = useAuthStore()
 
@@ -43,13 +37,6 @@ export const CourseSwitchSidebar = ({ onLogout }: CourseSwitchSidebarProps): JSX
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className='relative flex aspect-square size-12 items-center justify-center'>
-          <div className='flex aspect-square size-10 items-center justify-center'>
-            <NavUserMenu onLogout={onLogout} />
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   )
 }

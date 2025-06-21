@@ -30,12 +30,18 @@ func getAllCategories(c *gin.Context) {
 }
 
 func createCategory(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var request categoryDTO.CreateCategoryRequest
 	if err := c.BindJSON(&request); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err := CreateCategory(c, request)
+	err = CreateCategory(c, coursePhaseID, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -44,6 +50,12 @@ func createCategory(c *gin.Context) {
 }
 
 func updateCategory(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	categoryID, err := uuid.Parse(c.Param("categoryID"))
 	if err != nil {
 		log.Error("Error parsing categoryID: ", err)
@@ -57,7 +69,7 @@ func updateCategory(c *gin.Context) {
 		return
 	}
 
-	err = UpdateCategory(c, categoryID, request)
+	err = UpdateCategory(c, categoryID, coursePhaseID, request)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -82,7 +94,13 @@ func deleteCategory(c *gin.Context) {
 }
 
 func getCategoriesWithCompetencies(c *gin.Context) {
-	result, err := GetCategoriesWithCompetencies(c)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	result, err := GetCategoriesWithCompetencies(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

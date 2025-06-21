@@ -9,12 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/niclasheun/prompt2.0/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution"
-	"github.com/niclasheun/prompt2.0/coursePhase/resolution/resolutionDTO"
-	db "github.com/niclasheun/prompt2.0/db/sqlc"
-	"github.com/niclasheun/prompt2.0/student/studentDTO"
-	"github.com/niclasheun/prompt2.0/utils"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution/resolutionDTO"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
+	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -78,23 +78,47 @@ func GetAllParticipationsForCoursePhase(ctx context.Context, coursePhaseID uuid.
 	}, nil
 }
 
-func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {
-	coursePhaseParticipation, err := CoursePhaseParticipationServiceSingleton.queries.GetCoursePhaseParticipation(ctx, db.GetCoursePhaseParticipationParams{
-		CoursePhaseID:         coursePhaseID,
-		CourseParticipationID: courseParticipationID,
-	})
+func GetCoursePhaseParticipation(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution, error) {
+	coursePhaseParticipations, err := CoursePhaseParticipationServiceSingleton.queries.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious(ctx, coursePhaseID)
 	if err != nil {
 		log.Error(err)
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to get course phase participation")
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
 	}
 
-	participationDTO, err := coursePhaseParticipationDTO.GetCoursePhaseParticipationDTOFromDBModel(coursePhaseParticipation)
+	found := false
+	coursePhaseParticipation := db.GetAllCoursePhaseParticipationsForCoursePhaseIncludingPreviousRow{}
+	for _, participation := range coursePhaseParticipations {
+		if participation.CourseParticipationID == courseParticipationID {
+			coursePhaseParticipation = participation
+			found = true
+			break
+		}
+	}
+	if !found {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, errors.New("course phase participation not found")
+	}
+
+	participationDTO, err := coursePhaseParticipationDTO.GetAllCPPsForCoursePhaseDTOFromDBModel(coursePhaseParticipation)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
+	}
+
+	resolutions, err := CoursePhaseParticipationServiceSingleton.queries.GetResolutionsForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, err
+	}
+
+	resolutionDTOs := resolutionDTO.GetParticipationResolutionsDTOFromDBModels(resolutions)
+	resolutionDTOs, err = resolution.ReplaceResolutionURLs(ctx, resolutionDTOs)
 	if err != nil {
 		log.Error(err)
-		return coursePhaseParticipationDTO.GetCoursePhaseParticipation{}, errors.New("failed to create DTO from DB model")
+		return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{}, errors.New("failed to replace resolution URLs")
 	}
 
-	return participationDTO, nil
+	return coursePhaseParticipationDTO.CoursePhaseParticipationWithResolution{
+		Participation: participationDTO,
+		Resolutions:   resolutionDTOs,
+	}, nil
 }
 
 func CreateOrUpdateCoursePhaseParticipation(ctx context.Context, transactionQueries *db.Queries, newCoursePhaseParticipation coursePhaseParticipationDTO.CreateCoursePhaseParticipation) (coursePhaseParticipationDTO.GetCoursePhaseParticipation, error) {

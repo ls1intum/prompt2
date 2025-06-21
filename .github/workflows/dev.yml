@@ -8,8 +8,12 @@ jobs:
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml
     secrets: inherit
-  build-servers:
+  test-servers:
     needs: lint-servers
+    uses: ./.github/workflows/test-servers.yml
+    secrets: inherit
+  build-servers:
+    needs: test-servers
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   lint-clients:
@@ -30,7 +34,6 @@ jobs:
       interview_image_tag: ${{ needs.build-clients.outputs.interview_image_tag }}
       matching_image_tag: ${{ needs.build-clients.outputs.matching_image_tag }}
       intro_course_developer_image_tag: ${{ needs.build-clients.outputs.intro_course_developer_image_tag }}
-      intro_course_tutor_image_tag: ${{ needs.build-clients.outputs.intro_course_tutor_image_tag }}
       assessment_image_tag: ${{ needs.build-clients.outputs.assessment_image_tag }}
       team_allocation_image_tag: ${{ needs.build-clients.outputs.team_allocation_image_tag }}
       self_team_allocation_image_tag: ${{ needs.build-clients.outputs.self_team_allocation_image_tag }}

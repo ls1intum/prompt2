@@ -1,14 +1,19 @@
 import { Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ManagementPageHeader } from '@/components/ManagementPageHeader'
+import {
+  ErrorPage,
+  ManagementPageHeader,
+  useCustomElementWidth,
+} from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
-import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
+import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-import { ErrorPage } from '@/components/ErrorPage'
-import StudentScoreBadge from '../components/StudentScoreBadge'
-import { useCustomElementWidth } from '@/hooks/useCustomElementWidth'
+import { StudentScoreBadge } from '../components/StudentScoreBadge'
 import { useMemo } from 'react'
+
+import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
+import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
@@ -66,6 +71,10 @@ export const AssessmentOverviewPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
+        <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
+        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+      </div>
       <div style={{ width: `${tableWidth}px` }}>
         <CoursePhaseParticipationsTablePage
           participants={participations ?? []}

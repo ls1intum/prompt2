@@ -1,27 +1,26 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+  Input,
+  Textarea,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { useState } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { Competency, UpdateCompetencyRequest } from '../../../interfaces/competency'
 import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
@@ -32,11 +31,13 @@ const updateCompetencySchema = z.object({
   id: z.string(),
   categoryID: z.string(),
   name: z.string().min(1, 'Name is required'),
+  shortName: z.string().min(1, 'Short name is required'),
   description: z.string().min(1, 'Description is required'),
-  novice: z.string().min(1, 'Novice level description is required'),
-  intermediate: z.string().min(1, 'Intermediate level description is required'),
-  advanced: z.string().min(1, 'Advanced level description is required'),
-  expert: z.string().min(1, 'Expert level description is required'),
+  descriptionVeryBad: z.string().min(1, 'Very bad level description is required'),
+  descriptionBad: z.string().min(1, 'Bad level description is required'),
+  descriptionOk: z.string().min(1, 'OK level description is required'),
+  descriptionGood: z.string().min(1, 'Good level description is required'),
+  descriptionVeryGood: z.string().min(1, 'Very good level description is required'),
   weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
 })
 
@@ -59,11 +60,13 @@ export function EditCompetencyDialog({
       id: competency?.id,
       categoryID: competency?.categoryID,
       name: competency?.name,
+      shortName: competency?.shortName,
       description: competency?.description,
-      novice: competency?.novice,
-      intermediate: competency?.intermediate,
-      advanced: competency?.advanced,
-      expert: competency?.expert,
+      descriptionVeryBad: competency?.descriptionVeryBad,
+      descriptionBad: competency?.descriptionBad,
+      descriptionOk: competency?.descriptionOk,
+      descriptionGood: competency?.descriptionGood,
+      descriptionVeryGood: competency?.descriptionVeryGood,
       weight: competency?.weight,
     },
     resolver: zodResolver(updateCompetencySchema),
@@ -75,11 +78,13 @@ export function EditCompetencyDialog({
         id: competency.id,
         categoryID: competency.categoryID,
         name: competency.name,
+        shortName: competency.shortName,
         description: competency.description,
-        novice: competency.novice,
-        intermediate: competency.intermediate,
-        advanced: competency.advanced,
-        expert: competency.expert,
+        descriptionVeryBad: competency.descriptionVeryBad,
+        descriptionBad: competency.descriptionBad,
+        descriptionOk: competency.descriptionOk,
+        descriptionGood: competency.descriptionGood,
+        descriptionVeryGood: competency.descriptionVeryGood,
         weight: competency.weight,
       })
     }
@@ -120,6 +125,21 @@ export function EditCompetencyDialog({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='shortName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Short Competency Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Enter short competency name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='description'
@@ -141,13 +161,13 @@ export function EditCompetencyDialog({
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
-                name='novice'
+                name='descriptionVeryBad'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Novice Level</FormLabel>
+                    <FormLabel>Very Bad Level</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder='Describe novice level'
+                        placeholder='Describe very bad level'
                         className='resize-none min-h-[80px]'
                         {...field}
                       />
@@ -158,13 +178,13 @@ export function EditCompetencyDialog({
               />
               <FormField
                 control={form.control}
-                name='intermediate'
+                name='descriptionBad'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Intermediate Level</FormLabel>
+                    <FormLabel>Bad Level</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder='Describe intermediate level'
+                        placeholder='Describe bad level'
                         className='resize-none min-h-[80px]'
                         {...field}
                       />
@@ -175,13 +195,13 @@ export function EditCompetencyDialog({
               />
               <FormField
                 control={form.control}
-                name='advanced'
+                name='descriptionOk'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Advanced Level</FormLabel>
+                    <FormLabel>OK Level</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder='Describe advanced level'
+                        placeholder='Describe OK level'
                         className='resize-none min-h-[80px]'
                         {...field}
                       />
@@ -192,13 +212,30 @@ export function EditCompetencyDialog({
               />
               <FormField
                 control={form.control}
-                name='expert'
+                name='descriptionGood'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expert Level</FormLabel>
+                    <FormLabel>Good Level</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder='Describe expert level'
+                        placeholder='Describe good level'
+                        className='resize-none min-h-[80px]'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='descriptionVeryGood'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Very Good Level</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Describe very good level'
                         className='resize-none min-h-[80px]'
                         {...field}
                       />

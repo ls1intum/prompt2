@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/remainingAssessments"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,8 +35,51 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 	return exists, nil
 }
 
+func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (db.CountRemainingAssessmentsForStudentRow, error) {
+	remainingAssessments, err := AssessmentCompletionServiceSingleton.queries.CountRemainingAssessmentsForStudent(ctx, db.CountRemainingAssessmentsForStudentParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not count remaining assessments: ", err)
+		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
+	}
+	return remainingAssessments, nil
+}
+
+func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentCompletionServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.CreateOrUpdateAssessmentCompletion(ctx, db.CreateOrUpdateAssessmentCompletionParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         req.CoursePhaseID,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Author:                req.Author,
+		Comment:               req.Comment,
+		GradeSuggestion:       assessmentCompletionDTO.MapFloat64ToNumeric(req.GradeSuggestion),
+		Completed:             req.Completed,
+	})
+	if err != nil {
+		log.Error("could not create or update assessment completion: ", err)
+		return errors.New("could not create or update assessment completion")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit assessment completion: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
-	remaining, err := remainingAssessments.CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
+	remaining, err := CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		log.Error("could not count remaining assessments: ", err)
 		return errors.New("could not count remaining assessments")
@@ -44,6 +87,17 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 	if remaining.RemainingAssessments > 0 {
 		log.Error("cannot mark assessment as completed, remaining assessments exist")
 		return errors.New("cannot mark assessment as completed, remaining assessments exist")
+	}
+
+	// Check if there are at least 3 action items for this student in this course phase
+	actionItemCount, err := actionItem.CountActionItemsForStudentInPhase(ctx, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		log.Error("could not count action items for student in phase: ", err)
+		return errors.New("could not count action items for student in phase")
+	}
+	if actionItemCount < 3 {
+		log.Error("cannot mark assessment as completed, at least 3 action items are required")
+		return errors.New("cannot mark assessment as completed, at least 3 action items are required")
 	}
 
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
@@ -75,6 +129,18 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
 	err := AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not unmark assessment as finished: ", err)
+		return errors.New("could not unmark assessment as finished")
+	}
+	return nil
+}
+
+func DeleteAssessmentCompletion(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
+	err := AssessmentCompletionServiceSingleton.queries.DeleteAssessmentCompletion(ctx, db.DeleteAssessmentCompletionParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})

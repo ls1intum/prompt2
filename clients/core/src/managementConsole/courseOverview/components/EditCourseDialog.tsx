@@ -1,42 +1,38 @@
-import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog'
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { DatePickerWithRange } from '@/components/DateRangePicker'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import {
+  DatePickerWithRange,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+  Input,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import {
   CourseType,
   CourseTypeDetails,
   UpdateCourseData,
   useCourseStore,
 } from '@tumaet/prompt-shared-state'
-import { useParams } from 'react-router-dom'
-import { Input } from '@/components/ui/input'
-import { useEffect } from 'react'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
-import { useToast } from '@/hooks/use-toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
 
 interface CourseEditDialogProps {

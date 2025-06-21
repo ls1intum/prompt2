@@ -6,7 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+} from '@tumaet/prompt-ui-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 
@@ -89,7 +89,9 @@ export const Breadcrumbs: React.FC = () => {
               {index === breadcrumbList.length - 1 ? (
                 <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink onClick={() => navigate(crumb.path)}>{crumb.title}</BreadcrumbLink>
+                <BreadcrumbLink style={{ cursor: 'pointer' }} onClick={() => navigate(crumb.path)}>
+                  {crumb.title}
+                </BreadcrumbLink>
               )}
             </BreadcrumbItem>
           </React.Fragment>
