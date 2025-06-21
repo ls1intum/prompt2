@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, ClipboardCheck, LockIcon, Trash2, RotateCcw } from 'lucide-react'
+import { AlertCircle, ClipboardCheck, LockIcon, RotateCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,12 +11,6 @@ import {
   FormItem,
   FormMessage,
   cn,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Button,
   Tooltip,
   TooltipContent,
@@ -34,6 +28,7 @@ import { ScoreLevel } from '../../../../interfaces/scoreLevel'
 import { useUpdateAssessment } from './hooks/useUpdateAssessment'
 import { useCreateAssessment } from './hooks/useCreateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
+import { DeleteAssessmentDialog } from './components/DeleteAssessmentDialog'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -259,29 +254,12 @@ export const AssessmentForm = ({
 
         {assessment && (
           <div className='col-span-full'>
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Delete Assessment</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete this assessment? This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant='outline'
-                    onClick={() => setDeleteDialogOpen(false)}
-                    className='mr-2'
-                  >
-                    Cancel
-                  </Button>
-                  <Button variant='destructive' onClick={handleDelete}>
-                    <Trash2 className='w-4 h-4 mr-2' />
-                    Delete Assessment
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <DeleteAssessmentDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+              onConfirm={handleDelete}
+              isDeleting={deleteAssessment.isPending}
+            />
           </div>
         )}
       </div>
