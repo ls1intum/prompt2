@@ -40,7 +40,7 @@ export const SettingsPage = (): JSX.Element => {
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
-        <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:col-span-4mb-4'>
+        <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:col-span-4 mb-4'>
           <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
           <CategoryDiagram categories={categories} assessments={assessments} />
         </div>
