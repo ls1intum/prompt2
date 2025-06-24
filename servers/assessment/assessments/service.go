@@ -104,7 +104,7 @@ func GetAssessment(ctx context.Context, id uuid.UUID) (db.Assessment, error) {
 	return assessment, nil
 }
 
-func GetStudentAssessment(ctx context.Context, authHeader string, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
+func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
 	assessments, err := ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
 		log.Error("could not get assessments for student in phase: ", err)
