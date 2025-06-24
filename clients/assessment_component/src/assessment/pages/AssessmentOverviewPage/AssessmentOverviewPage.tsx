@@ -1,14 +1,12 @@
 import { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-import { ManagementPageHeader, useCustomElementWidth } from '@tumaet/prompt-ui-components'
-import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
 
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
-import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
@@ -36,6 +34,15 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           return match ? <StudentScoreBadge scoreLevel={match.scoreLevel} /> : ''
         },
         enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const scoreA = scoreLevels.find(
+            (s) => s.courseParticipationID === rowA.original.courseParticipationID,
+          )?.scoreLevel
+          const scoreB = scoreLevels.find(
+            (s) => s.courseParticipationID === rowB.original.courseParticipationID,
+          )?.scoreLevel
+          return (scoreA ?? '').localeCompare(scoreB ?? '')
+        },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
           value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
