@@ -45,7 +45,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
             scoreLevels.find((s) => s.courseParticipationID === rowB.original.courseParticipationID)
               ?.scoreLevel ?? ScoreLevel.VeryBad,
           )
-          return scoreA && scoreB ? scoreA - scoreB : 0
+          return scoreA - scoreB
         },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
