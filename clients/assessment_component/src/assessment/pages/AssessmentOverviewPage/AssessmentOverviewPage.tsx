@@ -10,6 +10,8 @@ import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhasePar
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
+import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
+
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
@@ -35,13 +37,15 @@ export const AssessmentOverviewPage = (): JSX.Element => {
         },
         enableSorting: true,
         sortingFn: (rowA, rowB) => {
-          const scoreA = scoreLevels.find(
-            (s) => s.courseParticipationID === rowA.original.courseParticipationID,
-          )?.scoreLevel
-          const scoreB = scoreLevels.find(
-            (s) => s.courseParticipationID === rowB.original.courseParticipationID,
-          )?.scoreLevel
-          return (scoreA ?? '').localeCompare(scoreB ?? '')
+          const scoreA = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowA.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
+          )
+          const scoreB = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowB.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
+          )
+          return scoreA && scoreB ? scoreA - scoreB : 0
         },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
