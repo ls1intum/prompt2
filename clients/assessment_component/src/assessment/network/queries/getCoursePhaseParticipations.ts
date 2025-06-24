@@ -1,11 +1,11 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { AssessmentParticipationWithStudent } from '../../interfaces/assessmentParticipationWithStudent'
 
 export const getCoursePhaseParticipations = async (
   coursePhaseID: string,
-): Promise<CoursePhaseParticipationWithStudent[]> => {
-  const response = await assessmentAxiosInstance.get<CoursePhaseParticipationWithStudent[]>(
+): Promise<AssessmentParticipationWithStudent[]> => {
+  const response = await assessmentAxiosInstance.get<AssessmentParticipationWithStudent[]>(
     `assessment/api/course_phase/${coursePhaseID}/config/participations`,
     {
       headers: {

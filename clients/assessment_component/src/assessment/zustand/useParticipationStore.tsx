@@ -1,9 +1,10 @@
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { create } from 'zustand'
 
+import { AssessmentParticipationWithStudent } from '../interfaces/assessmentParticipationWithStudent'
+
 export interface ParticipationStore {
-  participations: CoursePhaseParticipationWithStudent[]
-  setParticipations: (participations: CoursePhaseParticipationWithStudent[]) => void
+  participations: AssessmentParticipationWithStudent[]
+  setParticipations: (participations: AssessmentParticipationWithStudent[]) => void
 }
 
 export const useParticipationStore = create<ParticipationStore>((set) => ({
