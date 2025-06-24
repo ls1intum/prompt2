@@ -2,10 +2,13 @@ import { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { ManagementPageHeader, useCustomElementWidth } from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
 
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
@@ -15,16 +18,31 @@ import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentSc
 export const AssessmentOverviewPage = (): JSX.Element => {
   const navigate = useNavigate()
   const path = useLocation().pathname
-  const tableWidth = useCustomElementWidth('table-view')
 
   const { participations } = useParticipationStore()
   const { scoreLevels } = useScoreLevelStore()
 
-  const extraData = useMemo(() => {
-    return scoreLevels?.map((scoreLevelWithParticipation) => ({
-      courseParticipationID: scoreLevelWithParticipation.courseParticipationID,
-      value: <StudentScoreBadge scoreLevel={scoreLevelWithParticipation.scoreLevel} />,
-    }))
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+    if (!scoreLevels) return []
+
+    return [
+      {
+        id: 'scoreLevel',
+        header: 'Score Level',
+        accessorFn: (row) => {
+          const match = scoreLevels.find(
+            (s) => s.courseParticipationID === row.courseParticipationID,
+          )
+          return match ? <StudentScoreBadge scoreLevel={match.scoreLevel} /> : ''
+        },
+        enableSorting: true,
+        extraData: scoreLevels.map((s) => ({
+          courseParticipationID: s.courseParticipationID,
+          value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
+          stringValue: s.scoreLevel,
+        })),
+      },
+    ]
   }, [scoreLevels])
 
   return (
@@ -37,14 +55,13 @@ export const AssessmentOverviewPage = (): JSX.Element => {
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
-      <div style={{ width: `${tableWidth}px` }}>
+      <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={participations ?? []}
           prevDataKeys={[]}
-          extraData={extraData}
-          extraColumnHeader='ScoreLevel'
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
+          extraColumns={extraColumns}
           onClickRowAction={(student) =>
             navigate(`${path}/student-assessment/${student.courseParticipationID}`)
           }

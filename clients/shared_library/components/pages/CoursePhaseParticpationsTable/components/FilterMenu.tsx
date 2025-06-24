@@ -1,7 +1,7 @@
 import {
   Button,
   DropdownMenu,
-  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -10,7 +10,7 @@ import {
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { getStatusBadge } from '@/utils/getStatusBadge'
 import { ColumnFiltersState } from '@tanstack/react-table'
-import { Filter } from 'lucide-react'
+import { Filter, Check } from 'lucide-react'
 
 interface ColumnFiltersProps {
   columnFilters: ColumnFiltersState
@@ -54,16 +54,17 @@ export const FilterMenu = ({
   ) => {
     return Object.values(items).map((value) => {
       return (
-        <DropdownMenuCheckboxItem
+        <DropdownMenuItem
           key={value}
-          checked={isSelected(id, value)}
           onClick={(e) => {
             e.preventDefault()
             handleFilterChange(id, value)
           }}
+          className='flex items-center justify-between w-full px-3 py-1.5 cursor-pointer'
         >
-          {getDisplay(value)}
-        </DropdownMenuCheckboxItem>
+          <span className='text-sm'>{getDisplay(value)}</span>
+          {isSelected(id, value) && <Check className='h-4 w-4 text-primary' />}
+        </DropdownMenuItem>
       )
     })
   }

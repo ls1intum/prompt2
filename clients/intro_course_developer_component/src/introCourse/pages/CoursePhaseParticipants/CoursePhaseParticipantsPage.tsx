@@ -32,7 +32,7 @@ export const CoursePhaseParticipantsPage = (): JSX.Element => {
           <ManagementPageHeader>Course Phase Participants</ManagementPageHeader>
           <CoursePhaseParticipationsTablePage
             participants={coursePhaseParticipations?.participations ?? []}
-            prevDataKeys={['score']}
+            prevDataKeys={[]}
             restrictedDataKeys={[]}
             studentReadableDataKeys={[]}
           />

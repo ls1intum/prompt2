@@ -1,8 +1,4 @@
-import {
-  ManagementPageHeader,
-  ErrorPage,
-  useCustomElementWidth,
-} from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
@@ -12,10 +8,9 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 import { Team } from '../../interfaces/team'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableData } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableData'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
 export const AllocationParticipants = (): JSX.Element => {
-  const tableWidth = useCustomElementWidth('table-view')
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -38,17 +33,35 @@ export const AllocationParticipants = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraData: ExtraParticipationTableData[] | undefined = useMemo(() => {
-    if (!teams) return undefined
-    return teams
-      .map((team) =>
-        team.members.map((member) => ({
-          courseParticipationID: member.courseParticipationID,
-          value: team.name,
-          stringValue: team.name,
-        })),
-      )
-      .flat()
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+    if (!teams) return []
+
+    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
+    const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
+
+    const teamNameExtraData = teams.flatMap(({ id, members }) => {
+      const teamName = teamNameById.get(id) ?? 'No Team'
+
+      return members.map((member) => ({
+        courseParticipationID: member.courseParticipationID,
+        value: teamName,
+        stringValue: teamName,
+      }))
+    })
+
+    return [
+      {
+        id: 'allocatedTeam',
+        header: 'Allocated Team',
+        extraData: teamNameExtraData,
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.getValue('allocatedTeam') as string
+          const b = rowB.getValue('allocatedTeam') as string
+          return a.localeCompare(b)
+        },
+      },
+    ]
   }, [teams])
 
   const refetch = () => {
@@ -74,14 +87,13 @@ export const AllocationParticipants = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         This table shows all participants and their allocated teams.
       </p>
-      <div style={{ width: `${tableWidth}px` }}>
+      <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}
-          extraColumnHeader='Allocated Team'
-          extraData={extraData}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
+          extraColumns={extraColumns}
         />
       </div>
     </div>

@@ -1,8 +1,4 @@
-import {
-  ErrorPage,
-  ManagementPageHeader,
-  useCustomElementWidth,
-} from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
@@ -12,12 +8,11 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 import { Team } from '../../interfaces/team'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableData } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableData'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
 
 export const ParticipantsPage = (): JSX.Element => {
-  const tableWidth = useCustomElementWidth('table-view')
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -50,15 +45,13 @@ export const ParticipantsPage = (): JSX.Element => {
     queryFn: () => getTeamAllocations(phaseId ?? ''),
   })
 
-  const extraData: ExtraParticipationTableData[] | undefined = useMemo<
-    ExtraParticipationTableData[]
-  >(() => {
+  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
     // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
-    return teamAllocations.flatMap(({ projectId, students }) => {
+    const teamNameExtraData = teamAllocations.flatMap(({ projectId, students }) => {
       const teamName = teamNameById.get(projectId) ?? 'No Team'
 
       return students.map((courseParticipationID) => ({
@@ -67,6 +60,20 @@ export const ParticipantsPage = (): JSX.Element => {
         stringValue: teamName,
       }))
     })
+
+    return [
+      {
+        id: 'allocatedTeam',
+        header: 'Allocated Team',
+        extraData: teamNameExtraData,
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.getValue('allocatedTeam') as string
+          const b = rowB.getValue('allocatedTeam') as string
+          return a.localeCompare(b)
+        },
+      },
+    ]
   }, [teams, teamAllocations])
 
   const refetch = () => {
@@ -93,14 +100,13 @@ export const ParticipantsPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         This table shows all participants and their allocated teams.
       </p>
-      <div style={{ width: `${tableWidth}px` }}>
+      <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={coursePhaseParticipations.participations ?? []}
           prevDataKeys={[]}
-          extraColumnHeader='Allocated Team'
-          extraData={extraData}
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
+          extraColumns={extraColumns}
         />
       </div>
     </div>
