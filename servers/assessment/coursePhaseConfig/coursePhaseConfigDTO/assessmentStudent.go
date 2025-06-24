@@ -18,10 +18,9 @@ func GetAssessmentStudentsFromParticipations(participations []promptTypes.Course
 		var teamID *uuid.UUID
 		if ok {
 			parsedTeamID, err := uuid.Parse(teamIDStr)
-			if err != nil {
-				teamID = nil // If parsing fails, set teamID to nil
+			if err == nil {
+				teamID = &parsedTeamID
 			}
-			teamID = &parsedTeamID
 		}
 
 		assessmentStudents[i] = AssessmentParticipationWithStudent{
