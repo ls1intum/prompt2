@@ -109,11 +109,13 @@ export const AssessmentOverviewPage = (): JSX.Element => {
 
           return gradeSuggestionA - gradeSuggestionB
         },
-        extraData: assessmentCompletions.map((s) => ({
-          courseParticipationID: s.courseParticipationID,
-          value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
-          stringValue: s.gradeSuggestion.toFixed(1),
-        })),
+        extraData: assessmentCompletions
+          .filter((s) => s.completed)
+          .map((s) => ({
+            courseParticipationID: s.courseParticipationID,
+            value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
+            stringValue: s.gradeSuggestion.toFixed(1),
+          })),
       })
     }
 
