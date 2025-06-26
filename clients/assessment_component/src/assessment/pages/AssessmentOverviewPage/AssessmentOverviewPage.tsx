@@ -57,110 +57,108 @@ export const AssessmentOverviewPage = (): JSX.Element => {
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
 
-    const tmpExtraColumns = [] as ExtraParticipationTableColumn[]
-
-    tmpExtraColumns.push({
-      id: 'scoreLevel',
-      header: 'Score Level',
-      accessorFn: (row) => {
-        const match = scoreLevels.find((s) => s.courseParticipationID === row.courseParticipationID)
-        return match ? <StudentScoreBadge scoreLevel={match.scoreLevel} /> : ''
-      },
-      enableSorting: true,
-      sortingFn: (rowA, rowB) => {
-        const scoreA = mapScoreLevelToNumber(
-          scoreLevels.find((s) => s.courseParticipationID === rowA.original.courseParticipationID)
-            ?.scoreLevel ?? ScoreLevel.VeryBad,
-        )
-        const scoreB = mapScoreLevelToNumber(
-          scoreLevels.find((s) => s.courseParticipationID === rowB.original.courseParticipationID)
-            ?.scoreLevel ?? ScoreLevel.VeryBad,
-        )
-        return scoreA - scoreB
-      },
-      extraData: scoreLevels.map((s) => ({
-        courseParticipationID: s.courseParticipationID,
-        value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
-        stringValue: s.scoreLevel,
-      })),
-    })
-
-    if (assessmentCompletions) {
-      tmpExtraColumns.push({
-        id: 'gradeSuggestion',
-        header: 'Grade Suggestion',
+    return [
+      {
+        id: 'scoreLevel',
+        header: 'Score Level',
         accessorFn: (row) => {
-          const match = assessmentCompletions.find(
-            (a) => a.courseParticipationID === row.courseParticipationID,
+          const match = scoreLevels.find(
+            (s) => s.courseParticipationID === row.courseParticipationID,
           )
-          return match ? match.gradeSuggestion.toFixed(1) : ''
+          return match ? <StudentScoreBadge scoreLevel={match.scoreLevel} /> : ''
         },
         enableSorting: true,
         sortingFn: (rowA, rowB) => {
-          const gradeSuggestionA =
-            assessmentCompletions.find(
-              (s) => s.courseParticipationID === rowA.original.courseParticipationID,
-            )?.gradeSuggestion ?? 6
-
-          const gradeSuggestionB =
-            assessmentCompletions.find(
-              (s) => s.courseParticipationID === rowB.original.courseParticipationID,
-            )?.gradeSuggestion ?? 6
-
-          return gradeSuggestionA - gradeSuggestionB
-        },
-        extraData: assessmentCompletions
-          .filter((s) => s.completed)
-          .map((s) => ({
-            courseParticipationID: s.courseParticipationID,
-            value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
-            stringValue: s.gradeSuggestion.toFixed(1),
-          })),
-      })
-    }
-
-    if (teamsWithStudents.length > 0) {
-      tmpExtraColumns.push({
-        id: 'team',
-        header: 'Team',
-        accessorFn: (row) => {
-          const team = teamsWithStudents.find((t) =>
-            t.participantIds.includes(row.courseParticipationID),
+          const scoreA = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowA.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
           )
-          return team ? team.name : 'No Team'
-        },
-        enableSorting: true,
-        sortingFn: (rowA, rowB) => {
-          const teamA =
-            teamsWithStudents.find((t) =>
-              t.participantIds.includes(rowA.original.courseParticipationID),
-            )?.name ?? ''
-          const teamB =
-            teamsWithStudents.find((t) =>
-              t.participantIds.includes(rowB.original.courseParticipationID),
-            )?.name ?? ''
-          return teamA.localeCompare(teamB)
-        },
-        extraData: participations.map((p) => {
-          const team = teamsWithStudents.find((t) =>
-            t.participantIds.includes(p.courseParticipationID),
+          const scoreB = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowB.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
           )
-          return {
-            courseParticipationID: p.courseParticipationID,
-            value: team ? team.name : 'No Team',
-            stringValue: team ? team.name : 'No Team',
+          return scoreA - scoreB
+        },
+        extraData: scoreLevels.map((s) => ({
+          courseParticipationID: s.courseParticipationID,
+          value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
+          stringValue: s.scoreLevel,
+        })),
+      },
+      assessmentCompletions
+        ? {
+            id: 'gradeSuggestion',
+            header: 'Grade Suggestion',
+            accessorFn: (row) => {
+              const match = assessmentCompletions.find(
+                (a) => a.courseParticipationID === row.courseParticipationID,
+              )
+              return match ? match.gradeSuggestion.toFixed(1) : ''
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+              const gradeSuggestionA =
+                assessmentCompletions.find(
+                  (s) => s.courseParticipationID === rowA.original.courseParticipationID,
+                )?.gradeSuggestion ?? 6
+
+              const gradeSuggestionB =
+                assessmentCompletions.find(
+                  (s) => s.courseParticipationID === rowB.original.courseParticipationID,
+                )?.gradeSuggestion ?? 6
+
+              return gradeSuggestionA - gradeSuggestionB
+            },
+            extraData: assessmentCompletions
+              .filter((s) => s.completed)
+              .map((s) => ({
+                courseParticipationID: s.courseParticipationID,
+                value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
+                stringValue: s.gradeSuggestion.toFixed(1),
+              })),
           }
-        }),
-        filterFn: (row, filterValue) => {
-          const team = teamsWithStudents.find((t) =>
-            t.participantIds.includes(row.original.courseParticipationID),
-          )
-          return team ? team.name.toLowerCase().includes(filterValue.toLowerCase()) : false
-        },
-      })
-    }
-
-    return tmpExtraColumns
+        : undefined,
+      teamsWithStudents.length > 0
+        ? {
+            id: 'team',
+            header: 'Team',
+            accessorFn: (row) => {
+              const team = teamsWithStudents.find((t) =>
+                t.participantIds.includes(row.courseParticipationID),
+              )
+              return team ? team.name : 'No Team'
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+              const teamA =
+                teamsWithStudents.find((t) =>
+                  t.participantIds.includes(rowA.original.courseParticipationID),
+                )?.name ?? ''
+              const teamB =
+                teamsWithStudents.find((t) =>
+                  t.participantIds.includes(rowB.original.courseParticipationID),
+                )?.name ?? ''
+              return teamA.localeCompare(teamB)
+            },
+            extraData: participations.map((p) => {
+              const team = teamsWithStudents.find((t) =>
+                t.participantIds.includes(p.courseParticipationID),
+              )
+              return {
+                courseParticipationID: p.courseParticipationID,
+                value: team ? team.name : 'No Team',
+                stringValue: team ? team.name : 'No Team',
+              }
+            }),
+            filterFn: (row, filterValue) => {
+              const team = teamsWithStudents.find((t) =>
+                t.participantIds.includes(row.original.courseParticipationID),
+              )
+              return team ? team.name.toLowerCase().includes(filterValue.toLowerCase()) : false
+            },
+          }
+        : undefined,
+    ].filter((column) => column !== undefined)
   }, [participations, teamsWithStudents, scoreLevels, assessmentCompletions])
 
   if (isError) {
