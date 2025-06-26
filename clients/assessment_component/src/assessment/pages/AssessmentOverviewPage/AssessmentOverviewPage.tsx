@@ -54,6 +54,10 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     }))
   }, [teams, participations])
 
+  const completedGradings = useMemo(() => {
+    return assessmentCompletions?.filter((a) => a.completed) ?? []
+  }, [assessmentCompletions])
+
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
 
@@ -90,7 +94,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
             id: 'gradeSuggestion',
             header: 'Grade Suggestion',
             accessorFn: (row) => {
-              const match = assessmentCompletions.find(
+              const match = completedGradings.find(
                 (a) => a.courseParticipationID === row.courseParticipationID,
               )
               return match ? match.gradeSuggestion.toFixed(1) : ''
@@ -98,24 +102,22 @@ export const AssessmentOverviewPage = (): JSX.Element => {
             enableSorting: true,
             sortingFn: (rowA, rowB) => {
               const gradeSuggestionA =
-                assessmentCompletions.find(
+                completedGradings.find(
                   (s) => s.courseParticipationID === rowA.original.courseParticipationID,
                 )?.gradeSuggestion ?? 6
 
               const gradeSuggestionB =
-                assessmentCompletions.find(
+                completedGradings.find(
                   (s) => s.courseParticipationID === rowB.original.courseParticipationID,
                 )?.gradeSuggestion ?? 6
 
               return gradeSuggestionA - gradeSuggestionB
             },
-            extraData: assessmentCompletions
-              .filter((s) => s.completed)
-              .map((s) => ({
-                courseParticipationID: s.courseParticipationID,
-                value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
-                stringValue: s.gradeSuggestion.toFixed(1),
-              })),
+            extraData: completedGradings.map((s) => ({
+              courseParticipationID: s.courseParticipationID,
+              value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
+              stringValue: s.gradeSuggestion.toFixed(1),
+            })),
           }
         : undefined,
       teamsWithStudents.length > 0
@@ -159,7 +161,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           }
         : undefined,
     ].filter((column) => column !== undefined)
-  }, [participations, teamsWithStudents, scoreLevels, assessmentCompletions])
+  }, [participations, teamsWithStudents, scoreLevels, assessmentCompletions, completedGradings])
 
   if (isError) {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
