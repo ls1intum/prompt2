@@ -1,28 +1,49 @@
 import { useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 
-import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
+import { GradeSuggestionBadge } from '../components/GradeSuggestionBadge'
 
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
+import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+
 import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
+import { AssessmentCompletion } from '../../interfaces/assessment'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
 export const AssessmentOverviewPage = (): JSX.Element => {
+  const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
 
   const { participations } = useParticipationStore()
   const { scoreLevels } = useScoreLevelStore()
   const { teams } = useTeamStore()
+
+  const {
+    data: assessmentCompletions,
+    isPending: isAssessmentCompletionsPending,
+    isError: isAssessmentCompletionsError,
+    refetch: refetchAssessmentCompletions,
+  } = useQuery<AssessmentCompletion[]>({
+    queryKey: ['assessmentCompletions', phaseId],
+    queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
+  })
+
+  const isError = isAssessmentCompletionsError
+  const isPending = isAssessmentCompletionsPending
+  const refetch = refetchAssessmentCompletions
 
   const teamsWithStudents = useMemo(() => {
     return teams.map((team) => ({
@@ -63,6 +84,38 @@ export const AssessmentOverviewPage = (): JSX.Element => {
         stringValue: s.scoreLevel,
       })),
     })
+
+    if (assessmentCompletions) {
+      tmpExtraColumns.push({
+        id: 'gradeSuggestion',
+        header: 'Grade Suggestion',
+        accessorFn: (row) => {
+          const match = assessmentCompletions.find(
+            (a) => a.courseParticipationID === row.courseParticipationID,
+          )
+          return match ? match.gradeSuggestion.toFixed(1) : ''
+        },
+        enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const gradeSuggestionA =
+            assessmentCompletions.find(
+              (s) => s.courseParticipationID === rowA.original.courseParticipationID,
+            )?.gradeSuggestion ?? 6
+
+          const gradeSuggestionB =
+            assessmentCompletions.find(
+              (s) => s.courseParticipationID === rowB.original.courseParticipationID,
+            )?.gradeSuggestion ?? 6
+
+          return gradeSuggestionA - gradeSuggestionB
+        },
+        extraData: assessmentCompletions.map((s) => ({
+          courseParticipationID: s.courseParticipationID,
+          value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
+          stringValue: s.gradeSuggestion.toFixed(1),
+        })),
+      })
+    }
 
     if (teamsWithStudents.length > 0) {
       tmpExtraColumns.push({
@@ -106,7 +159,18 @@ export const AssessmentOverviewPage = (): JSX.Element => {
     }
 
     return tmpExtraColumns
-  }, [participations, teamsWithStudents, scoreLevels])
+  }, [participations, teamsWithStudents, scoreLevels, assessmentCompletions])
+
+  if (isError) {
+    return <ErrorPage message='Error loading assessments' onRetry={refetch} />
+  }
+  if (isPending) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
+  }
 
   return (
     <div id='table-view' className='relative flex flex-col'>

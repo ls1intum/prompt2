@@ -6,9 +6,13 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
   gradeSuggestion: number | null
+  text?: boolean
 }
 
-export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ gradeSuggestion }) => {
+export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({
+  gradeSuggestion,
+  text = true,
+}) => {
   if (gradeSuggestion === null) {
     return null
   }
@@ -28,7 +32,7 @@ export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ grad
 
   return (
     <Badge className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}>
-      Grade Suggestion: {gradeSuggestion.toFixed(1)}
+      {text ? 'Grade Suggestion:' : ''} {gradeSuggestion.toFixed(1)}
     </Badge>
   )
 }
