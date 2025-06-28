@@ -149,7 +149,18 @@ export const CoursePhaseParticipationsTablePage = ({
             <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
-            <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+            <FilterMenu
+              columnFilters={columnFilters}
+              setColumnFilters={setColumnFilters}
+              extraFilters={extraColumns?.map((col) => ({
+                id: col.id,
+                label: col.header,
+                options: Array.from(
+                  new Set(col.extraData.map((d) => String(d.value ?? ''))),
+                ).filter((v) => v !== ''),
+                getDisplay: (v) => v,
+              }))}
+            />
             <GroupActionsMenu
               disabled={table.getSelectedRowModel().rows.length === 0}
               selectedRows={table.getSelectedRowModel()}
