@@ -180,9 +180,9 @@ export const CoursePhaseParticipationsTablePage = ({
       </div>
 
       <div className='rounded-md border'>
-        <ScrollArea className='h-[calc(100vh-280px)] overflow-x-scroll'>
+        <ScrollArea className='h-[calc(100vh-280px)] overflow-x-scroll relative z-0'>
           <Table className='table-auto min-w-full w-full relative'>
-            <TableHeader className='bg-muted/100 sticky top-0 z-10'>
+            <TableHeader className='bg-muted/100'>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
