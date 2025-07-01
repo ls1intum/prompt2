@@ -40,6 +40,7 @@ export const AssessmentProfile = ({
                   {studentAssessment.assessmentCompletion && (
                     <GradeSuggestionBadge
                       gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
+                      text={true}
                     />
                   )}
                   {studentAssessment.assessments.length > 0 && (

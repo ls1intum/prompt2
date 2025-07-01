@@ -11,10 +11,14 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { mapNumberToScoreLevel } from '../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
-  gradeSuggestion?: number
+  gradeSuggestion: number | null
+  text?: boolean
 }
 
-export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ gradeSuggestion }) => {
+export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({
+  gradeSuggestion,
+  text = false,
+}) => {
   if (!gradeSuggestion) {
     return undefined
   }
@@ -29,7 +33,7 @@ export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({ grad
           <Badge
             className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
           >
-            Grade Suggestion: {gradeSuggestion.toFixed(1)}
+            {text ? 'Grade Suggestion:' : ''} {gradeSuggestion.toFixed(1)}
           </Badge>
         </TooltipTrigger>
         <TooltipContent side='top'>

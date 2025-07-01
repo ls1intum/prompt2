@@ -159,7 +159,9 @@ export const CoursePhaseParticipationsTablePage = ({
                   label: col.header,
                   options: Array.from(
                     new Set(col.extraData.map((d) => String(d.stringValue ?? d.value ?? ''))),
-                  ).filter((v) => v !== ''),
+                  )
+                    .filter((v) => v !== '')
+                    .sort((a, b) => a.localeCompare(b)), // Sort options in ascending order
                   getDisplay: (v) => v,
                 }))}
             />
