@@ -17,6 +17,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
@@ -92,6 +93,7 @@ func main() {
 
 	competencies.InitCompetencyModule(api, *query, conn)
 	categories.InitCategoryModule(api, *query, conn)
+	coursePhaseConfig.InitCoursePhaseConfigModule(api, *query, conn)
 	assessmentTemplates.InitAssessmentTemplateModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 	assessmentCompletion.InitAssessmentCompletionModule(api, *query, conn)

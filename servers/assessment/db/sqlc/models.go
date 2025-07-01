@@ -96,11 +96,6 @@ type AssessmentTemplate struct {
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 }
 
-type AssessmentTemplateCoursePhase struct {
-	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
-	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
-}
-
 type Category struct {
 	ID                   uuid.UUID   `json:"id"`
 	Name                 string      `json:"name"`
@@ -133,6 +128,12 @@ type CompletedScoreLevel struct {
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	ScoreLevel            string    `json:"score_level"`
+}
+
+type CoursePhaseConfig struct {
+	AssessmentTemplateID uuid.UUID          `json:"assessment_template_id"`
+	CoursePhaseID        uuid.UUID          `json:"course_phase_id"`
+	Deadline             pgtype.Timestamptz `json:"deadline"`
 }
 
 type WeightedParticipantScore struct {
