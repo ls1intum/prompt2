@@ -14,6 +14,7 @@ import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentSc
 import { AssessmentTemplateSelection } from './components/AssessmentTemplateSelection/AssessmentTemplateSelection'
 import { CategoryList } from './components/CategoryList'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
+import { DeadlineSelection } from './components/DeadlineSelection/DeadlineSelection'
 
 export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -46,7 +47,11 @@ export const SettingsPage = (): JSX.Element => {
         </div>
       )}
 
-      <AssessmentTemplateSelection />
+      <div className='grid xl:grid-cols-3 gap-4'>
+        <AssessmentTemplateSelection />
+        <DeadlineSelection />
+      </div>
+
       <CategoryList />
       <CreateCategoryForm />
     </div>
