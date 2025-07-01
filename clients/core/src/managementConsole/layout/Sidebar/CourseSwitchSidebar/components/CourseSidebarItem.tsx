@@ -44,7 +44,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
       <SidebarMenuButton
         size='lg'
         tooltip={{
-          children: course.name,
+          children: `${course.name} (${course.semesterTag})`,
           hidden: false,
         }}
         onClick={() => {
