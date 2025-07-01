@@ -1,14 +1,13 @@
 import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { saveAs } from 'file-saver'
-import { ExtraParticipationTableData } from '../interfaces/ExtraParticipationTableData'
+import { ExtraParticipationTableColumn } from '../interfaces/ExtraParticipationTableColumn'
 
 export const downloadParticipations = (
   data: CoursePhaseParticipationWithStudent[],
   prevDataKeys: string[],
   restrictedDataKeys: string[],
   studentReadableDataKeys: string[],
-  extraData: ExtraParticipationTableData[] = [],
-  extraColumnHeader: string | undefined,
+  extraColumns: ExtraParticipationTableColumn[] = [],
   filename = 'participation-export.csv',
 ) => {
   if (!data || data.length === 0) {
@@ -16,7 +15,7 @@ export const downloadParticipations = (
     return
   }
 
-  const csvHeaders = [
+  const baseHeaders = [
     'firstName',
     'lastName',
     'email',
@@ -31,40 +30,35 @@ export const downloadParticipations = (
     ...studentReadableDataKeys,
   ]
 
-  if (extraColumnHeader !== undefined) {
-    csvHeaders.push(extraColumnHeader ?? '')
-  }
+  const extraHeaders = extraColumns.map((col) => col.header)
+  const csvHeaders = [...baseHeaders, ...extraHeaders]
+
   const csvRows = data.map((row) => {
-    // Extract student data
     const student = row.student || {}
-    // Create a row with the required headers
+
     return csvHeaders
       .map((header) => {
         if (header in student) {
-          // Fetch data from the `student` object
           return JSON.stringify(student[header] ?? '')
         } else if (header === 'passStatus') {
-          // Fetch data from the main `ApplicationParticipation` object
           return JSON.stringify(row.passStatus ?? '')
         } else if (prevDataKeys.includes(header)) {
-          // Fetch additional scores from the `meta_data` object
           return JSON.stringify(row.prevData[header] ?? '')
         } else if (restrictedDataKeys.includes(header)) {
-          // Fetch additional scores from the `meta_data` object
           return JSON.stringify(row.restrictedData[header] ?? '')
         } else if (studentReadableDataKeys.includes(header)) {
-          // Fetch additional scores from the `meta_data` object
           return JSON.stringify(row.studentReadableData[header] ?? '')
-        } else if (header === extraColumnHeader) {
-          // Fetch additional scores from the `meta_data` object
-          const extraDataItem = extraData.find(
-            (item) => item.courseParticipationID === row.courseParticipationID,
-          )
-          return JSON.stringify(extraDataItem?.stringValue ?? '')
         } else if (header === 'courseParticipationID') {
-          // Fetch data from the main `ApplicationParticipation` object
           return JSON.stringify(row.courseParticipationID ?? '')
         } else {
+          // Attempt to find matching extra column
+          const matchingExtraColumn = extraColumns.find((col) => col.header === header)
+          if (matchingExtraColumn) {
+            const extraDataItem = matchingExtraColumn.extraData.find(
+              (item) => item.courseParticipationID === row.courseParticipationID,
+            )
+            return JSON.stringify(extraDataItem?.stringValue ?? '')
+          }
           return JSON.stringify('')
         }
       })
