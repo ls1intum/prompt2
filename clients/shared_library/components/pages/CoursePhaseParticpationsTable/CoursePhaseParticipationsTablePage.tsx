@@ -152,14 +152,16 @@ export const CoursePhaseParticipationsTablePage = ({
             <FilterMenu
               columnFilters={columnFilters}
               setColumnFilters={setColumnFilters}
-              extraFilters={extraColumns?.map((col) => ({
-                id: col.id,
-                label: col.header,
-                options: Array.from(
-                  new Set(col.extraData.map((d) => String(d.value ?? ''))),
-                ).filter((v) => v !== ''),
-                getDisplay: (v) => v,
-              }))}
+              extraFilters={extraColumns
+                ?.filter((col) => col.filterFn) // Only include columns with a filter function
+                .map((col) => ({
+                  id: col.id,
+                  label: col.header,
+                  options: Array.from(
+                    new Set(col.extraData.map((d) => String(d.value ?? ''))),
+                  ).filter((v) => v !== ''),
+                  getDisplay: (v) => v,
+                }))}
             />
             <GroupActionsMenu
               disabled={table.getSelectedRowModel().rows.length === 0}
