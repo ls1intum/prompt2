@@ -11,11 +11,6 @@ import {
   CardHeader,
   CardTitle,
   Textarea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
@@ -25,21 +20,24 @@ import { StudentAssessment } from '../../../../interfaces/studentAssessment'
 
 import { ActionItemPanel } from './components/ActionItemPanel'
 import { AssessmentCompletionDialog } from './components/AssessmentCompletionDialog'
+import { GradeSuggestion } from './components/GradeSuggestion'
 
 import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
 import { useDeadlineStore } from '../../../../zustand/useDeadlineStore'
 
+import { validateGrade } from './utils/validateGrade'
+
 interface AssessmentFeedbackProps {
   studentAssessment: StudentAssessment
   completed?: boolean
 }
 
-export function AssessmentCompletion({
+export const AssessmentCompletion = ({
   studentAssessment,
   completed = false,
-}: AssessmentFeedbackProps) {
+}: AssessmentFeedbackProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { deadline } = useDeadlineStore()
@@ -72,40 +70,6 @@ export function AssessmentCompletion({
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
-
-  const validGradeValues = [1, 1.3, 1.7, 2, 2.3, 2.7, 3, 3.3, 3.7, 4, 5]
-
-  const validateGrade = (
-    gradeString: string,
-  ): { isValid: boolean; value?: number; error?: string } => {
-    if (!gradeString || gradeString.trim() === '') {
-      return { isValid: true, value: 5.0 } // Default value when empty
-    }
-
-    const gradeValue = parseFloat(gradeString)
-
-    if (isNaN(gradeValue)) {
-      return { isValid: false, error: 'Grade must be a valid number' }
-    }
-
-    if (gradeValue < 1 || gradeValue > 5) {
-      return { isValid: false, error: 'Grade must be between 1.0 and 5.0' }
-    }
-
-    // Check if the grade matches one of the valid values (with small tolerance for floating point comparison)
-    const isValidValue = validGradeValues.some(
-      (validValue) => Math.abs(validValue - gradeValue) < 0.01,
-    )
-
-    if (!isValidValue) {
-      return {
-        isValid: false,
-        error: `Grade must be one of the predefined values (${validGradeValues.join(', ')})`,
-      }
-    }
-
-    return { isValid: true, value: gradeValue }
-  }
 
   const handleConfirm = () => {
     const handleCompletion = async () => {
@@ -154,15 +118,14 @@ export function AssessmentCompletion({
           return
         }
 
-        const completionData = {
+        await createOrUpdateCompletion({
           courseParticipationID: studentAssessment.courseParticipationID,
           coursePhaseID: phaseId ?? '',
           comment: newRemarks.trim(),
           gradeSuggestion: gradeValidation.value ?? 5.0,
           author: userName,
           completed: studentAssessment.assessmentCompletion.completed,
-        }
-        await createOrUpdateCompletion(completionData)
+        })
 
         // Clear any existing errors on successful save
         setError(null)
@@ -193,38 +156,15 @@ export function AssessmentCompletion({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Grade Suggestion</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select
-                value={gradeSuggestion}
-                onValueChange={(value) => {
-                  setGradeSuggestion(value)
-                  handleSaveFormData(generalRemarks, value)
-                }}
-                disabled={completed}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='1'>1.0 - Excellent</SelectItem>
-                  <SelectItem value='1.3'>1.3 - Very Good</SelectItem>
-                  <SelectItem value='1.7'>1.7 - Good</SelectItem>
-                  <SelectItem value='2'>2.0 - Good</SelectItem>
-                  <SelectItem value='2.3'>2.3 - Satisfactory</SelectItem>
-                  <SelectItem value='2.7'>2.7 - Satisfactory</SelectItem>
-                  <SelectItem value='3'>3.0 - Satisfactory</SelectItem>
-                  <SelectItem value='3.3'>3.3 - Sufficient</SelectItem>
-                  <SelectItem value='3.7'>3.7 - Sufficient</SelectItem>
-                  <SelectItem value='4'>4.0 - Sufficient</SelectItem>
-                  <SelectItem value='5'>5.0 - Fail</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
+          <GradeSuggestion
+            studentScore={studentAssessment.studentScore}
+            gradeSuggestion={gradeSuggestion}
+            onGradeSuggestionChange={(value) => {
+              setGradeSuggestion(value)
+              handleSaveFormData(generalRemarks, value)
+            }}
+            disabled={completed}
+          />
         </div>
 
         <ActionItemPanel studentAssessment={studentAssessment} />
