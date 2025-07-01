@@ -1,19 +1,20 @@
-import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useQuery } from '@tanstack/react-query'
 
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
-import { ErrorPage } from '@tumaet/prompt-ui-components'
+import { ErrorPage, LoadingPage } from '@tumaet/prompt-ui-components'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
 import { useGetAllCategoriesWithCompetencies } from './hooks/useGetAllCategoriesWithCompetencies'
 import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
+import { useGetDeadline } from './hooks/useGetDeadline'
 
 import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useCategoryStore } from '../zustand/useCategoryStore'
 import { useScoreLevelStore } from '../zustand/useScoreLevelStore'
+import { useDeadlineStore } from '../zustand/useDeadlineStore'
 
 interface AssessmentDataShellProps {
   children: React.ReactNode
@@ -24,6 +25,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   const { setParticipations } = useParticipationStore()
   const { setCategories } = useCategoryStore()
   const { setScoreLevels } = useScoreLevelStore()
+  const { setDeadline } = useDeadlineStore()
 
   const {
     data: coursePhaseParticipations,
@@ -49,14 +51,26 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetch: refetchScoreLevels,
   } = useGetAllScoreLevels()
 
-  const isError = isParticipationsError || isCategoriesError || isScoreLevelsError
+  const {
+    data: deadline,
+    isPending: isDeadlinePending,
+    isError: isDeadlineError,
+    refetch: refetchDeadline,
+  } = useGetDeadline()
+
+  const isError =
+    isParticipationsError || isCategoriesError || isScoreLevelsError || isDeadlineError
   const isPending =
-    isCoursePhaseParticipationsPending || isCategoriesPending || isScoreLevelsPending
+    isCoursePhaseParticipationsPending ||
+    isCategoriesPending ||
+    isScoreLevelsPending ||
+    isDeadlinePending
 
   const refetch = () => {
     refetchCoursePhaseParticipations()
     refetchCategories()
     refetchScoreLevels()
+    refetchDeadline()
   }
 
   useEffect(() => {
@@ -77,17 +91,13 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     }
   }, [scoreLevels, setScoreLevels])
 
+  useEffect(() => {
+    if (deadline && deadline != null) {
+      setDeadline(deadline)
+    }
+  }, [deadline, setDeadline])
+
   return (
-    <>
-      {isError ? (
-        <ErrorPage onRetry={refetch} />
-      ) : isPending ? (
-        <div className='flex justify-center items-center h-64'>
-          <Loader2 className='h-12 w-12 animate-spin text-primary' />
-        </div>
-      ) : (
-        <>{children}</>
-      )}
-    </>
+    <>{isError ? <ErrorPage onRetry={refetch} /> : isPending ? <LoadingPage /> : <>{children}</>}</>
   )
 }

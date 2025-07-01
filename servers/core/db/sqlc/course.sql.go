@@ -98,8 +98,6 @@ SELECT
      c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data
 FROM
   course c
-WHERE
-  c.end_date >= NOW() - INTERVAL '1 month'
 ORDER BY
     c.semester_tag, c.name DESC
 `
