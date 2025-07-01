@@ -214,6 +214,9 @@ func setInitialPhase(ctx context.Context, qtx *db.Queries, sourceID, targetID uu
 // copyDTOs collects all participation DTOs (inputs and outputs) used by the source course phases.
 // It returns a map from source DTO IDs to themselves, to support mapping-based operations.
 func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
+	dtoIDMap := make(map[uuid.UUID]uuid.UUID)
+
+	// Collect all DTOs from course phase types
 	unordered, err := qtx.GetNotOrderedCoursePhases(ctx, sourceID)
 	if err != nil {
 		return nil, err
@@ -231,9 +234,6 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 	for _, p := range sequence {
 		uniqueTypes[p.CoursePhaseTypeID] = struct{}{}
 	}
-
-	dtoIDMap := make(map[uuid.UUID]uuid.UUID)
-
 	for tID := range uniqueTypes {
 		outputs, err := qtx.GetCoursePhaseProvidedParticipationOutputs(ctx, tID)
 		if err != nil {
@@ -251,6 +251,25 @@ func copyDTOs(ctx context.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uui
 		for _, i := range inputs {
 			dtoIDMap[i.ID] = i.ID
 		}
+	}
+
+	// Collect all DTOs from graphs
+	phaseGraph, err := qtx.GetPhaseDataGraph(ctx, sourceID)
+	if err != nil {
+		return nil, err
+	}
+	for _, edge := range phaseGraph {
+		dtoIDMap[edge.FromCoursePhaseDtoID] = edge.FromCoursePhaseDtoID
+		dtoIDMap[edge.ToCoursePhaseDtoID] = edge.ToCoursePhaseDtoID
+	}
+
+	participationGraph, err := qtx.GetParticipationDataGraph(ctx, sourceID)
+	if err != nil {
+		return nil, err
+	}
+	for _, edge := range participationGraph {
+		dtoIDMap[edge.FromCoursePhaseDtoID] = edge.FromCoursePhaseDtoID
+		dtoIDMap[edge.ToCoursePhaseDtoID] = edge.ToCoursePhaseDtoID
 	}
 
 	return dtoIDMap, nil
