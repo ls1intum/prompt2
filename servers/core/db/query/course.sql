@@ -8,8 +8,6 @@ SELECT
      c.*
 FROM
   course c
-WHERE
-  c.end_date >= NOW() - INTERVAL '1 month'
 ORDER BY
     c.semester_tag, c.name DESC;
 
