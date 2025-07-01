@@ -85,14 +85,6 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           return scoreA - scoreB
         },
         enableColumnFilter: true,
-        filterFn: (row, columnId, filterValue) => {
-          const match = scoreLevels.find(
-            (s) => s.courseParticipationID === row.original.courseParticipationID,
-          )
-          const scoreLevel = match?.scoreLevel
-          const scoreLevelTitle = scoreLevel ? getLevelConfig(scoreLevel).title : null
-          return scoreLevelTitle ? filterValue.includes(scoreLevelTitle) : false
-        },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
           value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
@@ -138,7 +130,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
               const team = teamsWithStudents.find((t) =>
                 t.participantIds.includes(row.courseParticipationID),
               )
-              return team ? team.name : 'No Team'
+              return team ? team.name : ''
             },
             enableSorting: true,
             sortingFn: (rowA, rowB) => {
@@ -158,15 +150,15 @@ export const AssessmentOverviewPage = (): JSX.Element => {
               )
               return {
                 courseParticipationID: p.courseParticipationID,
-                value: team ? team.name : 'No Team',
-                stringValue: team ? team.name : 'No Team',
+                value: team ? team.name : '',
+                stringValue: team ? team.name : '',
               }
             }),
             filterFn: (row, columnId, filterValue) => {
               const team = teamsWithStudents.find((t) =>
                 t.participantIds.includes(row.original.courseParticipationID),
               )
-              const teamName = team ? team.name : 'No Team'
+              const teamName = team ? team.name : ''
               return Array.isArray(filterValue) ? filterValue.includes(teamName) : false
             },
           }
