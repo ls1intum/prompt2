@@ -4,7 +4,7 @@ ALTER TABLE assessment_template_course_phase
     RENAME TO course_phase_config;
 
 ALTER TABLE course_phase_config
-    ADD COLUMN deadline TIMESTAMPTZ NULL DEFAULT NULL;
+    ADD COLUMN deadline TIMESTAMPTZ NULL DEFAULT CURRENT_TIMESTAMP;
 
 CREATE OR REPLACE VIEW category_course_phase AS
 SELECT c.id AS category_id,

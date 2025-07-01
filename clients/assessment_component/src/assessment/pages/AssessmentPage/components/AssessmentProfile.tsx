@@ -1,12 +1,14 @@
 import { Book, Calendar, GraduationCap } from 'lucide-react'
-import AssessmentStatusBadge from './AssessmentStatusBadge'
-import { StudentScoreBadge } from '../../components/StudentScoreBadge'
-import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
 
 import { Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
 
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
+
+import { StudentScoreBadge } from '../../components/StudentScoreBadge'
+import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
+
+import { AssessmentStatusBadge } from './AssessmentStatusBadge'
 
 interface AssessmentProfileProps {
   participant: AssessmentParticipationWithStudent
@@ -41,7 +43,10 @@ export const AssessmentProfile = ({
                     />
                   )}
                   {studentAssessment.assessments.length > 0 && (
-                    <StudentScoreBadge scoreLevel={studentAssessment.studentScore.scoreLevel} />
+                    <StudentScoreBadge
+                      scoreLevel={studentAssessment.studentScore.scoreLevel}
+                      scoreNumeric={studentAssessment.studentScore.scoreNumeric}
+                    />
                   )}
                 </div>
               </div>

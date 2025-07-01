@@ -60,6 +60,12 @@ export const AllocationParticipants = (): JSX.Element => {
           const b = rowB.getValue('allocatedTeam') as string
           return a.localeCompare(b)
         },
+        enableColumnFilter: true,
+        filterFn: (row, columnId, filterValue) => {
+          const value = String(row.getValue(columnId) ?? '').toLowerCase()
+          if (!Array.isArray(filterValue)) return false
+          return filterValue.map((v) => v.toLowerCase()).includes(value)
+        },
       },
     ]
   }, [teams])

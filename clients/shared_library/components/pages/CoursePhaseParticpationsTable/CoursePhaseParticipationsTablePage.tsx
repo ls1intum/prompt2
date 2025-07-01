@@ -149,7 +149,20 @@ export const CoursePhaseParticipationsTablePage = ({
             <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400' />
           </div>
           <div className='flex space-x-2 w-full sm:w-auto'>
-            <FilterMenu columnFilters={columnFilters} setColumnFilters={setColumnFilters} />
+            <FilterMenu
+              columnFilters={columnFilters}
+              setColumnFilters={setColumnFilters}
+              extraFilters={extraColumns
+                ?.filter((col) => col.filterFn) // Only include columns with a filter function
+                .map((col) => ({
+                  id: col.id,
+                  label: col.header,
+                  options: Array.from(
+                    new Set(col.extraData.map((d) => String(d.stringValue ?? d.value ?? ''))),
+                  ).filter((v) => v !== ''),
+                  getDisplay: (v) => v,
+                }))}
+            />
             <GroupActionsMenu
               disabled={table.getSelectedRowModel().rows.length === 0}
               selectedRows={table.getSelectedRowModel()}
@@ -169,9 +182,9 @@ export const CoursePhaseParticipationsTablePage = ({
       </div>
 
       <div className='rounded-md border'>
-        <ScrollArea className='h-[calc(100vh-280px)] overflow-x-scroll'>
+        <ScrollArea className='h-[calc(100vh-280px)] overflow-x-scroll relative z-0'>
           <Table className='table-auto min-w-full w-full relative'>
-            <TableHeader className='bg-muted/100 sticky top-0 z-10'>
+            <TableHeader className='bg-muted/100'>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (

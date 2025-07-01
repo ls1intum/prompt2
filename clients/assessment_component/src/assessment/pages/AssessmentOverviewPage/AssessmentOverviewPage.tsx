@@ -18,6 +18,7 @@ import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAll
 
 import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
 import { AssessmentCompletion } from '../../interfaces/assessment'
+import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
@@ -83,10 +84,19 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           )
           return scoreA - scoreB
         },
+        enableColumnFilter: true,
+        filterFn: (row, columnId, filterValue) => {
+          const match = scoreLevels.find(
+            (s) => s.courseParticipationID === row.original.courseParticipationID,
+          )
+          const scoreLevel = match?.scoreLevel
+          const scoreLevelTitle = scoreLevel ? getLevelConfig(scoreLevel).title : null
+          return scoreLevelTitle ? filterValue.includes(scoreLevelTitle) : false
+        },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
           value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
-          stringValue: s.scoreLevel,
+          stringValue: getLevelConfig(s.scoreLevel).title,
         })),
       },
       assessmentCompletions
