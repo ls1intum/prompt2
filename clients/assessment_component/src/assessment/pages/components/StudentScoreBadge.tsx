@@ -1,23 +1,54 @@
 import React from 'react'
-import { Badge } from '@tumaet/prompt-ui-components'
+import {
+  Badge,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
-import { ScoreLevel } from '../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel, ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface ScoreLevelBadgeProps {
-  scoreLevel: ScoreLevel
-  score?: number
+  scoreLevel?: ScoreLevel
+  scoreNumeric?: number
 }
 
-export const StudentScoreBadge: React.FC<ScoreLevelBadgeProps> = ({ scoreLevel }) => {
-  const config = getLevelConfig(scoreLevel)
+export const StudentScoreBadge = ({ scoreLevel, scoreNumeric }: ScoreLevelBadgeProps) => {
+  if (!scoreLevel && !scoreNumeric) {
+    return undefined // No score provided, nothing to display
+  }
+
+  const config = getLevelConfig(
+    scoreLevel
+      ? scoreLevel
+      : scoreNumeric
+        ? mapNumberToScoreLevel(scoreNumeric)
+        : ScoreLevel.VeryBad,
+  )
+
+  const tooltipText =
+    'This score is automatically generated based on the assessment input. ' +
+    'It is intended to assist you in making your final grading decision.'
 
   return (
-    <Badge
-      className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg}`}
-      style={{ whiteSpace: 'nowrap' }}
-    >
-      {config.title}
-    </Badge>
+    <TooltipProvider delayDuration={250}>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge
+            className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {scoreLevel ? config.title : ''}
+            {scoreLevel && scoreNumeric ? ` (${scoreNumeric.toFixed(1)})` : ''}
+            {!scoreLevel && scoreNumeric ? `${scoreNumeric.toFixed(1)}` : ''}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side='top'>
+          <p className='max-w-lg text-center'>{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }

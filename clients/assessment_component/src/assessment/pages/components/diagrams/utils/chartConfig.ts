@@ -36,7 +36,7 @@ export function getBarColor(scoreLevel: ScoreLevel): string {
     case ScoreLevel.Bad:
       return chartConfig.bad.color || '#ffffff' // Bad color
     case ScoreLevel.Ok:
-      return chartConfig.ok.color || '#ffffff' // Advanced color
+      return chartConfig.ok.color || '#ffffff' // Ok color
     case ScoreLevel.Good:
       return chartConfig.good.color || '#ffffff' // Good color
     case ScoreLevel.VeryGood:
