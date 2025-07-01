@@ -28,31 +28,3 @@ WHERE id = $1;
 SELECT *
 FROM assessment_template
 WHERE name = $1;
-
--- name: CreateOrUpdateAssessmentTemplateCoursePhase :exec
-INSERT INTO assessment_template_course_phase (assessment_template_id, course_phase_id)
-VALUES ($1, $2)
-ON CONFLICT (course_phase_id) 
-DO UPDATE SET assessment_template_id = EXCLUDED.assessment_template_id;
-
--- name: DeleteAssessmentTemplateCoursePhase :exec
-DELETE
-FROM assessment_template_course_phase
-WHERE assessment_template_id = $1
-  AND course_phase_id = $2;
-
--- name: GetAssessmentTemplatesByCoursePhase :one
-SELECT at.*
-FROM assessment_template at
-         INNER JOIN assessment_template_course_phase atcp ON at.id = atcp.assessment_template_id
-WHERE atcp.course_phase_id = $1;
-
--- name: GetCoursePhasesByAssessmentTemplate :many
-SELECT atcp.course_phase_id
-FROM assessment_template_course_phase atcp
-WHERE atcp.assessment_template_id = $1;
-
--- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT *
-FROM assessment_template_course_phase
-ORDER BY assessment_template_id, course_phase_id;

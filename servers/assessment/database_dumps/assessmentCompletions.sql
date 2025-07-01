@@ -91,10 +91,11 @@ CREATE TABLE public.assessment_template (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE public.assessment_template_course_phase (
+CREATE TABLE public.course_phase_config (
     assessment_template_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
-    FOREIGN KEY (assessment_template_id) references assessment_template (id) ON DELETE CASCADE
+    deadline timestamp with time zone DEFAULT NULL,
+    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.category (
@@ -233,11 +234,11 @@ VALUES (
 INSERT INTO public.assessment_template (id, name, description)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
 
--- Insert some sample assessment_template_course_phase records
-INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+-- Insert some sample course_phase_config records
+INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9');
 
-INSERT INTO public.assessment_template_course_phase (assessment_template_id, course_phase_id)
+INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '319f28d4-8877-400e-9450-d49077aae7fe');
 
 INSERT INTO public.category
@@ -403,18 +404,18 @@ ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 -- Create the category_course_phase view
 CREATE VIEW category_course_phase AS
 SELECT c.id AS category_id,
-       atcp.course_phase_id
+       cpc.course_phase_id
 FROM category c
-         INNER JOIN assessment_template_course_phase atcp
-                    ON c.assessment_template_id = atcp.assessment_template_id;
+         INNER JOIN course_phase_config cpc
+                    ON c.assessment_template_id = cpc.assessment_template_id;
 
 CREATE INDEX idx_assessment_completion_participation_phase ON public.assessment_completion USING btree (course_participation_id, course_phase_id);
 
 ALTER TABLE ONLY public.category
 ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY public.assessment_template_course_phase
-ADD CONSTRAINT assessment_template_course_phase_template_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.course_phase_config
+ADD CONSTRAINT course_phase_config_template_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.assessment
 ADD CONSTRAINT assessment_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency(id) ON DELETE CASCADE;
