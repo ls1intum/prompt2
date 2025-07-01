@@ -203,6 +203,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5432:5432"
     networks:
       - prompt-network
 
@@ -221,6 +223,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5433:5432"
     networks:
       - prompt-network
 
@@ -239,9 +243,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5434:5432"
     networks:
       - prompt-network
-    
+
   db-self-team-allocation:
     image: "postgres:15.2-alpine"
     container_name: prompt-db-self-team-allocation
@@ -257,6 +263,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5436:5432"
     networks:
       - prompt-network
 
@@ -275,6 +283,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5435:5432"
     networks:
       - prompt-network
 
