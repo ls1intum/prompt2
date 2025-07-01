@@ -34,7 +34,7 @@ func (suite *CourseRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/course_test.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/copy_course_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
@@ -84,7 +84,7 @@ func (suite *CourseRouterTestSuite) TestGetAllCourses() {
 }
 
 func (suite *CourseRouterTestSuite) TestGetCourseByID() {
-	courseID := "3f42d322-e5bf-4faa-b576-51f2cab14c2e"
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
 	req, _ := http.NewRequest("GET", "/api/courses/"+courseID, nil)
 	resp := httptest.NewRecorder()
 
@@ -127,10 +127,10 @@ func (suite *CourseRouterTestSuite) TestCreateCourse() {
 }
 
 func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
-	courseID := "3f42d322-e5bf-4faa-b576-51f2cab14c2e"
-	firstUUID := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
-	secondUUID := uuid.MustParse("500db7ed-2eb2-42d0-82b3-8750e12afa8a")
-	thirdUUID := uuid.MustParse("92bb0532-39e5-453d-bc50-fa61ea0128b2")
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+	firstUUID := uuid.MustParse("3311591a-4951-4134-a360-cb970e4a9f76")
+	secondUUID := uuid.MustParse("bd727106-2dc0-4c44-a804-2efde26101ae")
+	thirdUUID := uuid.MustParse("0732c0a7-b234-41d8-960c-f04e420a7e0e")
 
 	// Construct the updated phase graph: first -> second -> third
 	updateGraphRequest := courseDTO.UpdateCoursePhaseGraph{
@@ -194,6 +194,35 @@ func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be the initial phase")
 	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be the initial phase")
 	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
+}
+
+func (suite *CourseRouterTestSuite) TestCopyCourse() {
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+
+	copyCourseRequest := courseDTO.CopyCourseRequest{
+		Name:        "Copied Course",
+		SemesterTag: pgtype.Text{String: "ws2425", Valid: true},
+		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},
+		EndDate:     pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+	}
+
+	body, _ := json.Marshal(copyCourseRequest)
+	req, _ := http.NewRequest("POST", "/api/courses/"+courseID+"/copy", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
+
+	var copiedCourse courseDTO.Course
+	err := json.Unmarshal(resp.Body.Bytes(), &copiedCourse)
+
+	assert.NoError(suite.T(), err, "Unmarshalling the copied course response should not produce an error")
+	assert.Equal(suite.T(), copyCourseRequest.Name, copiedCourse.Name, "Copied course name should match")
+	assert.Equal(suite.T(), copyCourseRequest.SemesterTag.String, copiedCourse.SemesterTag.String, "Copied course semester tag should match")
+	assert.Equal(suite.T(), copyCourseRequest.StartDate.Time.Format("2006-01-02"), copiedCourse.StartDate.Time.Format("2006-01-02"), "Copied course start date should match")
+	assert.Equal(suite.T(), copyCourseRequest.EndDate.Time.Format("2006-01-02"), copiedCourse.EndDate.Time.Format("2006-01-02"), "Copied course end date should match")
+	assert.NotEqual(suite.T(), uuid.MustParse(courseID), copiedCourse.ID, "Copied course ID should be different from original course ID")
 }
 
 func TestCourseRouterTestSuite(t *testing.T) {

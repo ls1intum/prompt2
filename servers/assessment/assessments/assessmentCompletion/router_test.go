@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	dto "github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -40,6 +41,9 @@ func (suite *AssessmentCompletionRouterTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	AssessmentCompletionServiceSingleton = &suite.service
+
+	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
 
 	suite.router = gin.Default()
 	api := suite.router.Group("/api/course_phase/:coursePhaseID")

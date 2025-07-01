@@ -1,6 +1,7 @@
 package assessmentCompletion
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +95,12 @@ func unmarkAssessmentAsCompleted(c *gin.Context) {
 		return
 	}
 	if err := UnmarkAssessmentAsCompleted(c, courseParticipationID, coursePhaseID); err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		// Check if the error is due to deadline being passed
+		if errors.Is(err, ErrDeadlinePassed) {
+			handleError(c, http.StatusForbidden, err)
+		} else {
+			handleError(c, http.StatusInternalServerError, err)
+		}
 		return
 	}
 	c.Status(http.StatusOK)

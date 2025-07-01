@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -34,6 +35,9 @@ func (suite *AssessmentCompletionServiceTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	AssessmentCompletionServiceSingleton = &suite.service
+
+	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
 }
 
 func (suite *AssessmentCompletionServiceTestSuite) TearDownSuite() {
