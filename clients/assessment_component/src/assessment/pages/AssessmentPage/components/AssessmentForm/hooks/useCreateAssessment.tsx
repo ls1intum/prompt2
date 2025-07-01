@@ -1,17 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { deleteAssessmentCompletion } from '../../../network/mutations/deleteAssessmentCompletion'
+import { createAssessment } from '../../../../../network/mutations/createOrUpdateAssessment'
+import { CreateOrUpdateAssessmentRequest } from '../../../../../interfaces/assessment'
 
-export const useDeleteAssessmentCompletion = (setError: (error: string | null) => void) => {
+export const useCreateAssessment = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (courseParticipationID: string) =>
-      deleteAssessmentCompletion(phaseId ?? '', courseParticipationID),
+    mutationFn: (assessment: CreateOrUpdateAssessmentRequest) => {
+      return createAssessment({ ...assessment, coursePhaseID: phaseId ?? '' })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
-      queryClient.invalidateQueries({ queryKey: ['scoreLevels', phaseId] })
       setError(null)
     },
     onError: (error: any) => {
