@@ -1,8 +1,8 @@
 services:
-  server:
+  server-core:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./servers/core
+      dockerfile: ../Dockerfile
     container_name: prompt-core-server
     depends_on:
       db:
@@ -15,22 +15,114 @@ services:
       - CORE_HOST=http://localhost:3000
       - DB_USER=prompt-postgres
       - DB_PASSWORD=prompt-postgres
-      - DB_HOST=localhost
+      - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=prompt
       - SSL_MODE=disable
       - SERVER_ADDRESS=0.0.0.0:8080
-      - KEYCLOAK_HOST=localhost:8081
+      - KEYCLOAK_HOST=http://keycloak:8080
       - KEYCLOAK_REALM_NAME=prompt
       - KEYCLOAK_CLIENT_ID=prompt-server
       - KEYCLOAK_CLIENT_SECRET=TvoTuMQWcwXTk8bqY49ElCVz8JthXyMb #DO NOT USE IN PRODUCTION !!!
       - KEYCLOAK_ID_OF_CLIENT=a584ca61-fa83-4e95-98b6-c5f3157ae4b4
       - KEYCLOAK_AUTHORIZED_PARTY=prompt-client
 
+  server-intro-course:
+    build:
+      context: ./servers/intro_course
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-intro-course
+    depends_on:
+      db-intro-course:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - DB_HOST_INTRO_COURSE=db-intro-course
+      - DB_PORT_INTRO_COURSE=5432
+      - DB_NAME=prompt
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_REALM_NAME=prompt
+      - KEYCLOAK_AUTHORIZED_PARTY=prompt-client
+      - KEYCLOAK_CLIENT_ID=prompt-server
+
+  server-team-allocation:
+    build:
+      context: ./servers/team_allocation
+      dockerfile: ../Dockerfile
+      args:
+        - SERVICE=team_allocation
+    container_name: prompt-server-team-allocation
+    depends_on:
+      db-team-allocation:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - DB_HOST_TEAM_ALLOCATION=db-team-allocation
+      - DB_PORT_TEAM_ALLOCATION=5432
+      - DB_NAME=prompt
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_REALM_NAME=prompt
+
+  server-self-team-allocation:
+    build:
+      context: ./servers/self_team_allocation
+      dockerfile: ../Dockerfile
+      args:
+        - SERVICE=self_team_allocation
+    container_name: prompt-server-self-team-allocation
+    depends_on:
+      db-self-team-allocation:
+        condition: service_healthy
+    ports:
+      - "8083:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - DB_HOST_SELF_TEAM_ALLOCATION=db-self-team-allocation
+      - DB_PORT_SELF_TEAM_ALLOCATION=5432
+      - DB_NAME=prompt
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_REALM_NAME=prompt
+
+  server-assessment:
+    build:
+      context: ./servers/assessment
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-assessment
+    depends_on:
+      db-assessment:
+        condition: service_healthy
+    ports:
+      - "8084:8080"
+    environment:
+      - CORE_HOST=http://localhost:3000
+      - SERVER_CORE_HOST=http://localhost:8080
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - DB_HOST_ASSESSMENT=db-assessment
+      - DB_PORT_ASSESSMENT=5432
+      - DB_NAME=prompt
+      - DB_PASSWORD=prompt-postgres
+      - KEYCLOAK_HOST=http://keycloak:8080
+      - KEYCLOAK_REALM_NAME=prompt
+
   core:
     build:
       context: ./clients/core
       dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
     container_name: prompt-client-core
     ports:
       - "3000:80"
@@ -41,17 +133,112 @@ services:
     build:
       context: ./clients/template_component
       dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
     container_name: prompt-client-template-component
     ports:
       - "3001:80"
     depends_on:
       - clients-base
 
+  assessment_component:
+    build:
+      context: ./clients/assessment_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-assessment-component
+    ports:
+      - "3002:80"
+    depends_on:
+      - clients-base
+      - server-core
+      - server-assessment
+
+  devops_challenge_component:
+    build:
+      context: ./clients/devops_challenge_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-devops-challenge-component
+    ports:
+      - "3003:80"
+    depends_on:
+      - clients-base
+      - server-core
+
+  intro_course_developer_component:
+    build:
+      context: ./clients/intro_course_developer_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-intro-course-developer-component
+    ports:
+      - "3004:80"
+    depends_on:
+      - clients-base
+      - server-core
+      - server-intro-course
+
+  interview_component:
+    build:
+      context: ./clients/interview_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-interview-component
+    ports:
+      - "3005:80"
+    depends_on:
+      - clients-base
+      - server-core
+
+  matching_component:
+    build:
+      context: ./clients/matching_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-matching-component
+    ports:
+      - "3006:80"
+    depends_on:
+      - clients-base
+      - server-core
+
+  team_allocation_component:
+    build:
+      context: ./clients/team_allocation_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-team-allocation-component
+    ports:
+      - "3007:80"
+    depends_on:
+      - clients-base
+      - server-core
+
+  self_team_allocation_component:
+    build:
+      context: ./clients/self_team_allocation_component
+      dockerfile: Dockerfile
+      args:
+        - IMAGE_TAG=latest
+    container_name: prompt-client-self-team-allocation-component
+    ports:
+      - "3008:80"
+    depends_on:
+      - clients-base
+      - server-core
+
   clients-base:
     build:
       context: ./clients
       dockerfile: Dockerfile
-    image: base:latest
+    image: ghcr.io/ls1intum/prompt2/prompt-clients-base:latest
 
   db:
     image: "postgres:15.2-alpine"
