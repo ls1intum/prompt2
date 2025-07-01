@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/ls1intum/prompt-sdk v1.0.3
+	github.com/ls1intum/prompt-sdk v1.0.5
 	github.com/sirupsen/logrus v1.9.3
 )
 
@@ -80,7 +80,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.37.0
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

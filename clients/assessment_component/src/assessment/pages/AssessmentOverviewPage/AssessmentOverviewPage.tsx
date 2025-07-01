@@ -1,12 +1,14 @@
-import { Loader2 } from 'lucide-react'
+import { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
+
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
-import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
-import { useParticipationStore } from '../../zustand/useParticipationStore'
+
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
-import { useMemo } from 'react'
+
+import { useParticipationStore } from '../../zustand/useParticipationStore'
+import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
@@ -16,17 +18,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
   const path = useLocation().pathname
 
   const { participations } = useParticipationStore()
-
-  const {
-    data: scoreLevels,
-    isPending: isScoreLevelsPending,
-    isError: isScoreLevelsError,
-    refetch: refetchScoreLevels,
-  } = useGetAllScoreLevels()
-
-  const refetch = () => {
-    refetchScoreLevels()
-  }
+  const { scoreLevels } = useScoreLevelStore()
 
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
@@ -50,15 +42,6 @@ export const AssessmentOverviewPage = (): JSX.Element => {
       },
     ]
   }, [scoreLevels])
-
-  if (isScoreLevelsError)
-    return <ErrorPage onRetry={refetch} description='Could not fetch scoreLevels' />
-  if (isScoreLevelsPending)
-    return (
-      <div className='flex justify-center items-center h-64'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-      </div>
-    )
 
   return (
     <div id='table-view' className='relative flex flex-col'>

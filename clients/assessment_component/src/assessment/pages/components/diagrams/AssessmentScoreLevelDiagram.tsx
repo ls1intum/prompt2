@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -10,12 +9,13 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
 
 import { BarChartWithScoreLevel } from './BarChartWithScoreLevel'
 
 interface AssessmentScoreLevelDiagramProps {
-  participations: CoursePhaseParticipationWithStudent[]
+  participations: AssessmentParticipationWithStudent[]
   scoreLevels: ScoreLevelWithParticipation[]
 }
 

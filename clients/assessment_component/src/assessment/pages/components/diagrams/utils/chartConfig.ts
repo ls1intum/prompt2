@@ -32,15 +32,15 @@ export const chartConfig: ChartConfig = {
 export function getBarColor(scoreLevel: ScoreLevel): string {
   switch (scoreLevel) {
     case ScoreLevel.VeryBad:
-      return chartConfig.veryBad.color || '#ffffff' // Novice color
+      return chartConfig.veryBad.color || '#ffffff' // VeryBad color
     case ScoreLevel.Bad:
-      return chartConfig.bad.color || '#ffffff' // Intermediate color
+      return chartConfig.bad.color || '#ffffff' // Bad color
     case ScoreLevel.Ok:
-      return chartConfig.ok.color || '#ffffff' // Advanced color
+      return chartConfig.ok.color || '#ffffff' // Ok color
     case ScoreLevel.Good:
-      return chartConfig.good.color || '#ffffff' // Expert color
+      return chartConfig.good.color || '#ffffff' // Good color
     case ScoreLevel.VeryGood:
-      return chartConfig.veryGood.color || '#ffffff' // Expert color
+      return chartConfig.veryGood.color || '#ffffff' // VeryGood color
     default:
       return chartConfig.notAssessed.color || '#ffffff' // Default color
   }

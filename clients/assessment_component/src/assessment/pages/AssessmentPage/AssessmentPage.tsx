@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom'
 import { useMemo } from 'react'
+import { Loader2 } from 'lucide-react'
 
-import { ErrorPage, LoadingPage } from '@tumaet/prompt-ui-components'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
 
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 import { CategoryAssessment } from './components/CategoryAssessment'
@@ -35,7 +36,12 @@ export const AssessmentPage = (): JSX.Element => {
   }, [categories, studentAssessment?.assessments?.length])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
-  if (isStudentAssessmentPending) return <LoadingPage />
+  if (isStudentAssessmentPending)
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
 
   if (!studentAssessment) {
     return (

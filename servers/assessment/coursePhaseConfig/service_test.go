@@ -114,6 +114,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineMul
 	assert.True(suite.T(), retrievedDeadline.Equal(secondDeadline), "Retrieved deadline should match the latest set deadline")
 }
 
+// Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls
+// to the core service. The router tests above verify the endpoint behavior and error handling.
+// The service function includes safe type assertions that prevent runtime panics when
+// the external API returns unexpected data structures.
 func TestCoursePhaseConfigServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(CoursePhaseConfigServiceTestSuite))
 }

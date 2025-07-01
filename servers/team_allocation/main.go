@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/team_allocation/allocation"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
 	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
@@ -90,6 +91,7 @@ func main() {
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
 	survey.InitSurveyModule(api, *query, conn)
+	allocation.InitAllocationModule(api, *query, conn)
 	tease.InitTeaseModule(router.Group("team-allocation/api"), *query, conn) // some tease endpoint are coursePhase independent
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")

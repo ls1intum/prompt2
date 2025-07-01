@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Label, Pie, PieChart } from 'recharts'
 
-import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -14,6 +14,7 @@ import {
   ChartTooltipContent,
 } from '@tumaet/prompt-ui-components'
 
+import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
 
 const chartConfig = {
@@ -39,7 +40,7 @@ const chartConfig = {
 } satisfies ChartConfig
 
 interface AssessmentDiagramProps {
-  participations: CoursePhaseParticipationWithStudent[]
+  participations: AssessmentParticipationWithStudent[]
   scoreLevels: ScoreLevelWithParticipation[]
 }
 

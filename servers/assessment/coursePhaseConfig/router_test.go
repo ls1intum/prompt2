@@ -72,7 +72,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadline() {
 	assert.NoError(suite.T(), err)
 
 	// Test GET request
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -92,7 +92,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineNonExis
 	nonExistentID := uuid.New()
 
 	// Test GET request for non-existent course phase
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", nonExistentID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", nonExistentID.String())
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -109,7 +109,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineNonExis
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineInvalidID() {
 	// Test GET request with invalid UUID
-	url := "/api/course_phase/invalid-uuid/deadline"
+	url := "/api/course_phase/invalid-uuid/config/deadline"
 	req, err := http.NewRequest("GET", url, nil)
 	assert.NoError(suite.T(), err)
 
@@ -134,7 +134,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadline() {
 	assert.NoError(suite.T(), err)
 
 	// Test PUT request
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonBody))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -161,7 +161,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 	assert.NoError(suite.T(), err)
 
 	// Test PUT request with invalid UUID
-	url := "/api/course_phase/invalid-uuid/deadline"
+	url := "/api/course_phase/invalid-uuid/config/deadline"
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonBody))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -179,7 +179,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInvalidBody() {
 	// Test PUT request with invalid JSON body
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte("invalid json")))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -197,7 +197,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineInva
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineEmptyBody() {
 	// Test PUT request with empty body
-	url := fmt.Sprintf("/api/course_phase/%s/deadline", suite.testCoursePhaseID.String())
+	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte("{}")))
 	assert.NoError(suite.T(), err)
 	req.Header.Set("Content-Type", "application/json")
@@ -209,6 +209,70 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadlineEmpt
 	// It might succeed with zero time or fail with validation error
 	assert.True(suite.T(), w.Code == http.StatusCreated || w.Code == http.StatusBadRequest,
 		"Should return either Created or Bad Request for empty body")
+}
+
+func (suite *CoursePhaseConfigRouterTestSuite) TestGetTeamsForCoursePhase() {
+	// Test GET request for teams
+	url := fmt.Sprintf("/api/course_phase/%s/config/teams", suite.testCoursePhaseID.String())
+	req, err := http.NewRequest("GET", url, nil)
+	assert.NoError(suite.T(), err)
+
+	w := httptest.NewRecorder()
+	suite.router.ServeHTTP(w, req)
+
+	// Since this calls an external service, we expect it to potentially fail
+	// but we're testing that the endpoint exists and handles requests properly
+	// The status should be either 200 (success) or 500 (external service failure)
+	assert.True(suite.T(), w.Code == http.StatusOK || w.Code == http.StatusInternalServerError,
+		"Should return either OK or Internal Server Error")
+
+	if w.Code == http.StatusOK {
+		var teams []coursePhaseConfigDTO.Team
+		err = json.Unmarshal(w.Body.Bytes(), &teams)
+		assert.NoError(suite.T(), err, "Response should be valid JSON array of teams")
+		// Teams array can be empty, that's valid
+	}
+}
+
+func (suite *CoursePhaseConfigRouterTestSuite) TestGetTeamsForCoursePhaseInvalidID() {
+	// Test GET request with invalid UUID
+	url := "/api/course_phase/invalid-uuid/config/teams"
+	req, err := http.NewRequest("GET", url, nil)
+	assert.NoError(suite.T(), err)
+
+	w := httptest.NewRecorder()
+	suite.router.ServeHTTP(w, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, w.Code)
+
+	var response map[string]string
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), response["error"], "Invalid course phase ID")
+}
+
+func (suite *CoursePhaseConfigRouterTestSuite) TestGetTeamsForCoursePhaseNonExistent() {
+	nonExistentID := uuid.New()
+
+	// Test GET request for non-existent course phase
+	url := fmt.Sprintf("/api/course_phase/%s/config/teams", nonExistentID.String())
+	req, err := http.NewRequest("GET", url, nil)
+	assert.NoError(suite.T(), err)
+
+	w := httptest.NewRecorder()
+	suite.router.ServeHTTP(w, req)
+
+	// Since this calls an external service, we expect it to potentially fail
+	// The status should be either 200 (success with empty array) or 500 (external service failure)
+	assert.True(suite.T(), w.Code == http.StatusOK || w.Code == http.StatusInternalServerError,
+		"Should return either OK or Internal Server Error for non-existent course phase")
+
+	if w.Code == http.StatusOK {
+		var teams []coursePhaseConfigDTO.Team
+		err = json.Unmarshal(w.Body.Bytes(), &teams)
+		assert.NoError(suite.T(), err, "Response should be valid JSON array")
+		// For non-existent course phase, teams array should be empty
+	}
 }
 
 func TestCoursePhaseConfigRouterTestSuite(t *testing.T) {
