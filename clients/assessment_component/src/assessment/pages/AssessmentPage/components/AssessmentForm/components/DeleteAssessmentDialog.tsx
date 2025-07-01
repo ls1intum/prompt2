@@ -36,8 +36,7 @@ export const DeleteAssessmentDialog = ({
         <DialogHeader>
           <DialogTitle>Reset Assessment</DialogTitle>
           <DialogDescription>
-            Are you sure you want to reset this assessment? This action cannot be undone and will
-            reset this assessment and its comment permanently.
+            Are you sure you want to reset this assessment? This action cannot be undone and you will have to complete this assessment and its comment again afterward.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
