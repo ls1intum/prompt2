@@ -3,12 +3,15 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
 
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
+
+import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
+import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
@@ -34,10 +37,30 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           return match ? <StudentScoreBadge scoreLevel={match.scoreLevel} /> : ''
         },
         enableSorting: true,
+        sortingFn: (rowA, rowB) => {
+          const scoreA = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowA.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
+          )
+          const scoreB = mapScoreLevelToNumber(
+            scoreLevels.find((s) => s.courseParticipationID === rowB.original.courseParticipationID)
+              ?.scoreLevel ?? ScoreLevel.VeryBad,
+          )
+          return scoreA - scoreB
+        },
+        enableColumnFilter: true,
+        filterFn: (row, columnId, filterValue) => {
+          const match = scoreLevels.find(
+            (s) => s.courseParticipationID === row.original.courseParticipationID,
+          )
+          const scoreLevel = match?.scoreLevel
+          const scoreLevelTitle = scoreLevel ? getLevelConfig(scoreLevel).title : null
+          return scoreLevelTitle ? filterValue.includes(scoreLevelTitle) : false
+        },
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
           value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
-          stringValue: s.scoreLevel,
+          stringValue: getLevelConfig(s.scoreLevel).title,
         })),
       },
     ]

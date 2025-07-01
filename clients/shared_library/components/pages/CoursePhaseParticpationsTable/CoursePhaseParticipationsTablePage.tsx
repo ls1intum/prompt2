@@ -158,7 +158,7 @@ export const CoursePhaseParticipationsTablePage = ({
                   id: col.id,
                   label: col.header,
                   options: Array.from(
-                    new Set(col.extraData.map((d) => String(d.value ?? ''))),
+                    new Set(col.extraData.map((d) => String(d.stringValue ?? d.value ?? ''))),
                   ).filter((v) => v !== ''),
                   getDisplay: (v) => v,
                 }))}
