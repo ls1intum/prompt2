@@ -162,11 +162,12 @@ export const AssessmentOverviewPage = (): JSX.Element => {
                 stringValue: team ? team.name : 'No Team',
               }
             }),
-            filterFn: (row, filterValue) => {
+            filterFn: (row, columnId, filterValue) => {
               const team = teamsWithStudents.find((t) =>
                 t.participantIds.includes(row.original.courseParticipationID),
               )
-              return team ? team.name.toLowerCase().includes(filterValue.toLowerCase()) : false
+              const teamName = team ? team.name : 'No Team'
+              return Array.isArray(filterValue) ? filterValue.includes(teamName) : false
             },
           }
         : undefined,
