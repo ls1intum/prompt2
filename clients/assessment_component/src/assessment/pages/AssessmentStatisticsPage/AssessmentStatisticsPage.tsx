@@ -4,14 +4,15 @@ import { Loader2 } from 'lucide-react'
 
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
-import { Assessment, AssessmentCompletion } from '../../interfaces/assessment'
+import { AssessmentCompletion } from '../../interfaces/assessment'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 
-import { getAllAssessmentsInPhase } from '../../network/queries/getAllAssessmentsInPhase'
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+
+import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
 import { useGetParticipantionsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
 
@@ -34,10 +35,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     isPending: isAssessmentsPending,
     isError: isAssessmentsError,
     refetch: refetchAssessments,
-  } = useQuery<Assessment[]>({
-    queryKey: ['assessments', phaseId],
-    queryFn: () => getAllAssessmentsInPhase(phaseId ?? ''),
-  })
+  } = useGetAllAssessments()
 
   const {
     data: assessmentCompletions,
