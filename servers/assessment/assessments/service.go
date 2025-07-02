@@ -15,7 +15,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +34,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
