@@ -111,17 +111,17 @@ func (q *Queries) GetEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.
 const getEvaluationsForAuthorInPhase = `-- name: GetEvaluationsForAuthorInPhase :many
 SELECT id, course_participation_id, course_phase_id, competency_id, score_level, author_course_participation_id, evaluated_at
 FROM evaluation
-WHERE course_phase_id = $1
-  AND author_course_participation_id = $2
+WHERE author_course_participation_id = $1
+  AND course_phase_id = $2
 `
 
 type GetEvaluationsForAuthorInPhaseParams struct {
-	CoursePhaseID               uuid.UUID `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID `json:"author_course_participation_id"`
+	CoursePhaseID               uuid.UUID `json:"course_phase_id"`
 }
 
 func (q *Queries) GetEvaluationsForAuthorInPhase(ctx context.Context, arg GetEvaluationsForAuthorInPhaseParams) ([]Evaluation, error) {
-	rows, err := q.db.Query(ctx, getEvaluationsForAuthorInPhase, arg.CoursePhaseID, arg.AuthorCourseParticipationID)
+	rows, err := q.db.Query(ctx, getEvaluationsForAuthorInPhase, arg.AuthorCourseParticipationID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}
