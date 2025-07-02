@@ -19,6 +19,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -99,6 +100,7 @@ func main() {
 	assessmentCompletion.InitAssessmentCompletionModule(api, *query, conn)
 	actionItem.InitActionItemModule(api, *query, conn)
 	scoreLevel.InitScoreLevelModule(api, *query, conn)
+	evaluations.InitEvaluationModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
 	err = router.Run(serverAddress)
