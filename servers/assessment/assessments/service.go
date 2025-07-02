@@ -147,11 +147,38 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 }
 
 func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
-	err := AssessmentServiceSingleton.queries.DeleteAssessment(ctx, id)
+	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	// Get the assessment details to check if it's editable
+	assessment, err := qtx.GetAssessment(ctx, id)
+	if err != nil {
+		log.Error("could not get assessment by ID: ", err)
+		return errors.New("could not get assessment by ID")
+	}
+
+	// Check if the assessment is editable before deleting
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, assessment.CourseParticipationID, assessment.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
+	err = qtx.DeleteAssessment(ctx, id)
 	if err != nil {
 		log.Error("could not delete assessment: ", err)
 		return errors.New("could not delete assessment")
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit assessment deletion: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 
