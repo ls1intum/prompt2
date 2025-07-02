@@ -1,0 +1,88 @@
+BEGIN;
+
+CREATE TABLE competency_map
+(
+    from_competency_id uuid NOT NULL,
+    to_competency_id   uuid NOT NULL,
+    FOREIGN KEY (from_competency_id) REFERENCES competency (id) ON DELETE CASCADE,
+    FOREIGN KEY (to_competency_id) REFERENCES competency (id) ON DELETE CASCADE,
+    PRIMARY KEY (from_competency_id, to_competency_id)
+);
+
+CREATE TABLE evaluation
+(
+    id                             uuid        NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_participation_id        uuid        NOT NULL,
+    course_phase_id                uuid        NOT NULL,
+    competency_id                  uuid        NOT NULL,
+    score_level                    score_level NOT NULL,
+    author_course_participation_id uuid        NOT NULL,
+    evaluated_at                   timestamptz NOT NULL             DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE CASCADE,
+    UNIQUE (course_participation_id, course_phase_id, competency_id, author_course_participation_id)
+);
+
+CREATE TABLE evaluation_completion
+(
+    id                             uuid        NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_participation_id        uuid        NOT NULL,
+    course_phase_id                uuid        NOT NULL,
+    author_course_participation_id uuid        NOT NULL,
+    completed_at                   timestamptz NOT NULL,
+    completed                      boolean     NOT NULL             DEFAULT false,
+    UNIQUE (course_participation_id, course_phase_id, author_course_participation_id)
+);
+
+CREATE TYPE feedback_type AS ENUM ('positive', 'negative');
+
+CREATE TABLE feedback_items
+(
+    id                             uuid          NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    feedback_type                  feedback_type NOT NULL,
+    feedback_text                  text          NOT NULL,
+    course_participation_id        uuid          NOT NULL,
+    course_phase_id                uuid          NOT NULL,
+    author_course_participation_id uuid          NOT NULL,
+    created_at                     timestamptz   NOT NULL             default CURRENT_TIMESTAMP
+);
+
+ALTER TABLE course_phase_config
+    ADD COLUMN self_assessment_enabled  boolean     NOT NULL DEFAULT false,
+    ADD COLUMN self_assessment_template uuid,
+    ADD COLUMN self_assessment_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN peer_assessment_enabled  boolean     NOT NULL DEFAULT false,
+    ADD COLUMN peer_assessment_template uuid,
+    ADD COLUMN peer_assessment_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+DO
+$$
+    DECLARE
+        self_uuid uuid;
+        peer_uuid uuid;
+    BEGIN
+        SELECT id INTO self_uuid FROM assessment_template WHERE name = 'Self Assessment Template';
+        IF self_uuid IS NULL THEN
+            RAISE EXCEPTION 'Self Assessment Template not found';
+        END IF;
+        SELECT id INTO peer_uuid FROM assessment_template WHERE name = 'Peer Assessment Template';
+        IF peer_uuid IS NULL THEN
+            RAISE EXCEPTION 'Peer Assessment Template not found';
+        END IF;
+        UPDATE course_phase_config
+        SET self_assessment_template = self_uuid,
+            peer_assessment_template = peer_uuid;
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_assessment_template SET DEFAULT %L',
+                       self_uuid);
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN peer_assessment_template SET DEFAULT %L',
+                       peer_uuid);
+        ALTER TABLE course_phase_config
+            ALTER COLUMN self_assessment_template SET NOT NULL,
+            ALTER COLUMN peer_assessment_template SET NOT NULL;
+    END
+$$;
+
+ALTER TABLE course_phase_config
+    ADD FOREIGN KEY (self_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
+    ADD FOREIGN KEY (peer_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT;
+
+COMMIT;
