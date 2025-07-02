@@ -46,6 +46,10 @@ CREATE TABLE feedback_items
     created_at                     timestamptz   NOT NULL             default CURRENT_TIMESTAMP
 );
 
+INSERT INTO assessment_template (id, name, description)
+VALUES (gen_random_uuid(), 'Self Assessment Template', 'This is the default self assessment template.'),
+       (gen_random_uuid(), 'Peer Assessment Template', 'This is the default peer assessment template.');
+
 ALTER TABLE course_phase_config
     ADD COLUMN self_assessment_enabled  boolean     NOT NULL DEFAULT false,
     ADD COLUMN self_assessment_template uuid,
