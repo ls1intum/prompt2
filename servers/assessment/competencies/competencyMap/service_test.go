@@ -43,7 +43,7 @@ func (suite *CompetencyMapServiceTestSuite) TestCreateCompetencyMapping() {
 	fromCompetencyID := uuid.MustParse("c1234567-1234-1234-1234-123456789012") // Programming Skills
 	toCompetencyID := uuid.MustParse("c4234567-1234-1234-1234-123456789012")   // Communication
 
-	req := competencyMapDTO.CreateCompetencyMappingRequest{
+	req := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
@@ -73,7 +73,7 @@ func (suite *CompetencyMapServiceTestSuite) TestDeleteCompetencyMapping() {
 	toCompetencyID := uuid.MustParse("c7234567-1234-1234-1234-123456789012")   // Mentoring
 
 	// First create a mapping
-	createReq := competencyMapDTO.CreateCompetencyMappingRequest{
+	createReq := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
@@ -81,7 +81,7 @@ func (suite *CompetencyMapServiceTestSuite) TestDeleteCompetencyMapping() {
 	assert.NoError(suite.T(), err)
 
 	// Then delete it
-	deleteReq := competencyMapDTO.DeleteCompetencyMappingRequest{
+	deleteReq := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
@@ -110,11 +110,11 @@ func (suite *CompetencyMapServiceTestSuite) TestGetAllCompetencyMappings() {
 	fromCompetencyID2 := uuid.MustParse("c4234567-1234-1234-1234-123456789012") // Communication
 	toCompetencyID2 := uuid.MustParse("c6234567-1234-1234-1234-123456789012")   // Project Management
 
-	req1 := competencyMapDTO.CreateCompetencyMappingRequest{
+	req1 := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID1,
 		ToCompetencyID:   toCompetencyID1,
 	}
-	req2 := competencyMapDTO.CreateCompetencyMappingRequest{
+	req2 := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID2,
 		ToCompetencyID:   toCompetencyID2,
 	}

@@ -59,7 +59,7 @@ func (suite *CompetencyMapRouterTestSuite) TestCreateCompetencyMapping() {
 	fromCompetencyID := uuid.MustParse("c5234567-1234-1234-1234-123456789012") // Teamwork
 	toCompetencyID := uuid.MustParse("c7234567-1234-1234-1234-123456789012")   // Mentoring
 
-	req := competencyMapDTO.CreateCompetencyMappingRequest{
+	req := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
@@ -86,7 +86,7 @@ func (suite *CompetencyMapRouterTestSuite) TestDeleteCompetencyMapping() {
 	fromCompetencyID := uuid.MustParse("c6234567-1234-1234-1234-123456789012") // Project Management
 	toCompetencyID := uuid.MustParse("c3234567-1234-1234-1234-123456789012")   // Testing
 
-	createReq := competencyMapDTO.CreateCompetencyMappingRequest{
+	createReq := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
@@ -94,7 +94,7 @@ func (suite *CompetencyMapRouterTestSuite) TestDeleteCompetencyMapping() {
 	assert.NoError(suite.T(), err)
 
 	// Now delete it via API
-	deleteReq := competencyMapDTO.DeleteCompetencyMappingRequest{
+	deleteReq := competencyMapDTO.CompetencyMapping{
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}

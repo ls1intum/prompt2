@@ -18,7 +18,7 @@ type CompetencyMapService struct {
 
 var CompetencyMapServiceSingleton *CompetencyMapService
 
-func CreateCompetencyMapping(ctx context.Context, req competencyMapDTO.CreateCompetencyMappingRequest) error {
+func CreateCompetencyMapping(ctx context.Context, req competencyMapDTO.CompetencyMapping) error {
 	err := CompetencyMapServiceSingleton.queries.CreateCompetencyMap(ctx, db.CreateCompetencyMapParams{
 		FromCompetencyID: req.FromCompetencyID,
 		ToCompetencyID:   req.ToCompetencyID,
@@ -30,7 +30,7 @@ func CreateCompetencyMapping(ctx context.Context, req competencyMapDTO.CreateCom
 	return nil
 }
 
-func DeleteCompetencyMapping(ctx context.Context, req competencyMapDTO.DeleteCompetencyMappingRequest) error {
+func DeleteCompetencyMapping(ctx context.Context, req competencyMapDTO.CompetencyMapping) error {
 	err := CompetencyMapServiceSingleton.queries.DeleteCompetencyMap(ctx, db.DeleteCompetencyMapParams{
 		FromCompetencyID: req.FromCompetencyID,
 		ToCompetencyID:   req.ToCompetencyID,

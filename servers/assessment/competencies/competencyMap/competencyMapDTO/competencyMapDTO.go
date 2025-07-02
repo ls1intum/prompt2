@@ -10,16 +10,6 @@ type CompetencyMapping struct {
 	ToCompetencyID   uuid.UUID `json:"toCompetencyId"`
 }
 
-type CreateCompetencyMappingRequest struct {
-	FromCompetencyID uuid.UUID `json:"fromCompetencyId" binding:"required"`
-	ToCompetencyID   uuid.UUID `json:"toCompetencyId" binding:"required"`
-}
-
-type DeleteCompetencyMappingRequest struct {
-	FromCompetencyID uuid.UUID `json:"fromCompetencyId" binding:"required"`
-	ToCompetencyID   uuid.UUID `json:"toCompetencyId" binding:"required"`
-}
-
 func GetCompetencyMappingFromDBModel(dbModel db.CompetencyMap) CompetencyMapping {
 	return CompetencyMapping{
 		FromCompetencyID: dbModel.FromCompetencyID,

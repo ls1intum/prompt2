@@ -22,7 +22,7 @@ func setupCompetencyMapRouter(routerGroup *gin.RouterGroup, authMiddleware func(
 }
 
 func createCompetencyMapping(c *gin.Context) {
-	var req competencyMapDTO.CreateCompetencyMappingRequest
+	var req competencyMapDTO.CompetencyMapping
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
@@ -38,7 +38,7 @@ func createCompetencyMapping(c *gin.Context) {
 }
 
 func deleteCompetencyMapping(c *gin.Context) {
-	var req competencyMapDTO.DeleteCompetencyMappingRequest
+	var req competencyMapDTO.CompetencyMapping
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
