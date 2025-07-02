@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,6 +29,12 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
+
+	// Check if the evaluation is editable before making changes
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID)
+	if err != nil {
+		return err
+	}
 
 	err = qtx.CreateOrUpdateEvaluation(ctx, db.CreateOrUpdateEvaluationParams{
 		CourseParticipationID:       req.CourseParticipationID,
@@ -50,11 +57,38 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 }
 
 func DeleteEvaluation(ctx context.Context, id uuid.UUID) error {
-	err := EvaluationServiceSingleton.queries.DeleteEvaluation(ctx, id)
+	tx, err := EvaluationServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
+
+	// Get the evaluation details to check if it's editable
+	evaluation, err := qtx.GetEvaluationByID(ctx, id)
+	if err != nil {
+		log.Error("could not get evaluation by ID: ", err)
+		return errors.New("could not get evaluation by ID")
+	}
+
+	// Check if the evaluation is editable before deleting
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID)
+	if err != nil {
+		return err
+	}
+
+	err = qtx.DeleteEvaluation(ctx, id)
 	if err != nil {
 		log.Error("could not delete evaluation: ", err)
 		return errors.New("could not delete evaluation")
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 
