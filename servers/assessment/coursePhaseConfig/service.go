@@ -135,3 +135,37 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 
 	return teams, nil
 }
+
+func GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
+	deadline, err := CoursePhaseConfigSingleton.queries.GetSelfAssessmentDeadline(ctx, coursePhaseID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No deadline found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var response *time.Time
+	if deadline.Valid {
+		response = &deadline.Time
+	}
+
+	return response, nil
+}
+
+func GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
+	deadline, err := CoursePhaseConfigSingleton.queries.GetPeerAssessmentDeadline(ctx, coursePhaseID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No deadline found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var response *time.Time
+	if deadline.Valid {
+		response = &deadline.Time
+	}
+
+	return response, nil
+}
