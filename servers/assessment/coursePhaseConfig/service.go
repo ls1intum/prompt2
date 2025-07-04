@@ -23,17 +23,17 @@ type CoursePhaseConfigService struct {
 
 var CoursePhaseConfigSingleton *CoursePhaseConfigService
 
-func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.CoursePhaseConfig, error) {
+func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (*db.CoursePhaseConfig, error) {
 	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		// No config found for this course phase, return nil
-		return db.CoursePhaseConfig{}, nil
+		return nil, nil
 	} else if err != nil {
 		log.Error("could not get course phase config: ", err)
-		return db.CoursePhaseConfig{}, errors.New("could not get course phase config")
+		return nil, errors.New("could not get course phase config")
 	}
 
-	return config, nil
+	return &config, nil
 }
 
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {

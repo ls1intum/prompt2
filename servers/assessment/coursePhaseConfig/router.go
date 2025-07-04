@@ -43,7 +43,12 @@ func getCoursePhaseConfig(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config))
+	if config == nil {
+		c.JSON(http.StatusOK, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(*config))
 }
 
 func updateCoursePhaseDeadline(c *gin.Context) {

@@ -246,21 +246,20 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetTeamsForCoursePhase() {
 	testID := uuid.New()
 	authHeader := "Bearer test-token"
 
-	// Test that the function doesn't panic and returns a slice
+	// Test that the function returns an error due to external dependency failure
 	teams, err := GetTeamsForCoursePhase(suite.suiteCtx, authHeader, testID)
-	assert.NoError(suite.T(), err, "Should not error (current implementation returns empty slice)")
-	assert.NotNil(suite.T(), teams, "Should return non-nil slice")
-	assert.IsType(suite.T(), []coursePhaseConfigDTO.Team{}, teams, "Should return correct type")
+	assert.Error(suite.T(), err, "Should error due to external service dependency")
+	assert.Nil(suite.T(), teams, "Should return nil on error")
 }
 
 func (suite *CoursePhaseConfigServiceTestSuite) TestGetParticipationsForCoursePhase() {
 	testID := uuid.New()
 	authHeader := "Bearer test-token"
 
-	// Test that the function doesn't panic
-	assert.NotPanics(suite.T(), func() {
-		_, _ = GetParticipationsForCoursePhase(suite.suiteCtx, authHeader, testID)
-	})
+	// Test that the function returns an error due to external dependency failure
+	participations, err := GetParticipationsForCoursePhase(suite.suiteCtx, authHeader, testID)
+	assert.Error(suite.T(), err, "Should error due to external service dependency")
+	assert.Nil(suite.T(), participations, "Should return nil on error")
 }
 
 // Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls

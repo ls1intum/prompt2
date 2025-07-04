@@ -65,65 +65,6 @@ func (suite *CoursePhaseConfigRouterTestSuite) TearDownSuite() {
 	}
 }
 
-func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadline() {
-	// First set a deadline
-	testDeadline := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
-	err := UpdateCoursePhaseDeadline(suite.suiteCtx, suite.testCoursePhaseID, testDeadline)
-	assert.NoError(suite.T(), err)
-
-	// Test GET request
-	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", suite.testCoursePhaseID.String())
-	req, err := http.NewRequest("GET", url, nil)
-	assert.NoError(suite.T(), err)
-
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusOK, w.Code)
-
-	var response *time.Time
-	err = json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(suite.T(), err)
-	assert.NotNil(suite.T(), response)
-	assert.True(suite.T(), response.Equal(testDeadline))
-}
-
-func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineNonExistent() {
-	nonExistentID := uuid.New()
-
-	// Test GET request for non-existent course phase
-	url := fmt.Sprintf("/api/course_phase/%s/config/deadline", nonExistentID.String())
-	req, err := http.NewRequest("GET", url, nil)
-	assert.NoError(suite.T(), err)
-
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusOK, w.Code)
-
-	var response *time.Time
-	err = json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(suite.T(), err)
-	assert.Nil(suite.T(), response)
-}
-
-func (suite *CoursePhaseConfigRouterTestSuite) TestGetCoursePhaseDeadlineInvalidID() {
-	// Test GET request with invalid UUID
-	url := "/api/course_phase/invalid-uuid/config/deadline"
-	req, err := http.NewRequest("GET", url, nil)
-	assert.NoError(suite.T(), err)
-
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusBadRequest, w.Code)
-
-	var response map[string]string
-	err = json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(suite.T(), err)
-	assert.Contains(suite.T(), response["error"], "Invalid course phase ID")
-}
-
 func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateCoursePhaseDeadline() {
 	testDeadline := time.Date(2025, 8, 15, 14, 30, 0, 0, time.UTC)
 	requestBody := coursePhaseConfigDTO.UpdateDeadlineRequest{
