@@ -31,6 +31,19 @@ func NewCoursePhaseConfigService(queries db.Queries, conn *pgxpool.Pool) *Course
 	}
 }
 
+func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (*db.CoursePhaseConfig, error) {
+	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No config found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
+		log.Error("could not get course phase config: ", err)
+		return nil, errors.New("could not get course phase config")
+	}
+
+	return &config, nil
+}
+
 func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
 	params := db.UpdateCoursePhaseDeadlineParams{
 		Deadline: pgtype.Timestamptz{
@@ -60,6 +73,52 @@ func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time
 	return response, nil
 }
 
+func GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
+	deadline, err := CoursePhaseConfigSingleton.queries.GetSelfAssessmentDeadline(ctx, coursePhaseID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No deadline found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var response *time.Time
+	if deadline.Valid {
+		response = &deadline.Time
+	}
+
+	return response, nil
+}
+
+func UpdateSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
+	params := db.UpdateSelfAssessmentDeadlineParams{
+		SelfAssessmentDeadline: pgtype.Timestamptz{
+			Time:  deadline,
+			Valid: true,
+		},
+		CoursePhaseID: coursePhaseID,
+	}
+
+	return CoursePhaseConfigSingleton.queries.UpdateSelfAssessmentDeadline(ctx, params)
+}
+
+func GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
+	deadline, err := CoursePhaseConfigSingleton.queries.GetPeerAssessmentDeadline(ctx, coursePhaseID)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		// No deadline found for this course phase, return nil
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var response *time.Time
+	if deadline.Valid {
+		response = &deadline.Time
+	}
+
+	return response, nil
+}
+
 func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
 	coreURL := utils.GetCoreUrl()
 	participations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
@@ -69,6 +128,54 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 	}
 
 	return coursePhaseConfigDTO.GetAssessmentStudentsFromParticipations(participations), nil
+}
+
+func UpdatePeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
+	params := db.UpdatePeerAssessmentDeadlineParams{
+		PeerAssessmentDeadline: pgtype.Timestamptz{
+			Time:  deadline,
+			Valid: true,
+		},
+		CoursePhaseID: coursePhaseID,
+	}
+
+	return CoursePhaseConfigSingleton.queries.UpdatePeerAssessmentDeadline(ctx, params)
+}
+
+func CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, templateID uuid.UUID) error {
+	params := db.CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams{
+		SelfAssessmentTemplate: pgtype.UUID{
+			Bytes: templateID,
+			Valid: true,
+		},
+		CoursePhaseID: coursePhaseID,
+	}
+
+	err := CoursePhaseConfigSingleton.queries.CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx, params)
+	if err != nil {
+		log.Error("could not create or update self assessment template for course phase: ", err)
+		return errors.New("could not create or update self assessment template for course phase")
+	}
+
+	return nil
+}
+
+func CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, templateID uuid.UUID) error {
+	params := db.CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams{
+		PeerAssessmentTemplate: pgtype.UUID{
+			Bytes: templateID,
+			Valid: true,
+		},
+		CoursePhaseID: coursePhaseID,
+	}
+
+	err := CoursePhaseConfigSingleton.queries.CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx, params)
+	if err != nil {
+		log.Error("could not create or update peer assessment template for course phase: ", err)
+		return errors.New("could not create or update peer assessment template for course phase")
+	}
+
+	return nil
 }
 
 func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
@@ -136,36 +243,23 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 	return teams, nil
 }
 
-func GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
-	deadline, err := CoursePhaseConfigSingleton.queries.GetSelfAssessmentDeadline(ctx, coursePhaseID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No deadline found for this course phase, return nil
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+func CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Context, req coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateCoursePhaseRequest) error {
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	err = qtx.CreateOrUpdateAssessmentTemplateCoursePhase(ctx, db.CreateOrUpdateAssessmentTemplateCoursePhaseParams{
+		AssessmentTemplateID: req.AssessmentTemplateID,
+		CoursePhaseID:        req.CoursePhaseID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to create or update assessment template course phase")
+		return err
 	}
 
-	var response *time.Time
-	if deadline.Valid {
-		response = &deadline.Time
-	}
-
-	return response, nil
-}
-
-func GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
-	deadline, err := CoursePhaseConfigSingleton.queries.GetPeerAssessmentDeadline(ctx, coursePhaseID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No deadline found for this course phase, return nil
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	var response *time.Time
-	if deadline.Valid {
-		response = &deadline.Time
-	}
-
-	return response, nil
+	return tx.Commit(ctx)
 }

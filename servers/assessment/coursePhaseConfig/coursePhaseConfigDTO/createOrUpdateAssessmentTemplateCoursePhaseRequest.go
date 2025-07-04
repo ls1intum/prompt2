@@ -1,4 +1,4 @@
-package assessmentTemplateDTO
+package coursePhaseConfigDTO
 
 import "github.com/google/uuid"
 

@@ -129,58 +129,6 @@ func DeleteAssessmentTemplate(ctx context.Context, templateID uuid.UUID) error {
 	return tx.Commit(ctx)
 }
 
-func CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Context, req assessmentTemplateDTO.CreateOrUpdateAssessmentTemplateCoursePhaseRequest) error {
-	tx, err := AssessmentTemplateServiceSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := AssessmentTemplateServiceSingleton.queries.WithTx(tx)
-
-	err = qtx.CreateOrUpdateAssessmentTemplateCoursePhase(ctx, db.CreateOrUpdateAssessmentTemplateCoursePhaseParams{
-		AssessmentTemplateID: req.AssessmentTemplateID,
-		CoursePhaseID:        req.CoursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update assessment template course phase")
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func DeleteAssessmentTemplateCoursePhase(ctx context.Context, assessmentTemplateID, coursePhaseID uuid.UUID) error {
-	tx, err := AssessmentTemplateServiceSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := AssessmentTemplateServiceSingleton.queries.WithTx(tx)
-
-	err = qtx.DeleteAssessmentTemplateCoursePhase(ctx, db.DeleteAssessmentTemplateCoursePhaseParams{
-		AssessmentTemplateID: assessmentTemplateID,
-		CoursePhaseID:        coursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Error("Failed to delete assessment template course phase")
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (assessmentTemplateDTO.AssessmentTemplate, error) {
-	template, err := AssessmentTemplateServiceSingleton.queries.GetAssessmentTemplatesByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.WithError(err).Error("Failed to get assessment templates by course phase")
-		return assessmentTemplateDTO.AssessmentTemplate{}, err
-	}
-
-	return assessmentTemplateDTO.MapDBAssessmentTemplateToDTOAssessmentTemplate(template), nil
-}
-
 func GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
 	coursePhaseIDs, err := AssessmentTemplateServiceSingleton.queries.GetCoursePhasesByAssessmentTemplate(ctx, assessmentTemplateID)
 	if err != nil {

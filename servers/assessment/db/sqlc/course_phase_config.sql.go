@@ -29,6 +29,38 @@ func (q *Queries) CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Contex
 	return err
 }
 
+const createOrUpdatePeerAssessmentTemplateCoursePhase = `-- name: CreateOrUpdatePeerAssessmentTemplateCoursePhase :exec
+UPDATE course_phase_config
+SET peer_assessment_template = $1
+WHERE course_phase_id = $2
+`
+
+type CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams struct {
+	PeerAssessmentTemplate pgtype.UUID `json:"peer_assessment_template"`
+	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
+}
+
+func (q *Queries) CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdatePeerAssessmentTemplateCoursePhase, arg.PeerAssessmentTemplate, arg.CoursePhaseID)
+	return err
+}
+
+const createOrUpdateSelfAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateSelfAssessmentTemplateCoursePhase :exec
+UPDATE course_phase_config
+SET self_assessment_template = $1
+WHERE course_phase_id = $2
+`
+
+type CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams struct {
+	SelfAssessmentTemplate pgtype.UUID `json:"self_assessment_template"`
+	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
+}
+
+func (q *Queries) CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateSelfAssessmentTemplateCoursePhase, arg.SelfAssessmentTemplate, arg.CoursePhaseID)
+	return err
+}
+
 const deleteAssessmentTemplateCoursePhase = `-- name: DeleteAssessmentTemplateCoursePhase :exec
 DELETE
 FROM course_phase_config
@@ -62,6 +94,29 @@ func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, cours
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
+SELECT assessment_template_id, course_phase_id, deadline, self_assessment_enabled, self_assessment_template, self_assessment_deadline, peer_assessment_enabled, peer_assessment_template, peer_assessment_deadline
+FROM course_phase_config
+WHERE course_phase_id = $1
+`
+
+func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (CoursePhaseConfig, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseConfig, coursePhaseID)
+	var i CoursePhaseConfig
+	err := row.Scan(
+		&i.AssessmentTemplateID,
+		&i.CoursePhaseID,
+		&i.Deadline,
+		&i.SelfAssessmentEnabled,
+		&i.SelfAssessmentTemplate,
+		&i.SelfAssessmentDeadline,
+		&i.PeerAssessmentEnabled,
+		&i.PeerAssessmentTemplate,
+		&i.PeerAssessmentDeadline,
 	)
 	return i, err
 }
@@ -118,6 +173,26 @@ func (q *Queries) GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID u
 	return peer_assessment_deadline, err
 }
 
+const getPeerAssessmentTemplateByCoursePhase = `-- name: GetPeerAssessmentTemplateByCoursePhase :one
+SELECT at.id, at.name, at.description, at.created_at, at.updated_at
+FROM assessment_template at
+         INNER JOIN course_phase_config cpc ON at.id = cpc.peer_assessment_template
+WHERE cpc.course_phase_id = $1
+`
+
+func (q *Queries) GetPeerAssessmentTemplateByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
+	row := q.db.QueryRow(ctx, getPeerAssessmentTemplateByCoursePhase, coursePhaseID)
+	var i AssessmentTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getSelfAssessmentDeadline = `-- name: GetSelfAssessmentDeadline :one
 SELECT self_assessment_deadline
 FROM course_phase_config
@@ -129,6 +204,26 @@ func (q *Queries) GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID u
 	var self_assessment_deadline pgtype.Timestamptz
 	err := row.Scan(&self_assessment_deadline)
 	return self_assessment_deadline, err
+}
+
+const getSelfAssessmentTemplateByCoursePhase = `-- name: GetSelfAssessmentTemplateByCoursePhase :one
+SELECT at.id, at.name, at.description, at.created_at, at.updated_at
+FROM assessment_template at
+         INNER JOIN course_phase_config cpc ON at.id = cpc.self_assessment_template
+WHERE cpc.course_phase_id = $1
+`
+
+func (q *Queries) GetSelfAssessmentTemplateByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
+	row := q.db.QueryRow(ctx, getSelfAssessmentTemplateByCoursePhase, coursePhaseID)
+	var i AssessmentTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
