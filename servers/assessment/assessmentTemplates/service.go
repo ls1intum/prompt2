@@ -85,6 +85,12 @@ func ListAssessmentTemplates(ctx context.Context) ([]assessmentTemplateDTO.Asses
 }
 
 func UpdateAssessmentTemplate(ctx context.Context, templateID uuid.UUID, req assessmentTemplateDTO.UpdateAssessmentTemplateRequest) error {
+	// First check if template exists
+	_, err := GetAssessmentTemplate(ctx, templateID)
+	if err != nil {
+		return err
+	}
+
 	tx, err := AssessmentTemplateServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err

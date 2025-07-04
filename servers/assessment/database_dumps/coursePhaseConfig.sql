@@ -34,7 +34,15 @@ CREATE TABLE public.course_phase_config (
     assessment_template_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
     deadline timestamp with time zone DEFAULT NULL,
-    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE
+    self_assessment_enabled boolean NOT NULL DEFAULT false,
+    self_assessment_template uuid,
+    self_assessment_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_assessment_enabled boolean NOT NULL DEFAULT false,
+    peer_assessment_template uuid,
+    peer_assessment_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
+    FOREIGN KEY (self_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
+    FOREIGN KEY (peer_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
 );
 
 --
@@ -42,15 +50,17 @@ CREATE TABLE public.course_phase_config (
 --
 
 INSERT INTO public.assessment_template (id, name, description) VALUES
-('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Template', 'Test template for unit tests');
+('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Template', 'Test template for unit tests'),
+('550e8400-e29b-41d4-a716-446655440001', 'Self Assessment Template', 'This is the default self assessment template.'),
+('550e8400-e29b-41d4-a716-446655440002', 'Peer Assessment Template', 'This is the default peer assessment template.');
 
 --
 -- Data for Name: course_phase_config; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 -- Sample data can be inserted here if needed for tests
--- INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline) VALUES
--- ('550e8400-e29b-41d4-a716-446655440000', '123e4567-e89b-12d3-a456-426614174000', '2025-12-31 23:59:59+00');
+-- INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_assessment_enabled, self_assessment_template, self_assessment_deadline, peer_assessment_enabled, peer_assessment_template, peer_assessment_deadline) VALUES
+-- ('550e8400-e29b-41d4-a716-446655440000', '123e4567-e89b-12d3-a456-426614174000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440001', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440002', '2025-12-31 23:59:59+00');
 
 --
 -- PostgreSQL database dump complete

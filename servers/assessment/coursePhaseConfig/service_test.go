@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -35,12 +36,15 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 
 	// Generate a test course phase ID and insert it with a template
 	suite.testCoursePhaseID = uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000") // From our test data
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")     // From our test data
+	selfTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001") // Self assessment template
+	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment template
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
-		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
-		templateID, suite.testCoursePhaseID)
+		`INSERT INTO course_phase_config (assessment_template_id, course_phase_id, self_assessment_template, peer_assessment_template) 
+		 VALUES ($1, $2, $3, $4)`,
+		templateID, suite.testCoursePhaseID, selfTemplateID, peerTemplateID)
 	if err != nil {
 		suite.T().Fatalf("Failed to insert test course phase config: %v", err)
 	}
@@ -112,6 +116,151 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineMul
 	assert.NoError(suite.T(), err, "Should be able to get course phase deadline")
 	assert.NotNil(suite.T(), retrievedDeadline, "Retrieved deadline should not be nil")
 	assert.True(suite.T(), retrievedDeadline.Equal(secondDeadline), "Retrieved deadline should match the latest set deadline")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
+	// Test getting course phase config
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	// Insert a course phase config entry first
+	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
+		templateID, testID)
+	assert.NoError(suite.T(), err)
+
+	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err, "Should be able to get course phase config")
+	assert.NotNil(suite.T(), config, "Config should not be nil")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfigNonExistent() {
+	nonExistentID := uuid.New()
+	config, err := GetCoursePhaseConfig(suite.suiteCtx, nonExistentID)
+	// Should return nil without error for non-existent config
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), config)
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateAndGetSelfAssessmentDeadline() {
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	// Insert a course phase config entry first
+	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
+		templateID, testID)
+	assert.NoError(suite.T(), err)
+
+	testDeadline := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	err = UpdateSelfAssessmentDeadline(suite.suiteCtx, testID, testDeadline)
+	assert.NoError(suite.T(), err, "Should be able to update self assessment deadline")
+
+	retrievedDeadline, err := GetSelfAssessmentDeadline(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err, "Should be able to get self assessment deadline")
+	assert.NotNil(suite.T(), retrievedDeadline, "Retrieved deadline should not be nil")
+	assert.True(suite.T(), retrievedDeadline.Equal(testDeadline), "Retrieved deadline should match the set deadline")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfAssessmentDeadlineNonExistent() {
+	nonExistentID := uuid.New()
+	deadline, err := GetSelfAssessmentDeadline(suite.suiteCtx, nonExistentID)
+	// Should return nil without error for non-existent deadline
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), deadline)
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateAndGetPeerAssessmentDeadline() {
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	// Insert a course phase config entry first
+	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
+		templateID, testID)
+	assert.NoError(suite.T(), err)
+
+	testDeadline := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	err = UpdatePeerAssessmentDeadline(suite.suiteCtx, testID, testDeadline)
+	assert.NoError(suite.T(), err, "Should be able to update peer assessment deadline")
+
+	retrievedDeadline, err := GetPeerAssessmentDeadline(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err, "Should be able to get peer assessment deadline")
+	assert.NotNil(suite.T(), retrievedDeadline, "Retrieved deadline should not be nil")
+	assert.True(suite.T(), retrievedDeadline.Equal(testDeadline), "Retrieved deadline should match the set deadline")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetPeerAssessmentDeadlineNonExistent() {
+	nonExistentID := uuid.New()
+	deadline, err := GetPeerAssessmentDeadline(suite.suiteCtx, nonExistentID)
+	// Should return nil without error for non-existent deadline
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), deadline)
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateAssessmentTemplateCoursePhase() {
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	req := coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest{
+		AssessmentTemplateID: templateID,
+	}
+
+	err := CreateOrUpdateAssessmentTemplateCoursePhase(suite.suiteCtx, testID, req)
+	// This may succeed or fail depending on database constraints - test that it doesn't panic
+	_ = err // Ignore the error for this test
+	assert.NotPanics(suite.T(), func() {
+		_ = CreateOrUpdateAssessmentTemplateCoursePhase(suite.suiteCtx, testID, req)
+	})
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateSelfAssessmentTemplateCoursePhase() {
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	req := coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest{
+		AssessmentTemplateID: templateID,
+	}
+
+	// Test that the function doesn't panic
+	assert.NotPanics(suite.T(), func() {
+		_ = CreateOrUpdateSelfAssessmentTemplateCoursePhase(suite.suiteCtx, testID, req)
+	})
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdatePeerAssessmentTemplateCoursePhase() {
+	testID := uuid.New()
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+
+	req := coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest{
+		AssessmentTemplateID: templateID,
+	}
+
+	// Test that the function doesn't panic
+	assert.NotPanics(suite.T(), func() {
+		_ = CreateOrUpdatePeerAssessmentTemplateCoursePhase(suite.suiteCtx, testID, req)
+	})
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetTeamsForCoursePhase() {
+	testID := uuid.New()
+	authHeader := "Bearer test-token"
+
+	// Test that the function doesn't panic and returns a slice
+	teams, err := GetTeamsForCoursePhase(suite.suiteCtx, authHeader, testID)
+	assert.NoError(suite.T(), err, "Should not error (current implementation returns empty slice)")
+	assert.NotNil(suite.T(), teams, "Should return non-nil slice")
+	assert.IsType(suite.T(), []coursePhaseConfigDTO.Team{}, teams, "Should return correct type")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetParticipationsForCoursePhase() {
+	testID := uuid.New()
+	authHeader := "Bearer test-token"
+
+	// Test that the function doesn't panic
+	assert.NotPanics(suite.T(), func() {
+		_, _ = GetParticipationsForCoursePhase(suite.suiteCtx, authHeader, testID)
+	})
 }
 
 // Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls

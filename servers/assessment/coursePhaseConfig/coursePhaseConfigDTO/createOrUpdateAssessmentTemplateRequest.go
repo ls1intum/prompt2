@@ -2,7 +2,6 @@ package coursePhaseConfigDTO
 
 import "github.com/google/uuid"
 
-type CreateOrUpdateAssessmentTemplateCoursePhaseRequest struct {
+type CreateOrUpdateAssessmentTemplateRequest struct {
 	AssessmentTemplateID uuid.UUID `json:"assessmentTemplateId"`
-	CoursePhaseID        uuid.UUID `json:"coursePhaseId"`
 }

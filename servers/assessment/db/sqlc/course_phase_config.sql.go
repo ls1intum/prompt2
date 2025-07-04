@@ -36,8 +36,8 @@ WHERE course_phase_id = $2
 `
 
 type CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams struct {
-	PeerAssessmentTemplate pgtype.UUID `json:"peer_assessment_template"`
-	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
+	PeerAssessmentTemplate uuid.UUID `json:"peer_assessment_template"`
+	CoursePhaseID          uuid.UUID `json:"course_phase_id"`
 }
 
 func (q *Queries) CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams) error {
@@ -52,8 +52,8 @@ WHERE course_phase_id = $2
 `
 
 type CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams struct {
-	SelfAssessmentTemplate pgtype.UUID `json:"self_assessment_template"`
-	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
+	SelfAssessmentTemplate uuid.UUID `json:"self_assessment_template"`
+	CoursePhaseID          uuid.UUID `json:"course_phase_id"`
 }
 
 func (q *Queries) CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams) error {
