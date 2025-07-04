@@ -79,13 +79,12 @@ $$
                        self_uuid);
         EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN peer_assessment_template SET DEFAULT %L',
                        peer_uuid);
-        ALTER TABLE course_phase_config
-            ALTER COLUMN self_assessment_template SET NOT NULL,
-            ALTER COLUMN peer_assessment_template SET NOT NULL;
     END
 $$;
 
 ALTER TABLE course_phase_config
+    ALTER COLUMN self_assessment_template SET NOT NULL,
+    ALTER COLUMN peer_assessment_template SET NOT NULL,
     ADD FOREIGN KEY (self_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
     ADD FOREIGN KEY (peer_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT;
 
