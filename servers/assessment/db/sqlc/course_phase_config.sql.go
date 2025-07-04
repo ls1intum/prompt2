@@ -106,7 +106,7 @@ func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, asses
 }
 
 const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT assessment_template_id, course_phase_id, deadline
+SELECT assessment_template_id, course_phase_id, deadline, self_assessment_enabled, self_assessment_template, self_assessment_deadline, peer_assessment_enabled, peer_assessment_template, peer_assessment_deadline
 FROM course_phase_config
 ORDER BY assessment_template_id, course_phase_id
 `
@@ -120,7 +120,17 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 	var items []CoursePhaseConfig
 	for rows.Next() {
 		var i CoursePhaseConfig
-		if err := rows.Scan(&i.AssessmentTemplateID, &i.CoursePhaseID, &i.Deadline); err != nil {
+		if err := rows.Scan(
+			&i.AssessmentTemplateID,
+			&i.CoursePhaseID,
+			&i.Deadline,
+			&i.SelfAssessmentEnabled,
+			&i.SelfAssessmentTemplate,
+			&i.SelfAssessmentDeadline,
+			&i.PeerAssessmentEnabled,
+			&i.PeerAssessmentTemplate,
+			&i.PeerAssessmentDeadline,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
