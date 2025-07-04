@@ -1,71 +1,148 @@
-# PROMPT 2.0: A Modular and Scalable Management Platform for Project-Based Teaching
+# PROMPT 2.0 – Project-Oriented Modular Platform for Teaching
 
-## Main Goals
-PROMPT 2.0 is a course management platform designed to support project-based teaching by streamlining organizational complexities. Initially developed for the iPraktikum at the Technical University of Munich (TUM), PROMPT has been reimagined to be flexible, modular, and applicable to a wide range of project-based courses. The platform helps instructors efficiently manage tasks such as student applications, team allocation, grading, and infrastructure setup.
+## What is PROMPT?
+
+**PROMPT (Project-Oriented Modular Platform for Teaching)** is a course management tool built to simplify the administration of project-based university courses.
+
+Originally developed for the **iPraktikum** at the **Technical University of Munich**, PROMPT is now a **modular and extensible platform** that adapts to the needs of instructors and scales across different teaching formats.
+
+### Key Features
+
+#### Core Features
+
+- **Course Configuration:** Build custom course flows using reusable course phases.
+- **Student Management:** Manage participant data and applications.
+- **Application Phase:** Streamlined workflows for student applications.
+
+#### Dynamically Loaded Course Phases
+
+PROMPT supports custom course phases as independently deployable modules:
+
+- 🗓 **Interview Phase** – Schedule and manage student interviews.
+- 🧑‍🤝‍🧑 **Team Phase** – Allocate students to projects and teams.
+- 📄 **TUM Matching Export** – Export data in TUM-compatible format.
+- 🧩 **Custom Phases** – Easily extend PROMPT with your own logic.
 
 ---
 
-## Project Structure
-PROMPT 2.0 is designed around the principle that a course consists of a sequence of independent, reusable course phases. This modularity is a central feature, reflected in both the client and server architectures. Each side is composed of a core component, offering shared functionality, and independently loaded modules, where each module corresponds to a specific course phase.
+## Guide to PROMPT
 
-### Clients
-- Built using **React**, **Webpack module federation**, and **TypeScript**.
-- Utilize a **shared library** for reusable UI components (built with `shadcn/ui`), shared functionality, and context management.
-- Each course phase (e.g., Intro Course Phase, Team Phase) is implemented as an independent React module. These modules are dynamically loaded into the frontend, allowing flexible customization. The Application Phase is a unique exception, as it is shared across all courses and is bundled within the core frontend.
+Explore the live system here 👉 [https://prompt.aet.cit.tum.de/](https://prompt.aet.cit.tum.de/)
 
-### Server
-- Implements a **service-based architecture** with the core written in **Go**.
-- The core provides essential functionality for managing courses.
-- Each course phase type may have its own **dedicated service**, encapsulating the logic and operations specific to that phase type. These services may or may not be stateless. 
+PROMPT is built for teaching teams who run complex project-based university courses. This guide gives you a first impression of the product, its modules, and typical workflows.
 
+### Build and Configure Courses
 
-### Additional Components
-- **Authentication:** Uses Keycloak for identity management.
-- **Database:** PostgreSQL is used for the database service.
+PROMPT lets you define courses by combining reusable “phases”:
+
+- Add application, interview, matching, and many more phases
+- Define prerequisites and outcomes for each phase
+
+![Screenshot: Course Configuration](docs/images/course-configurator.png)
 
 ---
 
-## Getting Started
+### Manage Students and Teams
 
-### Prerequisites
-To run the platform, ensure the following are installed:
+PROMPT provides powerful tools for handling student participation throughout your course:
+
+- Track incoming applications and monitor their progress
+- Schedule and conduct interviews with applicants
+- Form teams and assign projects using manual or semi-automated workflows
+- Evaluate student performance on a **per-phase basis**, enabling you to decide who passes or fails at each stage of the course independently
+
+![Screenshot: Application Administration](docs/images/application-administration.png)
+
+![Screenshot: Matching](docs/images/matching.png)
+
+---
+
+### Extend PROMPT with Custom Phases
+
+Each course phase can be developed and plugged in independently—ideal for institutions with evolving or specialized workflows.
+
+---
+
+## Development Guide
+
+This section is for **developers and contributors** looking to run PROMPT locally or contribute to its development.
+
+### Project Structure
+
+#### Clients
+
+- Built with **React**, **TypeScript**, and **Webpack Module Federation**
+- Micro-frontends for each course phase
+- Shared design system using [`shadcn/ui`](https://ui.shadcn.com/)
+
+#### Server
+
+- Developed in **Go**
+- Core service + modular service architecture for each course phase
+- **PostgreSQL** for data storage
+- **Keycloak** for authentication
+
+---
+
+### Getting Started
+
+#### Prerequisites
+
 - [Node.js](https://nodejs.org/)
 - [Yarn](https://yarnpkg.com/)
-- [Docker](https://www.docker.com/) (for server and supporting services)
+- [Go](https://go.dev/)
+- [Docker](https://www.docker.com/)
 
-### Installation and Setup
+#### Running the Clients
 
-#### Installing and Running the Clients
 1. Navigate to the client directory:
-    ```sh
-    cd clients
-    ```
+
+   ```bash
+   cd clients
+   ```
+
 2. Install dependencies:
-    ```sh
-    yarn install
-    ```
+
+   ```bash
+   yarn install
+   ```
+
 3. Start the development clients:
-    ```sh
-    yarn run dev
-    ```
-    This command uses `lerna` to launch all micro frontends simultaneously. To start a specific micro frontend, navigate to its subdirectory and run the development command there.
+
+   ```bash
+   yarn run dev
+   ```
+
+   This command uses `lerna` to launch all micro frontends simultaneously. To start a specific micro frontend, navigate to its subdirectory and run the development command there.
 
 #### Running the Server
-1. Navigate to the server directory:
-    ```sh
-    cd server
-    ```
-2. Start the server in development mode:
-    ```sh
-    go run main.go
-    ```
 
-#### Running Supporting Services (Database and Keycloak)
-1. Start the database and Keycloak using Docker:
-    ```sh
-    docker-compose up db keycloak
-    ```
-    To run the server in Docker alongside these services:
-    ```sh
-    docker-compose up
-    ```
+1. Navigate to the server directory:
+
+   ```bash
+   cd server
+   ```
+
+2. Start the server in development mode:
+
+   ```bash
+   go run main.go
+   ```
+
+#### Running Supporting Services
+
+```bash
+docker-compose up db keycloak
+```
+
+To run the server in Docker alongside these services:
+
+```bash
+docker-compose up
+```
+
+---
+
+## Configuration
+
+PROMPT can be customized for your course by composing it from different modular phases. These configurations are handled at the course level and dynamically loaded on demand.
