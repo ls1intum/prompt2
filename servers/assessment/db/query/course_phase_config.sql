@@ -35,3 +35,23 @@ WHERE course_phase_id = $2;
 SELECT deadline
 FROM course_phase_config
 WHERE course_phase_id = $1;
+
+-- name: GetSelfAssessmentDeadline :one
+SELECT self_assessment_deadline
+FROM course_phase_config
+WHERE course_phase_id = $1;
+
+-- name: GetPeerAssessmentDeadline :one
+SELECT peer_assessment_deadline
+FROM course_phase_config
+WHERE course_phase_id = $1;
+
+-- name: UpdateSelfAssessmentDeadline :exec
+UPDATE course_phase_config
+SET self_assessment_deadline = $1
+WHERE course_phase_id = $2;
+
+-- name: UpdatePeerAssessmentDeadline :exec
+UPDATE course_phase_config
+SET peer_assessment_deadline = $1
+WHERE course_phase_id = $2;
