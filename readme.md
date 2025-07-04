@@ -1,4 +1,4 @@
-# PROMPT 2.0 – Project-Oriented Modular Platform for Teaching
+# PROMPT 2.0: A Modular and Scalable Management Platform for Project-Based Teaching
 
 ## What is PROMPT?
 
