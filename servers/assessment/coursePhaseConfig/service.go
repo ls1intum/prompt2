@@ -23,6 +23,13 @@ type CoursePhaseConfigService struct {
 
 var CoursePhaseConfigSingleton *CoursePhaseConfigService
 
+func NewCoursePhaseConfigService(queries db.Queries, conn *pgxpool.Pool) *CoursePhaseConfigService {
+	return &CoursePhaseConfigService{
+		queries: queries,
+		conn:    conn,
+	}
+}
+
 func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (*db.CoursePhaseConfig, error) {
 	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
