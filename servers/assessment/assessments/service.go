@@ -158,8 +158,9 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 	// Get the assessment details to check if it's editable
 	assessment, err := qtx.GetAssessment(ctx, id)
 	if err != nil {
-		log.Error("could not get assessment by ID: ", err)
-		return errors.New("could not get assessment by ID")
+		// If assessment doesn't exist, return nil (no error) as it's already "deleted"
+		log.Info("assessment not found, nothing to delete: ", err)
+		return nil
 	}
 
 	// Check if the assessment is editable before deleting

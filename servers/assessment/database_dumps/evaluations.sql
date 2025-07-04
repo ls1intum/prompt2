@@ -81,6 +81,20 @@ CREATE TABLE public.evaluation (
     CONSTRAINT evaluation_unique_constraint UNIQUE (course_participation_id, course_phase_id, competency_id, author_course_participation_id)
 );
 
+CREATE TABLE public.evaluation_completion (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    author_course_participation_id uuid NOT NULL,
+    completed_at timestamp with time zone NOT NULL,
+    completed boolean DEFAULT false NOT NULL,
+    CONSTRAINT evaluation_completion_pkey PRIMARY KEY (id),
+    CONSTRAINT evaluation_completion_course_participation_id_fkey FOREIGN KEY (course_participation_id) REFERENCES public.course_participation(id) ON DELETE CASCADE,
+    CONSTRAINT evaluation_completion_course_phase_id_fkey FOREIGN KEY (course_phase_id) REFERENCES public.course_phase(id) ON DELETE CASCADE,
+    CONSTRAINT evaluation_completion_author_course_participation_id_fkey FOREIGN KEY (author_course_participation_id) REFERENCES public.course_participation(id) ON DELETE CASCADE,
+    CONSTRAINT evaluation_completion_unique_constraint UNIQUE (course_participation_id, course_phase_id, author_course_participation_id)
+);
+
 -- Insert test course phases
 INSERT INTO course_phase (id, name, course_id, start_date, end_date) VALUES
     ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Test Phase 1', '12345678-1234-1234-1234-123456789012', '2024-01-01', '2024-12-31'),
