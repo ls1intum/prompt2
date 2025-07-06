@@ -21,8 +21,7 @@ import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
 import { CoursePhaseConfigSelection } from './components/CoursePhaseConfigSelection/CoursePhaseConfigSelection'
-import { CategoryList } from './components/CategoryList'
-import { CreateCategoryForm } from './components/CreateCategoryForm'
+import { CategoryList } from './components/CategoryList/CategoryList'
 
 export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -78,7 +77,6 @@ export const SettingsPage = (): JSX.Element => {
               </div>
               <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
                 <CategoryList assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
-                <CreateCategoryForm assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

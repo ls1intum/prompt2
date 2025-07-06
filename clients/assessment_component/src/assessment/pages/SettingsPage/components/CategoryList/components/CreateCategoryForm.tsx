@@ -1,4 +1,7 @@
 import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { AlertCircle, Plus } from 'lucide-react'
+
 import {
   Button,
   Input,
@@ -9,10 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@tumaet/prompt-ui-components'
-import { useState } from 'react'
-import { AlertCircle, Plus } from 'lucide-react'
+
+import { CreateCategoryRequest } from '../../../../../interfaces/category'
+
 import { useCreateCategory } from '../hooks/useCreateCategory'
-import { CreateCategoryRequest } from '../../../interfaces/category'
 
 export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
   const [error, setError] = useState<string | undefined>(undefined)

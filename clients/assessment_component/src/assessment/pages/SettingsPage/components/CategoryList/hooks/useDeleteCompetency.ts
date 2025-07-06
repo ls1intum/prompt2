@@ -1,15 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { updateCompetency } from '../../../network/mutations/updateCompetency'
-import { UpdateCompetencyRequest } from '../../../interfaces/competency'
+import { deleteCompetency } from '../../../../../network/mutations/deleteCompetency'
 
-export const useUpdateCompetency = (setError: (error: string | null) => void) => {
+export const useDeleteCompetency = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (competency: UpdateCompetencyRequest) =>
-      updateCompetency(phaseId ?? '', competency),
+    mutationFn: (competencyID: string) => deleteCompetency(phaseId ?? '', competencyID),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['assessments'] })

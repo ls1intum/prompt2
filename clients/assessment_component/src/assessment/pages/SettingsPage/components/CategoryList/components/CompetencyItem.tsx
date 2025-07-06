@@ -3,9 +3,10 @@ import { ChevronRight, Edit, Trash2 } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
+import type { Competency } from '../../../../../interfaces/competency'
+
 import { EditCompetencyDialog } from './EditCompetencyDialog'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
-import type { Competency } from '../../../interfaces/competency'
 
 interface CompetencyItemProps {
   competency: Competency

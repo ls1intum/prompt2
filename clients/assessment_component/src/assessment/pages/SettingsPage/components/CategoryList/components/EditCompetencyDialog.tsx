@@ -1,5 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { AlertCircle } from 'lucide-react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
 import {
   Button,
   Dialog,
@@ -19,13 +24,10 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import { useState } from 'react'
-import { AlertCircle } from 'lucide-react'
-import type { Competency, UpdateCompetencyRequest } from '../../../interfaces/competency'
-import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
+import {} from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import type { Competency, UpdateCompetencyRequest } from '../../../../../interfaces/competency'
+import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
 const updateCompetencySchema = z.object({
   id: z.string(),

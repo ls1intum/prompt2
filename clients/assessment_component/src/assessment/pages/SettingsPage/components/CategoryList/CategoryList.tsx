@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-import { useCategoryStore } from '../../../zustand/useCategoryStore'
+import { useCategoryStore } from '../../../../zustand/useCategoryStore'
 
-import type { CategoryWithCompetencies } from '../../../interfaces/category'
+import type { CategoryWithCompetencies } from '../../../../interfaces/category'
 
-import { EditCategoryDialog } from './EditCategoryDialog'
-import { DeleteConfirmDialog } from './DeleteConfirmDialog'
-
-import { CategoryItem } from './CategoryItem'
+import { CategoryItem } from './components/CategoryItem'
+import { EditCategoryDialog } from './components/EditCategoryDialog'
+import { DeleteConfirmDialog } from './components/DeleteConfirmDialog'
+import { CreateCategoryForm } from './components/CreateCategoryForm'
 
 export const CategoryList = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
   const { categories } = useCategoryStore()
@@ -27,6 +27,8 @@ export const CategoryList = ({ assessmentTemplateID }: { assessmentTemplateID: s
           setCategoryToDelete={setCategoryToDelete}
         />
       ))}
+
+      <CreateCategoryForm assessmentTemplateID={assessmentTemplateID} />
 
       <EditCategoryDialog
         open={!!categoryToEdit}

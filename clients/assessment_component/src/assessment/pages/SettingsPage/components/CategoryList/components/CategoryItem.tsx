@@ -3,7 +3,7 @@ import { ChevronRight, ChevronDown, Edit, Trash2 } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
-import type { CategoryWithCompetencies } from '../../../interfaces/category'
+import type { CategoryWithCompetencies } from '../../../../../interfaces/category'
 
 import { CompetencyItem } from './CompetencyItem'
 import { CreateCompetencyForm } from './CreateCompetencyForm'
