@@ -9,18 +9,6 @@ VALUES ($1, $2)
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_template_id = EXCLUDED.assessment_template_id;
 
--- name: DeleteAssessmentTemplateCoursePhase :exec
-DELETE
-FROM course_phase_config
-WHERE assessment_template_id = $1
-  AND course_phase_id = $2;
-
--- name: GetAssessmentTemplatesByCoursePhase :one
-SELECT at.*
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.assessment_template_id
-WHERE cpc.course_phase_id = $1;
-
 -- name: GetCoursePhasesByAssessmentTemplate :many
 SELECT course_phase_id
 FROM course_phase_config
@@ -30,11 +18,6 @@ WHERE assessment_template_id = $1;
 SELECT *
 FROM course_phase_config
 ORDER BY assessment_template_id, course_phase_id;
-
--- name: UpdateCoursePhaseDeadline :exec
-UPDATE course_phase_config
-SET deadline = $1
-WHERE course_phase_id = $2;
 
 -- name: GetCoursePhaseDeadline :one
 SELECT deadline
@@ -51,34 +34,26 @@ SELECT peer_assessment_deadline
 FROM course_phase_config
 WHERE course_phase_id = $1;
 
--- name: UpdateSelfAssessmentDeadline :exec
-UPDATE course_phase_config
-SET self_assessment_deadline = $1
-WHERE course_phase_id = $2;
-
--- name: UpdatePeerAssessmentDeadline :exec
-UPDATE course_phase_config
-SET peer_assessment_deadline = $1
-WHERE course_phase_id = $2;
-
--- name: GetSelfAssessmentTemplateByCoursePhase :one
-SELECT at.*
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.self_assessment_template
-WHERE cpc.course_phase_id = $1;
-
--- name: GetPeerAssessmentTemplateByCoursePhase :one
-SELECT at.*
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.peer_assessment_template
-WHERE cpc.course_phase_id = $1;
-
--- name: CreateOrUpdateSelfAssessmentTemplateCoursePhase :exec
-UPDATE course_phase_config
-SET self_assessment_template = $1
-WHERE course_phase_id = $2;
-
--- name: CreateOrUpdatePeerAssessmentTemplateCoursePhase :exec
-UPDATE course_phase_config
-SET peer_assessment_template = $1
-WHERE course_phase_id = $2;
+-- name: CreateOrUpdateCoursePhaseConfig :exec
+INSERT INTO course_phase_config (
+    assessment_template_id, 
+    course_phase_id, 
+    deadline, 
+    self_assessment_enabled, 
+    self_assessment_template, 
+    self_assessment_deadline, 
+    peer_assessment_enabled, 
+    peer_assessment_template, 
+    peer_assessment_deadline
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (course_phase_id)
+DO UPDATE SET
+    assessment_template_id = EXCLUDED.assessment_template_id,
+    deadline = EXCLUDED.deadline,
+    self_assessment_enabled = EXCLUDED.self_assessment_enabled,
+    self_assessment_template = EXCLUDED.self_assessment_template,
+    self_assessment_deadline = EXCLUDED.self_assessment_deadline,
+    peer_assessment_enabled = EXCLUDED.peer_assessment_enabled,
+    peer_assessment_template = EXCLUDED.peer_assessment_template,
+    peer_assessment_deadline = EXCLUDED.peer_assessment_deadline;
