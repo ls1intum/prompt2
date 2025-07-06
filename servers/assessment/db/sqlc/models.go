@@ -181,12 +181,12 @@ type CoursePhaseConfig struct {
 	AssessmentTemplateID   uuid.UUID          `json:"assessment_template_id"`
 	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
 	Deadline               pgtype.Timestamptz `json:"deadline"`
-	SelfAssessmentEnabled  bool               `json:"self_assessment_enabled"`
-	SelfAssessmentTemplate uuid.UUID          `json:"self_assessment_template"`
-	SelfAssessmentDeadline pgtype.Timestamptz `json:"self_assessment_deadline"`
-	PeerAssessmentEnabled  bool               `json:"peer_assessment_enabled"`
-	PeerAssessmentTemplate uuid.UUID          `json:"peer_assessment_template"`
-	PeerAssessmentDeadline pgtype.Timestamptz `json:"peer_assessment_deadline"`
+	SelfEvaluationEnabled  bool               `json:"self_evaluation_enabled"`
+	SelfEvaluationTemplate uuid.UUID          `json:"self_evaluation_template"`
+	SelfEvaluationDeadline pgtype.Timestamptz `json:"self_evaluation_deadline"`
+	PeerEvaluationEnabled  bool               `json:"peer_evaluation_enabled"`
+	PeerEvaluationTemplate uuid.UUID          `json:"peer_evaluation_template"`
+	PeerEvaluationDeadline pgtype.Timestamptz `json:"peer_evaluation_deadline"`
 }
 
 type Evaluation struct {

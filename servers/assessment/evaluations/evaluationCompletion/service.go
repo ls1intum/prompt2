@@ -128,9 +128,9 @@ func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.
 func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) error {
 	// Check if deadline has passed for self-evaluations
 	if courseParticipationID == authorCourseParticipationID {
-		deadline, err := coursePhaseConfig.GetSelfAssessmentDeadline(ctx, coursePhaseID)
+		deadline, err := coursePhaseConfig.GetSelfEvaluationDeadline(ctx, coursePhaseID)
 		if err != nil {
-			log.Error("could not get self assessment deadline: ", err)
+			log.Error("could not get self evaluation deadline: ", err)
 			return errors.New("could not check deadline")
 		}
 		// If deadline exists and has passed, prevent unmarking
@@ -138,10 +138,10 @@ func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, cou
 			return ErrDeadlinePassed
 		}
 	} else {
-		// Check peer assessment deadline
-		deadline, err := coursePhaseConfig.GetPeerAssessmentDeadline(ctx, coursePhaseID)
+		// Check peer evaluation deadline
+		deadline, err := coursePhaseConfig.GetPeerEvaluationDeadline(ctx, coursePhaseID)
 		if err != nil {
-			log.Error("could not get peer assessment deadline: ", err)
+			log.Error("could not get peer evaluation deadline: ", err)
 			return errors.New("could not check deadline")
 		}
 		// If deadline exists and has passed, prevent unmarking

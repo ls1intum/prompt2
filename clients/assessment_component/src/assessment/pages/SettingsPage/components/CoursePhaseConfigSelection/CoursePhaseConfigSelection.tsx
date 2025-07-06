@@ -22,12 +22,12 @@ export const CoursePhaseConfigSelection = () => {
 
   const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)
-  const [selfAssessmentEnabled, setSelfAssessmentEnabled] = useState<boolean>(false)
-  const [selfAssessmentTemplate, setSelfAssessmentTemplate] = useState<string>('')
-  const [selfAssessmentDeadline, setSelfAssessmentDeadline] = useState<Date | undefined>(undefined)
-  const [peerAssessmentEnabled, setPeerAssessmentEnabled] = useState<boolean>(false)
-  const [peerAssessmentTemplate, setPeerAssessmentTemplate] = useState<string>('')
-  const [peerAssessmentDeadline, setPeerAssessmentDeadline] = useState<Date | undefined>(undefined)
+  const [selfEvaluationEnabled, setSelfEvaluationEnabled] = useState<boolean>(false)
+  const [selfEvaluationTemplate, setSelfEvaluationTemplate] = useState<string>('')
+  const [selfEvaluationDeadline, setSelfEvaluationDeadline] = useState<Date | undefined>(undefined)
+  const [peerAssessmentEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
+  const [peerAssessmentTemplate, setPeerEvaluationTemplate] = useState<string>('')
+  const [peerAssessmentDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
 
   const {
     data: templates,
@@ -42,14 +42,14 @@ export const CoursePhaseConfigSelection = () => {
     if (config) {
       setAssessmentTemplateId(config.assessmentTemplateID || '')
       setDeadline(config.deadline ? new Date(config.deadline) : undefined)
-      setSelfAssessmentEnabled(config.selfAssessmentEnabled || false)
-      setSelfAssessmentTemplate(config.selfAssessmentTemplate || '')
-      setSelfAssessmentDeadline(
-        config.selfAssessmentDeadline ? new Date(config.selfAssessmentDeadline) : undefined,
+      setSelfEvaluationEnabled(config.selfEvaluationEnabled || false)
+      setSelfEvaluationTemplate(config.selfEvaluationTemplate || '')
+      setSelfEvaluationDeadline(
+        config.selfEvaluationDeadline ? new Date(config.selfEvaluationDeadline) : undefined,
       )
-      setPeerAssessmentEnabled(config.peerAssessmentEnabled || false)
-      setPeerAssessmentTemplate(config.peerAssessmentTemplate || '')
-      setPeerAssessmentDeadline(
+      setPeerEvaluationEnabled(config.peerAssessmentEnabled || false)
+      setPeerEvaluationTemplate(config.peerAssessmentTemplate || '')
+      setPeerEvaluationDeadline(
         config.peerAssessmentDeadline ? new Date(config.peerAssessmentDeadline) : undefined,
       )
     }
@@ -67,9 +67,9 @@ export const CoursePhaseConfigSelection = () => {
     configMutation.mutate({
       assessmentTemplateId,
       deadline,
-      selfAssessmentEnabled,
-      selfAssessmentTemplate: selfAssessmentEnabled ? selfAssessmentTemplate : undefined,
-      selfAssessmentDeadline: selfAssessmentEnabled ? selfAssessmentDeadline : undefined,
+      selfEvaluationEnabled,
+      selfEvaluationTemplate: selfEvaluationEnabled ? selfEvaluationTemplate : undefined,
+      selfEvaluationDeadline: selfEvaluationEnabled ? selfEvaluationDeadline : undefined,
       peerAssessmentEnabled,
       peerAssessmentTemplate: peerAssessmentEnabled ? peerAssessmentTemplate : undefined,
       peerAssessmentDeadline: peerAssessmentEnabled ? peerAssessmentDeadline : undefined,
@@ -79,11 +79,11 @@ export const CoursePhaseConfigSelection = () => {
   const hasChanges =
     assessmentTemplateId !== (config?.assessmentTemplateID || '') ||
     deadline?.getTime() !== (config?.deadline ? new Date(config.deadline).getTime() : undefined) ||
-    selfAssessmentEnabled !== (config?.selfAssessmentEnabled || false) ||
-    selfAssessmentTemplate !== (config?.selfAssessmentTemplate || '') ||
-    selfAssessmentDeadline?.getTime() !==
-      (config?.selfAssessmentDeadline
-        ? new Date(config.selfAssessmentDeadline).getTime()
+    selfEvaluationEnabled !== (config?.selfEvaluationEnabled || false) ||
+    selfEvaluationTemplate !== (config?.selfEvaluationTemplate || '') ||
+    selfEvaluationDeadline?.getTime() !==
+      (config?.selfEvaluationDeadline
+        ? new Date(config.selfEvaluationDeadline).getTime()
         : undefined) ||
     peerAssessmentEnabled !== (config?.peerAssessmentEnabled || false) ||
     peerAssessmentTemplate !== (config?.peerAssessmentTemplate || '') ||
@@ -124,22 +124,22 @@ export const CoursePhaseConfigSelection = () => {
             <div className='flex items-center space-x-2'>
               <Checkbox
                 id='self-assessment-enabled'
-                checked={selfAssessmentEnabled}
-                onCheckedChange={(checked) => setSelfAssessmentEnabled(checked as boolean)}
+                checked={selfEvaluationEnabled}
+                onCheckedChange={(checked) => setSelfEvaluationEnabled(checked as boolean)}
                 disabled={configMutation.isPending}
               />
               <Label htmlFor='self-assessment-enabled' className='text-sm font-medium'>
-                Enable Self Assessment
+                Enable Self Evaluation
               </Label>
             </div>
 
-            {selfAssessmentEnabled && (
+            {selfEvaluationEnabled && (
               <AssessmentConfiguration
                 type={AssessmentType.SELF}
-                assessmentTemplateId={selfAssessmentTemplate}
-                setAssessmentTemplateId={setSelfAssessmentTemplate}
-                deadline={selfAssessmentDeadline}
-                setDeadline={setSelfAssessmentDeadline}
+                assessmentTemplateId={selfEvaluationTemplate}
+                setAssessmentTemplateId={setSelfEvaluationTemplate}
+                deadline={selfEvaluationDeadline}
+                setDeadline={setSelfEvaluationDeadline}
                 templates={templates ?? []}
                 configMutation={configMutation}
                 setError={setError}
@@ -152,11 +152,11 @@ export const CoursePhaseConfigSelection = () => {
               <Checkbox
                 id='peer-assessment-enabled'
                 checked={peerAssessmentEnabled}
-                onCheckedChange={(checked) => setPeerAssessmentEnabled(checked as boolean)}
+                onCheckedChange={(checked) => setPeerEvaluationEnabled(checked as boolean)}
                 disabled={configMutation.isPending}
               />
               <Label htmlFor='peer-assessment-enabled' className='text-sm font-medium'>
-                Enable Peer Assessment
+                Enable Peer Evaluation
               </Label>
             </div>
 
@@ -164,9 +164,9 @@ export const CoursePhaseConfigSelection = () => {
               <AssessmentConfiguration
                 type={AssessmentType.PEER}
                 assessmentTemplateId={peerAssessmentTemplate}
-                setAssessmentTemplateId={setPeerAssessmentTemplate}
+                setAssessmentTemplateId={setPeerEvaluationTemplate}
                 deadline={peerAssessmentDeadline}
-                setDeadline={setPeerAssessmentDeadline}
+                setDeadline={setPeerEvaluationDeadline}
                 templates={templates ?? []}
                 configMutation={configMutation}
                 setError={setError}

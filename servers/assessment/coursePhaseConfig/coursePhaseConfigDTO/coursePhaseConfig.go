@@ -11,12 +11,12 @@ type CoursePhaseConfig struct {
 	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateID"`
 	CoursePhaseID          uuid.UUID `json:"coursePhaseID"`
 	Deadline               time.Time `json:"deadline"`
-	SelfAssessmentEnabled  bool      `json:"selfAssessmentEnabled"`
-	SelfAssessmentTemplate uuid.UUID `json:"selfAssessmentTemplate,omitempty"`
-	SelfAssessmentDeadline time.Time `json:"selfAssessmentDeadline,omitempty"`
-	PeerAssessmentEnabled  bool      `json:"peerAssessmentEnabled"`
-	PeerAssessmentTemplate uuid.UUID `json:"peerAssessmentTemplate,omitempty"`
-	PeerAssessmentDeadline time.Time `json:"peerAssessmentDeadline,omitempty"`
+	SelfEvaluationEnabled  bool      `json:"selfEvaluationEnabled"`
+	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate,omitempty"`
+	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline,omitempty"`
+	PeerEvaluationEnabled  bool      `json:"peerAssessmentEnabled"`
+	PeerEvaluationTemplate uuid.UUID `json:"peerAssessmentTemplate,omitempty"`
+	PeerEvaluationDeadline time.Time `json:"peerAssessmentDeadline,omitempty"`
 }
 
 func MapDBCoursePhaseConfigToDTOCoursePhaseConfig(dbConfig db.CoursePhaseConfig) CoursePhaseConfig {
@@ -24,11 +24,11 @@ func MapDBCoursePhaseConfigToDTOCoursePhaseConfig(dbConfig db.CoursePhaseConfig)
 		AssessmentTemplateID:   dbConfig.AssessmentTemplateID,
 		CoursePhaseID:          dbConfig.CoursePhaseID,
 		Deadline:               dbConfig.Deadline.Time,
-		SelfAssessmentEnabled:  dbConfig.SelfAssessmentEnabled,
-		SelfAssessmentTemplate: dbConfig.SelfAssessmentTemplate,
-		SelfAssessmentDeadline: dbConfig.SelfAssessmentDeadline.Time,
-		PeerAssessmentEnabled:  dbConfig.PeerAssessmentEnabled,
-		PeerAssessmentTemplate: dbConfig.PeerAssessmentTemplate,
-		PeerAssessmentDeadline: dbConfig.PeerAssessmentDeadline.Time,
+		SelfEvaluationEnabled:  dbConfig.SelfEvaluationEnabled,
+		SelfEvaluationTemplate: dbConfig.SelfEvaluationTemplate,
+		SelfEvaluationDeadline: dbConfig.SelfEvaluationDeadline.Time,
+		PeerEvaluationEnabled:  dbConfig.PeerEvaluationEnabled,
+		PeerEvaluationTemplate: dbConfig.PeerEvaluationTemplate,
+		PeerEvaluationDeadline: dbConfig.PeerEvaluationDeadline.Time,
 	}
 }

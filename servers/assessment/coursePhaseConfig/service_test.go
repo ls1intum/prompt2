@@ -40,7 +40,7 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
-		`INSERT INTO course_phase_config (assessment_template_id, course_phase_id, self_assessment_template, peer_assessment_template) 
+		`INSERT INTO course_phase_config (assessment_template_id, course_phase_id, self_evaluation_template, peer_evaluation_template) 
 		 VALUES ($1, $2, $3, $4)`,
 		templateID, suite.testCoursePhaseID, selfTemplateID, peerTemplateID)
 	if err != nil {
@@ -87,17 +87,17 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfigNonExist
 	assert.Nil(suite.T(), config)
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfAssessmentDeadlineNonExistent() {
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfEvaluationDeadlineNonExistent() {
 	nonExistentID := uuid.New()
-	deadline, err := GetSelfAssessmentDeadline(suite.suiteCtx, nonExistentID)
+	deadline, err := GetSelfEvaluationDeadline(suite.suiteCtx, nonExistentID)
 	// Should return nil without error for non-existent deadline
 	assert.NoError(suite.T(), err)
 	assert.Nil(suite.T(), deadline)
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetPeerAssessmentDeadlineNonExistent() {
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetPeerEvaluationDeadlineNonExistent() {
 	nonExistentID := uuid.New()
-	deadline, err := GetPeerAssessmentDeadline(suite.suiteCtx, nonExistentID)
+	deadline, err := GetPeerEvaluationDeadline(suite.suiteCtx, nonExistentID)
 	// Should return nil without error for non-existent deadline
 	assert.NoError(suite.T(), err)
 	assert.Nil(suite.T(), deadline)

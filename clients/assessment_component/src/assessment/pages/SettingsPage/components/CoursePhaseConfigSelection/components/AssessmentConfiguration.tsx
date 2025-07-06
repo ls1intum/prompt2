@@ -47,8 +47,8 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <FileText className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Assessment Template'}
-            {type === AssessmentType.PEER && 'Peer Assessment Template'}
+            {type === AssessmentType.SELF && 'Self Evaluation Template'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Template'}
             {type === AssessmentType.ASSESSMENT && 'Assessment Template'}
           </Label>
         </div>
@@ -77,8 +77,8 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <Calendar className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Assessment Deadline'}
-            {type === AssessmentType.PEER && 'Peer Assessment Deadline'}
+            {type === AssessmentType.SELF && 'Self Evaluation Deadline'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Deadline'}
             {type === AssessmentType.ASSESSMENT && 'Assessment Deadline'}
           </Label>
         </div>

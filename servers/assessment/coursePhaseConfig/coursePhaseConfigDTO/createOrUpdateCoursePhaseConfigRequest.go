@@ -9,10 +9,10 @@ import (
 type CreateOrUpdateCoursePhaseConfigRequest struct {
 	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateId" binding:"required"`
 	Deadline               time.Time `json:"deadline"`
-	SelfAssessmentEnabled  bool      `json:"selfAssessmentEnabled"`
-	SelfAssessmentTemplate uuid.UUID `json:"selfAssessmentTemplate"`
-	SelfAssessmentDeadline time.Time `json:"selfAssessmentDeadline"`
-	PeerAssessmentEnabled  bool      `json:"peerAssessmentEnabled"`
-	PeerAssessmentTemplate uuid.UUID `json:"peerAssessmentTemplate"`
-	PeerAssessmentDeadline time.Time `json:"peerAssessmentDeadline"`
+	SelfEvaluationEnabled  bool      `json:"selfEvaluationEnabled"`
+	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate"`
+	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline"`
+	PeerEvaluationEnabled  bool      `json:"peerAssessmentEnabled"`
+	PeerEvaluationTemplate uuid.UUID `json:"peerAssessmentTemplate"`
+	PeerEvaluationDeadline time.Time `json:"peerAssessmentDeadline"`
 }
