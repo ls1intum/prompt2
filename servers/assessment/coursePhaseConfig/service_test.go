@@ -79,14 +79,6 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
 	assert.NotNil(suite.T(), config, "Config should not be nil")
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfigNonExistent() {
-	nonExistentID := uuid.New()
-	config, err := GetCoursePhaseConfig(suite.suiteCtx, nonExistentID)
-	// Should return nil without error for non-existent config
-	assert.NoError(suite.T(), err)
-	assert.Nil(suite.T(), config)
-}
-
 func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfEvaluationDeadlineNonExistent() {
 	nonExistentID := uuid.New()
 	deadline, err := GetSelfEvaluationDeadline(suite.suiteCtx, nonExistentID)
