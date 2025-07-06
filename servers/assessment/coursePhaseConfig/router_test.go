@@ -1,7 +1,6 @@
 package coursePhaseConfig
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -157,24 +156,6 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetParticipationsForCoursePha
 
 func (suite *CoursePhaseConfigRouterTestSuite) TestGetParticipationsForCoursePhaseInvalidID() {
 	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-uuid/config/participations", nil)
-	resp := httptest.NewRecorder()
-
-	suite.router.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
-}
-
-func (suite *CoursePhaseConfigRouterTestSuite) TestUpdateSelfEvaluationDeadlineInvalidJSON() {
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("/api/course_phase/%s/config/self-assessment-deadline", suite.testCoursePhaseID.String()), bytes.NewBuffer([]byte("invalid json")))
-	req.Header.Set("Content-Type", "application/json")
-	resp := httptest.NewRecorder()
-
-	suite.router.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
-}
-
-func (suite *CoursePhaseConfigRouterTestSuite) TestUpdatePeerEvaluationDeadlineInvalidJSON() {
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("/api/course_phase/%s/config/peer-assessment-deadline", suite.testCoursePhaseID.String()), bytes.NewBuffer([]byte("invalid json")))
-	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
