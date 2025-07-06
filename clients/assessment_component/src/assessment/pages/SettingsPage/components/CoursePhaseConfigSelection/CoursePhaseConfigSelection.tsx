@@ -68,11 +68,11 @@ export const CoursePhaseConfigSelection = () => {
       assessmentTemplateId,
       deadline,
       selfEvaluationEnabled,
-      selfEvaluationTemplate: selfEvaluationEnabled ? selfEvaluationTemplate : undefined,
-      selfEvaluationDeadline: selfEvaluationEnabled ? selfEvaluationDeadline : undefined,
+      selfEvaluationTemplate: selfEvaluationTemplate,
+      selfEvaluationDeadline: selfEvaluationDeadline,
       peerAssessmentEnabled,
-      peerAssessmentTemplate: peerAssessmentEnabled ? peerAssessmentTemplate : undefined,
-      peerAssessmentDeadline: peerAssessmentEnabled ? peerAssessmentDeadline : undefined,
+      peerAssessmentTemplate: peerAssessmentTemplate,
+      peerAssessmentDeadline: peerAssessmentDeadline,
     })
   }
 
