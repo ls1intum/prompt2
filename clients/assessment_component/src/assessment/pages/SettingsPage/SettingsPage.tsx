@@ -5,6 +5,7 @@ import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
@@ -19,6 +20,7 @@ export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
   const { categories } = useCategoryStore()
   const { scoreLevels } = useScoreLevelStore()
+  const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
 
   const {
     data: assessments,
@@ -47,8 +49,8 @@ export const SettingsPage = (): JSX.Element => {
       )}
 
       <CoursePhaseConfigSelection />
-      <CategoryList />
-      <CreateCategoryForm />
+      <CategoryList assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
+      <CreateCategoryForm assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
     </div>
   )
 }

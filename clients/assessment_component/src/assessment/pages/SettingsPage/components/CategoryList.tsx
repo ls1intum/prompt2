@@ -15,7 +15,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import type { CategoryWithCompetencies } from '../../../interfaces/category'
 import { CompetencyItem } from './CompetencyItem'
 
-export const CategoryList = () => {
+export const CategoryList = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
   const { categories } = useCategoryStore()
 
   const [categoryToEdit, setCategoryToEdit] = useState<CategoryWithCompetencies | undefined>(
@@ -93,6 +93,7 @@ export const CategoryList = () => {
         open={!!categoryToEdit}
         onOpenChange={(open) => !open && setCategoryToEdit(undefined)}
         category={categoryToEdit}
+        assessmentTemplateID={assessmentTemplateID}
       />
 
       {categoryToDelete && (

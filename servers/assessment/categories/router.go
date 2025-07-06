@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/categories/categoryDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -100,8 +101,16 @@ func getCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
-	result, err := GetCategoriesWithCompetencies(c, coursePhaseID)
+	config, err := coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
 	if err != nil {
+		log.Error("Error getting course phase config: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	result, err := GetCategoriesWithCompetencies(c, config.AssessmentTemplateID)
+	if err != nil {
+		log.Error("Error getting categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
