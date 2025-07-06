@@ -14,14 +14,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	coursePhaseRouter := routerGroup.Group("/config")
 
 	coursePhaseRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCoursePhaseConfig)
-
-	coursePhaseRouter.PUT("deadline", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateCoursePhaseDeadline)
-	coursePhaseRouter.PUT("self-assessment-deadline", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateSelfAssessmentDeadline)
-	coursePhaseRouter.PUT("peer-assessment-deadline", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updatePeerAssessmentDeadline)
-
-	coursePhaseRouter.POST("assessment-template", authMiddleware(promptSDK.PromptAdmin), createOrUpdateAssessmentTemplateCoursePhase)
-	coursePhaseRouter.POST("self-assessment-template", authMiddleware(promptSDK.PromptAdmin), createOrUpdateSelfAssessmentTemplateCoursePhase)
-	coursePhaseRouter.POST("peer-assessment-template", authMiddleware(promptSDK.PromptAdmin), createOrUpdatePeerAssessmentTemplateCoursePhase)
+	coursePhaseRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateCoursePhaseConfig)
 
 	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getTeamsForCoursePhase)
@@ -49,153 +42,6 @@ func getCoursePhaseConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(*config))
-}
-
-func updateCoursePhaseDeadline(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.UpdateDeadlineRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = UpdateCoursePhaseDeadline(c, coursePhaseID, request.Deadline)
-	if err != nil {
-		log.WithError(err).Error("Failed to update course phase deadline")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update deadline"})
-		return
-	}
-
-	c.Status(http.StatusCreated)
-}
-
-func updateSelfAssessmentDeadline(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.UpdateDeadlineRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = UpdateSelfAssessmentDeadline(c, coursePhaseID, request.Deadline)
-	if err != nil {
-		log.WithError(err).Error("Failed to update self assessment deadline")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update self assessment deadline"})
-		return
-	}
-
-	c.Status(http.StatusCreated)
-}
-
-func updatePeerAssessmentDeadline(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.UpdateDeadlineRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = UpdatePeerAssessmentDeadline(c, coursePhaseID, request.Deadline)
-	if err != nil {
-		log.WithError(err).Error("Failed to update peer assessment deadline")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update peer assessment deadline"})
-		return
-	}
-
-	c.Status(http.StatusCreated)
-}
-
-func createOrUpdateAssessmentTemplateCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest
-	if err := c.BindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = CreateOrUpdateAssessmentTemplateCoursePhase(c, coursePhaseID, request)
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update assessment template course phase")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or update assessment template course phase"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Assessment template course phase created/updated successfully"})
-}
-
-func createOrUpdateSelfAssessmentTemplateCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest
-	if err := c.BindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = CreateOrUpdateSelfAssessmentTemplateCoursePhase(c, coursePhaseID, request)
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update self assessment template course phase")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or update self assessment template course phase"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Self assessment template course phase created/updated successfully"})
-}
-
-func createOrUpdatePeerAssessmentTemplateCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var request coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest
-	if err := c.BindJSON(&request); err != nil {
-		log.WithError(err).Error("Failed to bind request")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-		return
-	}
-
-	err = CreateOrUpdatePeerAssessmentTemplateCoursePhase(c, coursePhaseID, request)
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update peer assessment template course phase")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or update peer assessment template course phase"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Peer assessment template course phase created/updated successfully"})
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {
@@ -234,4 +80,29 @@ func getTeamsForCoursePhase(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, teams)
+}
+
+func createOrUpdateCoursePhaseConfig(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	var request coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.WithError(err).Error("Failed to bind request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		return
+	}
+
+	err = CreateOrUpdateCoursePhaseConfig(c, coursePhaseID, request)
+	if err != nil {
+		log.WithError(err).Error("Failed to create or update course phase config")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or update course phase config"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Course phase config created/updated successfully"})
 }

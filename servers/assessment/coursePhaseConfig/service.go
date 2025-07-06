@@ -60,18 +60,6 @@ func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time
 	return response, nil
 }
 
-func UpdateCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
-	params := db.UpdateCoursePhaseDeadlineParams{
-		Deadline: pgtype.Timestamptz{
-			Time:  deadline,
-			Valid: true,
-		},
-		CoursePhaseID: coursePhaseID,
-	}
-
-	return CoursePhaseConfigSingleton.queries.UpdateCoursePhaseDeadline(ctx, params)
-}
-
 func GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetSelfAssessmentDeadline(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -89,18 +77,6 @@ func GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*t
 	return response, nil
 }
 
-func UpdateSelfAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
-	params := db.UpdateSelfAssessmentDeadlineParams{
-		SelfAssessmentDeadline: pgtype.Timestamptz{
-			Time:  deadline,
-			Valid: true,
-		},
-		CoursePhaseID: coursePhaseID,
-	}
-
-	return CoursePhaseConfigSingleton.queries.UpdateSelfAssessmentDeadline(ctx, params)
-}
-
 func GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetPeerAssessmentDeadline(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -116,81 +92,6 @@ func GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*t
 	}
 
 	return response, nil
-}
-
-func UpdatePeerAssessmentDeadline(ctx context.Context, coursePhaseID uuid.UUID, deadline time.Time) error {
-	params := db.UpdatePeerAssessmentDeadlineParams{
-		PeerAssessmentDeadline: pgtype.Timestamptz{
-			Time:  deadline,
-			Valid: true,
-		},
-		CoursePhaseID: coursePhaseID,
-	}
-
-	return CoursePhaseConfigSingleton.queries.UpdatePeerAssessmentDeadline(ctx, params)
-}
-
-func CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest) error {
-	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
-
-	err = qtx.CreateOrUpdateAssessmentTemplateCoursePhase(ctx, db.CreateOrUpdateAssessmentTemplateCoursePhaseParams{
-		AssessmentTemplateID: req.AssessmentTemplateID,
-		CoursePhaseID:        coursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update assessment template course phase")
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest) error {
-	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
-
-	err = qtx.CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx, db.CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams{
-		SelfAssessmentTemplate: req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update self assessment template course phase")
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateAssessmentTemplateRequest) error {
-	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
-
-	err = qtx.CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx, db.CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams{
-		PeerAssessmentTemplate: req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update peer assessment template course phase")
-		return err
-	}
-
-	return tx.Commit(ctx)
 }
 
 func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
@@ -267,4 +168,34 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 	}
 
 	return teams, nil
+}
+
+func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentTemplateID:   req.AssessmentTemplateID,
+		CoursePhaseID:          coursePhaseID,
+		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfAssessmentEnabled:  req.SelfAssessmentEnabled,
+		SelfAssessmentTemplate: req.SelfAssessmentTemplate,
+		SelfAssessmentDeadline: pgtype.Timestamptz{Time: req.SelfAssessmentDeadline, Valid: !req.SelfAssessmentDeadline.IsZero()},
+		PeerAssessmentEnabled:  req.PeerAssessmentEnabled,
+		PeerAssessmentTemplate: req.PeerAssessmentTemplate,
+		PeerAssessmentDeadline: pgtype.Timestamptz{Time: req.PeerAssessmentDeadline, Valid: !req.PeerAssessmentDeadline.IsZero()},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to create or update course phase config")
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

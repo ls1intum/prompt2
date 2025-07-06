@@ -8,8 +8,8 @@ import (
 )
 
 type CoursePhaseConfig struct {
-	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateId"`
-	CoursePhaseID          uuid.UUID `json:"coursePhaseId"`
+	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateID"`
+	CoursePhaseID          uuid.UUID `json:"coursePhaseID"`
 	Deadline               time.Time `json:"deadline"`
 	SelfAssessmentEnabled  bool      `json:"selfAssessmentEnabled"`
 	SelfAssessmentTemplate uuid.UUID `json:"selfAssessmentTemplate,omitempty"`

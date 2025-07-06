@@ -29,73 +29,56 @@ func (q *Queries) CreateOrUpdateAssessmentTemplateCoursePhase(ctx context.Contex
 	return err
 }
 
-const createOrUpdatePeerAssessmentTemplateCoursePhase = `-- name: CreateOrUpdatePeerAssessmentTemplateCoursePhase :exec
-UPDATE course_phase_config
-SET peer_assessment_template = $1
-WHERE course_phase_id = $2
+const createOrUpdateCoursePhaseConfig = `-- name: CreateOrUpdateCoursePhaseConfig :exec
+INSERT INTO course_phase_config (
+    assessment_template_id, 
+    course_phase_id, 
+    deadline, 
+    self_assessment_enabled, 
+    self_assessment_template, 
+    self_assessment_deadline, 
+    peer_assessment_enabled, 
+    peer_assessment_template, 
+    peer_assessment_deadline
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (course_phase_id)
+DO UPDATE SET
+    assessment_template_id = EXCLUDED.assessment_template_id,
+    deadline = EXCLUDED.deadline,
+    self_assessment_enabled = EXCLUDED.self_assessment_enabled,
+    self_assessment_template = EXCLUDED.self_assessment_template,
+    self_assessment_deadline = EXCLUDED.self_assessment_deadline,
+    peer_assessment_enabled = EXCLUDED.peer_assessment_enabled,
+    peer_assessment_template = EXCLUDED.peer_assessment_template,
+    peer_assessment_deadline = EXCLUDED.peer_assessment_deadline
 `
 
-type CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams struct {
-	PeerAssessmentTemplate uuid.UUID `json:"peer_assessment_template"`
-	CoursePhaseID          uuid.UUID `json:"course_phase_id"`
+type CreateOrUpdateCoursePhaseConfigParams struct {
+	AssessmentTemplateID   uuid.UUID          `json:"assessment_template_id"`
+	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
+	Deadline               pgtype.Timestamptz `json:"deadline"`
+	SelfAssessmentEnabled  bool               `json:"self_assessment_enabled"`
+	SelfAssessmentTemplate uuid.UUID          `json:"self_assessment_template"`
+	SelfAssessmentDeadline pgtype.Timestamptz `json:"self_assessment_deadline"`
+	PeerAssessmentEnabled  bool               `json:"peer_assessment_enabled"`
+	PeerAssessmentTemplate uuid.UUID          `json:"peer_assessment_template"`
+	PeerAssessmentDeadline pgtype.Timestamptz `json:"peer_assessment_deadline"`
 }
 
-func (q *Queries) CreateOrUpdatePeerAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdatePeerAssessmentTemplateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, createOrUpdatePeerAssessmentTemplateCoursePhase, arg.PeerAssessmentTemplate, arg.CoursePhaseID)
-	return err
-}
-
-const createOrUpdateSelfAssessmentTemplateCoursePhase = `-- name: CreateOrUpdateSelfAssessmentTemplateCoursePhase :exec
-UPDATE course_phase_config
-SET self_assessment_template = $1
-WHERE course_phase_id = $2
-`
-
-type CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams struct {
-	SelfAssessmentTemplate uuid.UUID `json:"self_assessment_template"`
-	CoursePhaseID          uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) CreateOrUpdateSelfAssessmentTemplateCoursePhase(ctx context.Context, arg CreateOrUpdateSelfAssessmentTemplateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, createOrUpdateSelfAssessmentTemplateCoursePhase, arg.SelfAssessmentTemplate, arg.CoursePhaseID)
-	return err
-}
-
-const deleteAssessmentTemplateCoursePhase = `-- name: DeleteAssessmentTemplateCoursePhase :exec
-DELETE
-FROM course_phase_config
-WHERE assessment_template_id = $1
-  AND course_phase_id = $2
-`
-
-type DeleteAssessmentTemplateCoursePhaseParams struct {
-	AssessmentTemplateID uuid.UUID `json:"assessment_template_id"`
-	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) DeleteAssessmentTemplateCoursePhase(ctx context.Context, arg DeleteAssessmentTemplateCoursePhaseParams) error {
-	_, err := q.db.Exec(ctx, deleteAssessmentTemplateCoursePhase, arg.AssessmentTemplateID, arg.CoursePhaseID)
-	return err
-}
-
-const getAssessmentTemplatesByCoursePhase = `-- name: GetAssessmentTemplatesByCoursePhase :one
-SELECT at.id, at.name, at.description, at.created_at, at.updated_at
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.assessment_template_id
-WHERE cpc.course_phase_id = $1
-`
-
-func (q *Queries) GetAssessmentTemplatesByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
-	row := q.db.QueryRow(ctx, getAssessmentTemplatesByCoursePhase, coursePhaseID)
-	var i AssessmentTemplate
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg CreateOrUpdateCoursePhaseConfigParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateCoursePhaseConfig,
+		arg.AssessmentTemplateID,
+		arg.CoursePhaseID,
+		arg.Deadline,
+		arg.SelfAssessmentEnabled,
+		arg.SelfAssessmentTemplate,
+		arg.SelfAssessmentDeadline,
+		arg.PeerAssessmentEnabled,
+		arg.PeerAssessmentTemplate,
+		arg.PeerAssessmentDeadline,
 	)
-	return i, err
+	return err
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
@@ -173,26 +156,6 @@ func (q *Queries) GetPeerAssessmentDeadline(ctx context.Context, coursePhaseID u
 	return peer_assessment_deadline, err
 }
 
-const getPeerAssessmentTemplateByCoursePhase = `-- name: GetPeerAssessmentTemplateByCoursePhase :one
-SELECT at.id, at.name, at.description, at.created_at, at.updated_at
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.peer_assessment_template
-WHERE cpc.course_phase_id = $1
-`
-
-func (q *Queries) GetPeerAssessmentTemplateByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
-	row := q.db.QueryRow(ctx, getPeerAssessmentTemplateByCoursePhase, coursePhaseID)
-	var i AssessmentTemplate
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getSelfAssessmentDeadline = `-- name: GetSelfAssessmentDeadline :one
 SELECT self_assessment_deadline
 FROM course_phase_config
@@ -204,26 +167,6 @@ func (q *Queries) GetSelfAssessmentDeadline(ctx context.Context, coursePhaseID u
 	var self_assessment_deadline pgtype.Timestamptz
 	err := row.Scan(&self_assessment_deadline)
 	return self_assessment_deadline, err
-}
-
-const getSelfAssessmentTemplateByCoursePhase = `-- name: GetSelfAssessmentTemplateByCoursePhase :one
-SELECT at.id, at.name, at.description, at.created_at, at.updated_at
-FROM assessment_template at
-         INNER JOIN course_phase_config cpc ON at.id = cpc.self_assessment_template
-WHERE cpc.course_phase_id = $1
-`
-
-func (q *Queries) GetSelfAssessmentTemplateByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (AssessmentTemplate, error) {
-	row := q.db.QueryRow(ctx, getSelfAssessmentTemplateByCoursePhase, coursePhaseID)
-	var i AssessmentTemplate
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }
 
 const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
@@ -260,52 +203,4 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateCoursePhaseDeadline = `-- name: UpdateCoursePhaseDeadline :exec
-UPDATE course_phase_config
-SET deadline = $1
-WHERE course_phase_id = $2
-`
-
-type UpdateCoursePhaseDeadlineParams struct {
-	Deadline      pgtype.Timestamptz `json:"deadline"`
-	CoursePhaseID uuid.UUID          `json:"course_phase_id"`
-}
-
-func (q *Queries) UpdateCoursePhaseDeadline(ctx context.Context, arg UpdateCoursePhaseDeadlineParams) error {
-	_, err := q.db.Exec(ctx, updateCoursePhaseDeadline, arg.Deadline, arg.CoursePhaseID)
-	return err
-}
-
-const updatePeerAssessmentDeadline = `-- name: UpdatePeerAssessmentDeadline :exec
-UPDATE course_phase_config
-SET peer_assessment_deadline = $1
-WHERE course_phase_id = $2
-`
-
-type UpdatePeerAssessmentDeadlineParams struct {
-	PeerAssessmentDeadline pgtype.Timestamptz `json:"peer_assessment_deadline"`
-	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
-}
-
-func (q *Queries) UpdatePeerAssessmentDeadline(ctx context.Context, arg UpdatePeerAssessmentDeadlineParams) error {
-	_, err := q.db.Exec(ctx, updatePeerAssessmentDeadline, arg.PeerAssessmentDeadline, arg.CoursePhaseID)
-	return err
-}
-
-const updateSelfAssessmentDeadline = `-- name: UpdateSelfAssessmentDeadline :exec
-UPDATE course_phase_config
-SET self_assessment_deadline = $1
-WHERE course_phase_id = $2
-`
-
-type UpdateSelfAssessmentDeadlineParams struct {
-	SelfAssessmentDeadline pgtype.Timestamptz `json:"self_assessment_deadline"`
-	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
-}
-
-func (q *Queries) UpdateSelfAssessmentDeadline(ctx context.Context, arg UpdateSelfAssessmentDeadlineParams) error {
-	_, err := q.db.Exec(ctx, updateSelfAssessmentDeadline, arg.SelfAssessmentDeadline, arg.CoursePhaseID)
-	return err
 }
