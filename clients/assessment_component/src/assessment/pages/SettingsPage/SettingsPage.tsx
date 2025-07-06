@@ -1,6 +1,14 @@
 import { Loader2 } from 'lucide-react'
 
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import {
+  ManagementPageHeader,
+  ErrorPage,
+  Card,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@tumaet/prompt-ui-components'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
@@ -49,8 +57,33 @@ export const SettingsPage = (): JSX.Element => {
       )}
 
       <CoursePhaseConfigSelection />
-      <CategoryList assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
-      <CreateCategoryForm assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
+
+      {config?.assessmentTemplateID && (
+        <Card className='p-6 overflow-hidden'>
+          <Accordion type='single' collapsible className='w-full'>
+            <AccordionItem value='competencies' className='border-none'>
+              <div className='flex justify-between items-center'>
+                <div>
+                  <h2 className='text-xl font-semibold tracking-tight'>Assessment Template</h2>
+
+                  <p className='text-muted-foreground text-sm mt-1'>
+                    Define the Assessment Categories and Competencies here
+                  </p>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <AccordionTrigger className='py-3 hover:no-underline'>
+                    <span className='text-sm font-medium'>Show Assessment Competencies</span>
+                  </AccordionTrigger>
+                </div>
+              </div>
+              <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
+                <CategoryList assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
+                <CreateCategoryForm assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
+      )}
     </div>
   )
 }
