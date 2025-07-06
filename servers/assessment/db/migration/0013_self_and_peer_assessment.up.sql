@@ -82,7 +82,7 @@ $$
         SET assessment_template_id   = assessment_uuid,
             self_evaluation_template = self_uuid,
             peer_evaluation_template = peer_uuid;
-        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_evaluation_template SET DEFAULT %L',
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN assessment_template_id SET DEFAULT %L',
                        assessment_uuid);
         EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_evaluation_template SET DEFAULT %L',
                        self_uuid);
