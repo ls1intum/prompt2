@@ -1,12 +1,17 @@
 package course
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
@@ -109,6 +114,11 @@ func copyCourseInternal(ctx context.Context, sourceCourseID uuid.UUID, courseVar
 	err = CourseServiceSingleton.createCourseGroupsAndRoles(ctx, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
 	if err != nil {
 		log.Error("Failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, err
+	}
+
+	err = copyPhaseConfigurations(ctx, qtx, phaseIDMap)
+	if err != nil {
 		return courseDTO.Course{}, err
 	}
 
@@ -383,6 +393,45 @@ func copyApplicationForm(ctx context.Context, qtx *db.Queries, sourceCoursePhase
 	err = updateApplicationFormHelper(ctx, qtx, targetCoursePhaseID, newApplicationForm)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func copyPhaseConfigurations(ctx context.Context, qtx *db.Queries, phaseIDMap map[uuid.UUID]uuid.UUID) error {
+	for oldPhaseID, newPhaseID := range phaseIDMap {
+		oldPhase, err := coursePhase.GetCoursePhaseByID(ctx, oldPhaseID)
+		if err != nil {
+			return fmt.Errorf("course phase type with ID %s not found: %w", oldPhaseID, err)
+		}
+
+		oldPhaseType, err := qtx.GetCoursePhaseTypeByID(ctx, oldPhase.CoursePhaseTypeID)
+		if err != nil {
+			return err
+		}
+
+		baseURL := oldPhaseType.BaseUrl
+		if baseURL == utils.GetEnv("CORE_HOST", "http://localhost:3000") {
+			continue
+		}
+		copyPath := "/copy"
+
+		url := baseURL + copyPath
+
+		copyRequest := promptTypes.PhaseCopyRequest{
+			SourceCoursePhaseID: oldPhaseID,
+			TargetCoursePhaseID: newPhaseID,
+		}
+
+		data, _ := json.Marshal(copyRequest)
+		resp, err := http.Post(url, "application/json", bytes.NewReader(data))
+		if err != nil {
+			return fmt.Errorf("failed to contact %s: %w", url, err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("copy failed (%d): %s", resp.StatusCode, body)
+		}
+		return nil
 	}
 	return nil
 }

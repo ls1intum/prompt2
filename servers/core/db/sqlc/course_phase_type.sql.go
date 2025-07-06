@@ -338,6 +338,24 @@ func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, courseP
 	return items, nil
 }
 
+const getCoursePhaseTypeByID = `-- name: GetCoursePhaseTypeByID :one
+SELECT id, name, initial_phase, base_url
+FROM course_phase_type
+WHERE id = $1
+`
+
+func (q *Queries) GetCoursePhaseTypeByID(ctx context.Context, id uuid.UUID) (CoursePhaseType, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseTypeByID, id)
+	var i CoursePhaseType
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.InitialPhase,
+		&i.BaseUrl,
+	)
+	return i, err
+}
+
 const insertAssessmentScoreOutput = `-- name: InsertAssessmentScoreOutput :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
                                                                  endpoint_path, specification)
@@ -593,7 +611,7 @@ const insertTeamRequiredInput = `-- name: InsertTeamRequiredInput :exec
 INSERT INTO course_phase_type_phase_required_input_dto (id, course_phase_type_id, dto_name, specification)
 VALUES (gen_random_uuid(),
         $1,
-        'team',
+        'teams',
         '{
           "type": "array",
           "items": {

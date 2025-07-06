@@ -1,8 +1,8 @@
 module github.com/ls1intum/prompt2/servers/core
 
-go 1.24
+go 1.24.1
 
-toolchain go1.24.1
+toolchain go1.24.4
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
@@ -63,6 +63,7 @@ require (
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/ls1intum/prompt-sdk v1.0.6 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
