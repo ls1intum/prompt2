@@ -42,7 +42,6 @@ func (suite *AssessmentCompletionRouterTestSuite) SetupSuite() {
 	}
 	AssessmentCompletionServiceSingleton = &suite.service
 
-	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
 	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
 
 	suite.router = gin.Default()

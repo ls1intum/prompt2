@@ -11,10 +11,9 @@ import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
-import { AssessmentTemplateSelection } from './components/AssessmentTemplateSelection/AssessmentTemplateSelection'
+import { CoursePhaseConfigSelection } from './components/CoursePhaseConfigSelection/CoursePhaseConfigSelection'
 import { CategoryList } from './components/CategoryList'
 import { CreateCategoryForm } from './components/CreateCategoryForm'
-import { DeadlineSelection } from './components/DeadlineSelection/DeadlineSelection'
 
 export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
@@ -47,11 +46,7 @@ export const SettingsPage = (): JSX.Element => {
         </div>
       )}
 
-      <div className='grid xl:grid-cols-3 gap-4'>
-        <AssessmentTemplateSelection />
-        <DeadlineSelection />
-      </div>
-
+      <CoursePhaseConfigSelection />
       <CategoryList />
       <CreateCategoryForm />
     </div>

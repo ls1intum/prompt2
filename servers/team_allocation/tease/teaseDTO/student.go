@@ -24,7 +24,7 @@ type Student struct {
 	StudyProgram           string                 `json:"studyProgram"`
 	Semester               pgtype.Int4            `json:"semester"`
 	Languages              []Language             `json:"languages"`
-	IntroSelfAssessment    string                 `json:"introSelfAssessment"`
+	IntroSelfEvaluation    string                 `json:"introSelfEvaluation"`
 	IntroCourseProficiency string                 `json:"introCourseProficiency"`
 	Skills                 []StudentSkillResponse `json:"skills"`
 	Devices                []string               `json:"devices"`
@@ -96,7 +96,7 @@ func ConvertCourseParticipationToTeaseStudent(
 		StudentComments:        []string{},
 		TutorComments:          []string{},
 		IntroCourseProficiency: teaseProficiency,
-		IntroSelfAssessment:    teaseProficiency, // we currently use the same for both as we do not yet have a self-assessment
+		IntroSelfEvaluation:    teaseProficiency, // we currently use the same for both as we do not yet have a self-assessment
 	}
 
 	// 4) Process multi-select answers for language proficiency
