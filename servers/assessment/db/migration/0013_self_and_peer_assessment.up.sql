@@ -47,45 +47,54 @@ CREATE TABLE feedback_items
 );
 
 INSERT INTO assessment_template (id, name, description)
-VALUES (gen_random_uuid(), 'Self Assessment Template', 'This is the default self assessment template.'),
-       (gen_random_uuid(), 'Peer Assessment Template', 'This is the default peer assessment template.');
+VALUES (gen_random_uuid(), 'Assessment Template', 'This is the default assessment template.'),
+       (gen_random_uuid(), 'Self Evaluation Template', 'This is the default self evaluation template.'),
+       (gen_random_uuid(), 'Peer Evaluation Template', 'This is the default peer evaluation template.');
 
 ALTER TABLE course_phase_config
-    ADD COLUMN self_assessment_enabled  boolean     NOT NULL DEFAULT false,
-    ADD COLUMN self_assessment_template uuid,
-    ADD COLUMN self_assessment_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ADD COLUMN peer_assessment_enabled  boolean     NOT NULL DEFAULT false,
-    ADD COLUMN peer_assessment_template uuid,
-    ADD COLUMN peer_assessment_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
+    ADD COLUMN self_evaluation_enabled  boolean     NOT NULL DEFAULT false,
+    ADD COLUMN self_evaluation_template uuid,
+    ADD COLUMN self_evaluation_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN peer_evaluation_enabled  boolean     NOT NULL DEFAULT false,
+    ADD COLUMN peer_evaluation_template uuid,
+    ADD COLUMN peer_evaluation_deadline timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 DO
 $$
     DECLARE
-        self_uuid uuid;
-        peer_uuid uuid;
+        assessment_uuid uuid;
+        self_uuid       uuid;
+        peer_uuid       uuid;
     BEGIN
-        SELECT id INTO self_uuid FROM assessment_template WHERE name = 'Self Assessment Template';
+        SELECT id INTO self_uuid FROM assessment_template WHERE name = 'Self Evaluation Template';
         IF self_uuid IS NULL THEN
-            RAISE EXCEPTION 'Self Assessment Template not found';
+            RAISE EXCEPTION 'Self Evaluation Template not found';
         END IF;
-        SELECT id INTO peer_uuid FROM assessment_template WHERE name = 'Peer Assessment Template';
+        SELECT id INTO peer_uuid FROM assessment_template WHERE name = 'Peer Evaluation Template';
         IF peer_uuid IS NULL THEN
-            RAISE EXCEPTION 'Peer Assessment Template not found';
+            RAISE EXCEPTION 'Peer Evaluation Template not found';
+        END IF;
+        SELECT id INTO assessment_uuid FROM assessment_template WHERE name = 'Assessment Template';
+        IF peer_uuid IS NULL THEN
+            RAISE EXCEPTION 'Assessment Template not found';
         END IF;
         UPDATE course_phase_config
-        SET self_assessment_template = self_uuid,
-            peer_assessment_template = peer_uuid;
-        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_assessment_template SET DEFAULT %L',
+        SET assessment_template_id   = assessment_uuid,
+            self_evaluation_template = self_uuid,
+            peer_evaluation_template = peer_uuid;
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN assessment_template_id SET DEFAULT %L',
+                       assessment_uuid);
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_evaluation_template SET DEFAULT %L',
                        self_uuid);
-        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN peer_assessment_template SET DEFAULT %L',
+        EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN peer_evaluation_template SET DEFAULT %L',
                        peer_uuid);
     END
 $$;
 
 ALTER TABLE course_phase_config
-    ALTER COLUMN self_assessment_template SET NOT NULL,
-    ALTER COLUMN peer_assessment_template SET NOT NULL,
-    ADD FOREIGN KEY (self_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    ADD FOREIGN KEY (peer_assessment_template) REFERENCES assessment_template (id) ON DELETE RESTRICT;
+    ALTER COLUMN self_evaluation_template SET NOT NULL,
+    ALTER COLUMN peer_evaluation_template SET NOT NULL,
+    ADD FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
+    ADD FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT;
 
 COMMIT;
