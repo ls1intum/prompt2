@@ -4,8 +4,20 @@ import { CreateOrUpdateAssessmentTemplateCoursePhaseRequest } from '../../interf
 export const createOrUpdateAssessmentTemplateCoursePhase = async (
   request: CreateOrUpdateAssessmentTemplateCoursePhaseRequest,
 ): Promise<void> => {
-  await assessmentAxiosInstance.post(
-    `assessment/api/course_phase/${request.coursePhaseID}/assessment-template/course-phase`,
-    request,
-  )
+  try {
+    await assessmentAxiosInstance.put(
+      `assessment/api/course_phase/${request.coursePhaseID}/assessment-template`,
+      {
+        assessmentTemplateID: request.assessmentTemplateID,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
