@@ -63,8 +63,8 @@ DO
 $$
     DECLARE
         assessment_uuid uuid;
-        self_uuid uuid;
-        peer_uuid uuid;
+        self_uuid       uuid;
+        peer_uuid       uuid;
     BEGIN
         SELECT id INTO self_uuid FROM assessment_template WHERE name = 'Self Evaluation Template';
         IF self_uuid IS NULL THEN
@@ -79,7 +79,7 @@ $$
             RAISE EXCEPTION 'Assessment Template not found';
         END IF;
         UPDATE course_phase_config
-        SET assessment_template_id      = assessment_uuid,
+        SET assessment_template_id   = assessment_uuid,
             self_evaluation_template = self_uuid,
             peer_evaluation_template = peer_uuid;
         EXECUTE format('ALTER TABLE course_phase_config ALTER COLUMN self_evaluation_template SET DEFAULT %L',

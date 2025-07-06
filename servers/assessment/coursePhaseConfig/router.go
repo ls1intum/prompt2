@@ -36,12 +36,7 @@ func getCoursePhaseConfig(c *gin.Context) {
 		return
 	}
 
-	if config == nil {
-		c.JSON(http.StatusOK, nil)
-		return
-	}
-
-	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(*config))
+	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config))
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {

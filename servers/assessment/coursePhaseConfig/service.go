@@ -30,17 +30,34 @@ func NewCoursePhaseConfigService(queries db.Queries, conn *pgxpool.Pool) *Course
 	}
 }
 
-func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (*db.CoursePhaseConfig, error) {
+func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.CoursePhaseConfig, error) {
 	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No config found for this course phase, return nil
-		return nil, nil
+		tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+		if err != nil {
+			return db.CoursePhaseConfig{}, err
+		}
+		defer promptSDK.DeferDBRollback(tx, ctx)
+
+		qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+		err = qtx.CreateDefaultCoursePhaseConfig(ctx, coursePhaseID)
+		if err != nil {
+			log.WithError(err).Error("Failed to create or update course phase config")
+			return db.CoursePhaseConfig{}, err
+		}
+
+		err = tx.Commit(ctx)
+		if err != nil {
+			log.WithError(err).Error("Failed to commit transaction for course phase config creation")
+			return db.CoursePhaseConfig{}, err
+		}
 	} else if err != nil {
 		log.Error("could not get course phase config: ", err)
-		return nil, errors.New("could not get course phase config")
+		return db.CoursePhaseConfig{}, errors.New("could not get course phase config")
 	}
 
-	return &config, nil
+	return config, nil
 }
 
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
