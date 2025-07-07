@@ -12,13 +12,9 @@ import { FileText, Calendar } from 'lucide-react'
 
 import { AssessmentTemplate } from '../../../../../interfaces/assessmentTemplate'
 
-import { CreateAssessmentTemplateDialog } from './CreateAssessmentTemplateDialog'
+import { AssessmentType } from '../../../interfaces/assessmentType'
 
-export enum AssessmentType {
-  SELF = 'SELF',
-  PEER = 'PEER',
-  ASSESSMENT = 'ASSESSMENT',
-}
+import { CreateAssessmentTemplateDialog } from './CreateAssessmentTemplateDialog'
 
 interface AsssessmentConfigurationProps {
   type: AssessmentType

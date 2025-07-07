@@ -1,20 +1,13 @@
 import { Loader2 } from 'lucide-react'
 
-import {
-  ManagementPageHeader,
-  ErrorPage,
-  Card,
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 
-import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
-import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
-
+import { useCategoryStore } from '../../zustand/useCategoryStore'
+import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
+import { usePeerEvaluationCategoryStore } from '../../zustand/usePeerEvaluationCategoryStore'
+import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
@@ -25,9 +18,11 @@ import { CategoryList } from './components/CategoryList/CategoryList'
 
 export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
-  const { categories } = useCategoryStore()
-  const { scoreLevels } = useScoreLevelStore()
   const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
+  const { categories } = useCategoryStore()
+  const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
+  const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
+  const { scoreLevels } = useScoreLevelStore()
 
   const {
     data: assessments,
@@ -58,29 +53,21 @@ export const SettingsPage = (): JSX.Element => {
       <CoursePhaseConfigSelection />
 
       {config?.assessmentTemplateID && (
-        <Card className='p-6 overflow-hidden'>
-          <Accordion type='single' collapsible className='w-full'>
-            <AccordionItem value='competencies' className='border-none'>
-              <div className='flex justify-between items-center'>
-                <div>
-                  <h2 className='text-xl font-semibold tracking-tight'>Assessment Template</h2>
+        <CategoryList assessmentTemplateID={config?.assessmentTemplateID} categories={categories} />
+      )}
 
-                  <p className='text-muted-foreground text-sm mt-1'>
-                    Define the Assessment Categories and Competencies here
-                  </p>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <AccordionTrigger className='py-3 hover:no-underline'>
-                    <span className='text-sm font-medium'>Show Assessment Competencies</span>
-                  </AccordionTrigger>
-                </div>
-              </div>
-              <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
-                <CategoryList assessmentTemplateID={config?.assessmentTemplateID ?? ''} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </Card>
+      {config?.selfEvaluationEnabled && config.selfEvaluationTemplate && (
+        <CategoryList
+          assessmentTemplateID={config?.selfEvaluationTemplate}
+          categories={selfEvaluationCategories}
+        />
+      )}
+
+      {config?.peerEvaluationEnabled && config.peerEvaluationTemplate && (
+        <CategoryList
+          assessmentTemplateID={config?.peerEvaluationTemplate}
+          categories={peerEvaluationCategories}
+        />
       )}
     </div>
   )
