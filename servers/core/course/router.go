@@ -456,11 +456,11 @@ func copyCourse(c *gin.Context) {
 
 // checkCourseCopyable godoc
 // @Summary Check if a course is copyable
-// @Description Check if a course is copyable by checking if each phase implements the "/copy" endpoint
+// @Description Returns whether the course can be copied based on the availability of the /copy endpoint in all course phases
 // @Tags courses
 // @Produce json
 // @Param uuid path string true "Course UUID"
-// @Success 200 {object} gin.H{"copyable": bool, "missingPhaseTypes": []string}
+// @Success 200 {object} courseDTO.CheckCopyableResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /courses/{uuid}/copyable [get]
@@ -478,15 +478,15 @@ func checkCourseCopyable(c *gin.Context) {
 	}
 
 	if len(missing) > 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"copyable":          false,
-			"missingPhaseTypes": missing,
+		c.JSON(http.StatusOK, courseDTO.CheckCourseCopyableResponse{
+			Copyable:          false,
+			MissingPhaseTypes: missing,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"copyable":          true,
-		"missingPhaseTypes": []string{},
+	c.JSON(http.StatusOK, courseDTO.CheckCourseCopyableResponse{
+		Copyable:          true,
+		MissingPhaseTypes: []string{},
 	})
 }
 
