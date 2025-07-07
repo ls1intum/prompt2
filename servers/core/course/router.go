@@ -38,6 +38,7 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
 
 	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
+	course.GET("/:uuid/copyable", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), checkCourseCopyable)
 }
 
 // getOwnCourses godoc
@@ -451,6 +452,45 @@ func copyCourse(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, newCourse)
+}
+
+// checkCourseCopyable godoc
+// @Summary Check if a course is copyable
+// @Description Check if a course is copyable by checking if each phase implements the "/copy" endpoint
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {object} gin.H{"copyable": true}
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/copyable [get]
+func checkCourseCopyable(c *gin.Context) {
+	courseVariables := courseDTO.CopyCourseRequest{}
+	if err := c.BindJSON(&courseVariables); err != nil {
+		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	originalCourseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
+		return
+	}
+
+	missing, err := CheckAllCoursePhasesCopyable(c, originalCourseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, fmt.Errorf("check failed: %w", err))
+		return
+	}
+
+	if len(missing) > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"copyable":          false,
+			"missingPhaseTypes": missing,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"copyable": true})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
