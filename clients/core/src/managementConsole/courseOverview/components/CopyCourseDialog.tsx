@@ -278,7 +278,7 @@ export const CopyCourseDialog = ({
           <AlertTriangle className='h-4 w-4' />
           <AlertTitle>Missing Configuration Support</AlertTitle>
           <AlertDescription>
-            The following phase types do not support automatic copying of their configurations:
+            The following phases do not support automatic copying of their configurations:
             {missingPhaseTypes.map((phaseType, index) => (
               <li key={index}>{phaseType}</li>
             ))}

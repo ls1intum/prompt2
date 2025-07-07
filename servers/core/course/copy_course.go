@@ -61,14 +61,14 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
 		if err != nil {
 			log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-			missing = append(missing, pt.Name)
+			missing = append(missing, p.Name.String+" ("+pt.Name+")")
 			checked[pt.BaseUrl] = pt.Name
 			continue
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			missing = append(missing, pt.Name)
+			missing = append(missing, p.Name.String+" ("+pt.Name+")")
 		}
 		checked[pt.BaseUrl] = pt.Name
 	}
@@ -91,14 +91,14 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 		resp, err := sendRequest("OPTIONS", c.GetHeader("Authorization"), nil, pt.BaseUrl+"/copy")
 		if err != nil {
 			log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-			missing = append(missing, pt.Name)
+			missing = append(missing, p.Name.String+" ("+pt.Name+")")
 			checked[pt.BaseUrl] = pt.Name
 			continue
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
-			missing = append(missing, pt.Name)
+			missing = append(missing, p.Name.String+" ("+pt.Name+")")
 		}
 		checked[pt.BaseUrl] = pt.Name
 	}
