@@ -41,10 +41,9 @@ export const ScoreLevelSelector = ({
             aria-describedby={descriptionId}
             className={cn(
               'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
-              isSelected ? config.selectedBg : '',
+              isSelected && config.selectedBg,
               isSelected && config.textColor,
-              !completed &&
-                'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
+              !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
               completed && 'opacity-80 cursor-not-allowed',
               // Hide non-selected items on small screens (< lg) only when a selection exists
               selectedScore && !isSelected && 'hidden lg:flex',

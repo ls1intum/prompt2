@@ -16,6 +16,7 @@ interface CompetencyHeaderProps {
   competencyScore?: CompetencyScore
   completed: boolean
   onResetClick: () => void
+  isEvaluation?: boolean
 }
 
 export const CompetencyHeader = ({
@@ -24,10 +25,11 @@ export const CompetencyHeader = ({
   competencyScore,
   completed,
   onResetClick,
+  isEvaluation = false,
 }: CompetencyHeaderProps) => {
   return (
     <div className={className}>
-      <div className='flex items-center justify-between mb-2'>
+      <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
           <h3 className='text-base font-medium'>{competency.name}</h3>
@@ -36,18 +38,20 @@ export const CompetencyHeader = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant='ghost' size='sm' onClick={onResetClick}>
-                  <RotateCcw className='h-4 w-4' />
+                <Button variant='ghost' onClick={onResetClick}>
+                  <RotateCcw />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Reset this assessment</p>
+                <p>Reset this selection</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </div>
-      <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
+      {!isEvaluation && (
+        <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
+      )}
     </div>
   )
 }

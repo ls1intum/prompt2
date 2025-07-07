@@ -95,6 +95,7 @@ export const EvaluationForm = ({
           competencyScore={evaluation}
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
+          isEvaluation={true}
         />
 
         <ScoreLevelSelector
