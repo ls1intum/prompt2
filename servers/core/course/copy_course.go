@@ -88,7 +88,13 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 			continue
 		}
 
-		resp, err := sendRequest("OPTIONS", c.GetHeader("Authorization"), nil, pt.BaseUrl+"/copy")
+		// send a dummy POST request to the copy endpoint to check if it exists
+		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
+			SourceCoursePhaseID: p.ID,
+			TargetCoursePhaseID: p.ID,
+		})
+
+		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
 		if err != nil {
 			log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
 			missing = append(missing, p.Name.String+" ("+pt.Name+")")

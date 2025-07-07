@@ -227,7 +227,13 @@ export const CopyCourseDialog = ({
             <Button variant='outline' onClick={handleBackToForm}>
               Back
             </Button>
-            <Button onClick={() => setCurrentStep('warning')}>Retry</Button>
+            <Button
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: ['course-copyability', courseId] })
+              }
+            >
+              Retry
+            </Button>
           </DialogFooter>
         </>
       )
@@ -279,9 +285,11 @@ export const CopyCourseDialog = ({
           <AlertTitle>Missing Configuration Support</AlertTitle>
           <AlertDescription>
             The following phases do not support automatic copying of their configurations:
-            {missingPhaseTypes.map((phaseType, index) => (
-              <li key={index}>{phaseType}</li>
-            ))}
+            <ul className='list-disc list-inside mt-2'>
+              {missingPhaseTypes.map((phaseType, index) => (
+                <li key={index}>{phaseType}</li>
+              ))}
+            </ul>
           </AlertDescription>
         </Alert>
         <Alert>
