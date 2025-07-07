@@ -1,14 +1,18 @@
 import { Loader2 } from 'lucide-react'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
 
 import { useGetMyEvaluations } from './hooks/useGetMyEvaluations'
+import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluationCompletion'
 
 import { CategoryEvaluation } from './components/CategoryEvaluation'
+import { EvaluationCompletion } from './components/EvaluationCompletion/EvaluationCompletion'
 
 export const SelfEvaluationPage = () => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { myParticipation } = useMyParticipationStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
 
@@ -19,9 +23,22 @@ export const SelfEvaluationPage = () => {
     refetch: refetchEvaluations,
   } = useGetMyEvaluations()
 
-  if (isEvaluationsError)
-    return <ErrorPage onRetry={refetchEvaluations} description='Could not fetch self evaluations' />
-  if (isEvaluationsPending)
+  const {
+    data: completion,
+    isPending: isCompletionPending,
+    isError: isCompletionError,
+    refetch: refetchCompletion,
+  } = useGetMySelfEvaluationCompletion()
+
+  const isError = isEvaluationsError || isCompletionError
+  const isPending = isEvaluationsPending || isCompletionPending
+  const refetch = () => {
+    refetchEvaluations()
+    refetchCompletion()
+  }
+
+  if (isError) return <ErrorPage onRetry={refetch} description='Could not fetch self evaluations' />
+  if (isPending)
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -41,6 +58,13 @@ export const SelfEvaluationPage = () => {
           completed={false}
         />
       ))}
+
+      <EvaluationCompletion
+        deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
+        authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
+        completed={completion?.completed ?? false}
+        completedAt={completion?.completedAt ? new Date(completion.completedAt) : undefined}
+      />
     </div>
   )
 }

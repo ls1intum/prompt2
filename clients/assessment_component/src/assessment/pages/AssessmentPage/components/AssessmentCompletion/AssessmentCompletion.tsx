@@ -18,8 +18,9 @@ import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 import { StudentAssessment } from '../../../../interfaces/studentAssessment'
 
+import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
+
 import { ActionItemPanel } from './components/ActionItemPanel'
-import { AssessmentCompletionDialog } from './components/AssessmentCompletionDialog'
 import { GradeSuggestion } from './components/GradeSuggestion'
 
 import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
@@ -51,7 +52,7 @@ export const AssessmentCompletion = ({
   )
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
 
   const { mutate: createOrUpdateCompletion, isPending: isCreatePending } =
     useCreateOrUpdateAssessmentCompletion(setError)
@@ -60,7 +61,7 @@ export const AssessmentCompletion = ({
     useUnmarkAssessmentAsCompleted(setError)
 
   const handleButtonClick = () => {
-    setError(null)
+    setError(undefined)
     setDialogOpen(true)
   }
 
@@ -128,8 +129,7 @@ export const AssessmentCompletion = ({
           completed: studentAssessment.assessmentCompletion.completed,
         })
 
-        // Clear any existing errors on successful save
-        setError(null)
+        setError(undefined)
       } catch (err) {
         console.error('Failed to save form data:', err)
         setError('Failed to save form data. Please try again.')
@@ -216,7 +216,13 @@ export const AssessmentCompletion = ({
       </div>
 
       <AssessmentCompletionDialog
-        studentAssessment={studentAssessment}
+        completed={studentAssessment.assessmentCompletion.completed}
+        completedAt={
+          studentAssessment.assessmentCompletion.completedAt
+            ? new Date(studentAssessment.assessmentCompletion.completedAt)
+            : undefined
+        }
+        author={studentAssessment.assessmentCompletion.author}
         isPending={isPending}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}

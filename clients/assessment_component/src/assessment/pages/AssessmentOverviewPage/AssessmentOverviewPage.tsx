@@ -17,7 +17,7 @@ import { useTeamStore } from '../../zustand/useTeamStore'
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
 import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
-import { AssessmentCompletion } from '../../interfaces/assessment'
+import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'

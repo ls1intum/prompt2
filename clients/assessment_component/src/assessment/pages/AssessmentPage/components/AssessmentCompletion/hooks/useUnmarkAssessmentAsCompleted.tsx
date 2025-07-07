@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import { unmarkAssessmentAsCompleted } from '../../../../../network/mutations/unmarkAssessmentAsCompleted'
 
-export const useUnmarkAssessmentAsCompleted = (setError: (error: string | null) => void) => {
+export const useUnmarkAssessmentAsCompleted = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -15,7 +15,7 @@ export const useUnmarkAssessmentAsCompleted = (setError: (error: string | null) 
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
       queryClient.invalidateQueries({ queryKey: ['scoreLevels', phaseId] })
       queryClient.invalidateQueries({ queryKey: ['assessmentCompletions', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

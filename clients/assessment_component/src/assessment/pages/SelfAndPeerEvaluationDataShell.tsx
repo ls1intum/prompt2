@@ -13,11 +13,13 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
 
+import { useCoursePhaseConfigStore } from '../zustand/useCoursePhaseConfigStore'
 import { useTeamStore } from '../zustand/useTeamStore'
 import { useMyParticipationStore } from '../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../zustand/usePeerEvaluationCategoryStore'
 
+import { useGetCoursePhaseConfig } from './hooks/useGetCoursePhaseConfig'
 import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
@@ -33,10 +35,18 @@ export const SelfAndPeerEvaluationDataShell = ({
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')
 
+  const { setCoursePhaseConfig } = useCoursePhaseConfigStore()
   const { setSelfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { setPeerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { setTeams } = useTeamStore()
   const { setMyParticipation } = useMyParticipationStore()
+
+  const {
+    data: coursePhaseConfig,
+    isPending: isCoursePhaseConfigPending,
+    isError: isCoursePhaseConfigError,
+    refetch: refetchCoursePhaseConfig,
+  } = useGetCoursePhaseConfig()
 
   const {
     data: selfEvaluationCategories,
@@ -74,18 +84,27 @@ export const SelfAndPeerEvaluationDataShell = ({
     isSelfEvaluationCategoriesError ||
     isPeerEvaluationCategoriesError ||
     isTeamsError ||
-    isParticipationsError
+    isParticipationsError ||
+    isCoursePhaseConfigError
   const isPending =
     isSelfEvaluationCategoriesPending ||
     isPeerEvaluationCategoriesPending ||
     isTeamsPending ||
-    isParticipationsPending
+    isParticipationsPending ||
+    isCoursePhaseConfigPending
   const refetch = () => {
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
     refetchTeams()
     refetchCoursePhaseParticipations()
+    refetchCoursePhaseConfig()
   }
+
+  useEffect(() => {
+    if (coursePhaseConfig) {
+      setCoursePhaseConfig(coursePhaseConfig)
+    }
+  }, [coursePhaseConfig, setCoursePhaseConfig])
 
   useEffect(() => {
     if (teams) {
