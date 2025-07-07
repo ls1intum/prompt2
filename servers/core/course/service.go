@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -382,20 +381,4 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	}
 
 	return nil
-}
-
-func CheckAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]string, error) {
-	missing, err := checkAllCoursePhasesCopyable(c, sourceCourseID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check course phases copyable: %w", err)
-	}
-	return missing, nil
-}
-
-func CopyCourse(c *gin.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
-	course, err := copyCourseInternal(c, sourceCourseID, courseVariables, requesterID)
-	if err != nil {
-		return courseDTO.Course{}, fmt.Errorf("course copy failed: %w", err)
-	}
-	return course, nil
 }

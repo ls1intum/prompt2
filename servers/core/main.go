@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
 	"github.com/ls1intum/prompt2/servers/core/course"
+	"github.com/ls1intum/prompt2/servers/core/course/copy"
 	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation"
@@ -133,6 +134,7 @@ func main() {
 	initMailing(api, *query, conn)
 	student.InitStudentModule(api, *query, conn)
 	course.InitCourseModule(api, *query, conn)
+	copy.InitCourseCopyModule(api, *query, conn)
 	coursePhase.InitCoursePhaseModule(api, *query, conn)
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
