@@ -17,7 +17,5 @@ var CopyServiceSingleton *CopyService
 type SelfTeamCopyHandler struct{}
 
 func (h *SelfTeamCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
-	// Implement the logic to handle the phase copy request
-	// This could involve copying team allocations, updating database entries, etc.
 	return nil
 }
