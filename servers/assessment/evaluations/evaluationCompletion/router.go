@@ -20,7 +20,6 @@ func setupEvaluationCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	evaluationRouter.DELETE("/course-participation/:courseParticipationID/author/:authorCourseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteEvaluationCompletion)
 
 	evaluationRouter.POST("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
-	evaluationRouter.PUT("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.POST("/my-completion/mark-complete", authMiddleware(promptSDK.CourseStudent), markMyEvaluationAsCompleted)
 	evaluationRouter.PUT("/my-completion/unmark", authMiddleware(promptSDK.CourseStudent), unmarkMyEvaluationAsCompleted)
 	evaluationRouter.GET("/my-completion/self", authMiddleware(promptSDK.CourseStudent), getMySelfEvaluationCompletion)
@@ -272,7 +271,7 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 }
 
 func getUserCourseParticipationID(c *gin.Context) (uuid.UUID, error) {
-	userCourseParticipationID, exists := c.Get("courseParticipationId")
+	userCourseParticipationID, exists := c.Get("courseParticipationID")
 	if !exists {
 		return uuid.UUID{}, errors.New("course participation ID not found in token")
 	}
