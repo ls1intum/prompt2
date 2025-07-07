@@ -5,10 +5,10 @@ import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
-import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
-import { usePeerEvaluationCategoryStore } from '../../zustand/usePeerEvaluationCategoryStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
+
+import { AssessmentType } from './interfaces/assessmentType'
 
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
@@ -20,8 +20,6 @@ export const SettingsPage = (): JSX.Element => {
   const { participations } = useParticipationStore()
   const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
   const { categories } = useCategoryStore()
-  const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
-  const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { scoreLevels } = useScoreLevelStore()
 
   const {
@@ -53,20 +51,23 @@ export const SettingsPage = (): JSX.Element => {
       <CoursePhaseConfigSelection />
 
       {config?.assessmentTemplateID && (
-        <CategoryList assessmentTemplateID={config?.assessmentTemplateID} categories={categories} />
+        <CategoryList
+          assessmentTemplateID={config?.assessmentTemplateID}
+          assessmentType={AssessmentType.ASSESSMENT}
+        />
       )}
 
       {config?.selfEvaluationEnabled && config.selfEvaluationTemplate && (
         <CategoryList
           assessmentTemplateID={config?.selfEvaluationTemplate}
-          categories={selfEvaluationCategories}
+          assessmentType={AssessmentType.SELF}
         />
       )}
 
       {config?.peerEvaluationEnabled && config.peerEvaluationTemplate && (
         <CategoryList
           assessmentTemplateID={config?.peerEvaluationTemplate}
-          categories={peerEvaluationCategories}
+          assessmentType={AssessmentType.PEER}
         />
       )}
     </div>
