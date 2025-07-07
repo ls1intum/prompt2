@@ -3,13 +3,10 @@ import type { CheckCourseCopyableResponse } from '../../managementConsole/course
 
 export const checkCourseCopyable = async (
   courseID: string,
-): Promise<CheckCourseCopyableResponse | undefined> => {
+): Promise<CheckCourseCopyableResponse> => {
   try {
-    return await axiosInstance.get(`/api/courses/${courseID}/copyable`, {
-      headers: {
-        'Content-Type': 'application/json-path+json',
-      },
-    })
+    const response = await axiosInstance.get(`/api/courses/${courseID}/copyable`)
+    return response.data
   } catch (err) {
     console.error(err)
     throw err
