@@ -3,7 +3,6 @@ package course
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -35,11 +34,11 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 
 	restrictedData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.RestrictedData)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to convert restricted data: %w", err)
 	}
 	studentReadableData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.StudentReadableData)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to convert student readable data: %w", err)
 	}
 
 	newCourse := courseDTO.CreateCourse{
@@ -55,76 +54,71 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 
 	tx, err := CourseServiceSingleton.conn.Begin(c)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer utils.DeferRollback(tx, c)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := newCourse.GetDBModel()
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to convert course to DB model: %w", err)
 	}
 	createCourseParams.ID = uuid.New()
 
 	createdCourse, err := qtx.CreateCourse(c, createCourseParams)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to create course in DB: %w", err)
 	}
 
 	phaseIDMap, err := copyCoursePhases(c, qtx, sourceCourseID, createdCourse.ID)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to copy course phases: %w", err)
 	}
 
-	err = copyCoursePhaseGraph(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap)
-	if err != nil {
-		return courseDTO.Course{}, err
+	if err := copyCoursePhaseGraph(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to copy course phase graph: %w", err)
 	}
 
-	err = setInitialPhase(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap)
-	if err != nil {
-		return courseDTO.Course{}, err
+	if err := setInitialPhase(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to set initial phase: %w", err)
 	}
 
 	dtoIDMap, err := copyDTOs(c, qtx, sourceCourseID)
 	if err != nil {
-		return courseDTO.Course{}, err
+		return courseDTO.Course{}, fmt.Errorf("failed to copy DTOs: %w", err)
 	}
 
-	err = copyMetaGraphs(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap)
-	if err != nil {
-		return courseDTO.Course{}, err
+	if err := copyMetaGraphs(c, qtx, sourceCourseID, createdCourse.ID, phaseIDMap, dtoIDMap); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to copy meta graphs: %w", err)
 	}
 
-	sourceAplicationPhaseID, err := getApplicationPhaseID(c, qtx, sourceCourseID)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return courseDTO.Course{}, err
+	sourceApplicationPhaseID, err := getApplicationPhaseID(c, qtx, sourceCourseID)
+	if err != nil && err != pgx.ErrNoRows {
+		return courseDTO.Course{}, fmt.Errorf("failed to get source application phase ID: %w", err)
 	}
 
 	targetApplicationPhaseID, err := getApplicationPhaseID(c, qtx, createdCourse.ID)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return courseDTO.Course{}, err
+	if err != nil && err != pgx.ErrNoRows {
+		return courseDTO.Course{}, fmt.Errorf("failed to get target application phase ID: %w", err)
 	}
 
-	if sourceAplicationPhaseID != uuid.Nil && targetApplicationPhaseID != uuid.Nil {
-		if err = copyApplicationForm(c, qtx, sourceAplicationPhaseID, targetApplicationPhaseID); err != nil {
-			return courseDTO.Course{}, err
+	if sourceApplicationPhaseID != uuid.Nil && targetApplicationPhaseID != uuid.Nil {
+		if err := copyApplicationForm(c, qtx, sourceApplicationPhaseID, targetApplicationPhaseID); err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to copy application form: %w", err)
 		}
 	}
 
-	err = copyPhaseConfigurations(c, qtx, phaseIDMap)
-	if err != nil {
-		return courseDTO.Course{}, err
+	if err := copyPhaseConfigurations(c, qtx, phaseIDMap); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to copy phase configurations: %w", err)
 	}
 
-	err = CourseServiceSingleton.createCourseGroupsAndRoles(c, createdCourse.Name, createdCourse.SemesterTag.String, requesterID)
-	if err != nil {
-		log.Error("Failed to create keycloak roles for course: ", err)
-		return courseDTO.Course{}, err
+	if err := CourseServiceSingleton.createCourseGroupsAndRoles(c, createdCourse.Name, createdCourse.SemesterTag.String, requesterID); err != nil {
+		log.Error("failed to create keycloak roles for course: ", err)
+		return courseDTO.Course{}, fmt.Errorf("failed to create keycloak roles/groups: %w", err)
 	}
 
 	if err := tx.Commit(c); err != nil {
-		return courseDTO.Course{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return courseDTO.Course{}, fmt.Errorf("failed to commit course transaction: %w", err)
 	}
 
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
@@ -135,11 +129,11 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 func copyCoursePhases(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUID) (map[uuid.UUID]uuid.UUID, error) {
 	sequence, err := qtx.GetCoursePhaseSequence(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get course phase sequence: %w", err)
 	}
 	unordered, err := qtx.GetNotOrderedCoursePhases(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get unordered course phases: %w", err)
 	}
 
 	allPhases := make(map[uuid.UUID]struct{})
@@ -154,7 +148,7 @@ func copyCoursePhases(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.U
 	for oldID := range allPhases {
 		phase, err := coursePhase.GetCoursePhaseByID(c, oldID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get course phase by ID %s: %w", oldID, err)
 		}
 
 		newPhase := coursePhaseDTO.CreateCoursePhase{
@@ -167,11 +161,11 @@ func copyCoursePhases(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.U
 		}
 		dbModel, err := newPhase.GetDBModel()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to convert phase to DB model: %w", err)
 		}
 		dbModel.ID = uuid.New()
 		if _, err := qtx.CreateCoursePhase(c, dbModel); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to create course phase: %w", err)
 		}
 		mapping[oldID] = dbModel.ID
 	}
@@ -183,19 +177,19 @@ func copyCoursePhases(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.U
 func copyCoursePhaseGraph(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap map[uuid.UUID]uuid.UUID) error {
 	graph, err := qtx.GetCoursePhaseGraph(c, sourceID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get course phase graph: %w", err)
 	}
 	for _, item := range graph {
 		fromID, ok1 := phaseMap[item.FromCoursePhaseID]
 		toID, ok2 := phaseMap[item.ToCoursePhaseID]
 		if !ok1 || !ok2 {
-			return fmt.Errorf("missing phase mapping for graph edge")
+			return fmt.Errorf("missing phase mapping for graph edge from %s to %s", item.FromCoursePhaseID, item.ToCoursePhaseID)
 		}
 		if err := qtx.CreateCourseGraphConnection(c, db.CreateCourseGraphConnectionParams{
 			FromCoursePhaseID: fromID,
 			ToCoursePhaseID:   toID,
 		}); err != nil {
-			return err
+			return fmt.Errorf("failed to create course graph connection: %w", err)
 		}
 	}
 	return nil
@@ -206,7 +200,7 @@ func copyCoursePhaseGraph(c *gin.Context, qtx *db.Queries, sourceID, targetID uu
 func setInitialPhase(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUID, phaseMap map[uuid.UUID]uuid.UUID) error {
 	sequence, err := qtx.GetCoursePhaseSequence(c, sourceID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get phase sequence: %w", err)
 	}
 	for _, p := range sequence {
 		if p.IsInitialPhase {
@@ -214,7 +208,7 @@ func setInitialPhase(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UU
 				CourseID: targetID,
 				ID:       phaseMap[p.ID],
 			}); err != nil {
-				return err
+				return fmt.Errorf("failed to set initial phase: %w", err)
 			}
 			break
 		}
@@ -230,11 +224,11 @@ func copyDTOs(c *gin.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUI
 	// Collect all DTOs from course phase types
 	unordered, err := qtx.GetNotOrderedCoursePhases(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get unordered course phases: %w", err)
 	}
 	sequence, err := qtx.GetCoursePhaseSequence(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get course phase sequence: %w", err)
 	}
 
 	// Collect all unique CoursePhaseTypeIDs
@@ -248,7 +242,7 @@ func copyDTOs(c *gin.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUI
 	for tID := range uniqueTypes {
 		outputs, err := qtx.GetCoursePhaseProvidedParticipationOutputs(c, tID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get participation outputs for type %s: %w", tID, err)
 		}
 		for _, o := range outputs {
 			dtoIDMap[o.ID] = o.ID
@@ -257,7 +251,7 @@ func copyDTOs(c *gin.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUI
 		// Get inputs
 		inputs, err := qtx.GetCoursePhaseRequiredParticipationInputs(c, tID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get participation inputs for type %s: %w", tID, err)
 		}
 		for _, i := range inputs {
 			dtoIDMap[i.ID] = i.ID
@@ -267,7 +261,7 @@ func copyDTOs(c *gin.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUI
 	// Collect all DTOs from graphs
 	phaseGraph, err := qtx.GetPhaseDataGraph(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get phase data graph: %w", err)
 	}
 	for _, edge := range phaseGraph {
 		dtoIDMap[edge.FromCoursePhaseDtoID] = edge.FromCoursePhaseDtoID
@@ -276,7 +270,7 @@ func copyDTOs(c *gin.Context, qtx *db.Queries, sourceID uuid.UUID) (map[uuid.UUI
 
 	participationGraph, err := qtx.GetParticipationDataGraph(c, sourceID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get participation data graph: %w", err)
 	}
 	for _, edge := range participationGraph {
 		dtoIDMap[edge.FromCoursePhaseDtoID] = edge.FromCoursePhaseDtoID
@@ -292,7 +286,7 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 	// Phase Data Graph
 	phaseGraph, err := qtx.GetPhaseDataGraph(c, sourceID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get phase data graph: %w", err)
 	}
 	converted := []courseDTO.MetaDataGraphItem{}
 	for _, i := range phaseGraph {
@@ -311,13 +305,13 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 		})
 	}
 	if err := updatePhaseDataGraphHelper(c, qtx, targetID, converted); err != nil {
-		return err
+		return fmt.Errorf("failed to update phase data graph: %w", err)
 	}
 
 	// Participation Data Graph
 	participationGraph, err := qtx.GetParticipationDataGraph(c, sourceID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get participation data graph: %w", err)
 	}
 	converted = []courseDTO.MetaDataGraphItem{}
 	for _, i := range participationGraph {
@@ -336,7 +330,10 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 		})
 	}
 
-	return updateParticipationDataGraphHelper(c, qtx, targetID, converted)
+	if err := updateParticipationDataGraphHelper(c, qtx, targetID, converted); err != nil {
+		return fmt.Errorf("failed to update participation data graph: %w", err)
+	}
+	return nil
 }
 
 // copyApplicationForm copies the application form—including all questions—from
@@ -344,7 +341,7 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 func copyApplicationForm(c *gin.Context, qtx *db.Queries, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
 	applicationForm, err := getApplicationFormHelper(c, qtx, sourceCoursePhaseID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve source application form: %w", err)
 	}
 
 	createQuestionsText := make([]applicationDTO.CreateQuestionText, 0, len(applicationForm.QuestionsText))
@@ -382,8 +379,7 @@ func copyApplicationForm(c *gin.Context, qtx *db.Queries, sourceCoursePhaseID, t
 		})
 	}
 
-	// Copy the application form
-	newApplicationForm := applicationDTO.UpdateForm{
+	form := applicationDTO.UpdateForm{
 		DeleteQuestionsText:        []uuid.UUID{},
 		DeleteQuestionsMultiSelect: []uuid.UUID{},
 		CreateQuestionsText:        createQuestionsText,
@@ -391,51 +387,52 @@ func copyApplicationForm(c *gin.Context, qtx *db.Queries, sourceCoursePhaseID, t
 		UpdateQuestionsText:        []applicationDTO.QuestionText{},
 		UpdateQuestionsMultiSelect: []applicationDTO.QuestionMultiSelect{},
 	}
-	err = updateApplicationFormHelper(c, qtx, targetCoursePhaseID, newApplicationForm)
-	if err != nil {
-		return err
+
+	if err := updateApplicationFormHelper(c, qtx, targetCoursePhaseID, form); err != nil {
+		return fmt.Errorf("failed to update application form: %w", err)
 	}
 	return nil
 }
 
+// copyPhaseConfigurations sends a request to the phase service to copy configurations
+// for each phase that has a server-side implementation in the source course. It uses the phase ID mapping to ensure
+// the correct phases are targeted.
 func copyPhaseConfigurations(c *gin.Context, qtx *db.Queries, phaseIDMap map[uuid.UUID]uuid.UUID) error {
 	for oldPhaseID, newPhaseID := range phaseIDMap {
 		oldPhase, err := coursePhase.GetCoursePhaseByID(c, oldPhaseID)
 		if err != nil {
-			return fmt.Errorf("course phase type with ID %s not found: %w", oldPhaseID, err)
+			return fmt.Errorf("course phase with ID %s not found: %w", oldPhaseID, err)
 		}
 
 		oldPhaseType, err := qtx.GetCoursePhaseTypeByID(c, oldPhase.CoursePhaseTypeID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to fetch course phase type: %w", err)
 		}
 
 		baseURL := oldPhaseType.BaseUrl
 		if baseURL == utils.GetEnv("CORE_HOST", "core") {
 			continue
 		}
-		copyPath := "/copy"
 
-		url := baseURL + copyPath
-
-		copyRequest := promptTypes.PhaseCopyRequest{
+		url := baseURL + "/copy"
+		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
 			SourceCoursePhaseID: oldPhaseID,
 			TargetCoursePhaseID: newPhaseID,
-		}
+		})
 
-		body, _ := json.Marshal(copyRequest)
 		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), url)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to send copy request to phase service: %w", err)
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			log.Error("Received non-OK response:", resp.Status)
-			return errors.New("non-OK response received")
+			if resp.StatusCode == http.StatusNotFound {
+				log.Warnf("Copy functionality not found for phase service '%s', skipping copy for this phase.", oldPhaseType.Name)
+				continue
+			}
+			return fmt.Errorf("received non-OK response from phase service '%s': %s", oldPhaseType.Name, resp.Status)
 		}
-
-		return nil
 	}
 	return nil
 }
@@ -446,7 +443,7 @@ func sendRequest(method, authHeader string, body io.Reader, url string) (*http.R
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		log.Error("Error creating request:", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -457,148 +454,67 @@ func sendRequest(method, authHeader string, body io.Reader, url string) (*http.R
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Error("Error sending request:", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 
 	return resp, nil
 }
 
-// updateParticipationDataGraphHelper deletes and recreates all participation data graph connections
-// for the given course using the provided metadata graph items.
-func updateParticipationDataGraphHelper(c *gin.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
-	// delete all previous connections
-	err := qtx.DeleteParticipationDataGraphConnections(c, courseID)
-	if err != nil {
-		return err
-	}
-
-	// create new connections
-	for _, graphItem := range graphUpdate {
-		err = qtx.CreateParticipationDataConnection(c, db.CreateParticipationDataConnectionParams{
-			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
-			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
-			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,
-			ToCoursePhaseDtoID:   graphItem.ToCoursePhaseDtoID,
-		})
-		if err != nil {
-			log.Error("Error creating graph connection: ", err)
-			return err
-		}
-	}
-	return nil
-
-}
-
-// getApplicationPhaseID returns the ID of the application phase for the given course.
-// If no application phase exists, it returns uuid.Nil and pgx.ErrNoRows.
-func getApplicationPhaseID(c *gin.Context, qtx *db.Queries, courseID uuid.UUID) (uuid.UUID, error) {
-	applicationPhaseID, err := qtx.GetApplicationPhaseIDForCourse(c, courseID)
-	if err != nil {
-		return uuid.Nil, err
-	}
-	return applicationPhaseID, nil
-}
-
-// updatePhaseDataGraphHelper deletes and recreates all phase data graph connections
-// for the given course using the provided metadata graph items.
-func updatePhaseDataGraphHelper(c *gin.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
-	// delete all previous connections
-	err := qtx.DeletePhaseDataGraphConnections(c, courseID)
-	if err != nil {
-		return err
-	}
-
-	// create new connections
-	for _, graphItem := range graphUpdate {
-		err = qtx.CreatePhaseDataConnection(c, db.CreatePhaseDataConnectionParams{
-			FromCoursePhaseID:    graphItem.FromCoursePhaseID,
-			ToCoursePhaseID:      graphItem.ToCoursePhaseID,
-			FromCoursePhaseDtoID: graphItem.FromCoursePhaseDtoID,
-			ToCoursePhaseDtoID:   graphItem.ToCoursePhaseDtoID,
-		})
-		if err != nil {
-			log.Error("Error creating graph connection: ", err)
-			return err
-		}
-	}
-	return nil
-
-}
-
 // updateApplicationFormHelper applies updates to a course phase's application form.
 // It handles creation, deletion, and updating of text and multi-select questions.
 func updateApplicationFormHelper(c *gin.Context, qtx *db.Queries, coursePhaseId uuid.UUID, form applicationDTO.UpdateForm) error {
-	// Check if course phase is application phase
 	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(c, coursePhaseId)
 	if err != nil {
 		log.Error(err)
-		return err
+		return fmt.Errorf("failed to check if course phase is application phase: %w", err)
 	}
 
 	if !isApplicationPhase {
-		return errors.New("course phase is not an application phase")
+		return fmt.Errorf("course phase is not an application phase")
 	}
 
-	// Delete all questions to be deleted
 	for _, questionID := range form.DeleteQuestionsMultiSelect {
-		err := qtx.DeleteApplicationQuestionMultiSelect(c, questionID)
-		if err != nil {
+		if err := qtx.DeleteApplicationQuestionMultiSelect(c, questionID); err != nil {
 			log.Error(err)
-			return errors.New("could not delete question")
+			return fmt.Errorf("could not delete multi-select question: %w", err)
 		}
 	}
-
 	for _, questionID := range form.DeleteQuestionsText {
-		err := qtx.DeleteApplicationQuestionText(c, questionID)
-		if err != nil {
+		if err := qtx.DeleteApplicationQuestionText(c, questionID); err != nil {
 			log.Error(err)
-			return errors.New("could not delete question")
+			return fmt.Errorf("could not delete text question: %w", err)
 		}
 	}
 
-	// Create all questions to be created
 	for _, question := range form.CreateQuestionsText {
-		questionDBModel := question.GetDBModel()
-		questionDBModel.ID = uuid.New()
-		// force ensuring right course phase id -> but also checked in validation
-		questionDBModel.CoursePhaseID = coursePhaseId
-
-		err = qtx.CreateApplicationQuestionText(c, questionDBModel)
-		if err != nil {
+		model := question.GetDBModel()
+		model.ID = uuid.New()
+		model.CoursePhaseID = coursePhaseId
+		if err := qtx.CreateApplicationQuestionText(c, model); err != nil {
 			log.Error(err)
-			return errors.New("could not create question")
+			return fmt.Errorf("could not create text question: %w", err)
 		}
 	}
-
 	for _, question := range form.CreateQuestionsMultiSelect {
-		questionDBModel := question.GetDBModel()
-		questionDBModel.ID = uuid.New()
-		// force ensuring right course phase id -> but also checked in validation
-		questionDBModel.CoursePhaseID = coursePhaseId
-
-		err = qtx.CreateApplicationQuestionMultiSelect(c, questionDBModel)
-		if err != nil {
+		model := question.GetDBModel()
+		model.ID = uuid.New()
+		model.CoursePhaseID = coursePhaseId
+		if err := qtx.CreateApplicationQuestionMultiSelect(c, model); err != nil {
 			log.Error(err)
-			return errors.New("could not create question")
+			return fmt.Errorf("could not create multi-select question: %w", err)
 		}
 	}
 
-	// Update the rest
 	for _, question := range form.UpdateQuestionsMultiSelect {
-		questionDBModel := question.GetDBModel()
-		err = qtx.UpdateApplicationQuestionMultiSelect(c, questionDBModel)
-		if err != nil {
+		if err := qtx.UpdateApplicationQuestionMultiSelect(c, question.GetDBModel()); err != nil {
 			log.Error(err)
-			return errors.New("could not update question")
+			return fmt.Errorf("could not update multi-select question: %w", err)
 		}
 	}
-
 	for _, question := range form.UpdateQuestionsText {
-		questionDBModel := question.GetDBModel()
-		err = qtx.UpdateApplicationQuestionText(c, questionDBModel)
-		if err != nil {
+		if err := qtx.UpdateApplicationQuestionText(c, question.GetDBModel()); err != nil {
 			log.Error(err)
-			return errors.New("could not update question")
+			return fmt.Errorf("could not update text question: %w", err)
 		}
 	}
 
@@ -613,24 +529,75 @@ func getApplicationFormHelper(c *gin.Context, qtx *db.Queries, coursePhaseID uui
 
 	isApplicationPhase, err := qtx.CheckIfCoursePhaseIsApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		return applicationDTO.Form{}, err
+		return applicationDTO.Form{}, fmt.Errorf("failed to check application phase: %w", err)
 	}
-
 	if !isApplicationPhase {
-		return applicationDTO.Form{}, errors.New("course phase is not an application phase")
+		return applicationDTO.Form{}, fmt.Errorf("course phase is not an application phase")
 	}
 
-	applicationQuestionsText, err := qtx.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
+	questionsText, err := qtx.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		return applicationDTO.Form{}, err
+		return applicationDTO.Form{}, fmt.Errorf("failed to get text questions: %w", err)
 	}
 
-	applicationQuestionsMultiSelect, err := qtx.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
+	questionsMultiSelect, err := qtx.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		return applicationDTO.Form{}, err
+		return applicationDTO.Form{}, fmt.Errorf("failed to get multi-select questions: %w", err)
 	}
 
-	applicationFormDTO := applicationDTO.GetFormDTOFromDBModel(applicationQuestionsText, applicationQuestionsMultiSelect)
+	return applicationDTO.GetFormDTOFromDBModel(questionsText, questionsMultiSelect), nil
+}
 
-	return applicationFormDTO, nil
+// updatePhaseDataGraphHelper deletes and recreates all phase data graph connections
+// for the given course using the provided metadata graph items.
+func updatePhaseDataGraphHelper(c *gin.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	if err := qtx.DeletePhaseDataGraphConnections(c, courseID); err != nil {
+		return fmt.Errorf("failed to delete old phase data graph connections: %w", err)
+	}
+
+	for _, item := range graphUpdate {
+		err := qtx.CreatePhaseDataConnection(c, db.CreatePhaseDataConnectionParams{
+			FromCoursePhaseID:    item.FromCoursePhaseID,
+			ToCoursePhaseID:      item.ToCoursePhaseID,
+			FromCoursePhaseDtoID: item.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   item.ToCoursePhaseDtoID,
+		})
+		if err != nil {
+			log.Error("Error creating phase data connection: ", err)
+			return fmt.Errorf("failed to create phase data connection: %w", err)
+		}
+	}
+	return nil
+}
+
+// updateParticipationDataGraphHelper deletes and recreates all participation data graph connections
+// for the given course using the provided metadata graph items.
+func updateParticipationDataGraphHelper(c *gin.Context, qtx *db.Queries, courseID uuid.UUID, graphUpdate []courseDTO.MetaDataGraphItem) error {
+	if err := qtx.DeleteParticipationDataGraphConnections(c, courseID); err != nil {
+		return fmt.Errorf("failed to delete old participation data graph connections: %w", err)
+	}
+
+	for _, item := range graphUpdate {
+		err := qtx.CreateParticipationDataConnection(c, db.CreateParticipationDataConnectionParams{
+			FromCoursePhaseID:    item.FromCoursePhaseID,
+			ToCoursePhaseID:      item.ToCoursePhaseID,
+			FromCoursePhaseDtoID: item.FromCoursePhaseDtoID,
+			ToCoursePhaseDtoID:   item.ToCoursePhaseDtoID,
+		})
+		if err != nil {
+			log.Error("Error creating participation data connection: ", err)
+			return fmt.Errorf("failed to create participation data connection: %w", err)
+		}
+	}
+	return nil
+}
+
+// getApplicationPhaseID returns the ID of the application phase for the given course.
+// If no application phase exists, it returns uuid.Nil and pgx.ErrNoRows.
+func getApplicationPhaseID(c *gin.Context, qtx *db.Queries, courseID uuid.UUID) (uuid.UUID, error) {
+	applicationPhaseID, err := qtx.GetApplicationPhaseIDForCourse(c, courseID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return applicationPhaseID, nil
 }
