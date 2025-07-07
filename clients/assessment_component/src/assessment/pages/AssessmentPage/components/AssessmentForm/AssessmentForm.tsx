@@ -18,12 +18,13 @@ import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfa
 import { Competency } from '../../../../interfaces/competency'
 import { ScoreLevel } from '../../../../interfaces/scoreLevel'
 
+import { CompetencyHeader } from '../../../components/CompetencyHeader'
+import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
+import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
+
 import { useUpdateAssessment } from './hooks/useUpdateAssessment'
 import { useCreateAssessment } from './hooks/useCreateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
-import { DeleteAssessmentDialog } from './components/DeleteAssessmentDialog'
-import { ScoreLevelSelector } from './components/ScoreLevelSelector'
-import { CompetencyHeader } from './components/CompetencyHeader'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -111,7 +112,7 @@ export const AssessmentForm = ({
       >
         <CompetencyHeader
           competency={competency}
-          assessment={assessment}
+          competencyScore={assessment}
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
         />

@@ -1,11 +1,7 @@
+import { CompetencyScore } from './competencyScore'
 import { ScoreLevel } from './scoreLevel'
 
-export type Assessment = {
-  id: string // UUID
-  courseParticipationID: string // UUID
-  coursePhaseID: string // UUID
-  competencyID: string // UUID
-  scoreLevel: ScoreLevel
+export type Assessment = CompetencyScore & {
   examples: string
   comment: string
   assessedAt: string // ISO 8601 date string

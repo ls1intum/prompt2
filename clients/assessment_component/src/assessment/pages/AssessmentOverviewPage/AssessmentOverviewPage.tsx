@@ -194,9 +194,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
           extraColumns={extraColumns}
-          onClickRowAction={(student) =>
-            navigate(`${path}/student-assessment/${student.courseParticipationID}`)
-          }
+          onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
           key={JSON.stringify(scoreLevels)}
         />
       </div>

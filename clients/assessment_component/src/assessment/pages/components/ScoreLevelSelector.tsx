@@ -1,9 +1,9 @@
 import { LockIcon } from 'lucide-react'
 import { cn } from '@tumaet/prompt-ui-components'
 
-import { getLevelConfig } from '../../../../utils/getLevelConfig'
-import { Competency } from '../../../../../interfaces/competency'
-import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { getLevelConfig } from '../utils/getLevelConfig'
+import { Competency } from '../../interfaces/competency'
+import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface ScoreLevelSelectorProps {
   competency: Competency

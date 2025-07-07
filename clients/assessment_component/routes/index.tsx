@@ -50,7 +50,7 @@ const routes: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   },
   {
-    path: '/student-assessment/:courseParticipationID',
+    path: '/overview/:courseParticipationID',
     element: (
       <AssessmentDataShell>
         <AssessmentPage />

@@ -7,19 +7,19 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import { Competency } from '../../../../../interfaces/competency'
-import { Assessment } from '../../../../../interfaces/assessment'
+import { Competency } from '../../interfaces/competency'
+import { CompetencyScore } from '../../interfaces/competencyScore'
 
 interface CompetencyHeaderProps {
   competency: Competency
-  assessment?: Assessment
+  competencyScore?: CompetencyScore
   completed: boolean
   onResetClick: () => void
 }
 
 export const CompetencyHeader = ({
   competency,
-  assessment,
+  competencyScore,
   completed,
   onResetClick,
 }: CompetencyHeaderProps) => {
@@ -30,7 +30,7 @@ export const CompetencyHeader = ({
           <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
           <h3 className='text-base font-medium'>{competency.name}</h3>
         </div>
-        {assessment && !completed && (
+        {competencyScore && !completed && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
