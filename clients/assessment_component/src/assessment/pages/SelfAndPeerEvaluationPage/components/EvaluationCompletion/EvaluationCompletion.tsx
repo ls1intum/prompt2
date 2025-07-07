@@ -66,7 +66,7 @@ export const EvaluationCompletion = ({
         }
         setDialogOpen(false)
       } catch (err) {
-        setError('An error occurred while updating the assessment completion status.')
+        setError('An error occurred while updating the completion status.')
       }
     }
 
@@ -93,7 +93,7 @@ export const EvaluationCompletion = ({
           )}
           {isDeadlinePassed && completed && (
             <div className='text-sm text-red-600 mt-1'>
-              Assessments cannot be unmarked as final after the deadline has passed.
+              Cannot be unmarked as final after the deadline has passed.
             </div>
           )}
         </div>
@@ -111,7 +111,7 @@ export const EvaluationCompletion = ({
           ) : (
             <span className='flex items-center gap-1'>
               <Lock className='h-3.5 w-3.5' />
-              Mark Assessment as Final
+              Mark as Final
             </span>
           )}
         </Button>

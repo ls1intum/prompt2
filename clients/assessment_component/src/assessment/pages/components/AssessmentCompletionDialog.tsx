@@ -41,21 +41,21 @@ export function AssessmentCompletionDialog({
     <>
       Marked as final {author ? <>by {author}</> : <></>}
       at {completedAt ? format(completedAt, 'MMM d, yyyy') : 'N/A'}
-      <br /> Are you sure you want to reopen this assessment for editing? This will allow you to
-      make changes to the assessment.
+      <br /> Are you sure you want to reopen this for editing? This will allow you to make changes
+      to your scores.
     </>
   ) : !isDeadlinePassed ? (
     <>
-      <strong>Are you sure you want to mark this assessment as final?</strong>
+      <strong>Are you sure you want to mark this as final?</strong>
       <br />
-      You can still unmark and edit it until the deadline. After the deadline, the assessment will
-      be locked permanently and no further changes will be possible.
+      You can still unmark and edit it until the deadline. After the deadline, the form will be
+      locked permanently and no further changes will be possible.
     </>
   ) : (
     <>
-      <strong>Are you sure you want to mark this assessment as final?</strong>
+      <strong>Are you sure you want to mark this as final?</strong>
       <br />
-      This will lock the assessment permanently and prevent further changes.
+      This will lock the form permanently and prevent further changes.
     </>
   )
 
@@ -70,9 +70,7 @@ export function AssessmentCompletionDialog({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {completed ? 'Reopen Assessment for Editing' : 'Mark Assessment as Final'}
-            </DialogTitle>
+            <DialogTitle>{completed ? 'Reopen for Editing' : 'Mark as Final'}</DialogTitle>
             <DialogDescription>
               <DialogDescription>{dialogDescription}</DialogDescription>
             </DialogDescription>
