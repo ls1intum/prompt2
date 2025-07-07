@@ -209,6 +209,11 @@ func GetEvaluationCompletion(ctx context.Context, courseParticipationID, courseP
 		AuthorCourseParticipationID: authorCourseParticipationID,
 	})
 	if err != nil {
+		// Check if it's a "no rows" error, which is expected when no completion exists yet
+		if err.Error() == "no rows in result set" {
+			// Return empty completion with default values
+			return db.EvaluationCompletion{}, nil
+		}
 		log.Error("could not get evaluation completion: ", err)
 		return db.EvaluationCompletion{}, errors.New("could not get evaluation completion")
 	}

@@ -332,12 +332,16 @@ func (q *Queries) GetSelfEvaluationCompletionsByCoursePhase(ctx context.Context,
 }
 
 const markEvaluationAsFinished = `-- name: MarkEvaluationAsFinished :exec
-UPDATE evaluation_completion
-SET completed    = true,
-    completed_at = $4
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND author_course_participation_id = $3
+INSERT INTO evaluation_completion (course_participation_id,
+                   course_phase_id,
+                   author_course_participation_id,
+                   completed_at,
+                   completed)
+VALUES ($1, $2, $3, $4, true)
+ON CONFLICT (course_participation_id, course_phase_id, author_course_participation_id)
+  DO UPDATE
+  SET completed_at = EXCLUDED.completed_at,
+    completed    = true
 `
 
 type MarkEvaluationAsFinishedParams struct {
