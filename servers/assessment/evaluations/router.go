@@ -102,7 +102,7 @@ func getPeerEvaluationsForParticipant(c *gin.Context) {
 
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		log.Error("Error parsing participantID: ", err)
+		log.Error("Error parsing courseParticipationID: ", err)
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -190,7 +190,7 @@ func deleteEvaluation(c *gin.Context) {
 		return
 	}
 	// Ensure the user is the author of the evaluation or has the right permissions
-	if !isEvalutationAuthor(c, evaluationID, courseParticipationID.(uuid.UUID)) {
+	if !isEvaluationAuthor(c, evaluationID, courseParticipationID.(uuid.UUID)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this evaluation"})
 		return
 	}
@@ -203,7 +203,7 @@ func deleteEvaluation(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func isEvalutationAuthor(c *gin.Context, evaluationID, authorID uuid.UUID) bool {
+func isEvaluationAuthor(c *gin.Context, evaluationID, authorID uuid.UUID) bool {
 	evaluation, err := GetEvaluationByID(c, evaluationID)
 	if err != nil {
 		log.Error("Error fetching evaluation: ", err)
