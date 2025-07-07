@@ -250,7 +250,7 @@ export const CopyCourseDialog = ({
             <Info className='h-4 w-4' />
             <AlertTitle>Everything Looks Good</AlertTitle>
             <AlertDescription>
-              All phases and their configurations will be copied automatically
+              All phases and their configurations will be copied automatically.
             </AlertDescription>
           </Alert>
           <DialogFooter>
