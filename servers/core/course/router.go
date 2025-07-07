@@ -2,6 +2,7 @@ package course
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -423,7 +424,7 @@ func deleteCourse(c *gin.Context) {
 // @Tags courses
 // @Produce json
 // @Param uuid path string true "Course UUID"
-// @Success 200 {string} string "OK"
+// @Success 201 {object} courseDTO.Course
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /courses/{uuid}/copy [post]
@@ -432,20 +433,20 @@ func copyCourse(c *gin.Context) {
 
 	courseVariables := courseDTO.CopyCourseRequest{}
 	if err := c.BindJSON(&courseVariables); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
 
 	originalCourseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
 		return
 	}
 
 	newCourse, err := CopyCourse(c, originalCourseID, courseVariables, userID)
 	if err != nil {
-		log.Error(err)
-		handleError(c, http.StatusInternalServerError, errors.New("failed to copy course"))
+		log.Error("Copy course failed: ", err)
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 

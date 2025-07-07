@@ -385,5 +385,9 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 }
 
 func CopyCourse(c *gin.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
-	return copyCourseInternal(c, sourceCourseID, courseVariables, requesterID)
+	course, err := copyCourseInternal(c, sourceCourseID, courseVariables, requesterID)
+	if err != nil {
+		return courseDTO.Course{}, fmt.Errorf("course copy failed: %w", err)
+	}
+	return course, nil
 }
