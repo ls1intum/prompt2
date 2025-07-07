@@ -17,6 +17,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	coursePhaseRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateCoursePhaseConfig)
 
 	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
+	coursePhaseRouter.GET("my-participation", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getParticipationForStudent)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getTeamsForCoursePhase)
 
 }
@@ -37,44 +38,6 @@ func getCoursePhaseConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config))
-}
-
-func getParticipationsForCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	authHeader := c.GetHeader("Authorization")
-	participations, err := GetParticipationsForCoursePhase(c, authHeader, coursePhaseID)
-	if err != nil {
-		log.WithError(err).Error("Failed to get participations for course phase")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participations"})
-		return
-	}
-
-	c.JSON(http.StatusOK, participations)
-}
-
-func getTeamsForCoursePhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		log.WithError(err).Error("Failed to parse course phase ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	authHeader := c.GetHeader("Authorization")
-	teams, err := GetTeamsForCoursePhase(c, authHeader, coursePhaseID)
-	if err != nil {
-		log.WithError(err).Error("Failed to get teams for course phase")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve teams"})
-		return
-	}
-
-	c.JSON(http.StatusOK, teams)
 }
 
 func createOrUpdateCoursePhaseConfig(c *gin.Context) {
@@ -100,4 +63,68 @@ func createOrUpdateCoursePhaseConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Course phase config created/updated successfully"})
+}
+
+func getParticipationsForCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	participations, err := GetParticipationsForCoursePhase(c, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get participations for course phase")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, participations)
+}
+
+func getParticipationForStudent(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	courseParticipationID, ok := c.Get("courseParticipationID")
+	if !ok {
+		log.Error("Error getting courseParticipationID from context")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	participation, err := GetParticipationForStudent(c, authHeader, coursePhaseID, courseParticipationID.(uuid.UUID))
+	if err != nil {
+		log.WithError(err).Error("Failed to get participation for student")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve participation"})
+		return
+	}
+
+	c.JSON(http.StatusOK, participation)
+}
+
+func getTeamsForCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	teams, err := GetTeamsForCoursePhase(c, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get teams for course phase")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve teams"})
+		return
+	}
+
+	c.JSON(http.StatusOK, teams)
 }

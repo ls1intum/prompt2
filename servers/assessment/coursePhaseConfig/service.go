@@ -60,6 +60,36 @@ func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.Cour
 	return config, nil
 }
 
+func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentTemplateID:   req.AssessmentTemplateID,
+		CoursePhaseID:          coursePhaseID,
+		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
+		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
+		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
+		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
+		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
+		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to create or update course phase config")
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -120,6 +150,17 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 	}
 
 	return coursePhaseConfigDTO.GetAssessmentStudentsFromParticipations(participations), nil
+}
+
+func GetParticipationForStudent(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
+	coreURL := utils.GetCoreUrl()
+	participation, err := promptSDK.FetchAndMergeCourseParticipationWithResolution(coreURL, authHeader, coursePhaseID, courseParticipationID)
+	if err != nil {
+		log.Error("could not fetch course phase participation with student: ", err)
+		return coursePhaseConfigDTO.AssessmentParticipationWithStudent{}, errors.New("could not fetch course phase participation with student")
+	}
+
+	return coursePhaseConfigDTO.GetAssessmentStudentFromParticipation(participation), nil
 }
 
 func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
@@ -185,34 +226,4 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 	}
 
 	return teams, nil
-}
-
-func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
-	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
-
-	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentTemplateID:   req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
-		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
-		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
-		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
-		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
-		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
-		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
-	}
-
-	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update course phase config")
-		return err
-	}
-
-	return tx.Commit(ctx)
 }
