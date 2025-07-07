@@ -460,17 +460,11 @@ func copyCourse(c *gin.Context) {
 // @Tags courses
 // @Produce json
 // @Param uuid path string true "Course UUID"
-// @Success 200 {object} gin.H{"copyable": true}
+// @Success 200 {object} gin.H{"copyable": bool, "missingPhaseTypes": []string}
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /courses/{uuid}/copyable [get]
 func checkCourseCopyable(c *gin.Context) {
-	courseVariables := courseDTO.CopyCourseRequest{}
-	if err := c.BindJSON(&courseVariables); err != nil {
-		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
-		return
-	}
-
 	originalCourseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
@@ -490,7 +484,10 @@ func checkCourseCopyable(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"copyable": true})
+	c.JSON(http.StatusOK, gin.H{
+		"copyable":          true,
+		"missingPhaseTypes": []string{},
+	})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
