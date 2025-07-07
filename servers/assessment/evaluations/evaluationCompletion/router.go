@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -263,14 +262,12 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 		return
 	}
 
-	evaluationCompletions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForAuthorInPhase(c, db.GetEvaluationCompletionsForAuthorInPhaseParams{
-		AuthorCourseParticipationID: userCourseParticipationUUID,
-		CoursePhaseID:               coursePhaseID,
-	})
+	evaluationCompletions, err := GetEvaluationCompletionsForAuthorInPhase(c, userCourseParticipationUUID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(evaluationCompletions))
 }
 
