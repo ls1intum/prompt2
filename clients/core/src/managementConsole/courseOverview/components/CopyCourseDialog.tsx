@@ -241,16 +241,16 @@ export const CopyCourseDialog = ({
       return (
         <>
           <DialogHeader>
-            <DialogTitle>Ready to Copy Course</DialogTitle>
+            <DialogTitle>Course Ready to Copy</DialogTitle>
             <DialogDescription>
-              All course phases support copying. The course can be fully copied.
+              All course phases support configuration copying. The course will be fully duplicated.
             </DialogDescription>
           </DialogHeader>
           <Alert>
             <Info className='h-4 w-4' />
-            <AlertTitle>All Systems Go!</AlertTitle>
+            <AlertTitle>Everything Looks Good</AlertTitle>
             <AlertDescription>
-              All course phases and configurations will be copied successfully.
+              All phases and their configurations will be copied automatically.
             </AlertDescription>
           </Alert>
           <DialogFooter>
