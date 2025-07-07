@@ -111,6 +111,7 @@ export const AssessmentForm = ({
         )}
       >
         <CompetencyHeader
+          className='lg:col-span-2 2xl:col-span-1'
           competency={competency}
           competencyScore={assessment}
           completed={completed}
@@ -118,6 +119,7 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
+          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}

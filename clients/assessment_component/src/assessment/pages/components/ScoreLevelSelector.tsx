@@ -6,20 +6,24 @@ import { Competency } from '../../interfaces/competency'
 import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 interface ScoreLevelSelectorProps {
+  className: string
   competency: Competency
   selectedScore?: ScoreLevel
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
+  isEvaluation?: boolean
 }
 
 export const ScoreLevelSelector = ({
+  className,
   competency,
   selectedScore,
   onScoreChange,
   completed,
+  isEvaluation = false,
 }: ScoreLevelSelectorProps) => {
   return (
-    <div className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'>
+    <div className={className}>
       {Object.values(ScoreLevel).map((level) => {
         const config = getLevelConfig(level)
         const isSelected = selectedScore === level
@@ -47,7 +51,9 @@ export const ScoreLevelSelector = ({
             )}
           >
             <div className='flex justify-between mb-1'>
-              <span className='font-semibold'>{config.title}</span>
+              <span className='font-semibold'>
+                {isEvaluation ? config.evaluationTitle : config.title}
+              </span>
               <div>
                 <span className='flex items-center gap-1'>
                   {completed && isSelected && (

@@ -85,11 +85,12 @@ export const EvaluationForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-5 gap-4 items-start p-4 border rounded-md relative',
+          'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md relative',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
         <CompetencyHeader
+          className='lg:col-span-2'
           competency={competency}
           competencyScore={evaluation}
           completed={completed}
@@ -97,10 +98,12 @@ export const EvaluationForm = ({
         />
 
         <ScoreLevelSelector
+          className='lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScoreLevel}
           onScoreChange={handleScoreChange}
           completed={completed}
+          isEvaluation={true}
         />
 
         {error && !completed && (

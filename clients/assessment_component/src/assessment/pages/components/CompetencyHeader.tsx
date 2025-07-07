@@ -11,6 +11,7 @@ import { Competency } from '../../interfaces/competency'
 import { CompetencyScore } from '../../interfaces/competencyScore'
 
 interface CompetencyHeaderProps {
+  className: string
   competency: Competency
   competencyScore?: CompetencyScore
   completed: boolean
@@ -18,13 +19,14 @@ interface CompetencyHeaderProps {
 }
 
 export const CompetencyHeader = ({
+  className,
   competency,
   competencyScore,
   completed,
   onResetClick,
 }: CompetencyHeaderProps) => {
   return (
-    <div className='lg:col-span-2 2xl:col-span-1'>
+    <div className={className}>
       <div className='flex items-center justify-between mb-2'>
         <div className='flex items-center gap-2'>
           <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
