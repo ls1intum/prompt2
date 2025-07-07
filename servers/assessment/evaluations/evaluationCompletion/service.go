@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -210,7 +211,7 @@ func GetEvaluationCompletion(ctx context.Context, courseParticipationID, courseP
 	})
 	if err != nil {
 		// Check if it's a "no rows" error, which is expected when no completion exists yet
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			// Return empty completion with default values
 			return db.EvaluationCompletion{}, nil
 		}
