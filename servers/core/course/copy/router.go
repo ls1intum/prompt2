@@ -67,7 +67,7 @@ func copyCourse(c *gin.Context) {
 // @Tags courses
 // @Produce json
 // @Param uuid path string true "Course UUID"
-// @Success 200 {object} courseDTO.CheckCourseCopyableResponse
+// @Success 200 {object} courseCopyDTO.CheckCourseCopyableResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /courses/{uuid}/copyable [get]
