@@ -56,7 +56,7 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 			checked[pt.BaseUrl] = pt.Name
 			continue
 		}
-		defer resp.Body.Close()
+		resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
 			missing = append(missing, p.Name.String+" ("+pt.Name+")")
@@ -92,7 +92,7 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 			checked[pt.BaseUrl] = pt.Name
 			continue
 		}
-		defer resp.Body.Close()
+		resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound {
 			missing = append(missing, p.Name.String+" ("+pt.Name+")")
