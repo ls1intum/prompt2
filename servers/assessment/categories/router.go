@@ -16,6 +16,9 @@ func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 
 	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCategories)
 	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCategoriesWithCompetencies)
+	categoryRouter.GET("/self/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationCategoriesWithCompetencies)
+	categoryRouter.GET("/peer/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationCategoriesWithCompetencies)
+
 	categoryRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createCategory)
 	categoryRouter.PUT("/:categoryID", authMiddleware(promptSDK.PromptAdmin), updateCategory)
 	categoryRouter.DELETE("/:categoryID", authMiddleware(promptSDK.PromptAdmin), deleteCategory)
@@ -111,6 +114,52 @@ func getCategoriesWithCompetencies(c *gin.Context) {
 	result, err := GetCategoriesWithCompetencies(c, config.AssessmentTemplateID)
 	if err != nil {
 		log.Error("Error getting categories with competencies: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func getSelfEvaluationCategoriesWithCompetencies(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	config, err := coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
+	if err != nil {
+		log.Error("Error getting course phase config: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	result, err := GetCategoriesWithCompetencies(c, config.SelfEvaluationTemplate)
+	if err != nil {
+		log.Error("Error getting self evaluation categories with competencies: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func getPeerEvaluationCategoriesWithCompetencies(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	config, err := coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
+	if err != nil {
+		log.Error("Error getting course phase config: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	result, err := GetCategoriesWithCompetencies(c, config.PeerEvaluationTemplate)
+	if err != nil {
+		log.Error("Error getting peer evaluation categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
