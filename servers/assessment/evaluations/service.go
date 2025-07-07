@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
@@ -40,7 +41,7 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 		CourseParticipationID:       req.CourseParticipationID,
 		CoursePhaseID:               coursePhaseID,
 		CompetencyID:                req.CompetencyID,
-		ScoreLevel:                  req.ScoreLevel,
+		ScoreLevel:                  scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
 		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
 	})
 	if err != nil {

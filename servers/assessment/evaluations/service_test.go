@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -163,7 +164,7 @@ func (suite *EvaluationServiceTestSuite) TestGetEvaluationByID() {
 	assert.Equal(suite.T(), suite.testParticipantID1, evaluation.CourseParticipationID)
 	assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
 	assert.Equal(suite.T(), suite.testCompetencyID1, evaluation.CompetencyID)
-	assert.Equal(suite.T(), db.ScoreLevelGood, evaluation.ScoreLevel)
+	assert.Equal(suite.T(), scoreLevelDTO.ScoreLevelGood, evaluation.ScoreLevel)
 	assert.Equal(suite.T(), suite.testParticipantID1, evaluation.AuthorCourseParticipationID)
 }
 
@@ -181,7 +182,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Create() {
 	request := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       suite.testParticipantID3,
 		CompetencyID:                suite.testCompetencyID1,
-		ScoreLevel:                  db.ScoreLevelVeryGood,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelVeryGood,
 		AuthorCourseParticipationID: suite.testParticipantID3,
 	}
 
@@ -195,7 +196,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Create() {
 	// Find the newly created evaluation
 	found := false
 	for _, evaluation := range evaluations {
-		if evaluation.CompetencyID == suite.testCompetencyID1 && evaluation.ScoreLevel == db.ScoreLevelVeryGood {
+		if evaluation.CompetencyID == suite.testCompetencyID1 && evaluation.ScoreLevel == scoreLevelDTO.ScoreLevelVeryGood {
 			found = true
 			break
 		}
@@ -209,7 +210,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Update() {
 	request := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       suite.testParticipantID2,
 		CompetencyID:                suite.testCompetencyID3,
-		ScoreLevel:                  db.ScoreLevelOk,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelOk,
 		AuthorCourseParticipationID: suite.testParticipantID2,
 	}
 
@@ -217,7 +218,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Update() {
 	assert.NoError(suite.T(), err)
 
 	// Now update it with a different score
-	request.ScoreLevel = db.ScoreLevelVeryGood
+	request.ScoreLevel = scoreLevelDTO.ScoreLevelVeryGood
 	err = CreateOrUpdateEvaluation(suite.suiteCtx, suite.testCoursePhaseID, request)
 	assert.NoError(suite.T(), err)
 
@@ -228,7 +229,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Update() {
 	// Find the updated evaluation
 	found := false
 	for _, evaluation := range evaluations {
-		if evaluation.CompetencyID == suite.testCompetencyID3 && evaluation.ScoreLevel == db.ScoreLevelVeryGood {
+		if evaluation.CompetencyID == suite.testCompetencyID3 && evaluation.ScoreLevel == scoreLevelDTO.ScoreLevelVeryGood {
 			found = true
 			break
 		}
@@ -242,7 +243,7 @@ func (suite *EvaluationServiceTestSuite) TestDeleteEvaluation() {
 	request := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       suite.testParticipantID1,
 		CompetencyID:                suite.testCompetencyID3,
-		ScoreLevel:                  db.ScoreLevelBad,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelBad,
 		AuthorCourseParticipationID: suite.testParticipantID1,
 	}
 
@@ -256,7 +257,7 @@ func (suite *EvaluationServiceTestSuite) TestDeleteEvaluation() {
 	var evaluationToDelete evaluationDTO.Evaluation
 	found := false
 	for _, evaluation := range evaluations {
-		if evaluation.CompetencyID == suite.testCompetencyID3 && evaluation.ScoreLevel == db.ScoreLevelBad {
+		if evaluation.CompetencyID == suite.testCompetencyID3 && evaluation.ScoreLevel == scoreLevelDTO.ScoreLevelBad {
 			evaluationToDelete = evaluation
 			found = true
 			break
@@ -278,7 +279,7 @@ func (suite *EvaluationServiceTestSuite) TestCreatePeerEvaluation() {
 	request := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       suite.testParticipantID2, // Being evaluated
 		CompetencyID:                suite.testCompetencyID2,
-		ScoreLevel:                  db.ScoreLevelGood,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelGood,
 		AuthorCourseParticipationID: suite.testParticipantID3, // Different from participant (peer evaluation)
 	}
 
@@ -293,7 +294,7 @@ func (suite *EvaluationServiceTestSuite) TestCreatePeerEvaluation() {
 	for _, evaluation := range evaluations {
 		if evaluation.CompetencyID == suite.testCompetencyID2 &&
 			evaluation.AuthorCourseParticipationID == suite.testParticipantID3 &&
-			evaluation.ScoreLevel == db.ScoreLevelGood {
+			evaluation.ScoreLevel == scoreLevelDTO.ScoreLevelGood {
 			found = true
 			break
 		}
