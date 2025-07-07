@@ -3,17 +3,18 @@ package evaluationDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
 type Evaluation struct {
-	ID                          uuid.UUID          `json:"id"`
-	CourseParticipationID       uuid.UUID          `json:"course_participation_id"`
-	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
-	CompetencyID                uuid.UUID          `json:"competency_id"`
-	ScoreLevel                  db.ScoreLevel      `json:"score_level"`
-	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
-	EvaluatedAt                 pgtype.Timestamptz `json:"evaluated_at"`
+	ID                          uuid.UUID                `json:"id"`
+	CourseParticipationID       uuid.UUID                `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID                `json:"coursePhaseID"`
+	CompetencyID                uuid.UUID                `json:"competencyID"`
+	ScoreLevel                  scoreLevelDTO.ScoreLevel `json:"scoreLevel"`
+	AuthorCourseParticipationID uuid.UUID                `json:"authorCourseParticipationID"`
+	EvaluatedAt                 pgtype.Timestamptz       `json:"evaluatedAt"`
 }
 
 func MapToEvaluationDTO(evaluation db.Evaluation) Evaluation {
@@ -22,7 +23,7 @@ func MapToEvaluationDTO(evaluation db.Evaluation) Evaluation {
 		CourseParticipationID:       evaluation.CourseParticipationID,
 		CoursePhaseID:               evaluation.CoursePhaseID,
 		CompetencyID:                evaluation.CompetencyID,
-		ScoreLevel:                  evaluation.ScoreLevel,
+		ScoreLevel:                  scoreLevelDTO.MapDBScoreLevelToDTO(evaluation.ScoreLevel),
 		AuthorCourseParticipationID: evaluation.AuthorCourseParticipationID,
 		EvaluatedAt:                 evaluation.EvaluatedAt,
 	}
