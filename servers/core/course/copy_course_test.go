@@ -66,7 +66,9 @@ func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 		EndDate:     newEndDate,
 	}
 
-	result, err := copyCourseInternal(suite.ctx, suite.sourceCourse.ID, copyReq, "test_user")
+	// Create a dummy *gin.Context for testing
+	ginCtx, _ := gin.CreateTestContext(nil)
+	result, err := copyCourseInternal(ginCtx, suite.sourceCourse.ID, copyReq, "test_user")
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newName, result.Name)
 	assert.Equal(suite.T(), newTag, result.SemesterTag.String)

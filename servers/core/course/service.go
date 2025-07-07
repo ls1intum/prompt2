@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -383,6 +384,6 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	return nil
 }
 
-func CopyCourse(ctx context.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
-	return copyCourseInternal(ctx, sourceCourseID, courseVariables, requesterID)
+func CopyCourse(c *gin.Context, sourceCourseID uuid.UUID, courseVariables courseDTO.CopyCourseRequest, requesterID string) (courseDTO.Course, error) {
+	return copyCourseInternal(c, sourceCourseID, courseVariables, requesterID)
 }
