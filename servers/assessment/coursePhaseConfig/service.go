@@ -170,7 +170,6 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 		log.Error("could not fetch course phase with resolution: ", err)
 		return nil, errors.New("could not fetch course phase with resolution")
 	}
-	log.Infof("Fetched course phase with resolution: %+v", cpWithResoultion)
 
 	teams := make([]coursePhaseConfigDTO.Team, 0)
 	teamsRaw, teamsExists := cpWithResoultion["teams"]
