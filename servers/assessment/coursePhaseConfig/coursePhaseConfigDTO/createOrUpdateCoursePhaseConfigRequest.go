@@ -12,7 +12,7 @@ type CreateOrUpdateCoursePhaseConfigRequest struct {
 	SelfEvaluationEnabled  bool      `json:"selfEvaluationEnabled"`
 	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate"`
 	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline"`
-	PeerEvaluationEnabled  bool      `json:"peerAssessmentEnabled"`
-	PeerEvaluationTemplate uuid.UUID `json:"peerAssessmentTemplate"`
-	PeerEvaluationDeadline time.Time `json:"peerAssessmentDeadline"`
+	PeerEvaluationEnabled  bool      `json:"peerEvaluationEnabled"`
+	PeerEvaluationTemplate uuid.UUID `json:"peerEvaluationTemplate"`
+	PeerEvaluationDeadline time.Time `json:"peerEvaluationDeadline"`
 }
