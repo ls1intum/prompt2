@@ -128,9 +128,9 @@ func (suite *CourseRouterTestSuite) TestCreateCourse() {
 
 func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
-	firstUUID := uuid.MustParse("3311591a-4951-4134-a360-cb970e4a9f76")
-	secondUUID := uuid.MustParse("bd727106-2dc0-4c44-a804-2efde26101ae")
-	thirdUUID := uuid.MustParse("0732c0a7-b234-41d8-960c-f04e420a7e0e")
+	firstUUID := uuid.MustParse("bd727106-2dc0-4c44-a804-2efde26101ae")
+	secondUUID := uuid.MustParse("93693f81-9c49-4183-ae70-c0ee3742560d")
+	thirdUUID := uuid.MustParse("0bf6eb6c-ff6f-40f4-af63-a005e2c8d123")
 
 	// Construct the updated phase graph: first -> second -> third
 	updateGraphRequest := courseDTO.UpdateCoursePhaseGraph{
