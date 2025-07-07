@@ -14,9 +14,9 @@ type CoursePhaseConfig struct {
 	SelfEvaluationEnabled  bool      `json:"selfEvaluationEnabled"`
 	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate,omitempty"`
 	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline,omitempty"`
-	PeerEvaluationEnabled  bool      `json:"peerAssessmentEnabled"`
-	PeerEvaluationTemplate uuid.UUID `json:"peerAssessmentTemplate,omitempty"`
-	PeerEvaluationDeadline time.Time `json:"peerAssessmentDeadline,omitempty"`
+	PeerEvaluationEnabled  bool      `json:"peerEvaluationEnabled"`
+	PeerEvaluationTemplate uuid.UUID `json:"peerEvaluationTemplate,omitempty"`
+	PeerEvaluationDeadline time.Time `json:"peerEvaluationDeadline,omitempty"`
 }
 
 func MapDBCoursePhaseConfigToDTOCoursePhaseConfig(dbConfig db.CoursePhaseConfig) CoursePhaseConfig {

@@ -25,9 +25,9 @@ export const CoursePhaseConfigSelection = () => {
   const [selfEvaluationEnabled, setSelfEvaluationEnabled] = useState<boolean>(false)
   const [selfEvaluationTemplate, setSelfEvaluationTemplate] = useState<string>('')
   const [selfEvaluationDeadline, setSelfEvaluationDeadline] = useState<Date | undefined>(undefined)
-  const [peerAssessmentEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
-  const [peerAssessmentTemplate, setPeerEvaluationTemplate] = useState<string>('')
-  const [peerAssessmentDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
+  const [peerEvaluationEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
+  const [peerEvaluationTemplate, setPeerEvaluationTemplate] = useState<string>('')
+  const [peerEvaluationDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
 
   const {
     data: templates,
@@ -47,10 +47,10 @@ export const CoursePhaseConfigSelection = () => {
       setSelfEvaluationDeadline(
         config.selfEvaluationDeadline ? new Date(config.selfEvaluationDeadline) : undefined,
       )
-      setPeerEvaluationEnabled(config.peerAssessmentEnabled || false)
-      setPeerEvaluationTemplate(config.peerAssessmentTemplate || '')
+      setPeerEvaluationEnabled(config.peerEvaluationEnabled || false)
+      setPeerEvaluationTemplate(config.peerEvaluationTemplate || '')
       setPeerEvaluationDeadline(
-        config.peerAssessmentDeadline ? new Date(config.peerAssessmentDeadline) : undefined,
+        config.peerEvaluationDeadline ? new Date(config.peerEvaluationDeadline) : undefined,
       )
     }
   }, [config])
@@ -70,9 +70,9 @@ export const CoursePhaseConfigSelection = () => {
       selfEvaluationEnabled,
       selfEvaluationTemplate: selfEvaluationTemplate,
       selfEvaluationDeadline: selfEvaluationDeadline,
-      peerAssessmentEnabled,
-      peerAssessmentTemplate: peerAssessmentTemplate,
-      peerAssessmentDeadline: peerAssessmentDeadline,
+      peerEvaluationEnabled,
+      peerEvaluationTemplate: peerEvaluationTemplate,
+      peerEvaluationDeadline: peerEvaluationDeadline,
     })
   }
 
@@ -85,11 +85,11 @@ export const CoursePhaseConfigSelection = () => {
       (config?.selfEvaluationDeadline
         ? new Date(config.selfEvaluationDeadline).getTime()
         : undefined) ||
-    peerAssessmentEnabled !== (config?.peerAssessmentEnabled || false) ||
-    peerAssessmentTemplate !== (config?.peerAssessmentTemplate || '') ||
-    peerAssessmentDeadline?.getTime() !==
-      (config?.peerAssessmentDeadline
-        ? new Date(config.peerAssessmentDeadline).getTime()
+    peerEvaluationEnabled !== (config?.peerEvaluationEnabled || false) ||
+    peerEvaluationTemplate !== (config?.peerEvaluationTemplate || '') ||
+    peerEvaluationDeadline?.getTime() !==
+      (config?.peerEvaluationDeadline
+        ? new Date(config.peerEvaluationDeadline).getTime()
         : undefined)
 
   return (
@@ -151,7 +151,7 @@ export const CoursePhaseConfigSelection = () => {
             <div className='flex items-center space-x-2'>
               <Checkbox
                 id='peer-assessment-enabled'
-                checked={peerAssessmentEnabled}
+                checked={peerEvaluationEnabled}
                 onCheckedChange={(checked) => setPeerEvaluationEnabled(checked as boolean)}
                 disabled={configMutation.isPending}
               />
@@ -160,12 +160,12 @@ export const CoursePhaseConfigSelection = () => {
               </Label>
             </div>
 
-            {peerAssessmentEnabled && (
+            {peerEvaluationEnabled && (
               <AssessmentConfiguration
                 type={AssessmentType.PEER}
-                assessmentTemplateId={peerAssessmentTemplate}
+                assessmentTemplateId={peerEvaluationTemplate}
                 setAssessmentTemplateId={setPeerEvaluationTemplate}
-                deadline={peerAssessmentDeadline}
+                deadline={peerEvaluationDeadline}
                 setDeadline={setPeerEvaluationDeadline}
                 templates={templates ?? []}
                 configMutation={configMutation}

@@ -5,9 +5,9 @@ export interface CoursePhaseConfig {
   selfEvaluationEnabled: boolean
   selfEvaluationTemplate: string // UUID as string, optional
   selfEvaluationDeadline: Date // optional
-  peerAssessmentEnabled: boolean
-  peerAssessmentTemplate: string // UUID as string, optional
-  peerAssessmentDeadline: Date // optional
+  peerEvaluationEnabled: boolean
+  peerEvaluationTemplate: string // UUID as string, optional
+  peerEvaluationDeadline: Date // optional
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {
@@ -16,7 +16,7 @@ export interface CreateOrUpdateCoursePhaseConfigRequest {
   selfEvaluationEnabled: boolean
   selfEvaluationTemplate?: string
   selfEvaluationDeadline?: Date
-  peerAssessmentEnabled: boolean
-  peerAssessmentTemplate?: string
-  peerAssessmentDeadline?: Date
+  peerEvaluationEnabled: boolean
+  peerEvaluationTemplate?: string
+  peerEvaluationDeadline?: Date
 }
