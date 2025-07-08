@@ -75,7 +75,7 @@ $$
             RAISE EXCEPTION 'Peer Evaluation Template not found';
         END IF;
         SELECT id INTO assessment_uuid FROM assessment_template WHERE name = 'Assessment Template';
-        IF peer_uuid IS NULL THEN
+        IF assessment_uuid IS NULL THEN
             RAISE EXCEPTION 'Assessment Template not found';
         END IF;
         UPDATE course_phase_config
