@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect, useCallback } from 'react'
 
 import {
@@ -44,9 +42,6 @@ export function FeedbackItemPanel({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
-  // Check if assessment is completed
-  const isAssessmentCompleted = completed
-
   const {
     feedbackItems: allFeedbackItems,
     isLoading: isGetFeedbackItemsPending,
@@ -78,7 +73,7 @@ export function FeedbackItemPanel({
   }, [feedbackItems, itemValues])
 
   const addFeedbackItem = () => {
-    if (isAssessmentCompleted) return
+    if (completed) return
 
     const handleAddFeedbackItem = async () => {
       try {
@@ -106,9 +101,9 @@ export function FeedbackItemPanel({
   const debouncedSave = useCallback(
     (item: FeedbackItem, text: string) => {
       const timeoutId = setTimeout(() => {
-        if (isAssessmentCompleted) return
+        if (completed) return
 
-        if (text.trim() !== item.feedbackText.trim() && text.trim() !== '') {
+        if (text.trim() !== item.feedbackText.trim()) {
           setSavingItemId(item.id)
 
           const updateRequest: UpdateFeedbackItemRequest = {
@@ -129,11 +124,11 @@ export function FeedbackItemPanel({
             },
           })
         }
-      }, 500) // 500 ms delay
+      }, 200)
 
       return timeoutId
     },
-    [updateFeedbackItem, refetch, isAssessmentCompleted],
+    [updateFeedbackItem, refetch, completed],
   )
 
   const handleTextChange = (itemId: string, value: string) => {
@@ -147,7 +142,7 @@ export function FeedbackItemPanel({
   }
 
   const openDeleteDialog = (itemId: string) => {
-    if (!isAssessmentCompleted) {
+    if (!completed) {
       setItemToDelete(itemId)
       setDeleteDialogOpen(true)
     }
@@ -226,7 +221,7 @@ export function FeedbackItemPanel({
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
-              isDisabled={isAssessmentCompleted}
+              isDisabled={completed}
               placeholder={placeholderText}
             />
           ))}
@@ -235,11 +230,9 @@ export function FeedbackItemPanel({
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
             onClick={addFeedbackItem}
-            disabled={isPending || isAssessmentCompleted}
+            disabled={isPending || completed}
             title={
-              isAssessmentCompleted
-                ? 'Assessment completed - cannot add new feedback items'
-                : addButtonText
+              completed ? 'Evaluation completed - cannot add new feedback items' : addButtonText
             }
           >
             {isCreatePending ? (

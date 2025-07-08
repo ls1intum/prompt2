@@ -42,9 +42,6 @@ export function ActionItemPanel({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
-  // Check if assessment is completed
-  const isAssessmentCompleted = completed
-
   const {
     data: actionItems = [],
     isPending: isGetActionItemsPending,
@@ -76,7 +73,7 @@ export function ActionItemPanel({
   }, [actionItems, itemValues])
 
   const addActionItem = () => {
-    if (isAssessmentCompleted) return
+    if (completed) return
 
     const handleAddActionItem = async () => {
       try {
@@ -104,9 +101,9 @@ export function ActionItemPanel({
   const debouncedSave = useCallback(
     (item: ActionItem, text: string) => {
       const timeoutId = setTimeout(() => {
-        if (isAssessmentCompleted) return
+        if (completed) return
 
-        if (text.trim() !== item.action.trim() && text.trim() !== '') {
+        if (text.trim() !== item.action.trim()) {
           setSavingItemId(item.id)
 
           const updateRequest: UpdateActionItemRequest = {
@@ -127,11 +124,11 @@ export function ActionItemPanel({
             },
           })
         }
-      }, 500) // 200 ms delay
+      }, 200) // 200 ms delay
 
       return timeoutId
     },
-    [phaseId, courseParticipationID, userName, updateActionItem, refetch, isAssessmentCompleted],
+    [phaseId, courseParticipationID, userName, updateActionItem, refetch, completed],
   )
 
   const handleTextChange = (itemId: string, value: string) => {
@@ -145,7 +142,7 @@ export function ActionItemPanel({
   }
 
   const openDeleteDialog = (itemId: string) => {
-    if (!isAssessmentCompleted) {
+    if (!completed) {
       setItemToDelete(itemId)
       setDeleteDialogOpen(true)
     }
@@ -204,7 +201,7 @@ export function ActionItemPanel({
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
-              isDisabled={isAssessmentCompleted}
+              isDisabled={completed}
             />
           ))}
 
@@ -212,9 +209,9 @@ export function ActionItemPanel({
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
             onClick={addActionItem}
-            disabled={isPending || isAssessmentCompleted}
+            disabled={isPending || completed}
             title={
-              isAssessmentCompleted
+              completed
                 ? 'Assessment completed - cannot add new action items'
                 : 'Add new action item'
             }
