@@ -25,7 +25,7 @@ import { GradeSuggestion } from './components/GradeSuggestion'
 import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
-import { useDeadlineStore } from '../../../../zustand/useDeadlineStore'
+import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 
 import { validateGrade } from './utils/validateGrade'
 
@@ -40,7 +40,8 @@ export const AssessmentCompletion = ({
 }: AssessmentFeedbackProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
-  const { deadline } = useDeadlineStore()
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+  const deadline = coursePhaseConfig?.deadline || undefined
 
   const [generalRemarks, setGeneralRemarks] = useState(
     studentAssessment.assessmentCompletion?.comment || '',

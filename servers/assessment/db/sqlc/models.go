@@ -12,6 +12,48 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type FeedbackType string
+
+const (
+	FeedbackTypePositive FeedbackType = "positive"
+	FeedbackTypeNegative FeedbackType = "negative"
+)
+
+func (e *FeedbackType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FeedbackType(s)
+	case string:
+		*e = FeedbackType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FeedbackType: %T", src)
+	}
+	return nil
+}
+
+type NullFeedbackType struct {
+	FeedbackType FeedbackType `json:"feedback_type"`
+	Valid        bool         `json:"valid"` // Valid is true if FeedbackType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFeedbackType) Scan(value interface{}) error {
+	if value == nil {
+		ns.FeedbackType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FeedbackType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFeedbackType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FeedbackType), nil
+}
+
 type ScoreLevel string
 
 const (
@@ -124,6 +166,11 @@ type Competency struct {
 	DescriptionVeryGood string      `json:"description_very_good"`
 }
 
+type CompetencyMap struct {
+	FromCompetencyID uuid.UUID `json:"from_competency_id"`
+	ToCompetencyID   uuid.UUID `json:"to_competency_id"`
+}
+
 type CompletedScoreLevel struct {
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
@@ -131,9 +178,44 @@ type CompletedScoreLevel struct {
 }
 
 type CoursePhaseConfig struct {
-	AssessmentTemplateID uuid.UUID          `json:"assessment_template_id"`
-	CoursePhaseID        uuid.UUID          `json:"course_phase_id"`
-	Deadline             pgtype.Timestamptz `json:"deadline"`
+	AssessmentTemplateID   uuid.UUID          `json:"assessment_template_id"`
+	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
+	Deadline               pgtype.Timestamptz `json:"deadline"`
+	SelfEvaluationEnabled  bool               `json:"self_evaluation_enabled"`
+	SelfEvaluationTemplate uuid.UUID          `json:"self_evaluation_template"`
+	SelfEvaluationDeadline pgtype.Timestamptz `json:"self_evaluation_deadline"`
+	PeerEvaluationEnabled  bool               `json:"peer_evaluation_enabled"`
+	PeerEvaluationTemplate uuid.UUID          `json:"peer_evaluation_template"`
+	PeerEvaluationDeadline pgtype.Timestamptz `json:"peer_evaluation_deadline"`
+}
+
+type Evaluation struct {
+	ID                          uuid.UUID          `json:"id"`
+	CourseParticipationID       uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
+	CompetencyID                uuid.UUID          `json:"competency_id"`
+	ScoreLevel                  ScoreLevel         `json:"score_level"`
+	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
+	EvaluatedAt                 pgtype.Timestamptz `json:"evaluated_at"`
+}
+
+type EvaluationCompletion struct {
+	ID                          uuid.UUID          `json:"id"`
+	CourseParticipationID       uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
+	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
+	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
+	Completed                   bool               `json:"completed"`
+}
+
+type FeedbackItem struct {
+	ID                          uuid.UUID          `json:"id"`
+	FeedbackType                FeedbackType       `json:"feedback_type"`
+	FeedbackText                string             `json:"feedback_text"`
+	CourseParticipationID       uuid.UUID          `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
+	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
+	CreatedAt                   pgtype.Timestamptz `json:"created_at"`
 }
 
 type WeightedParticipantScore struct {

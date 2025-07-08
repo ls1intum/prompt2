@@ -52,12 +52,12 @@ export const checksConfig: StudentCheck[] = [
     icon: <Star className='h-4 w-4' />,
   },
 
-  // SelfAssessment
+  // SelfEvaluation
   {
-    label: 'Self Assessment',
-    extractor: (s) => s.introSelfAssessment,
+    label: 'Self Evaluation',
+    extractor: (s) => s.introSelfEvaluation,
     isEmpty: (v) => v === undefined || v === null,
-    missingMessage: 'self assessment information',
+    missingMessage: 'self evaluation information',
     problemDescription: 'All students are missing self-assessment information.',
     details: 'Collect self-assessment from students. Export from the phase where collected.',
     category: 'score',

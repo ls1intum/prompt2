@@ -396,11 +396,7 @@ INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Master Test'
 -- Data for Name: course_phase; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO course_phase VALUES ('3311591a-4951-4134-a360-cb970e4a9f76', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Assessment', '{}', false, '613f8b0a-2200-4650-b0bb-6a26a0a140e8', '{}');
 INSERT INTO course_phase VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Application', '{"autoAccept": true, "applicationEndDate": "2025-06-01T23:59:00+02:00", "applicationStartDate": "2025-05-19T00:00:00+02:00", "externalStudentsAllowed": false, "universityLoginAvailable": true}', true, '3258275d-a76b-40f8-bb1a-95618299b8ac', '{}');
-INSERT INTO course_phase VALUES ('0732c0a7-b234-41d8-960c-f04e420a7e0e', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'IntroCourse', '{}', false, '8c97fd14-e1fe-4b12-bf7d-c542e620e8d8', '{}');
-INSERT INTO course_phase VALUES ('c03ce42c-c16d-43d1-ab96-a0b13b5d7c1f', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Self Team Allocation', '{}', false, 'cc63d311-6992-4b08-9719-a83b92f45e8f', '{}');
-INSERT INTO course_phase VALUES ('cee9035e-bae9-4120-8b14-fb4dabc9916b', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Team Allocation', '{}', false, '88ca3586-7748-4152-8c89-5fbb6e113587', '{}');
 INSERT INTO course_phase VALUES ('93693f81-9c49-4183-ae70-c0ee3742560d', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Matching', '{}', false, 'c313bd84-bc7b-4a5a-aca3-77a526e02f57', '{}');
 INSERT INTO course_phase VALUES ('0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', 'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Interview', '{"interviewQuestions": [{"id": 1747661413157, "orderNum": 0, "question": "Question 1"}, {"id": 1747661417361, "orderNum": 1, "question": "Question 2"}]}', false, '0542034b-87eb-4f91-ac90-b2e1536450de', '{}');
 
@@ -410,10 +406,6 @@ INSERT INTO course_phase VALUES ('0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', 'c1f806
 --
 
 INSERT INTO course_phase_graph VALUES ('0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', '93693f81-9c49-4183-ae70-c0ee3742560d');
-INSERT INTO course_phase_graph VALUES ('93693f81-9c49-4183-ae70-c0ee3742560d', '0732c0a7-b234-41d8-960c-f04e420a7e0e');
-INSERT INTO course_phase_graph VALUES ('0732c0a7-b234-41d8-960c-f04e420a7e0e', '3311591a-4951-4134-a360-cb970e4a9f76');
-INSERT INTO course_phase_graph VALUES ('3311591a-4951-4134-a360-cb970e4a9f76', 'cee9035e-bae9-4120-8b14-fb4dabc9916b');
-INSERT INTO course_phase_graph VALUES ('cee9035e-bae9-4120-8b14-fb4dabc9916b', 'c03ce42c-c16d-43d1-ab96-a0b13b5d7c1f');
 INSERT INTO course_phase_graph VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', '0bf6eb6c-ff6f-40f4-af63-a005e2c8d123');
 
 
@@ -484,9 +476,6 @@ INSERT INTO course_phase_type_phase_provided_output_dto VALUES ('eded55c7-1077-4
 INSERT INTO participation_data_dependency_graph VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', '0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', 'd7c3d526-c95d-4e23-8c6b-e0a561464ef3', '67a66cf6-5505-41f2-a72e-2f247b386b83');
 INSERT INTO participation_data_dependency_graph VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', '0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', '3c657de6-3fe1-41f3-a3c7-ceee83442815', '7ee14e46-4dd0-4281-a3da-26e00859a62e');
 INSERT INTO participation_data_dependency_graph VALUES ('0bf6eb6c-ff6f-40f4-af63-a005e2c8d123', '93693f81-9c49-4183-ae70-c0ee3742560d', '57f45359-3fd6-47b7-822e-74e57b5f530c', '0dfdb01d-fffd-4ebc-b191-3201aa2d0fc3');
-INSERT INTO participation_data_dependency_graph VALUES ('3311591a-4951-4134-a360-cb970e4a9f76', 'cee9035e-bae9-4120-8b14-fb4dabc9916b', '9a73af69-0ee1-46f1-bb3e-0d6775c7f02e', '2f17451e-d905-4484-aebc-a8c5191a4557');
-INSERT INTO participation_data_dependency_graph VALUES ('0732c0a7-b234-41d8-960c-f04e420a7e0e', 'cee9035e-bae9-4120-8b14-fb4dabc9916b', 'a67b6b12-bd5e-4be4-8353-fcc98fd7013d', 'afae0c00-a7ae-40f9-b707-af19393a58b7');
-INSERT INTO participation_data_dependency_graph VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', 'cee9035e-bae9-4120-8b14-fb4dabc9916b', '3c657de6-3fe1-41f3-a3c7-ceee83442815', 'faad5951-3af7-4189-adf3-298a545082af');
 
 
 --

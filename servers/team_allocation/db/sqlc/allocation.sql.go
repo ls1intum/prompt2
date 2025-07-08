@@ -9,25 +9,29 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createOrUpdateAllocation = `-- name: CreateOrUpdateAllocation :exec
-INSERT INTO allocations AS a (id,
-                              course_participation_id,
-                              team_id,
-                              course_phase_id,
-                              created_at,
-                              updated_at)
-VALUES ($1,
-        $2,
-        $3,
-        $4,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP)
+INSERT INTO allocations AS a (
+  id,
+  course_participation_id,
+  team_id,
+  course_phase_id,
+  created_at,
+  updated_at
+) VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+)
 ON CONFLICT ON CONSTRAINT allocations_participation_phase_uk
-    DO UPDATE
-    SET team_id    = EXCLUDED.team_id,
-        updated_at = CURRENT_TIMESTAMP
+DO UPDATE
+SET team_id = EXCLUDED.team_id,
+    updated_at = CURRENT_TIMESTAMP
 `
 
 type CreateOrUpdateAllocationParams struct {
@@ -97,6 +101,7 @@ func (q *Queries) GetAggregatedAllocationsByCoursePhase(ctx context.Context, cou
 const getAllocationForStudent = `-- name: GetAllocationForStudent :one
 SELECT id,
        course_participation_id,
+       student_full_name,
        team_id,
        course_phase_id,
        created_at,
@@ -111,12 +116,23 @@ type GetAllocationForStudentParams struct {
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocationForStudentParams) (Allocation, error) {
+type GetAllocationForStudentRow struct {
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	StudentFullName       string           `json:"student_full_name"`
+	TeamID                uuid.UUID        `json:"team_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
+}
+
+func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocationForStudentParams) (GetAllocationForStudentRow, error) {
 	row := q.db.QueryRow(ctx, getAllocationForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
-	var i Allocation
+	var i GetAllocationForStudentRow
 	err := row.Scan(
 		&i.ID,
 		&i.CourseParticipationID,
+		&i.StudentFullName,
 		&i.TeamID,
 		&i.CoursePhaseID,
 		&i.CreatedAt,
@@ -126,7 +142,7 @@ func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocation
 }
 
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
-SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at
+SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at, a.student_full_name
 FROM allocations a
 WHERE a.course_phase_id = $1
 `
@@ -147,6 +163,7 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 			&i.CoursePhaseID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.StudentFullName,
 		); err != nil {
 			return nil, err
 		}
@@ -156,4 +173,160 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 		return nil, err
 	}
 	return items, nil
+}
+
+const getTeamWithStudentNamesByID = `-- name: GetTeamWithStudentNamesByID :one
+SELECT
+  t.id,
+  t.name,
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
+FROM
+  team t
+LEFT JOIN
+  allocations a
+  ON t.id = a.team_id
+WHERE
+  t.id = $1
+GROUP BY
+  t.id, t.name
+`
+
+type GetTeamWithStudentNamesByIDRow struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
+}
+
+func (q *Queries) GetTeamWithStudentNamesByID(ctx context.Context, id uuid.UUID) (GetTeamWithStudentNamesByIDRow, error) {
+	row := q.db.QueryRow(ctx, getTeamWithStudentNamesByID, id)
+	var i GetTeamWithStudentNamesByIDRow
+	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
+	return i, err
+}
+
+const getTeamWithStudentNamesByTeamID = `-- name: GetTeamWithStudentNamesByTeamID :one
+SELECT
+  t.id,
+  t.name,
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
+FROM
+  team t
+LEFT JOIN
+  allocations a
+  ON t.id = a.team_id
+WHERE
+  t.course_phase_id = $1
+  AND t.id = $2
+GROUP BY
+  t.id, t.name
+ORDER BY
+  t.name
+`
+
+type GetTeamWithStudentNamesByTeamIDParams struct {
+	CoursePhaseID uuid.UUID `json:"course_phase_id"`
+	ID            uuid.UUID `json:"id"`
+}
+
+type GetTeamWithStudentNamesByTeamIDRow struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
+}
+
+func (q *Queries) GetTeamWithStudentNamesByTeamID(ctx context.Context, arg GetTeamWithStudentNamesByTeamIDParams) (GetTeamWithStudentNamesByTeamIDRow, error) {
+	row := q.db.QueryRow(ctx, getTeamWithStudentNamesByTeamID, arg.CoursePhaseID, arg.ID)
+	var i GetTeamWithStudentNamesByTeamIDRow
+	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
+	return i, err
+}
+
+const getTeamsWithStudentNames = `-- name: GetTeamsWithStudentNames :many
+SELECT
+  t.id,
+  t.name,
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseParticipationID', a.course_participation_id,
+        'studentName',           a.student_full_name
+      )
+      ORDER BY a.student_full_name
+    ) FILTER (WHERE a.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS team_members
+FROM
+  team t
+LEFT JOIN
+  allocations a
+  ON t.id = a.team_id
+WHERE
+  t.course_phase_id = $1
+GROUP BY
+  t.id, t.name
+ORDER BY
+  t.name
+`
+
+type GetTeamsWithStudentNamesRow struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
+}
+
+func (q *Queries) GetTeamsWithStudentNames(ctx context.Context, coursePhaseID uuid.UUID) ([]GetTeamsWithStudentNamesRow, error) {
+	rows, err := q.db.Query(ctx, getTeamsWithStudentNames, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamsWithStudentNamesRow
+	for rows.Next() {
+		var i GetTeamsWithStudentNamesRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.TeamMembers); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateStudentFullNameForAllocation = `-- name: UpdateStudentFullNameForAllocation :exec
+UPDATE allocations
+SET student_full_name = $1,
+    updated_at = CURRENT_TIMESTAMP
+WHERE course_participation_id = $2
+  AND course_phase_id = $3
+`
+
+type UpdateStudentFullNameForAllocationParams struct {
+	StudentFullName       string    `json:"student_full_name"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) UpdateStudentFullNameForAllocation(ctx context.Context, arg UpdateStudentFullNameForAllocationParams) error {
+	_, err := q.db.Exec(ctx, updateStudentFullNameForAllocation, arg.StudentFullName, arg.CourseParticipationID, arg.CoursePhaseID)
+	return err
 }
