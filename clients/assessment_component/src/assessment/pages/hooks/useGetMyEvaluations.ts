@@ -6,12 +6,13 @@ import { Evaluation } from '../../interfaces/evaluation'
 
 import { getMyEvaluations } from '../../network/queries/getMyEvaluations'
 
-export const useGetMyEvaluations = () => {
+export const useGetMyEvaluations = (options?: { enabled?: boolean }) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { data, ...queryInfo } = useQuery<Evaluation[]>({
     queryKey: ['my-evaluations', phaseId],
     queryFn: () => getMyEvaluations(phaseId ?? ''),
+    enabled: options?.enabled,
   })
 
   const evaluations = useMemo(() => data || [], [data])

@@ -95,14 +95,14 @@ export const SelfAndPeerEvaluationDataShell = ({
     isPending: isCompletionPending,
     isError: isCompletionError,
     refetch: refetchCompletion,
-  } = useGetMySelfEvaluationCompletion()
+  } = useGetMySelfEvaluationCompletion({ enabled: isStudent })
 
   const {
     data: peerEvaluationCompletions,
     isPending: isPeerEvaluationsPending,
     isError: isPeerEvaluationsError,
     refetch: refetchPeerEvaluations,
-  } = useGetMyPeerEvaluationCompletions()
+  } = useGetMyPeerEvaluationCompletions({ enabled: isStudent })
 
   const {
     selfEvaluations: selfEvaluations,
@@ -110,35 +110,37 @@ export const SelfAndPeerEvaluationDataShell = ({
     isPending: isMyEvaluationsPending,
     isError: isMyEvaluationsError,
     refetch: refetchMyEvaluations,
-  } = useGetMyEvaluations()
+  } = useGetMyEvaluations({ enabled: isStudent })
 
   const isError =
     isSelfEvaluationCategoriesError ||
     isPeerEvaluationCategoriesError ||
     isTeamsError ||
-    isParticipationsError ||
     isCoursePhaseConfigError ||
-    isCompletionError ||
-    isPeerEvaluationsError ||
-    isMyEvaluationsError
+    (isStudent && isParticipationsError) ||
+    (isStudent && isCompletionError) ||
+    (isStudent && isPeerEvaluationsError) ||
+    (isStudent && isMyEvaluationsError)
   const isPending =
     isSelfEvaluationCategoriesPending ||
     isPeerEvaluationCategoriesPending ||
     isTeamsPending ||
-    isParticipationsPending ||
     isCoursePhaseConfigPending ||
-    isCompletionPending ||
-    isPeerEvaluationsPending ||
-    isMyEvaluationsPending
+    (isStudent && isParticipationsPending) ||
+    (isStudent && isCompletionPending) ||
+    (isStudent && isPeerEvaluationsPending) ||
+    (isStudent && isMyEvaluationsPending)
   const refetch = () => {
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
     refetchTeams()
-    refetchCoursePhaseParticipations()
     refetchCoursePhaseConfig()
-    refetchCompletion()
-    refetchPeerEvaluations()
-    refetchMyEvaluations()
+    if (isStudent) {
+      refetchCoursePhaseParticipations()
+      refetchCompletion()
+      refetchPeerEvaluations()
+      refetchMyEvaluations()
+    }
   }
 
   useEffect(() => {
@@ -154,10 +156,10 @@ export const SelfAndPeerEvaluationDataShell = ({
   }, [teams, setTeams])
 
   useEffect(() => {
-    if (participation) {
+    if (participation && isStudent) {
       setMyParticipation(participation)
     }
-  }, [participation, setMyParticipation])
+  }, [participation, setMyParticipation, isStudent])
 
   useEffect(() => {
     if (selfEvaluationCategories) {
@@ -172,28 +174,28 @@ export const SelfAndPeerEvaluationDataShell = ({
   }, [peerEvaluationCategories, setPeerEvaluationCategories])
 
   useEffect(() => {
-    if (selfEvaluationCompletion) {
+    if (selfEvaluationCompletion && isStudent) {
       setSelfEvaluationCompletion(selfEvaluationCompletion)
     }
-  }, [selfEvaluationCompletion, setSelfEvaluationCompletion])
+  }, [selfEvaluationCompletion, setSelfEvaluationCompletion, isStudent])
 
   useEffect(() => {
-    if (peerEvaluationCompletions) {
+    if (peerEvaluationCompletions && isStudent) {
       setPeerEvaluationCompletions(peerEvaluationCompletions)
     }
-  }, [peerEvaluationCompletions, setPeerEvaluationCompletions])
+  }, [peerEvaluationCompletions, setPeerEvaluationCompletions, isStudent])
 
   useEffect(() => {
-    if (selfEvaluations) {
+    if (selfEvaluations && isStudent) {
       setSelfEvaluations(selfEvaluations)
     }
-  }, [selfEvaluations, setSelfEvaluations])
+  }, [selfEvaluations, setSelfEvaluations, isStudent])
 
   useEffect(() => {
-    if (peerEvaluations) {
+    if (peerEvaluations && isStudent) {
       setPeerEvaluations(peerEvaluations)
     }
-  }, [peerEvaluations, setPeerEvaluations])
+  }, [peerEvaluations, setPeerEvaluations, isStudent])
 
   if (isError)
     return (
