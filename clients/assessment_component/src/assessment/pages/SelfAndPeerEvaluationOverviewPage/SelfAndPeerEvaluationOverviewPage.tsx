@@ -137,7 +137,7 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
               <div className='text-2xl font-bold text-gray-900 mb-1'>
                 {isSelfEvaluationCompleted ? 'Completed' : 'Open'}
               </div>
-              <p className='text-sm text-gray-500'>Self Evaluation completed</p>
+              <p className='text-sm text-gray-500'>Self Evaluation completion status</p>
             </CardContent>
           </Card>
 
