@@ -129,9 +129,13 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
               <div className='flex items-center justify-between mb-4'>
                 <h3 className='text-lg font-medium text-gray-900'>Self Evaluation</h3>
                 {isSelfEvaluationCompleted ? (
-                  <Badge className='bg-green-100 text-green-800'>Completed</Badge>
+                  <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                    Completed
+                  </Badge>
                 ) : (
-                  <Badge className='bg-yellow-100 text-yellow-800'>Pending</Badge>
+                  <Badge className='bg-yellow-100 text-yellow-800 hover:bg-yellow-100'>
+                    Pending
+                  </Badge>
                 )}
               </div>
               <div className='text-2xl font-bold text-gray-900 mb-1'>
@@ -147,9 +151,11 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                 <div className='flex items-center justify-between mb-4'>
                   <h3 className='text-lg font-medium text-gray-900'>Peer Evaluations</h3>
                   {completedPeerEvaluations === totalPeerEvaluations ? (
-                    <Badge className='bg-green-100 text-green-800'>All Completed</Badge>
+                    <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                      All Completed
+                    </Badge>
                   ) : (
-                    <Badge className='bg-yellow-100 text-yellow-800'>
+                    <Badge className='bg-yellow-100 text-yellow-800 hover:bg-yellow-100'>
                       {completedPeerEvaluations}/{totalPeerEvaluations}
                     </Badge>
                   )}
@@ -170,7 +176,7 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
               <h1 className='text-2xl font-bold text-gray-900'>Self Evaluation</h1>
             </div>
             {coursePhaseConfig?.selfEvaluationDeadline && (
-              <Badge className='bg-blue-100 text-blue-800 flex items-center gap-1'>
+              <Badge className='bg-blue-100 text-blue-800 flex items-center gap-1 hover:bg-blue-100'>
                 <Clock className='h-3 w-3' />
                 Deadline: {format(new Date(coursePhaseConfig.selfEvaluationDeadline), 'dd.MM.yyyy')}
               </Badge>
@@ -194,9 +200,11 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                 <Users className='h-6 w-6 text-green-600' />
                 <h1 className='text-2xl font-bold text-gray-900'>Peer Evaluation</h1>
               </div>
-              <Badge className='bg-gray-100 text-gray-800'>Team {team.name}</Badge>
+              <Badge className='bg-gray-100 text-gray-800 hover:bg-gray-100'>
+                Team {team.name}
+              </Badge>
               {coursePhaseConfig?.peerEvaluationDeadline && (
-                <Badge className='bg-green-100 text-green-800 flex items-center gap-1'>
+                <Badge className='bg-green-100 text-green-800 hover:bg-green-100 flex items-center gap-1'>
                   <Clock className='h-3 w-3' />
                   Deadline:{' '}
                   {format(new Date(coursePhaseConfig.peerEvaluationDeadline), 'dd.MM.yyyy')}
