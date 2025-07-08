@@ -99,8 +99,15 @@ func DeleteTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID) error {
 }
 
 func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUpdateRequest) error {
+	tx, err := TeamsServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := TeamsServiceSingleton.queries.WithTx(tx)
+
 	for participationID, fullName := range req.StudentNamesPerID {
-		err := TeamsServiceSingleton.queries.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
+		err := qtx.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
 			StudentFullName:       fullName,
 			CourseParticipationID: participationID,
 			CoursePhaseID:         req.CoursePhaseID,
@@ -109,5 +116,10 @@ func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUp
 			return fmt.Errorf("failed to update name for participation ID %s: %w", participationID, err)
 		}
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }

@@ -106,7 +106,9 @@ export const ParticipantsPage = (): JSX.Element => {
       ),
     }
 
-    void addStudentNamesToTeams(requestPayload)
+    void addStudentNamesToTeams(requestPayload).catch((error) => {
+      console.error('Failed to update student names:', error)
+    })
   }, [coursePhaseParticipations, phaseId])
 
   const isError = isParticipationsError || isTeamsError || isTeamAllocationsError
