@@ -29,76 +29,54 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 	missing := []string{}
 
 	for _, p := range sequence {
-		pt, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, p.CoursePhaseTypeID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get phase type: %w", err)
+		if err := checkPhaseCopyable(c, p.ID, p.CoursePhaseTypeID, p.Name.String, checked, &missing); err != nil {
+			return nil, fmt.Errorf("failed to check phase copyable: %w", err)
 		}
-
-		// Skip internal/core phases
-		if pt.BaseUrl == utils.GetEnv("CORE_HOST", "core") {
-			continue
-		}
-
-		if _, seen := checked[pt.BaseUrl]; seen {
-			continue
-		}
-
-		// send a dummy POST request to the copy endpoint to check if it exists
-		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
-			SourceCoursePhaseID: p.ID,
-			TargetCoursePhaseID: p.ID,
-		})
-
-		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
-		if err != nil {
-			log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-			missing = append(missing, p.Name.String+" ("+pt.Name+")")
-			checked[pt.BaseUrl] = pt.Name
-			continue
-		}
-		resp.Body.Close()
-
-		if resp.StatusCode == http.StatusNotFound {
-			missing = append(missing, p.Name.String+" ("+pt.Name+")")
-		}
-		checked[pt.BaseUrl] = pt.Name
 	}
 
 	for _, p := range unordered {
-		pt, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, p.CoursePhaseTypeID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get phase type: %w", err)
+		if err := checkPhaseCopyable(c, p.ID, p.CoursePhaseTypeID, p.Name.String, checked, &missing); err != nil {
+			return nil, fmt.Errorf("failed to check phase copyable: %w", err)
 		}
-
-		// Skip internal/core phases
-		if pt.BaseUrl == utils.GetEnv("CORE_HOST", "core") {
-			continue
-		}
-
-		if _, seen := checked[pt.BaseUrl]; seen {
-			continue
-		}
-
-		// send a dummy POST request to the copy endpoint to check if it exists
-		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
-			SourceCoursePhaseID: p.ID,
-			TargetCoursePhaseID: p.ID,
-		})
-
-		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
-		if err != nil {
-			log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-			missing = append(missing, p.Name.String+" ("+pt.Name+")")
-			checked[pt.BaseUrl] = pt.Name
-			continue
-		}
-		resp.Body.Close()
-
-		if resp.StatusCode == http.StatusNotFound {
-			missing = append(missing, p.Name.String+" ("+pt.Name+")")
-		}
-		checked[pt.BaseUrl] = pt.Name
 	}
 
 	return missing, nil
+}
+
+// checkPhaseCopyable checks if a single course phase can be copied by sending a dummy request to the copy endpoint.
+func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseName string, checked map[string]string, missing *[]string) error {
+	pt, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, phaseTypeID)
+	if err != nil {
+		return fmt.Errorf("failed to get phase type: %w", err)
+	}
+
+	// Skip internal/core phases
+	if pt.BaseUrl == utils.GetEnv("CORE_HOST", "core") {
+		return nil
+	}
+
+	if _, seen := checked[pt.BaseUrl]; seen {
+		return nil
+	}
+
+	// send a dummy POST request to the copy endpoint to check if it exists
+	body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
+		SourceCoursePhaseID: phaseID,
+		TargetCoursePhaseID: phaseID,
+	})
+
+	resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
+	if err != nil {
+		log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
+		*missing = append(*missing, phaseName+" ("+pt.Name+")")
+		checked[pt.BaseUrl] = pt.Name
+		return nil
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		*missing = append(*missing, phaseName+" ("+pt.Name+")")
+	}
+	checked[pt.BaseUrl] = pt.Name
+	return nil
 }
