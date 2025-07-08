@@ -1,5 +1,6 @@
 import { Button, Textarea } from '@tumaet/prompt-ui-components'
 import { Check, Trash2 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 import type { ActionItem } from '../../../../../interfaces/actionItem'
 
@@ -21,6 +22,15 @@ export function ActionItemRow({
   isPending,
   isDisabled = false,
 }: ActionItemRowProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [value])
+
   return (
     <div
       className={`flex items-center gap-2 p-2 border rounded-md group relative ${isDisabled ? 'opacity-60' : ''}`}
@@ -29,6 +39,7 @@ export function ActionItemRow({
 
       <div className='flex-1 relative'>
         <Textarea
+          ref={textareaRef}
           className='w-full resize-none min-h-[24px]'
           value={value}
           onChange={(e) => {
@@ -48,7 +59,7 @@ export function ActionItemRow({
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement
             target.style.height = 'auto'
-            target.style.height = target.scrollHeight + 'px'
+            target.style.height = `${target.scrollHeight}px`
           }}
           disabled={isDisabled}
           readOnly={isDisabled}

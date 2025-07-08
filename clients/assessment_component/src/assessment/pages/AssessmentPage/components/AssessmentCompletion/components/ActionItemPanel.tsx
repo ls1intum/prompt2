@@ -33,11 +33,11 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   const { phaseId } = useParams<{
     phaseId: string
   }>()
-  const [error, setError] = useState<string | null>(null)
-  const [savingItemId, setSavingItemId] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
+  const [savingItemId, setSavingItemId] = useState<string | undefined>(undefined)
   const [itemValues, setItemValues] = useState<Record<string, string>>({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
   // Check if assessment is completed
   const isAssessmentCompleted = studentAssessment.assessmentCompletion.completed
@@ -117,11 +117,11 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
 
           updateActionItem(updateRequest, {
             onSuccess: () => {
-              setSavingItemId(null)
+              setSavingItemId(undefined)
               refetch()
             },
             onError: () => {
-              setSavingItemId(null)
+              setSavingItemId(undefined)
             },
           })
         }
@@ -168,7 +168,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
           })
           refetch()
           setDeleteDialogOpen(false)
-          setItemToDelete(null)
+          setItemToDelete(undefined)
         },
       })
     }
@@ -176,7 +176,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
 
   const cancelDelete = () => {
     setDeleteDialogOpen(false)
-    setItemToDelete(null)
+    setItemToDelete(undefined)
   }
 
   const isPending = isGetActionItemsPending || isCreatePending || isUpdatePending || isDeletePending
