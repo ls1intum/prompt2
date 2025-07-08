@@ -97,3 +97,17 @@ func DeleteTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID) error {
 	}
 	return nil
 }
+
+func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUpdateRequest) error {
+	for participationID, fullName := range req.StudentNamesPerID {
+		err := TeamsServiceSingleton.queries.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
+			StudentFullName:       fullName,
+			CourseParticipationID: participationID,
+			CoursePhaseID:         req.CoursePhaseID,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to update name for participation ID %s: %w", participationID, err)
+		}
+	}
+	return nil
+}
