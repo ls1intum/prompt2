@@ -18,6 +18,8 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 	teamRouter.PUT("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateTeam)
 	teamRouter.DELETE("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteTeam)
 
+	teamRouter.POST("/student-names", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), addStudentNamesToTeams)
+
 	// this is required to comply with the inter phase communication protocol
 	teamRouter.GET("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTeamByID)
 }
@@ -137,4 +139,20 @@ func deleteTeam(c *gin.Context) {
 
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, gin.H{"error": err.Error()})
+}
+
+func addStudentNamesToTeams(c *gin.Context) {
+	var req teamDTO.StudentNameUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := AddStudentNamesToAllocations(c, req); err != nil {
+		log.Error("Error adding student names to allocations: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

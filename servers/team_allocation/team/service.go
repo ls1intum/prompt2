@@ -21,12 +21,17 @@ type TeamsService struct {
 var TeamsServiceSingleton *TeamsService
 
 func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, error) {
-	dbTeams, err := TeamsServiceSingleton.queries.GetTeamsByCoursePhase(ctx, coursePhaseID)
+	dbTeams, err := TeamsServiceSingleton.queries.GetAllocationsWithStudentNames(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
 		return nil, errors.New("could not get the teams from the database")
 	}
-	return teamDTO.GetTeamDTOsFromDBModels(dbTeams), nil
+	dtos, err := teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams)
+	if err != nil {
+		log.Error("could not get the teams from the database: ", err)
+		return nil, errors.New("could not get the teams from the database")
+	}
+	return dtos, nil
 }
 
 func GetTeamByID(ctx context.Context, coursePhaseID uuid.UUID, teamID uuid.UUID) (teamDTO.Team, error) {
@@ -90,5 +95,31 @@ func DeleteTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID) error {
 		log.Error("could not delete the team: ", err)
 		return errors.New("could not delete the team")
 	}
+	return nil
+}
+
+func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUpdateRequest) error {
+	tx, err := TeamsServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := TeamsServiceSingleton.queries.WithTx(tx)
+
+	for participationID, fullName := range req.StudentNamesPerID {
+		err := qtx.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
+			StudentFullName:       fullName,
+			CourseParticipationID: participationID,
+			CoursePhaseID:         req.CoursePhaseID,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to update name for participation ID %s: %w", participationID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
