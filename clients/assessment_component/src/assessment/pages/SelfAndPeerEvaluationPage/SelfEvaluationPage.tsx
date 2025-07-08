@@ -1,12 +1,9 @@
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
-import { Loader2 } from 'lucide-react'
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
 import { useEvaluationStore } from '../../zustand/useEvaluationStore'
-
-import { useGetMyEvaluations } from '../hooks/useGetMyEvaluations'
 
 import { CategoryEvaluation } from './components/CategoryEvaluation'
 import { EvaluationCompletionPage } from './components/EvaluationCompletionPage/EvaluationCompletionPage'
@@ -15,17 +12,8 @@ export const SelfEvaluationPage = () => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { myParticipation } = useMyParticipationStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
-  const { selfEvaluationCompletion: completion } = useEvaluationStore()
-
-  const { selfEvaluations: evaluations, isPending, isError, refetch } = useGetMyEvaluations()
-
-  if (isError) return <ErrorPage onRetry={refetch} description='Could not fetch self evaluations' />
-  if (isPending)
-    return (
-      <div className='flex justify-center items-center h-64'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-      </div>
-    )
+  const { selfEvaluations: evaluations, selfEvaluationCompletion: completion } =
+    useEvaluationStore()
 
   return (
     <div className='flex flex-col gap-4'>
