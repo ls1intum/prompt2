@@ -217,9 +217,64 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 			log.Warnf("Skipping team at index %d: 'name' field is not a string", i)
 			continue
 		}
+
+		// Extract team members
+		members := make([]coursePhaseConfigDTO.TeamMember, 0)
+		membersRaw, membersExists := teamMap["members"]
+		if membersExists {
+			membersSlice, isMembersSlice := membersRaw.([]interface{})
+			if isMembersSlice {
+				for j, memberData := range membersSlice {
+					memberMap, isMemberMap := memberData.(map[string]interface{})
+					if !isMemberMap {
+						log.Warnf("Skipping member at index %d for team %s: not a valid map", j, teamName)
+						continue
+					}
+
+					// Extract course participation ID
+					cpIDRaw, cpIDExists := memberMap["courseParticipationID"]
+					if !cpIDExists {
+						log.Warnf("Skipping member at index %d for team %s: missing 'courseParticipationID' field", j, teamName)
+						continue
+					}
+					cpIDStr, isCPIDString := cpIDRaw.(string)
+					if !isCPIDString {
+						log.Warnf("Skipping member at index %d for team %s: 'courseParticipationID' field is not a string", j, teamName)
+						continue
+					}
+					cpID, err := uuid.Parse(cpIDStr)
+					if err != nil {
+						log.Warnf("Skipping member at index %d for team %s: invalid UUID format for 'courseParticipationID': %v", j, teamName, err)
+						continue
+					}
+
+					// Extract student name
+					studentNameRaw, studentNameExists := memberMap["studentName"]
+					if !studentNameExists {
+						log.Warnf("Skipping member at index %d for team %s: missing 'studentName' field", j, teamName)
+						continue
+					}
+					studentName, isStudentNameString := studentNameRaw.(string)
+					if !isStudentNameString {
+						log.Warnf("Skipping member at index %d for team %s: 'studentName' field is not a string", j, teamName)
+						continue
+					}
+
+					member := coursePhaseConfigDTO.TeamMember{
+						CourseParticipationID: cpID,
+						StudentName:           studentName,
+					}
+					members = append(members, member)
+				}
+			} else {
+				log.Warnf("Team %s: 'members' field is not a slice", teamName)
+			}
+		}
+
 		team := coursePhaseConfigDTO.Team{
-			ID:   teamID,
-			Name: teamName,
+			ID:      teamID,
+			Name:    teamName,
+			Members: members,
 		}
 		teams = append(teams, team)
 	}

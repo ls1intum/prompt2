@@ -84,11 +84,13 @@ export const EvaluationCompletionPage = ({
           feedbackType='positive'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
+          completed={completed}
         />
         <FeedbackItemPanel
           feedbackType='negative'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
+          completed={completed}
         />
       </div>
 

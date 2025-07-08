@@ -12,14 +12,5 @@ export const getMyPeerEvaluationCompletions = async (
       },
     },
   )
-  return [
-    ...response.data,
-    {
-      courseParticipationID: 'mockCourseParticipationID',
-      coursePhaseID: coursePhaseID,
-      completedAt: new Date().toISOString(),
-      completed: true,
-      authorCourseParticipationID: 'mockAuthorCourseParticipationID',
-    },
-  ]
+  return response.data
 }
