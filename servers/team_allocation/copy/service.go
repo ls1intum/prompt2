@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	promptTypes "github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	log "github.com/sirupsen/logrus"
@@ -21,22 +22,24 @@ var CopyServiceSingleton *CopyService
 type TeamAllocationCopyHandler struct{}
 
 func (h *TeamAllocationCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
-	tx, err := CopyServiceSingleton.conn.Begin(c.Request.Context())
+	ctx := c.Request.Context()
+
+	tx, err := CopyServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(c.Request.Context())
+	defer promptSDK.DeferDBRollback(tx, ctx)
 
 	qtx := CopyServiceSingleton.queries.WithTx(tx)
 
-	skills, err := qtx.GetSkillsByCoursePhase(c.Request.Context(), req.SourceCoursePhaseID)
+	skills, err := qtx.GetSkillsByCoursePhase(ctx, req.SourceCoursePhaseID)
 	if err != nil {
 		return err
 	}
 
 	// Copy skills to the new course phase
 	for _, skill := range skills {
-		err := qtx.CreateSkill(c.Request.Context(), db.CreateSkillParams{
+		err := qtx.CreateSkill(ctx, db.CreateSkillParams{
 			ID:            uuid.New(),
 			Name:          skill.Name,
 			CoursePhaseID: req.TargetCoursePhaseID,
@@ -46,7 +49,7 @@ func (h *TeamAllocationCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTy
 		}
 	}
 
-	if err := tx.Commit(c.Request.Context()); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit phase copy: ", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
