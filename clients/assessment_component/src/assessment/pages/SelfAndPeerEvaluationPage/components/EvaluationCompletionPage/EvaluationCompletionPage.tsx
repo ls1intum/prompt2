@@ -11,8 +11,11 @@ import { AssessmentCompletionDialog } from '../../../components/AssessmentComple
 import { useMarkMyEvaluationAsCompleted } from './hooks/useMarkMyEvaluationAsCompleted'
 import { useUnmarkMyEvaluationAsCompleted } from './hooks/useUnmarkMyEvaluationAsCompleted'
 
+import { FeedbackItemPanel } from './components/FeedbackItemPanel'
+
 interface EvaluationCompletionPageProps {
   deadline: Date
+  courseParticipationID: string
   authorCourseParticipationID: string
   completed?: boolean
   completedAt?: Date
@@ -20,6 +23,7 @@ interface EvaluationCompletionPageProps {
 
 export const EvaluationCompletionPage = ({
   deadline,
+  courseParticipationID,
   authorCourseParticipationID,
   completed = false,
   completedAt,
@@ -53,13 +57,13 @@ export const EvaluationCompletionPage = ({
             return
           }
           await unmarkAsCompleted({
-            courseParticipationID: authorCourseParticipationID,
+            courseParticipationID: courseParticipationID,
             coursePhaseID: phaseId ?? '',
             authorCourseParticipationID: authorCourseParticipationID,
           })
         } else {
           await markAsComplete({
-            courseParticipationID: authorCourseParticipationID,
+            courseParticipationID: courseParticipationID,
             coursePhaseID: phaseId ?? '',
             authorCourseParticipationID: authorCourseParticipationID,
           })
@@ -75,6 +79,19 @@ export const EvaluationCompletionPage = ({
 
   return (
     <div>
+      <div className='grid grid-cols-2 gap-4'>
+        <FeedbackItemPanel
+          feedbackType='positive'
+          courseParticipationID={courseParticipationID}
+          authorCourseParticipationID={authorCourseParticipationID}
+        />
+        <FeedbackItemPanel
+          feedbackType='negative'
+          courseParticipationID={courseParticipationID}
+          authorCourseParticipationID={authorCourseParticipationID}
+        />
+      </div>
+
       {error && !dialogOpen && (
         <Alert variant='destructive' className='mt-4'>
           <AlertDescription>{error}</AlertDescription>

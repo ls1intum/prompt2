@@ -6,12 +6,12 @@ import (
 )
 
 type CreateOrUpdateFeedbackItemRequest struct {
-	ID                          *uuid.UUID      `json:"id,omitempty"` // Optional for create, required for update
-	FeedbackType                db.FeedbackType `json:"feedbackType" binding:"required"`
-	FeedbackText                string          `json:"feedbackText" binding:"required"`
-	CourseParticipationID       uuid.UUID       `json:"courseParticipationID" binding:"required"`
-	CoursePhaseID               uuid.UUID       `json:"coursePhaseID" binding:"required"`
-	AuthorCourseParticipationID uuid.UUID       `json:"authorCourseParticipationID" binding:"required"`
+	ID                          *uuid.UUID      `json:"id"` // Optional for create, required for update
+	FeedbackType                db.FeedbackType `json:"feedbackType""`
+	FeedbackText                string          `json:"feedbackText"`
+	CourseParticipationID       uuid.UUID       `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID       `json:"coursePhaseID"`
+	AuthorCourseParticipationID uuid.UUID       `json:"authorCourseParticipationID"`
 }
 
 // GetCreateDBModel converts CreateOrUpdateFeedbackItemRequest to create database parameters.

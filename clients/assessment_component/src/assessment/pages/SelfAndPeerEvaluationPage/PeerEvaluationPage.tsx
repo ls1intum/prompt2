@@ -43,6 +43,7 @@ export const PeerEvaluationPage = () => {
 
       <EvaluationCompletionPage
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
+        courseParticipationID={courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
         completed={completion?.completed ?? false}
         completedAt={completion?.completedAt ? new Date(completion.completedAt) : undefined}

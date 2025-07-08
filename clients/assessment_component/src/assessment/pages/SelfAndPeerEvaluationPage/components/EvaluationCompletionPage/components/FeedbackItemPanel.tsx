@@ -1,8 +1,6 @@
 'use client'
 
-import { useParams } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
-import { useQuery } from '@tanstack/react-query'
 
 import {
   Card,
@@ -12,30 +10,34 @@ import {
   ErrorPage,
   Button,
 } from '@tumaet/prompt-ui-components'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Plus, Loader2, AlertCircle } from 'lucide-react'
+import { Plus, Loader2, AlertCircle, MessageCircle } from 'lucide-react'
 
-import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
-import { getAllActionItemsForStudentInPhase } from '../../../../../network/queries/getAllActionItemsForStudentInPhase'
+import type {
+  FeedbackItem,
+  FeedbackType,
+  UpdateFeedbackItemRequest,
+} from '../../../../../interfaces/feedbackItem'
 
-import { useCreateActionItem } from '../hooks/useCreateActionItem'
-import { useUpdateActionItem } from '../hooks/useUpdateActionItem'
-import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
-import { DeleteActionItemDialog } from './DeleteActionItemDialog'
-import { ActionItemRow } from './ActionItemRow'
+import { useGetMyFeedbackItems } from '../hooks/useGetMyFeedbackItems'
+import { useCreateFeedbackItem } from '../hooks/useCreateFeedbackItem'
+import { useUpdateFeedbackItem } from '../hooks/useUpdateFeedbackItem'
+import { useDeleteFeedbackItem } from '../hooks/useDeleteFeedbackItem'
+import { DeleteFeedbackItemDialog } from './DeleteFeedbackItemDialog'
+import { FeedbackItemRow } from './FeedbackItemRow'
 
-interface ActionItemPanelProps {
+interface FeedbackItemPanelProps {
+  feedbackType: FeedbackType
   courseParticipationID: string
+  authorCourseParticipationID: string
   completed?: boolean
 }
 
-export function ActionItemPanel({
+export function FeedbackItemPanel({
+  feedbackType,
   courseParticipationID,
+  authorCourseParticipationID,
   completed = false,
-}: ActionItemPanelProps) {
-  const { phaseId } = useParams<{
-    phaseId: string
-  }>()
+}: FeedbackItemPanelProps) {
   const [error, setError] = useState<string | undefined>(undefined)
   const [savingItemId, setSavingItemId] = useState<string | undefined>(undefined)
   const [itemValues, setItemValues] = useState<Record<string, string>>({})
@@ -46,46 +48,46 @@ export function ActionItemPanel({
   const isAssessmentCompleted = completed
 
   const {
-    data: actionItems = [],
-    isPending: isGetActionItemsPending,
+    feedbackItems: allFeedbackItems,
+    isLoading: isGetFeedbackItemsPending,
     isError,
     refetch,
-  } = useQuery<ActionItem[]>({
-    queryKey: ['actionItems', phaseId, courseParticipationID],
-    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID),
-  })
+  } = useGetMyFeedbackItems()
 
-  const { mutate: createActionItem, isPending: isCreatePending } = useCreateActionItem(setError)
-  const { mutate: updateActionItem, isPending: isUpdatePending } = useUpdateActionItem(setError)
-  const { mutate: deleteActionItem, isPending: isDeletePending } = useDeleteActionItem(setError)
+  // Filter feedback items by type and course participation
+  const feedbackItems = allFeedbackItems.filter(
+    (item) =>
+      item.feedbackType === feedbackType && item.courseParticipationID === courseParticipationID,
+  )
 
-  const { user } = useAuthStore()
-  const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+  const { mutate: createFeedbackItem, isPending: isCreatePending } = useCreateFeedbackItem(setError)
+  const { mutate: updateFeedbackItem, isPending: isUpdatePending } = useUpdateFeedbackItem(setError)
+  const { mutate: deleteFeedbackItem, isPending: isDeletePending } = useDeleteFeedbackItem(setError)
 
   // Initialize item values when data loads
   useEffect(() => {
     const newValues: Record<string, string> = {}
-    actionItems.forEach((item) => {
+    feedbackItems.forEach((item) => {
       if (!(item.id in itemValues)) {
-        newValues[item.id] = item.action
+        newValues[item.id] = item.feedbackText
       }
     })
     if (Object.keys(newValues).length > 0) {
       setItemValues((prev) => ({ ...prev, ...newValues }))
     }
-  }, [actionItems, itemValues])
+  }, [feedbackItems, itemValues])
 
-  const addActionItem = () => {
+  const addFeedbackItem = () => {
     if (isAssessmentCompleted) return
 
-    const handleAddActionItem = async () => {
+    const handleAddFeedbackItem = async () => {
       try {
-        await createActionItem(
+        await createFeedbackItem(
           {
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID,
-            action: '',
-            author: userName,
+            feedbackType,
+            courseParticipationID,
+            authorCourseParticipationID,
+            feedbackText: '',
           },
           {
             onSuccess: () => {
@@ -94,30 +96,30 @@ export function ActionItemPanel({
           },
         )
       } catch (err) {
-        setError('An error occurred while creating the action item.')
+        setError('An error occurred while creating the feedback item.')
       }
     }
 
-    handleAddActionItem()
+    handleAddFeedbackItem()
   }
 
   const debouncedSave = useCallback(
-    (item: ActionItem, text: string) => {
+    (item: FeedbackItem, text: string) => {
       const timeoutId = setTimeout(() => {
         if (isAssessmentCompleted) return
 
-        if (text.trim() !== item.action.trim() && text.trim() !== '') {
+        if (text.trim() !== item.feedbackText.trim() && text.trim() !== '') {
           setSavingItemId(item.id)
 
-          const updateRequest: UpdateActionItemRequest = {
+          const updateRequest: UpdateFeedbackItemRequest = {
             id: item.id,
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID,
-            action: text.trim(),
-            author: userName,
+            feedbackText: text.trim(),
+            feedbackType: item.feedbackType,
+            courseParticipationID: item.courseParticipationID,
+            authorCourseParticipationID: item.authorCourseParticipationID,
           }
 
-          updateActionItem(updateRequest, {
+          updateFeedbackItem(updateRequest, {
             onSuccess: () => {
               setSavingItemId(undefined)
               refetch()
@@ -127,17 +129,17 @@ export function ActionItemPanel({
             },
           })
         }
-      }, 500) // 200 ms delay
+      }, 500) // 500 ms delay
 
       return timeoutId
     },
-    [phaseId, courseParticipationID, userName, updateActionItem, refetch, isAssessmentCompleted],
+    [updateFeedbackItem, refetch, isAssessmentCompleted],
   )
 
   const handleTextChange = (itemId: string, value: string) => {
     setItemValues((prev) => ({ ...prev, [itemId]: value }))
 
-    const item = actionItems.find((it) => it.id === itemId)
+    const item = feedbackItems.find((it) => it.id === itemId)
     if (item) {
       const timeoutId = debouncedSave(item, value)
       return () => clearTimeout(timeoutId)
@@ -153,7 +155,7 @@ export function ActionItemPanel({
 
   const confirmDelete = () => {
     if (itemToDelete) {
-      deleteActionItem(itemToDelete, {
+      deleteFeedbackItem(itemToDelete, {
         onSuccess: () => {
           // Remove from local state
           setItemValues((prev) => {
@@ -174,13 +176,28 @@ export function ActionItemPanel({
     setItemToDelete(undefined)
   }
 
-  const isPending = isGetActionItemsPending || isCreatePending || isUpdatePending || isDeletePending
+  const isPending =
+    isGetFeedbackItemsPending || isCreatePending || isUpdatePending || isDeletePending
+
+  const panelTitle =
+    courseParticipationID === authorCourseParticipationID
+      ? feedbackType === 'positive'
+        ? 'What did you do particularly well?'
+        : 'Where can you still improve?'
+      : feedbackType === 'positive'
+        ? 'What did this student do particularly well?'
+        : 'Where can this student still improve?'
+  const addButtonText = 'Add Item'
+  const placeholderText =
+    feedbackType === 'positive'
+      ? 'What did this person do particularly well?'
+      : 'What could this person improve?'
 
   if (isError) {
-    return <ErrorPage message='Error loading assessments' onRetry={refetch} />
+    return <ErrorPage message='Error loading feedback items' onRetry={refetch} />
   }
 
-  if (isGetActionItemsPending) {
+  if (isGetFeedbackItemsPending) {
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -192,31 +209,37 @@ export function ActionItemPanel({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Action Items</CardTitle>
+          <CardTitle className='flex items-center gap-2'>
+            <MessageCircle
+              className={`h-5 w-5 ${feedbackType === 'positive' ? 'text-green-600' : 'text-red-600'}`}
+            />
+            {panelTitle}
+          </CardTitle>
         </CardHeader>
         <CardContent className='space-y-2'>
-          {actionItems.map((item) => (
-            <ActionItemRow
+          {feedbackItems.map((item) => (
+            <FeedbackItemRow
               key={item.id}
               item={item}
-              value={itemValues[item.id] || item.action}
+              value={itemValues[item.id] || item.feedbackText}
               onTextChange={handleTextChange}
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
               isDisabled={isAssessmentCompleted}
+              placeholder={placeholderText}
             />
           ))}
 
           <Button
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-            onClick={addActionItem}
+            onClick={addFeedbackItem}
             disabled={isPending || isAssessmentCompleted}
             title={
               isAssessmentCompleted
-                ? 'Assessment completed - cannot add new action items'
-                : 'Add new action item'
+                ? 'Assessment completed - cannot add new feedback items'
+                : addButtonText
             }
           >
             {isCreatePending ? (
@@ -224,7 +247,7 @@ export function ActionItemPanel({
             ) : (
               <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
             )}
-            <span className='text-muted-foreground'>Add Action Item</span>
+            <span className='text-muted-foreground'>{addButtonText}</span>
           </Button>
 
           {error && (
@@ -236,7 +259,7 @@ export function ActionItemPanel({
         </CardContent>
       </Card>
 
-      <DeleteActionItemDialog
+      <DeleteFeedbackItemDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={confirmDelete}

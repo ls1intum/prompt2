@@ -168,7 +168,10 @@ export const AssessmentCompletion = ({
           />
         </div>
 
-        <ActionItemPanel studentAssessment={studentAssessment} />
+        <ActionItemPanel
+          courseParticipationID={studentAssessment.courseParticipationID}
+          completed={studentAssessment.assessmentCompletion.completed}
+        />
       </div>
 
       {error && !dialogOpen && (
