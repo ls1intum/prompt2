@@ -7,7 +7,7 @@ import (
 
 type CreateOrUpdateFeedbackItemRequest struct {
 	ID                          *uuid.UUID      `json:"id"` // Optional for create, required for update
-	FeedbackType                db.FeedbackType `json:"feedbackType""`
+	FeedbackType                db.FeedbackType `json:"feedbackType"`
 	FeedbackText                string          `json:"feedbackText"`
 	CourseParticipationID       uuid.UUID       `json:"courseParticipationID"`
 	CoursePhaseID               uuid.UUID       `json:"coursePhaseID"`
