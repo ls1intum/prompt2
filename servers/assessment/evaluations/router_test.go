@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 	"github.com/stretchr/testify/assert"
@@ -138,7 +138,7 @@ func (suite *EvaluationRouterTestSuite) TestCreateOrUpdateEvaluation() {
 	requestBody := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       uuid.MustParse("02234567-1234-1234-1234-123456789012"), // Valid from test data
 		CompetencyID:                uuid.MustParse("c1234567-1234-1234-1234-123456789012"), // Valid from test data
-		ScoreLevel:                  db.ScoreLevelGood,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelGood,
 		AuthorCourseParticipationID: uuid.MustParse("01234567-1234-1234-1234-123456789012"), // Must match test middleware
 	}
 
@@ -171,7 +171,7 @@ func (suite *EvaluationRouterTestSuite) TestCreateOrUpdateEvaluationForbiddenAut
 	requestBody := evaluationDTO.CreateOrUpdateEvaluationRequest{
 		CourseParticipationID:       uuid.MustParse("02234567-1234-1234-1234-123456789012"), // Valid from test data
 		CompetencyID:                uuid.MustParse("c1234567-1234-1234-1234-123456789012"), // Valid from test data
-		ScoreLevel:                  db.ScoreLevelGood,
+		ScoreLevel:                  scoreLevelDTO.ScoreLevelGood,
 		AuthorCourseParticipationID: uuid.MustParse("02234567-1234-1234-1234-123456789012"), // Different from test middleware user
 	}
 

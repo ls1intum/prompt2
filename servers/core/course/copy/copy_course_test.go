@@ -1,4 +1,4 @@
-package course
+package copy
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
+	"github.com/ls1intum/prompt2/servers/core/course/copy/courseCopyDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/testutils"
@@ -18,29 +18,29 @@ import (
 
 type CopyCourseTestSuite struct {
 	suite.Suite
-	ctx           context.Context
-	cleanup       func()
-	courseService CourseService
-	sourceCourse  db.Course
+	ctx               context.Context
+	cleanup           func()
+	courseCopyService CourseCopyService
+	sourceCourse      db.Course
 }
 
 func (suite *CopyCourseTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/copy_course_test.sql")
+	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../../database_dumps/copy_course_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 
 	suite.cleanup = cleanup
-	suite.courseService = CourseService{
+	suite.courseCopyService = CourseCopyService{
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 		createCourseGroupsAndRoles: func(ctx context.Context, courseName, semesterTag, userID string) error {
 			return nil
 		},
 	}
-	CourseServiceSingleton = &suite.courseService
+	CourseCopyServiceSingleton = &suite.courseCopyService
 	coursePhase.InitCoursePhaseModule(gin.Default().Group("/api"), *testDB.Queries, testDB.Conn)
 
 	// Use the known UUID from the dump
@@ -59,25 +59,27 @@ func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 	newStartDate := pgtype.Date{Valid: true, Time: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)}
 	newEndDate := pgtype.Date{Valid: true, Time: time.Date(2025, 6, 30, 0, 0, 0, 0, time.UTC)}
 
-	copyReq := courseDTO.CopyCourseRequest{
+	copyReq := courseCopyDTO.CopyCourseRequest{
 		Name:        newName,
 		SemesterTag: pgtype.Text{Valid: true, String: newTag},
 		StartDate:   newStartDate,
 		EndDate:     newEndDate,
 	}
 
-	result, err := copyCourseInternal(suite.ctx, suite.sourceCourse.ID, copyReq, "test_user")
+	// Create a dummy *gin.Context for testing
+	ginCtx, _ := gin.CreateTestContext(nil)
+	result, err := copyCourseInternal(ginCtx, suite.sourceCourse.ID, copyReq, "test_user")
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), newName, result.Name)
 	assert.Equal(suite.T(), newTag, result.SemesterTag.String)
 
 	// Verify phase graph
-	newGraph, err := CourseServiceSingleton.queries.GetCoursePhaseGraph(suite.ctx, result.ID)
+	newGraph, err := CourseCopyServiceSingleton.queries.GetCoursePhaseGraph(suite.ctx, result.ID)
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), newGraph, "Expected course phase graph to be copied")
 
 	// Verify initial phase
-	sequence, err := CourseServiceSingleton.queries.GetCoursePhaseSequence(suite.ctx, result.ID)
+	sequence, err := CourseCopyServiceSingleton.queries.GetCoursePhaseSequence(suite.ctx, result.ID)
 	assert.NoError(suite.T(), err)
 	foundInitial := false
 	for _, p := range sequence {
@@ -89,18 +91,18 @@ func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 	assert.True(suite.T(), foundInitial, "Expected initial phase to be set")
 	assert.NotEmpty(suite.T(), sequence, "Expected course phase sequence to be copied")
 
-	partGraph, err := CourseServiceSingleton.queries.GetParticipationDataGraph(suite.ctx, result.ID)
+	partGraph, err := CourseCopyServiceSingleton.queries.GetParticipationDataGraph(suite.ctx, result.ID)
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), partGraph, "Expected participation meta data graph to be copied")
 
 	// Verify application form questions
-	applicationPhaseID, err := CourseServiceSingleton.queries.GetApplicationPhaseIDForCourse(suite.ctx, result.ID)
+	applicationPhaseID, err := CourseCopyServiceSingleton.queries.GetApplicationPhaseIDForCourse(suite.ctx, result.ID)
 	assert.NoError(suite.T(), err)
 
-	textQuestions, err := CourseServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(suite.ctx, applicationPhaseID)
+	textQuestions, err := CourseCopyServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(suite.ctx, applicationPhaseID)
 	assert.NoError(suite.T(), err)
 
-	multiSelectQuestions, err := CourseServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(suite.ctx, applicationPhaseID)
+	multiSelectQuestions, err := CourseCopyServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(suite.ctx, applicationPhaseID)
 	assert.NoError(suite.T(), err)
 
 	assert.True(suite.T(), len(textQuestions) > 0 || len(multiSelectQuestions) > 0, "Expected application form to be copied")

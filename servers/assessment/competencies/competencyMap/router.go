@@ -13,8 +13,8 @@ import (
 func setupCompetencyMapRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	competencyMapRouter := routerGroup.Group("/competency-mappings")
 
-	competencyMapRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createCompetencyMapping)
-	competencyMapRouter.DELETE("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteCompetencyMapping)
+	competencyMapRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createCompetencyMapping)
+	competencyMapRouter.DELETE("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteCompetencyMapping)
 	competencyMapRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCompetencyMappings)
 	competencyMapRouter.GET("/from/:fromCompetencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCompetencyMappings)
 	competencyMapRouter.GET("/to/:toCompetencyID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getReverseCompetencyMappings)

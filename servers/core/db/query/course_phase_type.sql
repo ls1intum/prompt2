@@ -2,6 +2,11 @@
 SELECT *
 FROM course_phase_type;
 
+-- name: GetCoursePhaseTypeByID :one
+SELECT *
+FROM course_phase_type
+WHERE id = $1;
+
 -- name: GetCoursePhaseRequiredParticipationInputs :many
 SELECT *
 FROM course_phase_type_participation_required_input_dto

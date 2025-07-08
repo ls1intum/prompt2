@@ -35,8 +35,6 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/self", getOwnCourses)
 
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
-
-	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
 }
 
 // getOwnCourses godoc
@@ -415,41 +413,6 @@ func deleteCourse(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-}
-
-// copyCourse godoc
-// @Summary Copy a course
-// @Description Copy a course by UUID
-// @Tags courses
-// @Produce json
-// @Param uuid path string true "Course UUID"
-// @Success 200 {string} string "OK"
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
-// @Router /courses/{uuid}/copy [post]
-func copyCourse(c *gin.Context) {
-	userID := c.GetString("userID")
-
-	courseVariables := courseDTO.CopyCourseRequest{}
-	if err := c.BindJSON(&courseVariables); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	originalCourseID, err := uuid.Parse(c.Param("uuid"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	newCourse, err := CopyCourse(c, originalCourseID, courseVariables, userID)
-	if err != nil {
-		log.Error(err)
-		handleError(c, http.StatusInternalServerError, errors.New("failed to copy course"))
-		return
-	}
-
-	c.IndentedJSON(http.StatusCreated, newCourse)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

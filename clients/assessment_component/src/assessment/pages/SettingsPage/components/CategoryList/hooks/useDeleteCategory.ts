@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+
 import { deleteCategory } from '../../../../../network/mutations/deleteCategory'
 
 export const useDeleteCategory = (setError: (error: string | null) => void) => {

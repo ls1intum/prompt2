@@ -272,7 +272,7 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 }
 
 func getUserCourseParticipationID(c *gin.Context) (uuid.UUID, error) {
-	userCourseParticipationID, exists := c.Get("courseParticipationId")
+	userCourseParticipationID, exists := c.Get("courseParticipationID")
 	if !exists {
 		return uuid.UUID{}, errors.New("course participation ID not found in token")
 	}
