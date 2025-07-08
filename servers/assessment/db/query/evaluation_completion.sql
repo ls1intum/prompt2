@@ -73,10 +73,11 @@ FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2;
 
--- name: GetEvaluationCompletionsForAuthorInPhase :many
+-- name: GetPeerEvaluationCompletionsForAuthorInPhase :many
 SELECT *
 FROM evaluation_completion
 WHERE author_course_participation_id = $1
+  AND author_course_participation_id != course_participation_id
   AND course_phase_id = $2;
 
 -- name: GetPeerEvaluationCompletionsForParticipantInPhase :many
