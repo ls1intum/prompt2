@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/team_allocation/allocation"
+	"github.com/ls1intum/prompt2/servers/team_allocation/copy"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
 	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
@@ -92,7 +93,11 @@ func main() {
 	teams.InitTeamModule(api, *query, conn)
 	survey.InitSurveyModule(api, *query, conn)
 	allocation.InitAllocationModule(api, *query, conn)
+
 	tease.InitTeaseModule(router.Group("team-allocation/api"), *query, conn) // some tease endpoint are coursePhase independent
+
+	copyApi := router.Group("team-allocation/api")
+	copy.InitCopyModule(copyApi, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)
