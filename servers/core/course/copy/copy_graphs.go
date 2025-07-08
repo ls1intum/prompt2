@@ -48,7 +48,9 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 		fromD, ok3 := dtoMap[i.FromCoursePhaseDtoID]
 		toD, ok4 := dtoMap[i.ToCoursePhaseDtoID]
 		if !ok1 || !ok2 || !ok3 || !ok4 {
-			return fmt.Errorf("invalid mapping in phase data graph")
+			return fmt.Errorf("missing mapping in phase data graph - phases: %s->%v, %s->%v; dtos: %s->%v, %s->%v",
+				i.FromCoursePhaseID, ok1, i.ToCoursePhaseID, ok2,
+				i.FromCoursePhaseDtoID, ok3, i.ToCoursePhaseDtoID, ok4)
 		}
 		converted = append(converted, courseDTO.MetaDataGraphItem{
 			FromCoursePhaseID:    fromP,
@@ -73,7 +75,9 @@ func copyMetaGraphs(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UUI
 		fromD, ok3 := dtoMap[i.FromCoursePhaseDtoID]
 		toD, ok4 := dtoMap[i.ToCoursePhaseDtoID]
 		if !ok1 || !ok2 || !ok3 || !ok4 {
-			return fmt.Errorf("invalid mapping in participation data graph")
+			return fmt.Errorf("missing mapping in participation data graph - phases: %s->%v, %s->%v; dtos: %s->%v, %s->%v",
+				i.FromCoursePhaseID, ok1, i.ToCoursePhaseID, ok2,
+				i.FromCoursePhaseDtoID, ok3, i.ToCoursePhaseDtoID, ok4)
 		}
 		converted = append(converted, courseDTO.MetaDataGraphItem{
 			FromCoursePhaseID:    fromP,
