@@ -11,6 +11,8 @@ import { useMemo } from 'react'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
+import { useEffect } from 'react'
+import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesToTeams'
 
 export const ParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -87,6 +89,27 @@ export const ParticipantsPage = (): JSX.Element => {
     refetchTeams()
     refetchTeamAllocations()
   }
+
+  useEffect(() => {
+    if (!coursePhaseParticipations?.participations?.length || !phaseId) return
+
+    const requestPayload = {
+      coursePhaseID: phaseId,
+      studentNames: coursePhaseParticipations.participations.reduce(
+        (acc, p) => {
+          if (p.student?.firstName && p.student?.lastName) {
+            acc[p.courseParticipationID] = `${p.student.firstName} ${p.student.lastName}`
+          }
+          return acc
+        },
+        {} as Record<string, string>,
+      ),
+    }
+
+    void addStudentNamesToTeams(requestPayload).catch((error) => {
+      console.error('Failed to update student names:', error)
+    })
+  }, [coursePhaseParticipations, phaseId])
 
   const isError = isParticipationsError || isTeamsError || isTeamAllocationsError
   const isPending = isCoursePhaseParticipationsPending || isTeamsPending || isTeamAllocationsPending
