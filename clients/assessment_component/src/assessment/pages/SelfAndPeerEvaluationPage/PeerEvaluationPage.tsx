@@ -34,7 +34,7 @@ export const PeerEvaluationPage = () => {
       {peerEvaluationCategories.map((category) => (
         <CategoryEvaluation
           key={category.id}
-          courseParticipationID={myParticipation?.courseParticipationID ?? ''}
+          courseParticipationID={courseParticipationID ?? ''}
           category={category}
           evaluations={evaluations}
           completed={completion?.completed ?? false}
