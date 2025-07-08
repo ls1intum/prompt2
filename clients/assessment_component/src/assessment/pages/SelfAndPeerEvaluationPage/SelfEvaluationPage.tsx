@@ -1,41 +1,23 @@
-import { Loader2 } from 'lucide-react'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import { Loader2 } from 'lucide-react'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
+import { useEvaluationStore } from '../../zustand/useEvaluationStore'
 
-import { useGetMyEvaluations } from './hooks/useGetMyEvaluations'
-import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluationCompletion'
+import { useGetMyEvaluations } from '../hooks/useGetMyEvaluations'
 
 import { CategoryEvaluation } from './components/CategoryEvaluation'
-import { EvaluationCompletion } from './components/EvaluationCompletion/EvaluationCompletion'
+import { EvaluationCompletionPage } from './components/EvaluationCompletionPage/EvaluationCompletionPage'
 
 export const SelfEvaluationPage = () => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { myParticipation } = useMyParticipationStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
+  const { selfEvaluationCompletion: completion } = useEvaluationStore()
 
-  const {
-    selfEvaluations: evaluations,
-    isPending: isEvaluationsPending,
-    isError: isEvaluationsError,
-    refetch: refetchEvaluations,
-  } = useGetMyEvaluations()
-
-  const {
-    data: completion,
-    isPending: isCompletionPending,
-    isError: isCompletionError,
-    refetch: refetchCompletion,
-  } = useGetMySelfEvaluationCompletion()
-
-  const isError = isEvaluationsError || isCompletionError
-  const isPending = isEvaluationsPending || isCompletionPending
-  const refetch = () => {
-    refetchEvaluations()
-    refetchCompletion()
-  }
+  const { selfEvaluations: evaluations, isPending, isError, refetch } = useGetMyEvaluations()
 
   if (isError) return <ErrorPage onRetry={refetch} description='Could not fetch self evaluations' />
   if (isPending)
@@ -59,11 +41,11 @@ export const SelfEvaluationPage = () => {
           courseParticipationID={myParticipation?.courseParticipationID ?? ''}
           category={category}
           evaluations={evaluations}
-          completed={completion.completed ?? false}
+          completed={completion?.completed ?? false}
         />
       ))}
 
-      <EvaluationCompletion
+      <EvaluationCompletionPage
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
         completed={completion?.completed ?? false}

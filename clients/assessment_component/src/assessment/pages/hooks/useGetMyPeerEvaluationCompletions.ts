@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
-import { getMyPeerEvaluationCompletions } from '../../../network/queries/getMyPeerEvaluationCompletions'
+import { EvaluationCompletion } from '../../interfaces/evaluationCompletion'
+import { getMyPeerEvaluationCompletions } from '../../network/queries/getMyPeerEvaluationCompletions'
 
 export const useGetMyPeerEvaluationCompletions = () => {
   const { phaseId } = useParams<{ phaseId: string }>()

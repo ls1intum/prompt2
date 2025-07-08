@@ -18,11 +18,14 @@ import { useTeamStore } from '../zustand/useTeamStore'
 import { useMyParticipationStore } from '../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../zustand/usePeerEvaluationCategoryStore'
+import { useEvaluationStore } from '../zustand/useEvaluationStore'
 
 import { useGetCoursePhaseConfig } from './hooks/useGetCoursePhaseConfig'
 import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
+import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluationCompletion'
+import { useGetMyPeerEvaluationCompletions } from './hooks/useGetMyPeerEvaluationCompletions'
 
 interface SelfAndPeerAssessmentDataShellProps {
   children: React.ReactNode
@@ -40,6 +43,7 @@ export const SelfAndPeerEvaluationDataShell = ({
   const { setPeerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { setTeams } = useTeamStore()
   const { setMyParticipation } = useMyParticipationStore()
+  const { setSelfEvaluationCompletion, setPeerEvaluationCompletions } = useEvaluationStore()
 
   const {
     data: coursePhaseConfig,
@@ -80,24 +84,44 @@ export const SelfAndPeerEvaluationDataShell = ({
     enabled: isStudent,
   })
 
+  const {
+    data: selfEvaluationCompletion,
+    isPending: isCompletionPending,
+    isError: isCompletionError,
+    refetch: refetchCompletion,
+  } = useGetMySelfEvaluationCompletion()
+
+  const {
+    data: peerEvaluationCompletions,
+    isPending: isPeerEvaluationsPending,
+    isError: isPeerEvaluationsError,
+    refetch: refetchPeerEvaluations,
+  } = useGetMyPeerEvaluationCompletions()
+
   const isError =
     isSelfEvaluationCategoriesError ||
     isPeerEvaluationCategoriesError ||
     isTeamsError ||
     isParticipationsError ||
-    isCoursePhaseConfigError
+    isCoursePhaseConfigError ||
+    isCompletionError ||
+    isPeerEvaluationsError
   const isPending =
     isSelfEvaluationCategoriesPending ||
     isPeerEvaluationCategoriesPending ||
     isTeamsPending ||
     isParticipationsPending ||
-    isCoursePhaseConfigPending
+    isCoursePhaseConfigPending ||
+    isCompletionPending ||
+    isPeerEvaluationsPending
   const refetch = () => {
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
     refetchTeams()
     refetchCoursePhaseParticipations()
     refetchCoursePhaseConfig()
+    refetchCompletion()
+    refetchPeerEvaluations()
   }
 
   useEffect(() => {
@@ -129,6 +153,16 @@ export const SelfAndPeerEvaluationDataShell = ({
       setPeerEvaluationCategories(peerEvaluationCategories)
     }
   }, [peerEvaluationCategories, setPeerEvaluationCategories])
+
+  useEffect(() => {
+    setSelfEvaluationCompletion(selfEvaluationCompletion)
+  }, [selfEvaluationCompletion, setSelfEvaluationCompletion])
+
+  useEffect(() => {
+    if (peerEvaluationCompletions) {
+      setPeerEvaluationCompletions(peerEvaluationCompletions)
+    }
+  }, [peerEvaluationCompletions, setPeerEvaluationCompletions])
 
   if (isError)
     return (

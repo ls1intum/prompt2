@@ -11,19 +11,19 @@ import { AssessmentCompletionDialog } from '../../../components/AssessmentComple
 import { useMarkMyEvaluationAsCompleted } from './hooks/useMarkMyEvaluationAsCompleted'
 import { useUnmarkMyEvaluationAsCompleted } from './hooks/useUnmarkMyEvaluationAsCompleted'
 
-interface EvaluationCompletionProps {
+interface EvaluationCompletionPageProps {
   deadline: Date
   authorCourseParticipationID: string
   completed?: boolean
   completedAt?: Date
 }
 
-export const EvaluationCompletion = ({
+export const EvaluationCompletionPage = ({
   deadline,
   authorCourseParticipationID,
   completed = false,
   completedAt,
-}: EvaluationCompletionProps) => {
+}: EvaluationCompletionPageProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const [dialogOpen, setDialogOpen] = useState(false)
