@@ -90,14 +90,14 @@ func setInitialPhase(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UU
 // copyPhaseConfigurations sends a request to the phase service to copy configurations
 // for each phase that has a server-side implementation in the source course. It uses the phase ID mapping to ensure
 // the correct phases are targeted.
-func copyPhaseConfigurations(c *gin.Context, qtx *db.Queries, phaseIDMap map[uuid.UUID]uuid.UUID) error {
+func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID) error {
 	for oldPhaseID, newPhaseID := range phaseIDMap {
 		oldPhase, err := coursePhase.GetCoursePhaseByID(c, oldPhaseID)
 		if err != nil {
 			return fmt.Errorf("course phase with ID %s not found: %w", oldPhaseID, err)
 		}
 
-		oldPhaseType, err := qtx.GetCoursePhaseTypeByID(c, oldPhase.CoursePhaseTypeID)
+		oldPhaseType, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, oldPhase.CoursePhaseTypeID)
 		if err != nil {
 			return fmt.Errorf("failed to fetch course phase type: %w", err)
 		}

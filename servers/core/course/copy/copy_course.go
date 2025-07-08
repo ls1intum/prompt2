@@ -109,7 +109,7 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to commit course transaction: %w", err)
 	}
 
-	if err := copyPhaseConfigurations(c, qtx, phaseIDMap); err != nil {
+	if err := copyPhaseConfigurations(c, phaseIDMap); err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to copy phase configurations: %w", err)
 	}
 
