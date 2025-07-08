@@ -21,12 +21,17 @@ type TeamsService struct {
 var TeamsServiceSingleton *TeamsService
 
 func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, error) {
-	dbTeams, err := TeamsServiceSingleton.queries.GetTeamsByCoursePhase(ctx, coursePhaseID)
+	dbTeams, err := TeamsServiceSingleton.queries.GetAllocationsWithStudentNames(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
 		return nil, errors.New("could not get the teams from the database")
 	}
-	return teamDTO.GetTeamDTOsFromDBModels(dbTeams), nil
+	dtos, err := teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams)
+	if err != nil {
+		log.Error("could not get the teams from the database: ", err)
+		return nil, errors.New("could not get the teams from the database")
+	}
+	return dtos, nil
 }
 
 func GetTeamByID(ctx context.Context, coursePhaseID uuid.UUID, teamID uuid.UUID) (teamDTO.Team, error) {
