@@ -100,10 +100,6 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		}
 	}
 
-	if err := copyPhaseConfigurations(c, qtx, phaseIDMap); err != nil {
-		return courseDTO.Course{}, fmt.Errorf("failed to copy phase configurations: %w", err)
-	}
-
 	if err := CourseCopyServiceSingleton.createCourseGroupsAndRoles(c, createdCourse.Name, createdCourse.SemesterTag.String, requesterID); err != nil {
 		log.Error("failed to create keycloak roles for course: ", err)
 		return courseDTO.Course{}, fmt.Errorf("failed to create keycloak roles/groups: %w", err)
@@ -111,6 +107,10 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 
 	if err := tx.Commit(c); err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to commit course transaction: %w", err)
+	}
+
+	if err := copyPhaseConfigurations(c, qtx, phaseIDMap); err != nil {
+		return courseDTO.Course{}, fmt.Errorf("failed to copy phase configurations: %w", err)
 	}
 
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
