@@ -15,7 +15,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/assessment/validation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +34,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	err = validation.CheckAssessmentCompletionExists(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -148,11 +147,39 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 }
 
 func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
-	err := AssessmentServiceSingleton.queries.DeleteAssessment(ctx, id)
+	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
+
+	// Get the assessment details to check if it's editable
+	assessment, err := qtx.GetAssessment(ctx, id)
+	if err != nil {
+		// If assessment doesn't exist, return nil (no error) as it's already "deleted"
+		log.Info("assessment not found, nothing to delete: ", err)
+		return nil
+	}
+
+	// Check if the assessment is editable before deleting
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, assessment.CourseParticipationID, assessment.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
+	err = qtx.DeleteAssessment(ctx, id)
 	if err != nil {
 		log.Error("could not delete assessment: ", err)
 		return errors.New("could not delete assessment")
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit assessment deletion: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 

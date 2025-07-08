@@ -3,7 +3,6 @@ package coursePhaseConfig
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -35,12 +34,15 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 
 	// Generate a test course phase ID and insert it with a template
 	suite.testCoursePhaseID = uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000") // From our test data
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")     // From our test data
+	selfTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001") // Self assessment template
+	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment template
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
-		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
-		templateID, suite.testCoursePhaseID)
+		`INSERT INTO course_phase_config (assessment_template_id, course_phase_id, self_evaluation_template, peer_evaluation_template) 
+		 VALUES ($1, $2, $3, $4)`,
+		templateID, suite.testCoursePhaseID, selfTemplateID, peerTemplateID)
 	if err != nil {
 		suite.T().Fatalf("Failed to insert test course phase config: %v", err)
 	}
@@ -52,20 +54,6 @@ func (suite *CoursePhaseConfigServiceTestSuite) TearDownSuite() {
 	}
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateAndGetCoursePhaseDeadline() {
-	// Test updating a course phase deadline
-	testDeadline := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
-
-	err := UpdateCoursePhaseDeadline(suite.suiteCtx, suite.testCoursePhaseID, testDeadline)
-	assert.NoError(suite.T(), err, "Should be able to update course phase deadline")
-
-	// Test getting the updated deadline
-	retrievedDeadline, err := GetCoursePhaseDeadline(suite.suiteCtx, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err, "Should be able to get course phase deadline")
-	assert.NotNil(suite.T(), retrievedDeadline, "Retrieved deadline should not be nil")
-	assert.True(suite.T(), retrievedDeadline.Equal(testDeadline), "Retrieved deadline should match the set deadline")
-}
-
 func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseDeadlineNonExistent() {
 	// Test getting a deadline for a non-existent course phase
 	nonExistentID := uuid.New()
@@ -75,23 +63,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseDeadlineNonExi
 	assert.Nil(suite.T(), deadline, "Deadline should be nil for non-existent course phase")
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineInvalidID() {
-	// Test updating with an invalid UUID (this would typically fail at the database level)
-	emptyID := uuid.UUID{}
-	testDeadline := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
-
-	// The behavior here depends on the database constraints
-	// We expect either an error or successful execution
-	// The exact assertion would depend on your database schema
-	assert.NotPanics(suite.T(), func() {
-		_ = UpdateCoursePhaseDeadline(suite.suiteCtx, emptyID, testDeadline)
-	}, "Should not panic with empty UUID")
-}
-
-func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineMultipleTimes() {
-	// Test updating the same course phase deadline multiple times
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
+	// Test getting course phase config
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000") // From our test data
+	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Insert a course phase config entry first
 	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
@@ -99,19 +74,45 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseDeadlineMul
 		templateID, testID)
 	assert.NoError(suite.T(), err)
 
-	firstDeadline := time.Date(2025, 6, 15, 12, 0, 0, 0, time.UTC)
-	err = UpdateCoursePhaseDeadline(suite.suiteCtx, testID, firstDeadline)
-	assert.NoError(suite.T(), err, "Should be able to update deadline first time")
+	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err, "Should be able to get course phase config")
+	assert.NotNil(suite.T(), config, "Config should not be nil")
+}
 
-	secondDeadline := time.Date(2025, 7, 15, 12, 0, 0, 0, time.UTC)
-	err = UpdateCoursePhaseDeadline(suite.suiteCtx, testID, secondDeadline)
-	assert.NoError(suite.T(), err, "Should be able to update deadline second time")
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfEvaluationDeadlineNonExistent() {
+	nonExistentID := uuid.New()
+	deadline, err := GetSelfEvaluationDeadline(suite.suiteCtx, nonExistentID)
+	// Should return nil without error for non-existent deadline
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), deadline)
+}
 
-	// Verify the latest deadline is retrieved
-	retrievedDeadline, err := GetCoursePhaseDeadline(suite.suiteCtx, testID)
-	assert.NoError(suite.T(), err, "Should be able to get course phase deadline")
-	assert.NotNil(suite.T(), retrievedDeadline, "Retrieved deadline should not be nil")
-	assert.True(suite.T(), retrievedDeadline.Equal(secondDeadline), "Retrieved deadline should match the latest set deadline")
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetPeerEvaluationDeadlineNonExistent() {
+	nonExistentID := uuid.New()
+	deadline, err := GetPeerEvaluationDeadline(suite.suiteCtx, nonExistentID)
+	// Should return nil without error for non-existent deadline
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), deadline)
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetTeamsForCoursePhase() {
+	testID := uuid.New()
+	authHeader := "Bearer test-token"
+
+	// Test that the function returns an error due to external dependency failure
+	teams, err := GetTeamsForCoursePhase(suite.suiteCtx, authHeader, testID)
+	assert.Error(suite.T(), err, "Should error due to external service dependency")
+	assert.Nil(suite.T(), teams, "Should return nil on error")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestGetParticipationsForCoursePhase() {
+	testID := uuid.New()
+	authHeader := "Bearer test-token"
+
+	// Test that the function returns an error due to external dependency failure
+	participations, err := GetParticipationsForCoursePhase(suite.suiteCtx, authHeader, testID)
+	assert.Error(suite.T(), err, "Should error due to external service dependency")
+	assert.Nil(suite.T(), participations, "Should return nil on error")
 }
 
 // Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls

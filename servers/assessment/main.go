@@ -12,13 +12,11 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessmentTemplates"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -96,9 +94,7 @@ func main() {
 	coursePhaseConfig.InitCoursePhaseConfigModule(api, *query, conn)
 	assessmentTemplates.InitAssessmentTemplateModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
-	assessmentCompletion.InitAssessmentCompletionModule(api, *query, conn)
-	actionItem.InitActionItemModule(api, *query, conn)
-	scoreLevel.InitScoreLevelModule(api, *query, conn)
+	evaluations.InitEvaluationModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
 	err = router.Run(serverAddress)

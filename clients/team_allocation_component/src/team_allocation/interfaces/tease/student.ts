@@ -13,7 +13,7 @@ export interface TeaseStudent {
   gender: Gender
   id: string
   introCourseProficiency: SkillProficiency
-  introSelfAssessment: SkillProficiency
+  introSelfEvaluation: SkillProficiency
   languages: Array<Language>
   lastName: string
   nationality: string
