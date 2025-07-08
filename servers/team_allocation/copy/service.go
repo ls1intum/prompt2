@@ -18,14 +18,22 @@ var CopyServiceSingleton *CopyService
 type TeamAllocationCopyHandler struct{}
 
 func (h *TeamAllocationCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
-	skills, err := CopyServiceSingleton.queries.GetSkillsByCoursePhase(c.Request.Context(), req.SourceCoursePhaseID)
+	tx, err := CopyServiceSingleton.conn.Begin(c.Request.Context())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(c.Request.Context())
+
+	qtx := CopyServiceSingleton.queries.WithTx(tx)
+
+	skills, err := qtx.GetSkillsByCoursePhase(c.Request.Context(), req.SourceCoursePhaseID)
 	if err != nil {
 		return err
 	}
 
 	// Copy skills to the new course phase
 	for _, skill := range skills {
-		err := CopyServiceSingleton.queries.CreateSkill(c.Request.Context(), db.CreateSkillParams{
+		err := qtx.CreateSkill(c.Request.Context(), db.CreateSkillParams{
 			ID:            uuid.New(),
 			Name:          skill.Name,
 			CoursePhaseID: req.TargetCoursePhaseID,
@@ -35,5 +43,5 @@ func (h *TeamAllocationCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTy
 		}
 	}
 
-	return nil
+	return tx.Commit(c.Request.Context())
 }
