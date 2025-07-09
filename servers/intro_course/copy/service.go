@@ -17,5 +17,6 @@ var CopyServiceSingleton *CopyService
 type IntroCourseCopyHandler struct{}
 
 func (h *IntroCourseCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
+
 	return nil
 }
