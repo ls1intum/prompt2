@@ -20,16 +20,10 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
   const { teams } = useTeamStore()
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
-  const team = teams.find(
-    (t) =>
-      t.members.some(
-        (member) =>
-          member.courseParticipationID === selfEvaluationCompletion?.courseParticipationID,
-      ) ||
-      t.members.some(
-        (member) =>
-          member.courseParticipationID === peerEvaluationCompletions[0]?.courseParticipationID,
-      ),
+  const team = teams.find((t) =>
+    t.members.some(
+      (member) => member.courseParticipationID === myParticipation?.courseParticipationID,
+    ),
   )
 
   const selfEvaluationCompetencyCount = selfEvaluationCategories.reduce(
