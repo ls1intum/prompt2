@@ -27,7 +27,7 @@ export const ScoreLevelSelector = ({
       {Object.values(ScoreLevel).map((level) => {
         const config = getLevelConfig(level)
         const isSelected = selectedScore === level
-        const descriptionId = `score-level-${level}-description`
+        const descriptionID = `score-level-${level}-description`
 
         return (
           <button
@@ -38,14 +38,13 @@ export const ScoreLevelSelector = ({
             aria-pressed={isSelected}
             aria-disabled={completed}
             aria-label={`Select ${config.title} score level`}
-            aria-describedby={descriptionId}
+            aria-describedby={descriptionID}
             className={cn(
               'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
               isSelected && config.selectedBg,
               isSelected && config.textColor,
               !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
               completed && 'opacity-80 cursor-not-allowed',
-              // Hide non-selected items on small screens (< lg) only when a selection exists
               selectedScore && !isSelected && 'hidden lg:flex',
             )}
           >
@@ -63,7 +62,7 @@ export const ScoreLevelSelector = ({
               </div>
             </div>
 
-            <p id={descriptionId} className='line-clamp-3 text-muted-foreground'>
+            <p id={descriptionID} className='line-clamp-3 text-muted-foreground'>
               {(() => {
                 const key =
                   `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency

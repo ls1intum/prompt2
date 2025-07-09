@@ -9,6 +9,7 @@ import { useTeamStore } from '../../zustand/useTeamStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { EvaluationInfoCard } from './components/EvaluationInfoCard'
+import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
 
 export const SelfAndPeerEvaluationOverviewPage = () => {
   const path = useLocation().pathname
@@ -73,9 +74,7 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
               </div>
               <div className='flex-1'>
                 <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-                  {allEvaluationsCompleted
-                    ? 'All Evaluations Completed!'
-                    : 'Evaluation Instructions'}
+                  {allEvaluationsCompleted ? 'All Evaluations Completed!' : 'Instructions'}
                 </h2>
                 {allEvaluationsCompleted ? (
                   <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
@@ -122,13 +121,9 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                   Self Evaluation
                 </h3>
                 {isSelfEvaluationCompleted ? (
-                  <Badge className='bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/30'>
-                    Completed
-                  </Badge>
+                  <AssessmentStatusBadge remainingAssessments={0} isFinalized={true} />
                 ) : (
-                  <Badge className='bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'>
-                    Pending
-                  </Badge>
+                  <AssessmentStatusBadge remainingAssessments={1} />
                 )}
               </div>
               <div className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1'>
@@ -147,15 +142,10 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                   <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
                     Peer Evaluations
                   </h3>
-                  {completedPeerEvaluations === totalPeerEvaluations ? (
-                    <Badge className='bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900/30'>
-                      All Completed
-                    </Badge>
-                  ) : (
-                    <Badge className='bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'>
-                      {completedPeerEvaluations}/{totalPeerEvaluations}
-                    </Badge>
-                  )}
+                  <AssessmentStatusBadge
+                    remainingAssessments={totalPeerEvaluations - completedPeerEvaluations}
+                    isFinalized={completedPeerEvaluations === totalPeerEvaluations}
+                  />
                 </div>
                 <div className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1'>
                   {completedPeerEvaluations}/{totalPeerEvaluations}
@@ -166,7 +156,6 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
           )}
         </div>
 
-        {/* Self Evaluation Section */}
         <div className='mb-8'>
           <div className='flex items-center gap-3 mb-6'>
             <div className='flex items-center gap-2'>
@@ -193,7 +182,6 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
           </Card>
         </div>
 
-        {/* Peer Evaluation Section */}
         {team && (
           <div>
             <div className='flex items-center gap-3 mb-6'>

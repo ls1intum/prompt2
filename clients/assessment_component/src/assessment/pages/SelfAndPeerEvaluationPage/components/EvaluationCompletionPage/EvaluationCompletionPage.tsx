@@ -51,7 +51,6 @@ export const EvaluationCompletionPage = ({
     const handleCompletion = async () => {
       try {
         if (completed) {
-          // Check if deadline has passed before unmarking
           if (isDeadlinePassed) {
             setError('Cannot unmark evaluation as completed: deadline has passed.')
             return
@@ -79,15 +78,15 @@ export const EvaluationCompletionPage = ({
 
   return (
     <div>
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <FeedbackItemPanel
-          feedbackType='positive'
+          feedbackType='negative'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
           completed={completed}
         />
         <FeedbackItemPanel
-          feedbackType='negative'
+          feedbackType='positive'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
           completed={completed}

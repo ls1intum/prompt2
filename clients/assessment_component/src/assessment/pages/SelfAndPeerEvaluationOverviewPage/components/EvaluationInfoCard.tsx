@@ -32,7 +32,6 @@ export const EvaluationInfoCard = ({
         <div className='flex-shrink-0'>
           <AssessmentStatusBadge
             remainingAssessments={competencyCount - (evaluations?.length || 0)}
-            isEvaluation={true}
             isFinalized={completed}
           />
         </div>

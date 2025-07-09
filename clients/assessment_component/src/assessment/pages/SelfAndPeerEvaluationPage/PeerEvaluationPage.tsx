@@ -36,7 +36,9 @@ export const PeerEvaluationPage = () => {
           key={category.id}
           courseParticipationID={courseParticipationID ?? ''}
           category={category}
-          evaluations={evaluations}
+          evaluations={evaluations.filter(
+            (evaluation) => evaluation.courseParticipationID === courseParticipationID,
+          )}
           completed={completion?.completed ?? false}
         />
       ))}
