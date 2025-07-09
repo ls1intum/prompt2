@@ -9,6 +9,7 @@ jobs:
     outputs:
       assessment-changed: ${{ steps.changes.outputs.assessment }}
       core-changed: ${{ steps.changes.outputs.core }}
+      team_allocation-changed: ${{ steps.changes.outputs.team_allocation }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -27,12 +28,14 @@ jobs:
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.assessment-changed == 'true' ||
-      needs.detect-changes.outputs.core-changed       == 'true'
+      needs.detect-changes.outputs.core-changed       == 'true' ||
+      needs.detect-changes.outputs.team_allocation-changed == 'true'
     strategy:
       matrix:
         directory:
           - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
           - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
+          - ${{ needs.detect-changes.outputs.team_allocation-changed == 'true' && 'team_allocation' || '' }}
         exclude:
           - directory: ""
     steps:
