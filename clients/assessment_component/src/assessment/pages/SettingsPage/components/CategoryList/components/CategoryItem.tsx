@@ -41,10 +41,7 @@ export const CategoryItem = ({
           <Button
             variant='ghost'
             size='icon'
-            onClick={(e) => {
-              e.stopPropagation()
-              setCategoryToEdit(category)
-            }}
+            onClick={() => setCategoryToEdit(category)}
             aria-label={`Edit ${category.name}`}
           >
             <Edit className='h-4 w-4' />
@@ -52,10 +49,7 @@ export const CategoryItem = ({
           <Button
             variant='ghost'
             size='icon'
-            onClick={(e) => {
-              e.stopPropagation()
-              setCategoryToDelete(category.id)
-            }}
+            onClick={() => setCategoryToDelete(category.id)}
             aria-label={`Delete ${category.name}`}
           >
             <Trash2 className='h-4 w-4 text-destructive' />
