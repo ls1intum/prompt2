@@ -19,6 +19,8 @@ jobs:
               - 'servers/assessment/**'
             core:
               - 'servers/core/**'
+            team_allocation:
+              - 'servers/team_allocation/**'
 
   test:
     runs-on: ubuntu-latest

@@ -83,7 +83,7 @@ func submitSurveyResponses(c *gin.Context) {
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found in context"})
 		return
 	}
 
