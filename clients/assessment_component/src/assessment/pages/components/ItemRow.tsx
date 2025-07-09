@@ -1,5 +1,5 @@
 import { Button, Textarea } from '@tumaet/prompt-ui-components'
-import { Check, MessageCircle, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 import type { ActionItem } from '../../interfaces/actionItem'
@@ -46,50 +46,27 @@ export function ItemRow({
     }
   }, [value])
 
-  // Determine icon and color based on type
-  const getIconAndColor = () => {
-    if (type === 'action') {
-      return {
-        Icon: Check,
-        colorClass: 'text-green-600',
-      }
-    } else {
-      // feedback type
-      const feedbackItem = item as FeedbackItem
-      return {
-        Icon: MessageCircle,
-        colorClass: feedbackItem.feedbackType === 'positive' ? 'text-green-600' : 'text-red-600',
-      }
-    }
-  }
-
-  // Default placeholders based on type
   const getDefaultPlaceholder = () => {
     if (placeholder) return placeholder
-    if (isDisabled) return 'Assessment completed - editing disabled'
     return type === 'action' ? 'Enter action item...' : 'Enter feedback...'
   }
 
-  // Get delete button title
   const getDeleteTitle = () => {
     if (isDisabled) return 'Assessment completed - editing disabled'
     return type === 'action' ? 'Delete action item' : 'Delete feedback item'
   }
 
-  const { Icon, colorClass } = getIconAndColor()
-
   return (
     <div
-      className={`flex items-center gap-2 p-2 border rounded-md group relative ${
+      className={`flex items-center gap-2 rounded-md group relative ${
         isDisabled ? 'opacity-60' : ''
       }`}
     >
-      <Icon className={`h-5 w-5 shrink-0 ${colorClass}`} />
-
       <div className='flex-1 relative'>
         <Textarea
           ref={textareaRef}
-          className='w-full resize-none min-h-[24px]'
+          className='w-full resize-none min-h-[24px] overflow-hidden'
+          rows={1}
           value={value}
           onChange={(e) => {
             if (!isDisabled) {
@@ -98,16 +75,6 @@ export function ItemRow({
             }
           }}
           placeholder={getDefaultPlaceholder()}
-          rows={1}
-          style={{
-            height: 'auto',
-            minHeight: '24px',
-          }}
-          onInput={(e) => {
-            const target = e.target as HTMLTextAreaElement
-            target.style.height = 'auto'
-            target.style.height = `${target.scrollHeight}px`
-          }}
           disabled={isDisabled}
           readOnly={isDisabled}
         />
