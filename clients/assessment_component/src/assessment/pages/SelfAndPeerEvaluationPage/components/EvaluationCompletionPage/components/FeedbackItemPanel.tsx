@@ -21,7 +21,7 @@ import { useCreateFeedbackItem } from '../hooks/useCreateFeedbackItem'
 import { useUpdateFeedbackItem } from '../hooks/useUpdateFeedbackItem'
 import { useDeleteFeedbackItem } from '../hooks/useDeleteFeedbackItem'
 import { DeleteFeedbackItemDialog } from './DeleteFeedbackItemDialog'
-import { FeedbackItemRow } from './FeedbackItemRow'
+import { ItemRow } from '../../../../components/ItemRow'
 
 interface FeedbackItemPanelProps {
   feedbackType: FeedbackType
@@ -213,8 +213,9 @@ export function FeedbackItemPanel({
         </CardHeader>
         <CardContent className='space-y-2'>
           {feedbackItems.map((item) => (
-            <FeedbackItemRow
+            <ItemRow
               key={item.id}
+              type='feedback'
               item={item}
               value={itemValues[item.id] || item.feedbackText}
               onTextChange={handleTextChange}

@@ -1,11 +1,11 @@
 import { Button, Textarea } from '@tumaet/prompt-ui-components'
-import { MessageCircle, Trash2 } from 'lucide-react'
+import { Check, MessageCircle, Trash2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
-import type { FeedbackItem } from '../../../../../interfaces/feedbackItem'
+import type { ActionItem } from '../../interfaces/actionItem'
+import type { FeedbackItem } from '../../interfaces/feedbackItem'
 
-interface FeedbackItemRowProps {
-  item: FeedbackItem
+interface BaseItemRowProps {
   value: string
   onTextChange: (itemId: string, value: string) => void
   onDelete: (itemId: string) => void
@@ -15,15 +15,28 @@ interface FeedbackItemRowProps {
   placeholder?: string
 }
 
-export function FeedbackItemRow({
+interface ActionItemRowProps extends BaseItemRowProps {
+  type: 'action'
+  item: ActionItem
+}
+
+interface FeedbackItemRowProps extends BaseItemRowProps {
+  type: 'feedback'
+  item: FeedbackItem
+}
+
+type ItemRowProps = ActionItemRowProps | FeedbackItemRowProps
+
+export function ItemRow({
+  type,
   item,
   value,
   onTextChange,
   onDelete,
   isPending,
   isDisabled = false,
-  placeholder = 'Enter feedback...',
-}: FeedbackItemRowProps) {
+  placeholder,
+}: ItemRowProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -33,7 +46,37 @@ export function FeedbackItemRow({
     }
   }, [value])
 
-  const iconColor = item.feedbackType === 'positive' ? 'text-green-600' : 'text-red-600'
+  // Determine icon and color based on type
+  const getIconAndColor = () => {
+    if (type === 'action') {
+      return {
+        Icon: Check,
+        colorClass: 'text-green-600',
+      }
+    } else {
+      // feedback type
+      const feedbackItem = item as FeedbackItem
+      return {
+        Icon: MessageCircle,
+        colorClass: feedbackItem.feedbackType === 'positive' ? 'text-green-600' : 'text-red-600',
+      }
+    }
+  }
+
+  // Default placeholders based on type
+  const getDefaultPlaceholder = () => {
+    if (placeholder) return placeholder
+    if (isDisabled) return 'Assessment completed - editing disabled'
+    return type === 'action' ? 'Enter action item...' : 'Enter feedback...'
+  }
+
+  // Get delete button title
+  const getDeleteTitle = () => {
+    if (isDisabled) return 'Assessment completed - editing disabled'
+    return type === 'action' ? 'Delete action item' : 'Delete feedback item'
+  }
+
+  const { Icon, colorClass } = getIconAndColor()
 
   return (
     <div
@@ -41,7 +84,7 @@ export function FeedbackItemRow({
         isDisabled ? 'opacity-60' : ''
       }`}
     >
-      <MessageCircle className={`h-5 w-5 shrink-0 ${iconColor}`} />
+      <Icon className={`h-5 w-5 shrink-0 ${colorClass}`} />
 
       <div className='flex-1 relative'>
         <Textarea
@@ -54,7 +97,7 @@ export function FeedbackItemRow({
               return cleanup
             }
           }}
-          placeholder={isDisabled ? 'Assessment completed - editing disabled' : placeholder}
+          placeholder={getDefaultPlaceholder()}
           rows={1}
           style={{
             height: 'auto',
@@ -76,7 +119,7 @@ export function FeedbackItemRow({
         className=''
         onClick={() => !isDisabled && onDelete(item.id)}
         disabled={isPending || isDisabled}
-        title={isDisabled ? 'Assessment completed - editing disabled' : 'Delete feedback item'}
+        title={getDeleteTitle()}
       >
         <Trash2 className='h-4 w-4 text-destructive' />
       </Button>

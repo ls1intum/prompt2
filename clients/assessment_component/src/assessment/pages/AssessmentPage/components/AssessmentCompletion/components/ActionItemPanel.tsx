@@ -22,7 +22,7 @@ import { useCreateActionItem } from '../hooks/useCreateActionItem'
 import { useUpdateActionItem } from '../hooks/useUpdateActionItem'
 import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
 import { DeleteActionItemDialog } from './DeleteActionItemDialog'
-import { ActionItemRow } from './ActionItemRow'
+import { ItemRow } from '../../../../components/ItemRow'
 
 interface ActionItemPanelProps {
   courseParticipationID: string
@@ -193,8 +193,9 @@ export function ActionItemPanel({
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (
-            <ActionItemRow
+            <ItemRow
               key={item.id}
+              type='action'
               item={item}
               value={itemValues[item.id] || item.action}
               onTextChange={handleTextChange}
