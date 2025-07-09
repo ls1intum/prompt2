@@ -20,7 +20,7 @@ import { useCreateOrUpdateCoursePhaseConfig } from './hooks/useCreateOrUpdateCou
 import { AssessmentConfiguration } from './components/AssessmentConfiguration'
 
 export const CoursePhaseConfigSelection = () => {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
 
   const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)

@@ -54,7 +54,7 @@ export function EditCompetencyDialog({
   onOpenChange,
   competency,
 }: EditCompetencyDialogProps) {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
   const { mutate, isPending: isUpdating } = useUpdateCompetency(setError)
 
   const form = useForm<UpdateCompetencyRequest>({

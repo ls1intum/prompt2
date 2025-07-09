@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { updateCategory } from '../../../../../network/mutations/updateCategory'
 import { UpdateCategoryRequest } from '../../../../../interfaces/category'
 
-export const useUpdateCategory = (setError: (error: string | null) => void) => {
+export const useUpdateCategory = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -13,7 +13,7 @@ export const useUpdateCategory = (setError: (error: string | null) => void) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['assessments'] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

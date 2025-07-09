@@ -39,7 +39,7 @@ export const AssessmentForm = ({
   assessment,
   completed = false,
 }: AssessmentFormProps) => {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const { user } = useAuthStore()

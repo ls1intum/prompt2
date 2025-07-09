@@ -3,7 +3,7 @@ import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 export function ScoreDistributionTooltipContent(props: any) {
   if (!props.active || !props.payload || !props.payload[0]) {
-    return null
+    return undefined
   }
 
   const data = props.payload[0].payload

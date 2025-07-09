@@ -20,7 +20,7 @@ import type { CreateCompetencyRequest } from '../../../../../interfaces/competen
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
 
 export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
 
   const {
     register,

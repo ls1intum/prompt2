@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import { deleteCategory } from '../../../../../network/mutations/deleteCategory'
 
-export const useDeleteCategory = (setError: (error: string | null) => void) => {
+export const useDeleteCategory = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -12,7 +12,7 @@ export const useDeleteCategory = (setError: (error: string | null) => void) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['assessments'] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

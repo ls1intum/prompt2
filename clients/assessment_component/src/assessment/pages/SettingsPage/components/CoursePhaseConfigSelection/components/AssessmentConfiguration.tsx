@@ -24,7 +24,7 @@ interface AsssessmentConfigurationProps {
   setDeadline: (date: Date | undefined) => void
   templates: AssessmentTemplate[]
   configMutation: any
-  setError: (error: string | null) => void
+  setError: (error: string | undefined) => void
 }
 
 export const AssessmentConfiguration = ({
