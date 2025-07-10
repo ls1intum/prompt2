@@ -34,10 +34,10 @@ export const DeleteAssessmentDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reset Assessment</DialogTitle>
+          <DialogTitle>Reset Selection</DialogTitle>
           <DialogDescription>
-            Are you sure you want to reset this assessment? This action cannot be undone and you
-            will have to complete this assessment and its comment again afterward.
+            Are you sure you want to reset this selection? This action cannot be undone and you will
+            have to complete this row again afterward.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -46,7 +46,7 @@ export const DeleteAssessmentDialog = ({
           </Button>
           <Button variant='destructive' onClick={handleConfirm} disabled={isDeleting}>
             <Trash2 className='w-4 h-4 mr-2' />
-            {isDeleting ? 'Resetting...' : 'Reset Assessment'}
+            {isDeleting ? 'Resetting...' : 'Reset'}
           </Button>
         </DialogFooter>
       </DialogContent>

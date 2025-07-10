@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
-import { AssessmentCompletion } from '../../interfaces/assessment'
+import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'

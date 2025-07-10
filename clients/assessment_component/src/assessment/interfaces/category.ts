@@ -8,12 +8,7 @@ export type Category = {
   weight: number
 }
 
-export type CategoryWithCompetencies = {
-  id: string
-  name: string
-  shortName: string
-  description?: string
-  weight: number
+export type CategoryWithCompetencies = Category & {
   competencies: Competency[]
 }
 

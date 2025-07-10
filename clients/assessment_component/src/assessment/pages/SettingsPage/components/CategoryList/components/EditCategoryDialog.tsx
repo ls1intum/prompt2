@@ -52,7 +52,7 @@ export function EditCategoryDialog({
   category,
   assessmentTemplateID,
 }: EditCategoryDialogProps) {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
   const { mutate, isPending: isUpdating } = useUpdateCategory(setError)
 
   const form = useForm<UpdateCategoryRequest>({

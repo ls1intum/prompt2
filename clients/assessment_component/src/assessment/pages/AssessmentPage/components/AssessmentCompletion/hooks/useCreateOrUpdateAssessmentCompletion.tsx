@@ -2,9 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 
 import { createOrUpdateAssessmentCompletion } from '../../../../../network/mutations/createAssessmentCompletion'
-import { CreateOrUpdateAssessmentCompletionRequest } from '../../../../../interfaces/assessment'
+import { CreateOrUpdateAssessmentCompletionRequest } from '../../../../../interfaces/assessmentCompletion'
 
-export const useCreateOrUpdateAssessmentCompletion = (setError: (error: string | null) => void) => {
+export const useCreateOrUpdateAssessmentCompletion = (
+  setError: (error: string | undefined) => void,
+) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -15,7 +17,7 @@ export const useCreateOrUpdateAssessmentCompletion = (setError: (error: string |
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
       queryClient.invalidateQueries({ queryKey: ['scoreLevels', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

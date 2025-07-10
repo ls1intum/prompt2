@@ -1,5 +1,5 @@
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
-import { CreateOrUpdateAssessmentCompletionRequest } from '../../interfaces/assessment'
+import { CreateOrUpdateAssessmentCompletionRequest } from '../../interfaces/assessmentCompletion'
 
 export const updateAssessmentCompletion = async (
   coursePhaseID: string,

@@ -7,45 +7,51 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import { Competency } from '../../../../../interfaces/competency'
-import { Assessment } from '../../../../../interfaces/assessment'
+import { Competency } from '../../interfaces/competency'
+import { CompetencyScore } from '../../interfaces/competencyScore'
 
 interface CompetencyHeaderProps {
+  className: string
   competency: Competency
-  assessment?: Assessment
+  competencyScore?: CompetencyScore
   completed: boolean
   onResetClick: () => void
+  isEvaluation?: boolean
 }
 
 export const CompetencyHeader = ({
+  className,
   competency,
-  assessment,
+  competencyScore,
   completed,
   onResetClick,
+  isEvaluation = false,
 }: CompetencyHeaderProps) => {
   return (
-    <div className='lg:col-span-2 2xl:col-span-1'>
-      <div className='flex items-center justify-between mb-2'>
+    <div className={className}>
+      <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <ClipboardCheck className='h-4 w-4 text-muted-foreground flex-shrink-0' />
           <h3 className='text-base font-medium'>{competency.name}</h3>
         </div>
-        {assessment && !completed && (
+        {competencyScore && !completed && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant='ghost' size='sm' onClick={onResetClick}>
-                  <RotateCcw className='h-4 w-4' />
+                <Button variant='ghost' onClick={onResetClick}>
+                  <RotateCcw />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Reset this assessment</p>
+                <p>Reset this selection</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </div>
-      <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
+      {!isEvaluation && (
+        <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
+      )}
     </div>
   )
 }

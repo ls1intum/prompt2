@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { updateCompetency } from '../../../../../network/mutations/updateCompetency'
 import { UpdateCompetencyRequest } from '../../../../../interfaces/competency'
 
-export const useUpdateCompetency = (setError: (error: string | null) => void) => {
+export const useUpdateCompetency = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -14,7 +14,7 @@ export const useUpdateCompetency = (setError: (error: string | null) => void) =>
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       queryClient.invalidateQueries({ queryKey: ['assessments'] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

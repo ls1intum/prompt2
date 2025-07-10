@@ -17,7 +17,7 @@ import { useTeamStore } from '../../zustand/useTeamStore'
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
 import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
-import { AssessmentCompletion } from '../../interfaces/assessment'
+import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
@@ -194,9 +194,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
           restrictedDataKeys={[]}
           studentReadableDataKeys={[]}
           extraColumns={extraColumns}
-          onClickRowAction={(student) =>
-            navigate(`${path}/student-assessment/${student.courseParticipationID}`)
-          }
+          onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
           key={JSON.stringify(scoreLevels)}
         />
       </div>

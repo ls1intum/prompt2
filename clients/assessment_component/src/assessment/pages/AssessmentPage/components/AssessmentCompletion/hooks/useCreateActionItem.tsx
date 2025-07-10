@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { createActionItem } from '../../../../../network/mutations/createActionItem'
 import { CreateActionItemRequest } from '../../../../../interfaces/actionItem'
 
-export const useCreateActionItem = (setError: (error: string | null) => void) => {
+export const useCreateActionItem = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{
     phaseId: string
   }>()
@@ -15,7 +15,7 @@ export const useCreateActionItem = (setError: (error: string | null) => void) =>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['actionItems', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

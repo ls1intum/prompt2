@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom'
 import { createOrUpdateCoursePhaseConfig } from '../../../../../network/mutations/createOrUpdateCoursePhaseConfig'
 import { CreateOrUpdateCoursePhaseConfigRequest } from '../../../../../interfaces/coursePhaseConfig'
 
-export const useCreateOrUpdateCoursePhaseConfig = (setError: (error: string | null) => void) => {
+export const useCreateOrUpdateCoursePhaseConfig = (
+  setError: (error: string | undefined) => void,
+) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -13,7 +15,7 @@ export const useCreateOrUpdateCoursePhaseConfig = (setError: (error: string | nu
       createOrUpdateCoursePhaseConfig(phaseId ?? '', request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coursePhaseConfig', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

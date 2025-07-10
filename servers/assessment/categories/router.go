@@ -16,8 +16,8 @@ func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 
 	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCategories)
 	categoryRouter.GET("/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCategoriesWithCompetencies)
-	categoryRouter.GET("/self/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationCategoriesWithCompetencies)
-	categoryRouter.GET("/peer/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationCategoriesWithCompetencies)
+	categoryRouter.GET("/self/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getSelfEvaluationCategoriesWithCompetencies)
+	categoryRouter.GET("/peer/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getPeerEvaluationCategoriesWithCompetencies)
 
 	categoryRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createCategory)
 	categoryRouter.PUT("/:categoryID", authMiddleware(promptSDK.PromptAdmin), updateCategory)
