@@ -1,5 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { AlertCircle } from 'lucide-react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
 import {
   Button,
   Dialog,
@@ -19,13 +24,12 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import { useState } from 'react'
-import { AlertCircle } from 'lucide-react'
-import type { CategoryWithCompetencies, UpdateCategoryRequest } from '../../../interfaces/category'
-import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import type {
+  CategoryWithCompetencies,
+  UpdateCategoryRequest,
+} from '../../../../../interfaces/category'
+import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
 const updateCategorySchema = z.object({
   id: z.string(),
@@ -39,9 +43,15 @@ interface EditCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   category?: CategoryWithCompetencies
+  assessmentTemplateID: string
 }
 
-export function EditCategoryDialog({ open, onOpenChange, category }: EditCategoryDialogProps) {
+export function EditCategoryDialog({
+  open,
+  onOpenChange,
+  category,
+  assessmentTemplateID,
+}: EditCategoryDialogProps) {
   const [error, setError] = useState<string | null>(null)
   const { mutate, isPending: isUpdating } = useUpdateCategory(setError)
 
@@ -52,6 +62,7 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
       shortName: category?.shortName,
       description: category?.description,
       weight: category?.weight,
+      assessmentTemplateID: assessmentTemplateID,
     },
     resolver: zodResolver(updateCategorySchema),
   })
@@ -64,9 +75,10 @@ export function EditCategoryDialog({ open, onOpenChange, category }: EditCategor
         shortName: category.shortName,
         description: category.description || '',
         weight: category.weight,
+        assessmentTemplateID: assessmentTemplateID,
       })
     }
-  }, [category, form])
+  }, [category, form, assessmentTemplateID])
 
   useEffect(() => {
     if (!open || !category) return

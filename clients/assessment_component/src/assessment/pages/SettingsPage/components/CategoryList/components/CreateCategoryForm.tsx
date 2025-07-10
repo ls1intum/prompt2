@@ -1,4 +1,7 @@
 import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { AlertCircle, Plus } from 'lucide-react'
+
 import {
   Button,
   Input,
@@ -9,22 +12,25 @@ import {
   CardHeader,
   CardTitle,
 } from '@tumaet/prompt-ui-components'
-import { useState } from 'react'
-import { AlertCircle, Plus } from 'lucide-react'
-import { useCreateCategory } from '../hooks/useCreateCategory'
-import { CreateCategoryRequest } from '../../../interfaces/category'
 
-export const CreateCategoryForm = () => {
-  const [error, setError] = useState<string | null>(null)
+import { CreateCategoryRequest } from '../../../../../interfaces/category'
+
+import { useCreateCategory } from '../hooks/useCreateCategory'
+
+export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
+  const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, reset } = useForm<CreateCategoryRequest>()
   const { mutate, isPending } = useCreateCategory(setError)
 
   const onSubmit = (data: CreateCategoryRequest) => {
-    mutate(data, {
-      onSuccess: () => {
-        reset()
+    mutate(
+      { ...data, assessmentTemplateID },
+      {
+        onSuccess: () => {
+          reset()
+        },
       },
-    })
+    )
   }
 
   return (

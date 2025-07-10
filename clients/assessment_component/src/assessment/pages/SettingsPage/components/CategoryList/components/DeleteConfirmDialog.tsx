@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { AlertCircle } from 'lucide-react'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +13,7 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import { AlertCircle } from 'lucide-react'
+
 import { useDeleteCategory } from '../hooks/useDeleteCategory'
 import { useDeleteCompetency } from '../hooks/useDeleteCompetency'
 

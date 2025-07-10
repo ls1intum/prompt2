@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { deleteCompetency } from '../../../network/mutations/deleteCompetency'
+import { deleteCompetency } from '../../../../../network/mutations/deleteCompetency'
 
 export const useDeleteCompetency = (setError: (error: string | null) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()

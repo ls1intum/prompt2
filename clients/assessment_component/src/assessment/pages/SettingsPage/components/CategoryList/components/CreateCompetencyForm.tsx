@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { AlertCircle } from 'lucide-react'
+
 import {
   Button,
   Input,
@@ -12,9 +14,10 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import { AlertCircle } from 'lucide-react'
+
+import type { CreateCompetencyRequest } from '../../../../../interfaces/competency'
+
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
-import type { CreateCompetencyRequest } from '../../../interfaces/competency'
 
 export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => {
   const [error, setError] = useState<string | null>(null)
