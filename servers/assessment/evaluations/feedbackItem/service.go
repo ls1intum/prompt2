@@ -21,8 +21,8 @@ var FeedbackItemServiceSingleton *FeedbackItemService
 func GetFeedbackItem(ctx context.Context, feedbackItemID uuid.UUID) (feedbackItemDTO.FeedbackItem, error) {
 	feedbackItem, err := FeedbackItemServiceSingleton.queries.GetFeedbackItem(ctx, feedbackItemID)
 	if err != nil {
-		log.Error("could not get feedback item: ", err)
-		return feedbackItemDTO.FeedbackItem{}, errors.New("could not get feedback item")
+		log.Errorf("could not get feedback item with ID %s: %v", feedbackItemID, err)
+		return feedbackItemDTO.FeedbackItem{}, errors.New(fmt.Sprintf("could not get feedback item with ID %s", feedbackItemID))
 	}
 	return feedbackItemDTO.MapDBFeedbackItemToFeedbackItemDTO(feedbackItem), nil
 }
