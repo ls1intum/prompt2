@@ -195,3 +195,54 @@ services:
     hostname: prompt.ase.cit.tum.de
     ports:
       - "25:25"
+
+  certificate_component:
+    build:
+      context: ./clients/certificate_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-certificate-component
+    ports:
+      - "3006:80"
+    depends_on:
+      - clients-base
+
+  certificate_service:
+    build:
+      context: ./servers/certificate_service
+      dockerfile: Dockerfile
+    container_name: prompt-certificate-service
+    depends_on:
+      - db
+      - minio
+    environment:
+      - PORT=8086
+      - DB_USER=prompt-postgres
+      - DB_PASSWORD=prompt-postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=prompt
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=prompt-minio
+      - MINIO_SECRET_KEY=prompt-minio
+      - MINIO_BUCKET_NAME=certificates
+      - MINIO_TEMPLATE_BUCKET_NAME=certificate-templates
+    ports:
+      - "8086:8086"
+
+  minio:
+    image: minio/minio
+    container_name: prompt-minio
+    command: server /data
+    environment:
+      - MINIO_ROOT_USER=prompt-minio
+      - MINIO_ROOT_PASSWORD=prompt-minio
+    volumes:
+      - ./minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
