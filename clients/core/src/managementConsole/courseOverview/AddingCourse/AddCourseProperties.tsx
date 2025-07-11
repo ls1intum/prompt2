@@ -39,7 +39,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
       name: initialValues?.name || '',
       dateRange: initialValues?.dateRange,
       courseType: initialValues?.courseType || '',
-      ects: initialValues?.ects || undefined,
+      ects: initialValues?.ects ?? undefined,
       semesterTag: initialValues?.semesterTag || '',
     },
   })
