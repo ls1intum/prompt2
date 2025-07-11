@@ -1,3 +1,6 @@
+import { useParams } from 'react-router-dom'
+
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -9,6 +12,12 @@ import { CategoryEvaluation } from './components/CategoryEvaluation'
 import { EvaluationCompletionPage } from './components/EvaluationCompletionPage/EvaluationCompletionPage'
 
 export const SelfEvaluationPage = () => {
+  const { courseId } = useParams<{
+    courseId: string
+  }>()
+  const { isStudentOfCourse } = useCourseStore()
+  const isStudent = isStudentOfCourse(courseId ?? '')
+
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { myParticipation } = useMyParticipationStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
@@ -29,7 +38,7 @@ export const SelfEvaluationPage = () => {
           courseParticipationID={myParticipation?.courseParticipationID ?? ''}
           category={category}
           evaluations={evaluations}
-          completed={completion?.completed ?? false}
+          completed={(completion?.completed ?? false) || !isStudent}
         />
       ))}
 
@@ -37,7 +46,7 @@ export const SelfEvaluationPage = () => {
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
         courseParticipationID={myParticipation?.courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
-        completed={completion?.completed ?? false}
+        completed={(completion?.completed ?? false) || !isStudent}
         completedAt={completion?.completedAt ? new Date(completion.completedAt) : undefined}
       />
     </div>

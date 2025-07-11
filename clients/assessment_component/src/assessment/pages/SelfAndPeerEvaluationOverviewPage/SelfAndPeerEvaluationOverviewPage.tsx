@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { Users, User } from 'lucide-react'
 
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ManagementPageHeader, Badge, Card } from '@tumaet/prompt-ui-components'
 
 import { useEvaluationStore } from '../../zustand/useEvaluationStore'
@@ -17,6 +18,10 @@ import { SelfEvaluationStatusCard } from './components/SelfEvaluationStatusCard'
 import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 
 export const SelfAndPeerEvaluationOverviewPage = () => {
+  const { isStudentOfCourse } = useCourseStore()
+  const { courseId } = useParams<{ courseId: string }>()
+  const isStudent = isStudentOfCourse(courseId ?? '')
+
   const path = useLocation().pathname
   const { selfEvaluations, peerEvaluations, selfEvaluationCompletion, peerEvaluationCompletions } =
     useEvaluationStore()
@@ -28,7 +33,8 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
 
   const team = teams.find((t) =>
     t.members.some(
-      (member) => member.courseParticipationID === myParticipation?.courseParticipationID,
+      (member) =>
+        member.courseParticipationID === myParticipation?.courseParticipationID || !isStudent,
     ),
   )
 

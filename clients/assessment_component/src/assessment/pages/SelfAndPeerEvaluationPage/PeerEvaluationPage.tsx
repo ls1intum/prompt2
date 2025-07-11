@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -14,7 +15,12 @@ import { CategoryEvaluation } from './components/CategoryEvaluation'
 import { EvaluationCompletionPage } from './components/EvaluationCompletionPage/EvaluationCompletionPage'
 
 export const PeerEvaluationPage = () => {
-  const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
+  const { courseId, courseParticipationID } = useParams<{
+    courseId: string
+    courseParticipationID: string
+  }>()
+  const { isStudentOfCourse } = useCourseStore()
+  const isStudent = isStudentOfCourse(courseId ?? '')
 
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { myParticipation } = useMyParticipationStore()
@@ -55,7 +61,7 @@ export const PeerEvaluationPage = () => {
           evaluations={evaluations.filter(
             (evaluation) => evaluation.courseParticipationID === courseParticipationID,
           )}
-          completed={completion?.completed ?? false}
+          completed={(completion?.completed ?? false) || !isStudent}
         />
       ))}
 
@@ -63,7 +69,7 @@ export const PeerEvaluationPage = () => {
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
         courseParticipationID={courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
-        completed={completion?.completed ?? false}
+        completed={(completion?.completed ?? false) || !isStudent}
         completedAt={completion?.completedAt ? new Date(completion.completedAt) : undefined}
       />
     </div>
