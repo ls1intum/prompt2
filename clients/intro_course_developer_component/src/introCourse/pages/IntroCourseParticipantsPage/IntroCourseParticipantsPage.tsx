@@ -6,7 +6,7 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
-export const CoursePhaseParticipantsPage = (): JSX.Element => {
+export const IntroCourseParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
