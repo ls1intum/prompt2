@@ -39,7 +39,7 @@ import { ApplicationManualAddingDialog } from './components/ApplicationManualAdd
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 import { useDeleteApplications } from './hooks/useDeleteApplications'
 
-export const ApplicationsAssessment = (): JSX.Element => {
+export const ApplicationParticipantsPage = (): JSX.Element => {
   const { additionalScores, participations } = useApplicationStore()
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'passStatus', desc: false },
@@ -134,7 +134,7 @@ export const ApplicationsAssessment = (): JSX.Element => {
 
   return (
     <div id='table-view' className='relative flex flex-col'>
-      <ManagementPageHeader>Applications Overview</ManagementPageHeader>
+      <ManagementPageHeader>Application Participants</ManagementPageHeader>
       <div className='space-y-4'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
           <div className='relative flex-grow max-w-md w-full'>

@@ -19,8 +19,8 @@ export const ApplicationSidebar = ({
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     subitems: [
       {
-        title: 'Applications',
-        goToPath: '/applications',
+        title: 'Participants',
+        goToPath: '/participants',
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
       },
       {
