@@ -72,6 +72,33 @@ func (h *AssessmentCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.
 		}
 	}
 
+	// Copy competencies
+	competencies, err := qtx.ListCompetencies(ctx)
+	if err != nil {
+		log.Error("could not list competencies: ", err)
+		return fmt.Errorf("failed to list competencies: %w", err)
+	}
+
+	for _, competency := range competencies {
+		err = qtx.CreateCompetency(ctx, db.CreateCompetencyParams{
+			ID:                  competency.ID,
+			CategoryID:          competency.CategoryID,
+			Name:                competency.Name,
+			ShortName:           competency.ShortName,
+			Description:         competency.Description,
+			DescriptionVeryBad:  competency.DescriptionVeryBad,
+			DescriptionBad:      competency.DescriptionBad,
+			DescriptionOk:       competency.DescriptionOk,
+			DescriptionGood:     competency.DescriptionGood,
+			DescriptionVeryGood: competency.DescriptionVeryGood,
+			Weight:              competency.Weight,
+		})
+		if err != nil {
+			log.Error("could not create competency: ", err)
+			return fmt.Errorf("failed to create competency: %w", err)
+		}
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit phase copy: ", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
