@@ -132,6 +132,22 @@ func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.
 		}
 	}
 
+	// Check if there are remaining evaluations before marking as completed
+	remainingEvaluations, err := EvaluationCompletionServiceSingleton.queries.CountRemainingEvaluationsForStudent(ctx, db.CountRemainingEvaluationsForStudentParams{
+		Column1:       req.CourseParticipationID,
+		Column2:       req.AuthorCourseParticipationID,
+		CoursePhaseID: req.CoursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check remaining evaluations: ", err)
+		return errors.New("could not check remaining evaluations")
+	}
+
+	if remainingEvaluations > 0 {
+		log.Warnf("cannot mark evaluation as completed: %d evaluations still remaining", remainingEvaluations)
+		return fmt.Errorf("cannot mark evaluation as completed: %d evaluations still remaining", remainingEvaluations)
+	}
+
 	tx, err := EvaluationCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
