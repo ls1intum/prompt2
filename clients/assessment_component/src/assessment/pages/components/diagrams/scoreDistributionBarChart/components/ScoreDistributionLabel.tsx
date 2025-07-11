@@ -10,7 +10,7 @@ interface ScoreDistributionLabelProps {
 
 export const ScoreDistributionLabel = (props: ScoreDistributionLabelProps) => {
   const { x = 0, y = 0, width = 0, height = 0, value = 0 } = props
-  if (value === 0) return null
+  if (value === 0) return undefined
   const scale = height / (Object.keys(ScoreLevel).length - 1)
   const averageY = y + height - (value - 1) * scale
   return (

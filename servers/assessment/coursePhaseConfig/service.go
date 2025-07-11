@@ -60,6 +60,36 @@ func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.Cour
 	return config, nil
 }
 
+func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentTemplateID:   req.AssessmentTemplateID,
+		CoursePhaseID:          coursePhaseID,
+		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
+		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
+		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
+		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
+		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
+		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to create or update course phase config")
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
 func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
 	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -122,6 +152,17 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 	return coursePhaseConfigDTO.GetAssessmentStudentsFromParticipations(participations), nil
 }
 
+func GetParticipationForStudent(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
+	coreURL := utils.GetCoreUrl()
+	participation, err := promptSDK.FetchAndMergeCourseParticipationWithResolution(coreURL, authHeader, coursePhaseID, courseParticipationID)
+	if err != nil {
+		log.Error("could not fetch course phase participation with student: ", err)
+		return coursePhaseConfigDTO.AssessmentParticipationWithStudent{}, errors.New("could not fetch course phase participation with student")
+	}
+
+	return coursePhaseConfigDTO.GetAssessmentStudentFromParticipation(participation), nil
+}
+
 func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
 	coreURL := utils.GetCoreUrl()
 	cpWithResoultion, err := promptSDK.FetchAndMergeCoursePhaseWithResolution(coreURL, authHeader, coursePhaseID)
@@ -129,7 +170,6 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 		log.Error("could not fetch course phase with resolution: ", err)
 		return nil, errors.New("could not fetch course phase with resolution")
 	}
-	log.Infof("Fetched course phase with resolution: %+v", cpWithResoultion)
 
 	teams := make([]coursePhaseConfigDTO.Team, 0)
 	teamsRaw, teamsExists := cpWithResoultion["teams"]
@@ -177,42 +217,67 @@ func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseI
 			log.Warnf("Skipping team at index %d: 'name' field is not a string", i)
 			continue
 		}
+
+		// Extract team members
+		members := make([]coursePhaseConfigDTO.TeamMember, 0)
+		membersRaw, membersExists := teamMap["members"]
+		if membersExists {
+			membersSlice, isMembersSlice := membersRaw.([]interface{})
+			if isMembersSlice {
+				for j, memberData := range membersSlice {
+					memberMap, isMemberMap := memberData.(map[string]interface{})
+					if !isMemberMap {
+						log.Warnf("Skipping member at index %d for team %s: not a valid map", j, teamName)
+						continue
+					}
+
+					// Extract course participation ID
+					cpIDRaw, cpIDExists := memberMap["courseParticipationID"]
+					if !cpIDExists {
+						log.Warnf("Skipping member at index %d for team %s: missing 'courseParticipationID' field", j, teamName)
+						continue
+					}
+					cpIDStr, isCPIDString := cpIDRaw.(string)
+					if !isCPIDString {
+						log.Warnf("Skipping member at index %d for team %s: 'courseParticipationID' field is not a string", j, teamName)
+						continue
+					}
+					cpID, err := uuid.Parse(cpIDStr)
+					if err != nil {
+						log.Warnf("Skipping member at index %d for team %s: invalid UUID format for 'courseParticipationID': %v", j, teamName, err)
+						continue
+					}
+
+					// Extract student name
+					studentNameRaw, studentNameExists := memberMap["studentName"]
+					if !studentNameExists {
+						log.Warnf("Skipping member at index %d for team %s: missing 'studentName' field", j, teamName)
+						continue
+					}
+					studentName, isStudentNameString := studentNameRaw.(string)
+					if !isStudentNameString {
+						log.Warnf("Skipping member at index %d for team %s: 'studentName' field is not a string", j, teamName)
+						continue
+					}
+
+					member := coursePhaseConfigDTO.TeamMember{
+						CourseParticipationID: cpID,
+						StudentName:           studentName,
+					}
+					members = append(members, member)
+				}
+			} else {
+				log.Warnf("Team %s: 'members' field is not a slice", teamName)
+			}
+		}
+
 		team := coursePhaseConfigDTO.Team{
-			ID:   teamID,
-			Name: teamName,
+			ID:      teamID,
+			Name:    teamName,
+			Members: members,
 		}
 		teams = append(teams, team)
 	}
 
 	return teams, nil
-}
-
-func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
-	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
-
-	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentTemplateID:   req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
-		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
-		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
-		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
-		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
-		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
-		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
-	}
-
-	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
-	if err != nil {
-		log.WithError(err).Error("Failed to create or update course phase config")
-		return err
-	}
-
-	return tx.Commit(ctx)
 }

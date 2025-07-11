@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { updateAssessment } from '../../../../../network/mutations/createOrUpdateAssessment'
 import { CreateOrUpdateAssessmentRequest } from '../../../../../interfaces/assessment'
 
-export const useUpdateAssessment = (setError: (error: string | null) => void) => {
+export const useUpdateAssessment = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -16,7 +16,7 @@ export const useUpdateAssessment = (setError: (error: string | null) => void) =>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessments', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

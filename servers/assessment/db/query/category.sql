@@ -1,9 +1,6 @@
 -- name: CreateCategory :exec
 INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
-VALUES ($1, $2, $3, $4, $5,
-        (SELECT assessment_template_id
-         FROM course_phase_config
-         WHERE course_phase_id = $6));
+VALUES ($1, $2, $3, $4, $5, $6);
 
 -- name: GetCategory :one
 SELECT *
@@ -21,9 +18,7 @@ SET name                   = $2,
     short_name             = $3,
     description            = $4,
     weight                 = $5,
-    assessment_template_id = (SELECT assessment_template_id
-                              FROM course_phase_config
-                              WHERE course_phase_id = $6)
+    assessment_template_id = $6
 WHERE id = $1;
 
 -- name: DeleteCategory :exec
@@ -70,7 +65,6 @@ SELECT c.id,
        )::json AS competencies
 FROM category c
          LEFT JOIN competency cmp ON c.id = cmp.category_id
-         INNER JOIN category_course_phase ccp ON c.id = ccp.category_id
-WHERE ccp.course_phase_id = $1
+WHERE c.assessment_template_id = $1
 GROUP BY c.id, c.name, c.short_name, c.description, c.weight
 ORDER BY c.name ASC;
