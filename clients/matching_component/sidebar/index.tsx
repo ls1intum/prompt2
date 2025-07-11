@@ -3,7 +3,7 @@ import { SidebarMenuItemProps } from '@/interfaces/sidebar'
 import { Role } from '@tumaet/prompt-shared-state'
 
 const sidebarItems: SidebarMenuItemProps = {
-  title: 'TemplateComponent',
+  title: 'Matching',
   icon: <Puzzle />,
   requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   goToPath: '',
