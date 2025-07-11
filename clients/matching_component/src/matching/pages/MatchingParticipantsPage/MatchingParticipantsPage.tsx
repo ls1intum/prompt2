@@ -6,7 +6,7 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
-export const ParticipantsTablePage = (): JSX.Element => {
+export const MatchingParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
