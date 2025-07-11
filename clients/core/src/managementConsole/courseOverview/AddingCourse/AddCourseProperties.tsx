@@ -39,7 +39,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
       name: initialValues?.name || '',
       dateRange: initialValues?.dateRange,
       courseType: initialValues?.courseType || '',
-      ects: initialValues?.ects || 0,
+      ects: initialValues?.ects || undefined,
       semesterTag: initialValues?.semesterTag || '',
     },
   })
@@ -131,7 +131,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
                       const value = e.target.value
                       field.onChange(value === '' ? '' : Number(value))
                     }}
-                    value={field.value === 0 && !isEctsDisabled ? '' : field.value}
+                    value={field.value ?? ''}
                     disabled={isEctsDisabled}
                     className='w-full'
                   />
