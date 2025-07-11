@@ -10,7 +10,7 @@ import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
-export const AllocationParticipants = (): JSX.Element => {
+export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -89,7 +89,7 @@ export const AllocationParticipants = (): JSX.Element => {
 
   return (
     <div id='table-view' className='relative flex flex-col'>
-      <ManagementPageHeader>Team Allocation Participants</ManagementPageHeader>
+      <ManagementPageHeader>Self Team Allocation Participants</ManagementPageHeader>
       <p className='text-sm text-muted-foreground mb-4'>
         This table shows all participants and their allocated teams.
       </p>
