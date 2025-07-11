@@ -44,8 +44,8 @@ import { columns as baseColumns } from './components/columns'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
-
 import type { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
+import { GroupAction } from './interfaces/GroupAction'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
@@ -54,6 +54,7 @@ interface CoursePhaseParticipationsTablePageProps {
   studentReadableDataKeys: string[]
   extraColumns?: ExtraParticipationTableColumn[]
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
+  customActions?: GroupAction[]
 }
 
 export const CoursePhaseParticipationsTablePage = ({
@@ -63,6 +64,7 @@ export const CoursePhaseParticipationsTablePage = ({
   studentReadableDataKeys = [],
   extraColumns,
   onClickRowAction,
+  customActions = [],
 }: Partial<CoursePhaseParticipationsTablePageProps>): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -175,10 +177,11 @@ export const CoursePhaseParticipationsTablePage = ({
                   prevDataKeys,
                   restrictedDataKeys,
                   studentReadableDataKeys,
-                  extraColumns ?? [],
+                  extraColumns,
                 )
                 table.resetRowSelection()
               }}
+              customActions={customActions}
             />
           </div>
         </div>
