@@ -81,8 +81,6 @@ export const GroupActionsMenu = ({
             Set Failed
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
-
           {/* Custom actions */}
           {customActions?.map((action, idx) => (
             <DropdownMenuItem
