@@ -39,7 +39,7 @@ import { ApplicationManualAddingDialog } from './components/ApplicationManualAdd
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 import { useDeleteApplications } from './hooks/useDeleteApplications'
 
-export const ApplicationsAssessment = (): JSX.Element => {
+export const ApplicationParticipantsPage = (): JSX.Element => {
   const { additionalScores, participations } = useApplicationStore()
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'passStatus', desc: false },
