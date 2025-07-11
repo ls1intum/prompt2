@@ -21,7 +21,7 @@ export const ParticipantsTablePage = (): JSX.Element => {
 
   return (
     <div>
-      <ManagementPageHeader>Course Phase Participants</ManagementPageHeader>
+      <ManagementPageHeader>Matching Participants</ManagementPageHeader>
       {isParticipationsError ? (
         <ErrorPage onRetry={refetchCoursePhaseParticipations} />
       ) : isCoursePhaseParticipationsPending ? (
