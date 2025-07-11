@@ -6,7 +6,7 @@ import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SeatAssignmentPage } from '../src/introCourse/pages/SeatAssignment/SeatAssignmentPage'
 import { MailingPage } from '../src/introCourse/pages/Mailing/MailingPage'
-import { CoursePhaseParticipantsPage } from '../src/introCourse/pages/CoursePhaseParticipants/CoursePhaseParticipantsPage'
+import { IntroCourseParticipantsPage } from '../src/introCourse/pages/IntroCourseParticipantsPage/IntroCourseParticipantsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
@@ -20,7 +20,7 @@ const routes: ExtendedRouteObject[] = [
   },
   {
     path: '/participants',
-    element: <CoursePhaseParticipantsPage />,
+    element: <IntroCourseParticipantsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
