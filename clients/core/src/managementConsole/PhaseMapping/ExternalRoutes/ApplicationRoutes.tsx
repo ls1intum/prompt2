@@ -27,7 +27,7 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
-    path: '/applications',
+    path: '/participants',
     element: (
       <ApplicationDataWrapper>
         <ApplicationsAssessment />
