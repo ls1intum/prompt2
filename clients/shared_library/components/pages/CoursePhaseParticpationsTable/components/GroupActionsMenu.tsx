@@ -10,6 +10,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { MoreHorizontal, FileDown, CheckCircle, XCircle } from 'lucide-react'
 import { ActionDialog } from '@/components/table/GroupActionDialog'
+import { GroupAction } from '../interfaces/GroupAction'
 import { RowModel } from '@tanstack/react-table'
 import { CoursePhaseParticipationWithStudent, PassStatus } from '@tumaet/prompt-shared-state'
 import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
@@ -21,6 +22,7 @@ interface GroupActionsMenuProps {
   onClose: () => void
   onExport: () => void
   disabled?: boolean
+  customActions?: GroupAction[]
 }
 
 export const GroupActionsMenu = ({
@@ -28,13 +30,22 @@ export const GroupActionsMenu = ({
   onClose,
   onExport,
   disabled = false,
+  customActions = [],
 }: GroupActionsMenuProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
+
   const [isOpen, setIsOpen] = useState(false)
+
   const [dialogState, setDialogState] = useState<{
     type: 'setPassed' | 'setFailed' | null
     isOpen: boolean
   }>({ type: null, isOpen: false })
+
+  const [customDialog, setCustomDialog] = useState<{
+    isOpen: boolean
+    action: GroupAction | null
+    ids: string[]
+  }>({ isOpen: false, action: null, ids: [] })
 
   const openDialog = (type: 'setPassed' | 'setFailed') => {
     setIsOpen(false)
@@ -60,6 +71,7 @@ export const GroupActionsMenu = ({
           <DropdownMenuLabel>Group Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
+          {/* Default actions */}
           <DropdownMenuItem onClick={() => openDialog('setPassed')}>
             <CheckCircle className='mr-2 h-4 w-4' />
             Set Passed
@@ -68,6 +80,26 @@ export const GroupActionsMenu = ({
             <XCircle className='mr-2 h-4 w-4' />
             Set Failed
           </DropdownMenuItem>
+
+          {/* Custom actions */}
+          {customActions?.map((action, idx) => (
+            <DropdownMenuItem
+              key={idx}
+              onClick={() => {
+                const ids = selectedRows.rows.map((r) => r.original.courseParticipationID)
+                if (action.confirm) {
+                  setCustomDialog({ isOpen: true, action, ids })
+                } else {
+                  action.onAction(ids)
+                  onClose()
+                }
+              }}
+            >
+              {action.icon && <span className='mr-2'>{action.icon}</span>}
+              {action.label}
+            </DropdownMenuItem>
+          ))}
+
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onExport}>
             <FileDown className='mr-2 h-4 w-4' />
@@ -120,6 +152,24 @@ export const GroupActionsMenu = ({
             mutateUpdateCoursePhaseParticipations(mutations)
             onClose()
           }}
+        />
+      )}
+
+      {customDialog.isOpen && customDialog.action && (
+        <ActionDialog
+          isOpen={customDialog.isOpen}
+          onClose={() => setCustomDialog({ isOpen: false, action: null, ids: [] })}
+          onConfirm={() => {
+            customDialog.action?.onAction(customDialog.ids)
+            setCustomDialog({ isOpen: false, action: null, ids: [] })
+            onClose()
+          }}
+          title={customDialog.action.confirm?.title ?? 'Confirm Action'}
+          description={
+            customDialog.action.confirm?.description ??
+            'Are you sure you want to perform this action?'
+          }
+          confirmLabel={customDialog.action.confirm?.confirmLabel ?? 'Confirm'}
         />
       )}
     </>
