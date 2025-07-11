@@ -103,7 +103,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		}
 
 		baseURL := oldPhaseType.BaseUrl
-		if baseURL == promptSDK.GetEnv("CORE_HOST", "core") {
+		if baseURL == promptSDK.GetEnv("SERVER_CORE_HOST", "core") {
 			continue
 		}
 
