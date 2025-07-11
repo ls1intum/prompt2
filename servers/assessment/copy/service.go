@@ -59,12 +59,12 @@ func (h *AssessmentCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.
 
 	for _, category := range categories {
 		err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-			ID:            category.ID,
-			Name:          category.Name,
-			ShortName:     category.ShortName,
-			Description:   category.Description,
-			Weight:        category.Weight,
-			CoursePhaseID: req.TargetCoursePhaseID,
+			ID:                   category.ID,
+			Name:                 category.Name,
+			ShortName:            category.ShortName,
+			Description:          category.Description,
+			Weight:               category.Weight,
+			AssessmentTemplateID: category.AssessmentTemplateID,
 		})
 		if err != nil {
 			log.Error("could not create category: ", err)
