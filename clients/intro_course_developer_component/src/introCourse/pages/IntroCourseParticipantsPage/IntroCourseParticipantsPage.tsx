@@ -29,7 +29,7 @@ export const IntroCourseParticipantsPage = (): JSX.Element => {
         </div>
       ) : (
         <>
-          <ManagementPageHeader>Course Phase Participants</ManagementPageHeader>
+          <ManagementPageHeader>Intro Course Participants</ManagementPageHeader>
           <CoursePhaseParticipationsTablePage
             participants={coursePhaseParticipations?.participations ?? []}
             prevDataKeys={[]}
