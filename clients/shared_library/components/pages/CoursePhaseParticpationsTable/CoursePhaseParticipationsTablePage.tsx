@@ -28,7 +28,6 @@ import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 import type { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
 import type { GroupAction } from './interfaces/GroupAction'
-import type { JSX } from 'react/jsx-runtime' // Declare JSX variable
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
