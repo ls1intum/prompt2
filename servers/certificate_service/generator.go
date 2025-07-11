@@ -17,15 +17,15 @@ import (
 )
 
 type CertificateData struct {
-	StudentID    string `json:"studentId"`
-	StudentName  string `json:"studentName"`
-	TeamName     string `json:"teamName"`
-	CourseName   string `json:"courseName"`
+	StudentID   string `json:"studentId"`
+	StudentName string `json:"studentName"`
+	TeamName    string `json:"teamName"`
+	CourseName  string `json:"courseName"`
 }
 
 func (s *Server) generateCertificatesAsync(courseID string) {
 	ctx := context.Background()
-	
+
 	// Get template from MinIO
 	templateObj, err := s.minioClient.GetObject(ctx,
 		os.Getenv("MINIO_TEMPLATE_BUCKET_NAME"),
@@ -106,7 +106,7 @@ func (s *Server) generateStudentCertificate(ctx context.Context, tempDir, templa
 	// Generate PDF using typst
 	outputPath := filepath.Join(tempDir, fmt.Sprintf("%s.pdf", student.StudentID))
 	cmd := exec.Command("typst", "compile", "--input", fmt.Sprintf("vars=%s", varsPath), templatePath, outputPath)
-	
+
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("typst compilation failed: %w, output: %s", err, out)
 	}

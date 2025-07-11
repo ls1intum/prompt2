@@ -62,12 +62,14 @@ KEYCLOAK_CLIENT_ID=prompt-client
 ### Database Setup
 
 1. Run migrations:
+
 ```bash
 cd servers/certificate_service
 migrate -path ./db/migration -database "postgres://prompt-postgres:prompt-postgres@localhost:5432/prompt?sslmode=disable" up
 ```
 
 2. Generate sqlc code:
+
 ```bash
 sqlc generate
 ```
@@ -112,10 +114,12 @@ docker-compose up -d minio certificate-service
 ## API Endpoints
 
 ### Student Endpoints
+
 - `GET /api/certificate/status?courseId={id}` - Get certificate availability status
 - `GET /api/certificate/download?studentId={id}` - Download certificate
 
 ### Instructor Endpoints (requires lecturer role)
+
 - `GET /api/certificate/students?courseId={id}` - List students and certificate status
 - `POST /api/certificate/generate?courseId={id}` - Generate certificates for all students
 - `POST /api/certificate/template?courseId={id}` - Upload certificate template
@@ -131,6 +135,7 @@ Certificate templates use the Typst format. The template should include variable
 - `date` - Certificate generation date
 
 Example template:
+
 ```typst
 #let vars = json("vars.json")
 

@@ -17,11 +17,11 @@ import (
 )
 
 type StudentResponse struct {
-	ID                 string     `json:"id"`
-	Name               string     `json:"name"`
-	Team               string     `json:"team"`
+	ID                   string     `json:"id"`
+	Name                 string     `json:"name"`
+	Team                 string     `json:"team"`
 	CertificateGenerated bool       `json:"certificateGenerated"`
-	LastDownload       *time.Time `json:"lastDownload"`
+	LastDownload         *time.Time `json:"lastDownload"`
 }
 
 // GetCertificateStatus handles the certificate status endpoint for students
@@ -54,7 +54,7 @@ func (s *Server) GetCertificateStatus(c *gin.Context) {
 		StudentID: studentID,
 		CourseID:  courseID,
 	})
-	
+
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"available":    false,
@@ -168,7 +168,7 @@ func (s *Server) ListStudents(c *gin.Context) {
 		students = append(students, StudentResponse{
 			ID:                   cert.StudentID.String(),
 			Name:                 "Student " + cert.StudentID.String()[:8], // Placeholder name since we don't have student data
-			Team:                 "Unknown", // Placeholder team since we don't have team data
+			Team:                 "Unknown",                                // Placeholder team since we don't have team data
 			CertificateGenerated: cert.GeneratedAt.Valid,
 			LastDownload:         lastDownload,
 		})

@@ -1,7 +1,9 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import path from 'path';
+import webpack from 'webpack';
+import { container } from 'webpack';
 
-module.exports = {
+const config: webpack.Configuration = {
     entry: './src/index',
     mode: 'development',
     output: {
@@ -27,7 +29,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './public/index.html',
         }),
-        new ModuleFederationPlugin({
+        new container.ModuleFederationPlugin({
             name: 'certificate',
             filename: 'remoteEntry.js',
             exposes: {
@@ -41,12 +43,11 @@ module.exports = {
     ],
     devServer: {
         static: {
-            directory: './dist',
+            directory: path.join(__dirname, 'dist'),
         },
         port: 3006,
         historyApiFallback: true,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-        },
     },
 };
+
+export default config;
