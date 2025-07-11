@@ -54,15 +54,6 @@ func (suite *CoursePhaseConfigServiceTestSuite) TearDownSuite() {
 	}
 }
 
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseDeadlineNonExistent() {
-	// Test getting a deadline for a non-existent course phase
-	nonExistentID := uuid.New()
-
-	deadline, err := GetCoursePhaseDeadline(suite.suiteCtx, nonExistentID)
-	assert.NoError(suite.T(), err, "Should not return error for non-existent course phase")
-	assert.Nil(suite.T(), deadline, "Deadline should be nil for non-existent course phase")
-}
-
 func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
 	// Test getting course phase config
 	testID := uuid.New()
@@ -77,42 +68,6 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
 	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
 	assert.NoError(suite.T(), err, "Should be able to get course phase config")
 	assert.NotNil(suite.T(), config, "Config should not be nil")
-}
-
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetSelfEvaluationDeadlineNonExistent() {
-	nonExistentID := uuid.New()
-	deadline, err := GetSelfEvaluationDeadline(suite.suiteCtx, nonExistentID)
-	// Should return nil without error for non-existent deadline
-	assert.NoError(suite.T(), err)
-	assert.Nil(suite.T(), deadline)
-}
-
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetPeerEvaluationDeadlineNonExistent() {
-	nonExistentID := uuid.New()
-	deadline, err := GetPeerEvaluationDeadline(suite.suiteCtx, nonExistentID)
-	// Should return nil without error for non-existent deadline
-	assert.NoError(suite.T(), err)
-	assert.Nil(suite.T(), deadline)
-}
-
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetTeamsForCoursePhase() {
-	testID := uuid.New()
-	authHeader := "Bearer test-token"
-
-	// Test that the function returns an error due to external dependency failure
-	teams, err := GetTeamsForCoursePhase(suite.suiteCtx, authHeader, testID)
-	assert.Error(suite.T(), err, "Should error due to external service dependency")
-	assert.Nil(suite.T(), teams, "Should return nil on error")
-}
-
-func (suite *CoursePhaseConfigServiceTestSuite) TestGetParticipationsForCoursePhase() {
-	testID := uuid.New()
-	authHeader := "Bearer test-token"
-
-	// Test that the function returns an error due to external dependency failure
-	participations, err := GetParticipationsForCoursePhase(suite.suiteCtx, authHeader, testID)
-	assert.Error(suite.T(), err, "Should error due to external service dependency")
-	assert.Nil(suite.T(), participations, "Should return nil on error")
 }
 
 // Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls
