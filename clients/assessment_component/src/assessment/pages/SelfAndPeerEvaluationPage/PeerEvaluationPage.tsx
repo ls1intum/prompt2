@@ -26,7 +26,7 @@ export const PeerEvaluationPage = () => {
     <div className='flex flex-col gap-4'>
       <ManagementPageHeader>Peer Evaluation</ManagementPageHeader>
 
-      <p className='text-sm text-gray-600'>
+      <p className='text-sm text-gray-600 dark:text-gray-400'>
         Please fill out the Peer evaluation below to assess the performance and contributions of
         your team members.
       </p>

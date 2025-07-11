@@ -19,7 +19,7 @@ export const SelfEvaluationPage = () => {
     <div className='flex flex-col gap-4'>
       <ManagementPageHeader>Self Evaluation</ManagementPageHeader>
 
-      <p className='text-sm text-gray-600'>
+      <p className='text-sm text-gray-600 dark:text-gray-400'>
         Please fill out the self-evaluation below to reflect on your performance and contributions.
       </p>
 
