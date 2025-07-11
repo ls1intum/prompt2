@@ -11,23 +11,23 @@ import {
 import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { SearchIcon, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import {
-  type ColumnDef,
-  type ColumnFiltersState,
+  ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
-  type SortingState,
+  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
-import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { columns as baseColumns } from './components/columns'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
-import type { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
-import type { GroupAction } from './interfaces/GroupAction'
+import { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
+import { GroupAction } from './interfaces/GroupAction'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
