@@ -6,7 +6,7 @@ import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { SeatAssignmentPage } from '../src/introCourse/pages/SeatAssignment/SeatAssignmentPage'
 import { MailingPage } from '../src/introCourse/pages/Mailing/MailingPage'
-import { CoursePhaseParticipantsPage } from '../src/introCourse/pages/CoursePhaseParticipantsPage/CoursePhaseParticipantsPage'
+import { CoursePhaseParticipantsPage } from '../src/introCourse/pages/CoursePhaseParticipants/CoursePhaseParticipantsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
