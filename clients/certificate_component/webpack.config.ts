@@ -45,7 +45,7 @@ const config: webpack.Configuration = {
         static: {
             directory: path.join(__dirname, 'dist'),
         },
-        port: 3006,
+        port: 3010,
         historyApiFallback: true,
     },
 };

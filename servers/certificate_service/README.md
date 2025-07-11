@@ -177,9 +177,28 @@ The service is containerized and can be deployed using the provided Dockerfile. 
 
 ## Limitations
 
-- Currently uses mock student data for certificate generation
-- Student/team information needs to be fetched from the core service API
+- **Mock Data**: Currently uses mock student data for certificate generation due to async operation token handling complexity
+- **Token Management**: Real data integration requires service account tokens for API calls during async certificate generation
 - Templates are stored per course but not versioned
+
+### Enabling Real Data Integration
+
+To enable real student data integration from the core API:
+
+1. **Service Account Setup**: Configure a service account in Keycloak with appropriate permissions to read student and course data
+
+2. **Token Configuration**: Add service account credentials to environment variables:
+
+   ```bash
+   SERVICE_ACCOUNT_CLIENT_ID=certificate-service
+   SERVICE_ACCOUNT_CLIENT_SECRET=your-secret
+   ```
+
+3. **Update Core API Client**: Modify `core_api.go` to use service account tokens instead of user tokens
+
+4. **Replace Mock Data**: In `generator.go`, replace the call to `getMockStudentData()` with a call to the core API
+
+The infrastructure for real data integration is already in place in `core_api.go`. The main challenge is handling authentication for async operations where user tokens are not available.
 
 ## Future Improvements
 

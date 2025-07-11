@@ -17,8 +17,9 @@ import (
 )
 
 type Server struct {
-	minioClient *minio.Client
-	queries     *db.Queries
+	minioClient   *minio.Client
+	queries       *db.Queries
+	coreAPIClient *CoreAPIClient
 }
 
 func getDatabaseURL() string {
@@ -92,8 +93,9 @@ func main() {
 	r.Use(keycloakTokenVerifier.AuthenticationMiddleware())
 
 	server := &Server{
-		minioClient: minioClient,
-		queries:     queries,
+		minioClient:   minioClient,
+		queries:       queries,
+		coreAPIClient: NewCoreAPIClient(),
 	}
 
 	// Routes

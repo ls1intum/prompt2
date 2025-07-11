@@ -59,9 +59,28 @@ func (s *Server) generateCertificatesAsync(courseID string) {
 	}
 	templateFile.Close()
 
+	// Get student data from core API
+	_, err = uuid.Parse(courseID)
+	if err != nil {
+		fmt.Printf("Invalid course ID format: %v\n", err)
+		// Fall back to mock data for development
+		students := s.getMockStudentData(courseID)
+		s.generateCertificatesForStudents(ctx, tempDir, templatePath, courseID, students)
+		return
+	}
+
+	// For now, use mock data since proper token handling for async operations
+	// requires additional infrastructure (service account tokens, etc.)
+	// TODO: Implement proper token handling for production use
+	fmt.Printf("Using mock data for certificate generation. TODO: Implement proper core API integration with service account tokens.\n")
+	students := s.getMockStudentData(courseID)
+	s.generateCertificatesForStudents(ctx, tempDir, templatePath, courseID, students)
+}
+
+func (s *Server) getMockStudentData(courseID string) []CertificateData {
 	// For demo purposes, we'll use mock data
 	// In a real implementation, you would get this data from the core service API
-	students := []CertificateData{
+	return []CertificateData{
 		{
 			StudentID:   "550e8400-e29b-41d4-a716-446655440001",
 			StudentName: "John Doe",
@@ -75,6 +94,9 @@ func (s *Server) generateCertificatesAsync(courseID string) {
 			CourseName:  "Software Engineering",
 		},
 	}
+}
+
+func (s *Server) generateCertificatesForStudents(ctx context.Context, tempDir, templatePath, courseID string, students []CertificateData) {
 
 	// Generate certificates for each student
 	for _, student := range students {
