@@ -13,7 +13,7 @@ export const DeadlineBadge = ({ deadline, type }: DeadlineBadgeProps) => {
   const badgeClassName =
     type === 'self'
       ? 'bg-blue-100 text-blue-800 border-blue-200 dark:border-blue-700 flex items-center gap-1 hover:bg-blue-100'
-      : 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100 flex items-center gap-1'
+      : 'bg-green-200 text-green-800 border-green-300 hover:bg-green-100 flex items-center gap-1'
 
   return (
     <Badge className={badgeClassName}>
