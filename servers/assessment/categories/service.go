@@ -31,12 +31,12 @@ func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDT
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-		ID:            uuid.New(),
-		Name:          req.Name,
-		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
-		Description:   pgtype.Text{String: req.Description, Valid: true},
-		Weight:        req.Weight,
-		CoursePhaseID: coursePhaseID,
+		ID:                   uuid.New(),
+		Name:                 req.Name,
+		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
+		Description:          pgtype.Text{String: req.Description, Valid: true},
+		Weight:               req.Weight,
+		AssessmentTemplateID: req.AssessmentTemplateID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -71,12 +71,12 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 
 func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
 	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-		ID:            id,
-		Name:          req.Name,
-		ShortName:     pgtype.Text{String: req.ShortName, Valid: true},
-		Description:   pgtype.Text{String: req.Description, Valid: true},
-		Weight:        req.Weight,
-		CoursePhaseID: coursePhaseID,
+		ID:                   id,
+		Name:                 req.Name,
+		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
+		Description:          pgtype.Text{String: req.Description, Valid: true},
+		Weight:               req.Weight,
+		AssessmentTemplateID: req.AssessmentTemplateID,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
@@ -94,8 +94,8 @@ func DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func GetCategoriesWithCompetencies(ctx context.Context, coursePhaseID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
-	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, coursePhaseID)
+func GetCategoriesWithCompetencies(ctx context.Context, assessmentTemplateID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
+	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, assessmentTemplateID)
 	if err != nil {
 		log.Error("could not get categories with competencies: ", err)
 		return nil, errors.New("could not get categories with competencies")

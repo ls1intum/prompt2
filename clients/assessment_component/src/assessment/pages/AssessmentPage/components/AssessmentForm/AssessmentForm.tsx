@@ -18,12 +18,13 @@ import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfa
 import { Competency } from '../../../../interfaces/competency'
 import { ScoreLevel } from '../../../../interfaces/scoreLevel'
 
+import { CompetencyHeader } from '../../../components/CompetencyHeader'
+import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
+import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
+
 import { useUpdateAssessment } from './hooks/useUpdateAssessment'
 import { useCreateAssessment } from './hooks/useCreateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
-import { DeleteAssessmentDialog } from './components/DeleteAssessmentDialog'
-import { ScoreLevelSelector } from './components/ScoreLevelSelector'
-import { CompetencyHeader } from './components/CompetencyHeader'
 
 interface AssessmentFormProps {
   courseParticipationID: string
@@ -38,7 +39,7 @@ export const AssessmentForm = ({
   assessment,
   completed = false,
 }: AssessmentFormProps) => {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const { user } = useAuthStore()
@@ -110,13 +111,15 @@ export const AssessmentForm = ({
         )}
       >
         <CompetencyHeader
+          className='lg:col-span-2 2xl:col-span-1'
           competency={competency}
-          assessment={assessment}
+          competencyScore={assessment}
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
         />
 
         <ScoreLevelSelector
+          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}

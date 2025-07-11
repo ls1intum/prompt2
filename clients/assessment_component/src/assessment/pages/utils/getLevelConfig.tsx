@@ -4,6 +4,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
   if (unknown) {
     return {
       title: 'Unknown',
+      evaluationTitle: 'Unknown',
       textColor: 'text-gray-700',
       selectedBg: 'bg-gray-100',
       icon: '⚪',
@@ -15,6 +16,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
     case ScoreLevel.VeryBad:
       return {
         title: 'Very Bad',
+        evaluationTitle: 'Strongly Disagree',
         textColor: 'text-red-700',
         selectedBg: 'bg-red-100',
         icon: '🔴',
@@ -23,6 +25,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
     case ScoreLevel.Bad:
       return {
         title: 'Bad',
+        evaluationTitle: 'Disagree',
         textColor: 'text-orange-700',
         selectedBg: 'bg-orange-100',
         icon: '🟠',
@@ -31,6 +34,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
     case ScoreLevel.Ok:
       return {
         title: 'Ok',
+        evaluationTitle: 'Neutral',
         textColor: 'text-yellow-700',
         selectedBg: 'bg-yellow-100',
         icon: '🟡',
@@ -39,6 +43,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
     case ScoreLevel.Good:
       return {
         title: 'Good',
+        evaluationTitle: 'Agree',
         textColor: 'text-green-700',
         selectedBg: 'bg-green-100',
         icon: '🟢',
@@ -47,6 +52,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
     case ScoreLevel.VeryGood:
       return {
         title: 'Very Good',
+        evaluationTitle: 'Strongly Agree',
         textColor: 'text-blue-700',
         selectedBg: 'bg-blue-100',
         icon: '🔵',

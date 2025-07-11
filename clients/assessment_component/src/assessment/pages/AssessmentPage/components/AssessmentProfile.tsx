@@ -7,8 +7,7 @@ import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 
 import { StudentScoreBadge } from '../../components/StudentScoreBadge'
 import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
-
-import { AssessmentStatusBadge } from './AssessmentStatusBadge'
+import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
 
 interface AssessmentProfileProps {
   participant: AssessmentParticipationWithStudent

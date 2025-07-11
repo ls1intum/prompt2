@@ -11,14 +11,16 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { AlertCircle, Loader2, Settings } from 'lucide-react'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
+
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 
 import { useGetAllAssessmentTemplates } from './hooks/useGetAllAssessmentTemplates'
 import { useCreateOrUpdateCoursePhaseConfig } from './hooks/useCreateOrUpdateCoursePhaseConfig'
-import { AssessmentConfiguration, AssessmentType } from './components/AssessmentConfiguration'
+import { AssessmentConfiguration } from './components/AssessmentConfiguration'
 
 export const CoursePhaseConfigSelection = () => {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
 
   const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)

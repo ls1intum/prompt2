@@ -8,12 +8,7 @@ export type Category = {
   weight: number
 }
 
-export type CategoryWithCompetencies = {
-  id: string
-  name: string
-  shortName: string
-  description?: string
-  weight: number
+export type CategoryWithCompetencies = Category & {
   competencies: Competency[]
 }
 
@@ -22,6 +17,7 @@ export interface CreateCategoryRequest {
   shortName: string
   description?: string
   weight: number
+  assessmentTemplateID: string
 }
 
 export interface UpdateCategoryRequest {
@@ -30,4 +26,5 @@ export interface UpdateCategoryRequest {
   shortName?: string
   description?: string
   weight?: number
+  assessmentTemplateID: string
 }

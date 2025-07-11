@@ -82,7 +82,15 @@ CREATE TABLE public.course_phase_config (
     assessment_template_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
     deadline timestamp with time zone DEFAULT NULL,
-    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE
+    self_evaluation_enabled boolean NOT NULL DEFAULT false,
+    self_evaluation_template uuid,
+    self_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_evaluation_enabled boolean NOT NULL DEFAULT false,
+    peer_evaluation_template uuid,
+    peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
+    FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
+    FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE public.competency (

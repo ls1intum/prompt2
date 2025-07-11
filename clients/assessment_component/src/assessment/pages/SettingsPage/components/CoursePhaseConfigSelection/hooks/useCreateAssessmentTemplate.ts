@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { createAssessmentTemplate } from '../../../../../network/mutations/createAssessmentTemplate'
 import { CreateAssessmentTemplateRequest } from '../../../../../interfaces/assessmentTemplate'
 
-export const useCreateAssessmentTemplate = (setError: (error: string | null) => void) => {
+export const useCreateAssessmentTemplate = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -13,7 +13,7 @@ export const useCreateAssessmentTemplate = (setError: (error: string | null) => 
       createAssessmentTemplate(phaseId ?? '', assessmentTemplate),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessmentTemplates'] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

@@ -17,7 +17,7 @@ import { useCreateAssessmentTemplate } from '../hooks/useCreateAssessmentTemplat
 import { CreateAssessmentTemplateRequest } from '../../../../../interfaces/assessmentTemplate'
 
 interface CreateAssessmentTemplateDialogProps {
-  onError: (error: string | null) => void
+  onError: (error: string | undefined) => void
 }
 
 export const CreateAssessmentTemplateDialog = ({
@@ -39,7 +39,7 @@ export const CreateAssessmentTemplateDialog = ({
       onSuccess: () => {
         reset()
         setIsDialogOpen(false)
-        onError(null)
+        onError(undefined)
       },
       onError: (err) => onError(err.message),
     })
@@ -48,7 +48,7 @@ export const CreateAssessmentTemplateDialog = ({
   const handleCancel = () => {
     setIsDialogOpen(false)
     reset()
-    onError(null)
+    onError(undefined)
   }
 
   return (

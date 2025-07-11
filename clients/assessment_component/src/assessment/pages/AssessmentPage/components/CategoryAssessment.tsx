@@ -2,10 +2,12 @@ import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 
-import { AssessmentForm } from './AssessmentForm/AssessmentForm'
 import type { CategoryWithCompetencies } from '../../../interfaces/category'
 import type { Assessment } from '../../../interfaces/assessment'
-import { AssessmentStatusBadge } from './AssessmentStatusBadge'
+
+import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
+
+import { AssessmentForm } from './AssessmentForm/AssessmentForm'
 
 interface CategoryAssessmentProps {
   category: CategoryWithCompetencies

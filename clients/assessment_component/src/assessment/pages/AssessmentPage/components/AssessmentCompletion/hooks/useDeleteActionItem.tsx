@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { deleteActionItem } from '../../../../../network/mutations/deleteActionItem'
 
-export const useDeleteActionItem = (setError: (error: string | null) => void) => {
+export const useDeleteActionItem = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
@@ -10,7 +10,7 @@ export const useDeleteActionItem = (setError: (error: string | null) => void) =>
     mutationFn: (actionItemId: string) => deleteActionItem(phaseId ?? '', actionItemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['actionItems', phaseId] })
-      setError(null)
+      setError(undefined)
     },
     onError: (error: any) => {
       if (error?.response?.data?.error) {

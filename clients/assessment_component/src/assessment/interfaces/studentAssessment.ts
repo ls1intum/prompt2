@@ -1,4 +1,5 @@
-import { Assessment, AssessmentCompletion } from './assessment'
+import { Assessment } from './assessment'
+import { AssessmentCompletion } from './assessmentCompletion'
 import { StudentScore } from './studentScore'
 
 export type StudentAssessment = {
