@@ -11,7 +11,7 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { mapNumberToScoreLevel } from '../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
-  gradeSuggestion: number | null
+  gradeSuggestion: number | undefined
   text?: boolean
 }
 

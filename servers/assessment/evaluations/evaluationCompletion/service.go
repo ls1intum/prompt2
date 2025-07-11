@@ -234,7 +234,7 @@ func ListPeerEvaluationCompletionsForParticipantInPhase(ctx context.Context, cou
 }
 
 func GetEvaluationCompletionsForAuthorInPhase(ctx context.Context, authorCourseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForAuthorInPhase(ctx, db.GetEvaluationCompletionsForAuthorInPhaseParams{
+	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsForAuthorInPhase(ctx, db.GetPeerEvaluationCompletionsForAuthorInPhaseParams{
 		AuthorCourseParticipationID: authorCourseParticipationID,
 		CoursePhaseID:               coursePhaseID,
 	})

@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { AssessmentParticipationWithStudent } from '../../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../../interfaces/scoreLevelWithParticipation'
 import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
-import { AssessmentCompletion } from '../../../../interfaces/assessment'
+import { AssessmentCompletion } from '../../../../interfaces/assessmentCompletion'
 import { Assessment } from '../../../../interfaces/assessment'
 
 export const useGetParticipantionsWithAssessment = (

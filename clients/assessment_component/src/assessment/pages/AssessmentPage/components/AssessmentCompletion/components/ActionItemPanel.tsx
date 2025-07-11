@@ -16,31 +16,31 @@ import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
 import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
-import type { StudentAssessment } from '../../../../../interfaces/studentAssessment'
 import { getAllActionItemsForStudentInPhase } from '../../../../../network/queries/getAllActionItemsForStudentInPhase'
 
 import { useCreateActionItem } from '../hooks/useCreateActionItem'
 import { useUpdateActionItem } from '../hooks/useUpdateActionItem'
 import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
 import { DeleteActionItemDialog } from './DeleteActionItemDialog'
-import { ActionItemRow } from './ActionItemRow'
+import { ItemRow } from '../../../../components/ItemRow'
 
 interface ActionItemPanelProps {
-  studentAssessment: StudentAssessment
+  courseParticipationID: string
+  completed?: boolean
 }
 
-export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
+export function ActionItemPanel({
+  courseParticipationID,
+  completed = false,
+}: ActionItemPanelProps) {
   const { phaseId } = useParams<{
     phaseId: string
   }>()
-  const [error, setError] = useState<string | null>(null)
-  const [savingItemId, setSavingItemId] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
+  const [savingItemId, setSavingItemId] = useState<string | undefined>(undefined)
   const [itemValues, setItemValues] = useState<Record<string, string>>({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
-
-  // Check if assessment is completed
-  const isAssessmentCompleted = studentAssessment.assessmentCompletion.completed
+  const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
   const {
     data: actionItems = [],
@@ -48,9 +48,8 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
     isError,
     refetch,
   } = useQuery<ActionItem[]>({
-    queryKey: ['actionItems', phaseId, studentAssessment.courseParticipationID],
-    queryFn: () =>
-      getAllActionItemsForStudentInPhase(phaseId ?? '', studentAssessment.courseParticipationID),
+    queryKey: ['actionItems', phaseId, courseParticipationID],
+    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID),
   })
 
   const { mutate: createActionItem, isPending: isCreatePending } = useCreateActionItem(setError)
@@ -74,14 +73,14 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   }, [actionItems, itemValues])
 
   const addActionItem = () => {
-    if (isAssessmentCompleted) return
+    if (completed) return
 
     const handleAddActionItem = async () => {
       try {
         await createActionItem(
           {
             coursePhaseID: phaseId ?? '',
-            courseParticipationID: studentAssessment.courseParticipationID,
+            courseParticipationID: courseParticipationID,
             action: '',
             author: userName,
           },
@@ -102,41 +101,34 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   const debouncedSave = useCallback(
     (item: ActionItem, text: string) => {
       const timeoutId = setTimeout(() => {
-        if (isAssessmentCompleted) return
+        if (completed) return
 
-        if (text.trim() !== item.action.trim() && text.trim() !== '') {
+        if (text.trim() !== item.action.trim()) {
           setSavingItemId(item.id)
 
           const updateRequest: UpdateActionItemRequest = {
             id: item.id,
             coursePhaseID: phaseId ?? '',
-            courseParticipationID: studentAssessment.courseParticipationID,
+            courseParticipationID: courseParticipationID,
             action: text.trim(),
             author: userName,
           }
 
           updateActionItem(updateRequest, {
             onSuccess: () => {
-              setSavingItemId(null)
+              setSavingItemId(undefined)
               refetch()
             },
             onError: () => {
-              setSavingItemId(null)
+              setSavingItemId(undefined)
             },
           })
         }
-      }, 500) // 200 ms delay
+      }, 200) // 200 ms delay
 
       return timeoutId
     },
-    [
-      phaseId,
-      studentAssessment.courseParticipationID,
-      userName,
-      updateActionItem,
-      refetch,
-      isAssessmentCompleted,
-    ],
+    [phaseId, courseParticipationID, userName, updateActionItem, refetch, completed],
   )
 
   const handleTextChange = (itemId: string, value: string) => {
@@ -150,7 +142,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
   }
 
   const openDeleteDialog = (itemId: string) => {
-    if (!isAssessmentCompleted) {
+    if (!completed) {
       setItemToDelete(itemId)
       setDeleteDialogOpen(true)
     }
@@ -168,7 +160,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
           })
           refetch()
           setDeleteDialogOpen(false)
-          setItemToDelete(null)
+          setItemToDelete(undefined)
         },
       })
     }
@@ -176,7 +168,7 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
 
   const cancelDelete = () => {
     setDeleteDialogOpen(false)
-    setItemToDelete(null)
+    setItemToDelete(undefined)
   }
 
   const isPending = isGetActionItemsPending || isCreatePending || isUpdatePending || isDeletePending
@@ -201,15 +193,16 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (
-            <ActionItemRow
+            <ItemRow
               key={item.id}
+              type='action'
               item={item}
               value={itemValues[item.id] || item.action}
               onTextChange={handleTextChange}
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
-              isDisabled={isAssessmentCompleted}
+              isDisabled={completed}
             />
           ))}
 
@@ -217,9 +210,9 @@ export function ActionItemPanel({ studentAssessment }: ActionItemPanelProps) {
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
             onClick={addActionItem}
-            disabled={isPending || isAssessmentCompleted}
+            disabled={isPending || completed}
             title={
-              isAssessmentCompleted
+              completed
                 ? 'Assessment completed - cannot add new action items'
                 : 'Add new action item'
             }
