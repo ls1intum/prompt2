@@ -175,6 +175,7 @@ export const CoursePhaseParticipationsTablePage = ({
                   prevDataKeys,
                   restrictedDataKeys,
                   studentReadableDataKeys,
+                  extraColumns ?? [],
                 )
                 table.resetRowSelection()
               }}
