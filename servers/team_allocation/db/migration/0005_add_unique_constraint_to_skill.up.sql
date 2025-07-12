@@ -1,0 +1,1 @@
+ALTER TABLE skill ADD CONSTRAINT unique_skill_name_per_phase UNIQUE (course_phase_id, name);
