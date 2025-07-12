@@ -133,7 +133,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 
 		// Don't send copy requests to core itself
 		coreHost := promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080")
-		if strings.HasPrefix(urlStr, coreHost) {
+		if urlStr == coreHost+"/copy" {
 			continue
 		}
 
@@ -155,7 +155,6 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			}
 			return fmt.Errorf("received non-OK response from phase service '%s': %s", oldPhaseType.Name, resp.Status)
 		}
-		return fmt.Errorf("this is the URL: %s", urlStr)
 	}
 	return nil
 }
