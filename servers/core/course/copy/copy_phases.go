@@ -16,6 +16,7 @@ import (
 	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -108,23 +109,13 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			continue
 		}
 
-		// Replace {CORE_HOST} before parsing the URL
-		baseURL := strings.ReplaceAll(
-			oldPhaseType.BaseUrl,
-			"{CORE_HOST}",
-			promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"),
-		)
+		coreHost := resolution.NormaliseHost(promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"))
+		log.Infof("Core host is '%s'", coreHost)
+		baseURL := strings.ReplaceAll(oldPhaseType.BaseUrl, "{CORE_HOST}", coreHost)
 
-		// Join with the /copy path
 		url, err := url.JoinPath(baseURL, "copy")
 		if err != nil {
-			return fmt.Errorf("failed to join path: %w", err)
-		}
-
-		// Don't send copy requests to core itself
-		coreHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:8080")
-		if url == coreHost+"/copy" {
-			continue
+			return fmt.Errorf("failed to join copy path: %w", err)
 		}
 
 		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
