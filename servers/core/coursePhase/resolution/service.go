@@ -22,7 +22,7 @@ func ReplaceResolutionURLs(ctx context.Context, resolutions []resolutionDTO.Reso
 		return resolutions, nil
 	}
 
-	coreHost := normaliseHost(ResolutionServiceSingleton.coreHost)
+	coreHost := NormaliseHost(ResolutionServiceSingleton.coreHost)
 
 	for i, r := range resolutions {
 		resolutions[i].BaseURL = strings.ReplaceAll(r.BaseURL, "{CORE_HOST}", coreHost)
@@ -31,8 +31,8 @@ func ReplaceResolutionURLs(ctx context.Context, resolutions []resolutionDTO.Reso
 	return resolutions, nil
 }
 
-// normaliseHost ensures the host string starts with a scheme.
-func normaliseHost(host string) string {
+// NormaliseHost ensures the host string starts with a scheme.
+func NormaliseHost(host string) string {
 	if strings.HasPrefix(host, "http://") || strings.HasPrefix(host, "https://") {
 		return host
 	}
