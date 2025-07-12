@@ -104,22 +104,36 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			return fmt.Errorf("failed to fetch course phase type: %w", err)
 		}
 
-		baseURL := oldPhaseType.BaseUrl
+		if oldPhaseType.BaseUrl == "core" {
+			continue
+		}
 
+		// Replace {CORE_HOST} before parsing the URL
+		baseURL := strings.ReplaceAll(
+			oldPhaseType.BaseUrl,
+			"{CORE_HOST}",
+			promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080"),
+		)
+
+		// Parse and validate the resulting URL
 		parsedBase, err := url.Parse(baseURL)
 		if err != nil {
-			return fmt.Errorf("invalid base URL: %w", err)
+			return fmt.Errorf("invalid base URL after env substitution: %w", err)
 		}
+		if parsedBase.Scheme == "" || parsedBase.Host == "" {
+			return fmt.Errorf("invalid base URL (missing scheme or host): %s", baseURL)
+		}
+
+		// Join with the /copy path
 		parsedBase.Path, err = url.JoinPath(parsedBase.Path, "copy")
 		if err != nil {
 			return fmt.Errorf("failed to join path: %w", err)
 		}
-
 		urlStr := parsedBase.String()
 
-		urlStr = strings.ReplaceAll(urlStr, "{CORE_HOST}", promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:3000"))
-
-		if urlStr == promptSDK.GetEnv("SERVER_CORE_HOST", "core") {
+		// Don't send copy requests to core itself
+		coreHost := promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080")
+		if strings.HasPrefix(urlStr, coreHost) {
 			continue
 		}
 
