@@ -46,7 +46,7 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 }
 
 // checkPhaseCopyable checks if a single course phase can be copied by sending a dummy request to the copy endpoint.
-func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseName string, checkedCoursePhases map[uuid.UUID]bool, missingPhasesPhases *[]string) error {
+func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseName string, checkedCoursePhases map[uuid.UUID]bool, missingPhases *[]string) error {
 	if checkedCoursePhases[phaseTypeID] {
 		return nil // already checked this phase type
 	}
@@ -79,14 +79,14 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 	log.Infof("Checking copy endpoint for phase '%s' with url %s", coursePhaseType.Name, url)
 	if err != nil {
 		log.Warnf("Error checking copy endpoint for phase '%s': %v", coursePhaseType.Name, err)
-		*missingPhasesPhases = append(*missingPhasesPhases, phaseName+" ("+coursePhaseType.Name+")")
+		*missingPhases = append(*missingPhases, phaseName+" ("+coursePhaseType.Name+")")
 		checkedCoursePhases[phaseTypeID] = true
 		return nil
 	}
 	resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		*missingPhasesPhases = append(*missingPhasesPhases, phaseName+" ("+coursePhaseType.Name+")")
+		*missingPhases = append(*missingPhases, phaseName+" ("+coursePhaseType.Name+")")
 	}
 	checkedCoursePhases[phaseTypeID] = true
 	return nil
