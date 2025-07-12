@@ -99,14 +99,14 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 	log.Infof("Checking copy endpoint for phase '%s' at %s", pt.Name, urlStr)
 	if err != nil {
 		log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-		*missing = append(*missing, phaseName+" ("+pt.Name+")"+" URL request was sent to: "+urlStr)
+		*missing = append(*missing, phaseName+" ("+pt.Name+")")
 		checked[pt.BaseUrl] = pt.Name
 		return nil
 	}
 	resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		*missing = append(*missing, phaseName+" ("+pt.Name+")")
+		*missing = append(*missing, phaseName+" ("+pt.Name+")"+" URL request was sent to: "+urlStr)
 	}
 	checked[pt.BaseUrl] = pt.Name
 	return nil
