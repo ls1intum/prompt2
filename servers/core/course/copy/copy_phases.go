@@ -155,6 +155,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			}
 			return fmt.Errorf("received non-OK response from phase service '%s': %s", oldPhaseType.Name, resp.Status)
 		}
+		return fmt.Errorf("this is the URL: %s", urlStr)
 	}
 	return nil
 }
