@@ -15,6 +15,18 @@ export const downloadParticipations = (
     return
   }
 
+  const headerDisplayMap: Record<string, string> = {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    matriculationNumber: 'Matriculation Number',
+    universityLogin: 'University Login',
+    hasUniversityAccount: 'Has University Account',
+    courseParticipationID: 'Course Participation ID',
+    gender: 'Gender',
+    passStatus: 'Pass Status',
+  }
+
   const baseHeaders = [
     'firstName',
     'lastName',
@@ -51,7 +63,6 @@ export const downloadParticipations = (
         } else if (header === 'courseParticipationID') {
           return JSON.stringify(row.courseParticipationID ?? '')
         } else {
-          // Attempt to find matching extra column
           const matchingExtraColumn = extraColumns.find((col) => col.header === header)
           if (matchingExtraColumn) {
             const extraDataItem = matchingExtraColumn.extraData.find(
@@ -65,9 +76,11 @@ export const downloadParticipations = (
       .join(';')
   })
 
-  const stringifiedHeaders = csvHeaders.map((header) => JSON.stringify(header))
-  const csvContent = [stringifiedHeaders.join(';'), ...csvRows].join('\n')
+  const stringifiedHeaders = csvHeaders.map((header) =>
+    JSON.stringify(headerDisplayMap[header] ?? header),
+  )
 
+  const csvContent = [stringifiedHeaders.join(';'), ...csvRows].join('\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   saveAs(blob, filename)
 }
