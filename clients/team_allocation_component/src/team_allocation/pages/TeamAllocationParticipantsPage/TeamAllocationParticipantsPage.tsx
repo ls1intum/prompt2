@@ -14,7 +14,7 @@ import { Allocation } from '../../interfaces/allocation'
 import { useEffect } from 'react'
 import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesToTeams'
 
-export const ParticipantsPage = (): JSX.Element => {
+export const TeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
