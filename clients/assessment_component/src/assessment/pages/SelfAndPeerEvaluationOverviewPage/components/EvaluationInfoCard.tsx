@@ -33,6 +33,7 @@ export const EvaluationInfoCard = ({
           <AssessmentStatusBadge
             remainingAssessments={competencyCount - (evaluations?.length || 0)}
             isFinalized={completed}
+            isEvaluation={true}
           />
         </div>
       </div>

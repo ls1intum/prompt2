@@ -214,7 +214,8 @@ export const SelfAndPeerEvaluationDataShell = ({
           <AlertTitle>Your are not a student of this course.</AlertTitle>
           <AlertDescription>
             The following components are disabled because you are not a student of this course.
-            Evaluations for self and peer assessments are currently only available for students.
+            Evaluations for self and peer assessments are currently only available for students. The
+            platform will show a random team regardless, to demonstrate the functionality.
           </AlertDescription>
         </Alert>
       )}

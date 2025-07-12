@@ -71,11 +71,12 @@ CREATE TABLE public.category (
 );
 
 CREATE TABLE public.assessment_template (
-    id uuid PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT assessment_template_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE public.course_phase_config (
@@ -88,6 +89,9 @@ CREATE TABLE public.course_phase_config (
     peer_evaluation_enabled boolean NOT NULL DEFAULT false,
     peer_evaluation_template uuid,
     peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
@@ -114,8 +118,8 @@ INSERT INTO public.assessment_template (id, name, description)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
 
 -- Insert some sample course_phase_config records
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02');
+INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00');
 
 INSERT INTO public.category
 VALUES (

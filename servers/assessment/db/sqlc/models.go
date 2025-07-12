@@ -187,6 +187,9 @@ type CoursePhaseConfig struct {
 	PeerEvaluationEnabled  bool               `json:"peer_evaluation_enabled"`
 	PeerEvaluationTemplate uuid.UUID          `json:"peer_evaluation_template"`
 	PeerEvaluationDeadline pgtype.Timestamptz `json:"peer_evaluation_deadline"`
+	Start                  pgtype.Timestamptz `json:"start"`
+	SelfEvaluationStart    pgtype.Timestamptz `json:"self_evaluation_start"`
+	PeerEvaluationStart    pgtype.Timestamptz `json:"peer_evaluation_start"`
 }
 
 type Evaluation struct {

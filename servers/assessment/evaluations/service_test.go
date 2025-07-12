@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -44,6 +45,9 @@ func (suite *EvaluationServiceTestSuite) SetupSuite() {
 	}
 
 	EvaluationServiceSingleton = &suite.evaluationService
+
+	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
 
 	// Test data IDs matching the evaluations.sql dump
 	suite.testCoursePhaseID = uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")

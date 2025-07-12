@@ -4,12 +4,14 @@ import { cn } from '@tumaet/prompt-ui-components'
 interface AssessmentStatusBadgeProps {
   className?: string
   remainingAssessments: number
+  isEvaluation?: boolean
   isFinalized?: boolean
 }
 
 export function AssessmentStatusBadge({
   className,
   remainingAssessments,
+  isEvaluation = false,
   isFinalized,
 }: AssessmentStatusBadgeProps) {
   const isCompleted = remainingAssessments === 0
@@ -46,7 +48,17 @@ export function AssessmentStatusBadge({
       {isInProgress && (
         <>
           <Clock className='h-3.5 w-3.5' />
-          <span>{remainingAssessments} left</span>
+          <span>
+            {remainingAssessments}{' '}
+            {isEvaluation
+              ? remainingAssessments === 1
+                ? 'question'
+                : 'questions'
+              : remainingAssessments === 1
+                ? 'assessment'
+                : 'assessments'}{' '}
+            left
+          </span>
         </>
       )}
     </span>

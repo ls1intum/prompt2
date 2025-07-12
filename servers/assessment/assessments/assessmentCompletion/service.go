@@ -17,9 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ErrDeadlinePassed represents an error when trying to perform an action after the deadline has passed
-var ErrDeadlinePassed = errors.New("cannot unmark assessment as completed: deadline has passed")
-
 type AssessmentCompletionService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
@@ -40,6 +37,11 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 }
 
 func CheckAssessmentIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID uuid.UUID) error {
+	err := coursePhaseConfig.IsAssessmentOpen(ctx, coursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
@@ -79,6 +81,11 @@ func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipatio
 }
 
 func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	err := coursePhaseConfig.IsAssessmentOpen(ctx, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -110,6 +117,11 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 }
 
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	err := coursePhaseConfig.IsAssessmentOpen(ctx, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	remaining, err := CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		log.Error("could not count remaining assessments: ", err)
@@ -159,16 +171,9 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 }
 
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
-	// Check if deadline has passed
-	deadline, err := coursePhaseConfig.GetCoursePhaseDeadline(ctx, coursePhaseID)
+	err := coursePhaseConfig.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
-		log.Error("could not get course phase deadline: ", err)
-		return errors.New("could not check deadline")
-	}
-
-	// If deadline exists and has passed, prevent unmarking
-	if deadline != nil && time.Now().After(*deadline) {
-		return ErrDeadlinePassed
+		return err
 	}
 
 	err = AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{

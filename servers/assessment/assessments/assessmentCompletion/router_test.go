@@ -141,7 +141,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCompletion() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	// Test successful creation
@@ -326,7 +326,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestListAssessmentCompletionsI
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpoint() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	// First create an assessment completion to unmark
@@ -357,7 +357,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpointNonExisting() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	// Test PUT /unmark endpoint on non-existing completion
@@ -384,7 +384,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCompletionResponseFormat() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	payload := dto.AssessmentCompletion{

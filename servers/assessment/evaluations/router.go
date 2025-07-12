@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -152,18 +153,10 @@ func createOrUpdateEvaluation(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
-		return
-	}
-
 	// TODO also check if the assessee is the same as the author or a team member
-
-	// Students can only create evaluations where they are the author
-	if request.AuthorCourseParticipationID != courseParticipationID.(uuid.UUID) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Students can only create evaluations as the author"})
+	statusCode, err := utils.ValidateStudentOwnership(c, request.AuthorCourseParticipationID)
+	if err != nil {
+		c.JSON(statusCode, gin.H{"error": "Students can only create evaluations as the author"})
 		return
 	}
 
@@ -183,14 +176,15 @@ func deleteEvaluation(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+	courseParticipationID, er := utils.GetUserCourseParticipationID(c)
+	if er != nil {
+		log.Error("Error getting student courseParticipationID: ", er)
+		handleError(c, http.StatusUnauthorized, er)
 		return
 	}
+
 	// Ensure the user is the author of the evaluation or has the right permissions
-	if !isEvaluationAuthor(c, evaluationID, courseParticipationID.(uuid.UUID)) {
+	if !isEvaluationAuthor(c, evaluationID, courseParticipationID) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this evaluation"})
 		return
 	}

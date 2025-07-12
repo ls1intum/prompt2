@@ -8,27 +8,33 @@ import (
 )
 
 type CoursePhaseConfig struct {
-	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateID"`
 	CoursePhaseID          uuid.UUID `json:"coursePhaseID"`
+	AssessmentTemplateID   uuid.UUID `json:"assessmentTemplateID"`
+	Start                  time.Time `json:"start"`
 	Deadline               time.Time `json:"deadline"`
 	SelfEvaluationEnabled  bool      `json:"selfEvaluationEnabled"`
-	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate,omitempty"`
-	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline,omitempty"`
+	SelfEvaluationTemplate uuid.UUID `json:"selfEvaluationTemplate"`
+	SelfEvaluationStart    time.Time `json:"selfEvaluationStart"`
+	SelfEvaluationDeadline time.Time `json:"selfEvaluationDeadline"`
 	PeerEvaluationEnabled  bool      `json:"peerEvaluationEnabled"`
-	PeerEvaluationTemplate uuid.UUID `json:"peerEvaluationTemplate,omitempty"`
-	PeerEvaluationDeadline time.Time `json:"peerEvaluationDeadline,omitempty"`
+	PeerEvaluationTemplate uuid.UUID `json:"peerEvaluationTemplate"`
+	PeerEvaluationStart    time.Time `json:"peerEvaluationStart"`
+	PeerEvaluationDeadline time.Time `json:"peerEvaluationDeadline"`
 }
 
 func MapDBCoursePhaseConfigToDTOCoursePhaseConfig(dbConfig db.CoursePhaseConfig) CoursePhaseConfig {
 	return CoursePhaseConfig{
-		AssessmentTemplateID:   dbConfig.AssessmentTemplateID,
 		CoursePhaseID:          dbConfig.CoursePhaseID,
+		AssessmentTemplateID:   dbConfig.AssessmentTemplateID,
+		Start:                  dbConfig.Start.Time,
 		Deadline:               dbConfig.Deadline.Time,
 		SelfEvaluationEnabled:  dbConfig.SelfEvaluationEnabled,
 		SelfEvaluationTemplate: dbConfig.SelfEvaluationTemplate,
+		SelfEvaluationStart:    dbConfig.SelfEvaluationStart.Time,
 		SelfEvaluationDeadline: dbConfig.SelfEvaluationDeadline.Time,
 		PeerEvaluationEnabled:  dbConfig.PeerEvaluationEnabled,
 		PeerEvaluationTemplate: dbConfig.PeerEvaluationTemplate,
+		PeerEvaluationStart:    dbConfig.PeerEvaluationStart.Time,
 		PeerEvaluationDeadline: dbConfig.PeerEvaluationDeadline.Time,
 	}
 }

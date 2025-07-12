@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 	"github.com/stretchr/testify/assert"
@@ -40,6 +41,10 @@ func (suite *EvaluationRouterTestSuite) SetupSuite() {
 	}
 
 	EvaluationServiceSingleton = &suite.evaluationService
+
+	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
+
 	suite.testCoursePhaseID = uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 
 	suite.router = gin.Default()

@@ -7,7 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,7 +19,6 @@ func setupEvaluationCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listEvaluationCompletionsByCoursePhase)
 	evaluationRouter.GET("/self", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listSelfEvaluationCompletionsByCoursePhase)
 	evaluationRouter.GET("/peer", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listPeerEvaluationCompletionsByCoursePhase)
-	evaluationRouter.DELETE("/course-participation/:courseParticipationID/author/:authorCourseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteEvaluationCompletion)
 
 	evaluationRouter.POST("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.PUT("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
@@ -71,29 +72,6 @@ func listPeerEvaluationCompletionsByCoursePhase(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(completions))
-}
-
-func deleteEvaluationCompletion(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	authorCourseParticipationID, err := uuid.Parse(c.Param("authorCourseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	if err := DeleteEvaluationCompletion(c, courseParticipationID, coursePhaseID, authorCourseParticipationID); err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.Status(http.StatusOK)
 }
 
 func getEvaluationCompletion(c *gin.Context) {
@@ -165,7 +143,7 @@ func createOrUpdateMyEvaluationCompletion(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := validateStudentOwnership(c, req.AuthorCourseParticipationID)
+	statusCode, err := utils.ValidateStudentOwnership(c, req.AuthorCourseParticipationID)
 	if err != nil {
 		handleError(c, statusCode, err)
 		return
@@ -173,6 +151,10 @@ func createOrUpdateMyEvaluationCompletion(c *gin.Context) {
 
 	err = CreateOrUpdateEvaluationCompletion(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -186,7 +168,7 @@ func markMyEvaluationAsCompleted(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := validateStudentOwnership(c, req.AuthorCourseParticipationID)
+	statusCode, err := utils.ValidateStudentOwnership(c, req.AuthorCourseParticipationID)
 	if err != nil {
 		handleError(c, statusCode, err)
 		return
@@ -194,6 +176,10 @@ func markMyEvaluationAsCompleted(c *gin.Context) {
 
 	err = MarkEvaluationAsCompleted(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -211,14 +197,14 @@ func unmarkMyEvaluationAsCompleted(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := validateStudentOwnership(c, req.AuthorCourseParticipationID)
+	statusCode, err := utils.ValidateStudentOwnership(c, req.AuthorCourseParticipationID)
 	if err != nil {
 		handleError(c, statusCode, err)
 		return
 	}
 
 	if err := UnmarkEvaluationAsCompleted(c, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID); err != nil {
-		if errors.Is(err, ErrDeadlinePassed) {
+		if errors.Is(err, coursePhaseConfig.ErrDeadlinePassed) {
 			handleError(c, http.StatusForbidden, err)
 		} else {
 			handleError(c, http.StatusInternalServerError, err)
@@ -235,7 +221,7 @@ func getMySelfEvaluationCompletion(c *gin.Context) {
 		return
 	}
 
-	userCourseParticipationUUID, err := getUserCourseParticipationID(c)
+	userCourseParticipationUUID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
 		handleError(c, http.StatusUnauthorized, err)
 		return
@@ -256,7 +242,7 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 		return
 	}
 
-	userCourseParticipationUUID, err := getUserCourseParticipationID(c)
+	userCourseParticipationUUID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
 		handleError(c, http.StatusUnauthorized, err)
 		return
@@ -269,41 +255,6 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(evaluationCompletions))
-}
-
-func getUserCourseParticipationID(c *gin.Context) (uuid.UUID, error) {
-	userCourseParticipationID, exists := c.Get("courseParticipationID")
-	if !exists {
-		return uuid.UUID{}, errors.New("course participation ID not found in token")
-	}
-
-	userCourseParticipationUUID, ok := userCourseParticipationID.(uuid.UUID)
-	if !ok {
-		userCourseParticipationStr, ok := userCourseParticipationID.(string)
-		if !ok {
-			return uuid.UUID{}, errors.New("invalid course participation ID format")
-		}
-		var err error
-		userCourseParticipationUUID, err = uuid.Parse(userCourseParticipationStr)
-		if err != nil {
-			return uuid.UUID{}, errors.New("invalid course participation ID")
-		}
-	}
-
-	return userCourseParticipationUUID, nil
-}
-
-func validateStudentOwnership(c *gin.Context, authorCourseParticipationID uuid.UUID) (int, error) {
-	userCourseParticipationUUID, err := getUserCourseParticipationID(c)
-	if err != nil {
-		return http.StatusUnauthorized, err
-	}
-
-	if authorCourseParticipationID != userCourseParticipationUUID {
-		return http.StatusForbidden, errors.New("you can only manage your own evaluation completions")
-	}
-
-	return http.StatusOK, nil
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

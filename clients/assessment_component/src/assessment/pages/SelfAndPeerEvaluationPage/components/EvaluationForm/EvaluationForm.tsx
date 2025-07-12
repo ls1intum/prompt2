@@ -96,6 +96,7 @@ export const EvaluationForm = ({
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
           isEvaluation={true}
+          isPeerEvaluation={courseParticipationID !== authorCourseParticipationID}
         />
 
         <ScoreLevelSelector

@@ -31,7 +31,6 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 
 	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
 
-	// Check if the evaluation is editable before making changes
 	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID)
 	if err != nil {
 		return err
@@ -66,14 +65,12 @@ func DeleteEvaluation(ctx context.Context, id uuid.UUID) error {
 
 	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
 
-	// Get the evaluation details to check if it's editable
 	evaluation, err := qtx.GetEvaluationByID(ctx, id)
 	if err != nil {
 		log.Error("could not get evaluation by ID: ", err)
 		return errors.New("could not get evaluation by ID")
 	}
 
-	// Check if the evaluation is editable before deleting
 	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID)
 	if err != nil {
 		return err
