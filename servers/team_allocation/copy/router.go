@@ -7,6 +7,5 @@ import (
 )
 
 func setupCopyRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	copyRouter := routerGroup.Group("")
-	promptTypes.RegisterCopyEndpoint(copyRouter, authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), &TeamAllocationCopyHandler{})
+	promptTypes.RegisterCopyEndpoint(routerGroup, authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), &TeamAllocationCopyHandler{})
 }

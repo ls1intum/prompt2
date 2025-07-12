@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -107,13 +109,25 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			continue
 		}
 
-		url := baseURL + "/copy"
+		parsedBase, err := url.Parse(baseURL)
+		if err != nil {
+			return fmt.Errorf("invalid base URL: %w", err)
+		}
+		parsedBase.Path, err = url.JoinPath(parsedBase.Path, "copy")
+		if err != nil {
+			return fmt.Errorf("failed to join path: %w", err)
+		}
+
+		urlStr := parsedBase.String()
+
+		urlStr = strings.ReplaceAll(urlStr, "{CORE_HOST}", promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:3000"))
+
 		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
 			SourceCoursePhaseID: oldPhaseID,
 			TargetCoursePhaseID: newPhaseID,
 		})
 
-		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), url)
+		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), urlStr)
 		if err != nil {
 			return fmt.Errorf("failed to send copy request to phase service: %w", err)
 		}
