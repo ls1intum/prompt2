@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -50,8 +52,36 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 		return fmt.Errorf("failed to get phase type: %w", err)
 	}
 
-	// Skip internal/core phases
-	if pt.BaseUrl == utils.GetEnv("CORE_HOST", "core") {
+	if pt.BaseUrl == "core" {
+		return nil
+	}
+
+	// Replace {CORE_HOST} before parsing the URL
+	baseURL := strings.ReplaceAll(
+		pt.BaseUrl,
+		"{CORE_HOST}",
+		promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080"),
+	)
+
+	// Parse and validate the resulting URL
+	parsedBase, err := url.Parse(baseURL)
+	if err != nil {
+		return fmt.Errorf("invalid base URL after env substitution: %w", err)
+	}
+	if parsedBase.Scheme == "" || parsedBase.Host == "" {
+		return fmt.Errorf("invalid base URL (missing scheme or host): %s", baseURL)
+	}
+
+	// Join with the /copy path
+	parsedBase.Path, err = url.JoinPath(parsedBase.Path, "copy")
+	if err != nil {
+		return fmt.Errorf("failed to join path: %w", err)
+	}
+	urlStr := parsedBase.String()
+
+	// Don't send copy requests to core itself
+	coreHost := promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080")
+	if urlStr == coreHost+"/copy" {
 		return nil
 	}
 
@@ -65,10 +95,10 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 		TargetCoursePhaseID: phaseID,
 	})
 
-	resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), pt.BaseUrl+"/copy")
+	resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), urlStr)
 	if err != nil {
 		log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
-		*missing = append(*missing, phaseName+" ("+pt.Name+")")
+		*missing = append(*missing, phaseName+" ("+pt.Name+")"+" URL request was sent to: "+urlStr)
 		checked[pt.BaseUrl] = pt.Name
 		return nil
 	}
