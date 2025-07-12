@@ -105,9 +105,6 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		}
 
 		baseURL := oldPhaseType.BaseUrl
-		if baseURL == promptSDK.GetEnv("SERVER_CORE_HOST", "core") {
-			continue
-		}
 
 		parsedBase, err := url.Parse(baseURL)
 		if err != nil {
@@ -121,6 +118,10 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		urlStr := parsedBase.String()
 
 		urlStr = strings.ReplaceAll(urlStr, "{CORE_HOST}", promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:3000"))
+
+		if urlStr == promptSDK.GetEnv("SERVER_CORE_HOST", "core") {
+			continue
+		}
 
 		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
 			SourceCoursePhaseID: oldPhaseID,
