@@ -23,7 +23,7 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 
-export const AssessmentOverviewPage = (): JSX.Element => {
+export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
@@ -179,7 +179,7 @@ export const AssessmentOverviewPage = (): JSX.Element => {
 
   return (
     <div id='table-view' className='relative flex flex-col'>
-      <ManagementPageHeader>Assessment Overview</ManagementPageHeader>
+      <ManagementPageHeader>Assessment Participants</ManagementPageHeader>
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
