@@ -60,7 +60,7 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 	baseURL := strings.ReplaceAll(
 		pt.BaseUrl,
 		"{CORE_HOST}",
-		promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080"),
+		promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"),
 	)
 
 	// Parse and validate the resulting URL
@@ -80,7 +80,7 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 	urlStr := parsedBase.String()
 
 	// Don't send copy requests to core itself
-	coreHost := promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080")
+	coreHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:8080")
 	if urlStr == coreHost+"/copy" {
 		return nil
 	}
@@ -96,6 +96,7 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 	})
 
 	resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), urlStr)
+	log.Infof("Checking copy endpoint for phase '%s' at %s", pt.Name, urlStr)
 	if err != nil {
 		log.Warnf("Error checking copy endpoint for phase '%s': %v", pt.Name, err)
 		*missing = append(*missing, phaseName+" ("+pt.Name+")"+" URL request was sent to: "+urlStr)

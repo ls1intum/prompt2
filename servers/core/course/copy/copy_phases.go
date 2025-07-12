@@ -112,7 +112,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		baseURL := strings.ReplaceAll(
 			oldPhaseType.BaseUrl,
 			"{CORE_HOST}",
-			promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080"),
+			promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"),
 		)
 
 		// Parse and validate the resulting URL
@@ -132,7 +132,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		urlStr := parsedBase.String()
 
 		// Don't send copy requests to core itself
-		coreHost := promptSDK.GetEnv("SERVER_CORE_HOST", "http://localhost:8080")
+		coreHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:8080")
 		if urlStr == coreHost+"/copy" {
 			continue
 		}
@@ -143,6 +143,7 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 		})
 
 		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), urlStr)
+		log.Infof("Sending copy request to %s for phase %s", urlStr, oldPhase.Name)
 		if err != nil {
 			return fmt.Errorf("failed to send copy request to phase service: %w", err)
 		}
