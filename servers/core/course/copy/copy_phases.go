@@ -115,25 +115,15 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"),
 		)
 
-		// Parse and validate the resulting URL
-		parsedBase, err := url.Parse(baseURL)
-		if err != nil {
-			return fmt.Errorf("invalid base URL after env substitution: %w", err)
-		}
-		if parsedBase.Scheme == "" || parsedBase.Host == "" {
-			return fmt.Errorf("invalid base URL (missing scheme or host): %s", baseURL)
-		}
-
 		// Join with the /copy path
-		parsedBase.Path, err = url.JoinPath(parsedBase.Path, "copy")
+		url, err := url.JoinPath(baseURL, "copy")
 		if err != nil {
 			return fmt.Errorf("failed to join path: %w", err)
 		}
-		urlStr := parsedBase.String()
 
 		// Don't send copy requests to core itself
 		coreHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:8080")
-		if urlStr == coreHost+"/copy" {
+		if url == coreHost+"/copy" {
 			continue
 		}
 
@@ -142,8 +132,8 @@ func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID)
 			TargetCoursePhaseID: newPhaseID,
 		})
 
-		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), urlStr)
-		log.Infof("Sending copy request to %s for phase %s", urlStr, oldPhase.Name)
+		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), url)
+		log.Infof("Sending copy request to %s for phase %s", url, oldPhase.Name)
 		if err != nil {
 			return fmt.Errorf("failed to send copy request to phase service: %w", err)
 		}

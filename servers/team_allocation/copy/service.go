@@ -22,6 +22,10 @@ var CopyServiceSingleton *CopyService
 type TeamAllocationCopyHandler struct{}
 
 func (h *TeamAllocationCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
+	if req.SourceCoursePhaseID == req.TargetCoursePhaseID {
+		return nil
+	}
+
 	ctx := c.Request.Context()
 
 	tx, err := CopyServiceSingleton.conn.Begin(ctx)
