@@ -1,17 +1,27 @@
-import { useLocation } from 'react-router-dom'
-import { Clock, Users, User, AlertCircle, CheckCircle2 } from 'lucide-react'
-import { format } from 'date-fns'
-import { ManagementPageHeader, Badge, Card, CardContent } from '@tumaet/prompt-ui-components'
+import { useMemo } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
+import { Users, User } from 'lucide-react'
+
+import { useCourseStore } from '@tumaet/prompt-shared-state'
+import { ManagementPageHeader, Badge, Card } from '@tumaet/prompt-ui-components'
+
 import { useEvaluationStore } from '../../zustand/useEvaluationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../zustand/usePeerEvaluationCategoryStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
+
 import { EvaluationInfoCard } from './components/EvaluationInfoCard'
-import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
+import { EvaluationInfoHeader } from './components/EvaluationInfoHeader'
+import { SelfEvaluationStatusCard } from './components/SelfEvaluationStatusCard'
+import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 
 export const SelfAndPeerEvaluationOverviewPage = () => {
+  const { isStudentOfCourse } = useCourseStore()
+  const { courseId } = useParams<{ courseId: string }>()
+  const isStudent = isStudentOfCourse(courseId ?? '')
+
   const path = useLocation().pathname
   const { selfEvaluations, peerEvaluations, selfEvaluationCompletion, peerEvaluationCompletions } =
     useEvaluationStore()
@@ -23,18 +33,29 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
 
   const team = teams.find((t) =>
     t.members.some(
-      (member) => member.courseParticipationID === myParticipation?.courseParticipationID,
+      (member) =>
+        member.courseParticipationID === myParticipation?.courseParticipationID || !isStudent,
     ),
   )
 
-  const selfEvaluationCompetencyCount = selfEvaluationCategories.reduce(
-    (count, category) => count + category.competencies.length,
-    0,
+  const now = new Date()
+  const selfEvaluationStarted =
+    !coursePhaseConfig?.selfEvaluationStart ||
+    now >= new Date(coursePhaseConfig.selfEvaluationStart)
+  const peerEvaluationStarted =
+    !coursePhaseConfig?.peerEvaluationStart ||
+    now >= new Date(coursePhaseConfig.peerEvaluationStart)
+
+  const selfEvaluationCompetencyCount = useMemo(
+    () =>
+      selfEvaluationCategories.reduce((count, category) => count + category.competencies.length, 0),
+    [selfEvaluationCategories],
   )
 
-  const peerEvaluationCompetencyCount = peerEvaluationCategories.reduce(
-    (count, category) => count + category.competencies.length,
-    0,
+  const peerEvaluationCompetencyCount = useMemo(
+    () =>
+      peerEvaluationCategories.reduce((count, category) => count + category.competencies.length, 0),
+    [peerEvaluationCategories],
   )
 
   const isSelfEvaluationCompleted = selfEvaluationCompletion?.completed ?? false
@@ -54,135 +75,64 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
       (member) => member.courseParticipationID !== myParticipation?.courseParticipationID,
     ).length ?? 0
 
-  const allEvaluationsCompleted =
-    isSelfEvaluationCompleted && completedPeerEvaluations === totalPeerEvaluations
+  const isPeerEvaluationCompleted = completedPeerEvaluations === totalPeerEvaluations
+  const allEvaluationsCompleted = isSelfEvaluationCompleted && isPeerEvaluationCompleted
 
   return (
     <div className='min-h-screen transition-colors'>
       <div className='max-w-6xl mx-auto px-4 py-6'>
-        <ManagementPageHeader>Self Evaluation and Peer Evaluation</ManagementPageHeader>
+        <ManagementPageHeader>
+          Self Evaluation
+          {coursePhaseConfig?.peerEvaluationEnabled && ' and Peer Evaluation'}
+        </ManagementPageHeader>
 
-        <Card className='mb-8 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
-          <CardContent className='p-6'>
-            <div className='flex items-start gap-4'>
-              <div className='flex-shrink-0'>
-                {allEvaluationsCompleted ? (
-                  <CheckCircle2 className='h-8 w-8 text-green-500 dark:text-green-400' />
-                ) : (
-                  <AlertCircle className='h-8 w-8 text-blue-500 dark:text-blue-400' />
-                )}
-              </div>
-              <div className='flex-1'>
-                <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-                  {allEvaluationsCompleted ? 'All Evaluations Completed!' : 'Instructions'}
-                </h2>
-                {allEvaluationsCompleted ? (
-                  <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                    Congratulations! You have successfully completed all required evaluations. Your
-                    self-evaluation and peer evaluations have been submitted and will be reviewed
-                    accordingly.
-                  </p>
-                ) : (
-                  <div className='space-y-3'>
-                    <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                      Please complete both your self-evaluation and peer evaluations before the
-                      specified deadlines. These evaluations are important and provide valuable
-                      feedback.
-                    </p>
-                    <div className='flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400'>
-                      <div className='flex items-center gap-2'>
-                        <Clock className='h-4 w-4' />
-                        <span>Complete before deadline</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <User className='h-4 w-4' />
-                        <span>Self-evaluation required</span>
-                      </div>
-                      {team && (
-                        <div className='flex items-center gap-2'>
-                          <Users className='h-4 w-4' />
-                          <span>Evaluate all team members</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <EvaluationInfoHeader
+          allEvaluationsCompleted={allEvaluationsCompleted}
+          coursePhaseConfig={coursePhaseConfig}
+          team={team}
+        />
 
-        {/* Status Cards */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
-          <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
-            <CardContent className='p-6'>
-              <div className='flex items-center justify-between mb-4'>
-                <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
-                  Self Evaluation
-                </h3>
-                {isSelfEvaluationCompleted ? (
-                  <AssessmentStatusBadge remainingAssessments={0} isFinalized={true} />
-                ) : (
-                  <AssessmentStatusBadge remainingAssessments={1} />
-                )}
-              </div>
-              <div className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1'>
-                {isSelfEvaluationCompleted ? 'Completed' : 'Open'}
-              </div>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
-                Self Evaluation completion status
-              </p>
-            </CardContent>
-          </Card>
+          {selfEvaluationStarted && (
+            <SelfEvaluationStatusCard
+              isCompleted={isSelfEvaluationCompleted}
+              coursePhaseConfig={coursePhaseConfig}
+            />
+          )}
 
-          {team && (
-            <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
-              <CardContent className='p-6'>
-                <div className='flex items-center justify-between mb-4'>
-                  <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
-                    Peer Evaluations
-                  </h3>
-                  <AssessmentStatusBadge
-                    remainingAssessments={totalPeerEvaluations - completedPeerEvaluations}
-                    isFinalized={completedPeerEvaluations === totalPeerEvaluations}
-                  />
-                </div>
-                <div className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1'>
-                  {completedPeerEvaluations}/{totalPeerEvaluations}
-                </div>
-                <p className='text-sm text-gray-500 dark:text-gray-400'>Team members evaluated</p>
-              </CardContent>
-            </Card>
+          {peerEvaluationStarted && team && (
+            <PeerEvaluationStatusCard
+              completedEvaluations={completedPeerEvaluations}
+              totalEvaluations={totalPeerEvaluations}
+              isCompleted={isPeerEvaluationCompleted}
+              coursePhaseConfig={coursePhaseConfig}
+            />
           )}
         </div>
 
-        <div className='mb-8'>
-          <div className='flex items-center gap-3 mb-6'>
-            <div className='flex items-center gap-2'>
-              <User className='h-6 w-6 text-blue-600 dark:text-blue-400' />
-              <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                Self Evaluation
-              </h1>
+        {selfEvaluationStarted && (
+          <div className='mb-8'>
+            <div className='flex items-center gap-3 mb-6'>
+              <div className='flex items-center gap-2'>
+                <User className='h-6 w-6 text-blue-600 dark:text-blue-400' />
+                <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                  Self Evaluation
+                </h1>
+              </div>
             </div>
-            {coursePhaseConfig?.selfEvaluationDeadline && (
-              <Badge className='bg-blue-100 text-blue-800 border-blue-200 dark:border-blue-700 flex items-center gap-1 hover:bg-blue-100'>
-                <Clock className='h-3 w-3' />
-                Deadline: {format(new Date(coursePhaseConfig.selfEvaluationDeadline), 'dd.MM.yyyy')}
-              </Badge>
-            )}
+            <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
+              <EvaluationInfoCard
+                name='Self Evaluation'
+                navigationPath={`${path}/self-evaluation`}
+                competencyCount={selfEvaluationCompetencyCount}
+                completed={isSelfEvaluationCompleted}
+                evaluations={selfEvaluations}
+              />
+            </Card>
           </div>
-          <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
-            <EvaluationInfoCard
-              name='Self Evaluation'
-              navigationPath={`${path}/self-evaluation`}
-              competencyCount={selfEvaluationCompetencyCount}
-              completed={isSelfEvaluationCompleted}
-              evaluations={selfEvaluations}
-            />
-          </Card>
-        </div>
+        )}
 
-        {team && (
+        {peerEvaluationStarted && team && (
           <div>
             <div className='flex items-center gap-3 mb-6'>
               <div className='flex items-center gap-2'>
@@ -191,16 +141,9 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                   Peer Evaluation
                 </h1>
               </div>
-              <Badge className='bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'>
+              <Badge className='bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'>
                 Team {team.name}
               </Badge>
-              {coursePhaseConfig?.peerEvaluationDeadline && (
-                <Badge className='bg-green-100 text-green-800 border-green-200 hover:bg-green-100 flex items-center gap-1'>
-                  <Clock className='h-3 w-3' />
-                  Deadline:{' '}
-                  {format(new Date(coursePhaseConfig.peerEvaluationDeadline), 'dd.MM.yyyy')}
-                </Badge>
-              )}
             </div>
             <div className='space-y-4'>
               {team.members

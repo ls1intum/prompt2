@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -45,6 +46,10 @@ func createOrUpdateAssessmentCompletion(c *gin.Context) {
 	}
 	err := CreateOrUpdateAssessmentCompletion(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -59,6 +64,10 @@ func markAssessmentAsCompleted(c *gin.Context) {
 	}
 	err := MarkAssessmentAsCompleted(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -96,7 +105,7 @@ func unmarkAssessmentAsCompleted(c *gin.Context) {
 	}
 	if err := UnmarkAssessmentAsCompleted(c, courseParticipationID, coursePhaseID); err != nil {
 		// Check if the error is due to deadline being passed
-		if errors.Is(err, ErrDeadlinePassed) {
+		if errors.Is(err, coursePhaseConfig.ErrDeadlinePassed) {
 			handleError(c, http.StatusForbidden, err)
 		} else {
 			handleError(c, http.StatusInternalServerError, err)

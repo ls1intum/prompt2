@@ -20,6 +20,8 @@ interface AsssessmentConfigurationProps {
   type: AssessmentType
   assessmentTemplateId: string
   setAssessmentTemplateId: (id: string) => void
+  startDate: Date | undefined
+  setStartDate: (date: Date | undefined) => void
   deadline: Date | undefined
   setDeadline: (date: Date | undefined) => void
   templates: AssessmentTemplate[]
@@ -31,6 +33,8 @@ export const AssessmentConfiguration = ({
   type,
   assessmentTemplateId,
   setAssessmentTemplateId,
+  startDate,
+  setStartDate,
   deadline,
   setDeadline,
   templates,
@@ -38,7 +42,7 @@ export const AssessmentConfiguration = ({
   setError,
 }: AsssessmentConfigurationProps) => {
   return (
-    <div className='grid xl:grid-cols-3 gap-4'>
+    <div className='grid xl:grid-cols-4 gap-4'>
       <div className='xl:col-span-2 space-y-4'>
         <div className='flex items-center gap-2'>
           <FileText className='h-4 w-4' />
@@ -73,6 +77,25 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <Calendar className='h-4 w-4' />
           <Label className='text-sm font-medium'>
+            {type === AssessmentType.SELF && 'Self Evaluation Start'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Start'}
+            {type === AssessmentType.ASSESSMENT && 'Assessment Start'}
+          </Label>
+        </div>
+        <div className='flex items-center gap-2'>
+          <DatePicker
+            date={startDate}
+            onSelect={(date) =>
+              setStartDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
+            }
+          />
+        </div>
+      </div>
+
+      <div className='space-y-4'>
+        <div className='flex items-center gap-2'>
+          <Calendar className='h-4 w-4' />
+          <Label className='text-sm font-medium'>
             {type === AssessmentType.SELF && 'Self Evaluation Deadline'}
             {type === AssessmentType.PEER && 'Peer Evaluation Deadline'}
             {type === AssessmentType.ASSESSMENT && 'Assessment Deadline'}
@@ -85,9 +108,6 @@ export const AssessmentConfiguration = ({
               setDeadline(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
             }
           />
-          {deadline && (
-            <span className='text-sm text-muted-foreground'>{format(deadline, 'dd.MM.yyyy')}</span>
-          )}
         </div>
       </div>
     </div>
