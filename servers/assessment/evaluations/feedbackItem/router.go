@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,15 +55,14 @@ func createOrUpdateFeedbackItem(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Students can only create feedback items where they are the author
-	if req.AuthorCourseParticipationID != courseParticipationID.(uuid.UUID) {
+	if req.AuthorCourseParticipationID != courseParticipationID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Students can only create feedback items as the author"})
 		return
 	}
@@ -85,14 +85,13 @@ func getMyFeedbackItems(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, err)
 		return
 	}
 
-	feedbackItems, err := ListFeedbackItemsByAuthorInPhase(c, courseParticipationID.(uuid.UUID), coursePhaseID)
+	feedbackItems, err := ListFeedbackItemsByAuthorInPhase(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -108,15 +107,14 @@ func deleteFeedbackItem(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Ensure the user is the author of the feedback item
-	if !IsFeedbackItemAuthor(c, feedbackItemID, courseParticipationID.(uuid.UUID)) {
+	if !IsFeedbackItemAuthor(c, feedbackItemID, courseParticipationID) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this feedback item"})
 		return
 	}

@@ -1,17 +1,15 @@
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
 import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
 import { DeadlineBadge } from '../../components/DeadlineBadge'
-import { CoursePhaseConfig } from '../../../interfaces/coursePhaseConfig'
+import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface SelfEvaluationStatusCardProps {
   isCompleted: boolean
-  coursePhaseConfig: CoursePhaseConfig | undefined
 }
 
-export const SelfEvaluationStatusCard = ({
-  isCompleted,
-  coursePhaseConfig,
-}: SelfEvaluationStatusCardProps) => {
+export const SelfEvaluationStatusCard = ({ isCompleted }: SelfEvaluationStatusCardProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
   return (
     <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
       <CardContent className='p-6'>
