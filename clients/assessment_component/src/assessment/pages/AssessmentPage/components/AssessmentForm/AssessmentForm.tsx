@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { AlertCircle } from 'lucide-react'
-import { format } from 'date-fns'
 
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import {
@@ -145,11 +144,12 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
+          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
         <CompetencyHeader
+          className='lg:col-span-2 2xl:col-span-1'
           competency={competency}
           competencyScore={assessment}
           completed={completed}
@@ -157,7 +157,7 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
-          className='2xl:col-span-4 grid grid-cols-1 lg:grid-cols-5 gap-1'
+          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
@@ -216,15 +216,6 @@ export const AssessmentForm = ({
               </FormItem>
             )}
           />
-
-          {assessment && (
-            <div className='text-xs text-muted-foreground mt-2'>
-              <div>
-                Last assessed by {assessment.author} at{' '}
-                {format(new Date(assessment.assessedAt), "MMM d, yyyy 'at' HH:mm")}
-              </div>
-            </div>
-          )}
 
           {error && !completed && (
             <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>

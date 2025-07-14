@@ -6,6 +6,8 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 
+import { AvatarStack } from './AvatarStack'
+
 interface ScoreLevelSelectorProps {
   className: string
   competency: Competency
@@ -24,7 +26,7 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   isEvaluation = false,
-  selfEvaluationScoreLevel = ScoreLevel.Good,
+  selfEvaluationScoreLevel = ScoreLevel.VeryBad,
   peerEvaluationScoreLevel,
 }: ScoreLevelSelectorProps) => {
   return (
@@ -34,15 +36,24 @@ export const ScoreLevelSelector = ({
         const isSelected = selectedScore === level
         const descriptionID = `score-level-${level}-description`
 
+        const avatars = [
+          ...(selfEvaluationScoreLevel && level === selfEvaluationScoreLevel
+            ? [<User key='self-evaluation-icon' size={20} className='text-blue-500' />]
+            : []),
+          ...(peerEvaluationScoreLevel && level === peerEvaluationScoreLevel
+            ? [<Users key='peer-evaluation-icon' size={20} className='text-green-500' />]
+            : []),
+        ]
+
         return (
-          <div key={level} className='relative'>
+          <div
+            key={level}
+            className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
+          >
             <div className='absolute -top-6 left-0 w-full'>
               <div className='flex justify-center items-center gap-2'>
-                {selfEvaluationScoreLevel && level === selfEvaluationScoreLevel && (
-                  <User size={20} className='text-blue-500' />
-                )}
-                {peerEvaluationScoreLevel && level === peerEvaluationScoreLevel && (
-                  <Users size={20} className='text-green-500' />
+                {(selfEvaluationScoreLevel || peerEvaluationScoreLevel) && (
+                  <AvatarStack avatars={avatars} size={20} overlap={0.7} />
                 )}
               </div>
             </div>
@@ -61,7 +72,6 @@ export const ScoreLevelSelector = ({
                 isSelected && config.textColor,
                 !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                 completed && 'opacity-80 cursor-not-allowed',
-                selectedScore && !isSelected && 'hidden lg:flex',
                 (selfEvaluationScoreLevel || peerEvaluationScoreLevel) && 'mt-2',
               )}
             >

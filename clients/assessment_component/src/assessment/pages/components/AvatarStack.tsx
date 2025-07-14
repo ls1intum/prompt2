@@ -14,7 +14,7 @@ export const AvatarStack = ({
   // For overlap: 0 = no overlap, 1 = completely overlapping
   // shift should decrease as more overlap is desired
   const shift = size * (1 - overlap)
-  const hoverShift = size * 0.1 // Small gap between items when hovered
+  const spreadGap = size * 0.3 // Gap between items when spread out
 
   return (
     <div
@@ -27,7 +27,6 @@ export const AvatarStack = ({
       {avatars.map((avatar, idx) => {
         // Calculate position and rotation
         const left = idx * shift
-        const hoverLeft = idx * hoverShift
         // z-index in reverse order, so later images are on top
         const zIndex = avatars.length - idx
         const center = (avatars.length - 1) / 2
@@ -37,19 +36,45 @@ export const AvatarStack = ({
           <div
             key={idx}
             className='absolute flex items-center justify-center transition-all duration-300 ease-in-out'
-            style={
-              {
-                width: size,
-                height: size,
-                left,
-                top: 0,
-                zIndex,
-                transform: `rotate(${rotation}deg)`,
-                '--hover-left': `${hoverLeft}px`,
-              } as React.CSSProperties & { '--hover-left': string }
-            }
+            style={{
+              width: size,
+              height: size,
+              left,
+              top: 0,
+              zIndex,
+              transform: `rotate(${rotation}deg)`,
+            }}
           >
-            <div className='group-hover:transform group-hover:rotate-0 group-hover:translate-x-[var(--hover-left)] transition-all duration-300 ease-in-out'>
+            <div
+              className='transition-all duration-300 ease-in-out group-hover:!rotate-0'
+              style={{
+                transform: `translateX(0px)`,
+              }}
+              onMouseEnter={(e) => {
+                const wrapper = e.currentTarget.closest('.group')
+                if (wrapper) {
+                  const allItems = wrapper.querySelectorAll('.absolute > div')
+                  allItems.forEach((item, itemIdx) => {
+                    const itemSpreadLeft =
+                      itemIdx * (size + spreadGap) - ((avatars.length - 1) * (size + spreadGap)) / 2
+                    ;(item as HTMLElement).style.transform =
+                      `translateX(${itemSpreadLeft}px) rotate(0deg)`
+                  })
+                }
+              }}
+              onMouseLeave={(e) => {
+                const wrapper = e.currentTarget.closest('.group')
+                if (wrapper) {
+                  const allItems = wrapper.querySelectorAll('.absolute > div')
+                  allItems.forEach((item, itemIdx) => {
+                    const itemCenter = (avatars.length - 1) / 2
+                    const itemRotation = (itemIdx - itemCenter) * rotationStep
+                    ;(item as HTMLElement).style.transform =
+                      `translateX(0px) rotate(${itemRotation}deg)`
+                  })
+                }
+              }}
+            >
               {avatar}
             </div>
           </div>
