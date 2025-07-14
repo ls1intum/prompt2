@@ -57,7 +57,7 @@ SELECT c.id,
                                cmp.description_very_good,
                                'weight',
                                cmp.weight,
-                               'mappedCompetencies',
+                               'mappedFromCompetencies',
                                COALESCE(
                                        (SELECT json_agg(cm.from_competency_id)
                                         FROM competency_map cm
