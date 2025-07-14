@@ -188,6 +188,9 @@ export function ActionItemPanel({
       <Card>
         <CardHeader>
           <CardTitle>Action Items</CardTitle>
+          <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+            Will be shown to students after the deadline
+          </p>
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (
