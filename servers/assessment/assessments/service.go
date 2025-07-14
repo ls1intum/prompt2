@@ -162,22 +162,23 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		ScoreLevel:   scoreLevelDTO.ScoreLevelVeryBad,
 		ScoreNumeric: pgtype.Float8{Float64: 0.0, Valid: true},
 	}
-	if len(assessments) > 0 {
-		exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
+
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
+	}
+
+	if exists {
+		dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {
-			log.Error("could not check assessment completion existence: ", err)
-			return assessmentDTO.StudentAssessment{}, errors.New("could not check assessment completion existence")
+			log.Error("could not get assessment completion: ", err)
+			return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
 		}
+		completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
+	}
 
-		if exists {
-			dbAssessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
-			if err != nil {
-				log.Error("could not get assessment completion: ", err)
-				return assessmentDTO.StudentAssessment{}, errors.New("could not get assessment completion")
-			}
-			completion = assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(dbAssessmentCompletion)
-		}
-
+	if len(assessments) > 0 {
 		studentScore, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
 		if err != nil {
 			log.Error("could not get score level: ", err)
