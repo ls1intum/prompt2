@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import {
   Textarea,
   Form,
@@ -12,11 +13,16 @@ import {
   FormMessage,
   cn,
 } from '@tumaet/prompt-ui-components'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
+
+import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
 import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
 import { Competency } from '../../../../interfaces/competency'
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+import {
+  ScoreLevel,
+  mapNumberToScoreLevel,
+  mapScoreLevelToNumber,
+} from '../../../../interfaces/scoreLevel'
 
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
@@ -102,16 +108,48 @@ export const AssessmentForm = ({
     }
   }
 
+  const { studentAssessment } = useStudentAssessmentStore()
+
+  const selfEvaluations = studentAssessment?.selfEvaluations.filter((se) =>
+    competency.mappedFromCompetencies.includes(se.competencyID),
+  )
+  const peerEvaluations = studentAssessment?.peerEvaluations.filter((pe) =>
+    competency.mappedFromCompetencies.includes(pe.competencyID),
+  )
+
+  const selfEvaluationScore =
+    (selfEvaluations ?? []).length > 0
+      ? mapNumberToScoreLevel(
+          (selfEvaluations ?? [])
+            .filter((se) => competency.mappedFromCompetencies.includes(se.competencyID))
+            .reduce(
+              (acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel ?? ScoreLevel.VeryBad),
+              0,
+            ),
+        )
+      : undefined
+
+  const peerEvaluationScore =
+    (peerEvaluations ?? []).length > 0
+      ? mapNumberToScoreLevel(
+          (peerEvaluations ?? [])
+            .filter((pe) => competency.mappedFromCompetencies.includes(pe.competencyID))
+            .reduce(
+              (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel ?? ScoreLevel.VeryBad),
+              0,
+            ),
+        )
+      : undefined
+
   return (
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
+          'grid grid-cols-1 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
         <CompetencyHeader
-          className='lg:col-span-2 2xl:col-span-1'
           competency={competency}
           competencyScore={assessment}
           completed={completed}
@@ -119,11 +157,13 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
-          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
+          className='2xl:col-span-4 grid grid-cols-1 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
+          selfEvaluationScoreLevel={selfEvaluationScore}
+          peerEvaluationScoreLevel={peerEvaluationScore}
         />
 
         <div className='flex flex-col h-full'>
