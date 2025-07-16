@@ -24,6 +24,8 @@ type AssessmentCompletionService struct {
 
 var AssessmentCompletionServiceSingleton *AssessmentCompletionService
 
+var ErrAssessmentCompleted = errors.New("assessment already completed")
+
 func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (bool, error) {
 	exists, err := AssessmentCompletionServiceSingleton.queries.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
 		CourseParticipationID: courseParticipationID,
@@ -37,9 +39,12 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 }
 
 func CheckAssessmentIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID uuid.UUID) error {
-	err := coursePhaseConfig.IsAssessmentOpen(ctx, coursePhaseID)
+	open, err := coursePhaseConfig.IsAssessmentOpen(ctx, coursePhaseID)
 	if err != nil {
 		return err
+	}
+	if !open {
+		return coursePhaseConfig.ErrNotStarted
 	}
 
 	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
@@ -61,8 +66,7 @@ func CheckAssessmentIsEditable(ctx context.Context, qtx *db.Queries, courseParti
 		}
 
 		if completion.Completed {
-			log.Error("assessment completion already exists and is marked as completed")
-			return errors.New("assessment completion already exists and is marked as completed")
+			return ErrAssessmentCompleted
 		}
 	}
 	return nil
@@ -81,7 +85,7 @@ func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipatio
 }
 
 func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
-	err := coursePhaseConfig.IsAssessmentOpen(ctx, req.CoursePhaseID)
+	err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -117,7 +121,7 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 }
 
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
-	err := coursePhaseConfig.IsAssessmentOpen(ctx, req.CoursePhaseID)
+	err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		return err
 	}
@@ -171,9 +175,12 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 }
 
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
-	err := coursePhaseConfig.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
+	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
 		return err
+	}
+	if deadlinePassed {
+		return coursePhaseConfig.ErrDeadlinePassed
 	}
 
 	err = AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{
