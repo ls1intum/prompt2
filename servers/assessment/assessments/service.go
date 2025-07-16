@@ -27,7 +27,7 @@ type AssessmentService struct {
 
 var AssessmentServiceSingleton *AssessmentService
 
-func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
+func CreateOrUpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -41,8 +41,7 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		return err
 	}
 
-	err = qtx.CreateAssessment(ctx, db.CreateAssessmentParams{
-		ID:                    uuid.New(),
+	err = qtx.CreateOrUpdateAssessment(ctx, db.CreateOrUpdateAssessmentParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         req.CoursePhaseID,
 		CompetencyID:          req.CompetencyID,
@@ -52,45 +51,11 @@ func CreateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAsses
 		Author:                req.Author,
 	})
 	if err != nil {
-		log.Error("could not create assessment: ", err)
-		return errors.New("could not create assessment")
+		log.Error("could not create or update assessment: ", err)
+		return errors.New("could not create or update assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
-		log.Error("could not commit assessment creation: ", err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
-	}
-	return nil
-}
-
-func UpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
-	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
-
-	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
-
-	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, req.CourseParticipationID, req.CoursePhaseID)
-	if err != nil {
-		return err
-	}
-
-	err = qtx.UpdateAssessment(ctx, db.UpdateAssessmentParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-		CompetencyID:          req.CompetencyID,
-		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
-		Examples:              req.Examples,
-		Comment:               pgtype.Text{String: req.Comment, Valid: true},
-		Author:                req.Author,
-	})
-	if err != nil {
-		log.Error("could not update assessment: ", err)
-		return errors.New("could not update assessment")
-	}
-	if err := tx.Commit(ctx); err != nil {
-		log.Error("could not commit assessment update: ", err)
+		log.Error("could not commit assessment creation/update: ", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return nil

@@ -27,8 +27,7 @@ import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
 import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
 
-import { useUpdateAssessment } from './hooks/useUpdateAssessment'
-import { useCreateAssessment } from './hooks/useCreateAssessment'
+import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
 
 interface AssessmentFormProps {
@@ -62,10 +61,8 @@ export const AssessmentForm = ({
     },
   })
 
-  const updateAssessment = useUpdateAssessment(setError)
-  const createAssessment = useCreateAssessment(setError)
+  const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
-  const { mutate } = assessment ? updateAssessment : createAssessment
   const selectedScore = form.watch('scoreLevel')
 
   useEffect(() => {
@@ -76,12 +73,12 @@ export const AssessmentForm = ({
         const isValid = await form.trigger('comment')
         if (isValid) {
           const data = form.getValues()
-          mutate(data)
+          createOrUpdateAssessment(data)
         }
       }
     })
     return () => subscription.unsubscribe()
-  }, [form, mutate, completed])
+  }, [form, createOrUpdateAssessment, completed])
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
