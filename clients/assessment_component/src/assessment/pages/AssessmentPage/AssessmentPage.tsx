@@ -87,10 +87,7 @@ export const AssessmentPage = (): JSX.Element => {
         />
       ))}
 
-      <AssessmentCompletion
-        studentAssessment={studentAssessment}
-        completed={studentAssessment.assessmentCompletion.completed}
-      />
+      <AssessmentCompletion />
     </div>
   )
 }
