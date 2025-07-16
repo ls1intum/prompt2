@@ -107,12 +107,13 @@ export const AssessmentForm = ({
     }
   }
 
-  const { studentAssessment } = useStudentAssessmentStore()
+  const { selfEvaluations: allSelfEvaluations, peerEvaluations: allPeerEvaluations } =
+    useStudentAssessmentStore()
 
-  const selfEvaluations = studentAssessment?.selfEvaluations.filter((se) =>
+  const selfEvaluations = allSelfEvaluations.filter((se) =>
     competency.mappedFromCompetencies.includes(se.competencyID),
   )
-  const peerEvaluations = studentAssessment?.peerEvaluations.filter((pe) =>
+  const peerEvaluations = allPeerEvaluations.filter((pe) =>
     competency.mappedFromCompetencies.includes(pe.competencyID),
   )
 
