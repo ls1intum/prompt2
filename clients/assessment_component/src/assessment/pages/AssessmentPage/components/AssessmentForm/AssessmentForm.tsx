@@ -119,19 +119,13 @@ export const AssessmentForm = ({
 
   const selfEvaluationScore = selfEvaluations?.length
     ? mapNumberToScoreLevel(
-        selfEvaluations.reduce(
-          (acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel ?? ScoreLevel.VeryBad),
-          0,
-        ),
+        selfEvaluations.reduce((acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel), 0),
       )
     : undefined
 
   const peerEvaluationScore = peerEvaluations?.length
     ? mapNumberToScoreLevel(
-        peerEvaluations.reduce(
-          (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel ?? ScoreLevel.VeryBad),
-          0,
-        ),
+        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0),
       )
     : undefined
 
