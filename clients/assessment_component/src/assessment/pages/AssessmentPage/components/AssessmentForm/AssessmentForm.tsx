@@ -117,29 +117,23 @@ export const AssessmentForm = ({
     competency.mappedFromCompetencies.includes(pe.competencyID),
   )
 
-  const selfEvaluationScore =
-    (selfEvaluations ?? []).length > 0
-      ? mapNumberToScoreLevel(
-          (selfEvaluations ?? [])
-            .filter((se) => competency.mappedFromCompetencies.includes(se.competencyID))
-            .reduce(
-              (acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel ?? ScoreLevel.VeryBad),
-              0,
-            ),
-        )
-      : undefined
+  const selfEvaluationScore = selfEvaluations?.length
+    ? mapNumberToScoreLevel(
+        selfEvaluations.reduce(
+          (acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel ?? ScoreLevel.VeryBad),
+          0,
+        ),
+      )
+    : undefined
 
-  const peerEvaluationScore =
-    (peerEvaluations ?? []).length > 0
-      ? mapNumberToScoreLevel(
-          (peerEvaluations ?? [])
-            .filter((pe) => competency.mappedFromCompetencies.includes(pe.competencyID))
-            .reduce(
-              (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel ?? ScoreLevel.VeryBad),
-              0,
-            ),
-        )
-      : undefined
+  const peerEvaluationScore = peerEvaluations?.length
+    ? mapNumberToScoreLevel(
+        peerEvaluations.reduce(
+          (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel ?? ScoreLevel.VeryBad),
+          0,
+        ),
+      )
+    : undefined
 
   return (
     <Form {...form}>
