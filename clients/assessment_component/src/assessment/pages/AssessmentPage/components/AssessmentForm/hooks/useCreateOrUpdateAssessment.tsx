@@ -9,6 +9,7 @@ export const useCreateOrUpdateAssessment = (setError: (error: string | undefined
 
   return useMutation({
     mutationFn: (assessment: CreateOrUpdateAssessmentRequest) => {
+      assessment.coursePhaseID = phaseId ?? ''
       return createOrUpdateAssessment(phaseId ?? '', assessment)
     },
     onSuccess: () => {
