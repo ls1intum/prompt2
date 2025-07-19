@@ -14,6 +14,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
+import { useTeamStore } from '../../../../zustand/useTeamStore'
 
 import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
 import { Competency } from '../../../../interfaces/competency'
@@ -106,6 +107,10 @@ export const AssessmentForm = ({
 
   const { selfEvaluations: allSelfEvaluations, peerEvaluations: allPeerEvaluations } =
     useStudentAssessmentStore()
+  const { teams } = useTeamStore()
+  const teamMembers = teams.find((t) =>
+    t.members.map((m) => m.courseParticipationID).includes(courseParticipationID ?? ''),
+  )?.members
 
   const selfEvaluations = allSelfEvaluations.filter((se) =>
     competency.mappedFromCompetencies.includes(se.competencyID),
@@ -125,6 +130,30 @@ export const AssessmentForm = ({
         peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0),
       )
     : undefined
+
+  const teamMembersWithScores =
+    teamMembers
+      ?.map((member) => {
+        const memberEvaluations = peerEvaluations.filter(
+          (pe) => pe.authorCourseParticipationID === member.courseParticipationID,
+        )
+        const averageScore =
+          memberEvaluations.length > 0
+            ? mapNumberToScoreLevel(
+                memberEvaluations.reduce(
+                  (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel),
+                  0,
+                ) / memberEvaluations.length,
+              )
+            : undefined
+        return averageScore !== undefined
+          ? {
+              name: member.studentName,
+              scoreLevel: averageScore,
+            }
+          : undefined
+      })
+      .filter((item) => item !== undefined) ?? []
 
   return (
     <Form {...form}>
@@ -150,6 +179,7 @@ export const AssessmentForm = ({
           completed={completed}
           selfEvaluationScoreLevel={selfEvaluationScore}
           peerEvaluationScoreLevel={peerEvaluationScore}
+          teamMembersWithScores={teamMembersWithScores}
         />
 
         <div className='flex flex-col h-full'>

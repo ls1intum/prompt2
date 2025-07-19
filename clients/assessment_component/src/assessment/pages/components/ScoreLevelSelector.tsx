@@ -1,5 +1,11 @@
 import { LockIcon, User, Users } from 'lucide-react'
-import { cn } from '@tumaet/prompt-ui-components'
+import {
+  cn,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 
 import { Competency } from '../../interfaces/competency'
 import { ScoreLevel } from '../../interfaces/scoreLevel'
@@ -7,6 +13,7 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AvatarStack } from './AvatarStack'
+import { StudentScoreBadge } from './StudentScoreBadge'
 
 interface ScoreLevelSelectorProps {
   className: string
@@ -17,6 +24,7 @@ interface ScoreLevelSelectorProps {
   isEvaluation?: boolean
   selfEvaluationScoreLevel?: ScoreLevel
   peerEvaluationScoreLevel?: ScoreLevel
+  teamMembersWithScores?: { name: string; scoreLevel: ScoreLevel }[]
 }
 
 export const ScoreLevelSelector = ({
@@ -28,6 +36,7 @@ export const ScoreLevelSelector = ({
   isEvaluation = false,
   selfEvaluationScoreLevel,
   peerEvaluationScoreLevel,
+  teamMembersWithScores,
 }: ScoreLevelSelectorProps) => {
   return (
     <div className={className}>
@@ -41,7 +50,25 @@ export const ScoreLevelSelector = ({
             ? [<User key='self-evaluation-icon' size={20} className='text-blue-500' />]
             : []),
           ...(peerEvaluationScoreLevel && level === peerEvaluationScoreLevel
-            ? [<Users key='peer-evaluation-icon' size={20} className='text-green-500' />]
+            ? [
+                <TooltipProvider key='peer-evaluation-icon'>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {teamMembersWithScores && teamMembersWithScores.length > 0
+                        ? teamMembersWithScores.map((member) => (
+                            <div key={member.name} className='flex items-center gap-1'>
+                              <span className='font-semibold'>{member.name}:</span>
+                              <StudentScoreBadge scoreLevel={member.scoreLevel} />
+                            </div>
+                          ))
+                        : undefined}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>,
+              ]
             : []),
         ]
 
