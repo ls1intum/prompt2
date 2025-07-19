@@ -126,7 +126,7 @@ func getMyEvaluations(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -178,7 +178,7 @@ func deleteEvaluation(c *gin.Context) {
 	courseParticipationID, er := utils.GetUserCourseParticipationID(c)
 	if er != nil {
 		log.Error("Error getting student courseParticipationID: ", er)
-		handleError(c, http.StatusUnauthorized, er)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(er), er)
 		return
 	}
 
