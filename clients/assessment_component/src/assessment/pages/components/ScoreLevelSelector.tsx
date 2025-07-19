@@ -12,7 +12,6 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 
-import { AvatarStack } from './AvatarStack'
 import { StudentScoreBadge } from './StudentScoreBadge'
 
 interface ScoreLevelSelectorProps {
@@ -34,7 +33,7 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   isEvaluation = false,
-  selfEvaluationScoreLevel,
+  selfEvaluationScoreLevel = ScoreLevel.Good,
   peerEvaluationScoreLevel,
   teamMembersWithScores,
 }: ScoreLevelSelectorProps) => {
@@ -45,33 +44,6 @@ export const ScoreLevelSelector = ({
         const isSelected = selectedScore === level
         const descriptionID = `score-level-${level}-description`
 
-        const avatars = [
-          ...(selfEvaluationScoreLevel && level === selfEvaluationScoreLevel
-            ? [<User key='self-evaluation-icon' size={20} className='text-blue-500' />]
-            : []),
-          ...(peerEvaluationScoreLevel && level === peerEvaluationScoreLevel
-            ? [
-                <TooltipProvider key='peer-evaluation-icon'>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {teamMembersWithScores && teamMembersWithScores.length > 0
-                        ? teamMembersWithScores.map((member) => (
-                            <div key={member.name} className='flex items-center gap-1'>
-                              <span className='font-semibold'>{member.name}:</span>
-                              <StudentScoreBadge scoreLevel={member.scoreLevel} />
-                            </div>
-                          ))
-                        : undefined}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>,
-              ]
-            : []),
-        ]
-
         return (
           <div
             key={level}
@@ -79,8 +51,27 @@ export const ScoreLevelSelector = ({
           >
             <div className='absolute -top-6 left-0 w-full'>
               <div className='flex justify-center items-center gap-2'>
-                {(selfEvaluationScoreLevel || peerEvaluationScoreLevel) && (
-                  <AvatarStack avatars={avatars} size={20} overlap={0.7} />
+                {selfEvaluationScoreLevel && level === selfEvaluationScoreLevel && (
+                  <User key='self-evaluation-icon' size={20} className='text-blue-500' />
+                )}
+                {peerEvaluationScoreLevel && level === peerEvaluationScoreLevel && (
+                  <TooltipProvider key='peer-evaluation-icon'>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {teamMembersWithScores && teamMembersWithScores.length > 0
+                          ? teamMembersWithScores.map((member) => (
+                              <div key={member.name} className='flex items-center gap-1'>
+                                <span className='font-semibold'>{member.name}:</span>
+                                <StudentScoreBadge scoreLevel={member.scoreLevel} />
+                              </div>
+                            ))
+                          : undefined}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             </div>
