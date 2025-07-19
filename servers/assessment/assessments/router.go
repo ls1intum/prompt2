@@ -14,8 +14,7 @@ func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	assessmentRouter := routerGroup.Group("/student-assessment")
 
 	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentsByCoursePhase)
-	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createAssessment)
-	assessmentRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateAssessment)
+	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessment)
 	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentAssessment)
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentsByStudentInPhase)
 	assessmentRouter.DELETE("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)
@@ -38,32 +37,18 @@ func listAssessmentsByCoursePhase(c *gin.Context) {
 	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
 }
 
-func createAssessment(c *gin.Context) {
+func createOrUpdateAssessment(c *gin.Context) {
 	var req assessmentDTO.CreateOrUpdateAssessmentRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err := CreateAssessment(c, req)
+	err := CreateOrUpdateAssessment(c, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Assessment created successfully"})
-}
-
-func updateAssessment(c *gin.Context) {
-	var req assessmentDTO.CreateOrUpdateAssessmentRequest
-	if err := c.BindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	err := UpdateAssessment(c, req)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Assessment updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Assessment created/updated successfully"})
 }
 
 func getStudentAssessment(c *gin.Context) {

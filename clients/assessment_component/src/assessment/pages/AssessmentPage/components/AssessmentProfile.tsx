@@ -31,7 +31,7 @@ export const AssessmentProfile = ({
                   {participant.student.firstName} {participant.student.lastName}
                 </h1>
 
-                <div className='flex items-center gap-1'>
+                <div className='flex flex-wrap items-center justify-center gap-1'>
                   <AssessmentStatusBadge
                     remainingAssessments={remainingAssessments}
                     isFinalized={studentAssessment.assessmentCompletion.completed}

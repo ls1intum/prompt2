@@ -13,7 +13,7 @@ import { Competency } from '../../interfaces/competency'
 import { CompetencyScore } from '../../interfaces/competencyScore'
 
 interface CompetencyHeaderProps {
-  className: string
+  className?: string
   competency: Competency
   competencyScore?: CompetencyScore
   completed: boolean

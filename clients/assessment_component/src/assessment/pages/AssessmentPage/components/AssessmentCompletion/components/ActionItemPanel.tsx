@@ -1,9 +1,9 @@
-'use client'
-
 import { useParams } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -12,11 +12,11 @@ import {
   ErrorPage,
   Button,
 } from '@tumaet/prompt-ui-components'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
 import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
 import { getAllActionItemsForStudentInPhase } from '../../../../../network/queries/getAllActionItemsForStudentInPhase'
+
+import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
 
 import { useCreateActionItem } from '../hooks/useCreateActionItem'
 import { useUpdateActionItem } from '../hooks/useUpdateActionItem'
@@ -24,15 +24,7 @@ import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
 import { DeleteActionItemDialog } from './DeleteActionItemDialog'
 import { ItemRow } from '../../../../components/ItemRow'
 
-interface ActionItemPanelProps {
-  courseParticipationID: string
-  completed?: boolean
-}
-
-export function ActionItemPanel({
-  courseParticipationID,
-  completed = false,
-}: ActionItemPanelProps) {
+export function ActionItemPanel() {
   const { phaseId } = useParams<{
     phaseId: string
   }>()
@@ -42,6 +34,10 @@ export function ActionItemPanel({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
+  const { courseParticipationID, assessmentCompletion } = useStudentAssessmentStore()
+
+  const completed = assessmentCompletion?.completed ?? false
+
   const {
     data: actionItems = [],
     isPending: isGetActionItemsPending,
@@ -49,7 +45,7 @@ export function ActionItemPanel({
     refetch,
   } = useQuery<ActionItem[]>({
     queryKey: ['actionItems', phaseId, courseParticipationID],
-    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID),
+    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ' '),
   })
 
   const { mutate: createActionItem, isPending: isCreatePending } = useCreateActionItem(setError)
@@ -80,7 +76,7 @@ export function ActionItemPanel({
         await createActionItem(
           {
             coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID,
+            courseParticipationID: courseParticipationID ?? '',
             action: '',
             author: userName,
           },
@@ -109,7 +105,7 @@ export function ActionItemPanel({
           const updateRequest: UpdateActionItemRequest = {
             id: item.id,
             coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID,
+            courseParticipationID: courseParticipationID ?? '',
             action: text.trim(),
             author: userName,
           }
@@ -190,6 +186,9 @@ export function ActionItemPanel({
       <Card>
         <CardHeader>
           <CardTitle>Action Items</CardTitle>
+          <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+            Will be shown to students after the deadline
+          </p>
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (

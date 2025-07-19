@@ -60,7 +60,7 @@ func (q *Queries) CountRemainingAssessmentsForStudent(ctx context.Context, arg C
 	return i, err
 }
 
-const createAssessment = `-- name: CreateAssessment :exec
+const createOrUpdateAssessment = `-- name: CreateOrUpdateAssessment :exec
 INSERT INTO assessment (id,
                         course_participation_id,
                         course_phase_id,
@@ -70,11 +70,17 @@ INSERT INTO assessment (id,
                         assessed_at,
                         author,
                         examples)
-VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8)
+VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6, $7)
+ON CONFLICT (course_participation_id, course_phase_id, competency_id)
+    DO UPDATE
+    SET score_level = EXCLUDED.score_level,
+        comment     = EXCLUDED.comment,
+        assessed_at = CURRENT_TIMESTAMP,
+        author      = EXCLUDED.author,
+        examples    = EXCLUDED.examples
 `
 
-type CreateAssessmentParams struct {
-	ID                    uuid.UUID   `json:"id"`
+type CreateOrUpdateAssessmentParams struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
 	CompetencyID          uuid.UUID   `json:"competency_id"`
@@ -84,9 +90,8 @@ type CreateAssessmentParams struct {
 	Examples              string      `json:"examples"`
 }
 
-func (q *Queries) CreateAssessment(ctx context.Context, arg CreateAssessmentParams) error {
-	_, err := q.db.Exec(ctx, createAssessment,
-		arg.ID,
+func (q *Queries) CreateOrUpdateAssessment(ctx context.Context, arg CreateOrUpdateAssessmentParams) error {
+	_, err := q.db.Exec(ctx, createOrUpdateAssessment,
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.CompetencyID,
@@ -293,39 +298,4 @@ func (q *Queries) ListAssessmentsByStudentInPhase(ctx context.Context, arg ListA
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateAssessment = `-- name: UpdateAssessment :exec
-UPDATE assessment
-SET score_level = $4,
-    comment     = $5,
-    assessed_at = CURRENT_TIMESTAMP,
-    author      = $6,
-    examples    = $7
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND competency_id = $3
-`
-
-type UpdateAssessmentParams struct {
-	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
-	CompetencyID          uuid.UUID   `json:"competency_id"`
-	ScoreLevel            ScoreLevel  `json:"score_level"`
-	Comment               pgtype.Text `json:"comment"`
-	Author                string      `json:"author"`
-	Examples              string      `json:"examples"`
-}
-
-func (q *Queries) UpdateAssessment(ctx context.Context, arg UpdateAssessmentParams) error {
-	_, err := q.db.Exec(ctx, updateAssessment,
-		arg.CourseParticipationID,
-		arg.CoursePhaseID,
-		arg.CompetencyID,
-		arg.ScoreLevel,
-		arg.Comment,
-		arg.Author,
-		arg.Examples,
-	)
-	return err
 }

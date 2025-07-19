@@ -124,14 +124,13 @@ func getMyEvaluations(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, ok := c.Get("courseParticipationID")
-	if !ok {
-		log.Error("Error getting courseParticipationID from context")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "courseParticipationID not found"})
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, http.StatusUnauthorized, err)
 		return
 	}
 
-	evaluations, err := GetEvaluationsForAuthorInPhase(c, courseParticipationID.(uuid.UUID), coursePhaseID)
+	evaluations, err := GetEvaluationsForAuthorInPhase(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

@@ -16,7 +16,8 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 
-import { StudentAssessment } from '../../../../interfaces/studentAssessment'
+import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
+import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
 
@@ -26,29 +27,20 @@ import { GradeSuggestion } from './components/GradeSuggestion'
 import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdateAssessmentCompletion'
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
-import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 
 import { validateGrade } from './utils/validateGrade'
 
-interface AssessmentFeedbackProps {
-  studentAssessment: StudentAssessment
-  completed?: boolean
-}
-
-export const AssessmentCompletion = ({
-  studentAssessment,
-  completed = false,
-}: AssessmentFeedbackProps) => {
+export const AssessmentCompletion = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const deadline = coursePhaseConfig?.deadline || undefined
 
-  const [generalRemarks, setGeneralRemarks] = useState(
-    studentAssessment.assessmentCompletion?.comment || '',
-  )
+  const { courseParticipationID, assessmentCompletion } = useStudentAssessmentStore()
+
+  const [generalRemarks, setGeneralRemarks] = useState(assessmentCompletion?.comment || '')
   const [gradeSuggestion, setGradeSuggestion] = useState(
-    studentAssessment.assessmentCompletion?.gradeSuggestion?.toString() || '',
+    assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -76,13 +68,13 @@ export const AssessmentCompletion = ({
   const handleConfirm = () => {
     const handleCompletion = async () => {
       try {
-        if (studentAssessment.assessmentCompletion.completed) {
+        if (assessmentCompletion?.completed ?? false) {
           // Check if deadline has passed before unmarking
           if (isDeadlinePassed) {
             setError('Cannot unmark assessment as completed: deadline has passed.')
             return
           }
-          await unmarkAsCompleted(studentAssessment.courseParticipationID)
+          await unmarkAsCompleted(courseParticipationID ?? '')
         } else {
           // Validate grade before final submission
           const gradeValidation = validateGrade(gradeSuggestion)
@@ -91,15 +83,14 @@ export const AssessmentCompletion = ({
             return
           }
 
-          const completionData = {
-            courseParticipationID: studentAssessment.courseParticipationID,
+          await markAsComplete({
+            courseParticipationID: courseParticipationID ?? '',
             coursePhaseID: phaseId ?? '',
             comment: generalRemarks.trim(),
             gradeSuggestion: gradeValidation.value ?? 5.0,
             author: userName,
             completed: true,
-          }
-          await markAsComplete(completionData)
+          })
         }
         setDialogOpen(false)
       } catch (err) {
@@ -113,7 +104,6 @@ export const AssessmentCompletion = ({
   const handleSaveFormData = async (newRemarks: string, newGrade: string) => {
     if (newRemarks.trim() || newGrade) {
       try {
-        // Validate grade before saving
         const gradeValidation = validateGrade(newGrade)
         if (!gradeValidation.isValid) {
           setError(`Failed to save: ${gradeValidation.error}`)
@@ -121,12 +111,12 @@ export const AssessmentCompletion = ({
         }
 
         await createOrUpdateCompletion({
-          courseParticipationID: studentAssessment.courseParticipationID,
+          courseParticipationID: courseParticipationID ?? '',
           coursePhaseID: phaseId ?? '',
           comment: newRemarks.trim(),
           gradeSuggestion: gradeValidation.value ?? 5.0,
           author: userName,
-          completed: studentAssessment.assessmentCompletion.completed,
+          completed: false,
         })
 
         setError(undefined)
@@ -152,26 +142,20 @@ export const AssessmentCompletion = ({
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
                 onBlur={() => handleSaveFormData(generalRemarks, gradeSuggestion)}
-                disabled={completed}
+                disabled={assessmentCompletion?.completed ?? false}
               />
             </CardContent>
           </Card>
 
           <GradeSuggestion
-            studentScore={studentAssessment.studentScore}
-            gradeSuggestion={gradeSuggestion}
             onGradeSuggestionChange={(value) => {
               setGradeSuggestion(value)
               handleSaveFormData(generalRemarks, value)
             }}
-            disabled={completed}
           />
         </div>
 
-        <ActionItemPanel
-          courseParticipationID={studentAssessment.courseParticipationID}
-          completed={studentAssessment.assessmentCompletion.completed}
-        />
+        <ActionItemPanel />
       </div>
 
       {error && !dialogOpen && (
@@ -190,7 +174,7 @@ export const AssessmentCompletion = ({
               )}
             </div>
           )}
-          {isDeadlinePassed && studentAssessment.assessmentCompletion.completed && (
+          {isDeadlinePassed && assessmentCompletion?.completed && (
             <div className='text-sm text-red-600 mt-1'>
               Assessments cannot be unmarked as final after the deadline has passed.
             </div>
@@ -199,12 +183,10 @@ export const AssessmentCompletion = ({
 
         <Button
           size='sm'
-          disabled={
-            isPending || (studentAssessment.assessmentCompletion.completed && isDeadlinePassed)
-          }
+          disabled={isPending || (assessmentCompletion?.completed && isDeadlinePassed)}
           onClick={handleButtonClick}
         >
-          {studentAssessment.assessmentCompletion.completed ? (
+          {assessmentCompletion?.completed ? (
             <span className='flex items-center gap-1'>
               <Unlock className='h-3.5 w-3.5' />
               Unmark as Final
@@ -219,13 +201,11 @@ export const AssessmentCompletion = ({
       </div>
 
       <AssessmentCompletionDialog
-        completed={studentAssessment.assessmentCompletion.completed}
+        completed={assessmentCompletion?.completed ?? false}
         completedAt={
-          studentAssessment.assessmentCompletion.completedAt
-            ? new Date(studentAssessment.assessmentCompletion.completedAt)
-            : undefined
+          assessmentCompletion?.completedAt ? new Date(assessmentCompletion.completedAt) : undefined
         }
-        author={studentAssessment.assessmentCompletion.author}
+        author={assessmentCompletion?.author}
         isPending={isPending}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}

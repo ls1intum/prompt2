@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { AlertCircle } from 'lucide-react'
-import { format } from 'date-fns'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { AlertCircle } from 'lucide-react'
+
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 import {
   Textarea,
   Form,
@@ -12,18 +12,23 @@ import {
   FormMessage,
   cn,
 } from '@tumaet/prompt-ui-components'
-import { useAuthStore } from '@tumaet/prompt-shared-state'
+
+import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
+import { useTeamStore } from '../../../../zustand/useTeamStore'
 
 import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
 import { Competency } from '../../../../interfaces/competency'
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+import {
+  ScoreLevel,
+  mapNumberToScoreLevel,
+  mapScoreLevelToNumber,
+} from '../../../../interfaces/scoreLevel'
 
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
 import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
 
-import { useUpdateAssessment } from './hooks/useUpdateAssessment'
-import { useCreateAssessment } from './hooks/useCreateAssessment'
+import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
 
 interface AssessmentFormProps {
@@ -57,10 +62,8 @@ export const AssessmentForm = ({
     },
   })
 
-  const updateAssessment = useUpdateAssessment(setError)
-  const createAssessment = useCreateAssessment(setError)
+  const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
-  const { mutate } = assessment ? updateAssessment : createAssessment
   const selectedScore = form.watch('scoreLevel')
 
   useEffect(() => {
@@ -71,12 +74,12 @@ export const AssessmentForm = ({
         const isValid = await form.trigger('comment')
         if (isValid) {
           const data = form.getValues()
-          mutate(data)
+          createOrUpdateAssessment(data)
         }
       }
     })
     return () => subscription.unsubscribe()
-  }, [form, mutate, completed])
+  }, [form, createOrUpdateAssessment, completed])
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
@@ -102,6 +105,56 @@ export const AssessmentForm = ({
     }
   }
 
+  const { selfEvaluations: allSelfEvaluations, peerEvaluations: allPeerEvaluations } =
+    useStudentAssessmentStore()
+  const { teams } = useTeamStore()
+  const teamMembers = teams.find((t) =>
+    t.members.map((m) => m.courseParticipationID).includes(courseParticipationID ?? ''),
+  )?.members
+
+  const selfEvaluations = allSelfEvaluations.filter((se) =>
+    competency.mappedFromCompetencies.includes(se.competencyID),
+  )
+  const peerEvaluations = allPeerEvaluations.filter((pe) =>
+    competency.mappedFromCompetencies.includes(pe.competencyID),
+  )
+
+  const selfEvaluationScore = selfEvaluations?.length
+    ? mapNumberToScoreLevel(
+        selfEvaluations.reduce((acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel), 0),
+      )
+    : undefined
+
+  const peerEvaluationScore = peerEvaluations?.length
+    ? mapNumberToScoreLevel(
+        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0),
+      )
+    : undefined
+
+  const teamMembersWithScores =
+    teamMembers
+      ?.map((member) => {
+        const memberEvaluations = peerEvaluations.filter(
+          (pe) => pe.authorCourseParticipationID === member.courseParticipationID,
+        )
+        const averageScore =
+          memberEvaluations.length > 0
+            ? mapNumberToScoreLevel(
+                memberEvaluations.reduce(
+                  (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel),
+                  0,
+                ) / memberEvaluations.length,
+              )
+            : undefined
+        return averageScore !== undefined
+          ? {
+              name: member.studentName,
+              scoreLevel: averageScore,
+            }
+          : undefined
+      })
+      .filter((item) => item !== undefined) ?? []
+
   return (
     <Form {...form}>
       <div
@@ -119,11 +172,14 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
-          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
+          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
+          selfEvaluationScoreLevel={selfEvaluationScore}
+          peerEvaluationScoreLevel={peerEvaluationScore}
+          teamMembersWithScores={teamMembersWithScores}
         />
 
         <div className='flex flex-col h-full'>
@@ -176,15 +232,6 @@ export const AssessmentForm = ({
               </FormItem>
             )}
           />
-
-          {assessment && (
-            <div className='text-xs text-muted-foreground mt-2'>
-              <div>
-                Last assessed by {assessment.author} at{' '}
-                {format(new Date(assessment.assessedAt), "MMM d, yyyy 'at' HH:mm")}
-              </div>
-            </div>
-          )}
 
           {error && !completed && (
             <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>

@@ -1,19 +1,23 @@
 import { useParams } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 
-import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
-import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
+import { useStudentAssessmentStore } from '../../zustand/useStudentAssessmentStore'
+
+import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
+
 import { AssessmentProfile } from './components/AssessmentProfile'
+import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
 
+  const { setStudentAssessment } = useStudentAssessmentStore()
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(
@@ -34,6 +38,12 @@ export const AssessmentPage = (): JSX.Element => {
       }, 0) - (studentAssessment?.assessments?.length || 0)
     )
   }, [categories, studentAssessment?.assessments?.length])
+
+  useEffect(() => {
+    if (studentAssessment) {
+      setStudentAssessment(studentAssessment)
+    }
+  }, [studentAssessment, setStudentAssessment])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
@@ -77,10 +87,7 @@ export const AssessmentPage = (): JSX.Element => {
         />
       ))}
 
-      <AssessmentCompletion
-        studentAssessment={studentAssessment}
-        completed={studentAssessment.assessmentCompletion.completed}
-      />
+      <AssessmentCompletion />
     </div>
   )
 }

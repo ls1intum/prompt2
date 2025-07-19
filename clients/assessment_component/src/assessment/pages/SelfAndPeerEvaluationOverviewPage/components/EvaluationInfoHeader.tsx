@@ -1,20 +1,22 @@
 import { AlertCircle, CheckCircle2, Clock, User, Users, Calendar } from 'lucide-react'
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
 import { format } from 'date-fns'
-import { CoursePhaseConfig } from '../../../interfaces/coursePhaseConfig'
+
 import { Team } from '../../../interfaces/team'
+
+import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface EvaluationInfoHeaderProps {
   allEvaluationsCompleted: boolean
-  coursePhaseConfig: CoursePhaseConfig | undefined
   team: Team | undefined
 }
 
 export const EvaluationInfoHeader = ({
   allEvaluationsCompleted,
-  coursePhaseConfig,
   team,
 }: EvaluationInfoHeaderProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
   const now = new Date()
   const selfEvaluationStarted =
     !coursePhaseConfig?.selfEvaluationStart ||
@@ -26,12 +28,18 @@ export const EvaluationInfoHeader = ({
   const evaluationsNotStarted =
     !selfEvaluationStarted || (coursePhaseConfig?.peerEvaluationEnabled && !peerEvaluationStarted)
 
+  const isAssessmentDeadlinePassed = coursePhaseConfig?.deadline
+    ? now >= new Date(coursePhaseConfig.deadline)
+    : false
+
   return (
     <Card className='mb-8 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
       <CardContent className='p-6'>
         <div className='flex items-start gap-4'>
           <div className='flex-shrink-0'>
-            {allEvaluationsCompleted ? (
+            {isAssessmentDeadlinePassed ? (
+              <CheckCircle2 className='h-8 w-8 text-blue-500 dark:text-blue-400' />
+            ) : allEvaluationsCompleted ? (
               <CheckCircle2 className='h-8 w-8 text-green-500 dark:text-green-400' />
             ) : evaluationsNotStarted ? (
               <Calendar className='h-8 w-8 text-orange-500 dark:text-orange-400' />
@@ -41,13 +49,21 @@ export const EvaluationInfoHeader = ({
           </div>
           <div className='flex-1'>
             <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-              {allEvaluationsCompleted
-                ? 'All Evaluations Completed!'
-                : evaluationsNotStarted
-                  ? 'Evaluations Not Yet Available'
-                  : 'Instructions'}
+              {isAssessmentDeadlinePassed
+                ? 'Assessment Results Available'
+                : allEvaluationsCompleted
+                  ? 'All Evaluations Completed!'
+                  : evaluationsNotStarted
+                    ? 'Evaluations Not Yet Available'
+                    : 'Instructions'}
             </h2>
-            {allEvaluationsCompleted ? (
+            {isAssessmentDeadlinePassed ? (
+              <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
+                The assessment deadline has passed and your evaluation results are now available.
+                You can view your action items and grade suggestions below to understand areas for
+                improvement.
+              </p>
+            ) : allEvaluationsCompleted ? (
               <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
                 Congratulations! You have successfully completed all required evaluations. Your
                 self-evaluation
