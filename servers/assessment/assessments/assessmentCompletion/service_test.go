@@ -86,7 +86,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New() // Use a new UUID to avoid conflicts
 
-	// Create test completion DTO
+	// Create test completion DTO with Completed: false so it can be updated later
 	completionDTO := assessmentCompletionDTO.AssessmentCompletion{
 		CourseParticipationID: partID,
 		CoursePhaseID:         phaseID,
@@ -94,7 +94,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 		Author:                "Test Author",
 		Comment:               "Test comment for assessment completion",
 		GradeSuggestion:       3.5,
-		Completed:             true,
+		Completed:             false, // Start with incomplete so we can update it
 	}
 
 	// Test creation
@@ -118,13 +118,13 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	gradeSuggestionFloat, err := completion.GradeSuggestion.Float64Value()
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 3.5, gradeSuggestionFloat.Float64)
-	assert.True(suite.T(), completion.Completed)
+	assert.False(suite.T(), completion.Completed) // Should be false initially
 
 	// Test update
 	completionDTO.Comment = "Updated test comment"
 	completionDTO.Author = "Updated Author"
 	completionDTO.GradeSuggestion = 2.0
-	completionDTO.Completed = false
+	completionDTO.Completed = false // Keep it false to allow updates
 
 	err = CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completionDTO)
 	assert.NoError(suite.T(), err, "Expected no error while updating assessment completion")

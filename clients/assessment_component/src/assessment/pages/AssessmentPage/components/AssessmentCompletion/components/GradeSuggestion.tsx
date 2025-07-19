@@ -31,6 +31,9 @@ export const GradeSuggestion = ({
     <Card>
       <CardHeader>
         <CardTitle>Grade Suggestion</CardTitle>
+        <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+          Will be shown to students after the deadline
+        </p>
         {studentScore.scoreNumeric > 0 ? (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Platform recommendation:</p>

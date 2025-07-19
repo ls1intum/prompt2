@@ -94,80 +94,56 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 	return tx.Commit(ctx)
 }
 
-func IsAssessmentOpen(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsAssessmentOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	open, err := CoursePhaseConfigSingleton.queries.IsAssessmentOpen(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if assessment is open: ", err)
-		return errors.New("could not check if assessment is open")
+		return false, errors.New("could not check if assessment is open")
 	}
-	if !open {
-		return ErrNotStarted
-	}
-
-	return nil
+	return open, nil
 }
 
-func IsAssessmentDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsAssessmentDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if assessment deadline has passed: ", err)
-		return errors.New("could not check if assessment deadline has passed")
+		return false, errors.New("could not check if assessment deadline has passed")
 	}
-	if deadlinePassed {
-		return ErrDeadlinePassed
-	}
-
-	return nil
+	return deadlinePassed, nil
 }
 
-func IsSelfEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsSelfEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	open, err := CoursePhaseConfigSingleton.queries.IsSelfEvaluationOpen(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if self evaluation is open: ", err)
-		return errors.New("could not check if self evaluation is open")
+		return false, errors.New("could not check if self evaluation is open")
 	}
-	if !open {
-		return ErrNotStarted
-	}
-
-	return nil
+	return open, nil
 }
 
-func IsSelfEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsSelfEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsSelfEvaluationDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if self evaluation deadline has passed: ", err)
-		return errors.New("could not check if self evaluation deadline has passed")
+		return false, errors.New("could not check if self evaluation deadline has passed")
 	}
-	if deadlinePassed {
-		return ErrDeadlinePassed
-	}
-
-	return nil
+	return deadlinePassed, nil
 }
 
-func IsPeerEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsPeerEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	open, err := CoursePhaseConfigSingleton.queries.IsPeerEvaluationOpen(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if peer evaluation is open: ", err)
-		return errors.New("could not check if peer evaluation is open")
+		return false, errors.New("could not check if peer evaluation is open")
 	}
-	if !open {
-		return ErrNotStarted
-	}
-
-	return nil
+	return open, nil
 }
 
-func IsPeerEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) error {
+func IsPeerEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
 	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsPeerEvaluationDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not check if peer evaluation deadline has passed: ", err)
-		return errors.New("could not check if peer evaluation deadline has passed")
+		return false, errors.New("could not check if peer evaluation deadline has passed")
 	}
-	if deadlinePassed {
-		return ErrDeadlinePassed
-	}
-
-	return nil
+	return deadlinePassed, nil
 }
