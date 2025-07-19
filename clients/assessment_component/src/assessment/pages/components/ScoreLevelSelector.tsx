@@ -33,7 +33,7 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   isEvaluation = false,
-  selfEvaluationScoreLevel = ScoreLevel.Good,
+  selfEvaluationScoreLevel,
   peerEvaluationScoreLevel,
   teamMembersWithScores,
 }: ScoreLevelSelectorProps) => {
