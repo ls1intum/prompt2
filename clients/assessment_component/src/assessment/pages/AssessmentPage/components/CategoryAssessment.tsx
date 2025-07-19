@@ -2,10 +2,14 @@ import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 
-import type { CategoryWithCompetencies } from '../../../interfaces/category'
-import type { Assessment } from '../../../interfaces/assessment'
+import { CategoryWithCompetencies } from '../../../interfaces/category'
+import { Assessment } from '../../../interfaces/assessment'
+import { mapNumberToScoreLevel } from '../../../interfaces/scoreLevel'
+
+import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
 
 import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
+import { StudentScoreBadge } from '../../components/StudentScoreBadge'
 
 import { AssessmentForm } from './AssessmentForm/AssessmentForm'
 
@@ -30,9 +34,11 @@ export const CategoryAssessment = ({
     setIsExpanded(!isExpanded)
   }
 
+  const categoryScore = getWeightedScoreLevel(assessments, [category])
+
   return (
     <div key={category.id} className='mb-6'>
-      <div className='flex items-center mb-4'>
+      <div className='flex items-center justify-center mb-4'>
         <button
           onClick={toggleExpand}
           className='p-1 mr-2 hover:bg-gray-100 rounded-sm focus:outline-none'
@@ -42,6 +48,12 @@ export const CategoryAssessment = ({
           {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
         </button>
         <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
+        {assessments.length > 0 && (
+          <StudentScoreBadge
+            scoreLevel={mapNumberToScoreLevel(categoryScore)}
+            scoreNumeric={categoryScore}
+          />
+        )}
         <AssessmentStatusBadge
           remainingAssessments={category.competencies.length - assessments.length}
           isFinalized={completed}

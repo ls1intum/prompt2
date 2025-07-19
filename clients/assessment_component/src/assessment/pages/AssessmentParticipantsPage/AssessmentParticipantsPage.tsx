@@ -87,7 +87,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         enableColumnFilter: true,
         extraData: scoreLevels.map((s) => ({
           courseParticipationID: s.courseParticipationID,
-          value: <StudentScoreBadge scoreLevel={s.scoreLevel} />,
+          value: <StudentScoreBadge scoreLevel={s.scoreLevel} showTooltip={true} />,
           stringValue: getLevelConfig(s.scoreLevel).title,
         })),
       },
