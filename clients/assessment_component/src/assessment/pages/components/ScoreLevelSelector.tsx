@@ -63,7 +63,7 @@ export const ScoreLevelSelector = ({
                       <TooltipContent>
                         {teamMembersWithScores && teamMembersWithScores.length > 0
                           ? teamMembersWithScores.map((member) => (
-                              <div key={member.name} className='flex items-center gap-1'>
+                              <div key={member.name} className='flex items-center gap-1 space-y-1'>
                                 <span className='font-semibold'>{member.name}:</span>
                                 <StudentScoreBadge scoreLevel={member.scoreLevel} />
                               </div>
