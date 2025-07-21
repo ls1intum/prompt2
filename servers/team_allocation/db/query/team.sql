@@ -34,9 +34,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -60,9 +61,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -84,9 +86,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members

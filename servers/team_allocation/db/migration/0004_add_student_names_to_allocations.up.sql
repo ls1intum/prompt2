@@ -1,6 +1,9 @@
 BEGIN;
 
 ALTER TABLE allocations
-ADD COLUMN student_full_name TEXT NOT NULL DEFAULT '';
+ADD COLUMN student_first_name TEXT NOT NULL DEFAULT '';
+
+ALTER TABLE allocations
+ADD COLUMN student_last_name TEXT NOT NULL DEFAULT '';
 
 COMMIT;

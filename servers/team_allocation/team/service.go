@@ -106,9 +106,10 @@ func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUp
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := TeamsServiceSingleton.queries.WithTx(tx)
 
-	for participationID, fullName := range req.StudentNamesPerID {
-		err := qtx.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
-			StudentFullName:       fullName,
+	for participationID, name := range req.StudentNamesPerID {
+		err := qtx.UpdateStudentNameForAllocation(ctx, db.UpdateStudentNameForAllocationParams{
+			StudentFirstName:      name.FirstName,
+			StudentLastName:       name.LastName,
 			CourseParticipationID: participationID,
 			CoursePhaseID:         req.CoursePhaseID,
 		})

@@ -8,14 +8,15 @@ import (
 )
 
 type Team struct {
-	ID      uuid.UUID    `json:"id"`
-	Name    string       `json:"name"`
-	Members []TeamMember `json:"members"`
+	ID      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	Members []Person  `json:"members"`
 }
 
-type TeamMember struct {
+type Person struct {
 	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	StudentName           string    `json:"studentName"`
+	StudentFirstName      string    `json:"studentFirstName"`
+	StudentLastName       string    `json:"studentLastName"`
 }
 
 func GetTeamDTOFromDBModel(dbTeam db.Team) Team {
@@ -34,7 +35,7 @@ func GetTeamDTOsFromDBModels(dbTeams []db.Team) []Team {
 }
 
 func GetTeamDTOFromAllocationRow(dbTeam db.GetAllocationsWithStudentNamesRow) (Team, error) {
-	var members []TeamMember
+	var members []Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
 		return Team{}, err
@@ -48,7 +49,7 @@ func GetTeamDTOFromAllocationRow(dbTeam db.GetAllocationsWithStudentNamesRow) (T
 }
 
 func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
-	var members []TeamMember
+	var members []Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
 		return Team{}, err
