@@ -52,7 +52,7 @@ SELECT t.id,
                                'tutorLastName', tu.last_name
                        )
                        ORDER BY tu.first_name
-                                ) FILTER (WHERE t.id IS NOT NULL),
+                                ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
                        '[]'::jsonb
        )::jsonb AS team_tutors
 FROM team t
@@ -87,7 +87,7 @@ SELECT t.id,
                                'tutorLastName', tu.last_name
                        )
                        ORDER BY tu.first_name
-                                ) FILTER (WHERE t.id IS NOT NULL),
+                                ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
                        '[]'::jsonb
        )::jsonb AS team_tutors
 FROM team t

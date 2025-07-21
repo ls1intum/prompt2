@@ -7,7 +7,7 @@ CREATE TABLE
     course_participation_id uuid NOT NULL,
     first_name              text NOT NULL,
     last_name               text NOT NULL,
-    team_id                 uuid,
+    team_id                 uuid NOT NULL,
     PRIMARY KEY (course_phase_id, course_participation_id),
     FOREIGN KEY (team_id, course_phase_id) REFERENCES team (id, course_phase_id) ON DELETE CASCADE
 );
