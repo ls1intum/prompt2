@@ -79,8 +79,8 @@ SELECT t.id,
                        jsonb_agg(
                        jsonb_build_object(
                                'courseParticipationID', a.course_participation_id,
-                               'studentFirstName', a.student_first_name,
-                               'studentLastName', a.student_last_name
+                               'firstName', a.student_first_name,
+                               'lastName', a.student_last_name
                        )
                        ORDER BY a.student_first_name
                                 ) FILTER (WHERE a.id IS NOT NULL),
@@ -90,8 +90,8 @@ SELECT t.id,
                        jsonb_agg(
                        jsonb_build_object(
                                'courseParticipationID', tu.course_participation_id,
-                               'tutorFirstName', tu.first_name,
-                               'tutorLastName', tu.last_name
+                               'firstName', tu.first_name,
+                               'lastName', tu.last_name
                        )
                        ORDER BY tu.first_name
                                 ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
@@ -173,8 +173,8 @@ SELECT t.id,
                        jsonb_agg(
                        jsonb_build_object(
                                'courseParticipationID', a.course_participation_id,
-                               'studentFirstName', a.student_first_name,
-                               'studentLastName', a.student_last_name
+                               'firstName', a.student_first_name,
+                               'lastName', a.student_last_name
                        )
                        ORDER BY a.student_first_name
                                 ) FILTER (WHERE a.id IS NOT NULL),
@@ -184,8 +184,8 @@ SELECT t.id,
                        jsonb_agg(
                        jsonb_build_object(
                                'courseParticipationID', tu.course_participation_id,
-                               'tutorFirstName', tu.first_name,
-                               'tutorLastName', tu.last_name
+                               'firstName', tu.first_name,
+                               'lastName', tu.last_name
                        )
                        ORDER BY tu.first_name
                                 ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
