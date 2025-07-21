@@ -9,7 +9,8 @@ ORDER BY name;
 SELECT *
 FROM team
 WHERE id = $1
-AND course_phase_id = $2; -- ensuring to get only teams in the authenticated course_phase
+  AND course_phase_id = $2;
+-- ensuring to get only teams in the authenticated course_phase
 
 -- name: CreateTeam :exec
 INSERT INTO team (id, name, course_phase_id)
@@ -19,89 +20,83 @@ VALUES ($1, $2, $3);
 UPDATE team
 SET name = $3
 WHERE id = $1
-AND course_phase_id = $2; -- ensuring to update only teams in the authenticated course_phase
+  AND course_phase_id = $2;
+-- ensuring to update only teams in the authenticated course_phase
 
 -- name: DeleteTeam :exec
-DELETE FROM team
+DELETE
+FROM team
 WHERE id = $1
-AND course_phase_id = $2; -- ensuring to delete only teams in the authenticated course_phase
+  AND course_phase_id = $2;
+-- ensuring to delete only teams in the authenticated course_phase
 
--- name: GetAllocationsWithStudentNames :many
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentFirstName',           a.student_first_name,
-        'studentLastName',            a.student_last_name
-      )
-      ORDER BY a.student_first_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.course_phase_id = $1
-GROUP BY
-  t.id, t.name
-ORDER BY
-  t.name;
+-- name: GetTeamsWithMembers :many
+SELECT t.id,
+       t.name,
+       COALESCE(
+                       jsonb_agg(
+                       jsonb_build_object(
+                               'courseParticipationID', a.course_participation_id,
+                               'studentFirstName', a.student_first_name,
+                               'studentLastName', a.student_last_name
+                       )
+                       ORDER BY a.student_first_name
+                                ) FILTER (WHERE a.id IS NOT NULL),
+                       '[]'::jsonb
+       )::jsonb AS team_members,
+       COALESCE(
+                       jsonb_agg(
+                       jsonb_build_object(
+                               'courseParticipationID', tu.course_participation_id,
+                               'tutorFirstName', tu.first_name,
+                               'tutorLastName', tu.last_name
+                       )
+                       ORDER BY tu.first_name
+                                ) FILTER (WHERE t.id IS NOT NULL),
+                       '[]'::jsonb
+       )::jsonb AS team_tutors
+FROM team t
+         LEFT JOIN
+     allocations a
+     ON t.id = a.team_id
+         LEFT JOIN tutor tu
+                   ON t.id = tu.team_id
+WHERE t.course_phase_id = $1
+GROUP BY t.id, t.name
+ORDER BY t.name;
 
--- name: GetAllocationsWithStudentNamesByID :one
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentFirstName',           a.student_first_name,
-        'studentLastName',            a.student_last_name
-      )
-      ORDER BY a.student_first_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.id = $1
-GROUP BY
-  t.id, t.name;
-
--- name: GetAllocationWithStudentNamesByTeamID :one
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentFirstName',           a.student_first_name,
-        'studentLastName',            a.student_last_name
-      )
-      ORDER BY a.student_first_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.course_phase_id = $1
+-- name: GetTeamWithMembersByTeamID :one
+SELECT t.id,
+       t.name,
+       COALESCE(
+                       jsonb_agg(
+                       jsonb_build_object(
+                               'courseParticipationID', a.course_participation_id,
+                               'studentFirstName', a.student_first_name,
+                               'studentLastName', a.student_last_name
+                       )
+                       ORDER BY a.student_first_name
+                                ) FILTER (WHERE a.id IS NOT NULL),
+                       '[]'::jsonb
+       )::jsonb AS team_members,
+       COALESCE(
+                       jsonb_agg(
+                       jsonb_build_object(
+                               'courseParticipationID', tu.course_participation_id,
+                               'tutorFirstName', tu.first_name,
+                               'tutorLastName', tu.last_name
+                       )
+                       ORDER BY tu.first_name
+                                ) FILTER (WHERE t.id IS NOT NULL),
+                       '[]'::jsonb
+       )::jsonb AS team_tutors
+FROM team t
+         LEFT JOIN
+     allocations a
+     ON t.id = a.team_id
+         LEFT JOIN tutor tu
+                   ON t.id = tu.team_id
+WHERE t.course_phase_id = $1
   AND t.id = $2
-GROUP BY
-  t.id, t.name
-ORDER BY
-  t.name;
+GROUP BY t.id, t.name
+ORDER BY t.name;

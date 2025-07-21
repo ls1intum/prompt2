@@ -97,3 +97,11 @@ type Team struct {
 	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
 	CreatedAt     pgtype.Timestamp `json:"created_at"`
 }
+
+type Tutor struct {
+	CoursePhaseID         uuid.UUID   `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
+	FirstName             string      `json:"first_name"`
+	LastName              string      `json:"last_name"`
+	TeamID                pgtype.UUID `json:"team_id"`
+}

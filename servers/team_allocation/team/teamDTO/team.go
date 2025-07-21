@@ -8,15 +8,16 @@ import (
 )
 
 type Team struct {
-	ID      uuid.UUID `json:"id"`
-	Name    string    `json:"name"`
-	Members []Person  `json:"members"`
+	ID      uuid.UUID `json:"id" binding:"uuid"`
+	Name    string    `json:"name" binding:"required"`
+	Members []Person  `json:"members" binding:"dive"`
+	Tutors  []Person  `json:"tutors" binding:"dive"`
 }
 
 type Person struct {
 	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	StudentFirstName      string    `json:"studentFirstName"`
-	StudentLastName       string    `json:"studentLastName"`
+	FirstName             string    `json:"firstName"`
+	LastName              string    `json:"lastName"`
 }
 
 func GetTeamDTOFromDBModel(dbTeam db.Team) Team {
@@ -34,43 +35,46 @@ func GetTeamDTOsFromDBModels(dbTeams []db.Team) []Team {
 	return teams
 }
 
-func GetTeamDTOFromAllocationRow(dbTeam db.GetAllocationsWithStudentNamesRow) (Team, error) {
-	var members []Person
-	// unmarshal the JSON blob into your slice of structs
-	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
-	}
+func GetTeamsWithMembersDTOFromDBModel(dbTeams []db.GetTeamsWithMembersRow) ([]Team, error) {
+	var teams []Team
 
-	return Team{
-		ID:      dbTeam.ID,
-		Name:    dbTeam.Name,
-		Members: members,
-	}, nil
-}
-
-func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
-	var members []Person
-	// unmarshal the JSON blob into your slice of structs
-	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
-	}
-
-	return Team{
-		ID:      dbTeam.ID,
-		Name:    dbTeam.Name,
-		Members: members,
-	}, nil
-}
-
-func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetAllocationsWithStudentNamesRow) ([]Team, error) {
-	teams := make([]Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
-		t, err := GetTeamDTOFromAllocationRow(dbTeam)
-		if err != nil {
-			// handle or log error; skip or abort as you preferable
+		var members []Person
+		var tutors []Person
+
+		if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
 			return nil, err
 		}
-		teams = append(teams, t)
+		if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
+			return nil, err
+		}
+
+		teams = append(teams, Team{
+			ID:      dbTeam.ID,
+			Name:    dbTeam.Name,
+			Members: members,
+			Tutors:  tutors,
+		})
 	}
+
 	return teams, nil
+}
+
+func GetTeamWithMembersByIdDTOFromDBModel(dbTeam db.GetTeamWithMembersByTeamIDRow) (Team, error) {
+	var members []Person
+	var tutors []Person
+	// unmarshal the JSON blob into your slice of structs
+	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
+		return Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
+		return Team{}, err
+	}
+
+	return Team{
+		ID:      dbTeam.ID,
+		Name:    dbTeam.Name,
+		Members: members,
+		Tutors:  tutors,
+	}, nil
 }
