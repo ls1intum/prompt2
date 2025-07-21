@@ -21,13 +21,15 @@ WITH numeric_scores AS (SELECT a.course_phase_id,
                                       ON a.competency_id = comp.id
                                  JOIN category cat
                                       ON comp.category_id = cat.id),
-     cat_weights AS (SELECT comp.category_id,
-                            SUM(comp.weight)::NUMERIC AS total_comp_weight,
-                            MAX(cat.weight)::NUMERIC  AS category_weight
-                     FROM competency comp
-                              JOIN category cat
-                                   ON comp.category_id = cat.id
-                     GROUP BY comp.category_id),
+     cat_weights AS (SELECT ns.course_phase_id,
+                            ns.course_participation_id,
+                            ns.category_id,
+                            SUM(ns.competency_weight)::NUMERIC AS total_comp_weight,
+                            MAX(ns.category_weight)::NUMERIC   AS category_weight
+                     FROM numeric_scores ns
+                     GROUP BY ns.course_phase_id,
+                              ns.course_participation_id,
+                              ns.category_id),
      competency_agg AS (SELECT course_phase_id,
                                course_participation_id,
                                category_id,
@@ -49,6 +51,8 @@ WITH numeric_scores AS (SELECT a.course_phase_id,
                       FROM competency_agg ca
                                JOIN cat_weights cw
                                     ON ca.category_id = cw.category_id
+                                        AND ca.course_phase_id = cw.course_phase_id
+                                        AND ca.course_participation_id = cw.course_participation_id
                       GROUP BY ca.course_phase_id,
                                ca.course_participation_id,
                                ca.category_id,

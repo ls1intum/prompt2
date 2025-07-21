@@ -6,23 +6,34 @@ export function getWeightedScoreLevel(
   competencyScores: CompetencyScore[],
   categories: CategoryWithCompetencies[],
 ): number {
-  const totalCategoryWeights = categories.reduce((total, category) => total + category.weight, 0)
-
-  const weightedCategoryScores = categories.map((category) => {
-    const totalCompetencyWeights = category.competencies.reduce(
-      (total, competency) => total + competency.weight,
-      0,
+  const totalWeightsOfCategoriesWithScore = categories
+    .filter((category) =>
+      category.competencies.some((competency) =>
+        competencyScores.some((score) => score.competencyID === competency.id),
+      ),
     )
+    .reduce((total, category) => total + category.weight, 0)
 
-    const weightedCompetencyScores = category.competencies.map((competency) => {
-      const scores = competencyScores
-        .filter((score) => score.competencyID === competency.id)
-        .map((score) => mapScoreLevelToNumber(score.scoreLevel) * competency.weight)
-      return scores.reduce((total, score) => total + score, 0) / totalCompetencyWeights
-    })
+  return (
+    categories
+      .map((category) => {
+        const totalWeightOfCompetenciesWithScore = category.competencies
+          .filter((competency) =>
+            competencyScores.some((score) => score.competencyID === competency.id),
+          )
+          .reduce((totalWeight, competency) => totalWeight + competency.weight, 0)
 
-    return weightedCompetencyScores.reduce((total, score) => total + score, 0)
-  })
-
-  return weightedCategoryScores.reduce((total, score) => total + score, 0) / totalCategoryWeights
+        return category.competencies
+          .map(
+            (competency) =>
+              competencyScores
+                .filter((score) => score.competencyID === competency.id)
+                .map((score) => mapScoreLevelToNumber(score.scoreLevel) * competency.weight)
+                .reduce((totalWeight, score) => totalWeight + score, 0) /
+              totalWeightOfCompetenciesWithScore,
+          )
+          .reduce((totalWeight, score) => totalWeight + score, 0)
+      })
+      .reduce((totalWeight, score) => totalWeight + score, 0) / totalWeightsOfCategoriesWithScore
+  )
 }
