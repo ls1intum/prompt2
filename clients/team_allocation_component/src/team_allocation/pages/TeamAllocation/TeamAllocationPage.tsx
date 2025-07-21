@@ -2,7 +2,7 @@ import type React from 'react'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { Loader2, Users, GraduationCap } from 'lucide-react'
+import { Loader2, Users } from 'lucide-react'
 
 import type { CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
 import type { Team } from '../../interfaces/team'
@@ -13,6 +13,8 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { AllocationSummaryCard } from './components/AllocationSummaryCard'
 
+import { getGravatarUrl } from '@/lib/getGravatarUrl'
+
 import {
   ErrorPage,
   ManagementPageHeader,
@@ -21,6 +23,9 @@ import {
   CardHeader,
   Badge,
   Separator,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
 } from '@tumaet/prompt-ui-components'
 
 export const TeamAllocationPage: React.FC = () => {
@@ -149,7 +154,7 @@ export const TeamAllocationPage: React.FC = () => {
                 <div>
                   <p className='text-sm font-medium mb-1'>Tutors:</p>
                   {team.tutors.length === 0 ? (
-                    <p className='text-sm italic text-muted-foreground'>No tutors assigned yet.</p>
+                    <p className='text-sm italic text-muted-foreground'>No tutors allocated yet.</p>
                   ) : (
                     <ul className='space-y-2'>
                       {team.tutors.map((tutor) => (
@@ -157,7 +162,16 @@ export const TeamAllocationPage: React.FC = () => {
                           key={tutor.courseParticipationID}
                           className='text-sm flex items-center gap-2'
                         >
-                          <GraduationCap className='h-4 w-4 text-muted-foreground' />
+                          <Avatar className='h-6 w-6'>
+                            <AvatarImage
+                              src={'https://github.com/shadcn.png'} // TODO: Placeholder, replace with actual tutor image URL if available
+                              alt={`${tutor.firstName} ${tutor.lastName}`}
+                            />
+                            <AvatarFallback className='text-xs font-medium'>
+                              {tutor.firstName[0]}
+                              {tutor.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
                           <span>
                             {tutor.firstName} {tutor.lastName}
                           </span>
@@ -177,10 +191,16 @@ export const TeamAllocationPage: React.FC = () => {
                     <ul className='space-y-2'>
                       {team.members.map((member) => (
                         <li key={member.id} className='text-sm flex items-center gap-2'>
-                          <div className='h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium'>
-                            {member.firstName[0]}
-                            {member.lastName[0]}
-                          </div>
+                          <Avatar className='h-6 w-6'>
+                            <AvatarImage
+                              src={getGravatarUrl(member.email)}
+                              alt={`${member.firstName} ${member.lastName}`}
+                            />
+                            <AvatarFallback className='text-xs font-medium'>
+                              {member.firstName[0]}
+                              {member.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
                           <span>
                             {member.firstName} {member.lastName}
                           </span>
