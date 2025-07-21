@@ -13,8 +13,6 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { AllocationSummaryCard } from './components/AllocationSummaryCard'
 
-import { TutorImportDialog } from './components/TutorImportDialog'
-
 import {
   ErrorPage,
   ManagementPageHeader,
@@ -111,9 +109,6 @@ export const TeamAllocationPage: React.FC = () => {
   return (
     <div className='space-y-6'>
       <ManagementPageHeader>Team Allocations</ManagementPageHeader>
-      <div className='flex justify-end'>
-        <TutorImportDialog />
-      </div>
       <AllocationSummaryCard
         coursePhaseParticipations={coursePhaseParticipations}
         teamAllocations={teamAllocations}

@@ -1,8 +1,9 @@
-import { Badge, Button, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
-import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
+import { Badge, Button, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
+import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Allocation } from '../../../interfaces/allocation'
+import { TutorImportDialog } from './TutorImportDialog'
 
 interface AllocationSummaryCardProps {
   coursePhaseParticipations: CoursePhaseParticipationsWithResolution | null
@@ -26,7 +27,6 @@ export const AllocationSummaryCard = ({
 
     const totalStudents = coursePhaseParticipations.participations.length
 
-    // Get all assigned student IDs from all allocations
     const assignedStudentIds = new Set<string>()
     teamAllocations.forEach((allocation) => {
       allocation.students.forEach((studentId) => {
@@ -66,6 +66,7 @@ export const AllocationSummaryCard = ({
           )}
         </div>
       </CardHeader>
+
       <CardContent className='pb-4'>
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
           <div className='bg-muted/40 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
@@ -97,7 +98,9 @@ export const AllocationSummaryCard = ({
           </div>
         </div>
       </CardContent>
-      <CardContent className='pt-0 pb-4 flex justify-end'>
+
+      <CardContent className='pt-0 pb-4 flex justify-between items-center'>
+        <TutorImportDialog />
         <Button asChild>
           <a href='/tease'>
             Go to Tease
