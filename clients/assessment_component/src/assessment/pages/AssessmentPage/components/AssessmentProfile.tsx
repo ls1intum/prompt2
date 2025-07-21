@@ -44,6 +44,7 @@ export const AssessmentProfile = ({
                 <StudentScoreBadge
                   scoreLevel={studentAssessment.studentScore.scoreLevel}
                   scoreNumeric={studentAssessment.studentScore.scoreNumeric}
+                  showTooltip={true}
                 />
               )}
             </div>
