@@ -69,12 +69,14 @@ export const AllocationSummaryCard = ({
 
       <CardContent className='pb-4'>
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-          <div className='bg-muted/40 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
-            <div className='rounded-full bg-background p-2 mb-2'>
-              <Users className='h-5 w-5 text-primary' />
+          <div className='bg-gray-50 dark:bg-gray-950 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
+            <div className='rounded-full bg-gray-100 dark:bg-gray-900/30 p-2 mb-2'>
+              <Users className='h-5 w-5 text-gray-600 dark:text-gray-400' />
             </div>
-            <p className='text-2xl font-bold'>{allocationStats.totalStudents}</p>
-            <p className='text-sm text-muted-foreground'>Total Students</p>
+            <p className='text-2xl font-bold text-gray-600 dark:text-gray-400'>
+              {allocationStats.totalStudents}
+            </p>
+            <p className='text-sm text-gray-600/80 dark:text-gray-400/80'>Total Students</p>
           </div>
 
           <div className='bg-green-50 dark:bg-green-950 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
