@@ -1,21 +1,21 @@
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
 import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
 import { DeadlineBadge } from '../../components/DeadlineBadge'
-import { CoursePhaseConfig } from '../../../interfaces/coursePhaseConfig'
+import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface PeerEvaluationStatusCardProps {
   completedEvaluations: number
   totalEvaluations: number
   isCompleted: boolean
-  coursePhaseConfig: CoursePhaseConfig | undefined
 }
 
 export const PeerEvaluationStatusCard = ({
   completedEvaluations,
   totalEvaluations,
   isCompleted,
-  coursePhaseConfig,
 }: PeerEvaluationStatusCardProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
   return (
     <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
       <CardContent className='p-6'>

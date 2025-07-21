@@ -10,28 +10,25 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 
-import { StudentScore } from '../../../../../interfaces/studentScore'
+import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
 
 import { StudentScoreBadge } from '../../../../components/StudentScoreBadge'
 
 interface GradeSuggestionProps {
-  studentScore: StudentScore
-  gradeSuggestion: string
   onGradeSuggestionChange: (value: string) => void
-  disabled?: boolean
 }
 
-export const GradeSuggestion = ({
-  studentScore,
-  gradeSuggestion,
-  onGradeSuggestionChange,
-  disabled = false,
-}: GradeSuggestionProps) => {
+export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
+  const { studentScore, assessmentCompletion } = useStudentAssessmentStore()
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Grade Suggestion</CardTitle>
-        {studentScore.scoreNumeric > 0 ? (
+        <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+          Will be shown to students after the deadline
+        </p>
+        {studentScore && studentScore.scoreNumeric > 0 ? (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Platform recommendation:</p>
             <StudentScoreBadge
@@ -43,7 +40,11 @@ export const GradeSuggestion = ({
         ) : undefined}
       </CardHeader>
       <CardContent>
-        <Select value={gradeSuggestion} onValueChange={onGradeSuggestionChange} disabled={disabled}>
+        <Select
+          value={assessmentCompletion?.gradeSuggestion.toFixed(1) ?? ''}
+          onValueChange={onGradeSuggestionChange}
+          disabled={assessmentCompletion?.completed ?? false}
+        >
           <SelectTrigger>
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
           </SelectTrigger>
