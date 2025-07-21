@@ -40,11 +40,10 @@ export const ScoreLevelSelector = ({
             aria-label={`Select ${config.title} score level`}
             aria-describedby={descriptionID}
             className={cn(
-              'w-full text-sm rounded-lg p-3 transition-all text-left flex flex-col justify-start bg-gray-50',
+              'w-full text-sm rounded-lg p-3 transition-all text-left flex flex-col justify-start',
               'focus:outline-none focus:ring-2 focus:ring-offset-2',
               !isSelected && 'hover:bg-gray-100',
-              isSelected && config.selectedBg,
-              isSelected && config.textColor,
+              isSelected ? cn(config.textColor, config.selectedBg) : 'bg-gray-50 dark:bg-gray-900',
               !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
               completed && 'opacity-80 cursor-not-allowed',
               selectedScore && !isSelected && 'hidden lg:flex',
@@ -64,7 +63,13 @@ export const ScoreLevelSelector = ({
               </div>
             </div>
 
-            <p id={descriptionID} className='line-clamp-3 text-muted-foreground'>
+            <p
+              id={descriptionID}
+              className={cn(
+                'line-clamp-3 text-muted-foreground',
+                isSelected && 'dark:text-gray-200',
+              )}
+            >
               {(() => {
                 const key =
                   `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency

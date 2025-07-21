@@ -38,26 +38,31 @@ export const CategoryAssessment = ({
 
   return (
     <div key={category.id} className='mb-6'>
-      <div className='flex items-center justify-center mb-4'>
-        <button
-          onClick={toggleExpand}
-          className='p-1 mr-2 hover:bg-gray-100 rounded-sm focus:outline-none'
-          aria-expanded={isExpanded}
-          aria-controls={`content-${category.id}`}
-        >
-          {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-        </button>
-        <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
-        {assessments.length > 0 && (
-          <StudentScoreBadge
-            scoreLevel={mapNumberToScoreLevel(categoryScore)}
-            scoreNumeric={categoryScore}
+      <div className='flex flex-grow items-center justify-center mb-4 gap-1'>
+        <div className='flex items-center justify-center w-full'>
+          <button
+            onClick={toggleExpand}
+            className='p-1 mr-2 hover:bg-gray-100 rounded-sm focus:outline-none'
+            aria-expanded={isExpanded}
+            aria-controls={`content-${category.id}`}
+          >
+            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+          </button>
+
+          <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
+        </div>
+        <div className='flex items-center justify-center gap-1'>
+          {assessments.length > 0 && (
+            <StudentScoreBadge
+              scoreLevel={mapNumberToScoreLevel(categoryScore)}
+              scoreNumeric={categoryScore}
+            />
+          )}
+          <AssessmentStatusBadge
+            remainingAssessments={category.competencies.length - assessments.length}
+            isFinalized={completed}
           />
-        )}
-        <AssessmentStatusBadge
-          remainingAssessments={category.competencies.length - assessments.length}
-          isFinalized={completed}
-        />
+        </div>
       </div>
 
       {isExpanded && (
