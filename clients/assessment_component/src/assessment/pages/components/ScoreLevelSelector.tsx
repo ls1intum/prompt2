@@ -40,7 +40,9 @@ export const ScoreLevelSelector = ({
             aria-label={`Select ${config.title} score level`}
             aria-describedby={descriptionID}
             className={cn(
-              'w-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
+              'w-full text-sm rounded-lg p-3 transition-all text-left flex flex-col justify-start bg-gray-50',
+              'focus:outline-none focus:ring-2 focus:ring-offset-2',
+              !isSelected && 'hover:bg-gray-100',
               isSelected && config.selectedBg,
               isSelected && config.textColor,
               !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',

@@ -106,7 +106,7 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md relative',
+          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
@@ -119,7 +119,7 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
-          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-1'
+          className='lg:col-span-2 2xl:col-span-4 flex gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
@@ -195,14 +195,12 @@ export const AssessmentForm = ({
         </div>
 
         {assessment && (
-          <div className='col-span-full'>
-            <DeleteAssessmentDialog
-              open={deleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-              onConfirm={handleDelete}
-              isDeleting={deleteAssessment.isPending}
-            />
-          </div>
+          <DeleteAssessmentDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onConfirm={handleDelete}
+            isDeleting={deleteAssessment.isPending}
+          />
         )}
       </div>
     </Form>

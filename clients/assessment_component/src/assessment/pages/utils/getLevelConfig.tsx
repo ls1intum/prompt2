@@ -18,7 +18,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         title: 'Very Bad',
         evaluationTitle: 'Strongly Disagree',
         textColor: 'text-red-700',
-        selectedBg: 'bg-red-100',
+        selectedBg: 'bg-red-200',
         icon: '🔴',
         border: 'border-red-300',
       }
@@ -27,7 +27,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         title: 'Bad',
         evaluationTitle: 'Disagree',
         textColor: 'text-orange-700',
-        selectedBg: 'bg-orange-100',
+        selectedBg: 'bg-orange-200',
         icon: '🟠',
         border: 'border-orange-300',
       }
@@ -36,7 +36,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         title: 'Ok',
         evaluationTitle: 'Neutral',
         textColor: 'text-yellow-700',
-        selectedBg: 'bg-yellow-100',
+        selectedBg: 'bg-yellow-200',
         icon: '🟡',
         border: 'border-yellow-300',
       }
@@ -45,7 +45,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         title: 'Good',
         evaluationTitle: 'Agree',
         textColor: 'text-green-700',
-        selectedBg: 'bg-green-100',
+        selectedBg: 'bg-green-200',
         icon: '🟢',
         border: 'border-green-300',
       }
@@ -54,7 +54,7 @@ export const getLevelConfig = (level: ScoreLevel, unknown?: boolean) => {
         title: 'Very Good',
         evaluationTitle: 'Strongly Agree',
         textColor: 'text-blue-700',
-        selectedBg: 'bg-blue-100',
+        selectedBg: 'bg-blue-200',
         icon: '🔵',
         border: 'border-blue-300',
       }
