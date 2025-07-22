@@ -59,8 +59,8 @@ WITH numeric_scores AS (SELECT a.course_phase_id,
                                cw.category_weight),
      final_scores AS (SELECT course_phase_id,
                              course_participation_id,
-                             SUM(category_score)::NUMERIC  AS weighted_category_sum,
-                             SUM(category_weight)::NUMERIC AS total_category_weight
+                             SUM(category_score * category_weight)::NUMERIC AS weighted_category_sum,
+                             SUM(category_weight)::NUMERIC                  AS total_category_weight
                       FROM category_agg
                       GROUP BY course_phase_id,
                                course_participation_id),

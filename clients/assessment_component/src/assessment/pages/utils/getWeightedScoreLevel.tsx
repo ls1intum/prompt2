@@ -23,7 +23,7 @@ export function getWeightedScoreLevel(
           )
           .reduce((totalWeight, competency) => totalWeight + competency.weight, 0)
 
-        return category.competencies
+        const categoryAverage = category.competencies
           .map(
             (competency) =>
               competencyScores
@@ -33,6 +33,8 @@ export function getWeightedScoreLevel(
               totalWeightOfCompetenciesWithScore,
           )
           .reduce((totalWeight, score) => totalWeight + score, 0)
+
+        return categoryAverage * category.weight
       })
       .reduce((totalWeight, score) => totalWeight + score, 0) / totalWeightsOfCategoriesWithScore
   )
