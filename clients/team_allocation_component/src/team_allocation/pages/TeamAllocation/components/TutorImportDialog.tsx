@@ -112,7 +112,9 @@ export function TutorImportDialog() {
     onError: (error: unknown) => {
       console.error('Error importing tutors:', error)
       setIsImporting(false)
-      setImportError('Failed to import tutors. Please try again.')
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to import tutors. Please try again.'
+      setImportError(`Import failed: ${errorMessage}`)
     },
   })
 

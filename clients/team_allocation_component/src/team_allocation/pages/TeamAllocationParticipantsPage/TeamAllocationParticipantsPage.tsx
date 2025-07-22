@@ -96,7 +96,7 @@ export const TeamAllocationParticipantsPage = (): JSX.Element => {
 
     const requestPayload = {
       coursePhaseID: phaseId,
-      studentNames: coursePhaseParticipations.participations.reduce(
+      studentNamesPerID: coursePhaseParticipations.participations.reduce(
         (acc, p) => {
           if (p.student?.firstName && p.student?.lastName) {
             acc[p.courseParticipationID] = {

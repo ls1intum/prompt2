@@ -17,7 +17,10 @@ func sendRequest(method, subURL, authHeader string, body io.Reader) (*http.Respo
 	requestURL := coreURL + subURL
 	req, err := http.NewRequest(method, requestURL, body)
 	if err != nil {
-		log.Error("Error creating request:", err)
+		log.WithFields(log.Fields{
+			"method": method,
+			"url":    requestURL,
+		}).Error("Error creating request:", err)
 		return nil, err
 	}
 
@@ -28,7 +31,10 @@ func sendRequest(method, subURL, authHeader string, body io.Reader) (*http.Respo
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error("Error sending request:", err)
+		log.WithFields(log.Fields{
+			"method": method,
+			"url":    requestURL,
+		}).Error("Error creating request:", err)
 		return nil, err
 	}
 
