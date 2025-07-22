@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/team/teamDTO"
 	log "github.com/sirupsen/logrus"
@@ -21,12 +22,12 @@ type TeamsService struct {
 var TeamsServiceSingleton *TeamsService
 
 func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, error) {
-	dbTeams, err := TeamsServiceSingleton.queries.GetAllocationsWithStudentNames(ctx, coursePhaseID)
+	dbTeams, err := TeamsServiceSingleton.queries.GetTeamsWithMembers(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
 		return nil, errors.New("could not get the teams from the database")
 	}
-	dtos, err := teamDTO.GetTeamWithFullNameDTOsFromDBModels(dbTeams)
+	dtos, err := teamDTO.GetTeamsWithMembersDTOFromDBModel(dbTeams)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
 		return nil, errors.New("could not get the teams from the database")
@@ -106,9 +107,10 @@ func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUp
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := TeamsServiceSingleton.queries.WithTx(tx)
 
-	for participationID, fullName := range req.StudentNamesPerID {
-		err := qtx.UpdateStudentFullNameForAllocation(ctx, db.UpdateStudentFullNameForAllocationParams{
-			StudentFullName:       fullName,
+	for participationID, name := range req.StudentNamesPerID {
+		err := qtx.UpdateStudentNameForAllocation(ctx, db.UpdateStudentNameForAllocationParams{
+			StudentFirstName:      name.FirstName,
+			StudentLastName:       name.LastName,
 			CourseParticipationID: participationID,
 			CoursePhaseID:         req.CoursePhaseID,
 		})
@@ -118,6 +120,37 @@ func AddStudentNamesToAllocations(ctx context.Context, req teamDTO.StudentNameUp
 	}
 
 	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []teamDTO.Tutor) error {
+	// add students to the keycloak group
+	tx, err := TeamsServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer utils.DeferRollback(tx, ctx)
+	qtx := TeamsServiceSingleton.queries.WithTx(tx)
+
+	for _, tutor := range tutors {
+		// store tutor in database
+		err := qtx.CreateTutor(ctx, db.CreateTutorParams{
+			CoursePhaseID:         coursePhaseID,
+			CourseParticipationID: tutor.CourseParticipationID,
+			FirstName:             tutor.FirstName,
+			LastName:              tutor.LastName,
+			TeamID:                tutor.TeamID,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 

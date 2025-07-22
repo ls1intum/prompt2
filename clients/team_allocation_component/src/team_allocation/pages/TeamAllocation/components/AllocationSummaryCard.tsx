@@ -1,8 +1,9 @@
-import { Badge, Button, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
-import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
 import { useMemo } from 'react'
+import { Badge, Button, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
+import { AlertCircle, ArrowRight, CheckCircle2, Users } from 'lucide-react'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Allocation } from '../../../interfaces/allocation'
+import { TutorImportDialog } from './TutorImportDialog'
 
 interface AllocationSummaryCardProps {
   coursePhaseParticipations: CoursePhaseParticipationsWithResolution | null
@@ -26,7 +27,6 @@ export const AllocationSummaryCard = ({
 
     const totalStudents = coursePhaseParticipations.participations.length
 
-    // Get all assigned student IDs from all allocations
     const assignedStudentIds = new Set<string>()
     teamAllocations.forEach((allocation) => {
       allocation.students.forEach((studentId) => {
@@ -66,14 +66,17 @@ export const AllocationSummaryCard = ({
           )}
         </div>
       </CardHeader>
+
       <CardContent className='pb-4'>
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-          <div className='bg-muted/40 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
-            <div className='rounded-full bg-background p-2 mb-2'>
-              <Users className='h-5 w-5 text-primary' />
+          <div className='bg-gray-50 dark:bg-gray-950 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
+            <div className='rounded-full bg-gray-100 dark:bg-gray-900/30 p-2 mb-2'>
+              <Users className='h-5 w-5 text-gray-600 dark:text-gray-400' />
             </div>
-            <p className='text-2xl font-bold'>{allocationStats.totalStudents}</p>
-            <p className='text-sm text-muted-foreground'>Total Students</p>
+            <p className='text-2xl font-bold text-gray-600 dark:text-gray-400'>
+              {allocationStats.totalStudents}
+            </p>
+            <p className='text-sm text-gray-600/80 dark:text-gray-400/80'>Total Students</p>
           </div>
 
           <div className='bg-green-50 dark:bg-green-950 rounded-lg p-4 flex flex-col items-center justify-center text-center'>
@@ -97,7 +100,9 @@ export const AllocationSummaryCard = ({
           </div>
         </div>
       </CardContent>
-      <CardContent className='pt-0 pb-4 flex justify-end'>
+
+      <CardContent className='pt-0 pb-4 flex justify-between items-center'>
+        <TutorImportDialog />
         <Button asChild>
           <a href='/tease'>
             Go to Tease
