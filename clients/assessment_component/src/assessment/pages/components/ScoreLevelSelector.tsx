@@ -101,6 +101,7 @@ export const ScoreLevelSelector = ({
                 !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                 completed && 'opacity-80 cursor-not-allowed',
                 (selfEvaluationScoreLevel || peerEvaluationScoreLevel) && 'mt-2',
+                !selectedScore && config.border,
               )}
             >
               <div className='flex justify-between mb-1'>
