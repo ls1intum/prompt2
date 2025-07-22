@@ -196,6 +196,8 @@ jobs:
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
             echo "SMTP_HOST=${{ vars.SMTP_HOST }}" >> .env.prod
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
+            echo "SMTP_USERNAME=${{ vars.SMTP_USERNAME }}" >> .env.prod
+            echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
 
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
