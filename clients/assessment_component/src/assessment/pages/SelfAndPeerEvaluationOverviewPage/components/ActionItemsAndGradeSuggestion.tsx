@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { Target, TrendingUp, CheckCircle2, Loader2, Check } from 'lucide-react'
+import { Target, TrendingUp, Loader2, Check } from 'lucide-react'
 
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import {
@@ -94,32 +94,20 @@ export const ActionItemsAndGradeSuggestion = () => {
         </Card>
       )}
 
-      <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-        <CardHeader className='pb-4'>
-          <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
-            <Target className='h-5 w-5 text-blue-600' />
-            Action Items
-            {displayActionItems.length > 0 && (
-              <Badge className='bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'>
-                {displayActionItems.length}
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {displayActionItems.length === 0 ? (
-            <div className='flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700'>
-              <CheckCircle2 className='h-5 w-5 text-blue-600 flex-shrink-0' />
-              <div>
-                <p className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-                  No action items to address
-                </p>
-                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-                  Great job! You&apos;re performing well in all areas.
-                </p>
-              </div>
-            </div>
-          ) : (
+      {displayActionItems.length > 0 && (
+        <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
+          <CardHeader className='pb-4'>
+            <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
+              <Target className='h-5 w-5 text-blue-600' />
+              Action Items
+              {displayActionItems.length > 0 && (
+                <Badge className='bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'>
+                  {displayActionItems.length}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className='space-y-2'>
               {displayActionItems.map((item) => (
                 <div
@@ -133,9 +121,9 @@ export const ActionItemsAndGradeSuggestion = () => {
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

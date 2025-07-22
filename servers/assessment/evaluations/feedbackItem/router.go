@@ -57,7 +57,7 @@ func createOrUpdateFeedbackItem(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -87,7 +87,7 @@ func getMyFeedbackItems(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func deleteFeedbackItem(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 

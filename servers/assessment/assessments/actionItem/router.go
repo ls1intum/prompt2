@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
@@ -130,7 +131,17 @@ func getMyActionItems(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
+		return
+	}
+
+	assessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !assessmentCompletion.Completed {
+		c.JSON(http.StatusOK, make([]actionItemDTO.ActionItem, 0))
 		return
 	}
 
