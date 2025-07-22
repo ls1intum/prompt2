@@ -201,8 +201,8 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         : undefined,
       coursePhaseConfig?.selfEvaluationEnabled
         ? {
-            id: 'selfEvaluationCompletion',
-            header: 'Self Evaluation Completed',
+            id: 'selfEvalStatus',
+            header: 'Self Eval Status',
             accessorFn: (row) => {
               const match = selfEvaluationCompletions?.find(
                 (s) => s.courseParticipationID === row.courseParticipationID,
@@ -231,8 +231,8 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         : undefined,
       coursePhaseConfig?.peerEvaluationEnabled
         ? {
-            id: 'peerEvaluationCompletion',
-            header: 'Peer Evaluation Status',
+            id: 'peerEvalStatus',
+            header: 'Peer Eval Status',
             accessorFn: (row) => {
               // Find the team for this student
               const studentTeam = teamsWithStudents.find((t) =>
