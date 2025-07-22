@@ -3,40 +3,27 @@ package teamDTO
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 )
 
-type Team struct {
-	ID      uuid.UUID `json:"id" binding:"uuid"`
-	Name    string    `json:"name" binding:"required"`
-	Members []Person  `json:"members" binding:"dive"`
-	Tutors  []Person  `json:"tutors" binding:"dive"`
-}
-
-type Person struct {
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	FirstName             string    `json:"firstName"`
-	LastName              string    `json:"lastName"`
-}
-
-func GetTeamDTOFromDBModel(dbTeam db.Team) Team {
-	return Team{
+func GetTeamDTOFromDBModel(dbTeam db.Team) promptTypes.Team {
+	return promptTypes.Team{
 		ID:   dbTeam.ID,
 		Name: dbTeam.Name,
 	}
 }
 
-func GetTeamDTOsFromDBModels(dbTeams []db.Team) []Team {
-	teams := make([]Team, 0, len(dbTeams))
+func GetTeamDTOsFromDBModels(dbTeams []db.Team) []promptTypes.Team {
+	teams := make([]promptTypes.Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		teams = append(teams, GetTeamDTOFromDBModel(dbTeam))
 	}
 	return teams
 }
 
-func GetTeamsWithMembersDTOFromDBModel(dbTeams []db.GetTeamsWithMembersRow) ([]Team, error) {
-	teams := make([]Team, 0, len(dbTeams))
+func GetTeamsWithMembersDTOFromDBModel(dbTeams []db.GetTeamsWithMembersRow) ([]promptTypes.Team, error) {
+	teams := make([]promptTypes.Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		t, err := GetTeamWithMembersDTOFromDBModel(dbTeam)
 		if err != nil {
@@ -47,18 +34,18 @@ func GetTeamsWithMembersDTOFromDBModel(dbTeams []db.GetTeamsWithMembersRow) ([]T
 	return teams, nil
 }
 
-func GetTeamWithMembersDTOFromDBModel(dbTeam db.GetTeamsWithMembersRow) (Team, error) {
-	var members []Person
-	var tutors []Person
+func GetTeamWithMembersDTOFromDBModel(dbTeam db.GetTeamsWithMembersRow) (promptTypes.Team, error) {
+	var members []promptTypes.Person
+	var tutors []promptTypes.Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
+		return promptTypes.Team{}, err
 	}
 	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
-		return Team{}, err
+		return promptTypes.Team{}, err
 	}
 
-	return Team{
+	return promptTypes.Team{
 		ID:      dbTeam.ID,
 		Name:    dbTeam.Name,
 		Members: members,
