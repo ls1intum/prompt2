@@ -70,67 +70,6 @@ func (q *Queries) GetTeamByCoursePhaseAndTeamID(ctx context.Context, arg GetTeam
 	return i, err
 }
 
-const getTeamWithMembersByTeamID = `-- name: GetTeamWithMembersByTeamID :one
-SELECT t.id,
-       t.name,
-       COALESCE(
-                       jsonb_agg(
-                       jsonb_build_object(
-                               'courseParticipationID', a.course_participation_id,
-                               'firstName', a.student_first_name,
-                               'lastName', a.student_last_name
-                       )
-                       ORDER BY a.student_first_name
-                                ) FILTER (WHERE a.id IS NOT NULL),
-                       '[]'::jsonb
-       )::jsonb AS team_members,
-       COALESCE(
-                       jsonb_agg(
-                       jsonb_build_object(
-                               'courseParticipationID', tu.course_participation_id,
-                               'firstName', tu.first_name,
-                               'lastName', tu.last_name
-                       )
-                       ORDER BY tu.first_name
-                                ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
-                       '[]'::jsonb
-       )::jsonb AS team_tutors
-FROM team t
-         LEFT JOIN
-     allocations a
-     ON t.id = a.team_id
-         LEFT JOIN tutor tu
-                   ON t.id = tu.team_id
-WHERE t.course_phase_id = $1
-  AND t.id = $2
-GROUP BY t.id, t.name
-ORDER BY t.name
-`
-
-type GetTeamWithMembersByTeamIDParams struct {
-	CoursePhaseID uuid.UUID `json:"course_phase_id"`
-	ID            uuid.UUID `json:"id"`
-}
-
-type GetTeamWithMembersByTeamIDRow struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	TeamMembers []byte    `json:"team_members"`
-	TeamTutors  []byte    `json:"team_tutors"`
-}
-
-func (q *Queries) GetTeamWithMembersByTeamID(ctx context.Context, arg GetTeamWithMembersByTeamIDParams) (GetTeamWithMembersByTeamIDRow, error) {
-	row := q.db.QueryRow(ctx, getTeamWithMembersByTeamID, arg.CoursePhaseID, arg.ID)
-	var i GetTeamWithMembersByTeamIDRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.TeamMembers,
-		&i.TeamTutors,
-	)
-	return i, err
-}
-
 const getTeamsByCoursePhase = `-- name: GetTeamsByCoursePhase :many
 SELECT id, name, course_phase_id, created_at
 FROM team
@@ -166,36 +105,34 @@ func (q *Queries) GetTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.
 const getTeamsWithMembers = `-- name: GetTeamsWithMembers :many
 SELECT t.id,
        t.name,
-       COALESCE(
-                       jsonb_agg(
-                       jsonb_build_object(
-                               'courseParticipationID', a.course_participation_id,
-                               'firstName', a.student_first_name,
-                               'lastName', a.student_last_name
-                       )
-                       ORDER BY a.student_first_name
-                                ) FILTER (WHERE a.id IS NOT NULL),
-                       '[]'::jsonb
-       )::jsonb AS team_members,
-       COALESCE(
-                       jsonb_agg(
-                       jsonb_build_object(
-                               'courseParticipationID', tu.course_participation_id,
-                               'firstName', tu.first_name,
-                               'lastName', tu.last_name
-                       )
-                       ORDER BY tu.first_name
-                                ) FILTER (WHERE tu.course_participation_id IS NOT NULL),
-                       '[]'::jsonb
-       )::jsonb AS team_tutors
+       COALESCE(members.team_members, '[]'::jsonb) AS team_members,
+       COALESCE(tutors.team_tutors, '[]'::jsonb)   AS team_tutors
 FROM team t
-         LEFT JOIN
-     allocations a
-     ON t.id = a.team_id
-         LEFT JOIN tutor tu
-                   ON t.id = tu.team_id
+         LEFT JOIN LATERAL (
+    SELECT jsonb_agg(
+                   jsonb_build_object(
+                           'courseParticipationID', a.course_participation_id,
+                           'firstName', a.student_first_name,
+                           'lastName', a.student_last_name
+                   )
+                   ORDER BY a.student_first_name
+           ) AS team_members
+    FROM allocations a
+    WHERE a.team_id = t.id
+    ) members ON TRUE
+         LEFT JOIN LATERAL (
+    SELECT jsonb_agg(
+                   jsonb_build_object(
+                           'courseParticipationID', tu.course_participation_id,
+                           'firstName', tu.first_name,
+                           'lastName', tu.last_name
+                   )
+                   ORDER BY tu.first_name
+           ) AS team_tutors
+    FROM tutor tu
+    WHERE tu.team_id = t.id
+    ) tutors ON TRUE
 WHERE t.course_phase_id = $1
-GROUP BY t.id, t.name
 ORDER BY t.name
 `
 

@@ -174,6 +174,9 @@ export function TutorImportDialog() {
                 {courses.map((course) => (
                   <SelectItem key={course.id} value={course.id}>
                     {course.name}
+                    {' ('}
+                    {course.semesterTag}
+                    {')'}
                   </SelectItem>
                 ))}
               </SelectContent>
