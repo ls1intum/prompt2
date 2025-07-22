@@ -1,4 +1,4 @@
--- name: CreateAssessment :exec
+-- name: CreateOrUpdateAssessment :exec
 INSERT INTO assessment (id,
                         course_participation_id,
                         course_phase_id,
@@ -8,26 +8,22 @@ INSERT INTO assessment (id,
                         assessed_at,
                         author,
                         examples)
-VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, $7, $8);
-
--- name: GetAssessment :one
-SELECT *
-FROM assessment
-WHERE id = $1;
-
--- name: UpdateAssessment :exec
-UPDATE assessment
-SET score_level = $4,
-    comment     = $5,
-    assessed_at = CURRENT_TIMESTAMP,
-    author      = $6,
-    examples    = $7
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND competency_id = $3;
+VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6, $7)
+ON CONFLICT (course_participation_id, course_phase_id, competency_id)
+    DO UPDATE
+    SET score_level = EXCLUDED.score_level,
+        comment     = EXCLUDED.comment,
+        assessed_at = CURRENT_TIMESTAMP,
+        author      = EXCLUDED.author,
+        examples    = EXCLUDED.examples;
 
 -- name: DeleteAssessment :exec
 DELETE
+FROM assessment
+WHERE id = $1;
+
+-- name: GetAssessment :one
+SELECT *
 FROM assessment
 WHERE id = $1;
 
