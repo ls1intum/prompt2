@@ -107,20 +107,18 @@ export const ScoreLevelSelector = ({
                 <span className='font-semibold'>
                   {isEvaluation ? config.evaluationTitle : config.title}
                 </span>
-                <div>
+
+                {completed && isSelected && (
                   <span className='flex items-center gap-1'>
-                    {completed && isSelected && (
-                      <LockIcon
-                        className={cn(
-                          'line-clamp-3 text-muted-foreground',
-                          isSelected && 'dark:text-gray-200',
-                          'h-4 w-4',
-                        )}
-                      />
-                    )}
-                    {config.icon}
+                    <LockIcon
+                      className={cn(
+                        'line-clamp-3 text-muted-foreground',
+                        isSelected && 'dark:text-gray-200',
+                        'h-4 w-4',
+                      )}
+                    />
                   </span>
-                </div>
+                )}
               </div>
 
               <p
