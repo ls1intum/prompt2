@@ -38,12 +38,14 @@ INSERT INTO evaluation_completion (course_participation_id,
                                    course_phase_id,
                                    author_course_participation_id,
                                    completed_at,
-                                   completed)
-VALUES ($1, $2, $3, $4, $5)
+                                   completed,
+                                   type)
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (course_participation_id, course_phase_id, author_course_participation_id)
     DO UPDATE
     SET completed_at = EXCLUDED.completed_at,
-        completed    = EXCLUDED.completed
+        completed    = EXCLUDED.completed,
+        type         = EXCLUDED.type
 `
 
 type CreateOrUpdateEvaluationCompletionParams struct {
@@ -52,6 +54,7 @@ type CreateOrUpdateEvaluationCompletionParams struct {
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
 	Completed                   bool               `json:"completed"`
+	Type                        EvaluationType     `json:"type"`
 }
 
 func (q *Queries) CreateOrUpdateEvaluationCompletion(ctx context.Context, arg CreateOrUpdateEvaluationCompletionParams) error {
@@ -61,6 +64,7 @@ func (q *Queries) CreateOrUpdateEvaluationCompletion(ctx context.Context, arg Cr
 		arg.AuthorCourseParticipationID,
 		arg.CompletedAt,
 		arg.Completed,
+		arg.Type,
 	)
 	return err
 }
@@ -85,7 +89,7 @@ func (q *Queries) DeleteEvaluationCompletion(ctx context.Context, arg DeleteEval
 }
 
 const getEvaluationCompletion = `-- name: GetEvaluationCompletion :one
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -108,12 +112,49 @@ func (q *Queries) GetEvaluationCompletion(ctx context.Context, arg GetEvaluation
 		&i.AuthorCourseParticipationID,
 		&i.CompletedAt,
 		&i.Completed,
+		&i.Type,
+	)
+	return i, err
+}
+
+const getEvaluationCompletionByType = `-- name: GetEvaluationCompletionByType :one
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
+FROM evaluation_completion
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND author_course_participation_id = $3
+  AND type = $4
+`
+
+type GetEvaluationCompletionByTypeParams struct {
+	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
+	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
+	Type                        EvaluationType `json:"type"`
+}
+
+func (q *Queries) GetEvaluationCompletionByType(ctx context.Context, arg GetEvaluationCompletionByTypeParams) (EvaluationCompletion, error) {
+	row := q.db.QueryRow(ctx, getEvaluationCompletionByType,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
+		arg.AuthorCourseParticipationID,
+		arg.Type,
+	)
+	var i EvaluationCompletion
+	err := row.Scan(
+		&i.ID,
+		&i.CourseParticipationID,
+		&i.CoursePhaseID,
+		&i.AuthorCourseParticipationID,
+		&i.CompletedAt,
+		&i.Completed,
+		&i.Type,
 	)
 	return i, err
 }
 
 const getEvaluationCompletionsByCoursePhase = `-- name: GetEvaluationCompletionsByCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_phase_id = $1
 `
@@ -134,6 +175,7 @@ func (q *Queries) GetEvaluationCompletionsByCoursePhase(ctx context.Context, cou
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -146,7 +188,7 @@ func (q *Queries) GetEvaluationCompletionsByCoursePhase(ctx context.Context, cou
 }
 
 const getEvaluationCompletionsForParticipantInPhase = `-- name: GetEvaluationCompletionsForParticipantInPhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -173,6 +215,7 @@ func (q *Queries) GetEvaluationCompletionsForParticipantInPhase(ctx context.Cont
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -185,10 +228,10 @@ func (q *Queries) GetEvaluationCompletionsForParticipantInPhase(ctx context.Cont
 }
 
 const getPeerEvaluationCompletionsByCoursePhase = `-- name: GetPeerEvaluationCompletionsByCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_phase_id = $1
-  AND course_participation_id != author_course_participation_id
+  AND type = 'peer'
 `
 
 func (q *Queries) GetPeerEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]EvaluationCompletion, error) {
@@ -207,6 +250,7 @@ func (q *Queries) GetPeerEvaluationCompletionsByCoursePhase(ctx context.Context,
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -219,11 +263,11 @@ func (q *Queries) GetPeerEvaluationCompletionsByCoursePhase(ctx context.Context,
 }
 
 const getPeerEvaluationCompletionsForAuthorInPhase = `-- name: GetPeerEvaluationCompletionsForAuthorInPhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE author_course_participation_id = $1
-  AND author_course_participation_id != course_participation_id
   AND course_phase_id = $2
+  AND type = 'peer'
 `
 
 type GetPeerEvaluationCompletionsForAuthorInPhaseParams struct {
@@ -247,6 +291,7 @@ func (q *Queries) GetPeerEvaluationCompletionsForAuthorInPhase(ctx context.Conte
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -259,11 +304,11 @@ func (q *Queries) GetPeerEvaluationCompletionsForAuthorInPhase(ctx context.Conte
 }
 
 const getPeerEvaluationCompletionsForParticipantInPhase = `-- name: GetPeerEvaluationCompletionsForParticipantInPhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2
-  AND course_participation_id != author_course_participation_id
+  AND type = 'peer'
 `
 
 type GetPeerEvaluationCompletionsForParticipantInPhaseParams struct {
@@ -287,6 +332,7 @@ func (q *Queries) GetPeerEvaluationCompletionsForParticipantInPhase(ctx context.
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -299,10 +345,10 @@ func (q *Queries) GetPeerEvaluationCompletionsForParticipantInPhase(ctx context.
 }
 
 const getSelfEvaluationCompletionsByCoursePhase = `-- name: GetSelfEvaluationCompletionsByCoursePhase :many
-SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
 FROM evaluation_completion
 WHERE course_phase_id = $1
-  AND course_participation_id = author_course_participation_id
+  AND type = 'self'
 `
 
 func (q *Queries) GetSelfEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]EvaluationCompletion, error) {
@@ -321,6 +367,165 @@ func (q *Queries) GetSelfEvaluationCompletionsByCoursePhase(ctx context.Context,
 			&i.AuthorCourseParticipationID,
 			&i.CompletedAt,
 			&i.Completed,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSelfEvaluationCompletionsForParticipantInPhase = `-- name: GetSelfEvaluationCompletionsForParticipantInPhase :many
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
+FROM evaluation_completion
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND type = 'self'
+`
+
+type GetSelfEvaluationCompletionsForParticipantInPhaseParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetSelfEvaluationCompletionsForParticipantInPhase(ctx context.Context, arg GetSelfEvaluationCompletionsForParticipantInPhaseParams) ([]EvaluationCompletion, error) {
+	rows, err := q.db.Query(ctx, getSelfEvaluationCompletionsForParticipantInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EvaluationCompletion
+	for rows.Next() {
+		var i EvaluationCompletion
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.AuthorCourseParticipationID,
+			&i.CompletedAt,
+			&i.Completed,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTutorEvaluationCompletionsByCoursePhase = `-- name: GetTutorEvaluationCompletionsByCoursePhase :many
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
+FROM evaluation_completion
+WHERE course_phase_id = $1
+  AND type = 'tutor'
+`
+
+func (q *Queries) GetTutorEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]EvaluationCompletion, error) {
+	rows, err := q.db.Query(ctx, getTutorEvaluationCompletionsByCoursePhase, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EvaluationCompletion
+	for rows.Next() {
+		var i EvaluationCompletion
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.AuthorCourseParticipationID,
+			&i.CompletedAt,
+			&i.Completed,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTutorEvaluationCompletionsForAuthorInPhase = `-- name: GetTutorEvaluationCompletionsForAuthorInPhase :many
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
+FROM evaluation_completion
+WHERE author_course_participation_id = $1
+  AND course_phase_id = $2
+  AND type = 'tutor'
+`
+
+type GetTutorEvaluationCompletionsForAuthorInPhaseParams struct {
+	AuthorCourseParticipationID uuid.UUID `json:"author_course_participation_id"`
+	CoursePhaseID               uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetTutorEvaluationCompletionsForAuthorInPhase(ctx context.Context, arg GetTutorEvaluationCompletionsForAuthorInPhaseParams) ([]EvaluationCompletion, error) {
+	rows, err := q.db.Query(ctx, getTutorEvaluationCompletionsForAuthorInPhase, arg.AuthorCourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EvaluationCompletion
+	for rows.Next() {
+		var i EvaluationCompletion
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.AuthorCourseParticipationID,
+			&i.CompletedAt,
+			&i.Completed,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTutorEvaluationCompletionsForParticipantInPhase = `-- name: GetTutorEvaluationCompletionsForParticipantInPhase :many
+SELECT id, course_participation_id, course_phase_id, author_course_participation_id, completed_at, completed, type
+FROM evaluation_completion
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND type = 'tutor'
+`
+
+type GetTutorEvaluationCompletionsForParticipantInPhaseParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetTutorEvaluationCompletionsForParticipantInPhase(ctx context.Context, arg GetTutorEvaluationCompletionsForParticipantInPhaseParams) ([]EvaluationCompletion, error) {
+	rows, err := q.db.Query(ctx, getTutorEvaluationCompletionsForParticipantInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EvaluationCompletion
+	for rows.Next() {
+		var i EvaluationCompletion
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseParticipationID,
+			&i.CoursePhaseID,
+			&i.AuthorCourseParticipationID,
+			&i.CompletedAt,
+			&i.Completed,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -337,12 +542,14 @@ INSERT INTO evaluation_completion (course_participation_id,
                    course_phase_id,
                    author_course_participation_id,
                    completed_at,
-                   completed)
-VALUES ($1, $2, $3, $4, true)
+                   completed,
+                   type)
+VALUES ($1, $2, $3, $4, true, $5)
 ON CONFLICT (course_participation_id, course_phase_id, author_course_participation_id)
   DO UPDATE
   SET completed_at = EXCLUDED.completed_at,
-    completed    = true
+    completed    = true,
+    type         = EXCLUDED.type
 `
 
 type MarkEvaluationAsFinishedParams struct {
@@ -350,6 +557,7 @@ type MarkEvaluationAsFinishedParams struct {
 	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
+	Type                        EvaluationType     `json:"type"`
 }
 
 func (q *Queries) MarkEvaluationAsFinished(ctx context.Context, arg MarkEvaluationAsFinishedParams) error {
@@ -358,6 +566,7 @@ func (q *Queries) MarkEvaluationAsFinished(ctx context.Context, arg MarkEvaluati
 		arg.CoursePhaseID,
 		arg.AuthorCourseParticipationID,
 		arg.CompletedAt,
+		arg.Type,
 	)
 	return err
 }

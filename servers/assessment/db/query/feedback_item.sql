@@ -9,8 +9,9 @@ INSERT INTO feedback_items (id,
                             feedback_text,
                             course_participation_id,
                             course_phase_id,
-                            author_course_participation_id)
-VALUES ($1, $2, $3, $4, $5, $6);
+                            author_course_participation_id,
+                            type)
+VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- name: UpdateFeedbackItem :exec
 UPDATE feedback_items
@@ -18,7 +19,8 @@ SET feedback_type                  = $2,
     feedback_text                  = $3,
     course_participation_id        = $4,
     course_phase_id                = $5,
-    author_course_participation_id = $6
+    author_course_participation_id = $6,
+    type                           = $7
 WHERE id = $1;
 
 -- name: DeleteFeedbackItem :exec

@@ -76,17 +76,19 @@ INSERT INTO feedback_items (id,
                             feedback_text,
                             course_participation_id,
                             course_phase_id,
-                            author_course_participation_id)
-VALUES ($1, $2, $3, $4, $5, $6)
+                            author_course_participation_id,
+                            type)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 type CreateFeedbackItemParams struct {
-	ID                          uuid.UUID    `json:"id"`
-	FeedbackType                FeedbackType `json:"feedback_type"`
-	FeedbackText                string       `json:"feedback_text"`
-	CourseParticipationID       uuid.UUID    `json:"course_participation_id"`
-	CoursePhaseID               uuid.UUID    `json:"course_phase_id"`
-	AuthorCourseParticipationID uuid.UUID    `json:"author_course_participation_id"`
+	ID                          uuid.UUID      `json:"id"`
+	FeedbackType                FeedbackType   `json:"feedback_type"`
+	FeedbackText                string         `json:"feedback_text"`
+	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
+	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
+	Type                        EvaluationType `json:"type"`
 }
 
 func (q *Queries) CreateFeedbackItem(ctx context.Context, arg CreateFeedbackItemParams) error {
@@ -97,6 +99,7 @@ func (q *Queries) CreateFeedbackItem(ctx context.Context, arg CreateFeedbackItem
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.AuthorCourseParticipationID,
+		arg.Type,
 	)
 	return err
 }
@@ -113,7 +116,7 @@ func (q *Queries) DeleteFeedbackItem(ctx context.Context, id uuid.UUID) error {
 }
 
 const getFeedbackItem = `-- name: GetFeedbackItem :one
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE id = $1
 `
@@ -129,12 +132,13 @@ func (q *Queries) GetFeedbackItem(ctx context.Context, id uuid.UUID) (FeedbackIt
 		&i.CoursePhaseID,
 		&i.AuthorCourseParticipationID,
 		&i.CreatedAt,
+		&i.Type,
 	)
 	return i, err
 }
 
 const listFeedbackItemsByAuthorInPhase = `-- name: ListFeedbackItemsByAuthorInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE author_course_participation_id = $1
   AND course_phase_id = $2
@@ -163,6 +167,7 @@ func (q *Queries) ListFeedbackItemsByAuthorInPhase(ctx context.Context, arg List
 			&i.CoursePhaseID,
 			&i.AuthorCourseParticipationID,
 			&i.CreatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -175,7 +180,7 @@ func (q *Queries) ListFeedbackItemsByAuthorInPhase(ctx context.Context, arg List
 }
 
 const listFeedbackItemsForCoursePhase = `-- name: ListFeedbackItemsForCoursePhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE course_phase_id = $1
 ORDER BY created_at
@@ -198,6 +203,7 @@ func (q *Queries) ListFeedbackItemsForCoursePhase(ctx context.Context, coursePha
 			&i.CoursePhaseID,
 			&i.AuthorCourseParticipationID,
 			&i.CreatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -210,7 +216,7 @@ func (q *Queries) ListFeedbackItemsForCoursePhase(ctx context.Context, coursePha
 }
 
 const listFeedbackItemsForStudentInPhase = `-- name: ListFeedbackItemsForStudentInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -239,6 +245,7 @@ func (q *Queries) ListFeedbackItemsForStudentInPhase(ctx context.Context, arg Li
 			&i.CoursePhaseID,
 			&i.AuthorCourseParticipationID,
 			&i.CreatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -251,7 +258,7 @@ func (q *Queries) ListFeedbackItemsForStudentInPhase(ctx context.Context, arg Li
 }
 
 const listNegativeFeedbackItemsForStudentInPhase = `-- name: ListNegativeFeedbackItemsForStudentInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -281,6 +288,7 @@ func (q *Queries) ListNegativeFeedbackItemsForStudentInPhase(ctx context.Context
 			&i.CoursePhaseID,
 			&i.AuthorCourseParticipationID,
 			&i.CreatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -293,7 +301,7 @@ func (q *Queries) ListNegativeFeedbackItemsForStudentInPhase(ctx context.Context
 }
 
 const listPositiveFeedbackItemsForStudentInPhase = `-- name: ListPositiveFeedbackItemsForStudentInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at
+SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
 FROM feedback_items
 WHERE course_participation_id = $1
   AND course_phase_id = $2
@@ -323,6 +331,7 @@ func (q *Queries) ListPositiveFeedbackItemsForStudentInPhase(ctx context.Context
 			&i.CoursePhaseID,
 			&i.AuthorCourseParticipationID,
 			&i.CreatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}
@@ -340,17 +349,19 @@ SET feedback_type                  = $2,
     feedback_text                  = $3,
     course_participation_id        = $4,
     course_phase_id                = $5,
-    author_course_participation_id = $6
+    author_course_participation_id = $6,
+    type                           = $7
 WHERE id = $1
 `
 
 type UpdateFeedbackItemParams struct {
-	ID                          uuid.UUID    `json:"id"`
-	FeedbackType                FeedbackType `json:"feedback_type"`
-	FeedbackText                string       `json:"feedback_text"`
-	CourseParticipationID       uuid.UUID    `json:"course_participation_id"`
-	CoursePhaseID               uuid.UUID    `json:"course_phase_id"`
-	AuthorCourseParticipationID uuid.UUID    `json:"author_course_participation_id"`
+	ID                          uuid.UUID      `json:"id"`
+	FeedbackType                FeedbackType   `json:"feedback_type"`
+	FeedbackText                string         `json:"feedback_text"`
+	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
+	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
+	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
+	Type                        EvaluationType `json:"type"`
 }
 
 func (q *Queries) UpdateFeedbackItem(ctx context.Context, arg UpdateFeedbackItemParams) error {
@@ -361,6 +372,7 @@ func (q *Queries) UpdateFeedbackItem(ctx context.Context, arg UpdateFeedbackItem
 		arg.CourseParticipationID,
 		arg.CoursePhaseID,
 		arg.AuthorCourseParticipationID,
+		arg.Type,
 	)
 	return err
 }
