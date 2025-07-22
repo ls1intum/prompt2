@@ -160,17 +160,24 @@ func getMyGradeSuggestion(c *gin.Context) {
 		return
 	}
 
-	completion, err := GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+	exists, err := CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	if !completion.Completed {
-		c.Status(http.StatusNoContent)
-		return
+	if exists {
+		completion, err := GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		if !completion.Completed {
+			c.Status(http.StatusNoContent)
+			return
+		}
+		c.JSON(http.StatusOK, completion.GradeSuggestion)
 	}
-
-	c.JSON(http.StatusOK, completion.GradeSuggestion)
+	c.Status(http.StatusNoContent)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
