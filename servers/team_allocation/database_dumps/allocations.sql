@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS allocations (
     CONSTRAINT allocations_participation_phase_uk UNIQUE (course_participation_id, course_phase_id)
 );
 
+ALTER TABLE allocations
+    DROP COLUMN student_full_name,
+    ADD COLUMN student_first_name TEXT NOT NULL DEFAULT '',
+    ADD COLUMN student_last_name  TEXT NOT NULL DEFAULT '';
+
 -- Test data
 -- Teams for allocations
 INSERT INTO team (id, name, course_phase_id) VALUES
@@ -40,9 +45,9 @@ INSERT INTO team (id, name, course_phase_id) VALUES
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Team Gamma', '4179d58a-d00d-4fa7-94a5-397bc69fab02');
 
 -- Allocations for testing
-INSERT INTO allocations (id, course_participation_id, team_id, course_phase_id, student_full_name) VALUES
-('e1e1e1e1-e1e1-e1e1-e1e1-e1e1e1e1e1e1', '99999999-9999-9999-9999-999999999991', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'John Doe'),
-('e2e2e2e2-e2e2-e2e2-e2e2-e2e2e2e2e2e2', '99999999-9999-9999-9999-999999999992', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Jane Smith'),
-('e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3', '99999999-9999-9999-9999-999999999993', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Bob Johnson');
+INSERT INTO allocations (id, course_participation_id, team_id, course_phase_id, student_first_name, student_last_name) VALUES
+('e1e1e1e1-e1e1-e1e1-e1e1-e1e1e1e1e1e1', '99999999-9999-9999-9999-999999999991', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'John', 'Doe'),
+('e2e2e2e2-e2e2-e2e2-e2e2-e2e2e2e2e2e2', '99999999-9999-9999-9999-999999999992', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Jane', 'Smith'),
+('e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3', '99999999-9999-9999-9999-999999999993', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Bob', 'Johnson');
 
 COMMIT;

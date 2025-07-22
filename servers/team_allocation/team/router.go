@@ -20,6 +20,8 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 
 	teamRouter.POST("/student-names", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), addStudentNamesToTeams)
 
+	teamRouter.POST("/tutors", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), importTutors)
+
 	// this is required to comply with the inter phase communication protocol
 	teamRouter.GET("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTeamByID)
 }
@@ -155,4 +157,28 @@ func addStudentNamesToTeams(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func importTutors(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var tutors []teamDTO.Tutor
+	if err := c.BindJSON(&tutors); err != nil {
+		log.Error("Error binding tutors: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := ImportTutors(c, coursePhaseID, tutors); err != nil {
+		log.Error("Error importing tutors: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusCreated)
 }

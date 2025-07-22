@@ -101,7 +101,8 @@ func (q *Queries) GetAggregatedAllocationsByCoursePhase(ctx context.Context, cou
 const getAllocationForStudent = `-- name: GetAllocationForStudent :one
 SELECT id,
        course_participation_id,
-       student_full_name,
+       student_first_name,
+       student_last_name,
        team_id,
        course_phase_id,
        created_at,
@@ -119,7 +120,8 @@ type GetAllocationForStudentParams struct {
 type GetAllocationForStudentRow struct {
 	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	StudentFullName       string           `json:"student_full_name"`
+	StudentFirstName      string           `json:"student_first_name"`
+	StudentLastName       string           `json:"student_last_name"`
 	TeamID                uuid.UUID        `json:"team_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
@@ -132,7 +134,8 @@ func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocation
 	err := row.Scan(
 		&i.ID,
 		&i.CourseParticipationID,
-		&i.StudentFullName,
+		&i.StudentFirstName,
+		&i.StudentLastName,
 		&i.TeamID,
 		&i.CoursePhaseID,
 		&i.CreatedAt,
@@ -142,7 +145,7 @@ func (q *Queries) GetAllocationForStudent(ctx context.Context, arg GetAllocation
 }
 
 const getAllocationsByCoursePhase = `-- name: GetAllocationsByCoursePhase :many
-SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at, a.student_full_name
+SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at, a.student_first_name, a.student_last_name
 FROM allocations a
 WHERE a.course_phase_id = $1
 `
@@ -163,7 +166,8 @@ func (q *Queries) GetAllocationsByCoursePhase(ctx context.Context, coursePhaseID
 			&i.CoursePhaseID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.StudentFullName,
+			&i.StudentFirstName,
+			&i.StudentLastName,
 		); err != nil {
 			return nil, err
 		}
@@ -183,9 +187,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -221,9 +226,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -267,9 +273,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -312,21 +319,28 @@ func (q *Queries) GetTeamsWithStudentNames(ctx context.Context, coursePhaseID uu
 	return items, nil
 }
 
-const updateStudentFullNameForAllocation = `-- name: UpdateStudentFullNameForAllocation :exec
+const updateStudentNameForAllocation = `-- name: UpdateStudentNameForAllocation :exec
 UPDATE allocations
-SET student_full_name = $1,
+SET student_first_name = $1,
+    student_last_name = $2,
     updated_at = CURRENT_TIMESTAMP
-WHERE course_participation_id = $2
-  AND course_phase_id = $3
+WHERE course_participation_id = $3
+  AND course_phase_id = $4
 `
 
-type UpdateStudentFullNameForAllocationParams struct {
-	StudentFullName       string    `json:"student_full_name"`
+type UpdateStudentNameForAllocationParams struct {
+	StudentFirstName      string    `json:"student_first_name"`
+	StudentLastName       string    `json:"student_last_name"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) UpdateStudentFullNameForAllocation(ctx context.Context, arg UpdateStudentFullNameForAllocationParams) error {
-	_, err := q.db.Exec(ctx, updateStudentFullNameForAllocation, arg.StudentFullName, arg.CourseParticipationID, arg.CoursePhaseID)
+func (q *Queries) UpdateStudentNameForAllocation(ctx context.Context, arg UpdateStudentNameForAllocationParams) error {
+	_, err := q.db.Exec(ctx, updateStudentNameForAllocation,
+		arg.StudentFirstName,
+		arg.StudentLastName,
+		arg.CourseParticipationID,
+		arg.CoursePhaseID,
+	)
 	return err
 }

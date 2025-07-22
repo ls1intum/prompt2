@@ -13,6 +13,8 @@ import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhasePa
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { AllocationSummaryCard } from './components/AllocationSummaryCard'
 
+import { getGravatarUrl } from '@/lib/getGravatarUrl'
+
 import {
   ErrorPage,
   ManagementPageHeader,
@@ -21,6 +23,9 @@ import {
   CardHeader,
   Badge,
   Separator,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
 } from '@tumaet/prompt-ui-components'
 
 export const TeamAllocationPage: React.FC = () => {
@@ -64,21 +69,25 @@ export const TeamAllocationPage: React.FC = () => {
     return map
   }, [coursePhaseParticipations])
 
-  const teamsWithMembers = useMemo(() => {
+  const teamsWithMembersAndTutors = useMemo(() => {
     if (!fetchedTeams) return []
 
     return fetchedTeams.map((team) => {
       const allocation = teamAllocations?.find((a) => a.projectId === team.id)
+
       const members = allocation
         ? (allocation.students
             .map((cpId) => participationMap.get(cpId))
             .filter(Boolean) as Student[])
         : []
 
+      const tutors = team.tutors ?? []
+
       return {
         id: team.id,
         name: team.name,
         members,
+        tutors,
       }
     })
   }, [fetchedTeams, teamAllocations, participationMap])
@@ -114,7 +123,7 @@ export const TeamAllocationPage: React.FC = () => {
         teamAllocations={teamAllocations}
       />
 
-      {teamsWithMembers.length === 0 ? (
+      {teamsWithMembersAndTutors.length === 0 ? (
         <Card className='bg-muted/40'>
           <CardContent className='pt-6 flex flex-col items-center justify-center text-center p-8'>
             <div className='rounded-full bg-muted p-3 mt-4 mb-4'>
@@ -126,7 +135,7 @@ export const TeamAllocationPage: React.FC = () => {
         </Card>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {teamsWithMembers.map((team) => (
+          {teamsWithMembersAndTutors.map((team) => (
             <Card
               key={team.id}
               className='overflow-hidden border-l-4 hover:shadow-md transition-shadow duration-200'
@@ -141,24 +150,61 @@ export const TeamAllocationPage: React.FC = () => {
                 </div>
               </CardHeader>
               <Separator />
-              <CardContent className='pt-4'>
-                {team.members.length === 0 ? (
-                  <p className='text-sm italic text-muted-foreground'>No members allocated yet.</p>
-                ) : (
-                  <ul className='space-y-2'>
-                    {team.members.map((member) => (
-                      <li key={member.id} className='text-sm flex items-center gap-2'>
-                        <div className='h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium'>
-                          {member.firstName[0]}
-                          {member.lastName[0]}
-                        </div>
-                        <span>
-                          {member.firstName} {member.lastName}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <CardContent className='pt-4 space-y-4'>
+                <div>
+                  <p className='text-sm font-medium mb-1'>Tutors:</p>
+                  {team.tutors.length === 0 ? (
+                    <p className='text-sm italic text-muted-foreground'>No tutors allocated yet.</p>
+                  ) : (
+                    <ul className='space-y-2'>
+                      {team.tutors.map((tutor) => (
+                        <li
+                          key={tutor.courseParticipationID}
+                          className='text-sm flex items-center gap-2'
+                        >
+                          <Avatar className='h-6 w-6'>
+                            <AvatarFallback className='text-xs font-medium'>
+                              {tutor.firstName[0]}
+                              {tutor.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>
+                            {tutor.firstName} {tutor.lastName}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <p className='text-sm font-medium mb-1'>Members:</p>
+                  {team.members.length === 0 ? (
+                    <p className='text-sm italic text-muted-foreground'>
+                      No members allocated yet.
+                    </p>
+                  ) : (
+                    <ul className='space-y-2'>
+                      {team.members.map((member) => (
+                        <li key={member.id} className='text-sm flex items-center gap-2'>
+                          <Avatar className='h-6 w-6'>
+                            <AvatarImage
+                              src={getGravatarUrl(member.email)}
+                              alt={`${member.firstName} ${member.lastName}`}
+                            />
+                            <AvatarFallback className='text-xs font-medium'>
+                              {member.firstName[0]}
+                              {member.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>
+                            {member.firstName} {member.lastName}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
