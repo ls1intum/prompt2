@@ -6,6 +6,10 @@ export function getWeightedScoreLevel(
   competencyScores: CompetencyScore[],
   categories: CategoryWithCompetencies[],
 ): number {
+  if (!competencyScores?.length || !categories?.length) {
+    return 0
+  }
+
   const totalWeightsOfCategoriesWithScore = categories
     .filter((category) =>
       category.competencies.some((competency) =>
