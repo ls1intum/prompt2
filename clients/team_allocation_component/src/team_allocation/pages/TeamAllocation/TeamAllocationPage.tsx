@@ -163,10 +163,6 @@ export const TeamAllocationPage: React.FC = () => {
                           className='text-sm flex items-center gap-2'
                         >
                           <Avatar className='h-6 w-6'>
-                            <AvatarImage
-                              src={'https://github.com/shadcn.png'} // TODO: Placeholder, replace with actual tutor image URL if available
-                              alt={`${tutor.firstName} ${tutor.lastName}`}
-                            />
                             <AvatarFallback className='text-xs font-medium'>
                               {tutor.firstName[0]}
                               {tutor.lastName[0]}
