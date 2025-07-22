@@ -1,17 +1,18 @@
-import { assessmentAxiosInstance } from '../assessmentServerConfig'
 import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
+import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
 export const getAssessmentCompletion = async (
   coursePhaseID: string,
   courseParticipationID: string,
 ): Promise<AssessmentCompletion> => {
-  const response = await assessmentAxiosInstance.get<AssessmentCompletion>(
-    `assessment/api/course_phase/${coursePhaseID}/student-assessment/completed/course-participation/${courseParticipationID}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  )
-  return response.data
+  try {
+    return (
+      await assessmentAxiosInstance.get(
+        `assessment/api/course_phase/${coursePhaseID}/student-assessment/completed/course-participation/${courseParticipationID}`,
+      )
+    ).data
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
