@@ -47,8 +47,8 @@ func parseTeamMembers(membersRaw interface{}) []promptTypes.Person {
 		memberMap := memberData.(map[string]interface{})
 
 		id, _ := uuid.Parse(memberMap["courseParticipationID"].(string))
-		firstName := memberMap["firstname"].(string)
-		lastName := memberMap["lastname"].(string)
+		firstName := memberMap["firstName"].(string)
+		lastName := memberMap["lastName"].(string)
 
 		member := promptTypes.Person{
 			ID:        id,

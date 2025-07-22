@@ -160,7 +160,7 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                         className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
                       >
                         <EvaluationInfoCard
-                          name={member.studentName}
+                          name={member.firstName + ' ' + member.lastName}
                           navigationPath={`${path}/peer-evaluation/${member?.courseParticipationID}`}
                           competencyCount={peerEvaluationCompetencyCount}
                           completed={

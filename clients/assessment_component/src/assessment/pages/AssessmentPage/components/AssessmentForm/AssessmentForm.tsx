@@ -148,7 +148,8 @@ export const AssessmentForm = ({
             : undefined
         return averageScore !== undefined
           ? {
-              name: member.studentName,
+              firstName: member.firstName,
+              lastName: member.lastName,
               scoreLevel: averageScore,
             }
           : undefined

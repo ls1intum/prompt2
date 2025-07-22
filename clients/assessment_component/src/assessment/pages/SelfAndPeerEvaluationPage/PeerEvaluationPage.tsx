@@ -36,7 +36,7 @@ export const PeerEvaluationPage = () => {
 
   const studentName = teams
     .flatMap((team) => team.members)
-    .find((participant) => participant.courseParticipationID === courseParticipationID)?.studentName
+    .find((participant) => participant.courseParticipationID === courseParticipationID)?.firstName
 
   useEffect(() => {
     if (studentName) {
