@@ -5,6 +5,7 @@ export type Team = {
 }
 
 export type TeamMember = {
-  courseParticipationID: string
-  studentName: string
+  id: string
+  firstName: string
+  lastName: string
 }

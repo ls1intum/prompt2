@@ -23,7 +23,7 @@ interface ScoreLevelSelectorProps {
   isEvaluation?: boolean
   selfEvaluationScoreLevel?: ScoreLevel
   peerEvaluationScoreLevel?: ScoreLevel
-  teamMembersWithScores?: { name: string; scoreLevel: ScoreLevel }[]
+  teamMembersWithScores?: { firstName: string; lastName: string; scoreLevel: ScoreLevel }[]
 }
 
 export const ScoreLevelSelector = ({
@@ -71,8 +71,13 @@ export const ScoreLevelSelector = ({
                         Peer Evaluation Result
                         {teamMembersWithScores && teamMembersWithScores.length > 0
                           ? teamMembersWithScores.map((member) => (
-                              <div key={member.name} className='flex items-center gap-1 space-y-1'>
-                                <span className='font-semibold'>{member.name}:</span>
+                              <div
+                                key={member.firstName}
+                                className='flex items-center gap-1 space-y-1'
+                              >
+                                <span className='font-semibold'>
+                                  {member.firstName} {member.lastName}:
+                                </span>
                                 <StudentScoreBadge scoreLevel={member.scoreLevel} />
                               </div>
                             ))

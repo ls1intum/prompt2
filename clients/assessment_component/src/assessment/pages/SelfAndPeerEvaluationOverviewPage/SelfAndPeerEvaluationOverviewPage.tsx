@@ -33,10 +33,7 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const team = teams.find((t) =>
-    t.members.some(
-      (member) =>
-        member.courseParticipationID === myParticipation?.courseParticipationID || !isStudent,
-    ),
+    t.members.some((member) => member.id === myParticipation?.courseParticipationID || !isStudent),
   )
 
   const now = new Date()
@@ -65,18 +62,15 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
 
   const completedPeerEvaluations =
     team?.members
-      .filter((member) => member.courseParticipationID !== myParticipation?.courseParticipationID)
+      .filter((member) => member.id !== myParticipation?.courseParticipationID)
       .filter(
         (member) =>
-          peerEvaluationCompletions.find(
-            (c) => c.courseParticipationID === member.courseParticipationID,
-          )?.completed,
+          peerEvaluationCompletions.find((c) => c.courseParticipationID === member.id)?.completed,
       ).length ?? 0
 
   const totalPeerEvaluations =
-    team?.members.filter(
-      (member) => member.courseParticipationID !== myParticipation?.courseParticipationID,
-    ).length ?? 0
+    team?.members.filter((member) => member.id !== myParticipation?.courseParticipationID).length ??
+    0
 
   const isPeerEvaluationCompleted = completedPeerEvaluations === totalPeerEvaluations
   const allEvaluationsCompleted = isSelfEvaluationCompleted && isPeerEvaluationCompleted
@@ -155,27 +149,23 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                 </div>
                 <div className='space-y-4'>
                   {team.members
-                    .filter(
-                      (member) =>
-                        member.courseParticipationID !== myParticipation?.courseParticipationID,
-                    )
+                    .filter((member) => member.id !== myParticipation?.courseParticipationID)
                     .map((member) => (
                       <Card
-                        key={member.courseParticipationID}
+                        key={member.id}
                         className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
                       >
                         <EvaluationInfoCard
-                          name={member.studentName}
-                          navigationPath={`${path}/peer-evaluation/${member?.courseParticipationID}`}
+                          name={member.firstName + ' ' + member.lastName}
+                          navigationPath={`${path}/peer-evaluation/${member?.id}`}
                           competencyCount={peerEvaluationCompetencyCount}
                           completed={
                             peerEvaluationCompletions.find(
-                              (c) => c.courseParticipationID === member.courseParticipationID,
+                              (c) => c.courseParticipationID === member.id,
                             )?.completed ?? false
                           }
                           evaluations={peerEvaluations.filter(
-                            (evaluation) =>
-                              evaluation.courseParticipationID === member.courseParticipationID,
+                            (evaluation) => evaluation.courseParticipationID === member.id,
                           )}
                         />
                       </Card>

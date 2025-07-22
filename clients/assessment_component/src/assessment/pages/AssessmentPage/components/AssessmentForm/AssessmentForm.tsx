@@ -109,7 +109,7 @@ export const AssessmentForm = ({
     useStudentAssessmentStore()
   const { teams } = useTeamStore()
   const teamMembers = teams.find((t) =>
-    t.members.map((m) => m.courseParticipationID).includes(courseParticipationID ?? ''),
+    t.members.map((m) => m.id).includes(courseParticipationID ?? ''),
   )?.members
 
   const selfEvaluations = allSelfEvaluations.filter((se) =>
@@ -135,7 +135,7 @@ export const AssessmentForm = ({
     teamMembers
       ?.map((member) => {
         const memberEvaluations = peerEvaluations.filter(
-          (pe) => pe.authorCourseParticipationID === member.courseParticipationID,
+          (pe) => pe.authorCourseParticipationID === member.id,
         )
         const averageScore =
           memberEvaluations.length > 0
@@ -148,7 +148,8 @@ export const AssessmentForm = ({
             : undefined
         return averageScore !== undefined
           ? {
-              name: member.studentName,
+              firstName: member.firstName,
+              lastName: member.lastName,
               scoreLevel: averageScore,
             }
           : undefined
