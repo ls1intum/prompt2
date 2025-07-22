@@ -6,6 +6,10 @@ export function getWeightedScoreLevel(
   competencyScores: CompetencyScore[],
   categories: CategoryWithCompetencies[],
 ): number {
+  if (!competencyScores?.length || !categories?.length) {
+    return 0
+  }
+
   const totalWeightsOfCategoriesWithScore = categories
     .filter((category) =>
       category.competencies.some((competency) =>
@@ -23,7 +27,7 @@ export function getWeightedScoreLevel(
           )
           .reduce((totalWeight, competency) => totalWeight + competency.weight, 0)
 
-        return category.competencies
+        const categoryAverage = category.competencies
           .map(
             (competency) =>
               competencyScores
@@ -33,6 +37,8 @@ export function getWeightedScoreLevel(
               totalWeightOfCompetenciesWithScore,
           )
           .reduce((totalWeight, score) => totalWeight + score, 0)
+
+        return categoryAverage * category.weight
       })
       .reduce((totalWeight, score) => totalWeight + score, 0) / totalWeightsOfCategoriesWithScore
   )

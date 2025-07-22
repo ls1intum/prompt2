@@ -1,16 +1,17 @@
-import { assessmentAxiosInstance } from '../assessmentServerConfig'
 import { EvaluationCompletion } from '../../interfaces/evaluationCompletion'
+import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
 export const getMyPeerEvaluationCompletions = async (
   coursePhaseID: string,
 ): Promise<EvaluationCompletion[]> => {
-  const response = await assessmentAxiosInstance.get<EvaluationCompletion[]>(
-    `assessment/api/course_phase/${coursePhaseID}/evaluation/completed/my-completion/peer`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  )
-  return response.data
+  try {
+    return (
+      await assessmentAxiosInstance.get(
+        `assessment/api/course_phase/${coursePhaseID}/evaluation/completed/my-completion/peer`,
+      )
+    ).data
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
