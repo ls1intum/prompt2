@@ -8,6 +8,5 @@ export const useGetMyGradeSuggestion = () => {
   return useQuery<number | undefined>({
     queryKey: ['myGradeSuggestion', phaseId],
     queryFn: () => getMyGradeSuggestion(phaseId ?? ''),
-    enabled: !!phaseId,
   })
 }

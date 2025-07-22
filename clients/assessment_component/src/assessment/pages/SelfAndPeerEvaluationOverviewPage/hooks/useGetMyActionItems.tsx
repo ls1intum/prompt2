@@ -9,6 +9,5 @@ export const useGetMyActionItems = () => {
   return useQuery<ActionItem[]>({
     queryKey: ['myActionItems', phaseId],
     queryFn: () => getMyActionItems(phaseId ?? ''),
-    enabled: !!phaseId,
   })
 }
