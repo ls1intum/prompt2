@@ -150,7 +150,6 @@ func getMyActionItems(c *gin.Context) {
 			c.Status(http.StatusNoContent)
 			return
 		}
-		c.JSON(http.StatusOK, completion.GradeSuggestion)
 	}
 
 	actionItems, err := ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)
