@@ -8,13 +8,18 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
 import { GradeSuggestionBadge } from '../components/GradeSuggestionBadge'
+import { PeerEvaluationCompletionBadge } from '../components/PeerEvaluationCompletionBadge'
 
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+import { getAllSelfEvaluationCompletionsInPhase } from '../../network/queries/getAllSelfEvaluationCompletionsInPhase'
+import { getAllPeerEvaluationCompletionsInPhase } from '../../network/queries/getAllPeerEvaluationCompletionsInPhase'
 
 import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
 import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
@@ -22,12 +27,14 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
 
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { participations } = useParticipationStore()
   const { scoreLevels } = useScoreLevelStore()
   const { teams } = useTeamStore()
@@ -42,9 +49,38 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
   })
 
-  const isError = isAssessmentCompletionsError
-  const isPending = isAssessmentCompletionsPending
-  const refetch = refetchAssessmentCompletions
+  const {
+    data: selfEvaluationCompletions,
+    isPending: isSelfEvaluationCompletionsPending,
+    isError: isSelfEvaluationCompletionsError,
+    refetch: refetchSelfEvaluationCompletions,
+  } = useQuery({
+    queryKey: ['selfEvaluationCompletions', phaseId],
+    queryFn: () => getAllSelfEvaluationCompletionsInPhase(phaseId ?? ''),
+  })
+
+  const {
+    data: peerEvaluationCompletions,
+    isPending: isPeerEvaluationCompletionsPending,
+    isError: isPeerEvaluationCompletionsError,
+    refetch: refetchPeerEvaluationCompletions,
+  } = useQuery({
+    queryKey: ['peerEvaluationCompletions', phaseId],
+    queryFn: () => getAllPeerEvaluationCompletionsInPhase(phaseId ?? ''),
+  })
+
+  const isError =
+    isAssessmentCompletionsError ||
+    isSelfEvaluationCompletionsError ||
+    isPeerEvaluationCompletionsError
+  const isPending =
+    isAssessmentCompletionsPending ||
+    isSelfEvaluationCompletionsPending ||
+    isPeerEvaluationCompletionsPending
+  const refetch =
+    refetchAssessmentCompletions ||
+    refetchSelfEvaluationCompletions ||
+    refetchPeerEvaluationCompletions
 
   const teamsWithStudents = useMemo(() => {
     return teams.map((team) => ({
@@ -163,8 +199,160 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
             },
           }
         : undefined,
+      coursePhaseConfig?.selfEvaluationEnabled
+        ? {
+            id: 'selfEvaluationCompletion',
+            header: 'Self Evaluation Completed',
+            accessorFn: (row) => {
+              const match = selfEvaluationCompletions?.find(
+                (s) => s.courseParticipationID === row.courseParticipationID,
+              )
+              return match ? match.completed : ''
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+              const selfEvalA = selfEvaluationCompletions?.find(
+                (s) => s.courseParticipationID === rowA.original.courseParticipationID,
+              )?.completed
+              const selfEvalB = selfEvaluationCompletions?.find(
+                (s) => s.courseParticipationID === rowB.original.courseParticipationID,
+              )?.completed
+              return (selfEvalA ? 1 : 0) - (selfEvalB ? 1 : 0)
+            },
+            extraData:
+              selfEvaluationCompletions?.map((s) => ({
+                courseParticipationID: s.courseParticipationID,
+                value: s.completed ? (
+                  <AssessmentStatusBadge remainingAssessments={0} isFinalized={true} />
+                ) : null,
+                stringValue: s.completed ? 'Yes' : 'No',
+              })) ?? [],
+          }
+        : undefined,
+      coursePhaseConfig?.peerEvaluationEnabled
+        ? {
+            id: 'peerEvaluationCompletion',
+            header: 'Peer Evaluation Status',
+            accessorFn: (row) => {
+              // Find the team for this student
+              const studentTeam = teamsWithStudents.find((t) =>
+                t.participantIds.includes(row.courseParticipationID),
+              )
+
+              if (!studentTeam) {
+                return <PeerEvaluationCompletionBadge completed={0} total={0} />
+              }
+
+              // Get team members excluding the current student
+              const teamMemberIds = studentTeam.participantIds.filter(
+                (id) => id !== row.courseParticipationID,
+              )
+
+              // Count completed peer evaluations by this student
+              const completedPeerEvaluations = teamMemberIds.filter((memberId) =>
+                peerEvaluationCompletions?.some(
+                  (completion) =>
+                    completion.authorCourseParticipationID === row.courseParticipationID &&
+                    completion.courseParticipationID === memberId &&
+                    completion.completed,
+                ),
+              ).length
+
+              const totalPeerEvaluations = teamMemberIds.length
+
+              return (
+                <PeerEvaluationCompletionBadge
+                  completed={completedPeerEvaluations}
+                  total={totalPeerEvaluations}
+                />
+              )
+            },
+            enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+              // Helper function to calculate completion ratio
+              const getCompletionRatio = (row: any) => {
+                const studentTeam = teamsWithStudents.find((t) =>
+                  t.participantIds.includes(row.original.courseParticipationID),
+                )
+
+                if (!studentTeam) return 0
+
+                const teamMemberIds = studentTeam.participantIds.filter(
+                  (id) => id !== row.original.courseParticipationID,
+                )
+
+                const completedPeerEvaluations = teamMemberIds.filter((memberId) =>
+                  peerEvaluationCompletions?.some(
+                    (completion) =>
+                      completion.authorCourseParticipationID ===
+                        row.original.courseParticipationID &&
+                      completion.courseParticipationID === memberId &&
+                      completion.completed,
+                  ),
+                ).length
+
+                const totalPeerEvaluations = teamMemberIds.length
+
+                return totalPeerEvaluations > 0
+                  ? completedPeerEvaluations / totalPeerEvaluations
+                  : 0
+              }
+
+              return getCompletionRatio(rowA) - getCompletionRatio(rowB)
+            },
+            extraData: participations.map((p) => {
+              const studentTeam = teamsWithStudents.find((t) =>
+                t.participantIds.includes(p.courseParticipationID),
+              )
+
+              if (!studentTeam) {
+                return {
+                  courseParticipationID: p.courseParticipationID,
+                  value: <PeerEvaluationCompletionBadge completed={0} total={0} />,
+                  stringValue: '0/0',
+                }
+              }
+
+              const teamMemberIds = studentTeam.participantIds.filter(
+                (id) => id !== p.courseParticipationID,
+              )
+
+              const completedPeerEvaluations = teamMemberIds.filter((memberId) =>
+                peerEvaluationCompletions?.some(
+                  (completion) =>
+                    completion.authorCourseParticipationID === p.courseParticipationID &&
+                    completion.courseParticipationID === memberId &&
+                    completion.completed,
+                ),
+              ).length
+
+              const totalPeerEvaluations = teamMemberIds.length
+              const statusText = `${completedPeerEvaluations}/${totalPeerEvaluations}`
+
+              return {
+                courseParticipationID: p.courseParticipationID,
+                value: (
+                  <PeerEvaluationCompletionBadge
+                    completed={completedPeerEvaluations}
+                    total={totalPeerEvaluations}
+                  />
+                ),
+                stringValue: statusText,
+              }
+            }),
+          }
+        : undefined,
     ].filter((column) => column !== undefined)
-  }, [participations, teamsWithStudents, scoreLevels, assessmentCompletions, completedGradings])
+  }, [
+    participations,
+    teamsWithStudents,
+    scoreLevels,
+    assessmentCompletions,
+    completedGradings,
+    coursePhaseConfig,
+    selfEvaluationCompletions,
+    peerEvaluationCompletions,
+  ])
 
   if (isError) {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
