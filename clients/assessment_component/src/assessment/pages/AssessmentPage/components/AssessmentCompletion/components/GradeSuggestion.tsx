@@ -48,7 +48,6 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
                 <StudentScoreBadge
                   scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
                   scoreNumeric={weightedScoreLevel}
-                  showTooltip={true}
                 />
               </div>
             )
@@ -66,7 +65,6 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
                 <StudentScoreBadge
                   scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
                   scoreNumeric={weightedScoreLevel}
-                  showTooltip={true}
                 />
               </div>
             )
