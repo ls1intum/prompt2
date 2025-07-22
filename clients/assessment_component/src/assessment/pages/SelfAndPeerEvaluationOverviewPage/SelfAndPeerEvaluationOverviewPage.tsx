@@ -3,7 +3,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import { Users, User } from 'lucide-react'
 
 import { useCourseStore } from '@tumaet/prompt-shared-state'
-import { ManagementPageHeader, Badge, Card } from '@tumaet/prompt-ui-components'
+import { cn, ManagementPageHeader, Badge, Card } from '@tumaet/prompt-ui-components'
 
 import { useEvaluationStore } from '../../zustand/useEvaluationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
@@ -144,7 +144,12 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
                       Peer Evaluation
                     </h1>
                   </div>
-                  <Badge className='bg-gray-100 dark:bg-gray-100 text-gray-800 dark:text-gray-800 border-gray-200 dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-gray-200'>
+                  <Badge
+                    className={cn(
+                      'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200',
+                      'dark:bg-gray-100 dark:text-gray-800 dark:border-gray-200 dark:hover:bg-gray-200',
+                    )}
+                  >
                     Team {team.name}
                   </Badge>
                 </div>
