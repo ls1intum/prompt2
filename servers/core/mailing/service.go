@@ -16,12 +16,14 @@ import (
 )
 
 type MailingService struct {
-	smtpHost    string
-	smtpPort    string
-	senderEmail mail.Address
-	clientURL   string
-	queries     db.Queries
-	conn        *pgxpool.Pool
+	smtpHost     string
+	smtpPort     string
+	smtpUsername string
+	smtpPassword string
+	senderEmail  mail.Address
+	clientURL    string
+	queries      db.Queries
+	conn         *pgxpool.Pool
 }
 
 var MailingServiceSingleton *MailingService
@@ -173,6 +175,15 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 		return errors.New("failed to send mail")
 	}
 	defer client.Close()
+
+	// Use SMTP authentication if username and password are provided
+	if MailingServiceSingleton.smtpUsername != "" && MailingServiceSingleton.smtpPassword != "" {
+		auth := smtp.PlainAuth("", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpPassword, MailingServiceSingleton.smtpHost)
+		if err := client.Auth(auth); err != nil {
+			log.Error("failed to authenticate with SMTP server: ", err)
+			return errors.New("failed to send mail")
+		}
+	}
 
 	// Set the sender and recipient
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {
