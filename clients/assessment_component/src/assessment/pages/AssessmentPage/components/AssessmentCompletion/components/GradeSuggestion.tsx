@@ -10,8 +10,12 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 
+import { useSelfEvaluationCategoryStore } from '../../../../../zustand/useSelfEvaluationCategoryStore'
+import { usePeerEvaluationCategoryStore } from '../../../../../zustand/usePeerEvaluationCategoryStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
+import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
 
+import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
 import { StudentScoreBadge } from '../../../../components/StudentScoreBadge'
 
 interface GradeSuggestionProps {
@@ -19,7 +23,10 @@ interface GradeSuggestionProps {
 }
 
 export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
-  const { studentScore, assessmentCompletion } = useStudentAssessmentStore()
+  const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
+  const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
+  const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
+    useStudentAssessmentStore()
 
   return (
     <Card>
@@ -28,7 +35,43 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
         <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
           Will be shown to students after the deadline
         </p>
-        {studentScore && studentScore.scoreNumeric > 0 ? (
+        {selfEvaluations &&
+          selfEvaluations.length > 1 &&
+          (() => {
+            const weightedScoreLevel = getWeightedScoreLevel(
+              selfEvaluations,
+              selfEvaluationCategories,
+            )
+            return (
+              <div className='flex flex-row items-center gap-2'>
+                <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
+                <StudentScoreBadge
+                  scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
+                  scoreNumeric={weightedScoreLevel}
+                  showTooltip={true}
+                />
+              </div>
+            )
+          })()}
+        {peerEvaluations &&
+          peerEvaluations.length > 1 &&
+          (() => {
+            const weightedScoreLevel = getWeightedScoreLevel(
+              peerEvaluations,
+              peerEvaluationCategories,
+            )
+            return (
+              <div className='flex flex-row items-center gap-2'>
+                <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
+                <StudentScoreBadge
+                  scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
+                  scoreNumeric={weightedScoreLevel}
+                  showTooltip={true}
+                />
+              </div>
+            )
+          })()}
+        {studentScore && studentScore.scoreNumeric > 0 && (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Platform recommendation:</p>
             <StudentScoreBadge
@@ -37,7 +80,7 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
               showTooltip={true}
             />
           </div>
-        ) : undefined}
+        )}
       </CardHeader>
       <CardContent>
         <Select
