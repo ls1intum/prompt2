@@ -12,7 +12,6 @@ import (
 )
 
 const createTeam = `-- name: CreateTeam :exec
-
 INSERT INTO team (id, name, course_phase_id)
 VALUES ($1, $2, $3)
 `
@@ -23,14 +22,12 @@ type CreateTeamParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
-// ensuring to get only teams in the authenticated course_phase
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
 	_, err := q.db.Exec(ctx, createTeam, arg.ID, arg.Name, arg.CoursePhaseID)
 	return err
 }
 
 const deleteTeam = `-- name: DeleteTeam :exec
-
 DELETE
 FROM team
 WHERE id = $1
@@ -42,7 +39,7 @@ type DeleteTeamParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
-// ensuring to update only teams in the authenticated course_phase
+// ensuring to delete only teams in the authenticated course_phase
 func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 	_, err := q.db.Exec(ctx, deleteTeam, arg.ID, arg.CoursePhaseID)
 	return err
@@ -60,6 +57,7 @@ type GetTeamByCoursePhaseAndTeamIDParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
+// ensuring to get only teams in the authenticated course_phase
 func (q *Queries) GetTeamByCoursePhaseAndTeamID(ctx context.Context, arg GetTeamByCoursePhaseAndTeamIDParams) (Team, error) {
 	row := q.db.QueryRow(ctx, getTeamByCoursePhaseAndTeamID, arg.ID, arg.CoursePhaseID)
 	var i Team
@@ -166,7 +164,6 @@ func (q *Queries) GetTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.
 }
 
 const getTeamsWithMembers = `-- name: GetTeamsWithMembers :many
-
 SELECT t.id,
        t.name,
        COALESCE(
@@ -209,7 +206,6 @@ type GetTeamsWithMembersRow struct {
 	TeamTutors  []byte    `json:"team_tutors"`
 }
 
-// ensuring to delete only teams in the authenticated course_phase
 func (q *Queries) GetTeamsWithMembers(ctx context.Context, coursePhaseID uuid.UUID) ([]GetTeamsWithMembersRow, error) {
 	rows, err := q.db.Query(ctx, getTeamsWithMembers, coursePhaseID)
 	if err != nil {
@@ -248,6 +244,7 @@ type UpdateTeamParams struct {
 	Name          string    `json:"name"`
 }
 
+// ensuring to update only teams in the authenticated course_phase
 func (q *Queries) UpdateTeam(ctx context.Context, arg UpdateTeamParams) error {
 	_, err := q.db.Exec(ctx, updateTeam, arg.ID, arg.CoursePhaseID, arg.Name)
 	return err
