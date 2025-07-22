@@ -112,8 +112,6 @@ func deleteFeedbackItem(c *gin.Context) {
 		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
-
-	// Ensure the user is the author of the feedback item
 	if !IsFeedbackItemAuthor(c, feedbackItemID, courseParticipationID) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this feedback item"})
 		return

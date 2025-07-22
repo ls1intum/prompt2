@@ -50,9 +50,16 @@ export const ScoreLevelSelector = ({
             className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
           >
             <div className='absolute -top-6 left-0 w-full'>
-              <div className='flex justify-center items-center gap-2'>
+              <div className='flex justify-center items-center text-left gap-2'>
                 {selfEvaluationScoreLevel && level === selfEvaluationScoreLevel && (
-                  <User key='self-evaluation-icon' size={20} className='text-blue-500' />
+                  <TooltipProvider key='peer-evaluation-icon'>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <User key='self-evaluation-icon' size={20} className='text-blue-500' />
+                      </TooltipTrigger>
+                      <TooltipContent>Self Evaluation Result</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
                 {peerEvaluationScoreLevel && level === peerEvaluationScoreLevel && (
                   <TooltipProvider key='peer-evaluation-icon'>
@@ -61,6 +68,7 @@ export const ScoreLevelSelector = ({
                         <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
                       </TooltipTrigger>
                       <TooltipContent>
+                        Peer Evaluation Result
                         {teamMembersWithScores && teamMembersWithScores.length > 0
                           ? teamMembersWithScores.map((member) => (
                               <div key={member.name} className='flex items-center gap-1 space-y-1'>
@@ -86,8 +94,10 @@ export const ScoreLevelSelector = ({
               aria-describedby={descriptionID}
               className={cn(
                 'w-full h-full text-sm border-2 rounded-lg p-3 transition-all text-left flex flex-col justify-start',
-                isSelected && config.selectedBg,
-                isSelected && config.textColor,
+                !isSelected && 'hover:bg-gray-100',
+                isSelected
+                  ? cn(config.textColor, config.selectedBg)
+                  : 'bg-gray-50 dark:bg-gray-900',
                 !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                 completed && 'opacity-80 cursor-not-allowed',
                 (selfEvaluationScoreLevel || peerEvaluationScoreLevel) && 'mt-2',
@@ -100,14 +110,26 @@ export const ScoreLevelSelector = ({
                 <div>
                   <span className='flex items-center gap-1'>
                     {completed && isSelected && (
-                      <LockIcon className='h-4 w-4 text-muted-foreground' />
+                      <LockIcon
+                        className={cn(
+                          'line-clamp-3 text-muted-foreground',
+                          isSelected && 'dark:text-gray-200',
+                          'h-4 w-4',
+                        )}
+                      />
                     )}
                     {config.icon}
                   </span>
                 </div>
               </div>
 
-              <p id={descriptionID} className='line-clamp-3 text-muted-foreground'>
+              <p
+                id={descriptionID}
+                className={cn(
+                  'line-clamp-3 text-muted-foreground',
+                  isSelected && 'dark:text-gray-200',
+                )}
+              >
                 {(() => {
                   const key =
                     `description${level.charAt(0).toUpperCase()}${level.slice(1)}` as keyof Competency

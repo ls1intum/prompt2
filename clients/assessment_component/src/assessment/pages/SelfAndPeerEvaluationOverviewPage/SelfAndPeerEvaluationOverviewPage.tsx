@@ -91,7 +91,10 @@ export const SelfAndPeerEvaluationOverviewPage = () => {
         <ManagementPageHeader>
           {isAssessmentDeadlinePassed
             ? 'Your Action Items and Grade Suggestion'
-            : 'Self Evaluation' + (peerEvaluationStarted && ' and Peer Evaluation')}
+            : 'Self Evaluation' +
+              (coursePhaseConfig?.peerEvaluationEnabled && peerEvaluationStarted
+                ? ' and Peer Evaluation'
+                : '')}
         </ManagementPageHeader>
 
         <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} team={team} />

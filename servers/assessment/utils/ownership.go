@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var ErrCourseParticipationIDNotFound = errors.New("course participation ID not found in token")
+var ErrCourseParticipationIDNotFound = errors.New("course participation ID not found")
 var ErrInvalidCourseParticipationIDFormat = errors.New("invalid course participation ID format")
 var ErrInvalidCourseParticipationID = errors.New("invalid course participation ID")
 var ErrOwnershipValidation = errors.New("you can only manage your own evaluation completions")

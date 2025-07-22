@@ -34,6 +34,7 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
             <StudentScoreBadge
               scoreLevel={studentScore.scoreLevel}
               scoreNumeric={studentScore.scoreNumeric}
+              showTooltip={true}
             />
           </div>
         ) : undefined}

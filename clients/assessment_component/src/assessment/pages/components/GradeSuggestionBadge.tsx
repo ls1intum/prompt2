@@ -15,10 +15,10 @@ interface GradeSuggestionBadgeProps {
   text?: boolean
 }
 
-export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({
+export const GradeSuggestionBadge = ({
   gradeSuggestion,
   text = false,
-}) => {
+}: GradeSuggestionBadgeProps) => {
   if (!gradeSuggestion) {
     return undefined
   }
@@ -32,6 +32,7 @@ export const GradeSuggestionBadge: React.FC<GradeSuggestionBadgeProps> = ({
         <TooltipTrigger>
           <Badge
             className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
+            style={{ whiteSpace: 'nowrap' }}
           >
             {text ? 'Grade Suggestion:' : ''} {gradeSuggestion.toFixed(1)}
           </Badge>

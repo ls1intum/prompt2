@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, CircleCheck } from 'lucide-react'
-import { cn } from '@tumaet/prompt-ui-components'
+import { cn, Badge } from '@tumaet/prompt-ui-components'
 
 interface AssessmentStatusBadgeProps {
   className?: string
@@ -19,7 +19,7 @@ export function AssessmentStatusBadge({
   const isCompletedButNotFinalized = isCompleted && !isFinalized
 
   const badgeStyles = cn(
-    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+    'items-center gap-1',
     {
       'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200':
         isCompleted && isFinalized,
@@ -30,7 +30,7 @@ export function AssessmentStatusBadge({
   )
 
   return (
-    <span className={badgeStyles}>
+    <Badge className={badgeStyles} style={{ whiteSpace: 'nowrap' }}>
       {isCompleted && isFinalized && (
         <>
           <CheckCircle className='h-3.5 w-3.5' />
@@ -61,6 +61,6 @@ export function AssessmentStatusBadge({
           </span>
         </>
       )}
-    </span>
+    </Badge>
   )
 }
