@@ -135,14 +135,22 @@ func getMyActionItems(c *gin.Context) {
 		return
 	}
 
-	assessmentCompletion, err := assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	if !assessmentCompletion.Completed {
-		c.JSON(http.StatusOK, make([]actionItemDTO.ActionItem, 0))
-		return
+	if exists {
+		completion, err := assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		if !completion.Completed {
+			c.Status(http.StatusNoContent)
+			return
+		}
+		c.JSON(http.StatusOK, completion.GradeSuggestion)
 	}
 
 	actionItems, err := ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)
