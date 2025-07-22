@@ -112,18 +112,12 @@ export const AssessmentForm = ({
     t.members.map((m) => m.id).includes(courseParticipationID ?? ''),
   )?.members
 
-  const selfEvaluations = allSelfEvaluations.filter((se) =>
+  const selfEvaluationScoreLevel = allSelfEvaluations.find((se) =>
     competency.mappedFromCompetencies.includes(se.competencyID),
-  )
+  )?.scoreLevel
   const peerEvaluations = allPeerEvaluations.filter((pe) =>
     competency.mappedFromCompetencies.includes(pe.competencyID),
   )
-
-  const selfEvaluationScore = selfEvaluations?.length
-    ? mapNumberToScoreLevel(
-        selfEvaluations.reduce((acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel), 0),
-      )
-    : undefined
 
   const peerEvaluationScore = peerEvaluations?.length
     ? mapNumberToScoreLevel(
@@ -178,7 +172,7 @@ export const AssessmentForm = ({
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
-          selfEvaluationScoreLevel={selfEvaluationScore}
+          selfEvaluationScoreLevel={selfEvaluationScoreLevel}
           peerEvaluationScoreLevel={peerEvaluationScore}
           teamMembersWithScores={teamMembersWithScores}
         />
