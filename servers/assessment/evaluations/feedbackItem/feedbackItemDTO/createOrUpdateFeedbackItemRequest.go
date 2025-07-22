@@ -6,12 +6,13 @@ import (
 )
 
 type CreateOrUpdateFeedbackItemRequest struct {
-	ID                          *uuid.UUID      `json:"id"` // Optional for create, required for update
-	FeedbackType                db.FeedbackType `json:"feedbackType"`
-	FeedbackText                string          `json:"feedbackText"`
-	CourseParticipationID       uuid.UUID       `json:"courseParticipationID"`
-	CoursePhaseID               uuid.UUID       `json:"coursePhaseID"`
-	AuthorCourseParticipationID uuid.UUID       `json:"authorCourseParticipationID"`
+	ID                          *uuid.UUID        `json:"id"` // Optional for create, required for update
+	FeedbackType                db.FeedbackType   `json:"feedbackType"`
+	FeedbackText                string            `json:"feedbackText"`
+	CourseParticipationID       uuid.UUID         `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID         `json:"coursePhaseID"`
+	AuthorCourseParticipationID uuid.UUID         `json:"authorCourseParticipationID"`
+	Type                        db.EvaluationType `json:"type"`
 }
 
 // GetCreateDBModel converts CreateOrUpdateFeedbackItemRequest to create database parameters.
@@ -23,6 +24,7 @@ func (r CreateOrUpdateFeedbackItemRequest) GetCreateDBModel() db.CreateFeedbackI
 		CourseParticipationID:       r.CourseParticipationID,
 		CoursePhaseID:               r.CoursePhaseID,
 		AuthorCourseParticipationID: r.AuthorCourseParticipationID,
+		Type:                        r.Type,
 	}
 }
 
@@ -39,5 +41,6 @@ func (r CreateOrUpdateFeedbackItemRequest) GetUpdateDBModel() db.UpdateFeedbackI
 		CourseParticipationID:       r.CourseParticipationID,
 		CoursePhaseID:               r.CoursePhaseID,
 		AuthorCourseParticipationID: r.AuthorCourseParticipationID,
+		Type:                        r.Type,
 	}
 }

@@ -14,6 +14,7 @@ type FeedbackItem struct {
 	CoursePhaseID               uuid.UUID          `json:"coursePhaseID"`
 	AuthorCourseParticipationID uuid.UUID          `json:"authorCourseParticipationID"`
 	CreatedAt                   pgtype.Timestamptz `json:"createdAt"`
+	Type                        db.EvaluationType  `json:"type"`
 }
 
 // GetFeedbackItemDTOsFromDBModels converts a slice of db.FeedbackItem to DTOs.
@@ -35,5 +36,6 @@ func MapDBFeedbackItemToFeedbackItemDTO(dbFeedbackItem db.FeedbackItem) Feedback
 		CoursePhaseID:               dbFeedbackItem.CoursePhaseID,
 		AuthorCourseParticipationID: dbFeedbackItem.AuthorCourseParticipationID,
 		CreatedAt:                   dbFeedbackItem.CreatedAt,
+		Type:                        dbFeedbackItem.Type,
 	}
 }

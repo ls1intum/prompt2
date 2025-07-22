@@ -19,17 +19,23 @@ func setupEvaluationCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listEvaluationCompletionsByCoursePhase)
 	evaluationRouter.GET("/self", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listSelfEvaluationCompletionsByCoursePhase)
 	evaluationRouter.GET("/peer", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listPeerEvaluationCompletionsByCoursePhase)
+	evaluationRouter.GET("/tutor", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listTutorEvaluationCompletionsByCoursePhase)
 
 	evaluationRouter.POST("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.PUT("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.POST("/my-completion/mark-complete", authMiddleware(promptSDK.CourseStudent), markMyEvaluationAsCompleted)
 	evaluationRouter.PUT("/my-completion/unmark", authMiddleware(promptSDK.CourseStudent), unmarkMyEvaluationAsCompleted)
+	evaluationRouter.POST("/my-completion/tutor", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyTutorEvaluationCompletion)
+	evaluationRouter.PUT("/my-completion/tutor", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyTutorEvaluationCompletion)
+	evaluationRouter.POST("/my-completion/tutor/mark-complete", authMiddleware(promptSDK.CourseStudent), markMyTutorEvaluationAsCompleted)
 	evaluationRouter.GET("/my-completion/self", authMiddleware(promptSDK.CourseStudent), getMySelfEvaluationCompletion)
 	evaluationRouter.GET("/my-completion/peer", authMiddleware(promptSDK.CourseStudent), getMyPeerEvaluationCompletions)
+	evaluationRouter.GET("/my-completion/tutor", authMiddleware(promptSDK.CourseStudent), getMyTutorEvaluationCompletions)
 
 	evaluationRouter.GET("/course-participation/:courseParticipationID/author/:authorCourseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getEvaluationCompletion)
 	evaluationRouter.GET("/course-participation/:courseParticipationID/self", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationCompletion)
 	evaluationRouter.GET("/course-participation/:courseParticipationID/peer", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationCompletions)
+	evaluationRouter.GET("/course-participation/:courseParticipationID/tutor", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getTutorEvaluationCompletions)
 }
 
 func listEvaluationCompletionsByCoursePhase(c *gin.Context) {
@@ -67,6 +73,20 @@ func listPeerEvaluationCompletionsByCoursePhase(c *gin.Context) {
 		return
 	}
 	completions, err := ListPeerEvaluationCompletionsByCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(completions))
+}
+
+func listTutorEvaluationCompletionsByCoursePhase(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	completions, err := ListTutorEvaluationCompletionsByCoursePhase(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -136,6 +156,25 @@ func getPeerEvaluationCompletions(c *gin.Context) {
 	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(evaluationCompletions))
 }
 
+func getTutorEvaluationCompletions(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	evaluationCompletions, err := ListTutorEvaluationCompletionsForParticipantInPhase(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(evaluationCompletions))
+}
+
 func createOrUpdateMyEvaluationCompletion(c *gin.Context) {
 	var req evaluationCompletionDTO.EvaluationCompletion
 	if err := c.BindJSON(&req); err != nil {
@@ -184,6 +223,56 @@ func markMyEvaluationAsCompleted(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Evaluation marked as completed successfully"})
+}
+
+func createOrUpdateMyTutorEvaluationCompletion(c *gin.Context) {
+	var req evaluationCompletionDTO.EvaluationCompletion
+	if err := c.BindJSON(&req); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	statusCode, err := utils.ValidateStudentOwnership(c, req.AuthorCourseParticipationID)
+	if err != nil {
+		handleError(c, statusCode, err)
+		return
+	}
+
+	err = CreateOrUpdateTutorEvaluationCompletion(c, req)
+	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Tutor evaluation completion created/updated successfully"})
+}
+
+func markMyTutorEvaluationAsCompleted(c *gin.Context) {
+	var req evaluationCompletionDTO.EvaluationCompletion
+	if err := c.BindJSON(&req); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	statusCode, err := utils.ValidateStudentOwnership(c, req.AuthorCourseParticipationID)
+	if err != nil {
+		handleError(c, statusCode, err)
+		return
+	}
+
+	err = MarkTutorEvaluationAsCompleted(c, req)
+	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Tutor evaluation marked as completed successfully"})
 }
 
 func unmarkMyEvaluationAsCompleted(c *gin.Context) {
@@ -249,6 +338,28 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 	}
 
 	evaluationCompletions, err := GetEvaluationCompletionsForAuthorInPhase(c, userCourseParticipationUUID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(evaluationCompletions))
+}
+
+func getMyTutorEvaluationCompletions(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userCourseParticipationUUID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
+		return
+	}
+
+	evaluationCompletions, err := GetTutorEvaluationCompletionsForAuthorInPhase(c, userCourseParticipationUUID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

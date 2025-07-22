@@ -147,3 +147,21 @@ func IsPeerEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID
 	}
 	return deadlinePassed, nil
 }
+
+func IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	open, err := CoursePhaseConfigSingleton.queries.IsTutorEvaluationOpen(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if tutor evaluation is open: ", err)
+		return false, errors.New("could not check if tutor evaluation is open")
+	}
+	return open, nil
+}
+
+func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsTutorEvaluationDeadlinePassed(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if tutor evaluation deadline has passed: ", err)
+		return false, errors.New("could not check if tutor evaluation deadline has passed")
+	}
+	return deadlinePassed, nil
+}

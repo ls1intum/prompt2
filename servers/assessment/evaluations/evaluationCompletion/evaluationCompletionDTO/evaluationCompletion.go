@@ -13,6 +13,7 @@ type EvaluationCompletion struct {
 	AuthorCourseParticipationID uuid.UUID          `json:"authorCourseParticipationID"`
 	CompletedAt                 pgtype.Timestamptz `json:"completedAt"`
 	Completed                   bool               `json:"completed"`
+	Type                        string             `json:"type"`
 }
 
 // GetEvaluationCompletionDTOsFromDBModels converts a slice of db.EvaluationCompletion to DTOs.
@@ -32,5 +33,6 @@ func MapDBEvaluationCompletionToEvaluationCompletionDTO(dbEvaluationCompletion d
 		AuthorCourseParticipationID: dbEvaluationCompletion.AuthorCourseParticipationID,
 		CompletedAt:                 dbEvaluationCompletion.CompletedAt,
 		Completed:                   dbEvaluationCompletion.Completed,
+		Type:                        string(dbEvaluationCompletion.Type),
 	}
 }
