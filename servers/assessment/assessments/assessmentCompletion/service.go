@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
@@ -134,17 +133,6 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 	if remaining.RemainingAssessments > 0 {
 		log.Error("cannot mark assessment as completed, remaining assessments exist")
 		return errors.New("cannot mark assessment as completed, remaining assessments exist")
-	}
-
-	// Check if there are at least 3 action items for this student in this course phase
-	actionItemCount, err := actionItem.CountActionItemsForStudentInPhase(ctx, req.CourseParticipationID, req.CoursePhaseID)
-	if err != nil {
-		log.Error("could not count action items for student in phase: ", err)
-		return errors.New("could not count action items for student in phase")
-	}
-	if actionItemCount < 3 {
-		log.Error("cannot mark assessment as completed, at least 3 action items are required")
-		return errors.New("cannot mark assessment as completed, at least 3 action items are required")
 	}
 
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)

@@ -223,7 +223,7 @@ func getMySelfEvaluationCompletion(c *gin.Context) {
 
 	userCourseParticipationUUID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -244,7 +244,7 @@ func getMyPeerEvaluationCompletions(c *gin.Context) {
 
 	userCourseParticipationUUID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 

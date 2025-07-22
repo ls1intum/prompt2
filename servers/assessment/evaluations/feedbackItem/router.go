@@ -57,7 +57,7 @@ func createOrUpdateFeedbackItem(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -87,7 +87,7 @@ func getMyFeedbackItems(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -109,11 +109,9 @@ func deleteFeedbackItem(c *gin.Context) {
 
 	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, http.StatusUnauthorized, err)
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
-
-	// Ensure the user is the author of the feedback item
 	if !IsFeedbackItemAuthor(c, feedbackItemID, courseParticipationID) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this feedback item"})
 		return
