@@ -34,17 +34,17 @@ func GetParticipationForStudent(ctx context.Context, authHeader string, coursePh
 	return coursePhaseConfigDTO.GetAssessmentStudentFromParticipation(participation), nil
 }
 
-// parseTeamMembers parses team members from a raw interface slice
-func parseTeamMembers(membersRaw interface{}) []promptTypes.Person {
-	members := make([]promptTypes.Person, 0)
+// parsePersons parses team members from a raw interface slice
+func parsePersons(personsRaw interface{}) []promptTypes.Person {
+	persons := make([]promptTypes.Person, 0)
 
-	if membersRaw == nil {
-		return members
+	if personsRaw == nil {
+		return persons
 	}
 
-	membersSlice := membersRaw.([]interface{})
-	for _, memberData := range membersSlice {
-		memberMap := memberData.(map[string]interface{})
+	personsSlice := personsRaw.([]interface{})
+	for _, personData := range personsSlice {
+		memberMap := personData.(map[string]interface{})
 
 		id, _ := uuid.Parse(memberMap["courseParticipationID"].(string))
 		firstName := memberMap["firstName"].(string)
@@ -55,10 +55,10 @@ func parseTeamMembers(membersRaw interface{}) []promptTypes.Person {
 			FirstName: firstName,
 			LastName:  lastName,
 		}
-		members = append(members, member)
+		persons = append(persons, member)
 	}
 
-	return members
+	return persons
 }
 
 // parseTeam parses individual team data from a map interface
@@ -102,15 +102,25 @@ func parseTeam(teamData interface{}, index int) (promptTypes.Team, bool) {
 	membersRaw, membersExists := teamMap["members"]
 	var members []promptTypes.Person
 	if membersExists {
-		members = parseTeamMembers(membersRaw)
+		members = parsePersons(membersRaw)
 	} else {
 		members = make([]promptTypes.Person, 0)
+	}
+
+	// Parse team tutors
+	tutorsRaw, tutorsExists := teamMap["tutors"]
+	var tutors []promptTypes.Person
+	if tutorsExists {
+		tutors = parsePersons(tutorsRaw)
+	} else {
+		tutors = make([]promptTypes.Person, 0)
 	}
 
 	team := promptTypes.Team{
 		ID:      teamID,
 		Name:    teamName,
 		Members: members,
+		Tutors:  tutors,
 	}
 
 	return team, true
