@@ -21,9 +21,10 @@ interface ScoreLevelSelectorProps {
   isEvaluation?: boolean
   selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
+  selfEvaluationStudentAnswers?: (() => JSX.Element)[]
   peerEvaluationCompetency?: Competency
   peerEvaluationScoreLevel?: ScoreLevel
-  teamMembersWithScores?: (() => JSX.Element)[]
+  peerEvaluationStudentAnswers?: (() => JSX.Element)[]
 }
 
 export const ScoreLevelSelector = ({
@@ -35,9 +36,10 @@ export const ScoreLevelSelector = ({
   isEvaluation = false,
   selfEvaluationCompetency,
   selfEvaluationScoreLevel,
+  selfEvaluationStudentAnswers,
   peerEvaluationCompetency,
   peerEvaluationScoreLevel,
-  teamMembersWithScores,
+  peerEvaluationStudentAnswers,
 }: ScoreLevelSelectorProps) => {
   return (
     <div className={className}>
@@ -62,7 +64,11 @@ export const ScoreLevelSelector = ({
                           <User key='self-evaluation-icon' size={20} className='text-blue-500' />
                         </TooltipTrigger>
                         <TooltipContent>
+                          Self Evaluation Results
                           <div>{selfEvaluationCompetency.name}</div>
+                          {selfEvaluationStudentAnswers && selfEvaluationStudentAnswers.length > 0
+                            ? selfEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
+                            : undefined}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -78,8 +84,8 @@ export const ScoreLevelSelector = ({
                         <TooltipContent>
                           Peer Evaluation Results
                           <div>Statement: {peerEvaluationCompetency.name}</div>
-                          {teamMembersWithScores && teamMembersWithScores.length > 0
-                            ? teamMembersWithScores.map((studentAnswer) => studentAnswer())
+                          {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
+                            ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
                             : undefined}
                         </TooltipContent>
                       </Tooltip>

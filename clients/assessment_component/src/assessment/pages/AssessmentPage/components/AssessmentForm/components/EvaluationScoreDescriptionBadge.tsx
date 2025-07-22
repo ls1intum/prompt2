@@ -7,8 +7,8 @@ import { getLevelConfig } from '../../../../utils/getLevelConfig'
 
 interface EvaluationScoreDescriptionBadgeProps {
   name: string
-  competency: Competency
-  scoreLevel: ScoreLevel
+  competency?: Competency
+  scoreLevel?: ScoreLevel
 }
 
 export const EvaluationScoreDescriptionBadge = ({
@@ -16,20 +16,22 @@ export const EvaluationScoreDescriptionBadge = ({
   competency,
   scoreLevel,
 }: EvaluationScoreDescriptionBadgeProps) => {
-  const config = getLevelConfig(scoreLevel)
+  const config = getLevelConfig(scoreLevel || ScoreLevel.VeryBad)
 
   const answerText = (() => {
     switch (scoreLevel) {
       case ScoreLevel.VeryBad:
-        return competency.descriptionVeryBad
+        return competency?.descriptionVeryBad
       case ScoreLevel.Bad:
-        return competency.descriptionBad
+        return competency?.descriptionBad
       case ScoreLevel.Ok:
-        return competency.descriptionOk
+        return competency?.descriptionOk
       case ScoreLevel.Good:
-        return competency.descriptionGood
+        return competency?.descriptionGood
       case ScoreLevel.VeryGood:
-        return competency.descriptionVeryGood
+        return competency?.descriptionVeryGood
+      default:
+        return 'No description available'
     }
   })()
 

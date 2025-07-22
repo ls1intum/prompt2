@@ -132,6 +132,18 @@ export const AssessmentForm = ({
   const selfEvaluationScoreLevel = allSelfEvaluationsForThisStudent.find(
     (se) => se.competencyID === selfEvaluationCompetency?.id,
   )?.scoreLevel
+
+  const selfEvaluationStudentAnswers = [
+    () => (
+      <EvaluationScoreDescriptionBadge
+        key={'self'}
+        competency={selfEvaluationCompetency}
+        scoreLevel={selfEvaluationScoreLevel}
+        name={assessmentParticipation?.student.firstName ?? 'This Person'}
+      />
+    ),
+  ]
+
   const peerEvaluations = allPeerEvaluationsForThisStudent.filter(
     (pe) => pe.competencyID === peerEvaluationCompetency?.id,
   )
@@ -142,7 +154,7 @@ export const AssessmentForm = ({
       )
     : undefined
 
-  const teamMembersWithScores =
+  const peerEvaluationStudentAnswers =
     teamMembers
       ?.map((member) => {
         const memberEvaluations = peerEvaluations.filter(
@@ -195,6 +207,7 @@ export const AssessmentForm = ({
           completed={completed}
           selfEvaluationCompetency={selfEvaluationCompetency}
           selfEvaluationScoreLevel={selfEvaluationScoreLevel}
+          selfEvaluationStudentAnswers={selfEvaluationStudentAnswers}
           peerEvaluationCompetency={
             peerEvaluationCompetency && peerEvaluationCompetency.id
               ? {
@@ -208,7 +221,7 @@ export const AssessmentForm = ({
               : undefined
           }
           peerEvaluationScoreLevel={peerEvaluationScore}
-          teamMembersWithScores={teamMembersWithScores}
+          peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
         <div className='flex flex-col h-full'>
