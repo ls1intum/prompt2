@@ -22,7 +22,7 @@ func setupActionItemRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteActionItem)
 	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getActionItemsForStudent)
 
-	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getMyActionItems)
+	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.CourseStudent), getMyActionItems)
 }
 
 func listActionItemsForCoursePhase(c *gin.Context) {
