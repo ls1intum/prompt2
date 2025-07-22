@@ -34,7 +34,8 @@ WHERE a.team_id = t.id
 -- name: GetAllocationForStudent :one
 SELECT id,
        course_participation_id,
-       student_full_name,
+       student_first_name,
+       student_last_name,
        team_id,
        course_phase_id,
        created_at,
@@ -59,9 +60,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -85,9 +87,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -109,9 +112,10 @@ SELECT
     jsonb_agg(
       jsonb_build_object(
         'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
+        'studentFirstName',           a.student_first_name,
+        'studentLastName',            a.student_last_name
       )
-      ORDER BY a.student_full_name
+      ORDER BY a.student_first_name
     ) FILTER (WHERE a.id IS NOT NULL),
     '[]'::jsonb
   )::jsonb AS team_members
@@ -128,9 +132,10 @@ GROUP BY
 ORDER BY
   t.name;
 
--- name: UpdateStudentFullNameForAllocation :exec
+-- name: UpdateStudentNameForAllocation :exec
 UPDATE allocations
-SET student_full_name = $1,
+SET student_first_name = $1,
+    student_last_name = $2,
     updated_at = CURRENT_TIMESTAMP
-WHERE course_participation_id = $2
-  AND course_phase_id = $3;
+WHERE course_participation_id = $3
+  AND course_phase_id = $4;

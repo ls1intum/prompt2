@@ -13,6 +13,7 @@ import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
 import { useEffect } from 'react'
 import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesToTeams'
+import { StudentName } from '../../interfaces/studentNameUpdateRequest'
 
 export const TeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -95,14 +96,17 @@ export const TeamAllocationParticipantsPage = (): JSX.Element => {
 
     const requestPayload = {
       coursePhaseID: phaseId,
-      studentNames: coursePhaseParticipations.participations.reduce(
+      studentNamesPerID: coursePhaseParticipations.participations.reduce(
         (acc, p) => {
           if (p.student?.firstName && p.student?.lastName) {
-            acc[p.courseParticipationID] = `${p.student.firstName} ${p.student.lastName}`
+            acc[p.courseParticipationID] = {
+              firstName: p.student.firstName,
+              lastName: p.student.lastName,
+            }
           }
           return acc
         },
-        {} as Record<string, string>,
+        {} as Record<string, StudentName>,
       ),
     }
 
