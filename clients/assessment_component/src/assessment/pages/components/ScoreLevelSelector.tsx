@@ -12,8 +12,6 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 
-import { StudentScoreBadge } from './StudentScoreBadge'
-
 interface ScoreLevelSelectorProps {
   className: string
   competency: Competency
@@ -21,9 +19,11 @@ interface ScoreLevelSelectorProps {
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
   isEvaluation?: boolean
+  selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
+  peerEvaluationCompetency?: Competency
   peerEvaluationScoreLevel?: ScoreLevel
-  teamMembersWithScores?: { firstName: string; lastName: string; scoreLevel: ScoreLevel }[]
+  teamMembersWithScores?: (() => JSX.Element)[]
 }
 
 export const ScoreLevelSelector = ({
@@ -33,7 +33,9 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   isEvaluation = false,
+  selfEvaluationCompetency,
   selfEvaluationScoreLevel,
+  peerEvaluationCompetency,
   peerEvaluationScoreLevel,
   teamMembersWithScores,
 }: ScoreLevelSelectorProps) => {
@@ -51,41 +53,38 @@ export const ScoreLevelSelector = ({
           >
             <div className='absolute -top-6 left-0 w-full'>
               <div className='flex justify-center items-center text-left gap-2'>
-                {selfEvaluationScoreLevel && level === selfEvaluationScoreLevel && (
-                  <TooltipProvider key='peer-evaluation-icon'>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <User key='self-evaluation-icon' size={20} className='text-blue-500' />
-                      </TooltipTrigger>
-                      <TooltipContent>Self Evaluation Result</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                {peerEvaluationScoreLevel && level === peerEvaluationScoreLevel && (
-                  <TooltipProvider key='peer-evaluation-icon'>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Peer Evaluation Result
-                        {teamMembersWithScores && teamMembersWithScores.length > 0
-                          ? teamMembersWithScores.map((member) => (
-                              <div
-                                key={member.firstName}
-                                className='flex items-center gap-1 space-y-1'
-                              >
-                                <span className='font-semibold'>
-                                  {member.firstName} {member.lastName}:
-                                </span>
-                                <StudentScoreBadge scoreLevel={member.scoreLevel} />
-                              </div>
-                            ))
-                          : undefined}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {selfEvaluationCompetency &&
+                  selfEvaluationScoreLevel &&
+                  level === selfEvaluationScoreLevel && (
+                    <TooltipProvider key='peer-evaluation-icon'>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <User key='self-evaluation-icon' size={20} className='text-blue-500' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div>{selfEvaluationCompetency.name}</div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                {peerEvaluationCompetency &&
+                  peerEvaluationScoreLevel &&
+                  level === peerEvaluationScoreLevel && (
+                    <TooltipProvider key='peer-evaluation-icon'>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Peer Evaluation Results
+                          <div>Statement: {peerEvaluationCompetency.name}</div>
+                          {teamMembersWithScores && teamMembersWithScores.length > 0
+                            ? teamMembersWithScores.map((studentAnswer) => studentAnswer())
+                            : undefined}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
               </div>
             </div>
 
