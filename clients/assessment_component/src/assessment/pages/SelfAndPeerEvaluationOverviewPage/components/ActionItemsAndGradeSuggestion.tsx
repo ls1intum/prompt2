@@ -32,14 +32,14 @@ export const ActionItemsAndGradeSuggestion = () => {
     isPending: isActionItemsPending,
     isError: isActionItemsError,
     refetch: refetchActionItems,
-  } = useGetMyActionItems()
+  } = useGetMyActionItems({ enabled: isStudent })
 
   const {
     data: gradeSuggestion,
     isPending: isGradeSuggestionPending,
     isError: isGradeSuggestionError,
     refetch: refetchGradeSuggestion,
-  } = useGetMyGradeSuggestion()
+  } = useGetMyGradeSuggestion({ enabled: isStudent })
 
   const displayActionItems = isStudent ? actionItems : exampleActionItems
   const displayGradeSuggestion = isStudent ? gradeSuggestion : exampleGradeSuggestion
