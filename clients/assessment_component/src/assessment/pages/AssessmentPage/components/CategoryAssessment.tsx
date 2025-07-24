@@ -42,7 +42,7 @@ export const CategoryAssessment = ({
         <div className='flex items-center justify-center w-full'>
           <button
             onClick={toggleExpand}
-            className='p-1 mr-2 hover:bg-gray-100 rounded-sm focus:outline-none'
+            className='p-1 mr-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm focus:outline-none'
             aria-expanded={isExpanded}
             aria-controls={`content-${category.id}`}
           >

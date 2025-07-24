@@ -77,10 +77,11 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     isAssessmentCompletionsPending ||
     isSelfEvaluationCompletionsPending ||
     isPeerEvaluationCompletionsPending
-  const refetch =
-    refetchAssessmentCompletions ||
-    refetchSelfEvaluationCompletions ||
-    refetchPeerEvaluationCompletions
+  const refetch = () => {
+    refetchAssessmentCompletions()
+    refetchSelfEvaluationCompletions()
+    refetchPeerEvaluationCompletions()
+  }
 
   const teamsWithStudents = useMemo(() => {
     return teams.map((team) => ({

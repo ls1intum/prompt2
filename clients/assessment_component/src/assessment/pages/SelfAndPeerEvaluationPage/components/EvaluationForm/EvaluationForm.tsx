@@ -107,25 +107,25 @@ export const EvaluationForm = ({
           completed={completed}
           isEvaluation={true}
         />
-
-        {error && !completed && (
-          <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>
-            <AlertCircle className='h-3 w-3' />
-            <p>{error}</p>
-          </div>
-        )}
-
-        {evaluation && (
-          <div className='col-span-full'>
-            <DeleteAssessmentDialog
-              open={deleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-              onConfirm={handleDelete}
-              isDeleting={deleteEvaluation.isPending}
-            />
-          </div>
-        )}
       </div>
+
+      {error && !completed && (
+        <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>
+          <AlertCircle className='h-3 w-3' />
+          <p>{error}</p>
+        </div>
+      )}
+
+      {evaluation && (
+        <div className='col-span-full'>
+          <DeleteAssessmentDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onConfirm={handleDelete}
+            isDeleting={deleteEvaluation.isPending}
+          />
+        </div>
+      )}
     </Form>
   )
 }

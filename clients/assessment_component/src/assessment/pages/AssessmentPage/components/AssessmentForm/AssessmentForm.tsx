@@ -15,6 +15,8 @@ import {
 
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 import { useTeamStore } from '../../../../zustand/useTeamStore'
+import { useSelfEvaluationCategoryStore } from '../../../../zustand/useSelfEvaluationCategoryStore'
+import { usePeerEvaluationCategoryStore } from '../../../../zustand/usePeerEvaluationCategoryStore'
 
 import { Assessment, CreateOrUpdateAssessmentRequest } from '../../../../interfaces/assessment'
 import { Competency } from '../../../../interfaces/competency'
@@ -27,6 +29,8 @@ import {
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
 import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
+
+import { EvaluationScoreDescriptionBadge } from './components/EvaluationScoreDescriptionBadge'
 
 import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
@@ -105,53 +109,68 @@ export const AssessmentForm = ({
     }
   }
 
-  const { selfEvaluations: allSelfEvaluations, peerEvaluations: allPeerEvaluations } =
-    useStudentAssessmentStore()
+  const selfEvaluationCompetency =
+    useSelfEvaluationCategoryStore().allSelfEvaluationCompetencies.find((c) =>
+      competency.mappedFromCompetencies.includes(c.id),
+    )
+  const peerEvaluationCompetency =
+    usePeerEvaluationCategoryStore().allPeerEvaluationCompetencies.find((c) =>
+      competency.mappedFromCompetencies.includes(c.id),
+    )
+
+  const {
+    selfEvaluations: allSelfEvaluationsForThisStudent,
+    peerEvaluations: allPeerEvaluationsForThisStudent,
+    assessmentParticipation,
+  } = useStudentAssessmentStore()
+
   const { teams } = useTeamStore()
   const teamMembers = teams.find((t) =>
-    t.members.map((m) => m.courseParticipationID).includes(courseParticipationID ?? ''),
+    t.members.map((m) => m.id).includes(courseParticipationID ?? ''),
   )?.members
 
-  const selfEvaluations = allSelfEvaluations.filter((se) =>
-    competency.mappedFromCompetencies.includes(se.competencyID),
-  )
-  const peerEvaluations = allPeerEvaluations.filter((pe) =>
-    competency.mappedFromCompetencies.includes(pe.competencyID),
-  )
+  const selfEvaluationScoreLevel = allSelfEvaluationsForThisStudent.find(
+    (se) => se.competencyID === selfEvaluationCompetency?.id,
+  )?.scoreLevel
 
-  const selfEvaluationScore = selfEvaluations?.length
-    ? mapNumberToScoreLevel(
-        selfEvaluations.reduce((acc, se) => acc + mapScoreLevelToNumber(se.scoreLevel), 0),
-      )
-    : undefined
+  const selfEvaluationStudentAnswers = [
+    () => (
+      <EvaluationScoreDescriptionBadge
+        key={'self'}
+        competency={selfEvaluationCompetency}
+        scoreLevel={selfEvaluationScoreLevel}
+        name={assessmentParticipation?.student.firstName ?? 'This Person'}
+      />
+    ),
+  ]
+
+  const peerEvaluations = allPeerEvaluationsForThisStudent.filter(
+    (pe) => pe.competencyID === peerEvaluationCompetency?.id,
+  )
 
   const peerEvaluationScore = peerEvaluations?.length
     ? mapNumberToScoreLevel(
-        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0),
+        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
+          peerEvaluations.length,
       )
     : undefined
 
-  const teamMembersWithScores =
+  const peerEvaluationStudentAnswers =
     teamMembers
       ?.map((member) => {
-        const memberEvaluations = peerEvaluations.filter(
-          (pe) => pe.authorCourseParticipationID === member.courseParticipationID,
-        )
-        const averageScore =
-          memberEvaluations.length > 0
-            ? mapNumberToScoreLevel(
-                memberEvaluations.reduce(
-                  (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel),
-                  0,
-                ) / memberEvaluations.length,
-              )
-            : undefined
-        return averageScore !== undefined
-          ? {
-              firstName: member.firstName,
-              lastName: member.lastName,
-              scoreLevel: averageScore,
-            }
+        const memberScoreLevel = peerEvaluations.find(
+          (pe) => pe.authorCourseParticipationID === member.id,
+        )?.scoreLevel
+
+        return memberScoreLevel !== undefined && peerEvaluationCompetency
+          ? () => (
+              <EvaluationScoreDescriptionBadge
+                key={member.id}
+                competency={peerEvaluationCompetency}
+                scoreLevel={memberScoreLevel}
+                name={`${member.firstName} ${member.lastName}`}
+              />
+            )
           : undefined
       })
       .filter((item) => item !== undefined) ?? []
@@ -178,9 +197,23 @@ export const AssessmentForm = ({
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
-          selfEvaluationScoreLevel={selfEvaluationScore}
+          selfEvaluationCompetency={selfEvaluationCompetency}
+          selfEvaluationScoreLevel={selfEvaluationScoreLevel}
+          selfEvaluationStudentAnswers={selfEvaluationStudentAnswers}
+          peerEvaluationCompetency={
+            peerEvaluationCompetency && peerEvaluationCompetency.id
+              ? {
+                  ...peerEvaluationCompetency,
+                  name:
+                    peerEvaluationCompetency.name.replace(
+                      /This person|this person/g,
+                      assessmentParticipation?.student.firstName ?? 'This Person',
+                    ) ?? '',
+                }
+              : undefined
+          }
           peerEvaluationScoreLevel={peerEvaluationScore}
-          teamMembersWithScores={teamMembersWithScores}
+          peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
         <div className='flex flex-col h-full'>

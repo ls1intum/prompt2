@@ -46,7 +46,7 @@ func parsePersons(personsRaw interface{}) []promptTypes.Person {
 	for _, personData := range personsSlice {
 		memberMap := personData.(map[string]interface{})
 
-		id, _ := uuid.Parse(memberMap["courseParticipationID"].(string))
+		id, _ := uuid.Parse(memberMap["id"].(string))
 		firstName := memberMap["firstName"].(string)
 		lastName := memberMap["lastName"].(string)
 
