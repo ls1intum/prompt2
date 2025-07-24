@@ -28,18 +28,23 @@ export function getWeightedScoreLevel(
           .reduce((totalWeight, competency) => totalWeight + competency.weight, 0)
 
         const categoryAverage = category.competencies
-          .map(
-            (competency) =>
-              competencyScores
-                .filter((score) => score.competencyID === competency.id)
+          .map((competency) => {
+            const competencyScoresInThisCompetency = competencyScores.filter(
+              (score) => score.competencyID === competency.id,
+            )
+
+            return (
+              competencyScoresInThisCompetency
                 .map((score) => mapScoreLevelToNumber(score.scoreLevel) * competency.weight)
-                .reduce((totalWeight, score) => totalWeight + score, 0) /
-              totalWeightOfCompetenciesWithScore,
-          )
-          .reduce((totalWeight, score) => totalWeight + score, 0)
+                .reduce((totalScore, score) => totalScore + score, 0) /
+              competencyScoresInThisCompetency.length /
+              totalWeightOfCompetenciesWithScore
+            )
+          })
+          .reduce((totalScore, score) => totalScore + score, 0)
 
         return categoryAverage * category.weight
       })
-      .reduce((totalWeight, score) => totalWeight + score, 0) / totalWeightsOfCategoriesWithScore
+      .reduce((totalScore, score) => totalScore + score, 0) / totalWeightsOfCategoriesWithScore
   )
 }
