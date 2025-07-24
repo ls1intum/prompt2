@@ -150,32 +150,24 @@ export const AssessmentForm = ({
 
   const peerEvaluationScore = peerEvaluations?.length
     ? mapNumberToScoreLevel(
-        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0),
+        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
+          peerEvaluations.length,
       )
     : undefined
 
   const peerEvaluationStudentAnswers =
     teamMembers
       ?.map((member) => {
-        const memberEvaluations = peerEvaluations.filter(
+        const memberScoreLevel = peerEvaluations.find(
           (pe) => pe.authorCourseParticipationID === member.id,
-        )
-        const averageScore =
-          memberEvaluations.length > 0
-            ? mapNumberToScoreLevel(
-                memberEvaluations.reduce(
-                  (acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel),
-                  0,
-                ) / memberEvaluations.length,
-              )
-            : undefined
+        )?.scoreLevel
 
-        return averageScore !== undefined && peerEvaluationCompetency
+        return memberScoreLevel !== undefined && peerEvaluationCompetency
           ? () => (
               <EvaluationScoreDescriptionBadge
                 key={member.id}
                 competency={peerEvaluationCompetency}
-                scoreLevel={averageScore}
+                scoreLevel={memberScoreLevel}
                 name={`${member.firstName} ${member.lastName}`}
               />
             )
