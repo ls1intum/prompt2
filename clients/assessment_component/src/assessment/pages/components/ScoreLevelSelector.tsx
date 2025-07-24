@@ -61,11 +61,16 @@ export const ScoreLevelSelector = ({
                     <TooltipProvider key='peer-evaluation-icon'>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <User key='self-evaluation-icon' size={20} className='text-blue-500' />
+                          <User
+                            key='self-evaluation-icon'
+                            size={20}
+                            className='text-blue-500 dark:text-blue-300'
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className='font-semibold'>Self Evaluation Results</div>
                           <div className='text-sm text-muted-foreground'>
+                            <span className='font-semibold'>Statement:</span>{' '}
                             {selfEvaluationCompetency.name}
                           </div>
                           {selfEvaluationStudentAnswers &&
@@ -95,7 +100,8 @@ export const ScoreLevelSelector = ({
                         <TooltipContent>
                           <div className='font-semibold'>Peer Evaluation Results</div>
                           <div className='text-sm text-muted-foreground'>
-                            Statement: {peerEvaluationCompetency.name}
+                            <span className='font-semibold'>Statement:</span>{' '}
+                            {peerEvaluationCompetency.name}
                           </div>
                           {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
                             ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
