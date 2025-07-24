@@ -13,6 +13,7 @@ import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
+import { FeedbackItemsPanel } from './components/FeedbackItemsPanel/FeedbackItemsPanel'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -92,6 +93,8 @@ export const AssessmentPage = (): JSX.Element => {
           completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}
+
+      <FeedbackItemsPanel courseParticipationID={courseParticipationID ?? ''} />
 
       <AssessmentCompletion />
     </div>
