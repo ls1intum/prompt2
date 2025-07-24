@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -79,7 +79,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetTeamsForCoursePhase() {
 		"Should return either OK or Internal Server Error")
 
 	if w.Code == http.StatusOK {
-		var teams []coursePhaseConfigDTO.Team
+		var teams []promptTypes.Team
 		err = json.Unmarshal(w.Body.Bytes(), &teams)
 		assert.NoError(suite.T(), err, "Response should be valid JSON array of teams")
 		// Teams array can be empty, that's valid
@@ -120,7 +120,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) TestGetTeamsForCoursePhaseNonExis
 		"Should return either OK or Internal Server Error for non-existent course phase")
 
 	if w.Code == http.StatusOK {
-		var teams []coursePhaseConfigDTO.Team
+		var teams []promptTypes.Team
 		err = json.Unmarshal(w.Body.Bytes(), &teams)
 		assert.NoError(suite.T(), err, "Response should be valid JSON array")
 		// For non-existent course phase, teams array should be empty
