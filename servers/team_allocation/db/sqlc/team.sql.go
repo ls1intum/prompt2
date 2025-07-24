@@ -111,7 +111,7 @@ FROM team t
          LEFT JOIN LATERAL (
     SELECT jsonb_agg(
                    jsonb_build_object(
-                           'courseParticipationID', a.course_participation_id,
+                           'id', a.course_participation_id,
                            'firstName', a.student_first_name,
                            'lastName', a.student_last_name
                    )
@@ -123,7 +123,7 @@ FROM team t
          LEFT JOIN LATERAL (
     SELECT jsonb_agg(
                    jsonb_build_object(
-                           'courseParticipationID', tu.course_participation_id,
+                           'id', tu.course_participation_id,
                            'firstName', tu.first_name,
                            'lastName', tu.last_name
                    )
