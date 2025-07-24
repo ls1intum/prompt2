@@ -4,14 +4,35 @@ import { ErrorPage } from '@tumaet/prompt-ui-components'
 
 import { FeedbackItemDisplayPanel } from './components/FeedbackItemDisplayPanel'
 import { useGetFeedbackItemsForStudent } from './hooks/useGetFeedbackItemsForStudent'
+import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
+import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
-interface FeedbackItemsPanelProps {
-  courseParticipationID: string
-}
+interface FeedbackItemsPanelProps {}
 
-export const FeedbackItemsPanel = ({ courseParticipationID }: FeedbackItemsPanelProps) => {
+export const FeedbackItemsPanel = ({}: FeedbackItemsPanelProps) => {
+  const { assessmentParticipation } = useStudentAssessmentStore()
+  const courseParticipationID = assessmentParticipation?.courseParticipationID || ''
+
   const { positiveFeedbackItems, negativeFeedbackItems, isLoading, isError, refetch } =
     useGetFeedbackItemsForStudent(courseParticipationID)
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
+  const studentName = assessmentParticipation?.student?.firstName || 'this student'
+
+  const getHeading = () => {
+    const selfEnabled = coursePhaseConfig?.selfEvaluationEnabled
+    const peerEnabled = coursePhaseConfig?.peerEvaluationEnabled
+
+    if (selfEnabled && peerEnabled) {
+      return 'Feedback Items from Self and Peer Evaluation'
+    } else if (selfEnabled) {
+      return 'Feedback Items from Self Evaluation'
+    } else if (peerEnabled) {
+      return 'Feedback Items from Peer Evaluation'
+    } else {
+      return 'Feedback Items'
+    }
+  }
 
   if (isError) {
     return <ErrorPage message='Error loading feedback items' onRetry={refetch} />
@@ -31,11 +52,19 @@ export const FeedbackItemsPanel = ({ courseParticipationID }: FeedbackItemsPanel
 
   return (
     <div className='space-y-4'>
-      <h1 className='text-xl font-semibold tracking-tight'>Feedback Items from students</h1>
+      <h1 className='text-xl font-semibold tracking-tight'>{getHeading()}</h1>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-        <FeedbackItemDisplayPanel feedbackItems={negativeFeedbackItems} feedbackType='negative' />
-        <FeedbackItemDisplayPanel feedbackItems={positiveFeedbackItems} feedbackType='positive' />
+        <FeedbackItemDisplayPanel
+          feedbackItems={negativeFeedbackItems}
+          feedbackType='negative'
+          studentName={studentName}
+        />
+        <FeedbackItemDisplayPanel
+          feedbackItems={positiveFeedbackItems}
+          feedbackType='positive'
+          studentName={studentName}
+        />
       </div>
     </div>
   )

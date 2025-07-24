@@ -8,14 +8,18 @@ import { FeedbackItemRow } from './FeedbackItemRow'
 interface FeedbackItemDisplayPanelProps {
   feedbackItems: FeedbackItem[]
   feedbackType: FeedbackType
+  studentName: string
 }
 
 export const FeedbackItemDisplayPanel = ({
   feedbackItems,
   feedbackType,
+  studentName,
 }: FeedbackItemDisplayPanelProps) => {
   const panelTitle =
-    feedbackType === 'positive' ? 'What was done particularly well' : 'Areas for improvement'
+    feedbackType === 'positive'
+      ? `What did ${studentName} do particularly well?`
+      : `Where could ${studentName} improve?`
 
   const iconColor = feedbackType === 'positive' ? 'text-green-600' : 'text-red-600'
 

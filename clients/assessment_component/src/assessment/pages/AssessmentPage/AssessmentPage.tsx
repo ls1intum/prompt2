@@ -94,7 +94,7 @@ export const AssessmentPage = (): JSX.Element => {
         />
       ))}
 
-      <FeedbackItemsPanel courseParticipationID={courseParticipationID ?? ''} />
+      <FeedbackItemsPanel />
 
       <AssessmentCompletion />
     </div>
