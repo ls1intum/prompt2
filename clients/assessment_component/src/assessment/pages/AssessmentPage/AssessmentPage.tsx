@@ -17,7 +17,7 @@ import { AssessmentCompletion } from './components/AssessmentCompletion/Assessme
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
 
-  const { setStudentAssessment } = useStudentAssessmentStore()
+  const { setStudentAssessment, setAssessmentParticipation } = useStudentAssessmentStore()
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(
@@ -44,6 +44,12 @@ export const AssessmentPage = (): JSX.Element => {
       setStudentAssessment(studentAssessment)
     }
   }, [studentAssessment, setStudentAssessment])
+
+  useEffect(() => {
+    if (participant) {
+      setAssessmentParticipation(participant)
+    }
+  }, [participant, setAssessmentParticipation])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
