@@ -33,6 +33,10 @@ export function getWeightedScoreLevel(
               (score) => score.competencyID === competency.id,
             )
 
+            if (competencyScoresInThisCompetency.length === 0) {
+              return undefined
+            }
+
             return (
               competencyScoresInThisCompetency
                 .map((score) => mapScoreLevelToNumber(score.scoreLevel) * competency.weight)
@@ -41,7 +45,7 @@ export function getWeightedScoreLevel(
               totalWeightOfCompetenciesWithScore
             )
           })
-          .reduce((totalScore, score) => totalScore + score, 0)
+          .reduce((totalScore: number, score) => totalScore + (score || 0), 0)
 
         return categoryAverage * category.weight
       })
