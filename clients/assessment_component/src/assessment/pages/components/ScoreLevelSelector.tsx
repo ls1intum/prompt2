@@ -64,11 +64,18 @@ export const ScoreLevelSelector = ({
                           <User key='self-evaluation-icon' size={20} className='text-blue-500' />
                         </TooltipTrigger>
                         <TooltipContent>
-                          Self Evaluation Results
-                          <div>{selfEvaluationCompetency.name}</div>
-                          {selfEvaluationStudentAnswers && selfEvaluationStudentAnswers.length > 0
-                            ? selfEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
-                            : undefined}
+                          <div className='font-semibold'>Self Evaluation Results</div>
+                          <div className='text-sm text-muted-foreground'>
+                            {selfEvaluationCompetency.name}
+                          </div>
+                          {selfEvaluationStudentAnswers &&
+                          selfEvaluationStudentAnswers.length > 0 ? (
+                            <div className='mt-2 space-y-1'>
+                              {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
+                                <div key={index}>{studentAnswer()}</div>
+                              ))}
+                            </div>
+                          ) : null}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -79,11 +86,17 @@ export const ScoreLevelSelector = ({
                     <TooltipProvider key='peer-evaluation-icon'>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
+                          <Users
+                            key='peer-evaluation-icon'
+                            size={20}
+                            className='text-green-500 dark:text-green-300'
+                          />
                         </TooltipTrigger>
                         <TooltipContent>
-                          Peer Evaluation Results
-                          <div>Statement: {peerEvaluationCompetency.name}</div>
+                          <div className='font-semibold'>Peer Evaluation Results</div>
+                          <div className='text-sm text-muted-foreground'>
+                            Statement: {peerEvaluationCompetency.name}
+                          </div>
                           {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
                             ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
                             : undefined}
