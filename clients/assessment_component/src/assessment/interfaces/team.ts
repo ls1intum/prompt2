@@ -6,7 +6,7 @@ export type Team = {
 }
 
 export type Person = {
-  courseParticipationID: string
+  id: string
   firstName: string
   lastName: string
 }

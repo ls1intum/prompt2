@@ -1,3 +1,4 @@
+import { AssessmentParticipationWithStudent } from '../interfaces/assessmentParticipationWithStudent'
 import { StudentAssessment } from '../interfaces/studentAssessment'
 
 import { Assessment } from '../interfaces/assessment'
@@ -18,6 +19,9 @@ export interface StudentAssessmentStore {
   positiveFeedbackItems: FeedbackItem[]
   negativeFeedbackItems: FeedbackItem[]
   setStudentAssessment: (assessment: StudentAssessment) => void
+
+  assessmentParticipation: AssessmentParticipationWithStudent | undefined
+  setAssessmentParticipation: (participation: AssessmentParticipationWithStudent) => void
 }
 
 export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) => ({
@@ -29,7 +33,6 @@ export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) =>
   peerEvaluations: [],
   positiveFeedbackItems: [],
   negativeFeedbackItems: [],
-
   setStudentAssessment: (assessment) =>
     set({
       courseParticipationID: assessment.courseParticipationID,
@@ -41,4 +44,7 @@ export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) =>
       positiveFeedbackItems: assessment.positiveFeedbackItems,
       negativeFeedbackItems: assessment.negativeFeedbackItems,
     }),
+
+  assessmentParticipation: undefined,
+  setAssessmentParticipation: (participation) => set({ assessmentParticipation: participation }),
 }))
