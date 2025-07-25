@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
@@ -42,6 +42,11 @@ export const AssessmentCompletion = () => {
   const [gradeSuggestion, setGradeSuggestion] = useState(
     assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
+
+  useEffect(() => {
+    setGeneralRemarks(assessmentCompletion?.comment || '')
+    setGradeSuggestion(assessmentCompletion?.gradeSuggestion?.toString() || '')
+  }, [assessmentCompletion])
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
