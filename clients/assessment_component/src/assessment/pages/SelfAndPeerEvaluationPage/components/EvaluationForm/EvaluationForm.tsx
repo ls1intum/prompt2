@@ -47,6 +47,16 @@ export const EvaluationForm = ({
   const deleteEvaluation = useDeleteEvaluation(setError)
   const selectedScoreLevel = form.watch('scoreLevel')
 
+  // Reset form when evaluation data changes (e.g., when switching students)
+  useEffect(() => {
+    form.reset({
+      courseParticipationID,
+      authorCourseParticipationID: authorCourseParticipationID,
+      competencyID: competency.id,
+      scoreLevel: evaluation?.scoreLevel,
+    })
+  }, [form, courseParticipationID, authorCourseParticipationID, competency.id, evaluation])
+
   useEffect(() => {
     if (completed) return
 
