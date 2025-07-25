@@ -41,7 +41,10 @@ export const FeedbackItemsPanel = ({}: FeedbackItemsPanelProps) => {
   if (isLoading) {
     return (
       <div className='flex justify-center items-center h-64'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+        <div role='status' aria-label='Loading feedback items'>
+          <Loader2 className='h-12 w-12 animate-spin text-primary' />
+          <span className='sr-only'>Loading feedback items...</span>
+        </div>
       </div>
     )
   }

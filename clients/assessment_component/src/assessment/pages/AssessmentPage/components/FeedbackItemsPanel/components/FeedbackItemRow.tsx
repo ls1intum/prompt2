@@ -44,12 +44,20 @@ export const FeedbackItemRow = ({ feedbackItem }: FeedbackItemRowProps) => {
 
         <div className='flex-shrink-0 mt-1'>
           {isSelfFeedback ? (
-            <User className='h-4 w-4 text-blue-500 dark:text-blue-400' />
+            <User
+              className='h-4 w-4 text-blue-500 dark:text-blue-400'
+              aria-label='Self feedback'
+              role='img'
+            />
           ) : (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Users className='h-4 w-4 text-green-600 dark:text-green-400' />
+                  <Users
+                    className='h-4 w-4 text-green-600 dark:text-green-400'
+                    aria-label='Author information'
+                    role='img'
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Author: {authorName}</p>
