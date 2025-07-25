@@ -73,6 +73,8 @@ func initKeycloak(router *gin.RouterGroup, queries db.Queries) {
 }
 
 func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
+	log.Debug("Reading mailing environment variables...")
+
 	clientURL := utils.GetEnv("CORE_HOST", "localhost:3000") // required for application link in mails
 	smtpHost := utils.GetEnv("SMTP_HOST", "127.0.0.1")
 	smtpPort := utils.GetEnv("SMTP_PORT", "25")
@@ -80,6 +82,17 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 	smtpPassword := utils.GetEnv("SMTP_PASSWORD", "")
 	senderEmail := utils.GetEnv("SENDER_EMAIL", "")
 	senderName := utils.GetEnv("SENDER_NAME", "Prompt Mailing Service")
+
+	log.Debug("Environment variables read:")
+	log.Debug("CORE_HOST: ", clientURL)
+	log.Debug("SMTP_HOST: ", smtpHost)
+	log.Debug("SMTP_PORT: ", smtpPort)
+	log.Debug("SMTP_USERNAME: ", smtpUsername)
+	log.Debug("SMTP_PASSWORD: ", "[REDACTED]") // Don't log the actual password
+	log.Debug("SENDER_EMAIL: ", senderEmail)
+	log.Debug("SENDER_NAME: ", senderName)
+
+	log.Info("Initializing mailing service with SMTP host: ", smtpHost, " port: ", smtpPort, " sender email: ", senderEmail)
 
 	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, smtpUsername, smtpPassword, senderName, senderEmail, clientURL)
 }

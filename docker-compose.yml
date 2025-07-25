@@ -29,6 +29,12 @@ services:
       - KEYCLOAK_ID_OF_CLIENT
       - KEYCLOAK_AUTHORIZED_PARTY
       - DEBUG
+      - SMTP_HOST
+      - SMTP_PORT
+      - SMTP_USERNAME
+      - SMTP_PASSWORD
+      - SENDER_EMAIL
+      - SENDER_NAME
 
   server-intro-course:
     build:
