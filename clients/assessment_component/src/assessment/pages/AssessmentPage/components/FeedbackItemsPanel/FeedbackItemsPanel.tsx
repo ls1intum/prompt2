@@ -48,7 +48,14 @@ export const FeedbackItemsPanel = () => {
   }
 
   if (positiveFeedbackItems.length === 0 && negativeFeedbackItems.length === 0) {
-    return null
+    return (
+      <div className='space-y-4'>
+        <h1 className='text-xl font-semibold tracking-tight'>{getHeading()}</h1>
+        <div className='flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-muted/30'>
+          <p className='text-muted-foreground my-2'>No feedback items available for this student</p>
+        </div>
+      </div>
+    )
   }
 
   return (
