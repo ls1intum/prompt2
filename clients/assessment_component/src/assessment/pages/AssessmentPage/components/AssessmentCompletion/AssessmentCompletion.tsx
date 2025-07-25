@@ -43,7 +43,6 @@ export const AssessmentCompletion = () => {
     assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
 
-  // Update local state when assessmentCompletion changes (e.g., when switching students)
   useEffect(() => {
     setGeneralRemarks(assessmentCompletion?.comment || '')
     setGradeSuggestion(assessmentCompletion?.gradeSuggestion?.toString() || '')

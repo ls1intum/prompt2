@@ -70,7 +70,6 @@ export const AssessmentForm = ({
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
 
-  // Reset form when assessment data changes (e.g., when switching students)
   useEffect(() => {
     form.reset({
       courseParticipationID,
