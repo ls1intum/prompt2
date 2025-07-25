@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
@@ -42,6 +42,11 @@ export const AssessmentCompletion = () => {
   const [gradeSuggestion, setGradeSuggestion] = useState(
     assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
+
+  useEffect(() => {
+    setGeneralRemarks(assessmentCompletion?.comment || '')
+    setGradeSuggestion(assessmentCompletion?.gradeSuggestion?.toString() || '')
+  }, [assessmentCompletion])
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -128,7 +133,9 @@ export const AssessmentCompletion = () => {
   }
 
   return (
-    <div>
+    <div className='space-y-4'>
+      <h1 className='text-xl font-semibold tracking-tight'>Finalize your Assessment</h1>
+
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <div className='grid grid-cols-1 gap-4'>
           <Card>

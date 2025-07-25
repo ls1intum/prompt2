@@ -39,6 +39,9 @@ func getAllTeams(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
+	log.Infof("Retrieved teams: %+v", teams)
+
 	c.JSON(http.StatusOK, gin.H{"teams": teams})
 }
 

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/team_allocation/team/teamDTO"
 	"github.com/ls1intum/prompt2/servers/team_allocation/testutils"
 	"github.com/stretchr/testify/assert"
@@ -59,7 +60,7 @@ func (suite *TeamRouterTestSuite) TestGetAllTeams() {
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
 	var response struct {
-		Teams []teamDTO.Team `json:"teams"`
+		Teams []promptTypes.Team `json:"teams"`
 	}
 	err := json.Unmarshal(resp.Body.Bytes(), &response)
 	assert.NoError(suite.T(), err)
@@ -85,7 +86,7 @@ func (suite *TeamRouterTestSuite) TestGetTeamByID() {
 
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	var team teamDTO.Team
+	var team promptTypes.Team
 	err := json.Unmarshal(resp.Body.Bytes(), &team)
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), team.ID, "Team ID should not be empty")

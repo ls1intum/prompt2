@@ -12,8 +12,6 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 
-import { StudentScoreBadge } from './StudentScoreBadge'
-
 interface ScoreLevelSelectorProps {
   className: string
   competency: Competency
@@ -21,9 +19,12 @@ interface ScoreLevelSelectorProps {
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
   isEvaluation?: boolean
+  selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
+  selfEvaluationStudentAnswers?: (() => JSX.Element)[]
+  peerEvaluationCompetency?: Competency
   peerEvaluationScoreLevel?: ScoreLevel
-  teamMembersWithScores?: { name: string; scoreLevel: ScoreLevel }[]
+  peerEvaluationStudentAnswers?: (() => JSX.Element)[]
 }
 
 export const ScoreLevelSelector = ({
@@ -33,9 +34,12 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   isEvaluation = false,
+  selfEvaluationCompetency,
   selfEvaluationScoreLevel,
+  selfEvaluationStudentAnswers,
+  peerEvaluationCompetency,
   peerEvaluationScoreLevel,
-  teamMembersWithScores,
+  peerEvaluationStudentAnswers,
 }: ScoreLevelSelectorProps) => {
   return (
     <div className={className}>
@@ -51,36 +55,53 @@ export const ScoreLevelSelector = ({
           >
             <div className='absolute -top-6 left-0 w-full'>
               <div className='flex justify-center items-center text-left gap-2'>
-                {selfEvaluationScoreLevel && level === selfEvaluationScoreLevel && (
-                  <TooltipProvider key='peer-evaluation-icon'>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <User key='self-evaluation-icon' size={20} className='text-blue-500' />
-                      </TooltipTrigger>
-                      <TooltipContent>Self Evaluation Result</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                {peerEvaluationScoreLevel && level === peerEvaluationScoreLevel && (
-                  <TooltipProvider key='peer-evaluation-icon'>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Users key='peer-evaluation-icon' size={20} className='text-green-500' />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Peer Evaluation Result
-                        {teamMembersWithScores && teamMembersWithScores.length > 0
-                          ? teamMembersWithScores.map((member) => (
-                              <div key={member.name} className='flex items-center gap-1 space-y-1'>
-                                <span className='font-semibold'>{member.name}:</span>
-                                <StudentScoreBadge scoreLevel={member.scoreLevel} />
-                              </div>
-                            ))
-                          : undefined}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {selfEvaluationCompetency &&
+                  selfEvaluationScoreLevel &&
+                  level === selfEvaluationScoreLevel && (
+                    <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <User size={20} className='text-blue-500 dark:text-blue-300' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className='font-semibold'>Self Evaluation Results</div>
+                          <div className='text-sm text-muted-foreground'>
+                            <span className='font-semibold'>Statement:</span>{' '}
+                            {selfEvaluationCompetency.name}
+                          </div>
+                          {selfEvaluationStudentAnswers &&
+                          selfEvaluationStudentAnswers.length > 0 ? (
+                            <div className='mt-2 space-y-1'>
+                              {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
+                                <div key={index}>{studentAnswer()}</div>
+                              ))}
+                            </div>
+                          ) : null}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                {peerEvaluationCompetency &&
+                  peerEvaluationScoreLevel &&
+                  level === peerEvaluationScoreLevel && (
+                    <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Users size={20} className='text-green-500 dark:text-green-300' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className='font-semibold'>Peer Evaluation Results</div>
+                          <div className='text-sm text-muted-foreground'>
+                            <span className='font-semibold'>Statement:</span>{' '}
+                            {peerEvaluationCompetency.name}
+                          </div>
+                          {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
+                            ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
+                            : undefined}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
               </div>
             </div>
 
@@ -101,26 +122,25 @@ export const ScoreLevelSelector = ({
                 !completed && 'focus:ring-2 focus:ring-offset-2 focus:ring-gray-400',
                 completed && 'opacity-80 cursor-not-allowed',
                 (selfEvaluationScoreLevel || peerEvaluationScoreLevel) && 'mt-2',
+                !selectedScore && config.border,
               )}
             >
               <div className='flex justify-between mb-1'>
                 <span className='font-semibold'>
                   {isEvaluation ? config.evaluationTitle : config.title}
                 </span>
-                <div>
+
+                {completed && isSelected && (
                   <span className='flex items-center gap-1'>
-                    {completed && isSelected && (
-                      <LockIcon
-                        className={cn(
-                          'line-clamp-3 text-muted-foreground',
-                          isSelected && 'dark:text-gray-200',
-                          'h-4 w-4',
-                        )}
-                      />
-                    )}
-                    {config.icon}
+                    <LockIcon
+                      className={cn(
+                        'line-clamp-3 text-muted-foreground',
+                        isSelected && 'dark:text-gray-200',
+                        'h-4 w-4',
+                      )}
+                    />
                   </span>
-                </div>
+                )}
               </div>
 
               <p

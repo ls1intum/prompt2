@@ -20,12 +20,22 @@ export function AssessmentStatusBadge({
 
   const badgeStyles = cn(
     'items-center gap-1',
-    {
-      'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200':
-        isCompleted && isFinalized,
-      'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200': isCompletedButNotFinalized,
-      'bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-200': isInProgress,
-    },
+    isCompleted &&
+      isFinalized &&
+      cn(
+        'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200',
+        'hover:bg-green-100 hover:text-green-800 hover:dark:bg-green-800 hover:dark:text-green-200',
+      ),
+    isCompletedButNotFinalized &&
+      cn(
+        'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200',
+        'hover:bg-blue-100 hover:text-blue-800 hover:dark:bg-blue-800 hover:dark:text-blue-200',
+      ),
+    isInProgress &&
+      cn(
+        'bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-200',
+        'hover:bg-amber-100 hover:text-amber-800 hover:dark:bg-amber-800 hover:dark:text-amber-200',
+      ),
     className,
   )
 
