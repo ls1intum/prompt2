@@ -34,6 +34,11 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseData)
 	course.GET("/self", getOwnCourses)
 
+	course.PUT("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseTemplateStatus)
+	course.GET("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), checkCourseTemplateStatus)
+
+	course.GET("/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getTemplateCourses)
+
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
 }
 
@@ -418,5 +423,65 @@ func deleteCourse(c *gin.Context) {
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, utils.ErrorResponse{
 		Error: err.Error(),
+	})
+}
+
+func updateCourseTemplateStatus(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var update courseDTO.CourseTemplateStatus
+	if err := c.BindJSON(&update); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdateCourseTemplateStatus(c, courseID, update.IsTemplate)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update course template status"))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func getTemplateCourses(c *gin.Context) {
+	rolesVal, exists := c.Get("userRoles")
+	if !exists {
+		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
+		return
+	}
+
+	userRoles := rolesVal.(map[string]bool)
+
+	courses, err := GetTemplateCourses(c, userRoles)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courses)
+}
+
+func checkCourseTemplateStatus(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	isTemplate, err := CheckCourseTemplateStatus(c, courseID)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to check if course is template"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseDTO.CourseTemplateStatus{
+		IsTemplate: isTemplate,
 	})
 }
