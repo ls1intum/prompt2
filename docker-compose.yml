@@ -1,9 +1,9 @@
 services:
-  server:
+  server-core:
     build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: prompt-core-server
+      context: ./servers/core
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-core
     depends_on:
       db:
         condition: service_healthy
@@ -11,23 +11,124 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
     environment:
-      - CORE_HOST=http://localhost:3000
-      - DB_USER=prompt-postgres
-      - DB_PASSWORD=prompt-postgres
-      - DB_HOST=localhost
-      - DB_PORT=5432
-      - DB_NAME=prompt
-      - SSL_MODE=disable
-      - SERVER_ADDRESS=0.0.0.0:8080
-      - KEYCLOAK_HOST=localhost:8081
-      - KEYCLOAK_REALM_NAME=prompt
-      - KEYCLOAK_CLIENT_ID=prompt-server
-      - KEYCLOAK_CLIENT_SECRET=TvoTuMQWcwXTk8bqY49ElCVz8JthXyMb #DO NOT USE IN PRODUCTION !!!
-      - KEYCLOAK_ID_OF_CLIENT=a584ca61-fa83-4e95-98b6-c5f3157ae4b4
-      - KEYCLOAK_AUTHORIZED_PARTY=prompt-client
+      - CORE_HOST
+      - DB_USER=${DB_CORE_USER}
+      - DB_PASSWORD=${DB_CORE_PASSWORD}
+      - DB_HOST=${DB_CORE_HOST}
+      - DB_PORT=${DB_CORE_PORT}
+      - DB_NAME=${DB_CORE_NAME}
+      - SSL_MODE
+      - SERVER_ADDRESS
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - KEYCLOAK_CLIENT_ID
+      - KEYCLOAK_CLIENT_SECRET
+      - KEYCLOAK_ID_OF_CLIENT
+      - KEYCLOAK_AUTHORIZED_PARTY
+      - DEBUG
 
-  core:
+  server-intro-course:
+    build:
+      context: ./servers/intro_course
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-intro-course
+    depends_on:
+      db-intro-course:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST=${DB_INTRO_COURSE_HOST}
+      - DB_PORT=${DB_INTRO_COURSE_PORT}
+      - DB_NAME=${DB_INTRO_COURSE_NAME}
+      - DB_PASSWORD=${DB_INTRO_COURSE_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - KEYCLOAK_AUTHORIZED_PARTY
+      - KEYCLOAK_CLIENT_ID
+      - DEBUG
+
+  server-team-allocation:
+    build:
+      context: ./servers/team_allocation
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-team-allocation
+    depends_on:
+      db-team-allocation:
+        condition: service_healthy
+    ports:
+      - "8083:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST=${DB_TEAM_ALLOCATION_HOST}
+      - DB_PORT=${DB_TEAM_ALLOCATION_PORT}
+      - DB_NAME=${DB_TEAM_ALLOCATION_NAME}
+      - DB_PASSWORD=${DB_TEAM_ALLOCATION_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - DEBUG
+
+  server-self-team-allocation:
+    build:
+      context: ./servers/self_team_allocation
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-self-team-allocation
+    depends_on:
+      db-self-team-allocation:
+        condition: service_healthy
+    ports:
+      - "8084:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST=${DB_SELF_TEAM_ALLOCATION_HOST}
+      - DB_PORT=${DB_SELF_TEAM_ALLOCATION_PORT}
+      - DB_NAME=${DB_SELF_TEAM_ALLOCATION_NAME}
+      - DB_PASSWORD=${DB_SELF_TEAM_ALLOCATION_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - DEBUG
+
+  server-assessment:
+    build:
+      context: ./servers/assessment
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-assessment
+    depends_on:
+      db-assessment:
+        condition: service_healthy
+    ports:
+      - "8085:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST=${DB_ASSESSMENT_HOST}
+      - DB_PORT=${DB_ASSESSMENT_PORT}
+      - DB_NAME=${DB_ASSESSMENT_NAME}
+      - DB_PASSWORD=${DB_ASSESSMENT_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - DEBUG
+
+  client-core:
     build:
       context: ./clients/core
       dockerfile: Dockerfile
@@ -37,13 +138,83 @@ services:
     depends_on:
       - clients-base
 
-  template_component:
+  client-template-component:
     build:
       context: ./clients/template_component
       dockerfile: Dockerfile
     container_name: prompt-client-template-component
     ports:
       - "3001:80"
+    depends_on:
+      - clients-base
+
+  client-assessment-component:
+    build:
+      context: ./clients/assessment_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-assessment-component
+    ports:
+      - "3002:80"
+    depends_on:
+      - clients-base
+
+  client-devops-challenge-component:
+    build:
+      context: ./clients/devops_challenge_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-devops-challenge-component
+    ports:
+      - "3003:80"
+    depends_on:
+      - clients-base
+
+  client-intro-course-developer-component:
+    build:
+      context: ./clients/intro_course_developer_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-intro-course-developer-component
+    ports:
+      - "3004:80"
+    depends_on:
+      - clients-base
+
+  client-interview-component:
+    build:
+      context: ./clients/interview_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-interview-component
+    ports:
+      - "3005:80"
+    depends_on:
+      - clients-base
+
+  client-matching-component:
+    build:
+      context: ./clients/matching_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-matching-component
+    ports:
+      - "3006:80"
+    depends_on:
+      - clients-base
+
+  client-team-allocation-component:
+    build:
+      context: ./clients/team_allocation_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-team-allocation-component
+    ports:
+      - "3007:80"
+    depends_on:
+      - clients-base
+
+  client-self-team-allocation-component:
+    build:
+      context: ./clients/self_team_allocation_component
+      dockerfile: Dockerfile
+    container_name: prompt-client-self-team-allocation-component
+    ports:
+      - "3008:80"
     depends_on:
       - clients-base
 
@@ -55,16 +226,16 @@ services:
 
   db:
     image: "postgres:15.2-alpine"
-    container_name: prompt-core-db
+    container_name: prompt-db
     environment:
-      - POSTGRES_USER=prompt-postgres
-      - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_USER=${DB_CORE_USER}
+      - POSTGRES_PASSWORD=${DB_CORE_PASSWORD}
+      - POSTGRES_DB=${DB_CORE_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${DB_CORE_NAME} -U ${DB_CORE_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -73,16 +244,16 @@ services:
 
   db-intro-course:
     image: "postgres:15.2-alpine"
-    container_name: prompt-intro-course-db
+    container_name: prompt-db-intro-course
     environment:
-      - POSTGRES_USER=prompt-postgres
-      - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_USER=${DB_INTRO_COURSE_USER}
+      - POSTGRES_PASSWORD=${DB_INTRO_COURSE_PASSWORD}
+      - POSTGRES_DB=${DB_INTRO_COURSE_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_intro_course_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${DB_INTRO_COURSE_NAME} -U ${DB_INTRO_COURSE_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -91,16 +262,16 @@ services:
 
   db-team-allocation:
     image: "postgres:15.2-alpine"
-    container_name: prompt-team-allocation-db
+    container_name: prompt-db-team-allocation
     environment:
-      - POSTGRES_USER=prompt-postgres
-      - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_USER=${DB_TEAM_ALLOCATION_USER}
+      - POSTGRES_PASSWORD=${DB_TEAM_ALLOCATION_PASSWORD}
+      - POSTGRES_DB=${DB_TEAM_ALLOCATION_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_team_allocation_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${DB_TEAM_ALLOCATION_NAME} -U ${DB_TEAM_ALLOCATION_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -109,16 +280,16 @@ services:
 
   db-assessment:
     image: "postgres:15.2-alpine"
-    container_name: prompt-assessment-db
+    container_name: prompt-db-assessment
     environment:
-      - POSTGRES_USER=prompt-postgres
-      - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_USER=${DB_ASSESSMENT_USER}
+      - POSTGRES_PASSWORD=${DB_ASSESSMENT_PASSWORD}
+      - POSTGRES_DB=${DB_ASSESSMENT_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_assessment_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${DB_ASSESSMENT_NAME} -U ${DB_ASSESSMENT_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -127,16 +298,16 @@ services:
 
   db-self-team-allocation:
     image: "postgres:15.2-alpine"
-    container_name: prompt-self-team-allocation-db
+    container_name: prompt-db-self-team-allocation
     environment:
-      - POSTGRES_USER=prompt-postgres
-      - POSTGRES_PASSWORD=prompt-postgres
-      - POSTGRES_DB=prompt
+      - POSTGRES_USER=${DB_SELF_TEAM_ALLOCATION_USER}
+      - POSTGRES_PASSWORD=${DB_SELF_TEAM_ALLOCATION_PASSWORD}
+      - POSTGRES_DB=${DB_SELF_TEAM_ALLOCATION_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_self_team_allocation_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d prompt -U prompt-postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${DB_SELF_TEAM_ALLOCATION_NAME} -U ${DB_SELF_TEAM_ALLOCATION_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -147,14 +318,14 @@ services:
     image: "postgres:15.2-alpine"
     container_name: prompt-keycloak-db
     environment:
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=keycloak
-      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - POSTGRES_DB=${KEYCLOAK_DB_NAME}
       - TZ=Europe/Berlin
     volumes:
       - ./keycloak_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER} -d ${KEYCLOAK_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -164,24 +335,34 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
     container_name: prompt-keycloak
+    command:
+      - start-dev
+      - --health-enabled=true
+      - --hostname-strict=false
     environment:
       KC_DB: postgres
-      KC_DB_URL_HOST: keycloak-db
-      KC_DB_URL_PORT: 5432
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    entrypoint: /opt/keycloak/bin/kc.sh start-dev
+      KC_DB_URL_HOST: ${KEYCLOAK_DB_HOST}
+      KC_DB_URL_PORT: ${KEYCLOAK_DB_PORT}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_PORT: "8081"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
     depends_on:
       keycloak-db:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8081:8080"
+      - "8081:8080"
+      - "9000:9000"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit',
-        ]
+      test: ["CMD-SHELL", "exec 4<>/dev/tcp/localhost/9000"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+      start_period: 90s
+  

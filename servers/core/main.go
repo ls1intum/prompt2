@@ -94,6 +94,11 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 // @externalDocs.description  PROMPT Documentation
 // @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
+	if utils.GetEnv("DEBUG", "false") == "true" {
+		log.SetLevel(log.DebugLevel)
+		log.Debug("Debug mode is enabled")
+	}
+
 	// establish database connection
 	databaseURL := getDatabaseURL()
 	log.Debug("Connecting to database at:", databaseURL)
