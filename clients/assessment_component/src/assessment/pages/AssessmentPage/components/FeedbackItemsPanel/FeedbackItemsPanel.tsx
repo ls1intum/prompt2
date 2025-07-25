@@ -7,9 +7,7 @@ import { useGetFeedbackItemsForStudent } from './hooks/useGetFeedbackItemsForStu
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
-interface FeedbackItemsPanelProps {}
-
-export const FeedbackItemsPanel = ({}: FeedbackItemsPanelProps) => {
+export const FeedbackItemsPanel = () => {
   const { assessmentParticipation } = useStudentAssessmentStore()
   const courseParticipationID = assessmentParticipation?.courseParticipationID || ''
 
