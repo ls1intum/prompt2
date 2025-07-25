@@ -5,7 +5,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
-	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
 )
 
 type StudentAssessment struct {
@@ -15,6 +14,4 @@ type StudentAssessment struct {
 	StudentScore          scoreLevelDTO.StudentScore                   `json:"studentScore"`
 	SelfEvaluations       []evaluationDTO.Evaluation                   `json:"selfEvaluations"`
 	PeerEvaluations       []evaluationDTO.Evaluation                   `json:"peerEvaluations"`
-	PositiveFeedbackItems []feedbackItemDTO.FeedbackItem               `json:"positiveFeedbackItems"`
-	NegativeFeedbackItems []feedbackItemDTO.FeedbackItem               `json:"negativeFeedbackItems"`
 }

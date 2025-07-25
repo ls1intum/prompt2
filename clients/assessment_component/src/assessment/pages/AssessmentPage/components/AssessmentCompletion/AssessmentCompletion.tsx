@@ -128,7 +128,9 @@ export const AssessmentCompletion = () => {
   }
 
   return (
-    <div>
+    <div className='space-y-4'>
+      <h1 className='text-xl font-semibold tracking-tight'>Finalize your Assessment</h1>
+
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <div className='grid grid-cols-1 gap-4'>
           <Card>

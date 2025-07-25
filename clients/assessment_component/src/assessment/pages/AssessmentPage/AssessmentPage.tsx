@@ -7,12 +7,14 @@ import { ErrorPage } from '@tumaet/prompt-ui-components'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useStudentAssessmentStore } from '../../zustand/useStudentAssessmentStore'
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 
 import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
+import { FeedbackItemsPanel } from './components/FeedbackItemsPanel/FeedbackItemsPanel'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
@@ -23,6 +25,7 @@ export const AssessmentPage = (): JSX.Element => {
   const participant = participations.find(
     (participation) => participation.courseParticipationID === courseParticipationID,
   )
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const {
     data: studentAssessment,
@@ -92,6 +95,10 @@ export const AssessmentPage = (): JSX.Element => {
           completed={studentAssessment.assessmentCompletion.completed}
         />
       ))}
+
+      {(coursePhaseConfig?.selfEvaluationEnabled || coursePhaseConfig?.peerEvaluationEnabled) && (
+        <FeedbackItemsPanel />
+      )}
 
       <AssessmentCompletion />
     </div>
