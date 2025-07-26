@@ -234,21 +234,6 @@ func (suite *CourseRouterTestSuite) TestGetTemplateCourses() {
 }
 
 func (suite *CourseRouterTestSuite) TestCheckCourseTemplateStatusTrue() {
-	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
-	req, _ := http.NewRequest("GET", "/api/courses/"+courseID+"/template", nil)
-	resp := httptest.NewRecorder()
-
-	suite.router.ServeHTTP(resp, req)
-
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-
-	var status courseDTO.CourseTemplateStatus
-	err := json.Unmarshal(resp.Body.Bytes(), &status)
-	assert.NoError(suite.T(), err)
-	assert.False(suite.T(), status.IsTemplate, "Course should not be a template")
-}
-
-func (suite *CourseRouterTestSuite) TestCheckCourseTemplateStatusFalse() {
 	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee"
 	req, _ := http.NewRequest("GET", "/api/courses/"+courseID+"/template", nil)
 	resp := httptest.NewRecorder()
@@ -261,6 +246,21 @@ func (suite *CourseRouterTestSuite) TestCheckCourseTemplateStatusFalse() {
 	err := json.Unmarshal(resp.Body.Bytes(), &status)
 	assert.NoError(suite.T(), err)
 	assert.True(suite.T(), status.IsTemplate, "Course should be a template")
+}
+
+func (suite *CourseRouterTestSuite) TestCheckCourseTemplateStatusFalse() {
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+	req, _ := http.NewRequest("GET", "/api/courses/"+courseID+"/template", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var status courseDTO.CourseTemplateStatus
+	err := json.Unmarshal(resp.Body.Bytes(), &status)
+	assert.NoError(suite.T(), err)
+	assert.False(suite.T(), status.IsTemplate, "Course should not be a template")
 }
 
 func TestCourseRouterTestSuite(t *testing.T) {
