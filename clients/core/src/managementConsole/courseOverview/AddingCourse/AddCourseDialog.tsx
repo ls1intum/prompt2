@@ -6,12 +6,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@tumaet/prompt-ui-components'
-import { CourseFormValues } from '@core/validations/course'
+import type { CourseFormValues } from '@core/validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'
-import { CourseAppearanceFormValues } from '@core/validations/courseAppearance'
+import type { CourseAppearanceFormValues } from '@core/validations/courseAppearance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { PostCourse } from '../interfaces/postCourse'
+import type { PostCourse } from '../interfaces/postCourse'
 import { postNewCourse } from '@core/network/mutations/postNewCourse'
 import { useNavigate } from 'react-router-dom'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
@@ -20,10 +20,16 @@ import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 
 interface AddCourseDialogProps {
   children: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({
+  children,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}) => {
+  const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [coursePropertiesFormValues, setCoursePropertiesFormValues] =
     React.useState<CourseFormValues | null>(null)
@@ -31,6 +37,10 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { forceTokenRefresh } = useKeycloak()
+
+  // Use controlled or internal state
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setIsOpen = controlledOnOpenChange || setInternalOpen
 
   const { mutate, isPending, error, isError, reset } = useMutation({
     mutationFn: (course: PostCourse) => {
@@ -70,10 +80,8 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
       // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
     }
-
     // todo API call
     mutate(course)
-
     setCurrentPage(1)
     setCoursePropertiesFormValues(null) // reset the page 1 form
   }
@@ -89,7 +97,7 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
 
   const handleCancel = useCallback(() => {
     setIsOpen(false)
-  }, [])
+  }, [setIsOpen])
 
   // makes sure that window is first closed, before resetting the form
   useEffect(() => {
@@ -110,7 +118,7 @@ export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({ children }) =>
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {controlledOpen === undefined && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className='sm:max-w-[550px]'>
         {isPending ? (
           <DialogLoadingDisplay customMessage='Updating course data...' />
