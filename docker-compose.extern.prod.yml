@@ -61,6 +61,8 @@ services:
       - KEYCLOAK_AUTHORIZED_PARTY
       - SMTP_HOST
       - SMTP_PORT
+      - SMTP_USERNAME
+      - SMTP_PASSWORD
       - SENDER_EMAIL
       - SENDER_NAME
     networks:

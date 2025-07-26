@@ -46,9 +46,10 @@ There are two options for setting up Keycloak:
 
 Follow these steps:
 
-#### 1. Create the Clients `prompt-client` 
+#### 1. Create the Clients `prompt-client`
+
 1. **Set URLs**  
-   Add your client domain to the following fields. All URLs must be prefixed with `https`. 
+   Add your client domain to the following fields. All URLs must be prefixed with `https`.
    - **Root URL**
    - **Home URL**
    - **Valid Redirect URLs**    (must be postfixed with `/*`)
@@ -67,7 +68,7 @@ Follow these steps:
      - **Token Claim Name:** `university_login` or `matriculation_number` (do **not** change)
      - **Add to Access Token:** Enabled
 
-#### 2. Create the Clients `prompt-server` 
+#### 2. Create the Clients `prompt-server`
 
 1. **Set URLs**  
    Add your server domain to:
@@ -75,7 +76,7 @@ Follow these steps:
    - **Home URL**
    - **Valid Redirect URI**
    - **Valid Post Logout Redirect URI**  
-     
+
    Each URL must start with `https` and ALL must be postfixed with `/*` (note that the postfixes might differ from those in `prompt-client`).
 
 2. **Enable Service Account Access**  
@@ -88,7 +89,7 @@ Follow these steps:
 
 3. **Add the required client roles**
    - Add the roles `PROMPT_ADMIN` and `PROMPT_LECTURER`
-   - Optionally create groups for these roles for easier user role management. 
+   - Optionally create groups for these roles for easier user role management.
 
 ---
 
@@ -97,6 +98,7 @@ Follow these steps:
 For this option, refer to the [Contributor Setup Guide](#contributor.setup-guide) on how to configure a standalone Keycloak instance and the `keycloakConfig.json`.
 
 Keep in mind:
+
 - The `docker-compose.extern.yml` includes a sample setup with a Docker container for Keycloak and a database instance to persist Keycloak data.
 - **Domain Setup:**  
   Configure a separate domain for your Keycloak instance (this can be a subdomain but **not** a subpath).  
@@ -118,7 +120,9 @@ You can use any SMTP server by adjusting your environment file with the correspo
 ---
 
 ## 3. Container Setup
+
 (adjust-environment-variables)=
+
 ### 3.1 Adjust Environment Variables
 
 An `.env.template` file is provided in the repository. This file includes all the runtime variables required for deployment. Below is an explanation of the variables:
@@ -217,6 +221,12 @@ Set these according to your deployment version (default is `main`).
 
 - **`SMTP_PORT`**  
   Defaults to `25`
+
+- **`SMTP_USERNAME`** (Optional)  
+  Username for SMTP authentication. Leave empty if your SMTP server doesn't require authentication.
+
+- **`SMTP_PASSWORD`** (Optional)  
+  Password for SMTP authentication. Leave empty if your SMTP server doesn't require authentication.
 
 ---
 
