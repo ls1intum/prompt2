@@ -246,6 +246,7 @@ type Course struct {
 	Ects                pgtype.Int4 `json:"ects"`
 	RestrictedData      []byte      `json:"restricted_data"`
 	StudentReadableData []byte      `json:"student_readable_data"`
+	Template            bool        `json:"template"`
 }
 
 type CourseParticipation struct {
