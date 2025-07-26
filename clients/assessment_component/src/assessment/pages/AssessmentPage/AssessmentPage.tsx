@@ -2,15 +2,17 @@ import { useParams } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
-import { ErrorPage } from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useStudentAssessmentStore } from '../../zustand/useStudentAssessmentStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
+import { useTeamStore } from '../../zustand/useTeamStore'
 
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 
+import { ParticipantNavigation } from './components/ParticipantNavigation'
 import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
@@ -19,7 +21,7 @@ import { FeedbackItemsPanel } from './components/FeedbackItemsPanel/FeedbackItem
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
 
-  const { setStudentAssessment, setAssessmentParticipation } = useStudentAssessmentStore()
+  const { setStudentAssessment, setAssessmentParticipation, setTeam } = useStudentAssessmentStore()
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(
@@ -54,6 +56,16 @@ export const AssessmentPage = (): JSX.Element => {
     }
   }, [participant, setAssessmentParticipation])
 
+  const { teams } = useTeamStore()
+  const team = teams.find((t) =>
+    t.members.some((member) => member.id === participant?.courseParticipationID),
+  )
+  useEffect(() => {
+    if (team) {
+      setTeam(team)
+    }
+  }, [team, setTeam])
+
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
     return (
@@ -73,7 +85,9 @@ export const AssessmentPage = (): JSX.Element => {
 
   return (
     <div className='space-y-4'>
-      <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
+      <ManagementPageHeader>Assess Student</ManagementPageHeader>
+
+      <ParticipantNavigation />
 
       {participant && (
         <AssessmentProfile
