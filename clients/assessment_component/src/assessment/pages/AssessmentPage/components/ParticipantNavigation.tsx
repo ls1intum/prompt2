@@ -29,7 +29,13 @@ export const ParticipantNavigation = () => {
   const prevMember = members[(currentIndex - 1 + members.length) % members.length]
   const nextMember = members[(currentIndex + 1) % members.length]
 
-  if (!assessmentParticipation || !prevMember || !nextMember || members.length <= 1) {
+  if (
+    currentIndex === -1 ||
+    !assessmentParticipation ||
+    !prevMember ||
+    !nextMember ||
+    members.length <= 1
+  ) {
     return undefined
   }
 
