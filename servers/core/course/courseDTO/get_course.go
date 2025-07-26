@@ -18,6 +18,7 @@ type Course struct {
 	CourseType          string        `json:"courseType"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	Template            bool          `json:"template"`
 }
 
 func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
@@ -43,5 +44,6 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		CourseType:          string(model.CourseType),
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
+		Template:            model.Template,
 	}, nil
 }
