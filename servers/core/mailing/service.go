@@ -220,7 +220,10 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 	// Enable STARTTLS if the server supports it (required for port 587)
 	if ok, _ := client.Extension("STARTTLS"); ok {
 		log.Debug("STARTTLS is supported, enabling TLS")
-		config := &tls.Config{ServerName: MailingServiceSingleton.smtpHost}
+		config := &tls.Config{
+			ServerName: MailingServiceSingleton.smtpHost,
+			MinVersion: tls.VersionTLS12,
+		}
 		if err = client.StartTLS(config); err != nil {
 			log.Error("failed to start TLS: ", err)
 			return fmt.Errorf("failed to establish TLS connection with %s: %v", MailingServiceSingleton.smtpHost, err)
