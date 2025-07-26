@@ -37,7 +37,7 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.PUT("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseTemplateStatus)
 	course.GET("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), checkCourseTemplateStatus)
 
-	course.GET("/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getTemplateCourses)
+	course.GET("/template", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getTemplateCourses)
 
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
 }
@@ -420,12 +420,18 @@ func deleteCourse(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, utils.ErrorResponse{
-		Error: err.Error(),
-	})
-}
-
+// updateCourseTemplateStatus godoc
+// @Summary Update course template status
+// @Description Update whether a course is marked as a template
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param update body courseDTO.CourseTemplateStatus true "Template status update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/template [put]
 func updateCourseTemplateStatus(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -449,6 +455,15 @@ func updateCourseTemplateStatus(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getTemplateCourses godoc
+// @Summary Get template courses
+// @Description Get all courses marked as templates accessible to the user
+// @Tags courses
+// @Produce json
+// @Success 200 {array} courseDTO.Course
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/template [get]
 func getTemplateCourses(c *gin.Context) {
 	rolesVal, exists := c.Get("userRoles")
 	if !exists {
@@ -467,6 +482,16 @@ func getTemplateCourses(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, courses)
 }
 
+// checkCourseTemplateStatus godoc
+// @Summary Check course template status
+// @Description Get the template status of a course
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {object} courseDTO.CourseTemplateStatus
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/template [get]
 func checkCourseTemplateStatus(c *gin.Context) {
 	courseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
@@ -483,5 +508,11 @@ func checkCourseTemplateStatus(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, courseDTO.CourseTemplateStatus{
 		IsTemplate: isTemplate,
+	})
+}
+
+func handleError(c *gin.Context, statusCode int, err error) {
+	c.JSON(statusCode, utils.ErrorResponse{
+		Error: err.Error(),
 	})
 }
