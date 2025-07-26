@@ -41,7 +41,7 @@ func (q *Queries) CheckCoursePhasesBelongToCourse(ctx context.Context, arg Check
 const createCourse = `-- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template
 `
 
 type CreateCourseParams struct {
@@ -79,6 +79,7 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.Ects,
 		&i.RestrictedData,
 		&i.StudentReadableData,
+		&i.Template,
 	)
 	return i, err
 }
@@ -95,7 +96,7 @@ func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
 
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
 SELECT
-     c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data
+     c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template
 FROM
   course c
 ORDER BY
@@ -121,6 +122,7 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 			&i.Ects,
 			&i.RestrictedData,
 			&i.StudentReadableData,
+			&i.Template,
 		); err != nil {
 			return nil, err
 		}
@@ -152,6 +154,7 @@ user_course_roles AS (
         c.student_readable_data,
         c.restricted_data,
         c.ects,
+        c.template,
         pr.user_role
     FROM
         course c
@@ -174,7 +177,8 @@ SELECT
         WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
         ELSE ucr.restricted_data::jsonb
     END AS restricted_data,
-    ucr.student_readable_data
+    ucr.student_readable_data,
+    ucr.template
 FROM
     user_course_roles ucr
 GROUP BY
@@ -186,7 +190,8 @@ GROUP BY
     ucr.course_type,
     ucr.student_readable_data,
     ucr.ects,
-    ucr.restricted_data
+    ucr.restricted_data,
+    ucr.template
 ORDER BY
     ucr.semester_tag, ucr.name DESC
 `
@@ -201,6 +206,7 @@ type GetAllActiveCoursesRestrictedRow struct {
 	Ects                pgtype.Int4 `json:"ects"`
 	RestrictedData      []byte      `json:"restricted_data"`
 	StudentReadableData []byte      `json:"student_readable_data"`
+	Template            bool        `json:"template"`
 }
 
 // struct: Course
@@ -223,6 +229,7 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 			&i.Ects,
 			&i.RestrictedData,
 			&i.StudentReadableData,
+			&i.Template,
 		); err != nil {
 			return nil, err
 		}
@@ -235,7 +242,7 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data FROM course
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template FROM course
 WHERE id = $1 LIMIT 1
 `
 
@@ -252,6 +259,7 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 		&i.Ects,
 		&i.RestrictedData,
 		&i.StudentReadableData,
+		&i.Template,
 	)
 	return i, err
 }

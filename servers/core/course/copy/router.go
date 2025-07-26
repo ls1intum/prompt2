@@ -22,8 +22,8 @@ import (
 func setupCourseCopyRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware, permissionIDMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	course := router.Group("/courses", authMiddleware())
 
-	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
 	course.GET("/:uuid/copyable", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), checkCourseCopyable)
+	course.POST("/:uuid/copy", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), copyCourse)
 }
 
 // copyCourse godoc

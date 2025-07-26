@@ -19,6 +19,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 import { env } from '@/env'
 import { parseURL } from './utils/parseURL'
 import { MailingConfigPage } from './managementConsole/mailingConfig/MailingConfigPage'
+import { CourseSettingsPage } from './managementConsole/courseSettings/CourseSettingsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,18 @@ export const App = (): JSX.Element => {
                     requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
                   >
                     <MailingConfigPage />
+                  </PermissionRestriction>
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course/:courseId/settings'
+              element={
+                <ManagementRoot>
+                  <PermissionRestriction
+                    requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
+                  >
+                    <CourseSettingsPage />
                   </PermissionRestriction>
                 </ManagementRoot>
               }
