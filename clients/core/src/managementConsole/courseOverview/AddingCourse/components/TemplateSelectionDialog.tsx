@@ -9,6 +9,7 @@ import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 import { FileIcon as FileTemplate, Calendar, BookOpen } from 'lucide-react'
 import type { Course } from '@core/interfaces/course'
+import { CourseTemplateIcon } from './CourseTemplateIcon'
 
 interface TemplateSelectionDialogProps {
   open: boolean
@@ -76,9 +77,10 @@ export const TemplateSelectionDialog: React.FC<TemplateSelectionDialogProps> = (
                       className='flex items-center gap-4 h-auto p-4 text-left justify-start'
                       variant='outline'
                     >
-                      <div className='flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 flex-shrink-0'>
-                        <FileTemplate className='w-6 h-6' />
-                      </div>
+                      <CourseTemplateIcon
+                        iconName={template.studentReadableData?.['icon'] || 'graduation-cap'}
+                        bgColor={template.studentReadableData?.['bg-color'] || 'bg-gray-100'}
+                      />
                       <div className='flex flex-col flex-1 min-w-0'>
                         <span className='font-semibold truncate'>{template.name}</span>
                         <div className='flex items-center gap-4 text-sm text-muted-foreground mt-1'>
