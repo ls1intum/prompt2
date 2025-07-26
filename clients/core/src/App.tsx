@@ -87,11 +87,7 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <PermissionRestriction
-                    requiredPermissions={[
-                      Role.PROMPT_ADMIN,
-                      Role.COURSE_LECTURER,
-                      Role.COURSE_EDITOR,
-                    ]}
+                    requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
                   >
                     <CourseSettingsPage />
                   </PermissionRestriction>

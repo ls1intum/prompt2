@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect, useCallback } from 'react'
 import { checkCourseTemplateStatus } from '@core/network/queries/checkCourseTemplateStatus'
 import { updateCourseTemplateStatus } from '@core/network/mutations/updateCourseTemplateStatus'
