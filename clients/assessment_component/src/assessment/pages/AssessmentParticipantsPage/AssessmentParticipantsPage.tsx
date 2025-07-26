@@ -373,7 +373,11 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         Click on a participant to view/edit their assessment.
       </p>
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
-        <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
+        <AssessmentDiagram
+          participations={participations}
+          scoreLevels={scoreLevels}
+          completions={assessmentCompletions}
+        />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
