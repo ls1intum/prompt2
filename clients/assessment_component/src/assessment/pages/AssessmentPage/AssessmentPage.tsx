@@ -12,7 +12,7 @@ import { useTeamStore } from '../../zustand/useTeamStore'
 
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 
-import { TeamNavigation } from './components/TeamNavigation'
+import { ParticipantNavigation } from './components/ParticipantNavigation'
 import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
@@ -87,7 +87,7 @@ export const AssessmentPage = (): JSX.Element => {
     <div className='space-y-4'>
       <ManagementPageHeader>Assess Student</ManagementPageHeader>
 
-      {team && team.members.length > 1 && <TeamNavigation />}
+      <ParticipantNavigation />
 
       {participant && (
         <AssessmentProfile
