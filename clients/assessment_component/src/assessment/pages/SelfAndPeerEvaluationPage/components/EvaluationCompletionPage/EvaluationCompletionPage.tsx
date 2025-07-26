@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
-import { format } from 'date-fns'
-
 import { Button, Alert, AlertDescription } from '@tumaet/prompt-ui-components'
 
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
+import { DeadlineBadge } from '../../../components/DeadlineBadge'
 
 import { useMarkMyEvaluationAsCompleted } from './hooks/useMarkMyEvaluationAsCompleted'
 import { useUnmarkMyEvaluationAsCompleted } from './hooks/useUnmarkMyEvaluationAsCompleted'
@@ -103,7 +102,10 @@ export const EvaluationCompletionPage = ({
         <div className='flex flex-col'>
           {deadline && (
             <div className='text-muted-foreground'>
-              Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
+              <DeadlineBadge
+                deadline={deadline}
+                type={courseParticipationID === authorCourseParticipationID ? 'self' : 'peer'}
+              />
               {isDeadlinePassed && (
                 <span className='text-red-600 ml-2 font-medium'>(Deadline has passed)</span>
               )}

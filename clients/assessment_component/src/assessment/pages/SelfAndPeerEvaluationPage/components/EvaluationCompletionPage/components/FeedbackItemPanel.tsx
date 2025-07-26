@@ -16,6 +16,8 @@ import type {
   UpdateFeedbackItemRequest,
 } from '../../../../../interfaces/feedbackItem'
 
+import { useStudentEvaluationStore } from '../../../../../zustand/useStudentEvaluationStore'
+
 import { useGetMyFeedbackItems } from '../hooks/useGetMyFeedbackItems'
 import { useCreateFeedbackItem } from '../hooks/useCreateFeedbackItem'
 import { useUpdateFeedbackItem } from '../hooks/useUpdateFeedbackItem'
@@ -41,6 +43,8 @@ export function FeedbackItemPanel({
   const [itemValues, setItemValues] = useState<Record<string, string>>({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
+
+  const { studentName } = useStudentEvaluationStore()
 
   const {
     feedbackItems: allFeedbackItems,
@@ -180,13 +184,17 @@ export function FeedbackItemPanel({
         ? 'What did you do particularly well?'
         : 'Where can you still improve?'
       : feedbackType === 'positive'
-        ? 'What did this student do particularly well?'
-        : 'Where can this student still improve?'
+        ? `What did ${studentName} do particularly well?`
+        : `Where can ${studentName} still improve?`
   const addButtonText = 'Add Item'
   const placeholderText =
-    feedbackType === 'positive'
-      ? 'What did this person do particularly well?'
-      : 'What could this person improve?'
+    courseParticipationID === authorCourseParticipationID
+      ? feedbackType === 'positive'
+        ? 'What did you do particularly well?'
+        : 'What could you improve?'
+      : feedbackType === 'positive'
+        ? `What did ${studentName} do particularly well?`
+        : `What could ${studentName} improve?`
 
   if (isError) {
     return <ErrorPage message='Error loading feedback items' onRetry={refetch} />

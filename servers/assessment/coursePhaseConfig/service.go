@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -12,9 +11,11 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
+
+var ErrNotStarted = errors.New("assessment has not started yet")
+var ErrDeadlinePassed = errors.New("deadline has passed")
 
 type CoursePhaseConfigService struct {
 	queries db.Queries
@@ -72,12 +73,15 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
 		AssessmentTemplateID:   req.AssessmentTemplateID,
 		CoursePhaseID:          coursePhaseID,
+		Start:                  pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
 		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
 		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
 		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
+		SelfEvaluationStart:    pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
 		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
 		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
 		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
+		PeerEvaluationStart:    pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
 		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
 	}
 
@@ -90,194 +94,56 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 	return tx.Commit(ctx)
 }
 
-func GetCoursePhaseDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
-	deadline, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseDeadline(ctx, coursePhaseID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No deadline found for this course phase, return nil
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	var response *time.Time
-	if deadline.Valid {
-		response = &deadline.Time
-	}
-
-	return response, nil
-}
-
-func GetSelfEvaluationDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
-	deadline, err := CoursePhaseConfigSingleton.queries.GetSelfEvaluationDeadline(ctx, coursePhaseID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No deadline found for this course phase, return nil
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	var response *time.Time
-	if deadline.Valid {
-		response = &deadline.Time
-	}
-
-	return response, nil
-}
-
-func GetPeerEvaluationDeadline(ctx context.Context, coursePhaseID uuid.UUID) (*time.Time, error) {
-	deadline, err := CoursePhaseConfigSingleton.queries.GetPeerEvaluationDeadline(ctx, coursePhaseID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		// No deadline found for this course phase, return nil
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	var response *time.Time
-	if deadline.Valid {
-		response = &deadline.Time
-	}
-
-	return response, nil
-}
-
-func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
-	coreURL := utils.GetCoreUrl()
-	participations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
+func IsAssessmentOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	open, err := CoursePhaseConfigSingleton.queries.IsAssessmentOpen(ctx, coursePhaseID)
 	if err != nil {
-		log.Error("could not fetch course phase participations with students: ", err)
-		return nil, errors.New("could not fetch course phase participations with students")
+		log.Error("could not check if assessment is open: ", err)
+		return false, errors.New("could not check if assessment is open")
 	}
-
-	return coursePhaseConfigDTO.GetAssessmentStudentsFromParticipations(participations), nil
+	return open, nil
 }
 
-func GetParticipationForStudent(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, courseParticipationID uuid.UUID) (coursePhaseConfigDTO.AssessmentParticipationWithStudent, error) {
-	coreURL := utils.GetCoreUrl()
-	participation, err := promptSDK.FetchAndMergeCourseParticipationWithResolution(coreURL, authHeader, coursePhaseID, courseParticipationID)
+func IsAssessmentDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
-		log.Error("could not fetch course phase participation with student: ", err)
-		return coursePhaseConfigDTO.AssessmentParticipationWithStudent{}, errors.New("could not fetch course phase participation with student")
+		log.Error("could not check if assessment deadline has passed: ", err)
+		return false, errors.New("could not check if assessment deadline has passed")
 	}
-
-	return coursePhaseConfigDTO.GetAssessmentStudentFromParticipation(participation), nil
+	return deadlinePassed, nil
 }
 
-func GetTeamsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]coursePhaseConfigDTO.Team, error) {
-	coreURL := utils.GetCoreUrl()
-	cpWithResoultion, err := promptSDK.FetchAndMergeCoursePhaseWithResolution(coreURL, authHeader, coursePhaseID)
+func IsSelfEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	open, err := CoursePhaseConfigSingleton.queries.IsSelfEvaluationOpen(ctx, coursePhaseID)
 	if err != nil {
-		log.Error("could not fetch course phase with resolution: ", err)
-		return nil, errors.New("could not fetch course phase with resolution")
+		log.Error("could not check if self evaluation is open: ", err)
+		return false, errors.New("could not check if self evaluation is open")
 	}
+	return open, nil
+}
 
-	teams := make([]coursePhaseConfigDTO.Team, 0)
-	teamsRaw, teamsExists := cpWithResoultion["teams"]
-	if !teamsExists {
-		log.Warn("No 'teams' field found in course phase resolution")
-		return teams, nil
+func IsSelfEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsSelfEvaluationDeadlinePassed(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if self evaluation deadline has passed: ", err)
+		return false, errors.New("could not check if self evaluation deadline has passed")
 	}
+	return deadlinePassed, nil
+}
 
-	teamsSlice, isSlice := teamsRaw.([]interface{})
-	if !isSlice {
-		log.Error("'teams' field is not a slice")
-		return nil, errors.New("invalid teams data structure")
+func IsPeerEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	open, err := CoursePhaseConfigSingleton.queries.IsPeerEvaluationOpen(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if peer evaluation is open: ", err)
+		return false, errors.New("could not check if peer evaluation is open")
 	}
+	return open, nil
+}
 
-	for i, teamData := range teamsSlice {
-		teamMap, isMap := teamData.(map[string]interface{})
-		if !isMap {
-			log.Warnf("Skipping team at index %d: not a valid map", i)
-			continue
-		}
-
-		teamIDRaw, idExists := teamMap["id"]
-		if !idExists {
-			log.Warnf("Skipping team at index %d: missing 'id' field", i)
-			continue
-		}
-		teamIDStr, isString := teamIDRaw.(string)
-		if !isString {
-			log.Warnf("Skipping team at index %d: 'id' field is not a string", i)
-			continue
-		}
-		teamID, err := uuid.Parse(teamIDStr)
-		if err != nil {
-			log.Warnf("Skipping team at index %d: invalid UUID format for 'id': %v", i, err)
-			continue
-		}
-
-		teamNameRaw, nameExists := teamMap["name"]
-		if !nameExists {
-			log.Warnf("Skipping team at index %d: missing 'name' field", i)
-			continue
-		}
-		teamName, isNameString := teamNameRaw.(string)
-		if !isNameString {
-			log.Warnf("Skipping team at index %d: 'name' field is not a string", i)
-			continue
-		}
-
-		// Extract team members
-		members := make([]coursePhaseConfigDTO.TeamMember, 0)
-		membersRaw, membersExists := teamMap["members"]
-		if membersExists {
-			membersSlice, isMembersSlice := membersRaw.([]interface{})
-			if isMembersSlice {
-				for j, memberData := range membersSlice {
-					memberMap, isMemberMap := memberData.(map[string]interface{})
-					if !isMemberMap {
-						log.Warnf("Skipping member at index %d for team %s: not a valid map", j, teamName)
-						continue
-					}
-
-					// Extract course participation ID
-					cpIDRaw, cpIDExists := memberMap["courseParticipationID"]
-					if !cpIDExists {
-						log.Warnf("Skipping member at index %d for team %s: missing 'courseParticipationID' field", j, teamName)
-						continue
-					}
-					cpIDStr, isCPIDString := cpIDRaw.(string)
-					if !isCPIDString {
-						log.Warnf("Skipping member at index %d for team %s: 'courseParticipationID' field is not a string", j, teamName)
-						continue
-					}
-					cpID, err := uuid.Parse(cpIDStr)
-					if err != nil {
-						log.Warnf("Skipping member at index %d for team %s: invalid UUID format for 'courseParticipationID': %v", j, teamName, err)
-						continue
-					}
-
-					// Extract student name
-					studentNameRaw, studentNameExists := memberMap["studentName"]
-					if !studentNameExists {
-						log.Warnf("Skipping member at index %d for team %s: missing 'studentName' field", j, teamName)
-						continue
-					}
-					studentName, isStudentNameString := studentNameRaw.(string)
-					if !isStudentNameString {
-						log.Warnf("Skipping member at index %d for team %s: 'studentName' field is not a string", j, teamName)
-						continue
-					}
-
-					member := coursePhaseConfigDTO.TeamMember{
-						CourseParticipationID: cpID,
-						StudentName:           studentName,
-					}
-					members = append(members, member)
-				}
-			} else {
-				log.Warnf("Team %s: 'members' field is not a slice", teamName)
-			}
-		}
-
-		team := coursePhaseConfigDTO.Team{
-			ID:      teamID,
-			Name:    teamName,
-			Members: members,
-		}
-		teams = append(teams, team)
+func IsPeerEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsPeerEvaluationDeadlinePassed(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if peer evaluation deadline has passed: ", err)
+		return false, errors.New("could not check if peer evaluation deadline has passed")
 	}
-
-	return teams, nil
+	return deadlinePassed, nil
 }

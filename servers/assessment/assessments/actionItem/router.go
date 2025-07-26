@@ -7,6 +7,9 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,6 +21,8 @@ func setupActionItemRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateActionItem)
 	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteActionItem)
 	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getActionItemsForStudent)
+
+	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.CourseStudent), getMyActionItems)
 }
 
 func listActionItemsForCoursePhase(c *gin.Context) {
@@ -97,6 +102,54 @@ func getActionItemsForStudent(c *gin.Context) {
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
+	}
+
+	actionItems, err := ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, actionItems)
+}
+
+func getMyActionItems(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !deadlinePassed {
+		c.JSON(http.StatusOK, make([]actionItemDTO.ActionItem, 0))
+		return
+	}
+
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
+		return
+	}
+
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if exists {
+		completion, err := assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		if !completion.Completed {
+			c.Status(http.StatusNoContent)
+			return
+		}
 	}
 
 	actionItems, err := ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)

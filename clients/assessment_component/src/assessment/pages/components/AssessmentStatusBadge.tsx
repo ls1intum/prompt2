@@ -1,15 +1,17 @@
 import { CheckCircle, Clock, CircleCheck } from 'lucide-react'
-import { cn } from '@tumaet/prompt-ui-components'
+import { cn, Badge } from '@tumaet/prompt-ui-components'
 
 interface AssessmentStatusBadgeProps {
   className?: string
   remainingAssessments: number
+  isEvaluation?: boolean
   isFinalized?: boolean
 }
 
 export function AssessmentStatusBadge({
   className,
   remainingAssessments,
+  isEvaluation = false,
   isFinalized,
 }: AssessmentStatusBadgeProps) {
   const isCompleted = remainingAssessments === 0
@@ -17,18 +19,28 @@ export function AssessmentStatusBadge({
   const isCompletedButNotFinalized = isCompleted && !isFinalized
 
   const badgeStyles = cn(
-    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-    {
-      'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200':
-        isCompleted && isFinalized,
-      'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200': isCompletedButNotFinalized,
-      'bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-200': isInProgress,
-    },
+    'items-center gap-1',
+    isCompleted &&
+      isFinalized &&
+      cn(
+        'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200',
+        'hover:bg-green-100 hover:text-green-800 hover:dark:bg-green-800 hover:dark:text-green-200',
+      ),
+    isCompletedButNotFinalized &&
+      cn(
+        'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200',
+        'hover:bg-blue-100 hover:text-blue-800 hover:dark:bg-blue-800 hover:dark:text-blue-200',
+      ),
+    isInProgress &&
+      cn(
+        'bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-200',
+        'hover:bg-amber-100 hover:text-amber-800 hover:dark:bg-amber-800 hover:dark:text-amber-200',
+      ),
     className,
   )
 
   return (
-    <span className={badgeStyles}>
+    <Badge className={badgeStyles} style={{ whiteSpace: 'nowrap' }}>
       {isCompleted && isFinalized && (
         <>
           <CheckCircle className='h-3.5 w-3.5' />
@@ -46,9 +58,19 @@ export function AssessmentStatusBadge({
       {isInProgress && (
         <>
           <Clock className='h-3.5 w-3.5' />
-          <span>{remainingAssessments} left</span>
+          <span>
+            {remainingAssessments}{' '}
+            {isEvaluation
+              ? remainingAssessments === 1
+                ? 'question'
+                : 'questions'
+              : remainingAssessments === 1
+                ? 'assessment'
+                : 'assessments'}{' '}
+            left
+          </span>
         </>
       )}
-    </span>
+    </Badge>
   )
 }

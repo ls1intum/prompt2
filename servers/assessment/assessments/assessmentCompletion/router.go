@@ -8,19 +8,23 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
 func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	assessmentRouter := routerGroup.Group("/student-assessment/completed")
+	assessmentCompletionRouter := routerGroup.Group("/student-assessment/completed")
 
-	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentCompletionsByCoursePhase)
-	assessmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
-	assessmentRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
-	assessmentRouter.POST("/mark-complete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmentAsCompleted)
-	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentCompletion)
-	assessmentRouter.PUT("/course-participation/:courseParticipationID/unmark", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), unmarkAssessmentAsCompleted)
-	assessmentRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteAssessmentCompletion)
+	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentCompletionsByCoursePhase)
+	assessmentCompletionRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.POST("/mark-complete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmentAsCompleted)
+	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentCompletion)
+	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), unmarkAssessmentAsCompleted)
+	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteAssessmentCompletion)
+
+	assessmentCompletionRouter.GET("/my-grade-suggestion", authMiddleware(promptSDK.CourseStudent), getMyGradeSuggestion)
 }
 
 func listAssessmentCompletionsByCoursePhase(c *gin.Context) {
@@ -45,6 +49,10 @@ func createOrUpdateAssessmentCompletion(c *gin.Context) {
 	}
 	err := CreateOrUpdateAssessmentCompletion(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -59,6 +67,10 @@ func markAssessmentAsCompleted(c *gin.Context) {
 	}
 	err := MarkAssessmentAsCompleted(c, req)
 	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -96,7 +108,7 @@ func unmarkAssessmentAsCompleted(c *gin.Context) {
 	}
 	if err := UnmarkAssessmentAsCompleted(c, courseParticipationID, coursePhaseID); err != nil {
 		// Check if the error is due to deadline being passed
-		if errors.Is(err, ErrDeadlinePassed) {
+		if errors.Is(err, coursePhaseConfig.ErrDeadlinePassed) {
 			handleError(c, http.StatusForbidden, err)
 		} else {
 			handleError(c, http.StatusInternalServerError, err)
@@ -123,6 +135,49 @@ func getAssessmentCompletion(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, assessmentCompletion)
+}
+
+func getMyGradeSuggestion(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
+		return
+	}
+
+	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !deadlinePassed {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	exists, err := CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if exists {
+		completion, err := GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+		if err != nil {
+			handleError(c, http.StatusInternalServerError, err)
+			return
+		}
+		if !completion.Completed {
+			c.Status(http.StatusNoContent)
+			return
+		}
+		c.JSON(http.StatusOK, completion.GradeSuggestion)
+	}
+	c.Status(http.StatusNoContent)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

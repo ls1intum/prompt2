@@ -141,17 +141,17 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCompletion() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
-	// Test successful creation
+	// Test successful creation with Completed: false so we can update it later
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
 		GradeSuggestion:       3.5,
-		Completed:             true,
+		Completed:             false, // Start with incomplete so we can update it
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
 	body, _ := json.Marshal(payload)
@@ -164,7 +164,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCo
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	// Test PUT endpoint (update)
+	// Test PUT endpoint (update) - keep it incomplete so update is allowed
 	payload.Comment = "Updated comment"
 	body, _ = json.Marshal(payload)
 	req, _ = http.NewRequest("PUT", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed", bytes.NewBuffer(body))
@@ -261,14 +261,14 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetAssessmentCompletionSuc
 	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
 
-	// First create an assessment completion using HTTP POST request
+	// First create an assessment completion using HTTP POST request with Completed: false
 	payload := dto.AssessmentCompletion{
 		CoursePhaseID:         phaseID,
 		CourseParticipationID: partID,
 		Author:                "Test Author",
 		Comment:               "Test comment",
 		GradeSuggestion:       4.0,
-		Completed:             true,
+		Completed:             false, // Use false to avoid validation issues
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
 	body, _ := json.Marshal(payload)
@@ -326,7 +326,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestListAssessmentCompletionsI
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpoint() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	// First create an assessment completion to unmark
@@ -357,7 +357,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpointNonExisting() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	// Test PUT /unmark endpoint on non-existing completion
@@ -384,7 +384,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestCreateOrUpdateAssessmentCompletionResponseFormat() {
-	phaseID := uuid.New()
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
 	partID := uuid.New()
 
 	payload := dto.AssessmentCompletion{

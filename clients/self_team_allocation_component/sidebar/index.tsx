@@ -14,7 +14,7 @@ const sidebarItems: SidebarMenuItemProps = {
   ],
   subitems: [
     {
-      title: 'Survey Participants',
+      title: 'Participants',
       goToPath: '/participants',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },

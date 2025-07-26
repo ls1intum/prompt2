@@ -3,73 +3,52 @@ package teamDTO
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 )
 
-type Team struct {
-	ID      uuid.UUID    `json:"id"`
-	Name    string       `json:"name"`
-	Members []TeamMember `json:"members"`
-}
-
-type TeamMember struct {
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	StudentName           string    `json:"studentName"`
-}
-
-func GetTeamDTOFromDBModel(dbTeam db.Team) Team {
-	return Team{
+func GetTeamDTOFromDBModel(dbTeam db.Team) promptTypes.Team {
+	return promptTypes.Team{
 		ID:   dbTeam.ID,
 		Name: dbTeam.Name,
 	}
 }
 
-func GetTeamDTOsFromDBModels(dbTeams []db.Team) []Team {
-	teams := make([]Team, 0, len(dbTeams))
+func GetTeamDTOsFromDBModels(dbTeams []db.Team) []promptTypes.Team {
+	teams := make([]promptTypes.Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		teams = append(teams, GetTeamDTOFromDBModel(dbTeam))
 	}
 	return teams
 }
 
-func GetTeamDTOFromAllocationRow(dbTeam db.GetAllocationsWithStudentNamesRow) (Team, error) {
-	var members []TeamMember
-	// unmarshal the JSON blob into your slice of structs
-	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
-	}
-
-	return Team{
-		ID:      dbTeam.ID,
-		Name:    dbTeam.Name,
-		Members: members,
-	}, nil
-}
-
-func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
-	var members []TeamMember
-	// unmarshal the JSON blob into your slice of structs
-	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
-	}
-
-	return Team{
-		ID:      dbTeam.ID,
-		Name:    dbTeam.Name,
-		Members: members,
-	}, nil
-}
-
-func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetAllocationsWithStudentNamesRow) ([]Team, error) {
-	teams := make([]Team, 0, len(dbTeams))
+func GetTeamsWithMembersDTOFromDBModel(dbTeams []db.GetTeamsWithMembersRow) ([]promptTypes.Team, error) {
+	teams := make([]promptTypes.Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
-		t, err := GetTeamDTOFromAllocationRow(dbTeam)
+		t, err := GetTeamWithMembersDTOFromDBModel(dbTeam)
 		if err != nil {
-			// handle or log error; skip or abort as you preferable
 			return nil, err
 		}
 		teams = append(teams, t)
 	}
 	return teams, nil
+}
+
+func GetTeamWithMembersDTOFromDBModel(dbTeam db.GetTeamsWithMembersRow) (promptTypes.Team, error) {
+	var members []promptTypes.Person
+	var tutors []promptTypes.Person
+	// unmarshal the JSON blob into your slice of structs
+	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
+		return promptTypes.Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
+		return promptTypes.Team{}, err
+	}
+
+	return promptTypes.Team{
+		ID:      dbTeam.ID,
+		Name:    dbTeam.Name,
+		Members: members,
+		Tutors:  tutors,
+	}, nil
 }

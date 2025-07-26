@@ -23,12 +23,15 @@ export const CoursePhaseConfigSelection = () => {
   const [error, setError] = useState<string | undefined>(undefined)
 
   const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
+  const [start, setStart] = useState<Date | undefined>(undefined)
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)
   const [selfEvaluationEnabled, setSelfEvaluationEnabled] = useState<boolean>(false)
   const [selfEvaluationTemplate, setSelfEvaluationTemplate] = useState<string>('')
+  const [selfEvaluationStart, setSelfEvaluationStart] = useState<Date | undefined>(undefined)
   const [selfEvaluationDeadline, setSelfEvaluationDeadline] = useState<Date | undefined>(undefined)
   const [peerEvaluationEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
   const [peerEvaluationTemplate, setPeerEvaluationTemplate] = useState<string>('')
+  const [peerEvaluationStart, setPeerEvaluationStart] = useState<Date | undefined>(undefined)
   const [peerEvaluationDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
 
   const {
@@ -43,14 +46,21 @@ export const CoursePhaseConfigSelection = () => {
   useEffect(() => {
     if (config) {
       setAssessmentTemplateId(config.assessmentTemplateID || '')
+      setStart(config.start ? new Date(config.start) : undefined)
       setDeadline(config.deadline ? new Date(config.deadline) : undefined)
       setSelfEvaluationEnabled(config.selfEvaluationEnabled || false)
       setSelfEvaluationTemplate(config.selfEvaluationTemplate || '')
+      setSelfEvaluationStart(
+        config.selfEvaluationStart ? new Date(config.selfEvaluationStart) : undefined,
+      )
       setSelfEvaluationDeadline(
         config.selfEvaluationDeadline ? new Date(config.selfEvaluationDeadline) : undefined,
       )
       setPeerEvaluationEnabled(config.peerEvaluationEnabled || false)
       setPeerEvaluationTemplate(config.peerEvaluationTemplate || '')
+      setPeerEvaluationStart(
+        config.peerEvaluationStart ? new Date(config.peerEvaluationStart) : undefined,
+      )
       setPeerEvaluationDeadline(
         config.peerEvaluationDeadline ? new Date(config.peerEvaluationDeadline) : undefined,
       )
@@ -68,27 +78,35 @@ export const CoursePhaseConfigSelection = () => {
   const handleSaveConfig = () => {
     configMutation.mutate({
       assessmentTemplateId,
+      start,
       deadline,
       selfEvaluationEnabled,
       selfEvaluationTemplate: selfEvaluationTemplate,
+      selfEvaluationStart: selfEvaluationStart,
       selfEvaluationDeadline: selfEvaluationDeadline,
       peerEvaluationEnabled,
       peerEvaluationTemplate: peerEvaluationTemplate,
+      peerEvaluationStart: peerEvaluationStart,
       peerEvaluationDeadline: peerEvaluationDeadline,
     })
   }
 
   const hasChanges =
     assessmentTemplateId !== (config?.assessmentTemplateID || '') ||
+    start?.getTime() !== (config?.start ? new Date(config.start).getTime() : undefined) ||
     deadline?.getTime() !== (config?.deadline ? new Date(config.deadline).getTime() : undefined) ||
     selfEvaluationEnabled !== (config?.selfEvaluationEnabled || false) ||
     selfEvaluationTemplate !== (config?.selfEvaluationTemplate || '') ||
+    selfEvaluationStart?.getTime() !==
+      (config?.selfEvaluationStart ? new Date(config.selfEvaluationStart).getTime() : undefined) ||
     selfEvaluationDeadline?.getTime() !==
       (config?.selfEvaluationDeadline
         ? new Date(config.selfEvaluationDeadline).getTime()
         : undefined) ||
     peerEvaluationEnabled !== (config?.peerEvaluationEnabled || false) ||
     peerEvaluationTemplate !== (config?.peerEvaluationTemplate || '') ||
+    peerEvaluationStart?.getTime() !==
+      (config?.peerEvaluationStart ? new Date(config.peerEvaluationStart).getTime() : undefined) ||
     peerEvaluationDeadline?.getTime() !==
       (config?.peerEvaluationDeadline
         ? new Date(config.peerEvaluationDeadline).getTime()
@@ -115,6 +133,8 @@ export const CoursePhaseConfigSelection = () => {
             type={AssessmentType.ASSESSMENT}
             assessmentTemplateId={assessmentTemplateId}
             setAssessmentTemplateId={setAssessmentTemplateId}
+            startDate={start}
+            setStartDate={setStart}
             deadline={deadline}
             setDeadline={setDeadline}
             templates={templates ?? []}
@@ -140,6 +160,8 @@ export const CoursePhaseConfigSelection = () => {
                 type={AssessmentType.SELF}
                 assessmentTemplateId={selfEvaluationTemplate}
                 setAssessmentTemplateId={setSelfEvaluationTemplate}
+                startDate={selfEvaluationStart}
+                setStartDate={setSelfEvaluationStart}
                 deadline={selfEvaluationDeadline}
                 setDeadline={setSelfEvaluationDeadline}
                 templates={templates ?? []}
@@ -167,6 +189,8 @@ export const CoursePhaseConfigSelection = () => {
                 type={AssessmentType.PEER}
                 assessmentTemplateId={peerEvaluationTemplate}
                 setAssessmentTemplateId={setPeerEvaluationTemplate}
+                startDate={peerEvaluationStart}
+                setStartDate={setPeerEvaluationStart}
                 deadline={peerEvaluationDeadline}
                 setDeadline={setPeerEvaluationDeadline}
                 templates={templates ?? []}

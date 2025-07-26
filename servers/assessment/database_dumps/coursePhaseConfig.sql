@@ -40,6 +40,9 @@ CREATE TABLE public.course_phase_config (
     peer_evaluation_enabled boolean NOT NULL DEFAULT false,
     peer_evaluation_template uuid,
     peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT

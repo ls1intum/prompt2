@@ -12,7 +12,6 @@ import (
 )
 
 const createTeam = `-- name: CreateTeam :exec
-
 INSERT INTO team (id, name, course_phase_id)
 VALUES ($1, $2, $3)
 `
@@ -23,17 +22,16 @@ type CreateTeamParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
-// ensuring to get only teams in the authenticated course_phase
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
 	_, err := q.db.Exec(ctx, createTeam, arg.ID, arg.Name, arg.CoursePhaseID)
 	return err
 }
 
 const deleteTeam = `-- name: DeleteTeam :exec
-
-DELETE FROM team
+DELETE
+FROM team
 WHERE id = $1
-AND course_phase_id = $2
+  AND course_phase_id = $2
 `
 
 type DeleteTeamParams struct {
@@ -41,156 +39,17 @@ type DeleteTeamParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
-// ensuring to update only teams in the authenticated course_phase
+// ensuring to delete only teams in the authenticated course_phase
 func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 	_, err := q.db.Exec(ctx, deleteTeam, arg.ID, arg.CoursePhaseID)
 	return err
-}
-
-const getAllocationWithStudentNamesByTeamID = `-- name: GetAllocationWithStudentNamesByTeamID :one
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.course_phase_id = $1
-  AND t.id = $2
-GROUP BY
-  t.id, t.name
-ORDER BY
-  t.name
-`
-
-type GetAllocationWithStudentNamesByTeamIDParams struct {
-	CoursePhaseID uuid.UUID `json:"course_phase_id"`
-	ID            uuid.UUID `json:"id"`
-}
-
-type GetAllocationWithStudentNamesByTeamIDRow struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	TeamMembers []byte    `json:"team_members"`
-}
-
-func (q *Queries) GetAllocationWithStudentNamesByTeamID(ctx context.Context, arg GetAllocationWithStudentNamesByTeamIDParams) (GetAllocationWithStudentNamesByTeamIDRow, error) {
-	row := q.db.QueryRow(ctx, getAllocationWithStudentNamesByTeamID, arg.CoursePhaseID, arg.ID)
-	var i GetAllocationWithStudentNamesByTeamIDRow
-	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
-	return i, err
-}
-
-const getAllocationsWithStudentNames = `-- name: GetAllocationsWithStudentNames :many
-
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.course_phase_id = $1
-GROUP BY
-  t.id, t.name
-ORDER BY
-  t.name
-`
-
-type GetAllocationsWithStudentNamesRow struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	TeamMembers []byte    `json:"team_members"`
-}
-
-// ensuring to delete only teams in the authenticated course_phase
-func (q *Queries) GetAllocationsWithStudentNames(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllocationsWithStudentNamesRow, error) {
-	rows, err := q.db.Query(ctx, getAllocationsWithStudentNames, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetAllocationsWithStudentNamesRow
-	for rows.Next() {
-		var i GetAllocationsWithStudentNamesRow
-		if err := rows.Scan(&i.ID, &i.Name, &i.TeamMembers); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAllocationsWithStudentNamesByID = `-- name: GetAllocationsWithStudentNamesByID :one
-SELECT
-  t.id,
-  t.name,
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  allocations a
-  ON t.id = a.team_id
-WHERE
-  t.id = $1
-GROUP BY
-  t.id, t.name
-`
-
-type GetAllocationsWithStudentNamesByIDRow struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	TeamMembers []byte    `json:"team_members"`
-}
-
-func (q *Queries) GetAllocationsWithStudentNamesByID(ctx context.Context, id uuid.UUID) (GetAllocationsWithStudentNamesByIDRow, error) {
-	row := q.db.QueryRow(ctx, getAllocationsWithStudentNamesByID, id)
-	var i GetAllocationsWithStudentNamesByIDRow
-	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
-	return i, err
 }
 
 const getTeamByCoursePhaseAndTeamID = `-- name: GetTeamByCoursePhaseAndTeamID :one
 SELECT id, name, course_phase_id, created_at
 FROM team
 WHERE id = $1
-AND course_phase_id = $2
+  AND course_phase_id = $2
 `
 
 type GetTeamByCoursePhaseAndTeamIDParams struct {
@@ -198,6 +57,7 @@ type GetTeamByCoursePhaseAndTeamIDParams struct {
 	CoursePhaseID uuid.UUID `json:"course_phase_id"`
 }
 
+// ensuring to get only teams in the authenticated course_phase
 func (q *Queries) GetTeamByCoursePhaseAndTeamID(ctx context.Context, arg GetTeamByCoursePhaseAndTeamIDParams) (Team, error) {
 	row := q.db.QueryRow(ctx, getTeamByCoursePhaseAndTeamID, arg.ID, arg.CoursePhaseID)
 	var i Team
@@ -242,11 +102,77 @@ func (q *Queries) GetTeamsByCoursePhase(ctx context.Context, coursePhaseID uuid.
 	return items, nil
 }
 
+const getTeamsWithMembers = `-- name: GetTeamsWithMembers :many
+SELECT t.id,
+       t.name,
+       COALESCE(members.team_members, '[]'::jsonb) AS team_members,
+       COALESCE(tutors.team_tutors, '[]'::jsonb)   AS team_tutors
+FROM team t
+         LEFT JOIN LATERAL (
+    SELECT jsonb_agg(
+                   jsonb_build_object(
+                           'id', a.course_participation_id,
+                           'firstName', a.student_first_name,
+                           'lastName', a.student_last_name
+                   )
+                   ORDER BY a.student_first_name
+           ) AS team_members
+    FROM allocations a
+    WHERE a.team_id = t.id
+    ) members ON TRUE
+         LEFT JOIN LATERAL (
+    SELECT jsonb_agg(
+                   jsonb_build_object(
+                           'id', tu.course_participation_id,
+                           'firstName', tu.first_name,
+                           'lastName', tu.last_name
+                   )
+                   ORDER BY tu.first_name
+           ) AS team_tutors
+    FROM tutor tu
+    WHERE tu.team_id = t.id
+    ) tutors ON TRUE
+WHERE t.course_phase_id = $1
+ORDER BY t.name
+`
+
+type GetTeamsWithMembersRow struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	TeamMembers []byte    `json:"team_members"`
+	TeamTutors  []byte    `json:"team_tutors"`
+}
+
+func (q *Queries) GetTeamsWithMembers(ctx context.Context, coursePhaseID uuid.UUID) ([]GetTeamsWithMembersRow, error) {
+	rows, err := q.db.Query(ctx, getTeamsWithMembers, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTeamsWithMembersRow
+	for rows.Next() {
+		var i GetTeamsWithMembersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.TeamMembers,
+			&i.TeamTutors,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateTeam = `-- name: UpdateTeam :exec
 UPDATE team
 SET name = $3
 WHERE id = $1
-AND course_phase_id = $2
+  AND course_phase_id = $2
 `
 
 type UpdateTeamParams struct {
@@ -255,6 +181,7 @@ type UpdateTeamParams struct {
 	Name          string    `json:"name"`
 }
 
+// ensuring to update only teams in the authenticated course_phase
 func (q *Queries) UpdateTeam(ctx context.Context, arg UpdateTeamParams) error {
 	_, err := q.db.Exec(ctx, updateTeam, arg.ID, arg.CoursePhaseID, arg.Name)
 	return err

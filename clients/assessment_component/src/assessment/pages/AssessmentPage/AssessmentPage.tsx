@@ -1,24 +1,31 @@
 import { useParams } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 
-import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
-import { CategoryAssessment } from './components/CategoryAssessment'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
+import { useStudentAssessmentStore } from '../../zustand/useStudentAssessmentStore'
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
+
+import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
+
 import { AssessmentProfile } from './components/AssessmentProfile'
+import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
+import { FeedbackItemsPanel } from './components/FeedbackItemsPanel/FeedbackItemsPanel'
 
 export const AssessmentPage = (): JSX.Element => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
 
+  const { setStudentAssessment, setAssessmentParticipation } = useStudentAssessmentStore()
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(
     (participation) => participation.courseParticipationID === courseParticipationID,
   )
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const {
     data: studentAssessment,
@@ -34,6 +41,18 @@ export const AssessmentPage = (): JSX.Element => {
       }, 0) - (studentAssessment?.assessments?.length || 0)
     )
   }, [categories, studentAssessment?.assessments?.length])
+
+  useEffect(() => {
+    if (studentAssessment) {
+      setStudentAssessment(studentAssessment)
+    }
+  }, [studentAssessment, setStudentAssessment])
+
+  useEffect(() => {
+    if (participant) {
+      setAssessmentParticipation(participant)
+    }
+  }, [participant, setAssessmentParticipation])
 
   if (isStudentAssessmentError) return <ErrorPage onRetry={refetchStudentAssessment} />
   if (isStudentAssessmentPending)
@@ -77,10 +96,11 @@ export const AssessmentPage = (): JSX.Element => {
         />
       ))}
 
-      <AssessmentCompletion
-        studentAssessment={studentAssessment}
-        completed={studentAssessment.assessmentCompletion.completed}
-      />
+      {(coursePhaseConfig?.selfEvaluationEnabled || coursePhaseConfig?.peerEvaluationEnabled) && (
+        <FeedbackItemsPanel />
+      )}
+
+      <AssessmentCompletion />
     </div>
   )
 }

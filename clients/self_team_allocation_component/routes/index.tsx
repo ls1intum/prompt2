@@ -1,7 +1,7 @@
 import { Role } from '@tumaet/prompt-shared-state'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { SelfTeamAllocationPage } from '../src/self_team_allocation/pages/TeamAllocation/SelfTeamAllocationPage'
-import { AllocationParticipants } from '../src/self_team_allocation/pages/AllocationParticipants/AllocationParticipantsPage'
+import { SelfTeamAllocationParticipantsPage } from '../src/self_team_allocation/pages/SelfTeamAllocationParticipantsPage/SelfTeamAllocationParticipantsPage'
 import { SettingsPage } from '../src/self_team_allocation/pages/Settings/SettingsPage'
 
 const routes: ExtendedRouteObject[] = [
@@ -17,7 +17,7 @@ const routes: ExtendedRouteObject[] = [
   },
   {
     path: '/participants',
-    element: <AllocationParticipants />,
+    element: <SelfTeamAllocationParticipantsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {

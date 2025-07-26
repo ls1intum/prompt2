@@ -1,16 +1,17 @@
-import { assessmentAxiosInstance } from '../assessmentServerConfig'
 import { ScoreLevelWithParticipation } from '../../interfaces/scoreLevelWithParticipation'
+import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
 export const getAllScoreLevels = async (
   coursePhaseID: string,
 ): Promise<ScoreLevelWithParticipation[]> => {
-  const response = await assessmentAxiosInstance.get<ScoreLevelWithParticipation[]>(
-    `assessment/api/course_phase/${coursePhaseID}/student-assessment/scoreLevel`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  )
-  return response.data
+  try {
+    return (
+      await assessmentAxiosInstance.get(
+        `assessment/api/course_phase/${coursePhaseID}/student-assessment/scoreLevel`,
+      )
+    ).data
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }

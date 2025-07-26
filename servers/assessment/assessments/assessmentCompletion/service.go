@@ -10,15 +10,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
-
-// ErrDeadlinePassed represents an error when trying to perform an action after the deadline has passed
-var ErrDeadlinePassed = errors.New("cannot unmark assessment as completed: deadline has passed")
 
 type AssessmentCompletionService struct {
 	queries db.Queries
@@ -26,6 +22,8 @@ type AssessmentCompletionService struct {
 }
 
 var AssessmentCompletionServiceSingleton *AssessmentCompletionService
+
+var ErrAssessmentCompleted = errors.New("assessment already completed")
 
 func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (bool, error) {
 	exists, err := AssessmentCompletionServiceSingleton.queries.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
@@ -40,6 +38,14 @@ func CheckAssessmentCompletionExists(ctx context.Context, courseParticipationID,
 }
 
 func CheckAssessmentIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID uuid.UUID) error {
+	open, err := coursePhaseConfig.IsAssessmentOpen(ctx, coursePhaseID)
+	if err != nil {
+		return err
+	}
+	if !open {
+		return coursePhaseConfig.ErrNotStarted
+	}
+
 	exists, err := qtx.CheckAssessmentCompletionExists(ctx, db.CheckAssessmentCompletionExistsParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
@@ -59,8 +65,7 @@ func CheckAssessmentIsEditable(ctx context.Context, qtx *db.Queries, courseParti
 		}
 
 		if completion.Completed {
-			log.Error("assessment completion already exists and is marked as completed")
-			return errors.New("assessment completion already exists and is marked as completed")
+			return ErrAssessmentCompleted
 		}
 	}
 	return nil
@@ -79,6 +84,11 @@ func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipatio
 }
 
 func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -110,6 +120,11 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 }
 
 func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
+	err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
 	remaining, err := CountRemainingAssessmentsForStudent(ctx, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
 		log.Error("could not count remaining assessments: ", err)
@@ -118,17 +133,6 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 	if remaining.RemainingAssessments > 0 {
 		log.Error("cannot mark assessment as completed, remaining assessments exist")
 		return errors.New("cannot mark assessment as completed, remaining assessments exist")
-	}
-
-	// Check if there are at least 3 action items for this student in this course phase
-	actionItemCount, err := actionItem.CountActionItemsForStudentInPhase(ctx, req.CourseParticipationID, req.CoursePhaseID)
-	if err != nil {
-		log.Error("could not count action items for student in phase: ", err)
-		return errors.New("could not count action items for student in phase")
-	}
-	if actionItemCount < 3 {
-		log.Error("cannot mark assessment as completed, at least 3 action items are required")
-		return errors.New("cannot mark assessment as completed, at least 3 action items are required")
 	}
 
 	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
@@ -159,16 +163,12 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 }
 
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
-	// Check if deadline has passed
-	deadline, err := coursePhaseConfig.GetCoursePhaseDeadline(ctx, coursePhaseID)
+	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {
-		log.Error("could not get course phase deadline: ", err)
-		return errors.New("could not check deadline")
+		return err
 	}
-
-	// If deadline exists and has passed, prevent unmarking
-	if deadline != nil && time.Now().After(*deadline) {
-		return ErrDeadlinePassed
+	if deadlinePassed {
+		return coursePhaseConfig.ErrDeadlinePassed
 	}
 
 	err = AssessmentCompletionServiceSingleton.queries.UnmarkAssessmentAsFinished(ctx, db.UnmarkAssessmentAsFinishedParams{

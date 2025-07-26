@@ -6,15 +6,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
+	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -90,30 +93,38 @@ func setInitialPhase(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.UU
 // copyPhaseConfigurations sends a request to the phase service to copy configurations
 // for each phase that has a server-side implementation in the source course. It uses the phase ID mapping to ensure
 // the correct phases are targeted.
-func copyPhaseConfigurations(c *gin.Context, qtx *db.Queries, phaseIDMap map[uuid.UUID]uuid.UUID) error {
+func copyPhaseConfigurations(c *gin.Context, phaseIDMap map[uuid.UUID]uuid.UUID) error {
 	for oldPhaseID, newPhaseID := range phaseIDMap {
 		oldPhase, err := coursePhase.GetCoursePhaseByID(c, oldPhaseID)
 		if err != nil {
 			return fmt.Errorf("course phase with ID %s not found: %w", oldPhaseID, err)
 		}
 
-		oldPhaseType, err := qtx.GetCoursePhaseTypeByID(c, oldPhase.CoursePhaseTypeID)
+		oldPhaseType, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, oldPhase.CoursePhaseTypeID)
 		if err != nil {
 			return fmt.Errorf("failed to fetch course phase type: %w", err)
 		}
 
-		baseURL := oldPhaseType.BaseUrl
-		if baseURL == utils.GetEnv("CORE_HOST", "core") {
+		if oldPhaseType.BaseUrl == "core" {
 			continue
 		}
 
-		url := baseURL + "/copy"
+		coreHost := resolution.NormaliseHost(promptSDK.GetEnv("CORE_HOST", "http://localhost:8080"))
+		log.Infof("Core host is '%s'", coreHost)
+		baseURL := strings.ReplaceAll(oldPhaseType.BaseUrl, "{CORE_HOST}", coreHost)
+
+		url, err := url.JoinPath(baseURL, "copy")
+		if err != nil {
+			return fmt.Errorf("failed to join copy path: %w", err)
+		}
+
 		body, _ := json.Marshal(promptTypes.PhaseCopyRequest{
 			SourceCoursePhaseID: oldPhaseID,
 			TargetCoursePhaseID: newPhaseID,
 		})
 
 		resp, err := sendRequest("POST", c.GetHeader("Authorization"), bytes.NewBuffer(body), url)
+		log.Infof("Sending copy request to %s for phase %s", url, oldPhase.Name)
 		if err != nil {
 			return fmt.Errorf("failed to send copy request to phase service: %w", err)
 		}

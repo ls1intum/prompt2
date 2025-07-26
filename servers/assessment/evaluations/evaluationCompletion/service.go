@@ -17,9 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ErrDeadlinePassed represents an error when trying to perform an action after the deadline has passed
-var ErrDeadlinePassed = errors.New("cannot unmark evaluation as completed: deadline has passed")
-
 type EvaluationCompletionService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
@@ -27,20 +24,25 @@ type EvaluationCompletionService struct {
 
 var EvaluationCompletionServiceSingleton *EvaluationCompletionService
 
-func CheckEvaluationCompletionExists(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) (bool, error) {
-	exists, err := EvaluationCompletionServiceSingleton.queries.CheckEvaluationCompletionExists(ctx, db.CheckEvaluationCompletionExistsParams{
-		CourseParticipationID:       courseParticipationID,
-		CoursePhaseID:               coursePhaseID,
-		AuthorCourseParticipationID: authorCourseParticipationID,
-	})
-	if err != nil {
-		log.Error("could not check evaluation completion existence: ", err)
-		return false, errors.New("could not check evaluation completion existence")
-	}
-	return exists, nil
-}
-
 func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) error {
+	if courseParticipationID == authorCourseParticipationID {
+		open, err := coursePhaseConfig.IsSelfEvaluationOpen(ctx, coursePhaseID)
+		if err != nil {
+			return err
+		}
+		if !open {
+			return coursePhaseConfig.ErrNotStarted
+		}
+	} else {
+		open, err := coursePhaseConfig.IsPeerEvaluationOpen(ctx, coursePhaseID)
+		if err != nil {
+			return err
+		}
+		if !open {
+			return coursePhaseConfig.ErrNotStarted
+		}
+	}
+
 	exists, err := qtx.CheckEvaluationCompletionExists(ctx, db.CheckEvaluationCompletionExistsParams{
 		CourseParticipationID:       courseParticipationID,
 		CoursePhaseID:               coursePhaseID,
@@ -70,6 +72,11 @@ func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParti
 }
 
 func CreateOrUpdateEvaluationCompletion(ctx context.Context, req evaluationCompletionDTO.EvaluationCompletion) error {
+	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID)
+	if err != nil {
+		return err
+	}
+
 	tx, err := EvaluationCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -99,6 +106,27 @@ func CreateOrUpdateEvaluationCompletion(ctx context.Context, req evaluationCompl
 }
 
 func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.EvaluationCompletion) error {
+	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID)
+	if err != nil {
+		return err
+	}
+
+	// Check if there are remaining evaluations before marking as completed
+	remainingEvaluations, err := EvaluationCompletionServiceSingleton.queries.CountRemainingEvaluationsForStudent(ctx, db.CountRemainingEvaluationsForStudentParams{
+		Column1:       req.CourseParticipationID,
+		Column2:       req.AuthorCourseParticipationID,
+		CoursePhaseID: req.CoursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not check remaining evaluations: ", err)
+		return errors.New("could not check remaining evaluations")
+	}
+
+	if remainingEvaluations > 0 {
+		log.Warnf("cannot mark evaluation as completed: %d evaluations still remaining", remainingEvaluations)
+		return fmt.Errorf("cannot mark evaluation as completed: %d evaluations still remaining", remainingEvaluations)
+	}
+
 	tx, err := EvaluationCompletionServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -127,27 +155,21 @@ func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.
 }
 
 func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) error {
-	// Check if deadline has passed for self-evaluations
 	if courseParticipationID == authorCourseParticipationID {
-		deadline, err := coursePhaseConfig.GetSelfEvaluationDeadline(ctx, coursePhaseID)
+		deadlinePassed, err := coursePhaseConfig.IsSelfEvaluationDeadlinePassed(ctx, coursePhaseID)
 		if err != nil {
-			log.Error("could not get self evaluation deadline: ", err)
-			return errors.New("could not check deadline")
+			return err
 		}
-		// If deadline exists and has passed, prevent unmarking
-		if deadline != nil && time.Now().After(*deadline) {
-			return ErrDeadlinePassed
+		if deadlinePassed {
+			return coursePhaseConfig.ErrDeadlinePassed
 		}
 	} else {
-		// Check peer evaluation deadline
-		deadline, err := coursePhaseConfig.GetPeerEvaluationDeadline(ctx, coursePhaseID)
+		deadlinePassed, err := coursePhaseConfig.IsPeerEvaluationDeadlinePassed(ctx, coursePhaseID)
 		if err != nil {
-			log.Error("could not get peer evaluation deadline: ", err)
-			return errors.New("could not check deadline")
+			return err
 		}
-		// If deadline exists and has passed, prevent unmarking
-		if deadline != nil && time.Now().After(*deadline) {
-			return ErrDeadlinePassed
+		if deadlinePassed {
+			return coursePhaseConfig.ErrDeadlinePassed
 		}
 	}
 

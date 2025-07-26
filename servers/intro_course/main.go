@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/intro_course/copy"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
 	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup"
@@ -84,6 +85,9 @@ func main() {
 	// Infrastructure Setup
 	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")
 	infrastructureSetup.InitInfrastructureModule(api, *query, conn, gitlabAccessToken)
+
+	copyApi := router.Group("intro-course/api")
+	copy.InitCopyModule(copyApi, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	err = router.Run(serverAddress)

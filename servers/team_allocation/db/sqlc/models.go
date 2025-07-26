@@ -63,7 +63,8 @@ type Allocation struct {
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
 	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
-	StudentFullName       string           `json:"student_full_name"`
+	StudentFirstName      string           `json:"student_first_name"`
+	StudentLastName       string           `json:"student_last_name"`
 }
 
 type Skill struct {
@@ -95,4 +96,12 @@ type Team struct {
 	Name          string           `json:"name"`
 	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
 	CreatedAt     pgtype.Timestamp `json:"created_at"`
+}
+
+type Tutor struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	FirstName             string    `json:"first_name"`
+	LastName              string    `json:"last_name"`
+	TeamID                uuid.UUID `json:"team_id"`
 }

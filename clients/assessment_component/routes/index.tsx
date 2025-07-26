@@ -7,7 +7,7 @@ import { SelfEvaluationPage } from '../src/assessment/pages/SelfAndPeerEvaluatio
 import { PeerEvaluationPage } from '../src/assessment/pages/SelfAndPeerEvaluationPage/PeerEvaluationPage'
 
 import { AssessmentDataShell } from '../src/assessment/pages/AssessmentDataShell'
-import { AssessmentOverviewPage } from '../src/assessment/pages/AssessmentOverviewPage/AssessmentOverviewPage'
+import { AssessmentParticipantsPage } from '../src/assessment/pages/AssessmentParticipantsPage/AssessmentParticipantsPage'
 import { AssessmentPage } from '../src/assessment/pages/AssessmentPage/AssessmentPage'
 import { AssessmentStatisticsPage } from '../src/assessment/pages/AssessmentStatisticsPage/AssessmentStatisticsPage'
 import { SettingsPage } from '../src/assessment/pages/SettingsPage/SettingsPage'
@@ -56,16 +56,16 @@ const routes: ExtendedRouteObject[] = [
     ],
   },
   {
-    path: '/overview',
+    path: '/participants',
     element: (
       <AssessmentDataShell>
-        <AssessmentOverviewPage />
+        <AssessmentParticipantsPage />
       </AssessmentDataShell>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR],
   },
   {
-    path: '/overview/:courseParticipationID',
+    path: '/participants/:courseParticipationID',
     element: (
       <AssessmentDataShell>
         <AssessmentPage />

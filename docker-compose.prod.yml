@@ -13,7 +13,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=niclas.heun@tum.de"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--experimental.plugins.jwt.moduleName=github.com/traefik-plugins/traefik-jwt-plugin"
       - "--experimental.plugins.jwt.version=v0.7.1"
@@ -60,6 +60,8 @@ services:
       - KEYCLOAK_AUTHORIZED_PARTY
       - SMTP_HOST
       - SMTP_PORT
+      - SMTP_USERNAME
+      - SMTP_PASSWORD
       - SENDER_EMAIL
       - SENDER_NAME
     networks:
@@ -573,15 +575,6 @@ services:
       - "80"
     depends_on:
       - server-core
-    networks:
-      - prompt-network
-
-  postfix:
-    image: ghcr.io/ls1admin/postfix:latest
-    container_name: prompt-postfix
-    restart: unless-stopped
-    volumes:
-      - ./postfix-config:/config
     networks:
       - prompt-network
 

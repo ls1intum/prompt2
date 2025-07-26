@@ -1,10 +1,12 @@
 export type Team = {
   id: string
   name: string
-  members: TeamMember[]
+  tutors: Person[]
+  members: Person[]
 }
 
-export type TeamMember = {
-  courseParticipationID: string
-  studentName: string
+export type Person = {
+  id: string
+  firstName: string
+  lastName: string
 }

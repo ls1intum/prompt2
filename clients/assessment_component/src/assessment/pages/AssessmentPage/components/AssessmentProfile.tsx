@@ -24,32 +24,29 @@ export const AssessmentProfile = ({
     <>
       <Card className='relative overflow-hidden'>
         <CardHeader>
-          <div className='flex flex-col sm:flex-row items-center gap-3'>
-            <div className='flex-1 text-left'>
-              <div className='flex flex-col sm:flex-row items-center gap-1'>
-                <h1 className='text-2xl font-bold mr-2'>
-                  {participant.student.firstName} {participant.student.lastName}
-                </h1>
+          <div className='flex flex-wrap items-center gap-2'>
+            <h1 className='text-2xl font-bold mr-2 sm:text-left sm:w-auto text-center w-full'>
+              {participant.student.firstName} {participant.student.lastName}
+            </h1>
 
-                <div className='flex items-center gap-1'>
-                  <AssessmentStatusBadge
-                    remainingAssessments={remainingAssessments}
-                    isFinalized={studentAssessment.assessmentCompletion.completed}
-                  />
-                  {studentAssessment.assessmentCompletion && (
-                    <GradeSuggestionBadge
-                      gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
-                      text={true}
-                    />
-                  )}
-                  {studentAssessment.assessments.length > 0 && (
-                    <StudentScoreBadge
-                      scoreLevel={studentAssessment.studentScore.scoreLevel}
-                      scoreNumeric={studentAssessment.studentScore.scoreNumeric}
-                    />
-                  )}
-                </div>
-              </div>
+            <div className='flex flex-wrap justify-center gap-1'>
+              <AssessmentStatusBadge
+                remainingAssessments={remainingAssessments}
+                isFinalized={studentAssessment.assessmentCompletion.completed}
+              />
+              {studentAssessment.assessmentCompletion && (
+                <GradeSuggestionBadge
+                  gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
+                  text={true}
+                />
+              )}
+              {studentAssessment.assessments.length > 0 && (
+                <StudentScoreBadge
+                  scoreLevel={studentAssessment.studentScore.scoreLevel}
+                  scoreNumeric={studentAssessment.studentScore.scoreNumeric}
+                  showTooltip={true}
+                />
+              )}
             </div>
           </div>
         </CardHeader>
