@@ -116,7 +116,6 @@ export const TemplateSelectionDialog = ({
           courseId={selectedTemplate.id}
           isOpen={showCopyDialog}
           onClose={handleCopyDialogClose}
-          useTemplateCopy={true}
         />
       )}
     </>

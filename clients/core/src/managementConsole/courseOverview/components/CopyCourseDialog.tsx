@@ -6,21 +6,15 @@ import { CopyCourseForm } from './CopyCourseForm'
 import { WarningStep } from './WarningStep'
 import type { CourseCopyDialogProps, DialogStep } from '../interfaces/copyCourseDialogProps'
 
-interface ExtendedCourseCopyDialogProps extends CourseCopyDialogProps {
-  useTemplateCopy?: boolean
-}
-
 export const CopyCourseDialog = ({
   courseId,
   isOpen,
   onClose,
-  useTemplateCopy = false,
-}: ExtendedCourseCopyDialogProps): JSX.Element => {
+}: CourseCopyDialogProps): JSX.Element => {
   const [currentStep, setCurrentStep] = useState<DialogStep>('form')
 
   // Use the appropriate hook based on the useTemplateCopy prop
-  const regularCopyHook = useCopyCourse(courseId, currentStep, onClose, setCurrentStep)
-  const templateCopyHook = useCopyCourse(courseId, currentStep, onClose, setCurrentStep)
+  const copyHook = useCopyCourse(courseId, currentStep, onClose, setCurrentStep)
 
   const {
     copyabilityData,
@@ -29,7 +23,7 @@ export const CopyCourseDialog = ({
     isCopying,
     handleProceedWithCopy,
     queryClient,
-  } = useTemplateCopy ? templateCopyHook : regularCopyHook
+  } = copyHook
 
   const { form, formData, course, onFormSubmit, resetForm } = useCourseForm(
     courseId,
