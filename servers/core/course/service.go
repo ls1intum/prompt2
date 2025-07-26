@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -384,8 +383,8 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	return nil
 }
 
-func UpdateCourseTemplateStatus(c *gin.Context, courseID uuid.UUID, isTemplate bool) error {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(c.Request.Context())
+func UpdateCourseTemplateStatus(ctx context.Context, courseID uuid.UUID, isTemplate bool) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
 	if isTemplate {
@@ -405,8 +404,8 @@ func UpdateCourseTemplateStatus(c *gin.Context, courseID uuid.UUID, isTemplate b
 	return nil
 }
 
-func GetTemplateCourses(sctx context.Context, userRoles map[string]bool) ([]courseDTO.Course, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(sctx)
+func GetTemplateCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
 	var courses []db.Course
@@ -445,8 +444,8 @@ func GetTemplateCourses(sctx context.Context, userRoles map[string]bool) ([]cour
 	return dtoCourses, nil
 }
 
-func CheckCourseTemplateStatus(c *gin.Context, courseID uuid.UUID) (bool, error) {
-	ctxWithTimeout, cancel := db.GetTimeoutContext(c.Request.Context())
+func CheckCourseTemplateStatus(ctx context.Context, courseID uuid.UUID) (bool, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
 	isTemplate, err := CourseServiceSingleton.queries.CheckCourseTemplateStatus(ctxWithTimeout, courseID)

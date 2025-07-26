@@ -18,7 +18,8 @@ SET
 SET
     standard_conforming_strings = on;
 
-SELECT pg_catalog.set_config('search_path', 'public', false);
+SELECT
+    pg_catalog.set_config ('search_path', 'public', false);
 
 SET
     check_function_bodies = false;
@@ -44,32 +45,36 @@ SET
 create type course_type as enum ('lecture', 'seminar', 'practical course');
 
 CREATE TABLE
-    course
-(
-    id           uuid        NOT NULL,
-    name         text        NOT NULL,
-    start_date   date,
-    end_date     date,
-    semester_tag text,
-    course_type  course_type NOT NULL,
-    ects         integer,
-    meta_data    jsonb,
-    template     boolean     NOT NULL DEFAULT FALSE
-);
+    course (
+        id uuid NOT NULL,
+        name text NOT NULL,
+        start_date date,
+        end_date date,
+        semester_tag text,
+        course_type course_type NOT NULL,
+        ects integer,
+        meta_data jsonb,
+        template boolean NOT NULL DEFAULT FALSE
+    );
 
 --
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('3f42d322-e5bf-4faa-b576-51f2cab14c2e',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'iPraktikum',
         '2024-10-01',
         '2030-01-01',
@@ -80,18 +85,24 @@ VALUES ('3f42d322-e5bf-4faa-b576-51f2cab14c2e',
           "icon": "apple",
           "bg-color": "bg-orange-100"
         }',
-        FALSE);
+        TRUE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('918977e1-2d27-4b55-9064-8504ff027a1a',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '918977e1-2d27-4b55-9064-8504ff027a1a',
         'New fancy course',
         '2024-10-01',
         '2030-01-01',
@@ -99,18 +110,24 @@ VALUES ('918977e1-2d27-4b55-9064-8504ff027a1a',
         'practical course',
         10,
         '{}',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('fe672868-3d07-4bdd-af41-121fd05e2d0d',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        'fe672868-3d07-4bdd-af41-121fd05e2d0d',
         'iPraktikum',
         '2024-10-01',
         '2030-01-01',
@@ -121,18 +138,24 @@ VALUES ('fe672868-3d07-4bdd-af41-121fd05e2d0d',
           "icon": "home",
           "color": "green"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('0bb5c8dc-a4df-4d64-a9fd-fe8840760d6b',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '0bb5c8dc-a4df-4d64-a9fd-fe8840760d6b',
         'Test5',
         '2025-01-13',
         '2030-01-18',
@@ -143,18 +166,24 @@ VALUES ('0bb5c8dc-a4df-4d64-a9fd-fe8840760d6b',
           "icon": "smartphone",
           "bg-color": "bg-blue-100"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('55856fdc-fc2f-456a-a5a5-726d60aaae7c',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '55856fdc-fc2f-456a-a5a5-726d60aaae7c',
         'iPraktikum3',
         '2025-01-07',
         '2030-01-24',
@@ -165,18 +194,24 @@ VALUES ('55856fdc-fc2f-456a-a5a5-726d60aaae7c',
           "icon": "smartphone",
           "bg-color": "bg-green-100"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('64a12e61-a238-4cea-a36a-5eaf89d7a940',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '64a12e61-a238-4cea-a36a-5eaf89d7a940',
         'Another TEst',
         '2024-12-15',
         '2030-01-17',
@@ -188,18 +223,24 @@ VALUES ('64a12e61-a238-4cea-a36a-5eaf89d7a940',
           "bg-color": "bg-red-100",
           "some-secret-data": "secret"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('07d0664c-6116-4897-97c9-521c8d73dd9f',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '07d0664c-6116-4897-97c9-521c8d73dd9f',
         'Further Testing',
         '2024-12-17',
         '2030-01-15',
@@ -210,18 +251,24 @@ VALUES ('07d0664c-6116-4897-97c9-521c8d73dd9f',
           "icon": "monitor",
           "bg-color": "bg-cyan-100"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('00f6d242-9716-487c-a8de-5e02112ea131',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '00f6d242-9716-487c-a8de-5e02112ea131',
         'Test150',
         '2024-12-17',
         '2030-01-17',
@@ -232,18 +279,24 @@ VALUES ('00f6d242-9716-487c-a8de-5e02112ea131',
           "icon": "book-open-text",
           "bg-color": "bg-orange-100"
         }',
-        FALSE);
+        FALSE
+    );
 
-INSERT INTO course (id,
-                    name,
-                    start_date,
-                    end_date,
-                    semester_tag,
-                    course_type,
-                    ects,
-                    meta_data,
-                    template)
-VALUES ('894cb6fc-9407-4642-b4de-2e0b4e893126',
+INSERT INTO
+    course (
+        id,
+        name,
+        start_date,
+        end_date,
+        semester_tag,
+        course_type,
+        ects,
+        meta_data,
+        template
+    )
+VALUES
+    (
+        '894cb6fc-9407-4642-b4de-2e0b4e893126',
         'iPraktikum-Test',
         '2025-03-10',
         '2030-08-01',
@@ -254,152 +307,168 @@ VALUES ('894cb6fc-9407-4642-b4de-2e0b4e893126',
           "icon": "gamepad-2",
           "bg-color": "bg-green-100"
         }',
-        FALSE);
+        FALSE
+    );
 
 --
 -- Name: course course_pkey; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
-ALTER TABLE ONLY course
-    ADD CONSTRAINT course_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY course ADD CONSTRAINT course_pkey PRIMARY KEY (id);
 
 --
 -- PostgreSQL database dump complete
 --
 CREATE TABLE
-    course_phase_type
-(
-    id   uuid NOT NULL,
-    name text NOT NULL
-);
+    course_phase_type (id uuid NOT NULL, name text NOT NULL);
 
 CREATE TABLE
-    course_phase
-(
-    id                   uuid    NOT NULL,
-    course_id            uuid    NOT NULL,
-    name                 text,
-    meta_data            jsonb,
-    is_initial_phase     boolean NOT NULL,
-    course_phase_type_id uuid    NOT NULL
-);
+    course_phase (
+        id uuid NOT NULL,
+        course_id uuid NOT NULL,
+        name text,
+        meta_data jsonb,
+        is_initial_phase boolean NOT NULL,
+        course_phase_type_id uuid NOT NULL
+    );
 
-INSERT INTO course_phase_type (id, name)
-VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744b',
-        'application');
+INSERT INTO
+    course_phase_type (id, name)
+VALUES
+    (
+        '7dc1c4e8-4255-4874-80a0-0c12b958744b',
+        'application'
+    );
 
-INSERT INTO course_phase_type (id, name)
-VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744c',
-        'template_component');
+INSERT INTO
+    course_phase_type (id, name)
+VALUES
+    (
+        '7dc1c4e8-4255-4874-80a0-0c12b958744c',
+        'template_component'
+    );
 
 --
 -- Data for Name: course_phase; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
-INSERT INTO course_phase (id,
-                          course_id,
-                          name,
-                          meta_data,
-                          is_initial_phase,
-                          course_phase_type_id)
-VALUES ('3d1f3b00-87f3-433b-a713-178c4050411b',
+INSERT INTO
+    course_phase (
+        id,
+        course_id,
+        name,
+        meta_data,
+        is_initial_phase,
+        course_phase_type_id
+    )
+VALUES
+    (
+        '3d1f3b00-87f3-433b-a713-178c4050411b',
         '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'Test',
         '{
           "test-key": "test-value"
         }',
         false,
-        '7dc1c4e8-4255-4874-80a0-0c12b958744b');
+        '7dc1c4e8-4255-4874-80a0-0c12b958744b'
+    );
 
-INSERT INTO course_phase (id,
-                          course_id,
-                          name,
-                          meta_data,
-                          is_initial_phase,
-                          course_phase_type_id)
-VALUES ('92bb0532-39e5-453d-bc50-fa61ea0128b2',
+INSERT INTO
+    course_phase (
+        id,
+        course_id,
+        name,
+        meta_data,
+        is_initial_phase,
+        course_phase_type_id
+    )
+VALUES
+    (
+        '92bb0532-39e5-453d-bc50-fa61ea0128b2',
         '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'Template Phase',
         '{}',
         false,
-        '7dc1c4e8-4255-4874-80a0-0c12b958744c');
+        '7dc1c4e8-4255-4874-80a0-0c12b958744c'
+    );
 
-INSERT INTO course_phase (id,
-                          course_id,
-                          name,
-                          meta_data,
-                          is_initial_phase,
-                          course_phase_type_id)
-VALUES ('500db7ed-2eb2-42d0-82b3-8750e12afa8a',
+INSERT INTO
+    course_phase (
+        id,
+        course_id,
+        name,
+        meta_data,
+        is_initial_phase,
+        course_phase_type_id
+    )
+VALUES
+    (
+        '500db7ed-2eb2-42d0-82b3-8750e12afa8a',
         '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'Application Phase',
         '{}',
         true,
-        '7dc1c4e8-4255-4874-80a0-0c12b958744b');
+        '7dc1c4e8-4255-4874-80a0-0c12b958744b'
+    );
 
-ALTER TABLE ONLY course_phase
-    ADD CONSTRAINT course_phase_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY course_phase ADD CONSTRAINT course_phase_pkey PRIMARY KEY (id);
 
 CREATE UNIQUE INDEX unique_initial_phase_per_course ON course_phase USING btree (course_id)
-    WHERE
-        (is_initial_phase = true);
+WHERE
+    (is_initial_phase = true);
 
-ALTER TABLE ONLY course_phase_type
-    ADD CONSTRAINT course_phase_type_name_key UNIQUE (name);
+ALTER TABLE ONLY course_phase_type ADD CONSTRAINT course_phase_type_name_key UNIQUE (name);
 
-ALTER TABLE ONLY course_phase_type
-    ADD CONSTRAINT course_phase_type_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY course_phase_type ADD CONSTRAINT course_phase_type_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY course_phase
-    ADD CONSTRAINT fk_phase_type FOREIGN KEY (course_phase_type_id) REFERENCES course_phase_type (id);
+ALTER TABLE ONLY course_phase ADD CONSTRAINT fk_phase_type FOREIGN KEY (course_phase_type_id) REFERENCES course_phase_type (id);
 
 CREATE TABLE
-    course_phase_graph
-(
-    from_course_phase_id uuid NOT NULL,
-    to_course_phase_id   uuid NOT NULL
-);
+    course_phase_graph (
+        from_course_phase_id uuid NOT NULL,
+        to_course_phase_id uuid NOT NULL
+    );
 
 --
 -- Data for Name: course_phase_graph; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
-INSERT INTO course_phase_graph (from_course_phase_id, to_course_phase_id)
-VALUES ('500db7ed-2eb2-42d0-82b3-8750e12afa8a',
-        '92bb0532-39e5-453d-bc50-fa61ea0128b2');
+INSERT INTO
+    course_phase_graph (from_course_phase_id, to_course_phase_id)
+VALUES
+    (
+        '500db7ed-2eb2-42d0-82b3-8750e12afa8a',
+        '92bb0532-39e5-453d-bc50-fa61ea0128b2'
+    );
 
 --
 -- Name: course_phase_graph unique_from_course_phase; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
-ALTER TABLE ONLY course_phase_graph
-    ADD CONSTRAINT unique_from_course_phase UNIQUE (from_course_phase_id);
+ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT unique_from_course_phase UNIQUE (from_course_phase_id);
 
 --
 -- Name: course_phase_graph unique_to_course_phase; Type: CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
-ALTER TABLE ONLY course_phase_graph
-    ADD CONSTRAINT unique_to_course_phase UNIQUE (to_course_phase_id);
+ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT unique_to_course_phase UNIQUE (to_course_phase_id);
 
 --
 -- Name: course_phase_graph fk_from_course_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
-ALTER TABLE ONLY course_phase_graph
-    ADD CONSTRAINT fk_from_course_phase FOREIGN KEY (from_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
+ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_from_course_phase FOREIGN KEY (from_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
 
 --
 -- Name: course_phase_graph fk_to_course_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
-ALTER TABLE ONLY course_phase_graph
-    ADD CONSTRAINT fk_to_course_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
+ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_to_course_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
 
 -- Apply migration
 -- 1) Adjust course
 ALTER TABLE course
-    RENAME COLUMN meta_data TO restricted_data;
+RENAME COLUMN meta_data TO restricted_data;
 
 ALTER TABLE course
-    ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';
 
 -- 2) Adjust course_phase
 ALTER TABLE course_phase
-    RENAME COLUMN meta_data TO restricted_data;
+RENAME COLUMN meta_data TO restricted_data;
 
 ALTER TABLE course_phase
-    ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+ADD COLUMN student_readable_data jsonb DEFAULT '{}';

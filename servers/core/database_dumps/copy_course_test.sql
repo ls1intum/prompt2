@@ -385,6 +385,7 @@ INSERT INTO application_question_multi_select VALUES ('c20829f9-d1d2-4952-95ee-1
 --
 
 INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Master Test', '2025-05-19', '2025-06-30', 'ss25', 'practical course', 10, '{}', '{"icon": "school", "bg-color": "bg-teal-100"}', FALSE);
+INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee', 'Template Test', '2025-05-19', '2025-08-30', 'ss25', 'practical course', 10, '{}', '{"icon": "school", "bg-color": "bg-teal-100"}', TRUE);
 
 
 --
