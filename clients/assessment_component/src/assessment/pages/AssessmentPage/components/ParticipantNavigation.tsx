@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { Button, ErrorPage } from '@tumaet/prompt-ui-components'
+import { Button } from '@tumaet/prompt-ui-components'
 
 import { useStudentAssessmentStore } from '../../../zustand/useStudentAssessmentStore'
 import { useParticipationStore } from '../../../zustand/useParticipationStore'
@@ -16,11 +16,10 @@ export const ParticipantNavigation = () => {
   const { participations } = useParticipationStore()
 
   const members = useMemo(() => {
-    return (team?.members.filter((member) =>
-      participations.some((p) => p.student.id === member.id),
-    ) ||
-      participations.map((p) => p.student) ||
-      []) as Person[]
+    const validTeamMembers = team?.members.filter((member) =>
+      participations.some((p) => p.courseParticipationID === member.id),
+    )
+    return (validTeamMembers || participations.map((p) => p.student) || []) as Person[]
   }, [team?.members, participations])
 
   const currentIndex =
@@ -30,11 +29,7 @@ export const ParticipantNavigation = () => {
   const prevMember = members[(currentIndex - 1 + members.length) % members.length]
   const nextMember = members[(currentIndex + 1) % members.length]
 
-  if (!assessmentParticipation) {
-    return <ErrorPage message='No team or assessment participation found.' />
-  }
-
-  if (members.length <= 1) {
+  if (!assessmentParticipation || !prevMember || !nextMember || members.length <= 1) {
     return undefined
   }
 
