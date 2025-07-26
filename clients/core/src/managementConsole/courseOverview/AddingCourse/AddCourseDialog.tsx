@@ -24,11 +24,11 @@ interface AddCourseDialogProps {
   onOpenChange?: (open: boolean) => void
 }
 
-export const AddCourseDialog: React.FC<AddCourseDialogProps> = ({
+export const AddCourseDialog = ({
   children,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}) => {
+}: AddCourseDialogProps): JSX.Element => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [coursePropertiesFormValues, setCoursePropertiesFormValues] =

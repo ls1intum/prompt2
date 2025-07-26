@@ -5,7 +5,6 @@ import { useCourseForm } from '../../../network/hooks/useCourseForm'
 import { CopyCourseForm } from './CopyCourseForm'
 import { WarningStep } from './WarningStep'
 import type { CourseCopyDialogProps, DialogStep } from '../interfaces/copyCourseDialogProps'
-import type { JSX } from 'react/jsx-runtime' // Declare JSX variable
 
 interface ExtendedCourseCopyDialogProps extends CourseCopyDialogProps {
   useTemplateCopy?: boolean
