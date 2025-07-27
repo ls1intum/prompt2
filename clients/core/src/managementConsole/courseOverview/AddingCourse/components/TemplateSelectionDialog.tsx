@@ -1,4 +1,3 @@
-import type React from 'react'
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@tumaet/prompt-ui-components'
 import { Button } from '@tumaet/prompt-ui-components'
@@ -35,15 +34,6 @@ export const TemplateSelectionDialog = ({
   })
 
   const handleTemplateSelect = (template: Course) => {
-    console.log('Selected template ID:', template.id, 'Length:', template.id.length)
-
-    // Validate UUID format
-    if (template.id.length !== 36) {
-      console.error('Invalid template ID format:', template.id)
-      // Handle the error appropriately
-      return
-    }
-
     setSelectedTemplate(template)
     onOpenChange(false)
     setShowCopyDialog(true)

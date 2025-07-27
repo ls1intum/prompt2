@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@tumaet/prompt-ui-components'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@tumaet/prompt-ui-components'
 import type { CourseFormValues } from '@core/validations/course'
 import { AddCourseProperties } from './AddCourseProperties'
 import { AddCourseAppearance } from './AddCourseAppearance'
@@ -19,13 +13,11 @@ import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 
 interface AddCourseDialogProps {
-  children: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
 export const AddCourseDialog = ({
-  children,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: AddCourseDialogProps): JSX.Element => {
@@ -118,7 +110,7 @@ export const AddCourseDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {controlledOpen === undefined && <DialogTrigger asChild>{children}</DialogTrigger>}
+      {controlledOpen === undefined}
       <DialogContent className='sm:max-w-[550px]'>
         {isPending ? (
           <DialogLoadingDisplay customMessage='Updating course data...' />

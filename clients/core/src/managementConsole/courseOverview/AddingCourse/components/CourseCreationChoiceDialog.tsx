@@ -85,9 +85,7 @@ export const CourseCreationChoiceDialog = ({
         </DialogContent>
       </Dialog>
 
-      <AddCourseDialog open={showAddCourse} onOpenChange={setShowAddCourse}>
-        <div />
-      </AddCourseDialog>
+      <AddCourseDialog open={showAddCourse} onOpenChange={setShowAddCourse}></AddCourseDialog>
 
       <TemplateSelectionDialog
         open={showTemplateSelection}
