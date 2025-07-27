@@ -71,6 +71,17 @@ export const AssessmentForm = ({
   const selectedScore = form.watch('scoreLevel')
 
   useEffect(() => {
+    form.reset({
+      courseParticipationID,
+      competencyID: competency.id,
+      scoreLevel: assessment?.scoreLevel,
+      comment: assessment ? assessment.comment : '',
+      examples: assessment ? assessment.examples : '',
+      author: userName,
+    })
+  }, [form, courseParticipationID, competency.id, assessment, userName])
+
+  useEffect(() => {
     if (completed) return
 
     const subscription = form.watch(async (_, { name }) => {

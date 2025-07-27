@@ -16,7 +16,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
-	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -163,18 +162,6 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		return assessmentDTO.StudentAssessment{}, errors.New("could not get peer evaluations")
 	}
 
-	positiveFeedbackItems, err := feedbackItem.ListPositiveFeedbackItemsForStudentInPhase(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not get positive feedback items: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get positive feedback items")
-	}
-
-	negativeFeedbackItems, err := feedbackItem.ListNegativeFeedbackItemsForStudentInPhase(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not get negative feedback items: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get negative feedback items")
-	}
-
 	return assessmentDTO.StudentAssessment{
 		CourseParticipationID: courseParticipationID,
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
@@ -182,8 +169,6 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		StudentScore:          studentScore,
 		SelfEvaluations:       selfEvaluations,
 		PeerEvaluations:       peerEvaluations,
-		PositiveFeedbackItems: positiveFeedbackItems,
-		NegativeFeedbackItems: negativeFeedbackItems,
 	}, nil
 }
 

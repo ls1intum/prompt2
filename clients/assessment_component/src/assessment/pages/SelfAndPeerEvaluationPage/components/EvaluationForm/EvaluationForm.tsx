@@ -48,6 +48,15 @@ export const EvaluationForm = ({
   const selectedScoreLevel = form.watch('scoreLevel')
 
   useEffect(() => {
+    form.reset({
+      courseParticipationID,
+      authorCourseParticipationID: authorCourseParticipationID,
+      competencyID: competency.id,
+      scoreLevel: evaluation?.scoreLevel,
+    })
+  }, [form, courseParticipationID, authorCourseParticipationID, competency.id, evaluation])
+
+  useEffect(() => {
     if (completed) return
 
     const subscription = form.watch(async (_, { name }) => {

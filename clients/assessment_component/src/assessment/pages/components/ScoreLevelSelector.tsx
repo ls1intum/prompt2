@@ -58,14 +58,10 @@ export const ScoreLevelSelector = ({
                 {selfEvaluationCompetency &&
                   selfEvaluationScoreLevel &&
                   level === selfEvaluationScoreLevel && (
-                    <TooltipProvider key='peer-evaluation-icon'>
+                    <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <User
-                            key='self-evaluation-icon'
-                            size={20}
-                            className='text-blue-500 dark:text-blue-300'
-                          />
+                          <User size={20} className='text-blue-500 dark:text-blue-300' />
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className='font-semibold'>Self Evaluation Results</div>
@@ -88,14 +84,10 @@ export const ScoreLevelSelector = ({
                 {peerEvaluationCompetency &&
                   peerEvaluationScoreLevel &&
                   level === peerEvaluationScoreLevel && (
-                    <TooltipProvider key='peer-evaluation-icon'>
+                    <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Users
-                            key='peer-evaluation-icon'
-                            size={20}
-                            className='text-green-500 dark:text-green-300'
-                          />
+                          <Users size={20} className='text-green-500 dark:text-green-300' />
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className='font-semibold'>Peer Evaluation Results</div>
