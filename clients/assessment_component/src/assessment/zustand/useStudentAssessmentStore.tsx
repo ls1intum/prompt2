@@ -5,7 +5,6 @@ import { Assessment } from '../interfaces/assessment'
 import { AssessmentCompletion } from '../interfaces/assessmentCompletion'
 import { StudentScore } from '../interfaces/studentScore'
 import { Evaluation } from '../interfaces/evaluation'
-import { Team } from '../interfaces/team'
 
 import { create } from 'zustand'
 
@@ -20,9 +19,6 @@ export interface StudentAssessmentStore {
 
   assessmentParticipation: AssessmentParticipationWithStudent | undefined
   setAssessmentParticipation: (participation: AssessmentParticipationWithStudent) => void
-
-  team: Team | undefined
-  setTeam: (team: Team) => void
 }
 
 export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) => ({
@@ -44,7 +40,4 @@ export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) =>
 
   assessmentParticipation: undefined,
   setAssessmentParticipation: (participation) => set({ assessmentParticipation: participation }),
-
-  team: undefined,
-  setTeam: (team) => set({ team }),
 }))
