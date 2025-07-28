@@ -22,6 +22,7 @@ interface CopyCourseFormProps {
   courseName?: string
   onSubmit: (data: CopyCourseFormValues) => void
   onClose: () => void
+  useTemplateCopy?: boolean
 }
 
 export const CopyCourseForm = ({
@@ -29,13 +30,18 @@ export const CopyCourseForm = ({
   courseName,
   onSubmit,
   onClose,
+  useTemplateCopy,
 }: CopyCourseFormProps): JSX.Element => {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Copy {courseName}</DialogTitle>
+        <DialogTitle>
+          {useTemplateCopy ? `Create Course from Template: ${courseName}` : `Copy: ${courseName}`}
+        </DialogTitle>
         <DialogDescription>
-          Create a copy of this course with a new name and semester tag.
+          {useTemplateCopy
+            ? 'Create a new course based on this template.'
+            : 'Create a complete copy of this course.'}
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
