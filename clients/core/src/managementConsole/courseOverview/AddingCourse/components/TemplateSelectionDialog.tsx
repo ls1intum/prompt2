@@ -34,13 +34,26 @@ export const TemplateSelectionDialog = ({
 
   const handleTemplateSelect = (template: Course) => {
     setSelectedTemplate(template)
-    onOpenChange(false) // Close the current dialog
-    setShowCopyDialog(true) // Open the copy dialog
+    onOpenChange(false)
+    setShowCopyDialog(true)
   }
 
   const handleCopyDialogClose = () => {
     setShowCopyDialog(false)
     setSelectedTemplate(null)
+  }
+
+  const convertTypeToReadable = (type: string): string => {
+    switch (type) {
+      case 'lecture':
+        return 'Lecture'
+      case 'seminar':
+        return 'Seminar'
+      case 'practical course':
+        return 'Practical Course'
+      default:
+        return type
+    }
   }
 
   return (
@@ -83,7 +96,7 @@ export const TemplateSelectionDialog = ({
                             <span>{template.ects} ECTS</span>
                           </div>
                           <span className='text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium'>
-                            {template.courseType}
+                            {convertTypeToReadable(template.courseType)}
                           </span>
                         </div>
                       </div>
