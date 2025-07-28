@@ -382,3 +382,77 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 
 	return nil
 }
+
+func UpdateCourseTemplateStatus(ctx context.Context, courseID uuid.UUID, isTemplate bool) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	if isTemplate {
+		err := CourseServiceSingleton.queries.MarkCourseAsTemplate(ctxWithTimeout, courseID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("failed to mark course as template")
+		}
+	} else {
+		err := CourseServiceSingleton.queries.UnmarkCourseAsTemplate(ctxWithTimeout, courseID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("failed to unmark course as template")
+		}
+	}
+
+	return nil
+}
+
+func GetTemplateCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	var courses []db.Course
+	var err error
+	if userRoles[permissionValidation.PromptAdmin] {
+		courses, err = CourseServiceSingleton.queries.GetTemplateCoursesAdmin(ctxWithTimeout)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		userRolesArray := []string{}
+		for key, value := range userRoles {
+			if value {
+				userRolesArray = append(userRolesArray, key)
+			}
+		}
+		coursesRestricted, err := CourseServiceSingleton.queries.GetTemplateCoursesRestricted(ctxWithTimeout, userRolesArray)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, course := range coursesRestricted {
+			courses = append(courses, db.Course(course))
+		}
+	}
+
+	dtoCourses := make([]courseDTO.Course, 0, len(courses))
+	for _, course := range courses {
+		dtoCourse, err := courseDTO.GetCourseDTOFromDBModel(course)
+		if err != nil {
+			return nil, err
+		}
+		dtoCourses = append(dtoCourses, dtoCourse)
+	}
+
+	return dtoCourses, nil
+}
+
+func CheckCourseTemplateStatus(ctx context.Context, courseID uuid.UUID) (bool, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	isTemplate, err := CourseServiceSingleton.queries.CheckCourseTemplateStatus(ctxWithTimeout, courseID)
+	if err != nil {
+		log.Error(err)
+		return false, errors.New("failed to check if course is template")
+	}
+
+	return isTemplate, nil
+}

@@ -178,6 +178,40 @@ func (suite *CourseServiceTestSuite) TestUpdateCoursePhaseOrder() {
 	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
 }
 
+func (suite *CourseServiceTestSuite) TestCheckCourseTemplateStatusTrue() {
+	courseID := uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e")
+	status, err := CheckCourseTemplateStatus(suite.ctx, courseID)
+	assert.NoError(suite.T(), err)
+	assert.True(suite.T(), status, "Course should be a template")
+}
+
+func (suite *CourseServiceTestSuite) TestCheckCourseTemplateStatusFalse() {
+	courseID := uuid.MustParse("918977e1-2d27-4b55-9064-8504ff027a1a")
+	status, err := CheckCourseTemplateStatus(suite.ctx, courseID)
+	assert.NoError(suite.T(), err)
+	assert.False(suite.T(), status, "Course should not be a template")
+}
+
+func (suite *CourseServiceTestSuite) TestUpdateCourseTemplateStatus() {
+	courseID := uuid.MustParse("918977e1-2d27-4b55-9064-8504ff027a1a")
+	err := UpdateCourseTemplateStatus(suite.ctx, courseID, true)
+	assert.NoError(suite.T(), err, "Updating course template status should not produce an error")
+
+	status, err := CourseServiceSingleton.queries.CheckCourseTemplateStatus(suite.ctx, courseID)
+	assert.NoError(suite.T(), err)
+	assert.True(suite.T(), status, "Course should now be a template")
+}
+
+func (suite *CourseServiceTestSuite) TestGetTemplateCourses() {
+	courses, err := GetTemplateCourses(suite.ctx, map[string]bool{permissionValidation.PromptAdmin: true})
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), courses, "Template courses should not be empty")
+
+	for _, course := range courses {
+		assert.True(suite.T(), course.Template, "All fetched courses should be templates")
+	}
+}
+
 func TestCourseServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(CourseServiceTestSuite))
 }
