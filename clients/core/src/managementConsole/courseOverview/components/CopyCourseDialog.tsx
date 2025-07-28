@@ -67,6 +67,7 @@ export const CopyCourseDialog = ({
             onBack={handleBackToForm}
             onProceed={handleProceed}
             queryClient={queryClient}
+            useTemplateCopy={useTemplateCopy}
           />
         )}
       </DialogContent>
