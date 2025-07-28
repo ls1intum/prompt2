@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Button,
 } from '@tumaet/prompt-ui-components'
-import { Button } from '@tumaet/prompt-ui-components'
 import { Plus, FileIcon as FileTemplate } from 'lucide-react'
 import { AddCourseDialog } from '@managementConsole/courseOverview/AddingCourse/AddCourseDialog'
 import { TemplateSelectionDialog } from './TemplateSelectionDialog'
@@ -44,11 +44,10 @@ export const CourseCreationChoiceDialog = ({
               Choose how you would like to get started
             </p>
           </DialogHeader>
-
           <div className='space-y-3 py-4'>
             <Button
               onClick={handleNewCourse}
-              className='w-full h-auto p-4 justify-start text-left hover:bg-accent/50 bg-transparent'
+              className='w-full h-auto p-4 justify-start text-left'
               variant='outline'
             >
               <div className='flex items-center gap-3 w-full'>
@@ -63,10 +62,9 @@ export const CourseCreationChoiceDialog = ({
                 </div>
               </div>
             </Button>
-
             <Button
               onClick={handleFromTemplate}
-              className='w-full h-auto p-4 justify-start text-left hover:bg-accent/50 bg-transparent'
+              className='w-full h-auto p-4 justify-start text-left'
               variant='outline'
             >
               <div className='flex items-center gap-3 w-full'>
@@ -84,9 +82,7 @@ export const CourseCreationChoiceDialog = ({
           </div>
         </DialogContent>
       </Dialog>
-
-      <AddCourseDialog open={showAddCourse} onOpenChange={setShowAddCourse}></AddCourseDialog>
-
+      <AddCourseDialog open={showAddCourse} onOpenChange={setShowAddCourse} />
       <TemplateSelectionDialog
         open={showTemplateSelection}
         onOpenChange={setShowTemplateSelection}
