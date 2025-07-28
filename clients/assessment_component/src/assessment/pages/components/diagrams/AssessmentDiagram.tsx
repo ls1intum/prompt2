@@ -24,7 +24,7 @@ const chartConfig = {
   },
   inProgress: {
     label: 'In Progress',
-    color: '#FBD38D', // Light orange
+    color: '#63B3ED', // Light blue
   },
   completed: {
     label: 'Completed',
