@@ -443,6 +443,120 @@ func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompleteRe
 	assert.Contains(suite.T(), response, "error")
 }
 
+func (suite *AssessmentCompletionRouterTestSuite) TestBulkMarkAssessmentsAsCompleteSuccess() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with empty list - this should succeed since there's nothing to validate
+	requestBody := map[string]interface{}{
+		"courseParticipationIDs": []string{},
+		"author":                 "Bulk Test Author",
+	}
+
+	body, err := json.Marshal(requestBody)
+	assert.NoError(suite.T(), err)
+
+	// Test POST request
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/bulk-mark-complete", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	// Verify response
+	var response map[string]interface{}
+	err = json.Unmarshal(resp.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), response, "message")
+	assert.Equal(suite.T(), "Successfully marked 0 assessments as completed", response["message"])
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestBulkMarkAssessmentsAsCompleteInvalidJSON() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with invalid JSON
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/bulk-mark-complete", bytes.NewBuffer([]byte("invalid json")))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestBulkMarkAssessmentsAsCompleteInvalidPhaseID() {
+	// Test with invalid phase ID
+	requestBody := map[string]interface{}{
+		"courseParticipationIDs": []string{uuid.New().String()},
+		"author":                 "Test Author",
+	}
+
+	body, err := json.Marshal(requestBody)
+	assert.NoError(suite.T(), err)
+
+	req, _ := http.NewRequest("POST", "/api/course_phase/invalid-uuid/student-assessment/completed/bulk-mark-complete", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestBulkMarkAssessmentsAsCompleteNonExistentParticipant() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with non-existent participant
+	requestBody := map[string]interface{}{
+		"courseParticipationIDs": []string{uuid.New().String()},
+		"author":                 "Test Author",
+	}
+
+	body, err := json.Marshal(requestBody)
+	assert.NoError(suite.T(), err)
+
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/bulk-mark-complete", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusInternalServerError, resp.Code)
+
+	var response map[string]interface{}
+	err = json.Unmarshal(resp.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), response, "error")
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestBulkMarkAssessmentsAsCompleteEmptyList() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with empty list
+	requestBody := map[string]interface{}{
+		"courseParticipationIDs": []string{},
+		"author":                 "Test Author",
+	}
+
+	body, err := json.Marshal(requestBody)
+	assert.NoError(suite.T(), err)
+
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/bulk-mark-complete", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var response map[string]interface{}
+	err = json.Unmarshal(resp.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), response, "message")
+	assert.Equal(suite.T(), "Successfully marked 0 assessments as completed", response["message"])
+}
+
 func TestAssessmentCompletionRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(AssessmentCompletionRouterTestSuite))
 }

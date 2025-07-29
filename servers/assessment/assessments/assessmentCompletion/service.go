@@ -162,6 +162,57 @@ func MarkAssessmentAsCompleted(ctx context.Context, req assessmentCompletionDTO.
 	return nil
 }
 
+func BulkMarkAssessmentsAsCompleted(ctx context.Context, coursePhaseID uuid.UUID, courseParticipationIDs []uuid.UUID, author string) error {
+	// Validate that all participants can be marked as completed
+	for _, courseParticipationID := range courseParticipationIDs {
+		err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("assessment not editable for participant ", courseParticipationID, ": ", err)
+			return fmt.Errorf("assessment not editable for participant %s: %w", courseParticipationID, err)
+		}
+
+		remaining, err := CountRemainingAssessmentsForStudent(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not count remaining assessments for participant ", courseParticipationID, ": ", err)
+			return fmt.Errorf("could not count remaining assessments for participant %s: %w", courseParticipationID, err)
+		}
+		if remaining.RemainingAssessments > 0 {
+			log.Error("cannot mark assessment as completed, remaining assessments exist for participant ", courseParticipationID)
+			return fmt.Errorf("cannot mark assessment as completed, remaining assessments exist for participant %s", courseParticipationID)
+		}
+	}
+
+	// Begin transaction
+	tx, err := AssessmentCompletionServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentCompletionServiceSingleton.queries.WithTx(tx)
+
+	// Mark all assessments as completed within the transaction
+	for _, courseParticipationID := range courseParticipationIDs {
+		err = qtx.MarkAssessmentAsFinished(ctx, db.MarkAssessmentAsFinishedParams{
+			CourseParticipationID: courseParticipationID,
+			CoursePhaseID:         coursePhaseID,
+			CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+			Author:                author,
+		})
+		if err != nil {
+			log.Error("could not mark assessment as finished for participant ", courseParticipationID, ": ", err)
+			return fmt.Errorf("could not mark assessment as finished for participant %s: %w", courseParticipationID, err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit bulk assessment completion: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func UnmarkAssessmentAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) error {
 	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(ctx, coursePhaseID)
 	if err != nil {

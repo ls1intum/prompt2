@@ -71,7 +71,6 @@ export const GroupActionsMenu = ({
           <DropdownMenuLabel>Group Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          {/* Default actions */}
           <DropdownMenuItem onClick={() => openDialog('setPassed')}>
             <CheckCircle className='mr-2 h-4 w-4' />
             Set Passed
@@ -81,7 +80,6 @@ export const GroupActionsMenu = ({
             Set Failed
           </DropdownMenuItem>
 
-          {/* Custom actions */}
           {customActions?.map((action, idx) => (
             <DropdownMenuItem
               key={idx}

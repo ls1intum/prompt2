@@ -1,10 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import {
+  ManagementPageHeader,
+  ErrorPage,
+  Alert,
+  AlertDescription,
+} from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { GroupAction } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/GroupAction'
 
 import { StudentScoreBadge } from '../components/StudentScoreBadge'
 import { GradeSuggestionBadge } from '../components/GradeSuggestionBadge'
@@ -28,6 +34,8 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
 import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
+
+import { useBulkMarkAssessmentsAsComplete } from './hooks/useBulkMarkAssessmentsAsComplete'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -83,6 +91,10 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     refetchPeerEvaluationCompletions()
   }
 
+  const [bulkMarkError, setBulkMarkError] = useState<string | undefined>(undefined)
+  const { mutate: handleBulkMarkAsComplete, isPending: isBulkMarkPending } =
+    useBulkMarkAssessmentsAsComplete(setBulkMarkError, participations)
+
   const teamsWithStudents = useMemo(() => {
     return teams.map((team) => ({
       name: team.name,
@@ -97,8 +109,6 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
   }, [assessmentCompletions])
 
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
-    if (!scoreLevels) return []
-
     return [
       {
         id: 'scoreLevel',
@@ -355,6 +365,24 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     peerEvaluationCompletions,
   ])
 
+  const customActions: GroupAction[] = useMemo(
+    () => [
+      {
+        label: 'Mark as Final',
+        icon: <CheckCircle className='h-4 w-4' />,
+        onAction: handleBulkMarkAsComplete,
+        disabled: isBulkMarkPending,
+        confirm: {
+          title: 'Mark Assessments as Final',
+          description:
+            'Are you sure you want to mark the selected assessments as final? This action can only be done if all assessments for each student are completed.',
+          confirmLabel: 'Mark as Final',
+        },
+      },
+    ],
+    [handleBulkMarkAsComplete, isBulkMarkPending],
+  )
+
   if (isError) {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
   }
@@ -372,10 +400,19 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
+
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
         <AssessmentDiagram participations={participations} scoreLevels={scoreLevels} />
         <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
+
+      {bulkMarkError && (
+        <Alert variant='destructive' className='mb-4'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{bulkMarkError}</AlertDescription>
+        </Alert>
+      )}
+
       <div className='w-full'>
         <CoursePhaseParticipationsTablePage
           participants={participations ?? []}
@@ -384,6 +421,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
           studentReadableDataKeys={[]}
           extraColumns={extraColumns}
           onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
+          customActions={customActions}
           key={JSON.stringify(scoreLevels)}
         />
       </div>

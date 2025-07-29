@@ -2,6 +2,7 @@ package assessmentCompletion
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	assessmentCompletionRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
 	assessmentCompletionRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
 	assessmentCompletionRouter.POST("/mark-complete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), markAssessmentAsCompleted)
+	assessmentCompletionRouter.POST("/bulk-mark-complete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), bulkMarkAssessmentsAsCompleted)
 	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentCompletion)
 	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), unmarkAssessmentAsCompleted)
 	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteAssessmentCompletion)
@@ -75,6 +77,31 @@ func markAssessmentAsCompleted(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Assessment marked as completed successfully"})
+}
+
+func bulkMarkAssessmentsAsCompleted(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var req assessmentCompletionDTO.BulkMarkAssessmentCompletionRequest
+	if err := c.BindJSON(&req); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = BulkMarkAssessmentsAsCompleted(c, coursePhaseID, req.CourseParticipationIDs, req.Author)
+	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Successfully marked %d assessments as completed", len(req.CourseParticipationIDs))})
 }
 
 func deleteAssessmentCompletion(c *gin.Context) {

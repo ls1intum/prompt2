@@ -206,6 +206,62 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	}
 }
 
+func (suite *AssessmentCompletionServiceTestSuite) TestBulkMarkAssessmentsAsCompleted() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with empty list - this should succeed
+	courseParticipationIDs := []uuid.UUID{}
+	author := "Bulk Test Author"
+
+	err := BulkMarkAssessmentsAsCompleted(suite.suiteCtx, phaseID, courseParticipationIDs, author)
+	assert.NoError(suite.T(), err, "Expected no error with empty list")
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestBulkMarkAssessmentsAsCompletedPartialFailure() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Create one valid participant and one invalid (non-existent)
+	partIDValid := uuid.New()
+	partIDInvalid := uuid.New()
+
+	// Create assessment completion only for the valid participant
+	completion := assessmentCompletionDTO.AssessmentCompletion{
+		CourseParticipationID: partIDValid,
+		CoursePhaseID:         phaseID,
+		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Author:                "Test Author",
+		Comment:               "Test comment",
+		GradeSuggestion:       3.5,
+		Completed:             false,
+	}
+
+	err := CreateOrUpdateAssessmentCompletion(suite.suiteCtx, completion)
+	assert.NoError(suite.T(), err, "Expected no error while creating assessment completion")
+
+	// Test bulk marking with one valid and one invalid participant
+	courseParticipationIDs := []uuid.UUID{partIDValid, partIDInvalid}
+	author := "Bulk Test Author"
+
+	err = BulkMarkAssessmentsAsCompleted(suite.suiteCtx, phaseID, courseParticipationIDs, author)
+	assert.Error(suite.T(), err, "Expected error during bulk marking with invalid participant")
+
+	// Verify that no assessments were marked as completed due to transaction rollback
+	validCompletion, err := GetAssessmentCompletion(suite.suiteCtx, partIDValid, phaseID)
+	assert.NoError(suite.T(), err, "Expected no error while getting valid assessment completion")
+	assert.False(suite.T(), validCompletion.Completed, "Expected valid assessment completion to remain incomplete due to transaction rollback")
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestBulkMarkAssessmentsAsCompletedEmptyList() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	// Test with empty list
+	courseParticipationIDs := []uuid.UUID{}
+	author := "Bulk Test Author"
+
+	err := BulkMarkAssessmentsAsCompleted(suite.suiteCtx, phaseID, courseParticipationIDs, author)
+	assert.NoError(suite.T(), err, "Expected no error with empty list")
+}
+
 func TestAssessmentCompletionServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(AssessmentCompletionServiceTestSuite))
 }
