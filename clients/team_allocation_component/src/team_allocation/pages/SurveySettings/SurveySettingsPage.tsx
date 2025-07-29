@@ -11,6 +11,10 @@ import { SurveyTimeframe } from '../../interfaces/timeframe'
 import { TeamSettings } from './components/TeamSettings'
 import { SkillSettings } from './components/SkillSettings'
 import { SurveyTimeframeSettings } from './components/SurveyTimeframeSettings'
+import { TeamAllocationConfig } from '../../interfaces/config'
+import { getConfig } from '../../network/queries/getConfig'
+import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { useEffect, useState } from 'react'
 
 export const SurveySettingsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -45,13 +49,72 @@ export const SurveySettingsPage = (): JSX.Element => {
     queryFn: () => getSurveyTimeframe(phaseId ?? ''),
   })
 
-  const isPending = isSkillsPending || isTeamsPending || isSurveyTimeframePending
-  const isError = isSkillsError || isTeamsError || isSurveyTimeframeError
+  const {
+    data: fetchedConfig,
+    isPending: isConfigPending,
+    isError: isConfigError,
+    refetch: refetchConfig,
+  } = useQuery<TeamAllocationConfig>({
+    queryKey: ['team_allocation_config', phaseId],
+    queryFn: () => getConfig(phaseId ?? ''),
+  })
+
+  const [missingConfigs, setMissingConfigs] = useState<MissingConfigItem[]>([])
+
+  const isPending = isSkillsPending || isTeamsPending || isSurveyTimeframePending || isConfigPending
+  const isError = isSkillsError || isTeamsError || isSurveyTimeframeError || isConfigError
   const refetch = () => {
     refetchSkills()
     refetchTeams()
     refetchTimeframe()
+    refetchConfig()
   }
+
+  const configToReadableTitle = (key: string): string => {
+    switch (key) {
+      case 'surveyTimeframe':
+        return 'Survey Timeframe'
+      case 'teams':
+        return 'Teams'
+      case 'skills':
+        return 'Skills'
+      default:
+        return key.charAt(0).toUpperCase() + key.slice(1)
+    }
+  }
+
+  const configToReadableDescription = (key: string): string => {
+    switch (key) {
+      case 'surveyTimeframe':
+        return 'survey timeframe'
+      case 'teams':
+        return 'teams'
+      case 'skills':
+        return 'skills'
+      default:
+        return key.slice(1)
+    }
+  }
+
+  useEffect(() => {
+    for (const [key, value] of Object.entries(fetchedConfig?.configurations || {})) {
+      if (!value) {
+        setMissingConfigs((prev: MissingConfigItem[]) => [
+          ...prev,
+          {
+            title: configToReadableTitle(key),
+            icon: Loader2,
+            description: `The ${configToReadableDescription(key)} configuration is missing.`,
+            link: ``,
+            hide: (): void =>
+              setMissingConfigs((prevConfigs: MissingConfigItem[]) =>
+                prevConfigs.filter((item: MissingConfigItem) => item.title !== key),
+              ),
+          } as MissingConfigItem,
+        ])
+      }
+    }
+  }, [fetchedConfig])
 
   if (isError) {
     return <ErrorPage onRetry={refetch} />
@@ -68,6 +131,7 @@ export const SurveySettingsPage = (): JSX.Element => {
   return (
     <>
       <ManagementPageHeader>Survey Settings</ManagementPageHeader>
+      <MissingConfig elements={missingConfigs} />
       {/* 1. Set the survey timeframe, skills and teams for this phase. */}
       <SurveyTimeframeSettings surveyTimeframe={fetchedSurveyTimeframe} />
       {/* 2. Set up the teams */}

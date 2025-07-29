@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/team_allocation/allocation"
+	"github.com/ls1intum/prompt2/servers/team_allocation/config"
 	"github.com/ls1intum/prompt2/servers/team_allocation/copy"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
@@ -98,6 +99,8 @@ func main() {
 
 	copyApi := router.Group("team-allocation/api")
 	copy.InitCopyModule(copyApi, *query, conn)
+
+	config.InitConfigModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
 	err = router.Run(serverAddress)
