@@ -169,46 +169,6 @@ export const CourseTemplateToggle = ({ courseId }: CourseTemplateToggleProps) =>
             )}
           </div>
         </div>
-
-        {/* Status Description */}
-        <div
-          className={`p-4 rounded-lg border-l-4 transition-colors duration-200 ${
-            isTemplate
-              ? 'bg-green-50 dark:bg-green-900/20 border-l-green-400 dark:border-l-green-500 text-green-800 dark:text-green-200'
-              : 'bg-blue-50 dark:bg-blue-900/20 border-l-blue-400 dark:border-l-blue-500 text-blue-800 dark:text-blue-200'
-          }`}
-        >
-          <div className='flex items-start gap-3'>
-            {isTemplate ? (
-              <CheckCircle2 className='h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0' />
-            ) : (
-              <Template className='h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0' />
-            )}
-            <div>
-              <p className='font-medium text-sm'>
-                {isTemplate ? 'Template Status: Active' : 'Template Status: Inactive'}
-              </p>
-              <p className='text-sm mt-1 opacity-90'>
-                {isTemplate
-                  ? 'This course is currently available as a template for creating new courses. ' +
-                    'Other users can use this course structure to create their own courses.'
-                  : 'This course is not available as a template. Enable this option to allow other users to create new courses based on this course structure.'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Info Section */}
-        <div className='p-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg border border-gray-100 dark:border-gray-700'>
-          <div className='flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400'>
-            <Template className='h-3 w-3' />
-            <span>
-              {isTemplate
-                ? 'Template courses help maintain consistency across your organization'
-                : 'Templates can be created from any published course'}
-            </span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   )
