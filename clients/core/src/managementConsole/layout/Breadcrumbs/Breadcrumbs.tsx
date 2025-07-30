@@ -45,7 +45,7 @@ export const Breadcrumbs: React.FC = () => {
 
           if (pathSegments.length >= 3 && pathSegments[3] === 'configurator') {
             breadcrumbs.push({
-              title: 'Course Configurator',
+              title: 'Phase Configurator',
               path: `/management/course/${courseId}/configurator`,
             })
           } else if (pathSegments.length >= 3) {
