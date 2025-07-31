@@ -57,7 +57,6 @@ export const CopyCourseDialog = ({
   const handleProceed = () => {
     if (!copyFormData || !templateFormData) return
     if (useTemplateCopy) {
-      // Ensure dateRange is included for templateFormData
       const { name, semesterTag } = templateFormData
       const dateRange = copyFormData.dateRange
       handleProceedWithCopy({ name, semesterTag, dateRange })
