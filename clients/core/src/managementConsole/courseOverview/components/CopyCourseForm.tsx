@@ -72,22 +72,24 @@ export const CopyCourseForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name='dateRange'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Course Duration</FormLabel>
-                <DatePickerWithRange
-                  date={field.value}
-                  setDate={field.onChange}
-                  className='w-full'
-                />
-                <FormDescription>Select the start and end dates for your course.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!useTemplateCopy && (
+            <FormField
+              control={form.control}
+              name='dateRange'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Course Duration</FormLabel>
+                  <DatePickerWithRange
+                    date={field.value}
+                    setDate={field.onChange}
+                    className='w-full'
+                  />
+                  <FormDescription>Select the start and end dates for your course.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <DialogFooter>
             <Button type='button' variant='outline' onClick={onClose}>
               Cancel
