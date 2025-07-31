@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CourseTemplateToggle } from './components/CourseTemplateToggle'
+import { MailingConfigPage } from '../mailingConfig/MailingConfigPage'
 
 export const CourseSettingsPage = (): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -12,6 +13,7 @@ export const CourseSettingsPage = (): JSX.Element => {
       </div>
 
       {courseId && <CourseTemplateToggle courseId={courseId} />}
+      <MailingConfigPage />
     </div>
   )
 }
