@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
@@ -56,85 +56,39 @@ export function ActionItemPanel() {
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
-  // Initialize item values when data loads
-  useEffect(() => {
-    const newValues: Record<string, string> = {}
-    actionItems.forEach((item) => {
-      if (!(item.id in itemValues)) {
-        newValues[item.id] = item.action
-      }
-    })
-    if (Object.keys(newValues).length > 0) {
-      setItemValues((prev) => ({ ...prev, ...newValues }))
-    }
-  }, [actionItems, itemValues])
-
-  const addActionItem = () => {
+  const addActionItem = async () => {
     if (completed) return
 
-    const handleAddActionItem = async () => {
-      try {
-        await createActionItem(
-          {
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID ?? '',
-            action: '',
-            author: userName,
-          },
-          {
-            onSuccess: () => {
-              refetch()
-            },
-          },
-        )
-      } catch (err) {
-        setError('An error occurred while creating the action item.')
-      }
-    }
-
-    handleAddActionItem()
+    return await createActionItem({
+      coursePhaseID: phaseId ?? '',
+      courseParticipationID: courseParticipationID ?? '',
+      action: '',
+      author: userName,
+    })
   }
-
-  const debouncedSave = useCallback(
-    (item: ActionItem, text: string) => {
-      const timeoutId = setTimeout(() => {
-        if (completed) return
-
-        if (text.trim() !== item.action.trim()) {
-          setSavingItemId(item.id)
-
-          const updateRequest: UpdateActionItemRequest = {
-            id: item.id,
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID ?? '',
-            action: text.trim(),
-            author: userName,
-          }
-
-          updateActionItem(updateRequest, {
-            onSuccess: () => {
-              setSavingItemId(undefined)
-              refetch()
-            },
-            onError: () => {
-              setSavingItemId(undefined)
-            },
-          })
-        }
-      }, 200) // 200 ms delay
-
-      return timeoutId
-    },
-    [phaseId, courseParticipationID, userName, updateActionItem, refetch, completed],
-  )
 
   const handleTextChange = (itemId: string, value: string) => {
     setItemValues((prev) => ({ ...prev, [itemId]: value }))
+  }
+
+  const handleTextBlur = (itemId: string) => {
+    if (completed) return
 
     const item = actionItems.find((it) => it.id === itemId)
-    if (item) {
-      const timeoutId = debouncedSave(item, value)
-      return () => clearTimeout(timeoutId)
+    const value = itemValues[itemId]
+
+    if (item && value !== undefined && value.trim() !== item.action.trim()) {
+      setSavingItemId(item.id)
+
+      const updateRequest: UpdateActionItemRequest = {
+        id: item.id,
+        coursePhaseID: phaseId ?? '',
+        courseParticipationID: courseParticipationID ?? '',
+        action: value.trim(),
+        author: userName,
+      }
+
+      updateActionItem(updateRequest)
     }
   }
 
@@ -149,15 +103,7 @@ export function ActionItemPanel() {
     if (itemToDelete) {
       deleteActionItem(itemToDelete, {
         onSuccess: () => {
-          // Remove from local state
-          setItemValues((prev) => {
-            const newValues = { ...prev }
-            delete newValues[itemToDelete]
-            return newValues
-          })
-          refetch()
           setDeleteDialogOpen(false)
-          setItemToDelete(undefined)
         },
       })
     }
@@ -197,8 +143,9 @@ export function ActionItemPanel() {
               key={item.id}
               type='action'
               item={item}
-              value={itemValues[item.id] || item.action}
+              value={itemValues[item.id] ?? item.action}
               onTextChange={handleTextChange}
+              onTextBlur={handleTextBlur}
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}

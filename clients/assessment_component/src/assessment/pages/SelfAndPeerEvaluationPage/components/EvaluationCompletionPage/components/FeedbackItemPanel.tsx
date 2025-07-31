@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
 import {
   Card,
@@ -11,7 +11,6 @@ import {
 import { Plus, Loader2, AlertCircle, MessageCircle } from 'lucide-react'
 
 import type {
-  FeedbackItem,
   FeedbackType,
   UpdateFeedbackItemRequest,
 } from '../../../../../interfaces/feedbackItem'
@@ -63,7 +62,6 @@ export function FeedbackItemPanel({
   const { mutate: updateFeedbackItem, isPending: isUpdatePending } = useUpdateFeedbackItem(setError)
   const { mutate: deleteFeedbackItem, isPending: isDeletePending } = useDeleteFeedbackItem(setError)
 
-  // Initialize item values when data loads
   useEffect(() => {
     const newValues: Record<string, string> = {}
     feedbackItems.forEach((item) => {
@@ -76,72 +74,39 @@ export function FeedbackItemPanel({
     }
   }, [feedbackItems, itemValues])
 
-  const addFeedbackItem = () => {
+  const addFeedbackItem = async () => {
     if (completed) return
 
-    const handleAddFeedbackItem = async () => {
-      try {
-        await createFeedbackItem(
-          {
-            feedbackType,
-            courseParticipationID,
-            authorCourseParticipationID,
-            feedbackText: '',
-          },
-          {
-            onSuccess: () => {
-              refetch()
-            },
-          },
-        )
-      } catch (err) {
-        setError('An error occurred while creating the feedback item.')
-      }
-    }
-
-    handleAddFeedbackItem()
+    return await createFeedbackItem({
+      feedbackType,
+      courseParticipationID,
+      authorCourseParticipationID,
+      feedbackText: '',
+    })
   }
-
-  const debouncedSave = useCallback(
-    (item: FeedbackItem, text: string) => {
-      const timeoutId = setTimeout(() => {
-        if (completed) return
-
-        if (text.trim() !== item.feedbackText.trim()) {
-          setSavingItemId(item.id)
-
-          const updateRequest: UpdateFeedbackItemRequest = {
-            id: item.id,
-            feedbackText: text.trim(),
-            feedbackType: item.feedbackType,
-            courseParticipationID: item.courseParticipationID,
-            authorCourseParticipationID: item.authorCourseParticipationID,
-          }
-
-          updateFeedbackItem(updateRequest, {
-            onSuccess: () => {
-              setSavingItemId(undefined)
-              refetch()
-            },
-            onError: () => {
-              setSavingItemId(undefined)
-            },
-          })
-        }
-      }, 200)
-
-      return timeoutId
-    },
-    [updateFeedbackItem, refetch, completed],
-  )
 
   const handleTextChange = (itemId: string, value: string) => {
     setItemValues((prev) => ({ ...prev, [itemId]: value }))
+  }
+
+  const handleTextBlur = (itemId: string) => {
+    if (completed) return
 
     const item = feedbackItems.find((it) => it.id === itemId)
-    if (item) {
-      const timeoutId = debouncedSave(item, value)
-      return () => clearTimeout(timeoutId)
+    const value = itemValues[itemId]
+
+    if (item && value !== undefined && value.trim() !== item.feedbackText.trim()) {
+      setSavingItemId(item.id)
+
+      const updateRequest: UpdateFeedbackItemRequest = {
+        id: item.id,
+        feedbackText: value.trim(),
+        feedbackType: item.feedbackType,
+        courseParticipationID: item.courseParticipationID,
+        authorCourseParticipationID: item.authorCourseParticipationID,
+      }
+
+      updateFeedbackItem(updateRequest)
     }
   }
 
@@ -156,15 +121,7 @@ export function FeedbackItemPanel({
     if (itemToDelete) {
       deleteFeedbackItem(itemToDelete, {
         onSuccess: () => {
-          // Remove from local state
-          setItemValues((prev) => {
-            const newValues = { ...prev }
-            delete newValues[itemToDelete]
-            return newValues
-          })
-          refetch()
           setDeleteDialogOpen(false)
-          setItemToDelete(undefined)
         },
       })
     }
@@ -225,8 +182,9 @@ export function FeedbackItemPanel({
               key={item.id}
               type='feedback'
               item={item}
-              value={itemValues[item.id] || item.feedbackText}
+              value={itemValues[item.id] ?? item.feedbackText}
               onTextChange={handleTextChange}
+              onTextBlur={handleTextBlur}
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
