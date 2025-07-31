@@ -74,10 +74,10 @@ export function FeedbackItemPanel({
     }
   }, [feedbackItems, itemValues])
 
-  const addFeedbackItem = async () => {
+  const handleAddFeedbackItem = async () => {
     if (completed) return
 
-    return await createFeedbackItem({
+    await createFeedbackItem({
       feedbackType,
       courseParticipationID,
       authorCourseParticipationID,
@@ -106,7 +106,14 @@ export function FeedbackItemPanel({
         authorCourseParticipationID: item.authorCourseParticipationID,
       }
 
-      updateFeedbackItem(updateRequest)
+      updateFeedbackItem(updateRequest, {
+        onSuccess: () => {
+          setSavingItemId(undefined)
+        },
+        onError: () => {
+          setSavingItemId(undefined)
+        },
+      })
     }
   }
 
@@ -196,7 +203,7 @@ export function FeedbackItemPanel({
           <Button
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-            onClick={addFeedbackItem}
+            onClick={handleAddFeedbackItem}
             disabled={isPending || completed}
             title={
               completed ? 'Evaluation completed - cannot add new feedback items' : addButtonText

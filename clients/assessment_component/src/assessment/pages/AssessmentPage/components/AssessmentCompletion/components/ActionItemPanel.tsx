@@ -56,10 +56,10 @@ export function ActionItemPanel() {
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
-  const addActionItem = async () => {
+  const handleAddActionItem = async () => {
     if (completed) return
 
-    return await createActionItem({
+    await createActionItem({
       coursePhaseID: phaseId ?? '',
       courseParticipationID: courseParticipationID ?? '',
       action: '',
@@ -88,7 +88,14 @@ export function ActionItemPanel() {
         author: userName,
       }
 
-      updateActionItem(updateRequest)
+      updateActionItem(updateRequest, {
+        onSuccess: () => {
+          setSavingItemId(undefined)
+        },
+        onError: () => {
+          setSavingItemId(undefined)
+        },
+      })
     }
   }
 
@@ -156,7 +163,7 @@ export function ActionItemPanel() {
           <Button
             variant='outline'
             className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-            onClick={addActionItem}
+            onClick={handleAddActionItem}
             disabled={isPending || completed}
             title={
               completed
