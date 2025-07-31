@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { AlertCircle } from 'lucide-react'
 
@@ -50,6 +50,7 @@ export const AssessmentForm = ({
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
@@ -86,14 +87,28 @@ export const AssessmentForm = ({
 
     const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        const isValid = await form.trigger('comment')
-        if (isValid) {
-          const data = form.getValues()
-          createOrUpdateAssessment(data)
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
         }
+
+        // Set a new timeout to debounce the API call
+        timeoutRef.current = setTimeout(async () => {
+          const isValid = await form.trigger('comment')
+          if (isValid) {
+            const data = form.getValues()
+            createOrUpdateAssessment(data)
+          }
+        }, 500) // 500ms debounce delay
       }
     })
-    return () => subscription.unsubscribe()
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      subscription.unsubscribe()
+    }
   }, [form, createOrUpdateAssessment, completed])
 
   const handleScoreChange = (value: ScoreLevel) => {
