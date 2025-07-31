@@ -13,6 +13,7 @@ export const useCopyCourse = (
   currentStep: DialogStep,
   onClose: () => void,
   setCurrentStep: (step: DialogStep) => void,
+  useTemplateCopy?: boolean,
 ) => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -73,6 +74,7 @@ export const useCopyCourse = (
       semesterTag: formData.semesterTag,
       startDate: formData.dateRange.from,
       endDate: formData.dateRange.to,
+      template: useTemplateCopy ?? false,
     }
     mutateCopyCourse(copyData)
   }

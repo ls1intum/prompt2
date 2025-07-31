@@ -62,6 +62,13 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to create course in DB: %w", err)
 	}
 
+	if courseVariables.Template {
+		err := qtx.MarkCourseAsTemplate(c, createdCourse.ID)
+		if err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to mark course as template: %w", err)
+		}
+	}
+
 	phaseIDMap, err := copyCoursePhases(c, qtx, sourceCourseID, createdCourse.ID)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to copy course phases: %w", err)
