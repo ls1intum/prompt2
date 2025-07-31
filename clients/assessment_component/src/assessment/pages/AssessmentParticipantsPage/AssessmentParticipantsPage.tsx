@@ -109,6 +109,8 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
   }, [assessmentCompletions])
 
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+    if (!scoreLevels) return []
+
     return [
       {
         id: 'scoreLevel',
@@ -413,18 +415,16 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         </Alert>
       )}
 
-      <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
-          participants={participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
-          extraColumns={extraColumns}
-          onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
-          customActions={customActions}
-          key={JSON.stringify(scoreLevels)}
-        />
-      </div>
+      <CoursePhaseParticipationsTablePage
+        participants={participations ?? []}
+        prevDataKeys={[]}
+        restrictedDataKeys={[]}
+        studentReadableDataKeys={[]}
+        extraColumns={extraColumns}
+        onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
+        customActions={customActions}
+        key={JSON.stringify(scoreLevels)}
+      />
     </div>
   )
 }

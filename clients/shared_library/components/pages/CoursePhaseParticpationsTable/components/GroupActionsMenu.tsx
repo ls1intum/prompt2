@@ -156,10 +156,9 @@ export const GroupActionsMenu = ({
       {customDialog.isOpen && customDialog.action && (
         <ActionDialog
           isOpen={customDialog.isOpen}
-          onClose={() => setCustomDialog({ isOpen: false, action: null, ids: [] })}
+          onClose={closeDialog}
           onConfirm={() => {
             customDialog.action?.onAction(customDialog.ids)
-            setCustomDialog({ isOpen: false, action: null, ids: [] })
             onClose()
           }}
           title={customDialog.action.confirm?.title ?? 'Confirm Action'}

@@ -5,14 +5,13 @@ import { bulkMarkAssessmentsAsComplete } from '../../../network/mutations/bulkMa
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 
 export const useBulkMarkAssessmentsAsComplete = (
-  setError?: (error: string | undefined) => void,
+  setError: (error: string | undefined) => void,
   participations?: AssessmentParticipationWithStudent[],
 ) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const { user } = useAuthStore()
 
-  // Function to replace IDs with names in error messages
   const replaceIdsWithNames = (errorMessage: string): string => {
     if (!participations) return errorMessage
 
@@ -29,15 +28,10 @@ export const useBulkMarkAssessmentsAsComplete = (
 
   return useMutation({
     mutationFn: (courseParticipationIDs: string[]) => {
-      const author = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
       return bulkMarkAssessmentsAsComplete(phaseId ?? '', {
         courseParticipationIDs,
-        author,
+        author: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
       })
-    },
-    onMutate: () => {
-      // Clear any previous errors when starting a new mutation
-      setError?.(undefined)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessmentCompletions', phaseId] })
@@ -46,9 +40,9 @@ export const useBulkMarkAssessmentsAsComplete = (
       if (error?.response?.data?.error) {
         const serverError = error.response.data?.error
         const userFriendlyError = replaceIdsWithNames(serverError)
-        setError?.(userFriendlyError)
+        setError(userFriendlyError)
       } else {
-        setError?.('An unexpected error occurred while marking assessments as final.')
+        setError('An unexpected error occurred while marking assessments as final.')
       }
     },
   })
