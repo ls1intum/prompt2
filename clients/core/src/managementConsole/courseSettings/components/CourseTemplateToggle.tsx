@@ -137,6 +137,7 @@ export const CourseTemplateToggle = ({ courseId }: CourseTemplateToggleProps) =>
         isOpen={isDialogOpen}
         onClose={handleDialogClose}
         useTemplateCopy={true}
+        createTemplate={true}
       />
     </>
   )

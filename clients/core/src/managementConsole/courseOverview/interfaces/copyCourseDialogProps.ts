@@ -3,6 +3,7 @@ export interface CourseCopyDialogProps {
   isOpen: boolean
   onClose: () => void
   useTemplateCopy?: boolean
+  createTemplate?: boolean
 }
 
 export type DialogStep = 'form' | 'warning' | 'loading'

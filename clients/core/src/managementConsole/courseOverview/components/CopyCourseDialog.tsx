@@ -13,6 +13,7 @@ export const CopyCourseDialog = ({
   isOpen,
   onClose,
   useTemplateCopy,
+  createTemplate,
 }: CourseCopyDialogProps): JSX.Element => {
   const [currentStep, setCurrentStep] = useState<DialogStep>('form')
 
@@ -68,7 +69,7 @@ export const CopyCourseDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose} aria-hidden='true'>
       <DialogContent className='max-w-md'>
-        {currentStep === 'form' && !useTemplateCopy && (
+        {currentStep === 'form' && !createTemplate && (
           <CopyCourseForm
             form={copyForm}
             courseName={copyCourse?.name}
@@ -77,7 +78,7 @@ export const CopyCourseDialog = ({
             useTemplateCopy={useTemplateCopy}
           />
         )}
-        {currentStep === 'form' && useTemplateCopy && (
+        {currentStep === 'form' && createTemplate && (
           <MakeTemplateCourseForm
             form={templateForm}
             courseName={templateCourse?.name}

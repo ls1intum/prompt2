@@ -119,6 +119,7 @@ export const TemplateSelectionDialog = ({
           isOpen={showCopyDialog}
           onClose={handleCopyDialogClose}
           useTemplateCopy={true}
+          createTemplate={false}
         />
       )}
     </>
