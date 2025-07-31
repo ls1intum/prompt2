@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { AlertCircle } from 'lucide-react'
 
@@ -50,8 +50,6 @@ export const AssessmentForm = ({
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const mountedRef = useRef(true)
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
@@ -88,50 +86,32 @@ export const AssessmentForm = ({
 
     const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        // For text fields (comment, examples), use debounce
-        if (name === 'comment' || name === 'examples') {
-          // Clear any existing timeout
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current)
-          }
-
-          // Set a new timeout to debounce the API call
-          timeoutRef.current = setTimeout(async () => {
-            // Check if component is still mounted before proceeding
-            if (!mountedRef.current) return
-
-            const isValid = await form.trigger(name)
-            if (isValid) {
-              const data = form.getValues()
-              createOrUpdateAssessment(data)
-            }
-          }, 500) // 500ms debounce delay
-        }
-        // For other fields (like scoreLevel), save immediately
-        else {
+        // Only save immediately for non-text fields (like scoreLevel)
+        if (name !== 'comment' && name !== 'examples') {
           const isValid = await form.trigger()
           if (isValid) {
             const data = form.getValues()
             createOrUpdateAssessment(data)
           }
         }
+        // Text fields will be saved on blur - no API calls while typing
       }
     })
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
       subscription.unsubscribe()
     }
   }, [form, createOrUpdateAssessment, completed])
 
-  // Cleanup mounted ref on unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false
+  const handleTextFieldBlur = async () => {
+    if (completed) return
+
+    const isValid = await form.trigger()
+    if (isValid) {
+      const data = form.getValues()
+      createOrUpdateAssessment(data)
     }
-  }, [])
+  }
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
@@ -282,6 +262,10 @@ export const AssessmentForm = ({
                     disabled={completed}
                     readOnly={completed}
                     {...field}
+                    onBlur={() => {
+                      field.onBlur()
+                      handleTextFieldBlur()
+                    }}
                   />
                 </FormControl>
                 {!completed && <FormMessage />}
@@ -308,6 +292,10 @@ export const AssessmentForm = ({
                     disabled={completed}
                     readOnly={completed}
                     {...field}
+                    onBlur={() => {
+                      field.onBlur()
+                      handleTextFieldBlur()
+                    }}
                   />
                 </FormControl>
                 {!completed && <FormMessage />}
