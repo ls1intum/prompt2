@@ -25,8 +25,9 @@ import { DeleteActionItemDialog } from './DeleteActionItemDialog'
 import { ItemRow } from '../../../../components/ItemRow'
 
 export function ActionItemPanel() {
-  const { phaseId } = useParams<{
+  const { phaseId, courseParticipationID } = useParams<{
     phaseId: string
+    courseParticipationID: string
   }>()
   const [error, setError] = useState<string | undefined>(undefined)
   const [savingItemId, setSavingItemId] = useState<string | undefined>(undefined)
@@ -34,7 +35,7 @@ export function ActionItemPanel() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
-  const { courseParticipationID, assessmentCompletion } = useStudentAssessmentStore()
+  const { assessmentCompletion } = useStudentAssessmentStore()
 
   const completed = assessmentCompletion?.completed ?? false
 
