@@ -87,19 +87,30 @@ export const AssessmentForm = ({
 
     const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        // Clear any existing timeout
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current)
-        }
+        // For text fields (comment, examples), use debounce
+        if (name === 'comment' || name === 'examples') {
+          // Clear any existing timeout
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+          }
 
-        // Set a new timeout to debounce the API call
-        timeoutRef.current = setTimeout(async () => {
+          // Set a new timeout to debounce the API call
+          timeoutRef.current = setTimeout(async () => {
+            const isValid = await form.trigger('comment')
+            if (isValid) {
+              const data = form.getValues()
+              createOrUpdateAssessment(data)
+            }
+          }, 500) // 500ms debounce delay
+        }
+        // For other fields (like scoreLevel), save immediately
+        else {
           const isValid = await form.trigger('comment')
           if (isValid) {
             const data = form.getValues()
             createOrUpdateAssessment(data)
           }
-        }, 500) // 500ms debounce delay
+        }
       }
     })
 
