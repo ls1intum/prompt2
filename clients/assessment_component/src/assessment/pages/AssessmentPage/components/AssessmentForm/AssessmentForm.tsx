@@ -51,6 +51,7 @@ export const AssessmentForm = ({
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const mountedRef = useRef(true)
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
@@ -96,7 +97,10 @@ export const AssessmentForm = ({
 
           // Set a new timeout to debounce the API call
           timeoutRef.current = setTimeout(async () => {
-            const isValid = await form.trigger('comment')
+            // Check if component is still mounted before proceeding
+            if (!mountedRef.current) return
+            
+            const isValid = await form.trigger(name)
             if (isValid) {
               const data = form.getValues()
               createOrUpdateAssessment(data)
@@ -105,7 +109,7 @@ export const AssessmentForm = ({
         }
         // For other fields (like scoreLevel), save immediately
         else {
-          const isValid = await form.trigger('comment')
+          const isValid = await form.trigger()
           if (isValid) {
             const data = form.getValues()
             createOrUpdateAssessment(data)
@@ -121,6 +125,13 @@ export const AssessmentForm = ({
       subscription.unsubscribe()
     }
   }, [form, createOrUpdateAssessment, completed])
+
+  // Cleanup mounted ref on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
