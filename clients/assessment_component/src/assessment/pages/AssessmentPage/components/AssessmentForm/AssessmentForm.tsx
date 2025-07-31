@@ -99,7 +99,7 @@ export const AssessmentForm = ({
           timeoutRef.current = setTimeout(async () => {
             // Check if component is still mounted before proceeding
             if (!mountedRef.current) return
-            
+
             const isValid = await form.trigger(name)
             if (isValid) {
               const data = form.getValues()
