@@ -72,8 +72,8 @@ export const useCopyCourse = (
     const copyData: CopyCourse = {
       name: formData.name,
       semesterTag: formData.semesterTag,
-      startDate: formData.dateRange.from,
-      endDate: formData.dateRange.to,
+      startDate: formData.dateRange?.from ?? new Date(),
+      endDate: formData.dateRange?.to ?? new Date(),
       template: useTemplateCopy ?? false,
     }
     mutateCopyCourse(copyData)

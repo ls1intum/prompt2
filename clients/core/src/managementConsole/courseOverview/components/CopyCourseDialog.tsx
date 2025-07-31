@@ -5,6 +5,8 @@ import { useCourseForm } from '../../../network/hooks/useCourseForm'
 import { CopyCourseForm } from './CopyCourseForm'
 import { WarningStep } from './WarningStep'
 import type { CourseCopyDialogProps, DialogStep } from '../interfaces/copyCourseDialogProps'
+import { MakeTemplateCourseForm } from './MakeTemplateCourseForm'
+import { useTemplateForm } from '../../../network/hooks/useTemplateForm'
 
 export const CopyCourseDialog = ({
   courseId,
@@ -25,14 +27,26 @@ export const CopyCourseDialog = ({
     queryClient,
   } = copyHook
 
-  const { form, formData, course, onFormSubmit, resetForm } = useCourseForm(
-    courseId,
-    setCurrentStep,
-  )
+  const {
+    form: copyForm,
+    formData: copyFormData,
+    course: copyCourse,
+    onFormSubmit: onCopyFormSubmit,
+    resetForm: resetCopyForm,
+  } = useCourseForm(courseId, setCurrentStep)
+
+  const {
+    form: templateForm,
+    formData: templateFormData,
+    course: templateCourse,
+    onFormSubmit: onTemplateFormSubmit,
+    resetForm: resetTemplateForm,
+  } = useTemplateForm(courseId, setCurrentStep)
 
   const handleClose = () => {
     setCurrentStep('form')
-    resetForm()
+    resetCopyForm()
+    resetTemplateForm()
     onClose()
   }
 
@@ -41,18 +55,34 @@ export const CopyCourseDialog = ({
   }
 
   const handleProceed = () => {
-    if (!formData) return
-    handleProceedWithCopy(formData)
+    if (!copyFormData || !templateFormData) return
+    if (useTemplateCopy) {
+      // Ensure dateRange is included for templateFormData
+      const { name, semesterTag } = templateFormData
+      const dateRange = copyFormData.dateRange
+      handleProceedWithCopy({ name, semesterTag, dateRange })
+    } else {
+      handleProceedWithCopy(copyFormData)
+    }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose} aria-hidden='true'>
       <DialogContent className='max-w-md'>
-        {currentStep === 'form' && (
+        {currentStep === 'form' && !useTemplateCopy && (
           <CopyCourseForm
-            form={form}
-            courseName={course?.name}
-            onSubmit={onFormSubmit}
+            form={copyForm}
+            courseName={copyCourse?.name}
+            onSubmit={onCopyFormSubmit}
+            onClose={handleClose}
+            useTemplateCopy={useTemplateCopy}
+          />
+        )}
+        {currentStep === 'form' && useTemplateCopy && (
+          <MakeTemplateCourseForm
+            form={templateForm}
+            courseName={templateCourse?.name}
+            onSubmit={onTemplateFormSubmit}
             onClose={handleClose}
             useTemplateCopy={useTemplateCopy}
           />

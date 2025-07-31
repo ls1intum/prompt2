@@ -9,29 +9,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
   Input,
   Button,
-  DatePickerWithRange,
 } from '@tumaet/prompt-ui-components'
 import type { UseFormReturn } from 'react-hook-form'
-import type { CopyCourseFormValues } from '@core/validations/copyCourse'
+import type { MakeTemplateCourseFormValues } from '@core/validations/makeTemplateCourse'
 
-interface CopyCourseFormProps {
-  form: UseFormReturn<CopyCourseFormValues>
+interface MakeTemplateCourseFormProps {
+  form: UseFormReturn<MakeTemplateCourseFormValues>
   courseName?: string
-  onSubmit: (data: CopyCourseFormValues) => void
+  onSubmit: (data: MakeTemplateCourseFormValues) => void
   onClose: () => void
   useTemplateCopy?: boolean
 }
 
-export const CopyCourseForm = ({
+export const MakeTemplateCourseForm = ({
   form,
   courseName,
   onSubmit,
   onClose,
   useTemplateCopy,
-}: CopyCourseFormProps): JSX.Element => {
+}: MakeTemplateCourseFormProps): JSX.Element => {
   return (
     <>
       <DialogHeader>
@@ -72,28 +70,6 @@ export const CopyCourseForm = ({
               </FormItem>
             )}
           />
-          {!useTemplateCopy && (
-            <FormField
-              control={form.control}
-              name='dateRange'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Course Duration</FormLabel>
-                  <DatePickerWithRange
-                    date={
-                      field.value && ('from' in field.value || 'to' in field.value)
-                        ? { from: field.value.from ?? undefined, to: field.value.to ?? undefined }
-                        : undefined
-                    }
-                    setDate={field.onChange}
-                    className='w-full'
-                  />
-                  <FormDescription>Select the start and end dates for your course.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
           <DialogFooter>
             <Button type='button' variant='outline' onClick={onClose}>
               Cancel
