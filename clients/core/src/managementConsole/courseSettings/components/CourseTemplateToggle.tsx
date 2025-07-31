@@ -113,7 +113,7 @@ export const CourseTemplateToggle = ({ courseId }: CourseTemplateToggleProps) =>
           <div>
             <Button
               onClick={handleDialogOpen}
-              disabled={isUpdating}
+              disabled={isUpdating || isTemplate}
               className={`
               w-full
               ${isUpdating ? 'opacity-70 cursor-not-allowed' : ''}
@@ -125,9 +125,7 @@ export const CourseTemplateToggle = ({ courseId }: CourseTemplateToggleProps) =>
                   <span>Updating...</span>
                 </>
               ) : (
-                <span>
-                  {isTemplate ? 'Remove from Templates' : 'Make a Template out of this Course'}
-                </span>
+                <span> Make a Template out of this Course</span>
               )}
             </Button>
           </div>
