@@ -82,7 +82,9 @@ export const CourseCards = (): JSX.Element => {
                     <div>
                       <p className='text-sm font-medium text-gray-500'>Duration</p>
                       <p className='text-base font-semibold'>
-                        {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
+                        {course.startDate && course.endDate
+                          ? `${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`
+                          : 'N/A'}
                       </p>
                     </div>
                   </div>

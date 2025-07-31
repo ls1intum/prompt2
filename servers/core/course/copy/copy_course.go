@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/ls1intum/prompt2/servers/core/course/copy/courseCopyDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
@@ -33,15 +34,29 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to convert student readable data: %w", err)
 	}
 
-	newCourse := courseDTO.CreateCourse{
-		Name:                courseVariables.Name,
-		StartDate:           courseVariables.StartDate,
-		EndDate:             courseVariables.EndDate,
-		SemesterTag:         courseVariables.SemesterTag,
-		RestrictedData:      restrictedData,
-		StudentReadableData: studentReadableData,
-		CourseType:          sourceCourse.CourseType,
-		Ects:                sourceCourse.Ects,
+	var newCourse courseDTO.CreateCourse
+	if courseVariables.Template {
+		newCourse = courseDTO.CreateCourse{
+			Name:                courseVariables.Name,
+			StartDate:           pgtype.Date{Valid: false},
+			EndDate:             pgtype.Date{Valid: false},
+			SemesterTag:         courseVariables.SemesterTag,
+			RestrictedData:      restrictedData,
+			StudentReadableData: studentReadableData,
+			CourseType:          sourceCourse.CourseType,
+			Ects:                sourceCourse.Ects,
+		}
+	} else {
+		newCourse = courseDTO.CreateCourse{
+			Name:                courseVariables.Name,
+			StartDate:           courseVariables.StartDate,
+			EndDate:             courseVariables.EndDate,
+			SemesterTag:         courseVariables.SemesterTag,
+			RestrictedData:      restrictedData,
+			StudentReadableData: studentReadableData,
+			CourseType:          sourceCourse.CourseType,
+			Ects:                sourceCourse.Ects,
+		}
 	}
 
 	tx, err := CourseCopyServiceSingleton.conn.Begin(c)
