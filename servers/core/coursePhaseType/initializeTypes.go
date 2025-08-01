@@ -254,7 +254,7 @@ func initAssessment() error {
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/assessment/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
-			baseURL = "http://localhost:8084/assessment/api"
+			baseURL = "http://localhost:8085/assessment/api"
 		}
 
 		// create the phase
@@ -402,7 +402,7 @@ func initSelfTeamAllocation() error {
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/self-team-allocation/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
-			baseURL = "http://localhost:8085/self-team-allocation/api"
+			baseURL = "http://localhost:8084/self-team-allocation/api"
 		}
 
 		newTeamAllocation := db.CreateCoursePhaseTypeParams{
