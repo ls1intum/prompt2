@@ -32,6 +32,7 @@ user_course_roles AS (
         c.student_readable_data,
         c.restricted_data,
         c.ects,
+        c.template,
         pr.user_role
     FROM
         course c
@@ -54,7 +55,8 @@ SELECT
         WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
         ELSE ucr.restricted_data::jsonb
     END AS restricted_data,
-    ucr.student_readable_data
+    ucr.student_readable_data,
+    ucr.template
 FROM
     user_course_roles ucr
 GROUP BY
@@ -66,7 +68,8 @@ GROUP BY
     ucr.course_type,
     ucr.student_readable_data,
     ucr.ects,
-    ucr.restricted_data
+    ucr.restricted_data,
+    ucr.template
 ORDER BY
     ucr.semester_tag, ucr.name DESC;
 

@@ -101,7 +101,7 @@ export const ApplicationMailingSettings = () => {
           title: 'Course Sender Information',
           description:
             'The course has not yet any set `Reply To Email Address` set. Please make sure to configure this in the course settings.',
-          link: `/management/course/${courseId}/mailing`,
+          link: `/management/course/${courseId}/settings`,
           icon: MailWarningIcon,
         },
       ])
