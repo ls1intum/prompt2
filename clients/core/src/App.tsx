@@ -18,7 +18,6 @@ import { PermissionRestriction } from './managementConsole/shared/components/Per
 import { Role } from '@tumaet/prompt-shared-state'
 import { env } from '@/env'
 import { parseURL } from './utils/parseURL'
-import { MailingConfigPage } from './managementConsole/mailingConfig/MailingConfigPage'
 import { CourseSettingsPage } from './managementConsole/courseSettings/CourseSettingsPage'
 
 const queryClient = new QueryClient({
@@ -71,13 +70,13 @@ export const App = (): JSX.Element => {
               }
             />
             <Route
-              path='/management/course/:courseId/mailing'
+              path='/management/course/:courseId/settings'
               element={
                 <ManagementRoot>
                   <PermissionRestriction
                     requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
                   >
-                    <MailingConfigPage />
+                    <CourseSettingsPage />
                   </PermissionRestriction>
                 </ManagementRoot>
               }

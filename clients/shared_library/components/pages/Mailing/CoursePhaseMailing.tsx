@@ -103,7 +103,7 @@ export const CoursePhaseMailing = ({ coursePhase }: CoursePhaseMailingProps) => 
         {
           title: 'Application Mailing',
           description: 'Please configure course mailing settings',
-          link: `/management/course/${courseId}/mailing`,
+          link: `/management/course/${courseId}/settings`,
           icon: MailWarningIcon,
         },
       ])
