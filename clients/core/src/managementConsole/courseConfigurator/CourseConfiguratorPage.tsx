@@ -11,7 +11,7 @@ export default function CourseConfiguratorPage() {
     <>
       <div>
         <div className='flex items-center justify-between mb-4'>
-          <ManagementPageHeader>Phase Configurator</ManagementPageHeader>
+          <ManagementPageHeader>Course Configurator</ManagementPageHeader>
           <HelpDialog />
         </div>
       </div>
