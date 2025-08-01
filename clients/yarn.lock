@@ -10296,14 +10296,14 @@ __metadata:
   linkType: hard
 
 "memfs@npm:^4.6.0":
-  version: 4.28.1
-  resolution: "memfs@npm:4.28.1"
+  version: 4.29.0
+  resolution: "memfs@npm:4.29.0"
   dependencies:
     "@jsonjoy.com/json-pack": "npm:^1.0.3"
     "@jsonjoy.com/util": "npm:^1.3.0"
     tree-dump: "npm:^1.0.1"
     tslib: "npm:^2.0.0"
-  checksum: 10c0/6fafc43341a10ce9ec4a0179b0ddbcefc43f5dbe4bc66aa8b17f913d71e6d436a4cf1ab070b0c60867d002532a5e88490961dba862da8a5419ba319979fd676c
+  checksum: 10c0/49ac1e294c461656e6e3de2a91859f8361934b8d60f66e7ecb971839c0492c8fed05416da843b60c2877d65ba315cff220a92887d16cbd0e9d2de31f871434c0
   languageName: node
   linkType: hard
 
