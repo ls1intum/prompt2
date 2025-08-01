@@ -2,11 +2,15 @@ package mailing
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/tls"
 	"errors"
 	"fmt"
+	"net"
 	"net/mail"
 	"net/smtp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,12 +20,14 @@ import (
 )
 
 type MailingService struct {
-	smtpHost    string
-	smtpPort    string
-	senderEmail mail.Address
-	clientURL   string
-	queries     db.Queries
-	conn        *pgxpool.Pool
+	smtpHost     string
+	smtpPort     string
+	smtpUsername string
+	smtpPassword string
+	senderEmail  mail.Address
+	clientURL    string
+	queries      db.Queries
+	conn         *pgxpool.Pool
 }
 
 var MailingServiceSingleton *MailingService
@@ -29,10 +35,10 @@ var MailingServiceSingleton *MailingService
 func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (bool, error) {
 	isApplicationPhase, err := MailingServiceSingleton.queries.CheckIfCoursePhaseIsApplicationPhase(ctx, coursePhaseID)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to verify if course phase %s is an application phase: %v", coursePhaseID, err)
 	}
 	if !isApplicationPhase {
-		return false, errors.New("course phase is not an application phase")
+		return false, fmt.Errorf("course phase %s is not an application phase, cannot send confirmation mail", coursePhaseID)
 	}
 
 	mailingInfo, err := MailingServiceSingleton.queries.GetConfirmationMailingInformation(ctx, db.GetConfirmationMailingInformationParams{
@@ -42,7 +48,7 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	if err != nil {
 		log.Error("failed to get mailing information: ", err)
-		return false, errors.New("failed to send mail")
+		return false, fmt.Errorf("failed to retrieve confirmation mailing information for course participation %s in phase %s: %v", courseParticipationID, coursePhaseID, err)
 	}
 
 	if !mailingInfo.SendConfirmationMail {
@@ -52,13 +58,13 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	if mailingInfo.ConfirmationMailContent == "" {
 		log.Error("mailing template is not correctly configured")
-		return false, nil
+		return false, fmt.Errorf("confirmation mail template is empty for course phase %s", coursePhaseID)
 	}
 
 	courseMailingSettings, err := getSenderInformation(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("failed to get sender information")
-		return false, err
+		return false, fmt.Errorf("failed to get sender information for course phase %s: %v", coursePhaseID, err)
 	}
 
 	log.Info("Sending confirmation mail to ", mailingInfo.Email.String)
@@ -72,8 +78,8 @@ func SendApplicationConfirmationMail(ctx context.Context, coursePhaseID, courseP
 
 	err = SendMail(courseMailingSettings, mailingInfo.Email.String, finalSubject, finalMessage)
 	if err != nil {
-		log.Error("failed to send mail: ", err)
-		return false, errors.New("failed to send mail")
+		log.Error("failed to send confirmation mail: ", err)
+		return false, fmt.Errorf("failed to send confirmation mail to %s: %v", mailingInfo.Email.String, err)
 	}
 
 	return true, nil
@@ -88,7 +94,7 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 		infos, err := MailingServiceSingleton.queries.GetPassedMailingInformation(ctx, coursePhaseID)
 		if err != nil {
 			log.Error("failed to get mailing information: ", err)
-			return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+			return mailingDTO.MailingReport{}, fmt.Errorf("failed to retrieve passed status mailing information for course phase %s: %v", coursePhaseID, err)
 		}
 		mailingInfo = mailingDTO.GetMailingInfoFromPassedMailingInformation(infos)
 
@@ -96,13 +102,13 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 		infos, err := MailingServiceSingleton.queries.GetFailedMailingInformation(ctx, coursePhaseID)
 		if err != nil {
 			log.Error("failed to get mailing information: ", err)
-			return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+			return mailingDTO.MailingReport{}, fmt.Errorf("failed to retrieve failed status mailing information for course phase %s: %v", coursePhaseID, err)
 		}
 		mailingInfo = mailingDTO.GetMailingInfoFromFailedMailingInformation(infos)
 
 	} else {
 		log.Error("invalid status")
-		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+		return mailingDTO.MailingReport{}, fmt.Errorf("invalid pass status '%s': expected 'passed' or 'failed'", status)
 
 	}
 
@@ -110,13 +116,13 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 	courseMailingSettings, err := getSenderInformation(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("failed to get sender information")
-		return mailingDTO.MailingReport{}, err
+		return mailingDTO.MailingReport{}, fmt.Errorf("failed to get course mailing settings: %v", err)
 	}
 
 	// 2.) Check if mailing is configured -> return if not
 	if mailingInfo.MailSubject == "" || mailingInfo.MailContent == "" {
 		log.Error("mailing template is not correctly configured")
-		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+		return mailingDTO.MailingReport{}, fmt.Errorf("mailing template incomplete: subject ('%s') or content ('%s') is empty", mailingInfo.MailSubject, mailingInfo.MailContent)
 	}
 
 	// 3.) Get all participants that have not been accepted incl. information
@@ -126,7 +132,7 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 	})
 	if err != nil {
 		log.Error("failed to get participant mailing information: ", err)
-		return mailingDTO.MailingReport{}, errors.New("failed to send mail")
+		return mailingDTO.MailingReport{}, fmt.Errorf("failed to retrieve participant information for course phase %s with status %s: %v", coursePhaseID, status, err)
 	}
 
 	// 4.) Send mail to all participants
@@ -140,9 +146,10 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 
 		err = SendMail(courseMailingSettings, participant.Email.String, finalSubject, finalMessage)
 		if err != nil {
-			log.Error("failed to send mail: ", err)
+			log.Error("failed to send status mail to participant: ", err)
 			response.FailedEmails = append(response.FailedEmails, participant.Email.String)
 		} else {
+			log.Debug("Successfully sent status mail to: ", participant.Email.String)
 			response.SuccessfulEmails = append(response.SuccessfulEmails, participant.Email.String)
 		}
 	}
@@ -152,12 +159,31 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 
 // SendMail sends an email with the specified HTML body, recipient, and subject.
 func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientAddress, subject, htmlBody string) error {
-	if MailingServiceSingleton.senderEmail.Address == "" ||
-		recipientAddress == "" ||
-		subject == "" ||
-		htmlBody == "" {
-		return fmt.Errorf("mailing is not correctly configured")
+	log.Debug("Starting mail validation")
+	log.Debug("Sender email address: ", MailingServiceSingleton.senderEmail.Address)
+	log.Debug("Sender username: ", MailingServiceSingleton.smtpUsername)
+	log.Debug("Recipient address: ", recipientAddress)
+	log.Debug("Subject: ", subject)
+	log.Debug("HTML body length: ", len(htmlBody))
+
+	if MailingServiceSingleton.senderEmail.Address == "" {
+		log.Debug("Validation failed: sender email address is empty")
+		return errors.New("mailing is not correctly configured: sender email address is empty")
 	}
+	if recipientAddress == "" {
+		log.Debug("Validation failed: recipient address is empty")
+		return errors.New("mailing is not correctly configured: recipient address is empty")
+	}
+	if subject == "" {
+		log.Debug("Validation failed: subject is empty")
+		return errors.New("mailing is not correctly configured: subject is empty")
+	}
+	if htmlBody == "" {
+		log.Debug("Validation failed: HTML body is empty")
+		return errors.New("mailing is not correctly configured: HTML body is empty")
+	}
+
+	log.Debug("Mail validation passed successfully")
 
 	to := mail.Address{Address: recipientAddress}
 
@@ -166,58 +192,109 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 	message.WriteString(htmlBody)
 
 	// Send the email
-	addr := fmt.Sprintf("%s:%s", MailingServiceSingleton.smtpHost, MailingServiceSingleton.smtpPort)
-	client, err := smtp.Dial(addr)
+	addr := net.JoinHostPort(MailingServiceSingleton.smtpHost, MailingServiceSingleton.smtpPort)
+	log.Debug("Connecting to SMTP server: ", addr)
+
+	// Create connection with timeout (30 seconds)
+	conn, err := net.DialTimeout("tcp", addr, 10*time.Second)
 	if err != nil {
 		log.Error("failed to connect to SMTP server: ", err.Error())
-		return errors.New("failed to send mail")
+		return fmt.Errorf("failed to connect to SMTP server %s: %v", addr, err)
+	}
+
+	// Set deadline for the entire SMTP operation
+	if err := conn.SetDeadline(time.Now().Add(15 * time.Second)); err != nil {
+		conn.Close()
+		log.Error("failed to set connection deadline: ", err)
+		return fmt.Errorf("failed to set SMTP connection timeout: %v", err)
+	}
+
+	client, err := smtp.NewClient(conn, MailingServiceSingleton.smtpHost)
+	if err != nil {
+		conn.Close()
+		log.Error("failed to create SMTP client: ", err.Error())
+		return fmt.Errorf("failed to create SMTP client for %s: %v", MailingServiceSingleton.smtpHost, err)
 	}
 	defer client.Close()
 
+	// Enable STARTTLS if the server supports it (required for port 587)
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		log.Debug("STARTTLS is supported, enabling TLS")
+		config := &tls.Config{
+			ServerName: MailingServiceSingleton.smtpHost,
+			MinVersion: tls.VersionTLS12,
+		}
+		if err = client.StartTLS(config); err != nil {
+			log.Error("failed to start TLS: ", err)
+			return fmt.Errorf("failed to establish TLS connection with %s: %v", MailingServiceSingleton.smtpHost, err)
+		}
+		log.Debug("TLS connection established")
+	} else {
+		log.Debug("STARTTLS not supported by server")
+	}
+
+	// Use SMTP authentication if username and password are provided
+	if MailingServiceSingleton.smtpUsername != "" && MailingServiceSingleton.smtpPassword != "" {
+		log.Debug("Authenticating with SMTP server")
+		auth := smtp.PlainAuth("", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpPassword, MailingServiceSingleton.smtpHost)
+		if err := client.Auth(auth); err != nil {
+			log.Error("failed to authenticate with SMTP server: ", err)
+			return fmt.Errorf("SMTP authentication failed for user '%s' on server %s: %v", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpHost, err)
+		}
+		log.Debug("SMTP authentication successful")
+	} else {
+		log.Debug("No SMTP authentication configured")
+	}
+
 	// Set the sender and recipient
+	log.Debug("Setting sender and recipients")
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {
 		log.Error("failed to set sender: ", err)
-		return errors.New("failed to send mail")
+		return fmt.Errorf("SMTP server rejected sender address '%s': %v", MailingServiceSingleton.senderEmail.Address, err)
 	}
 
 	if err := client.Rcpt(recipientAddress); err != nil {
 		log.Error("failed to set recipient: ", err)
-		return errors.New("failed to send mail")
+		return fmt.Errorf("SMTP server rejected recipient address '%s': %v", recipientAddress, err)
 	}
 
 	// set all cc mails
 	for _, cc := range courseMailingSettings.CC {
+		log.Debug("Adding CC recipient: ", cc.Address)
 		if err := client.Rcpt(cc.Address); err != nil {
 			log.Error("failed to set cc: ", err)
-			return errors.New("failed to send mail")
+			return fmt.Errorf("SMTP server rejected CC address '%s': %v", cc.Address, err)
 		}
 	}
 
 	// set all bcc mails
 	for _, bcc := range courseMailingSettings.BCC {
+		log.Debug("Adding BCC recipient: ", bcc.Address)
 		if err := client.Rcpt(bcc.Address); err != nil {
 			log.Error("failed to set bcc: ", err)
-			return errors.New("failed to send mail")
+			return fmt.Errorf("SMTP server rejected BCC address '%s': %v", bcc.Address, err)
 		}
 	}
 
 	// Send the data
+	log.Debug("Sending email data")
 	writer, err := client.Data()
 	if err != nil {
 		log.Error("failed to send data: ", err)
-		return errors.New("failed to send mail")
+		return fmt.Errorf("SMTP server failed to accept email data: %v", err)
 	}
 	_, err = writer.Write([]byte(message.String()))
 	if err != nil {
 		log.Error("failed to write message: ", err)
-		return errors.New("failed to send mail")
+		return fmt.Errorf("failed to write email content to SMTP server: %v", err)
 	}
 
 	if err := writer.Close(); err != nil {
 		log.Error("failed to close writer: ", err)
-		return errors.New("failed to send mail")
+		return fmt.Errorf("failed to finalize email transmission: %v", err)
 	}
 
+	log.Debug("Email sent successfully")
 	return client.Quit()
 }
 
@@ -225,30 +302,54 @@ func getSenderInformation(ctx context.Context, coursePhaseID uuid.UUID) (mailing
 	courseMailing, err := MailingServiceSingleton.queries.GetCourseMailingSettingsForCoursePhaseID(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("failed to get course mailing settings: ", err)
-		return mailingDTO.CourseMailingSettings{}, errors.New("failed to get course mailing infos")
+		return mailingDTO.CourseMailingSettings{}, fmt.Errorf("failed to retrieve course mailing settings for course phase %s: %v", coursePhaseID, err)
 	}
 
 	if courseMailing.ReplyToEmail == "" || courseMailing.ReplyToName == "" {
 		log.Error("reply to email or name is not set")
-		return mailingDTO.CourseMailingSettings{}, errors.New("reply to email or name is not set")
+		return mailingDTO.CourseMailingSettings{}, fmt.Errorf("course mailing configuration incomplete: reply-to email ('%s') or name ('%s') is empty", courseMailing.ReplyToEmail, courseMailing.ReplyToName)
 	}
 
 	courseMailingSettings, err := mailingDTO.GetCourseMailingSettingsFromDBModel(courseMailing)
 	if err != nil {
 		log.Error("failed to get course mailing settings: ", err)
-		return mailingDTO.CourseMailingSettings{}, errors.New("failed to get course mailing infos")
+		return mailingDTO.CourseMailingSettings{}, fmt.Errorf("failed to parse course mailing settings from database: %v", err)
 	}
 
 	return courseMailingSettings, nil
 
 }
 
+// generateMessageID creates a unique Message-ID header value
+func generateMessageID() string {
+	// Create a unique identifier using timestamp and random bytes
+	timestamp := time.Now().Unix()
+
+	// Generate 8 random bytes for uniqueness
+	randomBytes := make([]byte, 8)
+	if _, err := rand.Read(randomBytes); err != nil {
+		// Fallback to UUID if random bytes fail
+		return fmt.Sprintf("<%d.%s@prompt2.local>", timestamp, uuid.New().String())
+	}
+
+	// Convert random bytes to hex string
+	randomHex := fmt.Sprintf("%x", randomBytes)
+	return fmt.Sprintf("<%d.%s@prompt2.local>", timestamp, randomHex)
+}
+
 func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.CourseMailingSettings, recipient, subject string) {
-	// using this instead of map to geth a nicely formatted Mailing Header
+	// using this instead of map to get a nicely formatted Mailing Header
 	message.WriteString(fmt.Sprintf("From: %s\r\n", MailingServiceSingleton.senderEmail.String()))
 	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
 	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+
+	// Add Date header in RFC 2822 format
+	message.WriteString(fmt.Sprintf("Date: %s\r\n", time.Now().Format(time.RFC1123Z)))
+
+	// Add unique Message-ID header
+	message.WriteString(fmt.Sprintf("Message-ID: %s\r\n", generateMessageID()))
+
 	message.WriteString("MIME-Version: 1.0\r\n") // Improve Spam Score by setting explicit MIME-Version
 	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
 

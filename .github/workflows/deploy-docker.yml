@@ -52,6 +52,10 @@ on:
     secrets:
       VM_SSH_PRIVATE_KEY:
         required: true
+      SMTP_USERNAME:
+        required: true
+      SMTP_PASSWORD:
+        required: true
 
 jobs:
   deploy:
@@ -196,6 +200,8 @@ jobs:
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
             echo "SMTP_HOST=${{ vars.SMTP_HOST }}" >> .env.prod
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
+            echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env.prod
+            echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
 
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 

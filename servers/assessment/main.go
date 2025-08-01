@@ -96,7 +96,7 @@ func main() {
 	assessments.InitAssessmentModule(api, *query, conn)
 	evaluations.InitEvaluationModule(api, *query, conn)
 
-	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
+	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8085")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

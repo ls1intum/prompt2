@@ -82,6 +82,18 @@ export const App = (): JSX.Element => {
               }
             />
             <Route
+              path='/management/course/:courseId/settings'
+              element={
+                <ManagementRoot>
+                  <PermissionRestriction
+                    requiredPermissions={[Role.PROMPT_ADMIN, Role.COURSE_LECTURER]}
+                  >
+                    <CourseSettingsPage />
+                  </PermissionRestriction>
+                </ManagementRoot>
+              }
+            />
+            <Route
               path='/management/course/:courseId/:phaseId/*'
               element={
                 <ManagementRoot>

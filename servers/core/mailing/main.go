@@ -10,14 +10,16 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 )
 
-func InitMailingModule(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, smtpHost, smtpPort, senderName, senderEmail, clientURL string) {
+func InitMailingModule(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, smtpHost, smtpPort, smtpUsername, smtpPassword, senderName, senderEmail, clientURL string) {
 	MailingServiceSingleton = &MailingService{
-		smtpHost:    smtpHost,
-		smtpPort:    smtpPort,
-		senderEmail: mail.Address{Name: senderName, Address: senderEmail},
-		clientURL:   clientURL,
-		queries:     queries,
-		conn:        conn,
+		smtpHost:     smtpHost,
+		smtpPort:     smtpPort,
+		smtpUsername: smtpUsername,
+		smtpPassword: smtpPassword,
+		senderEmail:  mail.Address{Name: senderName, Address: senderEmail},
+		clientURL:    clientURL,
+		queries:      queries,
+		conn:         conn,
 	}
 
 	setupMailingRouter(router, keycloakTokenVerifier.KeycloakMiddleware, checkAccessControlByIDWrapper)
