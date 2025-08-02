@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { ScoreLevel, mapScoreLevelToNumber } from '../../../interfaces/scoreLevel'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
@@ -52,7 +52,7 @@ export const AuthorDiagram = ({
         .map((name) => name[0])
         .join(''),
       author,
-      participations.scores,
+      participations.scores.map((s) => mapScoreLevelToNumber(s)),
       participations.scoreLevels,
     ),
   )

@@ -1,17 +1,15 @@
-import { ScoreLevel, mapScoreLevelToNumber } from '../../../../../interfaces/scoreLevel'
+import { ScoreLevel, mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 import { ScoreDistributionDataPoint } from '../interfaces/ScoreDistributionDataPoint'
 
 export const createScoreDistributionDataPoint = (
   shortLabel: string,
   label: string,
-  scores: ScoreLevel[],
+  scores: number[],
   scoreLevels: ScoreLevel[],
 ): ScoreDistributionDataPoint => {
   const sortedScores = [...scores].sort((a, b) => {
-    const scoreA = mapScoreLevelToNumber(a)
-    const scoreB = mapScoreLevelToNumber(b)
-    return scoreA - scoreB
+    return a - b
   })
 
   if (scoreLevels.length === 0) {
@@ -33,18 +31,17 @@ export const createScoreDistributionDataPoint = (
   }
 
   const average =
-    sortedScores.reduce((sum, scoreLevel) => {
-      const score = mapScoreLevelToNumber(scoreLevel)
+    sortedScores.reduce((sum, score) => {
       return sum + score
     }, 0) / sortedScores.length
 
-  const computeQuartile = (sortedSco: ScoreLevel[], quartile: number): number => {
+  const computeQuartile = (sortedSco: number[], quartile: number): number => {
     const pos = (sortedSco.length - 1) * quartile
     const base = Math.floor(pos)
     const rest = pos - base
 
-    const scoreBase = mapScoreLevelToNumber(sortedSco[base])
-    const scoreNext = sortedSco[base + 1] ? mapScoreLevelToNumber(sortedSco[base + 1]) : scoreBase
+    const scoreBase = sortedSco[base]
+    const scoreNext = sortedSco[base + 1] ? sortedSco[base + 1] : scoreBase
 
     return scoreBase + rest * (scoreNext - scoreBase)
   }
@@ -54,7 +51,7 @@ export const createScoreDistributionDataPoint = (
     label,
     average: average,
     lowerQuartile: computeQuartile(sortedScores, 0.25),
-    median: sortedScores[Math.floor(sortedScores.length / 2)],
+    median: mapNumberToScoreLevel(sortedScores[Math.floor(sortedScores.length / 2)]),
     upperQuartile: computeQuartile(sortedScores, 0.75),
     counts: scoreLevels.reduce(
       (counts, scoreLevel) => {

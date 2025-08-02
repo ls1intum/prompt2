@@ -10,11 +10,11 @@ import { getCountryName } from '@/lib/getCountries'
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 
 import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
+import { groupBy } from './utils/groupBy'
 
 interface NationalityDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
@@ -23,36 +23,30 @@ interface NationalityDiagramProps {
 export const NationalityDiagram = ({
   participationsWithAssessment,
 }: NationalityDiagramProps): JSX.Element => {
-  const nationalityMap = new Map<string, { scores: ScoreLevel[]; scoreLevels: ScoreLevel[] }>()
-  participationsWithAssessment.forEach((p) => {
-    const nationality = p.participation.student.nationality || 'Unknown'
-
-    if (p.scoreLevel !== undefined) {
-      if (!nationalityMap.has(nationality)) {
-        nationalityMap.set(nationality, { scores: [], scoreLevels: [] })
-      }
-      nationalityMap.get(nationality)?.scores.push(...p.assessments.map((a) => a.scoreLevel))
-      nationalityMap.get(nationality)?.scoreLevels.push(p.scoreLevel)
-    }
-  })
-
-  const data = Array.from(nationalityMap.entries()).map(([nationality, participations]) =>
-    createScoreDistributionDataPoint(
-      nationality,
-      getCountryName(nationality) ?? 'Unknown Nationality',
-      participations.scores,
-      participations.scoreLevels,
-    ),
+  const nationalityMap = groupBy(
+    participationsWithAssessment,
+    (p) => p.participation.student.nationality || 'Unknown',
   )
 
+  const chartData = Object.values(nationalityMap).map((participations) => {
+    const nationality = participations[0].participation.student.nationality ?? 'Unknown'
+
+    return createScoreDistributionDataPoint(
+      nationality,
+      getCountryName(nationality) ?? 'Unknown',
+      participations.map((p) => p.scoreNumeric),
+      participations.map((p) => p.scoreLevel),
+    )
+  })
+
   return (
-    <Card className={`flex flex-col ${getGridSpanClass(nationalityMap.size)}`}>
+    <Card className={`flex flex-col ${getGridSpanClass(Object.values(nationalityMap).length)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Nationality Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <ScoreDistributionBarChart data={data} />
+        <ScoreDistributionBarChart data={chartData} />
       </CardContent>
     </Card>
   )

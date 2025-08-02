@@ -14,7 +14,7 @@ import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAll
 
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
-import { useGetParticipantionsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
+import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
@@ -47,7 +47,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
   })
 
-  const participationsWithAssessments = useGetParticipantionsWithAssessment(
+  const participationsWithAssessments = useGetParticipationsWithAssessment(
     participations || [],
     scoreLevels || [],
     assessmentCompletions || [],

@@ -6,14 +6,17 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { Category, CategoryWithCompetencies } from '../../../interfaces/category'
+import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel } from '../../../interfaces/scoreLevel'
+
+import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
+import { groupBy } from './utils/groupBy'
 
 interface CategoryDiagramProps {
   categories: CategoryWithCompetencies[]
@@ -21,30 +24,35 @@ interface CategoryDiagramProps {
 }
 
 export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProps): JSX.Element => {
-  const categoryMap = new Map<Category, ScoreLevel[]>()
-  categories.forEach((category) => {
-    const categoryAssessments = assessments
-      .filter((assessment) =>
-        category.competencies.map((competency) => competency.id).includes(assessment.competencyID),
-      )
-      .map((assessment) => assessment.scoreLevel)
-    if (!categoryMap.has(category)) {
-      categoryMap.set(category, [])
-    }
-    categoryMap.get(category)?.push(...categoryAssessments)
+  const chartData = categories.map((category) => {
+    const categoryAssessments = assessments.filter((assessment) =>
+      category.competencies.map((competency) => competency.id).includes(assessment.competencyID),
+    )
+
+    const groupedAssessments = groupBy(
+      categoryAssessments,
+      (assessment) => assessment.courseParticipationID,
+    )
+    const scores = Object.values(groupedAssessments).map((participantAssessments) =>
+      getWeightedScoreLevel(participantAssessments, [category]),
+    )
+
+    return createScoreDistributionDataPoint(
+      category.shortName,
+      category.name,
+      scores,
+      scores.map((s) => mapNumberToScoreLevel(s)),
+    )
   })
-  const data = Array.from(categoryMap.entries()).map(([category, scores]) =>
-    createScoreDistributionDataPoint(category.shortName, category.name, scores, scores),
-  )
 
   return (
-    <Card className={`flex flex-col ${getGridSpanClass(categoryMap.size)}`}>
+    <Card className={`flex flex-col ${getGridSpanClass(categories.length)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Category Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
-        <ScoreDistributionBarChart data={data} />
+        <ScoreDistributionBarChart data={chartData} />
       </CardContent>
     </Card>
   )

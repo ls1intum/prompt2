@@ -2,53 +2,38 @@ import { useMemo } from 'react'
 
 import { AssessmentParticipationWithStudent } from '../../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../../interfaces/scoreLevelWithParticipation'
-import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
 import { AssessmentCompletion } from '../../../../interfaces/assessmentCompletion'
 import { Assessment } from '../../../../interfaces/assessment'
 
-export const useGetParticipantionsWithAssessment = (
-  participants: AssessmentParticipationWithStudent[],
-  scoreLevels: ScoreLevelWithParticipation[],
+import { ParticipationWithAssessment } from '../interfaces/ParticipationWithAssessment'
+
+export const useGetParticipationsWithAssessment = (
+  participations: AssessmentParticipationWithStudent[],
+  participationsWithScore: ScoreLevelWithParticipation[],
   assessmentCompletions: AssessmentCompletion[],
   assessments: Assessment[],
 ) => {
   return useMemo<ParticipationWithAssessment[]>(() => {
-    return (
-      participants.map((participation) => {
-        const participationAssessments =
-          assessments.filter(
-            (assessment) =>
-              assessment.courseParticipationID === participation.courseParticipationID,
-          ) ?? []
-
-        if (!scoreLevels || scoreLevels.length === 0) {
-          return {
-            participation,
-            scoreLevel: undefined,
-            assessmentCompletion: undefined,
-            assessments: participationAssessments,
-          }
-        }
-
-        const scoreLevel =
-          scoreLevels?.find(
-            (devProfile) =>
-              devProfile.courseParticipationID === participation.courseParticipationID,
-          ) || undefined
-
-        const assessmentCompletion =
-          assessmentCompletions?.find(
-            (completion) =>
-              completion.courseParticipationID === participation.courseParticipationID,
-          ) || undefined
+    const temp = participationsWithScore
+      .map((participationWithScore) => {
+        const participation = participations.find(
+          (p) => p.courseParticipationID === participationWithScore.courseParticipationID,
+        )
+        const completion = assessmentCompletions.find(
+          (c) => c.courseParticipationID === participationWithScore.courseParticipationID,
+        )
 
         return {
           participation,
-          scoreLevel: scoreLevel?.scoreLevel,
-          assessmentCompletion,
-          assessments: participationAssessments,
-        }
-      }) || []
-    )
-  }, [participants, scoreLevels, assessmentCompletions, assessments])
+          assessments: assessments.filter(
+            (a) => a.courseParticipationID === participationWithScore.courseParticipationID,
+          ),
+          scoreLevel: participationWithScore.scoreLevel,
+          scoreNumeric: participationWithScore.scoreNumeric,
+          assessmentCompletion: completion,
+        } as ParticipationWithAssessment
+      })
+      .filter((p) => p.participation !== undefined)
+    return temp
+  }, [participations, participationsWithScore, assessmentCompletions, assessments])
 }
