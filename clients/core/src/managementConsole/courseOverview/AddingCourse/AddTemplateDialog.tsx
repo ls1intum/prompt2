@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@tumaet/prompt-ui-components'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { AddCourseAppearance } from './AddCourseAppearance'
 import type { CourseAppearanceFormValues } from '@core/validations/courseAppearance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -26,6 +32,8 @@ export const AddTemplateDialog = ({
   const [templatePropertiesFormValues, setTemplatePropertiesFormValues] =
     React.useState<TemplateFormValues | null>(null)
 
+  const { toast } = useToast()
+
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { forceTokenRefresh } = useKeycloak()
@@ -39,6 +47,11 @@ export const AddTemplateDialog = ({
       return postNewCourse(course)
     },
     onSuccess: (data: string | undefined) => {
+      toast({
+        title: 'Template created successfully',
+        description: 'You can now use this template for new courses.',
+        variant: 'success',
+      })
       forceTokenRefresh() // refresh token to get permission for new course
         .then(() => {
           // Invalidate course queries
@@ -55,6 +68,11 @@ export const AddTemplateDialog = ({
         })
         .catch((err) => {
           console.error('Error during token refresh or query invalidation:', err)
+          toast({
+            title: 'Course copied but navigation failed',
+            description: 'Please refresh the page to see your new course.',
+            variant: 'destructive',
+          })
           return err
         })
     },
