@@ -27,6 +27,7 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { AssessmentGradeDistributionDiagram } from '../components/diagrams/AssessmentGradeDistributionDiagram'
 import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
@@ -95,6 +96,10 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
   const completedGradings = useMemo(() => {
     return assessmentCompletions?.filter((a) => a.completed) ?? []
   }, [assessmentCompletions])
+
+  const completedGrades = useMemo(() => {
+    return completedGradings.map((completion) => completion.gradeSuggestion)
+  }, [completedGradings])
 
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
@@ -372,13 +377,19 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 mb-6'>
         <AssessmentDiagram
           participations={participations}
           scoreLevels={scoreLevels}
           completions={assessmentCompletions}
         />
-        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        <AssessmentGradeDistributionDiagram
+          participations={participations}
+          grades={completedGrades}
+        />
+        <div className='hidden xl:flex'>
+          <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        </div>
       </div>
       <div className='w-full'>
         <CoursePhaseParticipationsTablePage
