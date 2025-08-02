@@ -35,8 +35,8 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
       <CardHeader>
         <div className='flex flex-col sm:flex-row items-center'>
           {/* Avatar */}
-          <div className='flex-1 text-center sm:text-left'>
-            <div className='flex flex-col items-center sm:items-start pt-6'>
+          <div className='flex-1 text-start sm:text-left'>
+            <div className='flex flex-col items-start sm:items-start pt-6'>
               <h1 className='text-2xl font-bold'>
                 {student.firstName} {student.lastName}
               </h1>

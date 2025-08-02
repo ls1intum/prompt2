@@ -92,7 +92,7 @@ func main() {
 	copyApi := router.Group("self-team-allocation/api")
 	copy.InitCopyModule(copyApi, *query, conn)
 
-	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8085")
+	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
-import { ErrorPage } from '@tumaet/prompt-ui-components'
+import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
@@ -11,6 +11,7 @@ import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigSto
 
 import { useGetStudentAssessment } from './hooks/useGetStudentAssessment'
 
+import { ParticipantNavigation } from './components/ParticipantNavigation'
 import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
@@ -73,7 +74,9 @@ export const AssessmentPage = (): JSX.Element => {
 
   return (
     <div className='space-y-4'>
-      <h1 className='text-2xl font-semibold tracking-tight'>Assess Competencies</h1>
+      <ManagementPageHeader>Assess Student</ManagementPageHeader>
+
+      <ParticipantNavigation />
 
       {participant && (
         <AssessmentProfile

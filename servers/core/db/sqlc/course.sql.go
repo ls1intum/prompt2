@@ -97,9 +97,12 @@ func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
-SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template
-FROM course c
-ORDER BY c.semester_tag, c.name DESC
+SELECT
+     c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data
+FROM
+  course c
+ORDER BY
+    c.semester_tag, c.name DESC
 `
 
 func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error) {
@@ -228,10 +231,8 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template
-FROM course
-WHERE id = $1
-LIMIT 1
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data FROM course
+WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {

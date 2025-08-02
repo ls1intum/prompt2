@@ -9,7 +9,7 @@ export const CourseSettingsPage = (): JSX.Element => {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between mb-4'>
-        <ManagementPageHeader>Course Settings</ManagementPageHeader>
+        <ManagementPageHeader>Settings</ManagementPageHeader>
       </div>
 
       {courseId && <CourseTemplateToggle courseId={courseId} />}

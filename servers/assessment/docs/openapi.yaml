@@ -9,7 +9,7 @@ servers:
     variables:
       assessmentServerURL:
         description: URL of the assessment server
-        default: localhost:8084
+        default: localhost:8085
       coursePhaseID:
         description: ID of the course phase
         default: example-course-phase-id
