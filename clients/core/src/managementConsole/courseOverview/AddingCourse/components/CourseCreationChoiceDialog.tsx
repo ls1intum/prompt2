@@ -144,7 +144,7 @@ export const CourseCreationChoiceDialog = ({
                   Use Template
                 </span>
                 <span className='text-sm text-muted-foreground mt-0.5'>
-                  Choose from your existing course templates
+                  Choose from your existing templates
                 </span>
               </div>
             </div>
