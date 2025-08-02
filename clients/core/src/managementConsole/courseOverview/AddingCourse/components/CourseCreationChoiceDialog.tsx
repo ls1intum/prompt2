@@ -7,9 +7,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@tumaet/prompt-ui-components'
-import { Plus, FileIcon as FileTemplate } from 'lucide-react'
+import { Plus, FileIcon as FileTemplate, LayoutTemplate } from 'lucide-react'
 import { AddCourseDialog } from '@managementConsole/courseOverview/AddingCourse/AddCourseDialog'
 import { TemplateSelectionDialog } from './TemplateSelectionDialog'
+import { AddTemplateDialog } from '../AddTemplateDialog'
 
 interface CourseCreationChoiceDialogProps {
   children: React.ReactNode
@@ -21,6 +22,7 @@ export const CourseCreationChoiceDialog = ({
   const [isOpen, setIsOpen] = useState(false)
   const [showAddCourse, setShowAddCourse] = useState(false)
   const [showTemplateSelection, setShowTemplateSelection] = useState(false)
+  const [showAddTemplate, setShowAddTemplate] = useState(false)
 
   const handleNewCourse = () => {
     setIsOpen(false)
@@ -30,6 +32,11 @@ export const CourseCreationChoiceDialog = ({
   const handleFromTemplate = () => {
     setIsOpen(false)
     setShowTemplateSelection(true)
+  }
+
+  const handleAddTemplate = () => {
+    setIsOpen(false)
+    setShowAddTemplate(true)
   }
 
   return (
@@ -79,6 +86,38 @@ export const CourseCreationChoiceDialog = ({
             </div>
 
             <div
+              onClick={handleAddTemplate}
+              className={
+                'group flex items-center gap-4 w-full p-5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer ' +
+                'transition-all duration-200 hover:border-primary hover:bg-primary-foreground/50 hover:shadow-md'
+              }
+              role='button'
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleAddTemplate()
+                }
+              }}
+            >
+              <div
+                className={
+                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 flex-shrink-0 ' +
+                  'transition-all duration-200 group-hover:bg-primary group-hover:text-white'
+                }
+              >
+                <LayoutTemplate className='w-6 h-6 text-primary transition-all duration-200 group-hover:text-white' />
+              </div>
+              <div className='flex flex-col min-w-0 flex-1'>
+                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-primary'>
+                  Create New Template
+                </span>
+                <span className='text-sm text-muted-foreground mt-0.5'>
+                  Start from scratch with a blank template
+                </span>
+              </div>
+            </div>
+
+            <div
               onClick={handleFromTemplate}
               className={
                 'group flex items-center gap-4 w-full p-5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer ' +
@@ -117,6 +156,7 @@ export const CourseCreationChoiceDialog = ({
         open={showTemplateSelection}
         onOpenChange={setShowTemplateSelection}
       />
+      <AddTemplateDialog open={showAddTemplate} onOpenChange={setShowAddTemplate} />
     </>
   )
 }
