@@ -26,7 +26,7 @@ export const HelpDialog = (): JSX.Element => {
         <DialogHeader>
           <DialogTitle className='text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100'>
             <HelpCircle className='h-5 w-5 text-gray-600 dark:text-gray-300' />
-            Phase Configurator Help
+            Course Configurator Help
           </DialogTitle>
           <p className='text-gray-600 dark:text-gray-400 text-sm mt-1'>
             Learn how to set up your course using the visual editor.
@@ -38,7 +38,7 @@ export const HelpDialog = (): JSX.Element => {
           <div>
             <h3 className='text-lg font-medium mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100'>
               <Lightbulb className='h-4 w-4 text-gray-600 dark:text-gray-300' />
-              What is the Phase Configurator?
+              What is the Course Configurator?
             </h3>
             <p className='text-gray-700 dark:text-gray-300 text-sm leading-relaxed'>
               The configurator lets you build and customize your course using drag-and-drop. A
