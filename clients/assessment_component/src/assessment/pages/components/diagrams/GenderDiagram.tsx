@@ -20,13 +20,18 @@ export const GenderDiagram = ({
   participationsWithAssessment,
 }: GenderDiagramProps): JSX.Element => {
   const chartData = Object.values(Gender).map((gender) => {
+    const genderLabel =
+      gender === Gender.PREFER_NOT_TO_SAY
+        ? 'Unknown'
+        : gender.replace(/_/g, ' ').charAt(0).toUpperCase() + gender.replace(/_/g, ' ').slice(1)
+
     const participationWithAssessment = participationsWithAssessment.filter(
       (p) => p.participation.student.gender === gender,
     )
 
     return createScoreDistributionDataPoint(
-      gender,
-      gender,
+      genderLabel,
+      genderLabel,
       participationWithAssessment.map((p) => p.scoreNumeric),
       participationWithAssessment.map((p) => p.scoreLevel),
     )
