@@ -387,9 +387,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
           participations={participations}
           grades={completedGrades}
         />
-        <div className='hidden xl:flex'>
-          <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
-        </div>
+        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
         <CoursePhaseParticipationsTablePage
