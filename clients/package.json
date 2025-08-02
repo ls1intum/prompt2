@@ -1,6 +1,6 @@
 {
   "name": "prompt-module-federation",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "private": true,
   "workspaces": {
     "packages": [
@@ -46,7 +46,7 @@
     "@tumaet/prompt-shared-state": "^0.0.21",
     "@tumaet/prompt-ui-components": "^0.0.15",
     "autoprefixer": "^10.4.20",
-    "axios": "^1.8.2",
+    "axios": "^1.11.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "css-loader": "^7.1.2",
