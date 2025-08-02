@@ -29,13 +29,9 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
       category.competencies.map((competency) => competency.id).includes(assessment.competencyID),
     )
 
-    const groupedAssessments = groupBy(
-      categoryAssessments,
-      (assessment) => assessment.courseParticipationID,
-    )
-    const scores = Object.values(groupedAssessments).map((participantAssessments) =>
-      getWeightedScoreLevel(participantAssessments, [category]),
-    )
+    const scores = Array.from(
+      groupBy(categoryAssessments, (assessment) => assessment.courseParticipationID).values(),
+    ).map((participantAssessments) => getWeightedScoreLevel(participantAssessments, [category]))
 
     return createScoreDistributionDataPoint(
       category.shortName,

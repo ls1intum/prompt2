@@ -23,14 +23,9 @@ interface NationalityDiagramProps {
 export const NationalityDiagram = ({
   participationsWithAssessment,
 }: NationalityDiagramProps): JSX.Element => {
-  const nationalityMap = groupBy(
-    participationsWithAssessment,
-    (p) => p.participation.student.nationality || 'Unknown',
-  )
-
-  const chartData = Object.values(nationalityMap).map((participations) => {
-    const nationality = participations[0].participation.student.nationality ?? 'Unknown'
-
+  const chartData = Array.from(
+    groupBy(participationsWithAssessment, (p) => p.participation.student.nationality || 'Unknown'),
+  ).map(([nationality, participations]) => {
     return createScoreDistributionDataPoint(
       nationality,
       getCountryName(nationality) ?? 'Unknown',
@@ -40,7 +35,7 @@ export const NationalityDiagram = ({
   })
 
   return (
-    <Card className={`flex flex-col ${getGridSpanClass(Object.values(nationalityMap).length)}`}>
+    <Card className={`flex flex-col ${getGridSpanClass(chartData.length)}`}>
       <CardHeader className='items-center pb-0'>
         <CardTitle>Nationality Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
