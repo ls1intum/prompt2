@@ -46,11 +46,19 @@ export const GradeDistributionDiagram = ({
     return gradeData
   }, [participations, grades])
 
+  const averageGrade = useMemo(() => {
+    if (grades.length === 0) return null
+    const total = grades.reduce((sum, grade) => sum + grade, 0)
+    return (total / grades.length).toFixed(1)
+  }, [grades])
+
   return (
     <Card className='flex flex-col w-full h-full'>
       <CardHeader className='items-center'>
         <CardTitle>Grade Distribution</CardTitle>
-        <CardDescription>Number of students per grade</CardDescription>
+        <CardDescription>
+          Number of students per grade {averageGrade && ` (Average: ${averageGrade})`}
+        </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col justify-end pb-0'>
         <BarChartWithGrades data={chartData} />

@@ -19,7 +19,6 @@ import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks
 
 import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
 
-import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
 import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
@@ -61,104 +60,53 @@ export const AssessmentStatisticsPage = () => {
     assessments || [],
   )
 
-  const filteredData = useMemo(() => {
+  const { filteredParticipations, filteredParticipationWithAssessments } = useMemo(() => {
     if (!participations || !assessmentCompletions || !participationsWithAssessments) {
       return {
-        participations: [],
-        completions: [],
-        grades: [],
-        participationsWithAssessments: [],
+        filteredParticipations: [],
+        filteredParticipationWithAssessments: [],
       }
     }
 
-    const participationIDsWithGrades = new Set(
-      participationsWithAssessments
-        .filter((c) => c.assessmentCompletion?.gradeSuggestion !== undefined)
-        .map((c) => c.participation.courseParticipationID),
-    )
+    let parts = participations
+    let partsWithAssessments = participationsWithAssessments
 
-    let filteredParticipations = participations
-    let filteredCompletions = assessmentCompletions
-    let filteredParticipationsWithAssessments = participationsWithAssessments
-
-    // Apply grade filters
-    if (filters.hasGrade) {
-      // Only include participations that have grades
-      filteredParticipations = filteredParticipations.filter((p) =>
-        participationIDsWithGrades.has(p.courseParticipationID),
-      )
-      filteredCompletions = filteredCompletions.filter((c) => c.gradeSuggestion !== undefined)
-      filteredParticipationsWithAssessments = filteredParticipationsWithAssessments.filter((p) =>
-        participationIDsWithGrades.has(p.participation.courseParticipationID),
-      )
-    } else if (filters.noGrade) {
-      // Only include participations that don't have grades
-      filteredParticipations = filteredParticipations.filter(
-        (p) => !participationIDsWithGrades.has(p.courseParticipationID),
-      )
-      filteredCompletions = filteredCompletions.filter((c) => c.gradeSuggestion === undefined)
-      filteredParticipationsWithAssessments = filteredParticipationsWithAssessments.filter(
-        (p) => !participationIDsWithGrades.has(p.participation.courseParticipationID),
-      )
-    }
-
-    // Apply gender filters
     if (filters.genders && filters.genders.length > 0) {
-      filteredParticipations = filteredParticipations.filter(
-        (p) => p.student.gender && filters.genders!.includes(p.student.gender),
-      )
-      filteredParticipationsWithAssessments = filteredParticipationsWithAssessments.filter(
+      parts = parts.filter((p) => p.student.gender && filters.genders!.includes(p.student.gender))
+      partsWithAssessments = partsWithAssessments.filter(
         (p) =>
           p.participation.student.gender &&
           filters.genders!.includes(p.participation.student.gender),
       )
-      // Filter completions to match filtered participations
-      const filteredParticipationIds = new Set(
-        filteredParticipations.map((p) => p.courseParticipationID),
-      )
-      filteredCompletions = filteredCompletions.filter((c) =>
-        filteredParticipationIds.has(c.courseParticipationID),
-      )
     }
 
-    // Apply semester filters
     if (filters.semester && (filters.semester.min || filters.semester.max)) {
       const { min, max } = filters.semester
 
-      filteredParticipations = filteredParticipations.filter((p) => {
+      parts = parts.filter((p) => {
         const semester = p.student.currentSemester || 0
         const meetsMin = !min || semester >= min
         const meetsMax = !max || semester <= max
         return meetsMin && meetsMax
       })
 
-      filteredParticipationsWithAssessments = filteredParticipationsWithAssessments.filter((p) => {
+      partsWithAssessments = partsWithAssessments.filter((p) => {
         const semester = p.participation.student.currentSemester || 0
         const meetsMin = !min || semester >= min
         const meetsMax = !max || semester <= max
         return meetsMin && meetsMax
       })
-
-      // Filter completions to match filtered participations
-      const filteredParticipationIds = new Set(
-        filteredParticipations.map((p) => p.courseParticipationID),
-      )
-      filteredCompletions = filteredCompletions.filter((c) =>
-        filteredParticipationIds.has(c.courseParticipationID),
-      )
     }
-
-    const filteredGrades = filteredCompletions
-      .map((c) => c.gradeSuggestion)
-      .filter((g) => g !== undefined)
 
     return {
-      participations: filteredParticipations,
-      completions: filteredCompletions,
-      grades: filteredGrades,
-      participationsWithAssessments: filteredParticipationsWithAssessments,
+      filteredParticipations: parts,
+      filteredParticipationWithAssessments: partsWithAssessments,
     }
   }, [participations, assessmentCompletions, participationsWithAssessments, filters])
+
+  const filteredGrades = filteredParticipationWithAssessments
+    .map((p) => p.assessmentCompletion?.gradeSuggestion)
+    .filter((p) => p !== undefined)
 
   const isError = isAssessmentsError || isAssessmentCompletionsError
   const isPending = isAssessmentsPending || isAssessmentCompletionsPending
@@ -183,44 +131,30 @@ export const AssessmentStatisticsPage = () => {
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Statistics</ManagementPageHeader>
 
-      <h1>Grade Statistics</h1>
+      <h1 className='text-xl font-semibold'>Grade Statistics</h1>
 
-      <div className='space-y-4'>
-        <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
-          <FilterMenu filters={filters} setFilters={setFilters} />
+      <div className='space-y-2'>
+        <div className='flex justify-between items-end'>
+          <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
+            <FilterMenu filters={filters} setFilters={setFilters} />
+          </div>
+          <div className='text-sm text-muted-foreground'>
+            Showing {filteredParticipations.length} of {participations?.length ?? 0} participants
+            {filteredGrades.length > 0 && ` with ${filteredGrades.length} grades`}
+          </div>
         </div>
 
-        <div className='flex flex-wrap gap-2'>
-          <FilterBadges filters={filters} onRemoveFilter={setFilters} />
-        </div>
-
-        <div className='text-sm text-muted-foreground'>
-          Showing {filteredData.participations.length} of {participations?.length ?? 0} participants
-          {filteredData.grades.length > 0 && ` with ${filteredData.grades.length} grades`}
-        </div>
+        <FilterBadges filters={filters} onRemoveFilter={setFilters} />
+        <GradeDistributionDiagram participations={filteredParticipations} grades={filteredGrades} />
       </div>
 
-      <div>
-        <GradeDistributionDiagram
-          participations={filteredData.participations}
-          grades={filteredData.grades}
-        />
-      </div>
-
-      <h1>Score Level Statistics</h1>
+      <h1 className='text-xl font-semibold'>Score Level Statistics</h1>
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
-        <AssessmentDiagram
-          participations={participations}
-          scoreLevels={scoreLevels}
-          completions={assessmentCompletions}
-        />
         <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
-        <GenderDiagram participationsWithAssessment={filteredData.participationsWithAssessments} />
+        <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
-        <AuthorDiagram participationsWithAssessment={filteredData.participationsWithAssessments} />
-        <NationalityDiagram
-          participationsWithAssessment={filteredData.participationsWithAssessments}
-        />
+        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
+        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
   )
