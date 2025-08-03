@@ -86,7 +86,7 @@ export const BarChartWithGrades = ({ data }: BarChartWithGradesProps) => {
           cursor={false}
           content={<ChartTooltipContent />}
           labelFormatter={(label) => `Grade: ${label}`}
-          formatter={(value) => [value, 'Students']}
+          formatter={(value) => [value, ' Students']}
         />
         <Bar dataKey='count' radius={[4, 4, 0, 0]}>
           {data.map((entry, index) => (
