@@ -14,15 +14,15 @@ import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithP
 
 import { BarChartWithScoreLevel } from './BarChartWithScoreLevel'
 
-interface AssessmentScoreLevelDiagramProps {
+interface ScoreLevelDistributionDiagramProps {
   participations: AssessmentParticipationWithStudent[]
   scoreLevels: ScoreLevelWithParticipation[]
 }
 
-export const AssessmentScoreLevelDiagram = ({
+export const ScoreLevelDistributionDiagram = ({
   participations,
   scoreLevels,
-}: AssessmentScoreLevelDiagramProps): JSX.Element => {
+}: ScoreLevelDistributionDiagramProps): JSX.Element => {
   const chartData = useMemo(() => {
     const scoreLevelCounts = [
       { level: ScoreLevel.VeryGood, label: 'Very Good' },

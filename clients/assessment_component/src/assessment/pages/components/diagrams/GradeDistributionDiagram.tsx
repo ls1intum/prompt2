@@ -12,15 +12,15 @@ import { AssessmentParticipationWithStudent } from '../../../interfaces/assessme
 
 import { BarChartWithGrades } from './BarChartWithGrades'
 
-interface AssessmentGradeDistributionDiagramProps {
+interface GradeDistributionDiagramProps {
   participations: AssessmentParticipationWithStudent[]
   grades: number[]
 }
 
-export const AssessmentGradeDistributionDiagram = ({
+export const GradeDistributionDiagram = ({
   participations,
   grades,
-}: AssessmentGradeDistributionDiagramProps): JSX.Element => {
+}: GradeDistributionDiagramProps): JSX.Element => {
   const chartData = useMemo(() => {
     const validGradeValues = [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0]
     const gradeData = validGradeValues.map((gradeValue) => {

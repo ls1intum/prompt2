@@ -17,7 +17,7 @@ import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
-import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
 import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
@@ -83,7 +83,7 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
           scoreLevels={scoreLevels}
           completions={assessmentCompletions}
         />
-        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
         <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
         <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />

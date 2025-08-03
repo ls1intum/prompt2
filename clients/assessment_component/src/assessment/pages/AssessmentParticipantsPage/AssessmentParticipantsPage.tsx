@@ -26,8 +26,8 @@ import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
-import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
-import { AssessmentGradeDistributionDiagram } from '../components/diagrams/AssessmentGradeDistributionDiagram'
+import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
+import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
 import { AssessmentStatusBadge } from '../components/AssessmentStatusBadge'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
@@ -383,11 +383,8 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
           scoreLevels={scoreLevels}
           completions={assessmentCompletions}
         />
-        <AssessmentGradeDistributionDiagram
-          participations={participations}
-          grades={completedGrades}
-        />
-        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        <GradeDistributionDiagram participations={participations} grades={completedGrades} />
+        <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
         <CoursePhaseParticipationsTablePage
