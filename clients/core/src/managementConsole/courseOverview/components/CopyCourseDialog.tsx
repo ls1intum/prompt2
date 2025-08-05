@@ -76,7 +76,7 @@ export const CopyCourseDialog = ({
         {currentStep === 'form' && !createTemplate && (
           <CopyCourseForm
             form={copyForm}
-            courseName={copyCourse?.name}
+            courseName={copyCourse?.name || ''}
             onSubmit={onCopyFormSubmit}
             onClose={handleClose}
             useTemplateCopy={useTemplateCopy}
@@ -85,7 +85,7 @@ export const CopyCourseDialog = ({
         {currentStep === 'form' && createTemplate && (
           <MakeTemplateCourseForm
             form={templateForm}
-            courseName={templateCourse?.name}
+            courseName={templateCourse?.name || ''}
             onSubmit={onTemplateFormSubmit}
             onClose={handleClose}
           />

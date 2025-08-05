@@ -18,7 +18,7 @@ import type { MakeTemplateCourseFormValues } from '@core/validations/makeTemplat
 
 interface MakeTemplateCourseFormProps {
   form: UseFormReturn<MakeTemplateCourseFormValues>
-  courseName?: string
+  courseName: string
   onSubmit: (data: MakeTemplateCourseFormValues) => void
   onClose: () => void
 }

@@ -19,7 +19,7 @@ import type { CopyCourseFormValues } from '@core/validations/copyCourse'
 
 interface CopyCourseFormProps {
   form: UseFormReturn<CopyCourseFormValues>
-  courseName?: string
+  courseName: string
   onSubmit: (data: CopyCourseFormValues) => void
   onClose: () => void
   useTemplateCopy?: boolean
