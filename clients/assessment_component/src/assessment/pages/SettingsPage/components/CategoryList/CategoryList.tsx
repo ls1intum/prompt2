@@ -96,6 +96,7 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                   category={category}
                   setCategoryToEdit={setCategoryToEdit}
                   setCategoryToDelete={setCategoryToDelete}
+                  assessmentType={assessmentType}
                 />
               ))}
 

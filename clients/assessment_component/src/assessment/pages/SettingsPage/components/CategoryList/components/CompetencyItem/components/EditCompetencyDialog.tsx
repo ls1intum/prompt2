@@ -30,7 +30,7 @@ import type {
   Competency,
   UpdateCompetencyRequest,
 } from '../../../../../../../interfaces/competency'
-import { useUpdateCompetency } from '../../../hooks/useUpdateCompetency'
+import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
 const updateCompetencySchema = z.object({
   id: z.string(),
@@ -110,7 +110,7 @@ export function EditCompetencyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[600px]'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Competency</DialogTitle>
           <DialogDescription>Update the competency details below.</DialogDescription>

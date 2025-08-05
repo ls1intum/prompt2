@@ -50,28 +50,30 @@ export const CreateCategoryForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='name' className='text-sm font-medium'>
-              Category Name
-            </Label>
-            <Input
-              id='name'
-              placeholder='Enter category name'
-              className='focus-visible:ring-1'
-              {...register('name', { required: true })}
-            />
-          </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='name' className='text-sm font-medium'>
+                Category Name
+              </Label>
+              <Input
+                id='name'
+                placeholder='Enter category name'
+                className='focus-visible:ring-1'
+                {...register('name', { required: true })}
+              />
+            </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='shortName' className='text-sm font-medium'>
-              Short Category Name
-            </Label>
-            <Input
-              id='shortName'
-              placeholder='Enter short category name'
-              className='focus-visible:ring-1'
-              {...register('shortName', { required: true })}
-            />
+            <div className='space-y-2'>
+              <Label htmlFor='shortName' className='text-sm font-medium'>
+                Short Category Name
+              </Label>
+              <Input
+                id='shortName'
+                placeholder='Enter short category name'
+                className='focus-visible:ring-1'
+                {...register('shortName', { required: true })}
+              />
+            </div>
           </div>
 
           <div className='space-y-2'>

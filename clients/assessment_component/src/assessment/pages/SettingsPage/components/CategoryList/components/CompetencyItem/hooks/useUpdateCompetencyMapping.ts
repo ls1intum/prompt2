@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { Competency } from '../../../../../../../interfaces/competency'
 import {
   createCompetencyMapping,
   deleteCompetencyMapping,
-} from '../../../../../network/mutations/competencyMapping'
-import { Competency } from '../../../../../interfaces/competency'
+} from '../../../../../../../network/mutations/competencyMapping'
 
 export const useUpdateCompetencyMapping = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()

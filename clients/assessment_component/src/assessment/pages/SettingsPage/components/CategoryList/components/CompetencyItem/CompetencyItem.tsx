@@ -5,35 +5,43 @@ import { Button } from '@tumaet/prompt-ui-components'
 
 import { Competency } from '../../../../../../interfaces/competency'
 
+import { useCoursePhaseConfigStore } from '../../../../../../zustand/useCoursePhaseConfigStore'
 import { useSelfEvaluationCategoryStore } from '../../../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../../../zustand/usePeerEvaluationCategoryStore'
 
-import { EditCompetencyDialog } from './components/EditCompetencyDialog'
+import { ScoreLevelSelector } from '../../../../../components/ScoreLevelSelector'
+
+import { AssessmentType } from '../../../../interfaces/assessmentType'
+
 import { DeleteConfirmDialog } from '../DeleteConfirmDialog'
-import { useUpdateCompetencyMapping } from '../../hooks/useUpdateCompetencyMapping'
+
+import { EditCompetencyDialog } from './components/EditCompetencyDialog'
 import { EvaluationMapping } from './components/EvaluationMapping'
 
 interface CompetencyItemProps {
   competency: Competency
   categoryID: string
+  assessmentType: AssessmentType
 }
 
-export const CompetencyItem = ({ competency, categoryID }: CompetencyItemProps) => {
+export const CompetencyItem = ({ competency, categoryID, assessmentType }: CompetencyItemProps) => {
   const [competencyToEdit, setCompetencyToEdit] = useState<Competency | undefined>(undefined)
   const [competencyToDelete, setCompetencyToDelete] = useState<
     | {
         id: string
+        name: string
         categoryID: string
       }
     | undefined
   >(undefined)
-  const [error, setError] = useState<string | undefined>(undefined)
+
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+  const isEvaluationEnabled =
+    coursePhaseConfig?.selfEvaluationEnabled || coursePhaseConfig?.peerEvaluationEnabled
 
   const { allSelfEvaluationCompetencies } = useSelfEvaluationCategoryStore()
   const { allPeerEvaluationCompetencies } = usePeerEvaluationCategoryStore()
-  const updateMappingMutation = useUpdateCompetencyMapping(setError)
 
-  // Get currently mapped self and peer evaluation competencies
   const currentSelfMapping = competency.mappedFromCompetencies.find((id) =>
     allSelfEvaluationCompetencies.some((comp) => comp.id === id),
   )
@@ -41,146 +49,80 @@ export const CompetencyItem = ({ competency, categoryID }: CompetencyItemProps) 
     allPeerEvaluationCompetencies.some((comp) => comp.id === id),
   )
 
-  const handleSelfEvaluationMapping = (competencyId: string) => {
-    if (competencyId === 'none') {
-      // Remove mapping if "No mapping" is selected
-      if (currentSelfMapping) {
-        updateMappingMutation.mutate({
-          competency,
-          newMappedCompetencyId: currentSelfMapping,
-          action: 'remove',
-          evaluationType: 'self',
-        })
-      }
-    } else {
-      updateMappingMutation.mutate({
-        competency,
-        newMappedCompetencyId: competencyId,
-        action: 'update',
-        evaluationType: 'self',
-        currentMapping: currentSelfMapping,
-      })
-    }
-  }
-
-  const handlePeerEvaluationMapping = (competencyId: string) => {
-    if (competencyId === 'none') {
-      // Remove mapping if "No mapping" is selected
-      if (currentPeerMapping) {
-        updateMappingMutation.mutate({
-          competency,
-          newMappedCompetencyId: currentPeerMapping,
-          action: 'remove',
-          evaluationType: 'peer',
-        })
-      }
-    } else {
-      updateMappingMutation.mutate({
-        competency,
-        newMappedCompetencyId: competencyId,
-        action: 'update',
-        evaluationType: 'peer',
-        currentMapping: currentPeerMapping,
-      })
-    }
-  }
-
-  const handleRemoveSelfMapping = () => {
-    if (currentSelfMapping) {
-      updateMappingMutation.mutate({
-        competency,
-        newMappedCompetencyId: currentSelfMapping,
-        action: 'remove',
-        evaluationType: 'self',
-      })
-    }
-  }
-
-  const handleRemovePeerMapping = () => {
-    if (currentPeerMapping) {
-      updateMappingMutation.mutate({
-        competency,
-        newMappedCompetencyId: currentPeerMapping,
-        action: 'remove',
-        evaluationType: 'peer',
-      })
-    }
-  }
-
   return (
     <div>
-      <div className='rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md relative'>
-        <div className='absolute top-2 right-2 flex gap-1'>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-7 w-7'
-            onClick={() => setCompetencyToEdit(competency)}
-            aria-label={`Edit ${competency.name}`}
-          >
-            <Edit className='h-3.5 w-3.5' />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-7 w-7'
-            onClick={() => setCompetencyToDelete({ id: competency.id, categoryID: categoryID })}
-            aria-label={`Delete ${competency.name}`}
-          >
-            <Trash2 className='h-3.5 w-3.5 text-destructive' />
-          </Button>
-        </div>
-        <div className='mb-3'>
-          <div className='flex items-center gap-2 mb-2'>
-            <span className='text-sm font-medium'>{competency.name}</span>
-          </div>
-          <div className='mb-3 space-y-3'>
-            {/* Self Evaluation Mapping */}
-            <EvaluationMapping
-              label='Self Evaluation Competency'
-              placeholder='Select self evaluation competency...'
-              competencies={allSelfEvaluationCompetencies}
-              currentMapping={currentSelfMapping}
-              onMappingChange={handleSelfEvaluationMapping}
-              onRemoveMapping={handleRemoveSelfMapping}
-            />
+      <div className='rounded-md border p-4 space-y-4'>
+        <div className='flex justify-between items-center gap-2'>
+          <h3 className='text-base font-medium'>{competency.name}</h3>
 
-            {/* Peer Evaluation Mapping */}
-            <EvaluationMapping
-              label='Peer Evaluation Competency'
-              placeholder='Select peer evaluation competency...'
-              competencies={allPeerEvaluationCompetencies}
-              currentMapping={currentPeerMapping}
-              onMappingChange={handlePeerEvaluationMapping}
-              onRemoveMapping={handleRemovePeerMapping}
-            />
+          <div className='flex'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-7 w-7'
+              onClick={() => setCompetencyToEdit(competency)}
+              aria-label={`Edit ${competency.name}`}
+            >
+              <Edit size={16} />
+            </Button>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-7 w-7'
+              onClick={() =>
+                setCompetencyToDelete({
+                  id: competency.id,
+                  name: competency.name,
+                  categoryID: categoryID,
+                })
+              }
+              aria-label={`Delete ${competency.name}`}
+            >
+              <Trash2 size={16} className='text-destructive' />
+            </Button>
+          </div>
+        </div>
 
-            {error && <div className='text-xs text-destructive mt-1'>{error}</div>}
+        <div className='text-sm text-muted-foreground'>{competency.description}</div>
+
+        <ScoreLevelSelector
+          className='lg:col-span-2 grid grid-cols-1 lg:grid-cols-5 gap-1'
+          competency={competency}
+          onScoreChange={() => {}}
+          completed={false}
+        />
+
+        {isEvaluationEnabled && assessmentType === AssessmentType.ASSESSMENT && (
+          <div>
+            <h3 className='text-sm font-medium mb-2'>
+              {coursePhaseConfig?.selfEvaluationEnabled && coursePhaseConfig?.peerEvaluationEnabled
+                ? 'Self and Peer Evaluation Mapping'
+                : coursePhaseConfig?.selfEvaluationEnabled
+                  ? 'Self Evaluation Mapping'
+                  : 'Peer Evaluation Mapping'}
+            </h3>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              {coursePhaseConfig?.selfEvaluationEnabled && (
+                <EvaluationMapping
+                  assessmentType={AssessmentType.SELF}
+                  competencies={allSelfEvaluationCompetencies}
+                  currentMapping={currentSelfMapping}
+                  competency={competency}
+                />
+              )}
+
+              {coursePhaseConfig?.peerEvaluationEnabled && (
+                <EvaluationMapping
+                  assessmentType={AssessmentType.PEER}
+                  competencies={allPeerEvaluationCompetencies}
+                  currentMapping={currentPeerMapping}
+                  competency={competency}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        <div className='text-sm text-muted-foreground mb-3'>{competency.description}</div>
-        <div className='text-xs grid grid-cols-5 gap-x-2'>
-          <div className='space-y-1'>
-            <div className='font-semibold'>Very Bad</div>
-            <div>{competency.descriptionVeryBad}</div>
-          </div>
-          <div className='space-y-1'>
-            <div className='font-semibold'>Bad</div>
-            <div>{competency.descriptionBad}</div>
-          </div>
-          <div className='space-y-1'>
-            <div className='font-semibold'>OK</div>
-            <div>{competency.descriptionOk}</div>
-          </div>
-          <div className='space-y-1'>
-            <div className='font-semibold'>Good</div>
-            <div>{competency.descriptionGood}</div>
-          </div>
-          <div className='space-y-1'>
-            <div className='font-semibold'>Very Good</div>
-            <div>{competency.descriptionVeryGood}</div>
-          </div>
-        </div>
+        )}
       </div>
 
       <EditCompetencyDialog

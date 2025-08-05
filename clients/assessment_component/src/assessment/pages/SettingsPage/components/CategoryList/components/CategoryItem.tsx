@@ -5,19 +5,23 @@ import { Button } from '@tumaet/prompt-ui-components'
 
 import type { CategoryWithCompetencies } from '../../../../../interfaces/category'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
+
 import { CompetencyItem } from './CompetencyItem/CompetencyItem'
-import { CreateCompetencyForm } from './CompetencyItem/components/CreateCompetencyForm'
+import { CreateCompetencyForm } from './CreateCompetencyForm'
 
 interface CategoryItemProps {
   category: CategoryWithCompetencies
   setCategoryToEdit: (category: CategoryWithCompetencies | undefined) => void
   setCategoryToDelete: (categoryID: string | undefined) => void
+  assessmentType: AssessmentType
 }
 
 export const CategoryItem = ({
   category,
   setCategoryToEdit,
   setCategoryToDelete,
+  assessmentType,
 }: CategoryItemProps) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [showAddCompetencyForm, setShowAddCompetencyForm] = useState(false)
@@ -42,18 +46,20 @@ export const CategoryItem = ({
           <Button
             variant='ghost'
             size='icon'
+            className='h-7 w-7'
             onClick={() => setCategoryToEdit(category)}
             aria-label={`Edit ${category.name}`}
           >
-            <Edit className='h-4 w-4' />
+            <Edit size={16} />
           </Button>
           <Button
             variant='ghost'
             size='icon'
+            className='h-7 w-7'
             onClick={() => setCategoryToDelete(category.id)}
             aria-label={`Delete ${category.name}`}
           >
-            <Trash2 className='h-4 w-4 text-destructive' />
+            <Trash2 size={16} className='text-destructive' />
           </Button>
         </div>
       </div>
@@ -69,6 +75,7 @@ export const CategoryItem = ({
                   key={competency.id}
                   competency={competency}
                   categoryID={category.id}
+                  assessmentType={assessmentType}
                 />
               ))}
             </div>
