@@ -1,4 +1,20 @@
-export function GradeDistributionTooltipContent(props: any) {
+interface GradeDistributionData {
+  name: string
+  average: number
+  median: number
+  lowerQuartile: number
+  upperQuartile: number
+  counts: Record<string, number>
+}
+
+interface GradeDistributionTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: GradeDistributionData
+  }>
+}
+
+export function GradeDistributionTooltipContent(props: GradeDistributionTooltipProps) {
   if (!props.active || !props.payload || !props.payload[0]) {
     return undefined
   }
