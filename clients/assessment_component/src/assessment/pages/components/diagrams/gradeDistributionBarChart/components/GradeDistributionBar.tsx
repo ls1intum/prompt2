@@ -1,9 +1,24 @@
 import { Rectangle } from 'recharts'
 import { getGradeColor } from '../../../../utils/gradeConfig'
 
-export const GradeDistributionBar = (props: any) => {
+interface GradeDistributionBarProps {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  payload?: {
+    name: string
+    average: number
+    median: number
+    lowerQuartile: number
+    upperQuartile: number
+    counts: Record<string, number>
+  }
+}
+
+export const GradeDistributionBar = (props: GradeDistributionBarProps) => {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props
-  if (payload.lowerQuartile === 0 || payload.upperQuartile === 0) return undefined
+  if (!payload || payload.lowerQuartile < 1 || payload.upperQuartile < 1) return undefined
 
   const scale = height / 4.0 // Range from 1.0 to 5.0 (total range of 4.0)
   const barColor = getGradeColor(payload.average) // Round to nearest 0.1
