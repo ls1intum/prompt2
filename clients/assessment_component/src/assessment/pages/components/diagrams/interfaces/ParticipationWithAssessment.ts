@@ -5,7 +5,8 @@ import { Assessment } from '../../../../interfaces/assessment'
 
 export interface ParticipationWithAssessment {
   participation: AssessmentParticipationWithStudent
-  scoreLevel: ScoreLevel | undefined
-  assessmentCompletion: AssessmentCompletion | undefined
   assessments: Assessment[]
+  scoreLevel: ScoreLevel
+  scoreNumeric: number
+  assessmentCompletion: AssessmentCompletion | undefined
 }

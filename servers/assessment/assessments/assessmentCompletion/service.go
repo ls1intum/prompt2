@@ -13,6 +13,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -103,7 +104,7 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 		Comment:               req.Comment,
-		GradeSuggestion:       assessmentCompletionDTO.MapFloat64ToNumeric(req.GradeSuggestion),
+		GradeSuggestion:       utils.MapFloat64ToNumeric(req.GradeSuggestion),
 		Completed:             req.Completed,
 	})
 	if err != nil {

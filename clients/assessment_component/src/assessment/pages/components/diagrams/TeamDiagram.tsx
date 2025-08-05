@@ -1,4 +1,3 @@
-import { Gender } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -7,44 +6,48 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
-
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { GradeDistributionBarChart } from './gradeDistributionBarChart/GradeDistributionBarChart'
-
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
 import { createGradeDistributionDataPoint } from './gradeDistributionBarChart/utils/createGradeDistributionDataPoint'
 
-interface GenderDiagramProps {
+import { getGridSpanClass } from './utils/getGridSpanClass'
+import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
+import { Team } from '../../../interfaces/team'
+
+import { groupBy } from './utils/groupBy'
+
+interface TeamDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
+  teams: Team[]
   showGrade?: boolean
 }
 
-export const GenderDiagram = ({
+export const TeamDiagram = ({
   participationsWithAssessment,
+  teams,
   showGrade = false,
-}: GenderDiagramProps): JSX.Element => {
-  const data = Object.values(Gender).map((gender) => {
-    const genderLabel =
-      gender === Gender.PREFER_NOT_TO_SAY
-        ? 'Unknown'
-        : gender.replace(/_/g, ' ').charAt(0).toUpperCase() + gender.replace(/_/g, ' ').slice(1)
+}: TeamDiagramProps): JSX.Element => {
+  // Create a map from teamID to team name for quick lookup
+  const teamNameMap = new Map(teams.map((team) => [team.id, team.name]))
 
-    const participationWithAssessment = participationsWithAssessment.filter(
-      (p) => p.participation.student.gender === gender,
-    )
-
+  const data = Array.from(
+    groupBy(participationsWithAssessment, (p) => {
+      const teamName = teamNameMap.get(p.participation.teamID) ?? 'No Team'
+      return teamName
+    }),
+  ).map(([teamName, participations]) => {
     return {
-      shortLabel: genderLabel,
-      label: genderLabel,
-      participationWithAssessment: participationWithAssessment,
+      shortLabel: teamName.length > 10 ? teamName.substring(0, 8) + '...' : teamName,
+      label: teamName,
+      participationWithAssessment: participations,
     }
   })
 
   return (
-    <Card className='flex flex-col'>
+    <Card className={`flex flex-col ${getGridSpanClass(data.length)}`}>
       <CardHeader className='items-center'>
-        <CardTitle>Gender Distribution </CardTitle>
+        <CardTitle>Team Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
       <CardContent className='flex-1'>
