@@ -27,7 +27,6 @@ import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
 import { TeamDiagram } from '../components/diagrams/TeamDiagram'
-import { TeamGradeDiagram } from '../components/diagrams/TeamGradeDiagram'
 
 import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
 import { FilterBadges } from './components/FilterBadges'
@@ -139,9 +138,10 @@ export const AssessmentStatisticsPage = () => {
           showGrade
         />
         {teams && teams.length > 0 && (
-          <TeamGradeDiagram
+          <TeamDiagram
             participationsWithAssessment={filteredParticipationWithAssessments}
             teams={teams}
+            showGrade
           />
         )}
       </div>
