@@ -9,6 +9,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
   Input,
   Button,
 } from '@tumaet/prompt-ui-components'
@@ -20,7 +21,6 @@ interface MakeTemplateCourseFormProps {
   courseName?: string
   onSubmit: (data: MakeTemplateCourseFormValues) => void
   onClose: () => void
-  useTemplateCopy?: boolean
 }
 
 export const MakeTemplateCourseForm = ({
@@ -28,19 +28,12 @@ export const MakeTemplateCourseForm = ({
   courseName,
   onSubmit,
   onClose,
-  useTemplateCopy,
 }: MakeTemplateCourseFormProps): JSX.Element => {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>
-          {useTemplateCopy ? `Create Course from Template: ${courseName}` : `Copy: ${courseName}`}
-        </DialogTitle>
-        <DialogDescription>
-          {useTemplateCopy
-            ? 'Create a new course based on this template.'
-            : 'Create a complete copy of this course.'}
-        </DialogDescription>
+        <DialogTitle>{`Create Template from Course: ${courseName}`}</DialogTitle>
+        <DialogDescription>{'Create a new template based on this course.'}</DialogDescription>
       </DialogHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
@@ -49,9 +42,9 @@ export const MakeTemplateCourseForm = ({
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Course Name</FormLabel>
+                <FormLabel>Template Name</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter course name' {...field} className='w-full' />
+                  <Input placeholder='Enter template name' {...field} className='w-full' />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -62,10 +55,13 @@ export const MakeTemplateCourseForm = ({
             name='semesterTag'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Semester Tag</FormLabel>
+                <FormLabel>Template Tag</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter semester tag' {...field} className='w-full' />
+                  <Input placeholder='Enter template tag' {...field} className='w-full' />
                 </FormControl>
+                <FormDescription>
+                  e.g. templateios (lowercase letters and numbers only)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

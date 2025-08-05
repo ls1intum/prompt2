@@ -88,7 +88,6 @@ export const CopyCourseDialog = ({
             courseName={templateCourse?.name}
             onSubmit={onTemplateFormSubmit}
             onClose={handleClose}
-            useTemplateCopy={useTemplateCopy}
           />
         )}
         {currentStep === 'warning' && (

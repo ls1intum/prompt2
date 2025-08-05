@@ -68,6 +68,9 @@ export const CopyCourseForm = ({
                 <FormControl>
                   <Input placeholder='Enter semester tag' {...field} className='w-full' />
                 </FormControl>
+                <FormDescription>
+                  e.g. ios2425 or ws2425 (lowercase letters and numbers only)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

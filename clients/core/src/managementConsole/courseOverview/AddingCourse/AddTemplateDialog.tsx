@@ -138,7 +138,9 @@ export const AddTemplateDialog = ({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className='text-2xl font-bold text-center'>Add a New Course</DialogTitle>
+              <DialogTitle className='text-2xl font-bold text-center'>
+                Add a New Template
+              </DialogTitle>
             </DialogHeader>
             {currentPage === 1 ? (
               <AddTemplateProperties
@@ -147,7 +149,7 @@ export const AddTemplateDialog = ({
                 initialValues={templatePropertiesFormValues || undefined}
               />
             ) : (
-              <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} />
+              <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} createTemplate={true} />
             )}
           </>
         )}

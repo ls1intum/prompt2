@@ -69,9 +69,9 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
           name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Course Name</FormLabel>
+              <FormLabel>Template Name</FormLabel>
               <FormControl>
-                <Input placeholder='Enter a course name' {...field} className='w-full' />
+                <Input placeholder='Enter a template name' {...field} className='w-full' />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,17 +132,17 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
           name='semesterTag'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Semester Tag</FormLabel>
+              <FormLabel>Template Tag</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='Enter a semester tag'
+                  placeholder='Enter a template tag'
                   value={field.value}
                   onChange={handleSemesterTagChange}
                   className='w-full'
                 />
               </FormControl>
               <FormDescription>
-                e.g. ios2425 or ws2425 (lowercase letters and numbers only)
+                e.g. templateios (lowercase letters and numbers only)
               </FormDescription>
               <FormMessage />
             </FormItem>
