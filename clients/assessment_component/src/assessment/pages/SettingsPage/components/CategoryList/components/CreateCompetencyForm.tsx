@@ -19,7 +19,13 @@ import type { CreateCompetencyRequest } from '../../../../../interfaces/competen
 
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
 
-export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => {
+export const CreateCompetencyForm = ({
+  categoryID,
+  onCancel,
+}: {
+  categoryID: string
+  onCancel?: () => void
+}) => {
   const [error, setError] = useState<string | undefined>(undefined)
 
   const {
@@ -37,6 +43,7 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
     mutate(data, {
       onSuccess: () => {
         reset()
+        onCancel?.()
       },
     })
   }
@@ -201,9 +208,22 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
             </div>
           </div>
 
-          <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
-            {isPending ? 'Creating...' : 'Create'}
-          </Button>
+          <div className='flex gap-2'>
+            <Button type='submit' disabled={isPending} className='flex-1'>
+              {isPending ? 'Creating...' : 'Create'}
+            </Button>
+            {onCancel && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onCancel}
+                disabled={isPending}
+                className='flex-1'
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
 
         {error && (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, ChevronDown, Edit, Trash2 } from 'lucide-react'
+import { ChevronRight, ChevronDown, Edit, Trash2, Plus } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
@@ -19,7 +19,8 @@ export const CategoryItem = ({
   setCategoryToEdit,
   setCategoryToDelete,
 }: CategoryItemProps) => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [showAddCompetencyForm, setShowAddCompetencyForm] = useState(false)
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded)
@@ -62,7 +63,7 @@ export const CategoryItem = ({
           {category.competencies.length === 0 ? (
             <p className='text-sm text-muted-foreground italic'>No competencies available yet.</p>
           ) : (
-            <div className='grid gap-4 sm:grid-cols-2'>
+            <div className='grid gap-4'>
               {category.competencies.map((competency) => (
                 <CompetencyItem
                   key={competency.id}
@@ -73,7 +74,21 @@ export const CategoryItem = ({
             </div>
           )}
           <div className='py-4 border-t mt-2'>
-            <CreateCompetencyForm categoryID={category.id} />
+            {showAddCompetencyForm ? (
+              <CreateCompetencyForm
+                categoryID={category.id}
+                onCancel={() => setShowAddCompetencyForm(false)}
+              />
+            ) : (
+              <Button
+                variant='outline'
+                className='w-full border-dashed flex items-center justify-center p-4 hover:bg-muted/50 transition-colors'
+                onClick={() => setShowAddCompetencyForm(true)}
+              >
+                <Plus className='h-4 w-4 mr-2 text-muted-foreground' />
+                <span className='text-muted-foreground'>Add Competency</span>
+              </Button>
+            )}
           </div>
         </div>
       )}

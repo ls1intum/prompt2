@@ -17,7 +17,13 @@ import { CreateCategoryRequest } from '../../../../../interfaces/category'
 
 import { useCreateCategory } from '../hooks/useCreateCategory'
 
-export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
+export const CreateCategoryForm = ({
+  assessmentTemplateID,
+  onCancel,
+}: {
+  assessmentTemplateID: string
+  onCancel?: () => void
+}) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, reset } = useForm<CreateCategoryRequest>()
   const { mutate, isPending } = useCreateCategory(setError)
@@ -28,6 +34,7 @@ export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplat
       {
         onSuccess: () => {
           reset()
+          onCancel?.()
         },
       },
     )
@@ -103,9 +110,22 @@ export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplat
             </div>
           )}
 
-          <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
-            {isPending ? 'Creating...' : 'Create Category'}
-          </Button>
+          <div className='flex gap-2'>
+            <Button type='submit' disabled={isPending} className='flex-1'>
+              {isPending ? 'Creating...' : 'Create Category'}
+            </Button>
+            {onCancel && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onCancel}
+                disabled={isPending}
+                className='flex-1'
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>

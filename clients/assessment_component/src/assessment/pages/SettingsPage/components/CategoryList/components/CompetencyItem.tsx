@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2 } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
@@ -45,10 +45,6 @@ export const CompetencyItem = ({ competency, categoryID }: CompetencyItemProps) 
           >
             <Trash2 className='h-3.5 w-3.5 text-destructive' />
           </Button>
-        </div>
-        <div className='text-base font-medium mb-2 flex items-center gap-2 pr-16'>
-          <ChevronRight className='h-4 w-4 text-muted-foreground' />
-          {competency.name}
         </div>
         <div className='text-sm text-muted-foreground mb-3'>{competency.description}</div>
         <div className='text-xs grid grid-cols-5 gap-x-2'>
