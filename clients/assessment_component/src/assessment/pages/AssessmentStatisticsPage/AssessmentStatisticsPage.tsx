@@ -111,6 +111,16 @@ export const AssessmentStatisticsPage = () => {
     .map((p) => p.assessmentCompletion?.gradeSuggestion)
     .filter((p) => p !== undefined)
 
+  const filteredScoreLevels = useMemo(
+    () =>
+      filteredParticipationWithAssessments.map((p) => ({
+        courseParticipationID: p.participation.courseParticipationID,
+        scoreLevel: p.scoreLevel,
+        scoreNumeric: p.scoreNumeric,
+      })),
+    [filteredParticipationWithAssessments],
+  )
+
   const isError = isAssessmentsError || isAssessmentCompletionsError
   const isPending = isAssessmentsPending || isAssessmentCompletionsPending
 
@@ -161,11 +171,7 @@ export const AssessmentStatisticsPage = () => {
       <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
         <ScoreLevelDistributionDiagram
           participations={filteredParticipations}
-          scoreLevels={filteredParticipationWithAssessments.map((p) => ({
-            courseParticipationID: p.participation.courseParticipationID,
-            scoreLevel: p.scoreLevel,
-            scoreNumeric: p.scoreNumeric,
-          }))}
+          scoreLevels={filteredScoreLevels}
         />
         <GenderDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />

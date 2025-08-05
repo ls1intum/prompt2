@@ -41,7 +41,7 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
   }
 
   if (filters.semester && (filters.semester.min || filters.semester.max)) {
-    const semesterLabel = `Semester: ${filters.semester.min || '?'} - ${filters.semester.max || '?'}`
+    const semesterLabel = `Semester: ${filters.semester.min || '0'} - ${filters.semester.max || '∞'}`
     activeBadges.push({
       key: 'semester',
       label: semesterLabel,
