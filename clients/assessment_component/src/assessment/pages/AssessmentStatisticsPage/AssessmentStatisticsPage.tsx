@@ -24,9 +24,6 @@ import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
-import { GenderGradeDiagram } from '../components/diagrams/GenderGradeDiagram'
-import { AuthorGradeDiagram } from '../components/diagrams/AuthorGradeDiagram'
-import { NationalityGradeDiagram } from '../components/diagrams/NationalityGradeDiagram'
 
 import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
 import { FilterBadges } from './components/FilterBadges'
@@ -160,10 +157,17 @@ export const AssessmentStatisticsPage = () => {
 
       <h1 className='text-xl font-semibold'>Detailed Grade Statistics</h1>
       <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
-        <GenderGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-        <AuthorGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-        <NationalityGradeDiagram
+        <GenderDiagram
           participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
+        />
+        <AuthorDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
+        />
+        <NationalityDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
         />
       </div>
 
