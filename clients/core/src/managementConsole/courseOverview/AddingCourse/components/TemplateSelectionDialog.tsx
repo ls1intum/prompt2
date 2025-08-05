@@ -6,7 +6,7 @@ import { CopyCourseDialog } from '@managementConsole/courseOverview/components/C
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 import { FileIcon, Calendar, BookOpen } from 'lucide-react'
-import type { Course } from '@core/interfaces/course'
+import type { CourseWithTemplateInfo } from '@core/interfaces/courseWithTemplateInfo'
 import { CourseTemplateIcon } from './CourseTemplateIcon'
 
 interface TemplateSelectionDialogProps {
@@ -18,7 +18,7 @@ export const TemplateSelectionDialog = ({
   open,
   onOpenChange,
 }: TemplateSelectionDialogProps): JSX.Element => {
-  const [selectedTemplate, setSelectedTemplate] = useState<Course | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<CourseWithTemplateInfo | null>(null)
   const [showCopyDialog, setShowCopyDialog] = useState(false)
 
   const {
@@ -32,7 +32,7 @@ export const TemplateSelectionDialog = ({
     enabled: open,
   })
 
-  const handleTemplateSelect = (template: Course) => {
+  const handleTemplateSelect = (template: CourseWithTemplateInfo) => {
     setSelectedTemplate(template)
     onOpenChange(false)
     setShowCopyDialog(true)

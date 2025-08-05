@@ -1,7 +1,7 @@
 import { SidebarMenuItem } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
 import { CourseCreationChoiceDialog } from '@managementConsole/courseOverview/AddingCourse/components/CourseCreationChoiceDialog'
-import { SidebarMenuButton } from '@tumaet/prompt-ui-components' // Ensure SidebarMenuButton is imported
+import { SidebarMenuButton } from '@tumaet/prompt-ui-components'
 
 export const AddCourseButton = (): JSX.Element => {
   return (

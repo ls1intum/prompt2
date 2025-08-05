@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/network/configService'
-import type { Course } from '../../interfaces/course'
+import type { CourseWithTemplateInfo } from '../../interfaces/courseWithTemplateInfo'
 
-export const getTemplateCourses = async (): Promise<Course[]> => {
+export const getTemplateCourses = async (): Promise<CourseWithTemplateInfo[]> => {
   try {
     return (await axiosInstance.get(`/api/courses/template`)).data
   } catch (err) {
