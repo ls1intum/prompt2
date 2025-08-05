@@ -11,7 +11,7 @@ import {
 import { ChartContainer } from '@tumaet/prompt-ui-components'
 
 import { GradeDistributionDataPoint } from './interfaces/GradeDistributionDataPoint'
-import { GRADE_CHART_CONFIG } from '../../../utils/gradeConfig'
+import { GRADE_CONFIG } from '../../../utils/gradeConfig'
 
 import { GradeDistributionTooltipContent } from './components/GradeDistributionTooltipContent'
 import { GradeDistributionBar } from './components/GradeDistributionBar'
@@ -24,7 +24,7 @@ export interface GradeDistributionBarChartProps {
 export function GradeDistributionBarChart({ data }: GradeDistributionBarChartProps) {
   if (!data || data.length === 0) {
     return (
-      <ChartContainer config={GRADE_CHART_CONFIG} className='w-full h-[280px]'>
+      <ChartContainer config={GRADE_CONFIG} className='w-full h-[280px]'>
         <div className='flex items-center justify-center h-64 text-gray-500'>
           <p>No data available</p>
         </div>
@@ -44,7 +44,7 @@ export function GradeDistributionBarChart({ data }: GradeDistributionBarChartPro
   }))
 
   return (
-    <ChartContainer config={GRADE_CHART_CONFIG} className='w-full h-[280px]'>
+    <ChartContainer config={GRADE_CONFIG} className='w-full h-[280px]'>
       <BarChart data={chartData} margin={{ top: 30, right: 10, bottom: 10, left: 10 }}>
         <CartesianGrid
           horizontal={true}
