@@ -23,7 +23,7 @@ export const CategoryItem = ({
   setCategoryToDelete,
   assessmentType,
 }: CategoryItemProps) => {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [showAddCompetencyForm, setShowAddCompetencyForm] = useState(false)
 
   const toggleExpand = () => {
@@ -93,7 +93,7 @@ export const CategoryItem = ({
                 onClick={() => setShowAddCompetencyForm(true)}
               >
                 <Plus className='h-4 w-4 mr-2 text-muted-foreground' />
-                <span className='text-muted-foreground'>Add Competency</span>
+                <span className='text-muted-foreground'>Add Competency to {category.name}</span>
               </Button>
             )}
           </div>
