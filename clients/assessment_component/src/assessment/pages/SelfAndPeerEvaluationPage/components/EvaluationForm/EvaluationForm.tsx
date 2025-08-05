@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react'
 
 import { Form, cn } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../../interfaces/assessmentType'
 import { Competency } from '../../../../interfaces/competency'
 import { Evaluation, CreateOrUpdateEvaluationRequest } from '../../../../interfaces/evaluation'
 import { ScoreLevel } from '../../../../interfaces/scoreLevel'
@@ -104,8 +105,11 @@ export const EvaluationForm = ({
           competencyScore={evaluation}
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
-          isEvaluation={true}
-          isPeerEvaluation={courseParticipationID !== authorCourseParticipationID}
+          assessmentType={
+            courseParticipationID === authorCourseParticipationID
+              ? AssessmentType.SELF
+              : AssessmentType.PEER
+          }
         />
 
         <ScoreLevelSelector
@@ -114,7 +118,7 @@ export const EvaluationForm = ({
           selectedScore={selectedScoreLevel}
           onScoreChange={handleScoreChange}
           completed={completed}
-          isEvaluation={true}
+          assessmentType={AssessmentType.SELF}
         />
       </div>
 

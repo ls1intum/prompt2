@@ -8,7 +8,7 @@ import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
-import { AssessmentType } from './interfaces/assessmentType'
+import { AssessmentType } from '../../interfaces/assessmentType'
 
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'

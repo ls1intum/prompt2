@@ -13,6 +13,7 @@ import {
   ChartTooltipContent,
 } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
 import { CompetencyScoreCompletion } from '../../../interfaces/competencyScoreCompletion'
@@ -36,14 +37,14 @@ interface AssessmentDiagramProps {
   participations: AssessmentParticipationWithStudent[]
   scoreLevels: ScoreLevelWithParticipation[]
   completions: CompetencyScoreCompletion[]
-  isEvaluation?: boolean
+  assessmentType?: AssessmentType
 }
 
 export const AssessmentDiagram = ({
   participations,
   scoreLevels,
   completions,
-  isEvaluation = false,
+  assessmentType = AssessmentType.ASSESSMENT,
 }: AssessmentDiagramProps): JSX.Element => {
   const { chartData, totalAssessments } = React.useMemo(() => {
     const completed = participations.filter((p) =>
@@ -71,9 +72,30 @@ export const AssessmentDiagram = ({
   return (
     <Card className='flex flex-col'>
       <CardHeader className='items-center pb-0'>
-        <CardTitle>{isEvaluation ? 'Evaluation' : 'Assessments'}</CardTitle>
+        <CardTitle>
+          {(() => {
+            switch (assessmentType) {
+              case AssessmentType.SELF:
+                return 'Self Evaluation'
+              case AssessmentType.PEER:
+                return 'Peer Evaluation'
+              default:
+                return 'Assessments'
+            }
+          })()}
+        </CardTitle>
         <CardDescription>
-          All {isEvaluation ? 'evaluations' : 'assessments'} and their status
+          {(() => {
+            switch (assessmentType) {
+              case AssessmentType.SELF:
+                return 'self evaluations'
+              case AssessmentType.PEER:
+                return 'peer evaluations'
+              default:
+                return 'assessments'
+            }
+          })()}
+          and their status
         </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>

@@ -12,8 +12,8 @@ import { useCategoryStore } from '../../../../zustand/useCategoryStore'
 import { useSelfEvaluationCategoryStore } from '../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../zustand/usePeerEvaluationCategoryStore'
 
+import { AssessmentType } from '../../../../interfaces/assessmentType'
 import type { CategoryWithCompetencies } from '../../../../interfaces/category'
-import { AssessmentType } from '../../interfaces/assessmentType'
 
 import { CategoryItem } from './components/CategoryItem'
 import { EditCategoryDialog } from './components/EditCategoryDialog'

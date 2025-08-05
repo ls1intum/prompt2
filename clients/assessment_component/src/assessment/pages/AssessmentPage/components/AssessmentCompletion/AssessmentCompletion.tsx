@@ -168,9 +168,7 @@ export const AssessmentCompletion = () => {
       )}
 
       <div className='flex justify-between items-center mt-8'>
-        <div className='flex flex-col'>
-          {deadline && <DeadlineBadge deadline={deadline} type='assessment' />}
-        </div>
+        <div className='flex flex-col'>{deadline && <DeadlineBadge deadline={deadline} />}</div>
 
         <Button
           size='sm'
