@@ -17,6 +17,7 @@ import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAll
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
 import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks/useGetParticipationsWithAssessment'
+import { useFilteredParticipations } from './hooks/useFilteredParticipations'
 
 import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
 
@@ -25,7 +26,6 @@ import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
-import { GenderGradeDiagram } from '../components/diagrams/GenderGradeDiagram'
 import { AuthorGradeDiagram } from '../components/diagrams/AuthorGradeDiagram'
 import { NationalityGradeDiagram } from '../components/diagrams/NationalityGradeDiagram'
 import { TeamDiagram } from '../components/diagrams/TeamDiagram'
@@ -67,56 +67,13 @@ export const AssessmentStatisticsPage = () => {
     assessments || [],
   )
 
-  const { filteredParticipations, filteredParticipationWithAssessments } = useMemo(() => {
-    if (!participations || !assessmentCompletions || !participationsWithAssessments) {
-      return {
-        filteredParticipations: [],
-        filteredParticipationWithAssessments: [],
-      }
-    }
-
-    let parts = participations
-    let partsWithAssessments = participationsWithAssessments
-
-    if (filters.genders && filters.genders.length > 0) {
-      parts = parts.filter((p) => p.student.gender && filters.genders!.includes(p.student.gender))
-      partsWithAssessments = partsWithAssessments.filter(
-        (p) =>
-          p.participation.student.gender &&
-          filters.genders!.includes(p.participation.student.gender),
-      )
-    }
-
-    if (filters.teams && filters.teams.length > 0) {
-      parts = parts.filter((p) => filters.teams!.includes(p.teamID))
-      partsWithAssessments = partsWithAssessments.filter((p) =>
-        filters.teams!.includes(p.participation.teamID),
-      )
-    }
-
-    if (filters.semester && (filters.semester.min || filters.semester.max)) {
-      const { min, max } = filters.semester
-
-      parts = parts.filter((p) => {
-        const semester = p.student.currentSemester || 0
-        const meetsMin = !min || semester >= min
-        const meetsMax = !max || semester <= max
-        return meetsMin && meetsMax
-      })
-
-      partsWithAssessments = partsWithAssessments.filter((p) => {
-        const semester = p.participation.student.currentSemester || 0
-        const meetsMin = !min || semester >= min
-        const meetsMax = !max || semester <= max
-        return meetsMin && meetsMax
-      })
-    }
-
-    return {
-      filteredParticipations: parts,
-      filteredParticipationWithAssessments: partsWithAssessments,
-    }
-  }, [participations, assessmentCompletions, participationsWithAssessments, filters])
+  const { filteredParticipations, filteredParticipationWithAssessments } =
+    useFilteredParticipations({
+      participations,
+      assessmentCompletions: assessmentCompletions || null,
+      participationsWithAssessments,
+      filters,
+    })
 
   const filteredGrades = filteredParticipationWithAssessments
     .map((p) => p.assessmentCompletion?.gradeSuggestion)
@@ -171,7 +128,10 @@ export const AssessmentStatisticsPage = () => {
 
       <h1 className='text-xl font-semibold'>Detailed Grade Statistics</h1>
       <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
-        <GenderGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
+        <GenderDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade={true}
+        />
         <AuthorGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
         <NationalityGradeDiagram
           participationsWithAssessment={filteredParticipationWithAssessments}
