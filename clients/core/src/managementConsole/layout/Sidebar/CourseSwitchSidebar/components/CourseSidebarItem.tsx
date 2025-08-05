@@ -1,8 +1,10 @@
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@tumaet/prompt-ui-components'
-import { Course } from '@tumaet/prompt-shared-state'
+import type { Course } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { checkCourseTemplateStatus } from '../../../../../network/queries/checkCourseTemplateStatus'
 
 // Todo move somewhere else
 const subtleColors = [
@@ -28,8 +30,14 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const { courseId } = useParams<{ courseId: string }>()
 
   const isActive = course.id === courseId
-  const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-grey-100']
+  const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-gray-100']
   const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
+
+  const { data } = useQuery({
+    queryKey: ['template-status', course.id],
+    queryFn: () => checkCourseTemplateStatus(course.id),
+  })
+  const isTemplate = data?.isTemplate || false
 
   const MemoizedIcon = useMemo(() => {
     return (
@@ -63,10 +71,10 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         >
           <div
             className={`
-                flex aspect-square items-center justify-center rounded-lg  text-gray-800
-                ${isActive ? 'size-12' : 'size-10'} 
-                ${bgColor}
-            `}
+            relative flex aspect-square items-center justify-center rounded-lg text-gray-800
+            ${isActive ? 'size-12' : 'size-10'} ${bgColor}
+            ${isTemplate ? 'border-2 border-dashed border-blue-500' : ''}
+          `}
           >
             <div className='size-6'>{MemoizedIcon}</div>
           </div>
