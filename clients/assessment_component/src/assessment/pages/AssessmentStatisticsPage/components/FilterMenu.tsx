@@ -90,6 +90,12 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56'>
+        <DropdownMenuLabel>
+          <div className='text-sm text-muted-foreground'>
+            Filters will be applied to all diagrams.
+          </div>
+        </DropdownMenuLabel>
+
         <DropdownMenuLabel>Gender</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {Object.values(Gender).map((gender) => {
