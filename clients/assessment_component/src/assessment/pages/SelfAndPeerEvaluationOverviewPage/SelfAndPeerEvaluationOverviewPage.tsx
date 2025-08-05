@@ -17,7 +17,7 @@ import { EvaluationInfoHeader } from './components/EvaluationInfoHeader'
 import { SelfEvaluationStatusCard } from './components/SelfEvaluationStatusCard'
 import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 import { ActionItemsAndGradeSuggestion } from './components/ActionItemsAndGradeSuggestion'
-import { TeamBadge } from '../components/TeamBadge'
+import { TeamBadge } from '../components/badges'
 
 export const SelfAndPeerEvaluationOverviewPage = () => {
   const { isStudentOfCourse } = useCourseStore()

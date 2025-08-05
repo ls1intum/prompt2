@@ -1,6 +1,5 @@
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
-import { DeadlineBadge } from '../../components/DeadlineBadge'
+import { AssessmentStatusBadge, DeadlineBadge } from '../../components/badges'
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface PeerEvaluationStatusCardProps {

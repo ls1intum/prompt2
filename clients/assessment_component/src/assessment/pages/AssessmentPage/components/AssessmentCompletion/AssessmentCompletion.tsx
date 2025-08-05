@@ -18,7 +18,7 @@ import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseCon
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
-import { DeadlineBadge } from '../../../components/DeadlineBadge'
+import { DeadlineBadge } from '../../../components/badges'
 
 import { ActionItemPanel } from './components/ActionItemPanel'
 import { GradeSuggestion } from './components/GradeSuggestion'

@@ -5,7 +5,7 @@ import { Lock, Unlock } from 'lucide-react'
 import { Button, Alert, AlertDescription } from '@tumaet/prompt-ui-components'
 
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
-import { DeadlineBadge } from '../../../components/DeadlineBadge'
+import { DeadlineBadge } from '../../../components/badges'
 
 import { useMarkMyEvaluationAsCompleted } from './hooks/useMarkMyEvaluationAsCompleted'
 import { useUnmarkMyEvaluationAsCompleted } from './hooks/useUnmarkMyEvaluationAsCompleted'

@@ -8,8 +8,7 @@ import { mapNumberToScoreLevel } from '../../../interfaces/scoreLevel'
 
 import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
 
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
-import { StudentScoreBadge } from '../../components/StudentScoreBadge'
+import { AssessmentStatusBadge, StudentScoreBadge } from '../../components/badges'
 
 import { AssessmentForm } from './AssessmentForm/AssessmentForm'
 

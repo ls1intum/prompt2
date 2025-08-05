@@ -4,7 +4,7 @@ import { Card } from '@tumaet/prompt-ui-components'
 
 import { Evaluation } from '../../../interfaces/evaluation'
 
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
+import { AssessmentStatusBadge } from '../../components/badges'
 
 interface EvaluationInfoCardProps {
   name: string
