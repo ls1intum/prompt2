@@ -10,6 +10,7 @@ import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
+import { useTeamStore } from '../../zustand/useTeamStore'
 
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
 
@@ -27,6 +28,8 @@ import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
 import { GenderGradeDiagram } from '../components/diagrams/GenderGradeDiagram'
 import { AuthorGradeDiagram } from '../components/diagrams/AuthorGradeDiagram'
 import { NationalityGradeDiagram } from '../components/diagrams/NationalityGradeDiagram'
+import { TeamDiagram } from '../components/diagrams/TeamDiagram'
+import { TeamGradeDiagram } from '../components/diagrams/TeamGradeDiagram'
 
 import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
 import { FilterBadges } from './components/FilterBadges'
@@ -38,6 +41,7 @@ export const AssessmentStatisticsPage = () => {
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
   const { scoreLevels } = useScoreLevelStore()
+  const { teams } = useTeamStore()
 
   const {
     data: assessments,
@@ -80,6 +84,13 @@ export const AssessmentStatisticsPage = () => {
         (p) =>
           p.participation.student.gender &&
           filters.genders!.includes(p.participation.student.gender),
+      )
+    }
+
+    if (filters.teams && filters.teams.length > 0) {
+      parts = parts.filter((p) => filters.teams!.includes(p.teamID))
+      partsWithAssessments = partsWithAssessments.filter((p) =>
+        filters.teams!.includes(p.participation.teamID),
       )
     }
 
@@ -146,7 +157,7 @@ export const AssessmentStatisticsPage = () => {
       <div className='space-y-2'>
         <div className='flex justify-between items-end gap-2'>
           <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
-            <FilterMenu filters={filters} setFilters={setFilters} />
+            <FilterMenu filters={filters} setFilters={setFilters} teams={teams} />
           </div>
           <div className='text-sm text-muted-foreground'>
             Filters will be applied to all diagrams. Currently showing{' '}
@@ -154,7 +165,7 @@ export const AssessmentStatisticsPage = () => {
           </div>
         </div>
 
-        <FilterBadges filters={filters} onRemoveFilter={setFilters} />
+        <FilterBadges filters={filters} onRemoveFilter={setFilters} teams={teams} />
         <GradeDistributionDiagram participations={filteredParticipations} grades={filteredGrades} />
       </div>
 
@@ -165,6 +176,12 @@ export const AssessmentStatisticsPage = () => {
         <NationalityGradeDiagram
           participationsWithAssessment={filteredParticipationWithAssessments}
         />
+        {teams && teams.length > 0 && (
+          <TeamGradeDiagram
+            participationsWithAssessment={filteredParticipationWithAssessments}
+            teams={teams}
+          />
+        )}
       </div>
 
       <h1 className='text-xl font-semibold'>Detailed Score Level Statistics</h1>
@@ -177,6 +194,12 @@ export const AssessmentStatisticsPage = () => {
         <CategoryDiagram categories={categories} assessments={assessments} />
         <AuthorDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
         <NationalityDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
+        {teams && teams.length > 0 && (
+          <TeamDiagram
+            participationsWithAssessment={filteredParticipationWithAssessments}
+            teams={teams}
+          />
+        )}
       </div>
     </div>
   )

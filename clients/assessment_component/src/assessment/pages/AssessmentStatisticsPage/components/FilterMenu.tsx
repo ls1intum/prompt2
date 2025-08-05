@@ -10,6 +10,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Filter } from 'lucide-react'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
+import { Team } from '../../../interfaces/team'
 
 export interface StatisticsFilter {
   genders?: Gender[]
@@ -17,14 +18,16 @@ export interface StatisticsFilter {
     min?: number
     max?: number
   }
+  teams?: string[]
 }
 
 interface FilterMenuProps {
   filters: StatisticsFilter
   setFilters: React.Dispatch<React.SetStateAction<StatisticsFilter>>
+  teams: Team[]
 }
 
-export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Element => {
+export const FilterMenu = ({ filters, setFilters, teams }: FilterMenuProps): JSX.Element => {
   const handleGenderFilterChange = (gender: Gender) => {
     setFilters((prevFilters) => {
       const currentGenders = prevFilters.genders || []
@@ -35,6 +38,20 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
       return {
         ...prevFilters,
         genders: newGenders.length > 0 ? newGenders : undefined,
+      }
+    })
+  }
+
+  const handleTeamFilterChange = (teamId: string) => {
+    setFilters((prevFilters) => {
+      const currentTeams = prevFilters.teams || []
+      const newTeams = currentTeams.includes(teamId)
+        ? currentTeams.filter((t) => t !== teamId)
+        : [...currentTeams, teamId]
+
+      return {
+        ...prevFilters,
+        teams: newTeams.length > 0 ? newTeams : undefined,
       }
     })
   }
@@ -67,12 +84,14 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
 
   const hasActiveFilters =
     (filters.genders && filters.genders.length > 0) ||
-    (filters.semester && (filters.semester.min || filters.semester.max))
+    (filters.semester && (filters.semester.min || filters.semester.max)) ||
+    (filters.teams && filters.teams.length > 0)
 
   const getActiveFilterCount = () => {
     let count = 0
     if (filters.genders && filters.genders.length > 0) count += filters.genders.length
     if (filters.semester && (filters.semester.min || filters.semester.max)) count++
+    if (filters.teams && filters.teams.length > 0) count += filters.teams.length
     return count
   }
 
@@ -113,6 +132,21 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
             </DropdownMenuCheckboxItem>
           )
         })}
+
+        <DropdownMenuLabel>Teams</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {teams.map((team) => (
+          <DropdownMenuCheckboxItem
+            key={team.id}
+            checked={filters.teams?.includes(team.id) || false}
+            onClick={(e) => {
+              e.preventDefault()
+              handleTeamFilterChange(team.id)
+            }}
+          >
+            {team.name}
+          </DropdownMenuCheckboxItem>
+        ))}
 
         <DropdownMenuLabel>Semester of Study</DropdownMenuLabel>
         <DropdownMenuSeparator />
