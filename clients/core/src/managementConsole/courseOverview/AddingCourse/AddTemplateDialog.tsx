@@ -69,8 +69,8 @@ export const AddTemplateDialog = ({
         .catch((err) => {
           console.error('Error during token refresh or query invalidation:', err)
           toast({
-            title: 'Course copied but navigation failed',
-            description: 'Please refresh the page to see your new course.',
+            title: 'Template created but navigation failed',
+            description: 'Please refresh the page to see your new template.',
             variant: 'destructive',
           })
           return err
@@ -129,10 +129,9 @@ export const AddTemplateDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {controlledOpen === undefined}
       <DialogContent className='sm:max-w-[550px]'>
         {isPending ? (
-          <DialogLoadingDisplay customMessage='Updating course data...' />
+          <DialogLoadingDisplay customMessage='Updating template data...' />
         ) : isError ? (
           <DialogErrorDisplay error={error} />
         ) : (
