@@ -12,8 +12,6 @@ import { Filter } from 'lucide-react'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
 
 export interface StatisticsFilter {
-  hasGrade?: boolean
-  noGrade?: boolean
   genders?: Gender[]
   semester?: {
     min?: number
@@ -27,27 +25,6 @@ interface FilterMenuProps {
 }
 
 export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Element => {
-  const handleGradeFilterChange = (key: 'hasGrade' | 'noGrade', value: boolean) => {
-    setFilters((prevFilters) => {
-      const newFilters = { ...prevFilters }
-
-      if (key === 'hasGrade' && value) {
-        // If "Has Grade" is selected, unselect "No Grade"
-        newFilters.noGrade = false
-        newFilters.hasGrade = true
-      } else if (key === 'noGrade' && value) {
-        // If "No Grade" is selected, unselect "Has Grade"
-        newFilters.hasGrade = false
-        newFilters.noGrade = true
-      } else {
-        // If unchecking, just update the specific key
-        newFilters[key] = value
-      }
-
-      return newFilters
-    })
-  }
-
   const handleGenderFilterChange = (gender: Gender) => {
     setFilters((prevFilters) => {
       const currentGenders = prevFilters.genders || []
@@ -89,14 +66,11 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
   }
 
   const hasActiveFilters =
-    filters.hasGrade ||
-    filters.noGrade ||
     (filters.genders && filters.genders.length > 0) ||
     (filters.semester && (filters.semester.min || filters.semester.max))
 
   const getActiveFilterCount = () => {
     let count = 0
-    if (filters.hasGrade || filters.noGrade) count++
     if (filters.genders && filters.genders.length > 0) count += filters.genders.length
     if (filters.semester && (filters.semester.min || filters.semester.max)) count++
     return count
@@ -116,29 +90,6 @@ export const FilterMenu = ({ filters, setFilters }: FilterMenuProps): JSX.Elemen
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56'>
-        <DropdownMenuLabel>Grade Status</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-
-        <DropdownMenuCheckboxItem
-          checked={filters.hasGrade || false}
-          onClick={(e) => {
-            e.preventDefault()
-            handleGradeFilterChange('hasGrade', !filters.hasGrade)
-          }}
-        >
-          Has Grade
-        </DropdownMenuCheckboxItem>
-
-        <DropdownMenuCheckboxItem
-          checked={filters.noGrade || false}
-          onClick={(e) => {
-            e.preventDefault()
-            handleGradeFilterChange('noGrade', !filters.noGrade)
-          }}
-        >
-          No Grade
-        </DropdownMenuCheckboxItem>
-
         <DropdownMenuLabel>Gender</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {Object.values(Gender).map((gender) => {

@@ -1,15 +1,12 @@
 import { Rectangle } from 'recharts'
+import { getGradeColor } from '../../../../utils/gradeConfig'
 
-import { mapNumberToScoreLevel, ScoreLevel } from '../../../../../interfaces/scoreLevel'
-
-import { getBarColor } from '../../utils/chartConfig'
-
-export const ScoreDistributionBar = (props: any) => {
+export const GradeDistributionBar = (props: any) => {
   const { x = 0, y = 0, width = 0, height = 0, payload } = props
   if (payload.lowerQuartile === 0 || payload.upperQuartile === 0) return undefined
 
-  const scale = height / (Object.keys(ScoreLevel).length - 1)
-  const barColor = getBarColor(mapNumberToScoreLevel(payload.average))
+  const scale = height / 4.0 // Range from 1.0 to 5.0 (total range of 4.0)
+  const barColor = getGradeColor(payload.average) // Round to nearest 0.1
   const upperQuartileY = y + height - (payload.upperQuartile - 1) * scale
 
   const minHeight = 6

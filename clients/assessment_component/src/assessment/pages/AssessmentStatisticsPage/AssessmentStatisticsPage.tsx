@@ -24,6 +24,9 @@ import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
+import { GenderGradeDiagram } from '../components/diagrams/GenderGradeDiagram'
+import { AuthorGradeDiagram } from '../components/diagrams/AuthorGradeDiagram'
+import { NationalityGradeDiagram } from '../components/diagrams/NationalityGradeDiagram'
 
 import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
 import { FilterBadges } from './components/FilterBadges'
@@ -131,6 +134,15 @@ export const AssessmentStatisticsPage = () => {
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Statistics</ManagementPageHeader>
 
+      <h1 className='text-xl font-semibold'>Score Level Statistics</h1>
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
+        <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
+        <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
+        <CategoryDiagram categories={categories} assessments={assessments} />
+        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
+        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
+      </div>
+
       <h1 className='text-xl font-semibold'>Grade Statistics</h1>
 
       <div className='space-y-2'>
@@ -147,14 +159,10 @@ export const AssessmentStatisticsPage = () => {
         <FilterBadges filters={filters} onRemoveFilter={setFilters} />
         <GradeDistributionDiagram participations={filteredParticipations} grades={filteredGrades} />
       </div>
-
-      <h1 className='text-xl font-semibold'>Score Level Statistics</h1>
       <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
-        <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
-        <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
-        <CategoryDiagram categories={categories} assessments={assessments} />
-        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
-        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
+        <GenderGradeDiagram participationsWithAssessment={participationsWithAssessments} />
+        <AuthorGradeDiagram participationsWithAssessment={participationsWithAssessments} />
+        <NationalityGradeDiagram participationsWithAssessment={participationsWithAssessments} />
       </div>
     </div>
   )

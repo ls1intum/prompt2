@@ -9,6 +9,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
+import { VALID_GRADE_VALUES } from '../../utils/gradeConfig'
 
 import { BarChartWithGrades } from './BarChartWithGrades'
 
@@ -22,8 +23,7 @@ export const GradeDistributionDiagram = ({
   grades,
 }: GradeDistributionDiagramProps): JSX.Element => {
   const chartData = useMemo(() => {
-    const validGradeValues = [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0]
-    const gradeData = validGradeValues.map((gradeValue) => {
+    const gradeData = VALID_GRADE_VALUES.map((gradeValue) => {
       const count = grades.filter((grade) => Math.abs(grade - gradeValue) < 0.01).length
 
       return {

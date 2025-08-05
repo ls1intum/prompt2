@@ -9,13 +9,6 @@ interface FilterBadgesProps {
 }
 
 export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => {
-  const handleRemoveGradeFilter = (key: 'hasGrade' | 'noGrade') => {
-    onRemoveFilter((prevFilters) => ({
-      ...prevFilters,
-      [key]: false,
-    }))
-  }
-
   const handleRemoveGenderFilter = (gender: Gender) => {
     onRemoveFilter((prevFilters) => {
       const currentGenders = prevFilters.genders || []
@@ -36,22 +29,6 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
   }
 
   const activeBadges: Array<{ key: string; label: string; onRemove: () => void }> = []
-
-  if (filters.hasGrade) {
-    activeBadges.push({
-      key: 'hasGrade',
-      label: 'Has Grade',
-      onRemove: () => handleRemoveGradeFilter('hasGrade'),
-    })
-  }
-
-  if (filters.noGrade) {
-    activeBadges.push({
-      key: 'noGrade',
-      label: 'No Grade',
-      onRemove: () => handleRemoveGradeFilter('noGrade'),
-    })
-  }
 
   if (filters.genders) {
     filters.genders.forEach((gender) => {
