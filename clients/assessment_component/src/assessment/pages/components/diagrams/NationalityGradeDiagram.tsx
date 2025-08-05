@@ -39,11 +39,11 @@ export const NationalityGradeDiagram = ({
 
   return (
     <Card className={`flex flex-col ${getGridSpanClass(chartData.length)}`}>
-      <CardHeader className='items-center pb-0'>
+      <CardHeader className='items-center'>
         <CardTitle>Nationality Distribution</CardTitle>
         <CardDescription>Grades</CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0'>
+      <CardContent className='flex-1'>
         <GradeDistributionBarChart data={chartData} />
       </CardContent>
     </Card>

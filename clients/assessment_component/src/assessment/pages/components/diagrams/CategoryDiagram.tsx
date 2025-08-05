@@ -43,11 +43,11 @@ export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProp
 
   return (
     <Card className={`flex flex-col ${getGridSpanClass(categories.length)}`}>
-      <CardHeader className='items-center pb-0'>
+      <CardHeader className='items-center'>
         <CardTitle>Category Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0'>
+      <CardContent className='flex-1'>
         <ScoreDistributionBarChart data={chartData} />
       </CardContent>
     </Card>

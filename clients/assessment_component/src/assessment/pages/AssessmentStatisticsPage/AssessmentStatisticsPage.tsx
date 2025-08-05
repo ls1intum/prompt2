@@ -134,14 +134,13 @@ export const AssessmentStatisticsPage = () => {
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Statistics</ManagementPageHeader>
       <div className='space-y-2'>
-        <div className='flex justify-between items-end'>
+        <div className='flex justify-between items-end gap-2'>
           <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
             <FilterMenu filters={filters} setFilters={setFilters} />
           </div>
           <div className='text-sm text-muted-foreground'>
-            Filters will be applied to all diagrams. Showing {filteredParticipations.length} of{' '}
-            {participations?.length ?? 0} participants
-            {filteredGrades.length > 0 && ` with ${filteredGrades.length} grades`}
+            Filters will be applied to all diagrams. Currently showing{' '}
+            {filteredParticipations.length} of {participations?.length ?? 0} participants.
           </div>
         </div>
 
@@ -149,8 +148,17 @@ export const AssessmentStatisticsPage = () => {
         <GradeDistributionDiagram participations={filteredParticipations} grades={filteredGrades} />
       </div>
 
+      <h1 className='text-xl font-semibold'>Detailed Grade Statistics</h1>
+      <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
+        <GenderGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
+        <AuthorGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
+        <NationalityGradeDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+        />
+      </div>
+
       <h1 className='text-xl font-semibold'>Detailed Score Level Statistics</h1>
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
+      <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
         <ScoreLevelDistributionDiagram
           participations={filteredParticipations}
           scoreLevels={filteredParticipationWithAssessments.map((p) => ({
@@ -163,15 +171,6 @@ export const AssessmentStatisticsPage = () => {
         <CategoryDiagram categories={categories} assessments={assessments} />
         <AuthorDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
         <NationalityDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-      </div>
-
-      <h1 className='text-xl font-semibold'>Detailed Grade Statistics</h1>
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
-        <GenderGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-        <AuthorGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-        <NationalityGradeDiagram
-          participationsWithAssessment={filteredParticipationWithAssessments}
-        />
       </div>
     </div>
   )
