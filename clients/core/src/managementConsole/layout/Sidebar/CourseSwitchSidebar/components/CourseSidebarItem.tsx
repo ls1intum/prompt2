@@ -65,7 +65,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         <div
           className={`relative flex aspect-square size-12 items-center justify-center ${
             isActive && isTemplate
-              ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-blue-500'
+              ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-primary'
               : isActive && !isTemplate
                 ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
                 : ''
@@ -75,7 +75,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
             className={`
             relative flex aspect-square items-center justify-center rounded-lg text-gray-800
             ${isActive ? 'size-12' : 'size-10'} ${bgColor}
-            ${!isActive && isTemplate ? 'border-2 border-dashed border-blue-500' : ''}
+            ${!isActive && isTemplate ? 'border-2 border-dashed border-primary' : ''}
           `}
           >
             <div className='size-6'>{MemoizedIcon}</div>
