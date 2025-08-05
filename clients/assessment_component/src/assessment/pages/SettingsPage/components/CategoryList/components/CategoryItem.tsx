@@ -5,8 +5,8 @@ import { Button } from '@tumaet/prompt-ui-components'
 
 import type { CategoryWithCompetencies } from '../../../../../interfaces/category'
 
-import { CompetencyItem } from './CompetencyItem'
-import { CreateCompetencyForm } from './CreateCompetencyForm'
+import { CompetencyItem } from './CompetencyItem/CompetencyItem'
+import { CreateCompetencyForm } from './CompetencyItem/components/CreateCompetencyForm'
 
 interface CategoryItemProps {
   category: CategoryWithCompetencies

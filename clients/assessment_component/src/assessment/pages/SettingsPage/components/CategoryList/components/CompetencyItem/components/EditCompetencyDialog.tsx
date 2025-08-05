@@ -26,8 +26,11 @@ import {
 } from '@tumaet/prompt-ui-components'
 import {} from 'react'
 
-import type { Competency, UpdateCompetencyRequest } from '../../../../../interfaces/competency'
-import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
+import type {
+  Competency,
+  UpdateCompetencyRequest,
+} from '../../../../../../../interfaces/competency'
+import { useUpdateCompetency } from '../../../hooks/useUpdateCompetency'
 
 const updateCompetencySchema = z.object({
   id: z.string(),

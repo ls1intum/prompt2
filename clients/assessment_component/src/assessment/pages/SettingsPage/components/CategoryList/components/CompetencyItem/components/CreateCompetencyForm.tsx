@@ -15,9 +15,9 @@ import {
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
 
-import type { CreateCompetencyRequest } from '../../../../../interfaces/competency'
+import type { CreateCompetencyRequest } from '../../../../../../../interfaces/competency'
 
-import { useCreateCompetency } from '../hooks/useCreateCompetency'
+import { useCreateCompetency } from '../../../hooks/useCreateCompetency'
 
 export const CreateCompetencyForm = ({
   categoryID,
