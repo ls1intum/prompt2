@@ -26,8 +26,6 @@ import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
-import { AuthorGradeDiagram } from '../components/diagrams/AuthorGradeDiagram'
-import { NationalityGradeDiagram } from '../components/diagrams/NationalityGradeDiagram'
 import { TeamDiagram } from '../components/diagrams/TeamDiagram'
 import { TeamGradeDiagram } from '../components/diagrams/TeamGradeDiagram'
 
@@ -132,9 +130,13 @@ export const AssessmentStatisticsPage = () => {
           participationsWithAssessment={filteredParticipationWithAssessments}
           showGrade={true}
         />
-        <AuthorGradeDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
-        <NationalityGradeDiagram
+        <AuthorDiagram
           participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
+        />
+        <NationalityDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
         />
         {teams && teams.length > 0 && (
           <TeamGradeDiagram
