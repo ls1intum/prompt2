@@ -106,9 +106,6 @@ export const EvaluationCompletionPage = ({
                 deadline={deadline}
                 type={courseParticipationID === authorCourseParticipationID ? 'self' : 'peer'}
               />
-              {isDeadlinePassed && (
-                <span className='text-red-600 ml-2 font-medium'>(Deadline has passed)</span>
-              )}
             </div>
           )}
           {isDeadlinePassed && completed && (

@@ -4,7 +4,7 @@ import { Badge } from '@tumaet/prompt-ui-components'
 
 interface DeadlineBadgeProps {
   deadline: Date | string
-  type: 'self' | 'peer'
+  type: 'self' | 'peer' | 'assessment'
 }
 
 export const DeadlineBadge = ({ deadline, type }: DeadlineBadgeProps) => {
@@ -23,7 +23,9 @@ export const DeadlineBadge = ({ deadline, type }: DeadlineBadgeProps) => {
     badgeClassName =
       type === 'self'
         ? 'bg-blue-100 text-blue-800 border-blue-200 dark:border-blue-700 flex items-center gap-1 hover:bg-blue-100'
-        : 'bg-green-200 text-green-800 border-green-300 hover:bg-green-100 flex items-center gap-1'
+        : type === 'peer'
+          ? 'bg-green-200 text-green-800 border-green-300 hover:bg-green-100 flex items-center gap-1'
+          : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-100 flex items-center gap-1'
     deadlineText = `Deadline: ${format(deadlineDate, 'dd.MM.yyyy')}`
   }
 

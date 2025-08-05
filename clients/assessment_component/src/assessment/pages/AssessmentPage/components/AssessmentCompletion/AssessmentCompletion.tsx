@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
-import { format } from 'date-fns'
-
 import {
   Button,
   Card,
@@ -20,6 +18,7 @@ import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseCon
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
+import { DeadlineBadge } from '../../../components/DeadlineBadge'
 
 import { ActionItemPanel } from './components/ActionItemPanel'
 import { GradeSuggestion } from './components/GradeSuggestion'
@@ -64,7 +63,6 @@ export const AssessmentCompletion = () => {
 
   const isPending = isCreatePending || isMarkPending || isUnmarkPending
 
-  // Check if deadline has passed
   const isDeadlinePassed = deadline ? new Date() > new Date(deadline) : false
 
   const { user } = useAuthStore()
@@ -74,14 +72,12 @@ export const AssessmentCompletion = () => {
     const handleCompletion = async () => {
       try {
         if (assessmentCompletion?.completed ?? false) {
-          // Check if deadline has passed before unmarking
           if (isDeadlinePassed) {
             setError('Cannot unmark assessment as completed: deadline has passed.')
             return
           }
           await unmarkAsCompleted(courseParticipationID ?? '')
         } else {
-          // Validate grade before final submission
           const gradeValidation = validateGrade(gradeSuggestion)
           if (!gradeValidation.isValid) {
             setError(`Cannot complete assessment: ${gradeValidation.error}`)
@@ -173,19 +169,7 @@ export const AssessmentCompletion = () => {
 
       <div className='flex justify-between items-center mt-8'>
         <div className='flex flex-col'>
-          {deadline && (
-            <div className='text-muted-foreground'>
-              Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
-              {isDeadlinePassed && (
-                <span className='text-red-600 ml-2 font-medium'>(Deadline has passed)</span>
-              )}
-            </div>
-          )}
-          {isDeadlinePassed && assessmentCompletion?.completed && (
-            <div className='text-sm text-red-600 mt-1'>
-              Assessments cannot be unmarked as final after the deadline has passed.
-            </div>
-          )}
+          {deadline && <DeadlineBadge deadline={deadline} type='assessment' />}
         </div>
 
         <Button
