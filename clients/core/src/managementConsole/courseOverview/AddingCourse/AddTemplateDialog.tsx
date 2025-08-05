@@ -97,7 +97,7 @@ export const AddTemplateDialog = ({
     setTemplatePropertiesFormValues(null) // reset the page 1 form
   }
 
-  const handleNext = (data) => {
+  const handleNext = (data: TemplateFormValues) => {
     setTemplatePropertiesFormValues(data)
     setCurrentPage(2)
   }
