@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
@@ -29,7 +30,7 @@ type AssignmentService struct {
 
 var AssignmentServiceSingleton *AssignmentService
 
-func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, error) {
+func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]promptTypes.Team, error) {
 	dbTeams, err := TeamsServiceSingleton.queries.GetTeamsWithStudentNames(ctx, coursePhaseID)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
@@ -43,19 +44,19 @@ func GetAllTeams(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Team, 
 	return dtos, nil
 }
 
-func GetTeamByID(ctx context.Context, coursePhaseID uuid.UUID, teamID uuid.UUID) (teamDTO.Team, error) {
+func GetTeamByID(ctx context.Context, coursePhaseID uuid.UUID, teamID uuid.UUID) (promptTypes.Team, error) {
 	dbTeam, err := TeamsServiceSingleton.queries.GetTeamWithStudentNamesByTeamID(ctx, db.GetTeamWithStudentNamesByTeamIDParams{
 		ID:            teamID,
 		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
-		return teamDTO.Team{}, errors.New("could not get the teams from the database")
+		return promptTypes.Team{}, errors.New("could not get the teams from the database")
 	}
 	dto, err := teamDTO.GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam)
 	if err != nil {
 		log.Error("could not get the teams from the database: ", err)
-		return teamDTO.Team{}, errors.New("could not get the teams from the database")
+		return promptTypes.Team{}, errors.New("could not get the teams from the database")
 	}
 	return dto, nil
 }
