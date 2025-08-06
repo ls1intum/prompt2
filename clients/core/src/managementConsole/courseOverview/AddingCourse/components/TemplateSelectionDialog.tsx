@@ -8,6 +8,7 @@ import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 import { FileIcon, Calendar, BookOpen } from 'lucide-react'
 import type { CourseWithTemplateInfo } from '@core/interfaces/courseWithTemplateInfo'
 import { CourseTemplateIcon } from './CourseTemplateIcon'
+import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 
 interface TemplateSelectionDialogProps {
   open: boolean
@@ -41,19 +42,6 @@ export const TemplateSelectionDialog = ({
   const handleCopyDialogClose = () => {
     setShowCopyDialog(false)
     setSelectedTemplate(null)
-  }
-
-  const convertTypeToReadable = (type: string): string => {
-    switch (type) {
-      case 'lecture':
-        return 'Lecture'
-      case 'seminar':
-        return 'Seminar'
-      case 'practical course':
-        return 'Practical Course'
-      default:
-        return type
-    }
   }
 
   return (
@@ -96,7 +84,7 @@ export const TemplateSelectionDialog = ({
                             <span>{template.ects} ECTS</span>
                           </div>
                           <span className='text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium'>
-                            {convertTypeToReadable(template.courseType)}
+                            {CourseTypeDetails[template.courseType].name}
                           </span>
                         </div>
                       </div>
