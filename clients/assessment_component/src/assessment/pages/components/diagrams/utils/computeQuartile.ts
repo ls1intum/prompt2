@@ -1,15 +1,15 @@
 /**
  * Computes the specified quartile value from an array of numbers.
  *
- * @param values - An array of numbers. The function will sort the array in ascending order.
+ * @param values - An array of numbers. The function will sort a copy of the array in ascending order.
  * @param quartile - The desired quartile to compute, represented as a number between 0 and 1
  *                   (e.g., 0.25 for the first quartile, 0.5 for the median, 0.75 for the third quartile).
- * @returns The computed quartile value.
+ * @returns The computed quartile value, or 0 if the input array is empty.
  *
  * @remarks
- * This function sorts the input array `values` in ascending order before computing the quartile.
+ * This function sorts a copy of the input array `values` in ascending order before computing the quartile.
  * The function uses linear interpolation to calculate the quartile value when the position
- * is not an integer.
+ * is not an integer. Returns 0 if the input array is empty.
  *
  * @example
  * ```typescript
@@ -20,13 +20,19 @@
  * ```
  */
 export function computeQuartile(values: number[], quartile: number): number {
-  values.sort((a, b) => a - b) // Sort values in ascending order
-  const pos = (values.length - 1) * quartile
+  // Return 0 if the input array is empty
+  if (values.length === 0) {
+    return 0
+  }
+
+  // Sort a copy of the array to avoid mutating the original
+  const sortedValues = [...values].sort((a, b) => a - b)
+  const pos = (sortedValues.length - 1) * quartile
   const base = Math.floor(pos)
   const rest = pos - base
 
-  const gradeBase = values[base]
-  const gradeNext = values[base + 1] ? values[base + 1] : gradeBase
+  const gradeBase = sortedValues[base]
+  const gradeNext = sortedValues[base + 1] ? sortedValues[base + 1] : gradeBase
 
   return gradeBase + rest * (gradeNext - gradeBase)
 }
