@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@tumaet/prompt-ui-components'
-import type { CourseFormValues } from '@core/validations/course'
-import { AddCourseProperties } from './AddCourseProperties'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { AddCourseAppearance } from './AddCourseAppearance'
 import type { CourseAppearanceFormValues } from '@core/validations/courseAppearance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -11,20 +15,24 @@ import { useNavigate } from 'react-router-dom'
 import { useKeycloak } from '@core/keycloak/useKeycloak'
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
+import { AddTemplateProperties } from './AddTemplateProperties'
+import { TemplateFormValues } from '@core/validations/template'
 
-interface AddCourseDialogProps {
+interface AddTemplateDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
-export const AddCourseDialog = ({
+export const AddTemplateDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: AddCourseDialogProps): JSX.Element => {
+}: AddTemplateDialogProps): JSX.Element => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
-  const [coursePropertiesFormValues, setCoursePropertiesFormValues] =
-    React.useState<CourseFormValues | null>(null)
+  const [templatePropertiesFormValues, setTemplatePropertiesFormValues] =
+    React.useState<TemplateFormValues | null>(null)
+
+  const { toast } = useToast()
 
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -39,6 +47,11 @@ export const AddCourseDialog = ({
       return postNewCourse(course)
     },
     onSuccess: (data: string | undefined) => {
+      toast({
+        title: 'Template created successfully',
+        description: 'You can now use this template for new courses.',
+        variant: 'success',
+      })
       forceTokenRefresh() // refresh token to get permission for new course
         .then(() => {
           // Invalidate course queries
@@ -55,6 +68,11 @@ export const AddCourseDialog = ({
         })
         .catch((err) => {
           console.error('Error during token refresh or query invalidation:', err)
+          toast({
+            title: 'Template created but navigation failed',
+            description: 'Please refresh the page to see your new template.',
+            variant: 'destructive',
+          })
           return err
         })
     },
@@ -62,25 +80,25 @@ export const AddCourseDialog = ({
 
   const onSubmit = (data: CourseAppearanceFormValues) => {
     const course: PostCourse = {
-      name: coursePropertiesFormValues?.name || '',
-      startDate: coursePropertiesFormValues?.dateRange?.from || new Date(),
-      endDate: coursePropertiesFormValues?.dateRange?.to || new Date(),
-      courseType: coursePropertiesFormValues?.courseType || '',
-      ects: coursePropertiesFormValues?.ects || 0,
-      semesterTag: coursePropertiesFormValues?.semesterTag || '',
+      name: templatePropertiesFormValues?.name || '',
+      startDate: new Date(),
+      endDate: new Date(),
+      courseType: templatePropertiesFormValues?.courseType || '',
+      ects: templatePropertiesFormValues?.ects || 0,
+      semesterTag: templatePropertiesFormValues?.semesterTag || '',
       restrictedMetaData: {},
       // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
-      template: false,
+      template: true,
     }
     // todo API call
     mutate(course)
     setCurrentPage(1)
-    setCoursePropertiesFormValues(null) // reset the page 1 form
+    setTemplatePropertiesFormValues(null) // reset the page 1 form
   }
 
-  const handleNext = (data) => {
-    setCoursePropertiesFormValues(data)
+  const handleNext = (data: TemplateFormValues) => {
+    setTemplatePropertiesFormValues(data)
     setCurrentPage(2)
   }
 
@@ -96,7 +114,7 @@ export const AddCourseDialog = ({
   useEffect(() => {
     if (!isOpen) {
       reset()
-      setCoursePropertiesFormValues(null)
+      setTemplatePropertiesFormValues(null)
       setCurrentPage(1)
     }
   }, [isOpen, reset])
@@ -111,25 +129,26 @@ export const AddCourseDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {controlledOpen === undefined}
       <DialogContent className='sm:max-w-[550px]'>
         {isPending ? (
-          <DialogLoadingDisplay customMessage='Updating course data...' />
+          <DialogLoadingDisplay customMessage='Updating template data...' />
         ) : isError ? (
           <DialogErrorDisplay error={error} />
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className='text-2xl font-bold text-center'>Add a New Course</DialogTitle>
+              <DialogTitle className='text-2xl font-bold text-center'>
+                Add a New Template
+              </DialogTitle>
             </DialogHeader>
             {currentPage === 1 ? (
-              <AddCourseProperties
+              <AddTemplateProperties
                 onNext={handleNext}
                 onCancel={handleCancel}
-                initialValues={coursePropertiesFormValues || undefined}
+                initialValues={templatePropertiesFormValues || undefined}
               />
             ) : (
-              <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} />
+              <AddCourseAppearance onBack={handleBack} onSubmit={onSubmit} createTemplate={true} />
             )}
           </>
         )}

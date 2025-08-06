@@ -16,6 +16,7 @@ type CreateCourse struct {
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 	CourseType          db.CourseType `json:"courseType"`
 	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
+	Template            bool          `json:"template"`
 }
 
 func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {
@@ -40,5 +41,6 @@ func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {
 		StudentReadableData: studentReadableData,
 		CourseType:          c.CourseType,
 		Ects:                c.Ects,
+		Template:            c.Template,
 	}, nil
 }
