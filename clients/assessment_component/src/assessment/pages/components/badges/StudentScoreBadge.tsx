@@ -7,8 +7,8 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import { getLevelConfig } from '../utils/getLevelConfig'
-import { mapNumberToScoreLevel, ScoreLevel } from '../../interfaces/scoreLevel'
+import { getLevelConfig } from '../../utils/getLevelConfig'
+import { mapNumberToScoreLevel, ScoreLevel } from '../../../interfaces/scoreLevel'
 
 interface ScoreLevelBadgeProps {
   scoreLevel?: ScoreLevel

@@ -17,7 +17,8 @@ import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
 import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'
-import { StudentScoreBadge } from '../../../../components/StudentScoreBadge'
+
+import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
   onGradeSuggestionChange: (value: string) => void
