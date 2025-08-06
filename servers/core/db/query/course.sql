@@ -8,7 +8,9 @@ LIMIT 1;
 -- name: GetAllActiveCoursesAdmin :many
 SELECT c.*
 FROM course c
-ORDER BY c.semester_tag, c.name DESC;
+ORDER BY c.template,
+         c.semester_tag,
+         c.name DESC;
 
 -- name: GetAllActiveCoursesRestricted :many
 -- struct: Course
@@ -57,7 +59,9 @@ GROUP BY ucr.id,
          ucr.ects,
          ucr.restricted_data,
          ucr.template
-ORDER BY ucr.semester_tag, ucr.name DESC;
+ORDER BY ucr.template,
+         ucr.semester_tag,
+         ucr.name DESC;
 
 
 -- name: CreateCourse :one

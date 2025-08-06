@@ -99,7 +99,9 @@ func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
 SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template
 FROM course c
-ORDER BY c.semester_tag, c.name DESC
+ORDER BY c.template,
+         c.semester_tag,
+         c.name DESC
 `
 
 func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error) {
@@ -179,7 +181,9 @@ GROUP BY ucr.id,
          ucr.ects,
          ucr.restricted_data,
          ucr.template
-ORDER BY ucr.semester_tag, ucr.name DESC
+ORDER BY ucr.template,
+         ucr.semester_tag,
+         ucr.name DESC
 `
 
 type GetAllActiveCoursesRestrictedRow struct {
