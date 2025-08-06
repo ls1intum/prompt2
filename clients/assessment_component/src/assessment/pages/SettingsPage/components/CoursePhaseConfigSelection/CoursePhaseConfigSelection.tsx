@@ -11,7 +11,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { AlertCircle, Loader2, Settings } from 'lucide-react'
 
-import { AssessmentType } from '../../interfaces/assessmentType'
+import { AssessmentType } from '../../../../interfaces/assessmentType'
 
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 

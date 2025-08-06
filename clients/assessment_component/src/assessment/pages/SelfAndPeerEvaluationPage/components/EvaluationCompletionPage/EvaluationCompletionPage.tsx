@@ -4,6 +4,8 @@ import { Lock, Unlock } from 'lucide-react'
 
 import { Button, Alert, AlertDescription } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../../interfaces/assessmentType'
+
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
 import { DeadlineBadge } from '../../../components/badges'
 
@@ -104,7 +106,11 @@ export const EvaluationCompletionPage = ({
             <div className='text-muted-foreground'>
               <DeadlineBadge
                 deadline={deadline}
-                type={courseParticipationID === authorCourseParticipationID ? 'self' : 'peer'}
+                type={
+                  courseParticipationID === authorCourseParticipationID
+                    ? AssessmentType.SELF
+                    : AssessmentType.PEER
+                }
               />
             </div>
           )}

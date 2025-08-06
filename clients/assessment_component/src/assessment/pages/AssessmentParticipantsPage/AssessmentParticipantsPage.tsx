@@ -6,13 +6,6 @@ import { Loader2 } from 'lucide-react'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
-import {
-  StudentScoreBadge,
-  GradeSuggestionBadge,
-  PeerEvaluationCompletionBadge,
-  AssessmentStatusBadge,
-} from '../components/badges'
-
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -31,6 +24,13 @@ import { getLevelConfig } from '../utils/getLevelConfig'
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
 import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
+
+import {
+  StudentScoreBadge,
+  GradeSuggestionBadge,
+  PeerEvaluationCompletionBadge,
+  AssessmentStatusBadge,
+} from '../components/badges'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { Card } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
 import { Evaluation } from '../../../interfaces/evaluation'
 
 import { AssessmentStatusBadge } from '../../components/badges'
@@ -33,7 +34,7 @@ export const EvaluationInfoCard = ({
           <AssessmentStatusBadge
             remainingAssessments={competencyCount - (evaluations?.length || 0)}
             isFinalized={completed}
-            isEvaluation={true}
+            assessmentType={AssessmentType.SELF}
           />
         </div>
       </div>

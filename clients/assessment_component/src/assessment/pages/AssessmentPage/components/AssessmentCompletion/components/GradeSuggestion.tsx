@@ -15,10 +15,10 @@ import { usePeerEvaluationCategoryStore } from '../../../../../zustand/usePeerEv
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
 import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
 
-import { StudentScoreBadge } from '../../../../components/badges'
-
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
 import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'
+
+import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
   onGradeSuggestionChange: (value: string) => void
