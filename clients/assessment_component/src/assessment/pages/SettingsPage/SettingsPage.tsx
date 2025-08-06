@@ -11,7 +11,7 @@ import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 import { AssessmentType } from '../../interfaces/assessmentType'
 
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
-import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
 
 import { CoursePhaseConfigSelection } from './components/CoursePhaseConfigSelection/CoursePhaseConfigSelection'
 import { CategoryList } from './components/CategoryList/CategoryList'
@@ -43,7 +43,10 @@ export const SettingsPage = (): JSX.Element => {
         </div>
       ) : (
         <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:col-span-4 mb-4'>
-          <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+          <ScoreLevelDistributionDiagram
+            participations={participations}
+            scoreLevels={scoreLevels}
+          />
           <CategoryDiagram categories={categories} assessments={assessments} />
         </div>
       )}

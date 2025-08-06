@@ -16,6 +16,8 @@ import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAsse
 import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
+import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'
+
 import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
@@ -90,17 +92,11 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='1.0'>Very Good - 1.0</SelectItem>
-            <SelectItem value='1.3'>Very Good - 1.3</SelectItem>
-            <SelectItem value='1.7'>Good - 1.7</SelectItem>
-            <SelectItem value='2.0'>Good - 2.0</SelectItem>
-            <SelectItem value='2.3'>Good - 2.3</SelectItem>
-            <SelectItem value='2.7'>Satisfactory - 2.7</SelectItem>
-            <SelectItem value='3.0'>Satisfactory - 3.0</SelectItem>
-            <SelectItem value='3.3'>Satisfactory - 3.3</SelectItem>
-            <SelectItem value='3.7'>Sufficient - 3.7</SelectItem>
-            <SelectItem value='4.0'>Sufficient - 4.0</SelectItem>
-            <SelectItem value='5.0'>Fail - 5.0</SelectItem>
+            {GRADE_SELECT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardContent>

@@ -6,13 +6,6 @@ import { Loader2 } from 'lucide-react'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
 
-import {
-  StudentScoreBadge,
-  GradeSuggestionBadge,
-  PeerEvaluationCompletionBadge,
-  AssessmentStatusBadge,
-} from '../components/badges'
-
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -29,7 +22,15 @@ import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
-import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
+import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
+
+import {
+  StudentScoreBadge,
+  GradeSuggestionBadge,
+  PeerEvaluationCompletionBadge,
+  AssessmentStatusBadge,
+} from '../components/badges'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -97,6 +98,10 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
   const completedGradings = useMemo(() => {
     return assessmentCompletions?.filter((a) => a.completed) ?? []
   }, [assessmentCompletions])
+
+  const completedGrades = useMemo(() => {
+    return completedGradings.map((completion) => completion.gradeSuggestion)
+  }, [completedGradings])
 
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!scoreLevels) return []
@@ -374,13 +379,14 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
       <p className='text-sm text-muted-foreground mb-4'>
         Click on a participant to view/edit their assessment.
       </p>
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6'>
+      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 mb-6'>
         <AssessmentDiagram
           participations={participations}
           scoreLevels={scoreLevels}
           completions={assessmentCompletions}
         />
-        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
+        <GradeDistributionDiagram participations={participations} grades={completedGrades} />
+        <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
         <CoursePhaseParticipationsTablePage

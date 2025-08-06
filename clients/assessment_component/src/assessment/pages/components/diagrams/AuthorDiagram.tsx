@@ -6,65 +6,72 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
-
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
+import { GradeDistributionBarChart } from './gradeDistributionBarChart/GradeDistributionBarChart'
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
+import { createGradeDistributionDataPoint } from './gradeDistributionBarChart/utils/createGradeDistributionDataPoint'
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
 import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
+import { groupBy } from './utils/groupBy'
+
 interface AuthorDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
+  showGrade?: boolean
 }
 
 export const AuthorDiagram = ({
   participationsWithAssessment,
+  showGrade = false,
 }: AuthorDiagramProps): JSX.Element => {
-  const authorsMap = new Map<string, { scores: ScoreLevel[]; scoreLevels: ScoreLevel[] }>()
-  participationsWithAssessment.forEach((p) => {
-    if (p.assessmentCompletion?.author !== undefined) {
-      const author = p.assessmentCompletion?.author ?? 'Unknown Author'
-
-      if (p.scoreLevel !== undefined) {
-        if (!authorsMap.has(author)) {
-          authorsMap.set(author, { scores: [], scoreLevels: [] })
-        }
-        authorsMap.get(author)?.scores.push(...p.assessments.map((a) => a.scoreLevel))
-        authorsMap.get(author)?.scoreLevels.push(p.scoreLevel)
-      }
-    } else {
-      p.assessments.forEach((assessment) => {
-        const author = assessment.author ?? 'Unknown Author'
-
-        if (!authorsMap.has(author)) {
-          authorsMap.set(author, { scores: [], scoreLevels: [] })
-        }
-        authorsMap.get(author)?.scores.push(assessment.scoreLevel)
-      })
-    }
-  })
-
-  const data = Array.from(authorsMap.entries()).map(([author, participations]) =>
-    createScoreDistributionDataPoint(
-      author
+  const data = Array.from(
+    groupBy(
+      participationsWithAssessment,
+      (p) => p.assessmentCompletion?.author ?? 'Unknown Author',
+    ),
+  ).map(([author, participations]) => {
+    return {
+      shortLabel: author
         .split(' ')
         .map((name) => name[0])
         .join(''),
-      author,
-      participations.scores,
-      participations.scoreLevels,
-    ),
-  )
+      label: author,
+      participationWithAssessment: participations,
+    }
+  })
 
   return (
-    <Card className={`flex flex-col ${getGridSpanClass(authorsMap.size)}`}>
-      <CardHeader className='items-center pb-0'>
+    <Card className={`flex flex-col ${getGridSpanClass(data.length)}`}>
+      <CardHeader className='items-center'>
         <CardTitle>Author Distribution</CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0'>
-        <ScoreDistributionBarChart data={data} />
+      <CardContent className='flex-1'>
+        {showGrade ? (
+          <GradeDistributionBarChart
+            data={data.map((d) =>
+              createGradeDistributionDataPoint(
+                d.shortLabel,
+                d.label,
+                d.participationWithAssessment
+                  .map((p) => p.assessmentCompletion?.gradeSuggestion)
+                  .filter((grade): grade is number => grade !== undefined),
+              ),
+            )}
+          />
+        ) : (
+          <ScoreDistributionBarChart
+            data={data.map((d) =>
+              createScoreDistributionDataPoint(
+                d.shortLabel,
+                d.label,
+                d.participationWithAssessment.map((p) => p.scoreNumeric),
+                d.participationWithAssessment.map((p) => p.scoreLevel),
+              ),
+            )}
+          />
+        )}
       </CardContent>
     </Card>
   )

@@ -14,12 +14,13 @@ WHERE course_phase_id = $1
 
 -- name: GetAllScoreLevels :many
 SELECT course_participation_id,
-       score_level
-FROM completed_score_levels
+       score_level,
+       score_numeric
+FROM weighted_participant_scores
 WHERE course_phase_id = $1;
 
 -- name: GetScoreLevelByCourseParticipationID :one
 SELECT score_level
-FROM completed_score_levels
+FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2;

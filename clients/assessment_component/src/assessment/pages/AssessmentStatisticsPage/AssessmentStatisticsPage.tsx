@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
+import { useState, useMemo } from 'react'
 
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
@@ -14,17 +15,22 @@ import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAll
 
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
 
-import { useGetParticipantionsWithAssessment } from '../components/diagrams/hooks/useGetParticipantWithAssessment'
+import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks/useGetParticipationsWithAssessment'
 
-import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
-import { AssessmentScoreLevelDiagram } from '../components/diagrams/AssessmentScoreLevelDiagram'
+import { GradeDistributionDiagram } from '../components/diagrams/GradeDistributionDiagram'
+
+import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
 import { GenderDiagram } from '../components/diagrams/GenderDiagram'
 import { AuthorDiagram } from '../components/diagrams/AuthorDiagram'
 import { CategoryDiagram } from '../components/diagrams/CategoryDiagram'
 import { NationalityDiagram } from '../components/diagrams/NationalityDiagram'
 
-export const AssessmentStatisticsPage = (): JSX.Element => {
+import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
+import { FilterBadges } from './components/FilterBadges'
+
+export const AssessmentStatisticsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
+  const [filters, setFilters] = useState<StatisticsFilter>({})
 
   const { categories } = useCategoryStore()
   const { participations } = useParticipationStore()
@@ -47,11 +53,69 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
     queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
   })
 
-  const participationsWithAssessments = useGetParticipantionsWithAssessment(
+  const participationsWithAssessments = useGetParticipationsWithAssessment(
     participations || [],
     scoreLevels || [],
     assessmentCompletions || [],
     assessments || [],
+  )
+
+  const { filteredParticipations, filteredParticipationWithAssessments } = useMemo(() => {
+    if (!participations || !assessmentCompletions || !participationsWithAssessments) {
+      return {
+        filteredParticipations: [],
+        filteredParticipationWithAssessments: [],
+      }
+    }
+
+    let parts = participations
+    let partsWithAssessments = participationsWithAssessments
+
+    if (filters.genders && filters.genders.length > 0) {
+      parts = parts.filter((p) => p.student.gender && filters.genders!.includes(p.student.gender))
+      partsWithAssessments = partsWithAssessments.filter(
+        (p) =>
+          p.participation.student.gender &&
+          filters.genders!.includes(p.participation.student.gender),
+      )
+    }
+
+    if (filters.semester && (filters.semester.min || filters.semester.max)) {
+      const { min, max } = filters.semester
+
+      parts = parts.filter((p) => {
+        const semester = p.student.currentSemester || 0
+        const meetsMin = !min || semester >= min
+        const meetsMax = !max || semester <= max
+        return meetsMin && meetsMax
+      })
+
+      partsWithAssessments = partsWithAssessments.filter((p) => {
+        const semester = p.participation.student.currentSemester || 0
+        const meetsMin = !min || semester >= min
+        const meetsMax = !max || semester <= max
+        return meetsMin && meetsMax
+      })
+    }
+
+    return {
+      filteredParticipations: parts,
+      filteredParticipationWithAssessments: partsWithAssessments,
+    }
+  }, [participations, assessmentCompletions, participationsWithAssessments, filters])
+
+  const filteredGrades = filteredParticipationWithAssessments
+    .map((p) => p.assessmentCompletion?.gradeSuggestion)
+    .filter((p) => p !== undefined)
+
+  const filteredScoreLevels = useMemo(
+    () =>
+      filteredParticipationWithAssessments.map((p) => ({
+        courseParticipationID: p.participation.courseParticipationID,
+        scoreLevel: p.scoreLevel,
+        scoreNumeric: p.scoreNumeric,
+      })),
+    [filteredParticipationWithAssessments],
   )
 
   const isError = isAssessmentsError || isAssessmentCompletionsError
@@ -76,18 +140,47 @@ export const AssessmentStatisticsPage = (): JSX.Element => {
   return (
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Statistics</ManagementPageHeader>
+      <div className='space-y-2'>
+        <div className='flex justify-between items-end gap-2'>
+          <div className='flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4'>
+            <FilterMenu filters={filters} setFilters={setFilters} />
+          </div>
+          <div className='text-sm text-muted-foreground'>
+            Filters will be applied to all diagrams. Currently showing{' '}
+            {filteredParticipations.length} of {participations?.length ?? 0} participants.
+          </div>
+        </div>
 
-      <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-6'>
-        <AssessmentDiagram
-          participations={participations}
-          scoreLevels={scoreLevels}
-          completions={assessmentCompletions}
+        <FilterBadges filters={filters} onRemoveFilter={setFilters} />
+        <GradeDistributionDiagram participations={filteredParticipations} grades={filteredGrades} />
+      </div>
+
+      <h1 className='text-xl font-semibold'>Detailed Grade Statistics</h1>
+      <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
+        <GenderDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
         />
-        <AssessmentScoreLevelDiagram participations={participations} scoreLevels={scoreLevels} />
-        <GenderDiagram participationsWithAssessment={participationsWithAssessments} />
+        <AuthorDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
+        />
+        <NationalityDiagram
+          participationsWithAssessment={filteredParticipationWithAssessments}
+          showGrade
+        />
+      </div>
+
+      <h1 className='text-xl font-semibold'>Detailed Score Level Statistics</h1>
+      <div className='grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 mb-6'>
+        <ScoreLevelDistributionDiagram
+          participations={filteredParticipations}
+          scoreLevels={filteredScoreLevels}
+        />
+        <GenderDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
         <CategoryDiagram categories={categories} assessments={assessments} />
-        <AuthorDiagram participationsWithAssessment={participationsWithAssessments} />
-        <NationalityDiagram participationsWithAssessment={participationsWithAssessments} />
+        <AuthorDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
+        <NationalityDiagram participationsWithAssessment={filteredParticipationWithAssessments} />
       </div>
     </div>
   )
