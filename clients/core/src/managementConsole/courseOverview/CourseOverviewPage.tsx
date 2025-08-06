@@ -78,7 +78,9 @@ export const CourseOverview = (): JSX.Element => {
                 <div>
                   <p className='text-secondary-foreground'>Duration</p>
                   <p className='text-lg'>
-                    {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
+                    {course.startDate && course.endDate
+                      ? `${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`
+                      : 'N/A'}
                   </p>
                 </div>
               </div>

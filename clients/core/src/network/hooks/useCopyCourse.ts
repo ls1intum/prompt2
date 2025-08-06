@@ -6,16 +6,19 @@ import { checkCourseCopyable } from '@core/network/mutations/checkCourseCopyable
 import type { CopyCourse } from '../../managementConsole/courseOverview/interfaces/copyCourse'
 import type { CopyCourseFormValues } from '@core/validations/copyCourse'
 import type { DialogStep } from '../../managementConsole/courseOverview/interfaces/copyCourseDialogProps'
+import { useKeycloak } from '@core/keycloak/useKeycloak'
 
 export const useCopyCourse = (
   courseId: string,
   currentStep: DialogStep,
   onClose: () => void,
   setCurrentStep: (step: DialogStep) => void,
+  useTemplateCopy?: boolean,
 ) => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { forceTokenRefresh } = useKeycloak()
 
   // Query to check if course is copyable
   const {
@@ -32,13 +35,28 @@ export const useCopyCourse = (
     mutationFn: (courseData: CopyCourse) => {
       return copyCourse(courseId ?? '', courseData)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] })
+    onSuccess: (data: string | undefined) => {
       toast({
         title: 'Successfully Copied Course',
       })
-      navigate('/management/general')
-      onClose()
+      forceTokenRefresh() // refresh token to get permission for new course
+        .then(() => {
+          // Invalidate course queries
+          return queryClient.invalidateQueries({ queryKey: ['courses'] })
+        })
+        .then(() => {
+          // Wait for courses to be refetched
+          return queryClient.refetchQueries({ queryKey: ['courses'] })
+        })
+        .then(() => {
+          // Close the window and navigate
+          navigate(`/management/course/${data}`)
+          onClose()
+        })
+        .catch((err) => {
+          console.error('Error during token refresh or query invalidation:', err)
+          return err
+        })
     },
     onError: () => {
       toast({
@@ -54,8 +72,9 @@ export const useCopyCourse = (
     const copyData: CopyCourse = {
       name: formData.name,
       semesterTag: formData.semesterTag,
-      startDate: formData.dateRange.from,
-      endDate: formData.dateRange.to,
+      startDate: formData.dateRange?.from ?? new Date(),
+      endDate: formData.dateRange?.to ?? new Date(),
+      template: useTemplateCopy ?? false,
     }
     mutateCopyCourse(copyData)
   }

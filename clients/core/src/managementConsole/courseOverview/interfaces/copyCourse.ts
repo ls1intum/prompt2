@@ -3,6 +3,7 @@ export interface CopyCourse {
   semesterTag: string
   startDate: Date
   endDate: Date
+  template: boolean
 }
 
 // Helper function to format Date as YYYY-MM-DD

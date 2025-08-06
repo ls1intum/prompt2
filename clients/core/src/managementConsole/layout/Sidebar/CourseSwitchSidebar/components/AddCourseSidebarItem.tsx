@@ -1,11 +1,12 @@
-import { SidebarMenuButton, SidebarMenuItem } from '@tumaet/prompt-ui-components'
+import { SidebarMenuItem } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
-import { AddCourseDialog } from '../../../../courseOverview/AddingCourse/AddCourseDialog'
+import { CourseCreationChoiceDialog } from '@managementConsole/courseOverview/AddingCourse/components/CourseCreationChoiceDialog'
+import { SidebarMenuButton } from '@tumaet/prompt-ui-components'
 
 export const AddCourseButton = (): JSX.Element => {
   return (
     <SidebarMenuItem>
-      <AddCourseDialog>
+      <CourseCreationChoiceDialog>
         <SidebarMenuButton
           size='lg'
           tooltip={{
@@ -20,7 +21,7 @@ export const AddCourseButton = (): JSX.Element => {
             </div>
           </div>
         </SidebarMenuButton>
-      </AddCourseDialog>
+      </CourseCreationChoiceDialog>
     </SidebarMenuItem>
   )
 }

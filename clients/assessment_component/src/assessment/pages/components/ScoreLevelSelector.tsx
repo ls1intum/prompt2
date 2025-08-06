@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
 import { Competency } from '../../interfaces/competency'
 import { ScoreLevel } from '../../interfaces/scoreLevel'
 
@@ -18,7 +19,7 @@ interface ScoreLevelSelectorProps {
   selectedScore?: ScoreLevel
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
-  isEvaluation?: boolean
+  assessmentType?: AssessmentType
   selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
   selfEvaluationStudentAnswers?: (() => JSX.Element)[]
@@ -33,7 +34,7 @@ export const ScoreLevelSelector = ({
   selectedScore,
   onScoreChange,
   completed,
-  isEvaluation = false,
+  assessmentType = AssessmentType.ASSESSMENT,
   selfEvaluationCompetency,
   selfEvaluationScoreLevel,
   selfEvaluationStudentAnswers,
@@ -127,7 +128,9 @@ export const ScoreLevelSelector = ({
             >
               <div className='flex justify-between mb-1'>
                 <span className='font-semibold'>
-                  {isEvaluation ? config.evaluationTitle : config.title}
+                  {assessmentType === AssessmentType.SELF || assessmentType === AssessmentType.PEER
+                    ? config.evaluationTitle
+                    : config.title}
                 </span>
 
                 {completed && isSelected && (

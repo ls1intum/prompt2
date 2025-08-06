@@ -9,6 +9,7 @@ export interface PostCourse {
   semesterTag: string
   restrictedMetaData: { [key: string]: any }
   studentReadableData: { [key: string]: any }
+  template: boolean
 }
 
 // Helper function to format Date as YYYY-MM-DD

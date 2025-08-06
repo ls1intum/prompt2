@@ -161,6 +161,10 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	}
 
 	createCourseParams.ID = uuid.New()
+	if createCourseParams.Template {
+		createCourseParams.StartDate = pgtype.Date{Valid: false}
+		createCourseParams.EndDate = pgtype.Date{Valid: false}
+	}
 	createdCourse, err := qtx.CreateCourse(ctx, createCourseParams)
 	if err != nil {
 		return courseDTO.Course{}, err

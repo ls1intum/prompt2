@@ -10,9 +10,8 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { FileText, Calendar } from 'lucide-react'
 
+import { AssessmentType } from '../../../../../interfaces/assessmentType'
 import { AssessmentTemplate } from '../../../../../interfaces/assessmentTemplate'
-
-import { AssessmentType } from '../../../interfaces/assessmentType'
 
 import { CreateAssessmentTemplateDialog } from './CreateAssessmentTemplateDialog'
 

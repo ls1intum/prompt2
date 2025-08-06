@@ -14,14 +14,16 @@ import (
 
 const getAllScoreLevels = `-- name: GetAllScoreLevels :many
 SELECT course_participation_id,
-       score_level
-FROM completed_score_levels
+       score_level,
+       score_numeric
+FROM weighted_participant_scores
 WHERE course_phase_id = $1
 `
 
 type GetAllScoreLevelsRow struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	ScoreLevel            string    `json:"score_level"`
+	CourseParticipationID uuid.UUID      `json:"course_participation_id"`
+	ScoreLevel            string         `json:"score_level"`
+	ScoreNumeric          pgtype.Numeric `json:"score_numeric"`
 }
 
 func (q *Queries) GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllScoreLevelsRow, error) {
@@ -33,7 +35,7 @@ func (q *Queries) GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID
 	var items []GetAllScoreLevelsRow
 	for rows.Next() {
 		var i GetAllScoreLevelsRow
-		if err := rows.Scan(&i.CourseParticipationID, &i.ScoreLevel); err != nil {
+		if err := rows.Scan(&i.CourseParticipationID, &i.ScoreLevel, &i.ScoreNumeric); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -46,7 +48,7 @@ func (q *Queries) GetAllScoreLevels(ctx context.Context, coursePhaseID uuid.UUID
 
 const getScoreLevelByCourseParticipationID = `-- name: GetScoreLevelByCourseParticipationID :one
 SELECT score_level
-FROM completed_score_levels
+FROM weighted_participant_scores
 WHERE course_phase_id = $1
   AND course_participation_id = $2
 `

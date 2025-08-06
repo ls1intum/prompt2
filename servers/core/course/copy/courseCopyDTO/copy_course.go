@@ -7,4 +7,5 @@ type CopyCourseRequest struct {
 	SemesterTag pgtype.Text `json:"semesterTag"`
 	StartDate   pgtype.Date `json:"startDate"`
 	EndDate     pgtype.Date `json:"endDate"`
+	Template    bool        `json:"template"`
 }
