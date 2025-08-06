@@ -10,7 +10,7 @@ export const createScoreDistributionDataPoint = (
   scores: number[],
   scoreLevels: ScoreLevel[],
 ): ScoreDistributionDataPoint => {
-  if (scoreLevels.length === 0) {
+  if (scores.length === 0 || scoreLevels.length === 0) {
     return {
       shortLabel,
       label,
