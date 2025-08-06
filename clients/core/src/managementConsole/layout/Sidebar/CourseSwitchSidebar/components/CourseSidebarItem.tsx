@@ -6,20 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { checkCourseTemplateStatus } from '../../../../../network/queries/checkCourseTemplateStatus'
 
-// Todo move somewhere else
-const subtleColors = [
-  'bg-red-100',
-  'bg-yellow-100',
-  'bg-green-100',
-  'bg-blue-100',
-  'bg-indigo-100',
-  'bg-purple-100',
-  'bg-pink-100',
-  'bg-orange-100',
-  'bg-teal-100',
-  'bg-cyan-100',
-]
-
 interface CourseSidebarItemProps {
   course: Course
 }
@@ -30,7 +16,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const { courseId } = useParams<{ courseId: string }>()
 
   const isActive = course.id === courseId
-  const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-gray-100']
+  const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-100'
   const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
 
   const { data } = useQuery({
