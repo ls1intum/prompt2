@@ -28,7 +28,7 @@ import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdate
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
 
-import { validateGrade } from './utils/validateGrade'
+import { validateGrade } from '../../../utils/gradeConfig'
 
 export const AssessmentCompletion = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
