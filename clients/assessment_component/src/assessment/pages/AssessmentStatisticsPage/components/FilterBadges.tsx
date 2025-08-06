@@ -2,13 +2,15 @@ import { Badge } from '@tumaet/prompt-ui-components'
 import { X } from 'lucide-react'
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { StatisticsFilter } from './FilterMenu'
+import { Team } from '../../../interfaces/team'
 
 interface FilterBadgesProps {
   filters: StatisticsFilter
   onRemoveFilter: React.Dispatch<React.SetStateAction<StatisticsFilter>>
+  teams: Team[]
 }
 
-export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => {
+export const FilterBadges = ({ filters, onRemoveFilter, teams }: FilterBadgesProps) => {
   const handleRemoveGenderFilter = (gender: Gender) => {
     onRemoveFilter((prevFilters) => {
       const currentGenders = prevFilters.genders || []
@@ -16,6 +18,17 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
       return {
         ...prevFilters,
         genders: newGenders.length > 0 ? newGenders : undefined,
+      }
+    })
+  }
+
+  const handleRemoveTeamFilter = (teamId: string) => {
+    onRemoveFilter((prevFilters) => {
+      const currentTeams = prevFilters.teams || []
+      const newTeams = currentTeams.filter((t) => t !== teamId)
+      return {
+        ...prevFilters,
+        teams: newTeams.length > 0 ? newTeams : undefined,
       }
     })
   }
@@ -36,6 +49,18 @@ export const FilterBadges = ({ filters, onRemoveFilter }: FilterBadgesProps) => 
         key: `gender-${gender}`,
         label: `Gender: ${getGenderString(gender)}`,
         onRemove: () => handleRemoveGenderFilter(gender),
+      })
+    })
+  }
+
+  if (filters.teams) {
+    filters.teams.forEach((teamId) => {
+      const team = teams.find((t) => t.id === teamId)
+      const teamName = team ? team.name : 'Unknown Team'
+      activeBadges.push({
+        key: `team-${teamId}`,
+        label: `Team: ${teamName}`,
+        onRemove: () => handleRemoveTeamFilter(teamId),
       })
     })
   }
