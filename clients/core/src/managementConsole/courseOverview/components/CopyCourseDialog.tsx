@@ -17,8 +17,6 @@ export const CopyCourseDialog = ({
 }: CourseCopyDialogProps): JSX.Element => {
   const [currentStep, setCurrentStep] = useState<DialogStep>('form')
 
-  const copyHook = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, useTemplateCopy)
-
   const {
     copyabilityData,
     isCheckingCopyability,
@@ -26,7 +24,7 @@ export const CopyCourseDialog = ({
     isCopying,
     handleProceedWithCopy,
     queryClient,
-  } = copyHook
+  } = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, useTemplateCopy)
 
   const {
     form: copyForm,
