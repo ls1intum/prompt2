@@ -19,7 +19,13 @@ import type { CreateCompetencyRequest } from '../../../../../interfaces/competen
 
 import { useCreateCompetency } from '../hooks/useCreateCompetency'
 
-export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => {
+export const CreateCompetencyForm = ({
+  categoryID,
+  onCancel,
+}: {
+  categoryID: string
+  onCancel?: () => void
+}) => {
   const [error, setError] = useState<string | undefined>(undefined)
 
   const {
@@ -37,22 +43,23 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
     mutate(data, {
       onSuccess: () => {
         reset()
+        onCancel?.()
       },
     })
   }
 
   return (
     <Card className='w-full shadow-sm'>
-      <CardHeader className='pb-3'>
-        <CardTitle className='text-xl font-semibold'>Create New Competency</CardTitle>
+      <CardHeader>
+        <CardTitle>Create New Competency</CardTitle>
       </CardHeader>
 
       <CardContent>
         <form id='competency-form' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <input type='hidden' {...register('categoryID', { required: true })} />
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6'>
-            <div className='space-y-2'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
+            <div className='md:col-span-2 space-y-2'>
               <Label htmlFor='name' className='font-medium'>
                 Name
               </Label>
@@ -96,9 +103,8 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
               />
               {errors.weight && <p className='text-sm text-red-500 mt-1'>Weight is required</p>}
             </div>
-          </div>
-          <div className='grid grid-cols-1 gap-4 mb-6'>
-            <div className='space-y-2 sm:col-span-2'>
+
+            <div className='sm:col-span-2 md:col-span-4 space-y-2'>
               <Label htmlFor='description' className='font-medium'>
                 Description
               </Label>
@@ -201,9 +207,22 @@ export const CreateCompetencyForm = ({ categoryID }: { categoryID: string }) => 
             </div>
           </div>
 
-          <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
-            {isPending ? 'Creating...' : 'Create'}
-          </Button>
+          <div className='flex gap-2'>
+            <Button type='submit' disabled={isPending} className='flex-1'>
+              {isPending ? 'Creating...' : 'Create'}
+            </Button>
+            {onCancel && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onCancel}
+                disabled={isPending}
+                className='flex-1'
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
 
         {error && (

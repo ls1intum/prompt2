@@ -14,7 +14,7 @@ import { ScoreLevel } from '../../interfaces/scoreLevel'
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 interface ScoreLevelSelectorProps {
-  className: string
+  className?: string
   competency: Competency
   selectedScore?: ScoreLevel
   onScoreChange: (value: ScoreLevel) => void
