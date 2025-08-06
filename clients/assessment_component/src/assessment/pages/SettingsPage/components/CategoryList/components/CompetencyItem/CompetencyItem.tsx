@@ -3,6 +3,7 @@ import { Edit, Trash2 } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../../../../interfaces/assessmentType'
 import { Competency } from '../../../../../../interfaces/competency'
 
 import { useCoursePhaseConfigStore } from '../../../../../../zustand/useCoursePhaseConfigStore'
@@ -10,8 +11,6 @@ import { useSelfEvaluationCategoryStore } from '../../../../../../zustand/useSel
 import { usePeerEvaluationCategoryStore } from '../../../../../../zustand/usePeerEvaluationCategoryStore'
 
 import { ScoreLevelSelector } from '../../../../../components/ScoreLevelSelector'
-
-import { AssessmentType } from '../../../../interfaces/assessmentType'
 
 import { DeleteConfirmDialog } from '../DeleteConfirmDialog'
 

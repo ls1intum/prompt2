@@ -12,7 +12,7 @@ import {
   TooltipProvider,
 } from '@tumaet/prompt-ui-components'
 
-import { AssessmentType } from '../../../../../interfaces/assessmentType'
+import { AssessmentType } from '../../../../../../../interfaces/assessmentType'
 import { Competency } from '../../../../../../../interfaces/competency'
 
 import { useUpdateCompetencyMapping } from '../hooks/useUpdateCompetencyMapping'

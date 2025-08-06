@@ -3,9 +3,8 @@ import { ChevronRight, ChevronDown, Edit, Trash2, Plus } from 'lucide-react'
 
 import { Button } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../../../interfaces/assessmentType'
 import type { CategoryWithCompetencies } from '../../../../../interfaces/category'
-
-import { AssessmentType } from '../../../interfaces/assessmentType'
 
 import { CompetencyItem } from './CompetencyItem/CompetencyItem'
 import { CreateCompetencyForm } from './CreateCompetencyForm'
