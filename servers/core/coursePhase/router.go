@@ -220,6 +220,16 @@ func handleError(c *gin.Context, statusCode int, err error) {
 	})
 }
 
+// getCoursePhaseParticipationStatusCounts godoc
+// @Summary Get course phase participation status counts
+// @Description Get counts of participation statuses for a course phase
+// @Tags course_phases
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} map[string]int "Status counts"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participation_status_counts [get]
 func getCoursePhaseParticipationStatusCounts(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
