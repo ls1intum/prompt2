@@ -100,6 +100,7 @@ export const CopyCourseDialog = ({
             onProceed={handleProceed}
             queryClient={queryClient}
             useTemplateCopy={useTemplateCopy}
+            createTemplate={createTemplate}
           />
         )}
       </DialogContent>
