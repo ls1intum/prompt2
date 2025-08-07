@@ -45,7 +45,7 @@ export const CourseCreationChoiceDialog = ({
         <DialogContent className='sm:max-w-[420px] p-6'>
           <DialogHeader className='text-center'>
             <DialogTitle className='text-2xl font-bold text-gray-900 dark:text-gray-50'>
-              Add a New Course
+              Select a Starting Point
             </DialogTitle>
             <p className='text-sm text-muted-foreground mt-2'>
               Choose how you would like to get started
