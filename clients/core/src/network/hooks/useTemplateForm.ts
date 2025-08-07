@@ -15,7 +15,7 @@ export const useTemplateForm = (courseId: string, setCurrentStep: (step: DialogS
     resolver: zodResolver(makeTemplateCourseSchema),
     defaultValues: {
       name: course?.name,
-      semesterTag: '',
+      semesterTag: 'template',
     },
   })
 

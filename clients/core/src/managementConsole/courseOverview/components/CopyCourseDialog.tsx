@@ -57,7 +57,8 @@ export const CopyCourseDialog = ({
     if (!copyFormData && !templateFormData) return
     if (createTemplate) {
       if (templateFormData) {
-        const { name, semesterTag } = templateFormData
+        const name = templateFormData.name
+        const semesterTag = templateFormData.semesterTag || 'template'
         const dateRange = copyFormData?.dateRange || { from: new Date(), to: new Date() }
         handleProceedWithCopy({ name, semesterTag, dateRange })
       }
