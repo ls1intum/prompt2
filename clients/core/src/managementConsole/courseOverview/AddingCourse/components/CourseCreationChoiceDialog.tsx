@@ -1,4 +1,3 @@
-import type React from 'react'
 import { useState } from 'react'
 import {
   Dialog,
@@ -56,8 +55,8 @@ export const CourseCreationChoiceDialog = ({
             <div
               onClick={handleNewCourse}
               className={
-                'group flex items-center gap-4 w-full p-5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer ' +
-                'transition-all duration-200 hover:border-primary hover:bg-primary-foreground/50 hover:shadow-md'
+                'group flex items-center gap-4 w-full p-5 rounded-xl border border-border bg-card shadow-sm cursor-pointer ' +
+                'transition-colors duration-200 hover:bg-accent hover:text-accent-foreground'
               }
               role='button'
               tabIndex={0}
@@ -69,14 +68,14 @@ export const CourseCreationChoiceDialog = ({
             >
               <div
                 className={
-                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 flex-shrink-0 ' +
-                  'transition-all duration-200 group-hover:bg-primary group-hover:text-white'
+                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex-shrink-0 ' +
+                  'transition-colors duration-200 group-hover:text-accent-foreground'
                 }
               >
-                <Plus className='w-6 h-6 text-primary transition-all duration-200 group-hover:text-white' />
+                <Plus className='w-6 h-6 text-primary transition-colors duration-200 group-hover:text-accent-foreground' />
               </div>
               <div className='flex flex-col min-w-0 flex-1'>
-                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-primary'>
+                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-accent-foreground'>
                   Create New Course
                 </span>
                 <span className='text-sm text-muted-foreground mt-0.5'>
@@ -84,12 +83,11 @@ export const CourseCreationChoiceDialog = ({
                 </span>
               </div>
             </div>
-
             <div
               onClick={handleAddTemplate}
               className={
-                'group flex items-center gap-4 w-full p-5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer ' +
-                'transition-all duration-200 hover:border-primary hover:bg-primary-foreground/50 hover:shadow-md'
+                'group flex items-center gap-4 w-full p-5 rounded-xl border border-border bg-card shadow-sm cursor-pointer ' +
+                'transition-colors duration-200 hover:bg-accent hover:text-accent-foreground'
               }
               role='button'
               tabIndex={0}
@@ -101,14 +99,14 @@ export const CourseCreationChoiceDialog = ({
             >
               <div
                 className={
-                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 flex-shrink-0 ' +
-                  'transition-all duration-200 group-hover:bg-primary group-hover:text-white'
+                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex-shrink-0 ' +
+                  'transition-colors duration-200 group-hover:text-accent-foreground'
                 }
               >
-                <LayoutTemplate className='w-6 h-6 text-primary transition-all duration-200 group-hover:text-white' />
+                <LayoutTemplate className='w-6 h-6 text-primary transition-colors duration-200 group-hover:text-accent-foreground' />
               </div>
               <div className='flex flex-col min-w-0 flex-1'>
-                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-primary'>
+                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-accent-foreground'>
                   Create New Template
                 </span>
                 <span className='text-sm text-muted-foreground mt-0.5'>
@@ -116,12 +114,11 @@ export const CourseCreationChoiceDialog = ({
                 </span>
               </div>
             </div>
-
             <div
               onClick={handleFromTemplate}
               className={
-                'group flex items-center gap-4 w-full p-5 rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer ' +
-                'transition-all duration-200 hover:border-primary hover:bg-primary-foreground/50 hover:shadow-md'
+                'group flex items-center gap-4 w-full p-5 rounded-xl border border-border bg-card shadow-sm cursor-pointer ' +
+                'transition-colors duration-200 hover:bg-accent hover:text-accent-foreground'
               }
               role='button'
               tabIndex={0}
@@ -133,14 +130,14 @@ export const CourseCreationChoiceDialog = ({
             >
               <div
                 className={
-                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 flex-shrink-0 ' +
-                  'transition-all duration-200 group-hover:bg-primary group-hover:text-white'
+                  'flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex-shrink-0 ' +
+                  'transition-colors duration-200 group-hover:text-accent-foreground'
                 }
               >
-                <FileTemplate className='w-6 h-6 text-primary transition-all duration-200 group-hover:text-white' />
+                <FileTemplate className='w-6 h-6 text-primary transition-colors duration-200 group-hover:text-accent-foreground' />
               </div>
               <div className='flex flex-col min-w-0 flex-1'>
-                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-primary'>
+                <span className='font-semibold text-base text-gray-800 dark:text-gray-100 transition-colors duration-200 group-hover:text-accent-foreground'>
                   Use Template
                 </span>
                 <span className='text-sm text-muted-foreground mt-0.5'>
