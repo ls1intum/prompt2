@@ -655,6 +655,38 @@ func (q *Queries) GetCoursePhaseParticipationByUniversityLoginAndCoursePhase(ctx
 	return i, err
 }
 
+const getCoursePhaseParticipationStatusCounts = `-- name: GetCoursePhaseParticipationStatusCounts :many
+SELECT pass_status, COUNT(*) AS count
+FROM course_phase_participation
+WHERE course_phase_id = $1
+GROUP BY pass_status
+`
+
+type GetCoursePhaseParticipationStatusCountsRow struct {
+	PassStatus NullPassStatus `json:"pass_status"`
+	Count      int64          `json:"count"`
+}
+
+func (q *Queries) GetCoursePhaseParticipationStatusCounts(ctx context.Context, coursePhaseID uuid.UUID) ([]GetCoursePhaseParticipationStatusCountsRow, error) {
+	rows, err := q.db.Query(ctx, getCoursePhaseParticipationStatusCounts, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCoursePhaseParticipationStatusCountsRow
+	for rows.Next() {
+		var i GetCoursePhaseParticipationStatusCountsRow
+		if err := rows.Scan(&i.PassStatus, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getStudentsOfCoursePhase = `-- name: GetStudentsOfCoursePhase :many
 WITH 
   -----------------------------------------------------------------------
