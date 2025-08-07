@@ -37,7 +37,10 @@ export const CourseCards = (): JSX.Element => {
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Card
-              className='overflow-hidden border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none h-full flex flex-col'
+              className={
+                'overflow-hidden border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer ' +
+                'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none h-full flex flex-col'
+              }
               onClick={() => handleCourseClick(course.id)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
