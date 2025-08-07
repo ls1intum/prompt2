@@ -11,7 +11,6 @@ import {
 import { AlertTriangle, Info } from 'lucide-react'
 import type { QueryClient } from '@tanstack/react-query'
 import type { CopyabilityData } from '../interfaces/copyCourseDialogProps'
-import { c } from 'framer-motion/dist/types.d-Cjd591yU'
 
 interface WarningStepProps {
   copyabilityData?: CopyabilityData
