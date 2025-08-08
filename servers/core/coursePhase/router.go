@@ -237,17 +237,10 @@ func getCoursePhaseParticipationStatusCounts(c *gin.Context) {
 		return
 	}
 
-	counts, err := CoursePhaseServiceSingleton.queries.GetCoursePhaseParticipationStatusCounts(c, id)
+	countsMap, err := GetCoursePhaseParticipationStatusCounts(c, id)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
-	}
-
-	// Convert the slice of structs to a map
-	countsMap := make(map[string]int)
-	for _, count := range counts {
-		status := string(count.PassStatus.PassStatus)
-		countsMap[status] = int(count.Count)
 	}
 
 	c.IndentedJSON(http.StatusOK, countsMap)
