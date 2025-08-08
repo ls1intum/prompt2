@@ -101,3 +101,16 @@ func GetPrevPhaseDataByCoursePhaseID(ctx context.Context, coursePhaseID uuid.UUI
 
 	return prevCoursePhaseDataDTO, nil
 }
+
+func GetCoursePhaseParticipationStatusCounts(ctx context.Context, coursePhaseID uuid.UUID) (map[string]int, error) {
+	counts, err := CoursePhaseServiceSingleton.queries.GetCoursePhaseParticipationStatusCounts(ctx, coursePhaseID)
+
+	// Convert the slice of structs to a map
+	countsMap := make(map[string]int)
+	for _, count := range counts {
+		status := string(count.PassStatus.PassStatus)
+		countsMap[status] = int(count.Count)
+	}
+
+	return countsMap, err
+}

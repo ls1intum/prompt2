@@ -324,6 +324,15 @@ definitions:
           $ref: '#/definitions/applicationDTO.QuestionText'
         type: array
     type: object
+  courseCopyDTO.CheckCourseCopyableResponse:
+    properties:
+      copyable:
+        type: boolean
+      missingPhaseTypes:
+        items:
+          type: string
+        type: array
+    type: object
   courseDTO.Course:
     properties:
       courseType:
@@ -344,6 +353,8 @@ definitions:
         type: string
       studentReadableData:
         $ref: '#/definitions/meta.MetaData'
+      template:
+        type: boolean
     type: object
   courseDTO.CoursePhaseGraph:
     properties:
@@ -351,6 +362,11 @@ definitions:
         type: string
       toCoursePhaseID:
         type: string
+    type: object
+  courseDTO.CourseTemplateStatus:
+    properties:
+      isTemplate:
+        type: boolean
     type: object
   courseDTO.CourseWithPhases:
     properties:
@@ -395,6 +411,8 @@ definitions:
         type: string
       studentReadableData:
         $ref: '#/definitions/meta.MetaData'
+      template:
+        type: boolean
     type: object
   courseDTO.MetaDataGraphItem:
     properties:
@@ -1613,6 +1631,35 @@ paths:
       summary: Get previous phase data by course phase ID
       tags:
       - course_phases
+  /course_phases/{uuid}/participation_status_counts:
+    get:
+      description: Get counts of participation statuses for a course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status counts
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get course phase participation status counts
+      tags:
+      - course_phases
   /course_phases/{uuid}/participations:
     get:
       description: Get all participations for a given course phase
@@ -1988,6 +2035,61 @@ paths:
       summary: Update course data
       tags:
       - courses
+  /courses/{uuid}/copy:
+    post:
+      description: Copy a course by UUID
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/courseDTO.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Copy a course
+      tags:
+      - courses
+  /courses/{uuid}/copyable:
+    get:
+      description: Returns whether the course can be copied based on the availability
+        of the /copy endpoint in all course phases
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/courseCopyDTO.CheckCourseCopyableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Check if a course is copyable
+      tags:
+      - courses
   /courses/{uuid}/participation_data_graph:
     get:
       description: Get the participation data graph for a course
@@ -2272,6 +2374,67 @@ paths:
       summary: Update course phase order
       tags:
       - courses
+  /courses/{uuid}/template:
+    get:
+      description: Get the template status of a course
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/courseDTO.CourseTemplateStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Check course template status
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update whether a course is marked as a template
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Template status update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/courseDTO.CourseTemplateStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update course template status
+      tags:
+      - courses
   /courses/self:
     get:
       description: Get the course IDs for the current user
@@ -2285,6 +2448,29 @@ paths:
               type: string
             type: array
       summary: Get own courses
+      tags:
+      - courses
+  /courses/template:
+    get:
+      description: Get all courses marked as templates accessible to the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/courseDTO.Course'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get template courses
       tags:
       - courses
   /keycloak/{courseID}/group:

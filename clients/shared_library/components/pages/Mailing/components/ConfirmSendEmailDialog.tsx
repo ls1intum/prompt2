@@ -1,8 +1,10 @@
 import { Send, Loader2, AlertCircle, CheckCircle, X } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { SendStatusMail, PassStatus } from '@tumaet/prompt-shared-state'
 import { sendStatusMail } from '@/network/mutations/sendStatusMail'
+import { getCoursePhaseParticipationStatusCounts } from '@/network/queries/getCoursePhaseParticipationStatusCounts'
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,8 @@ export const ConfirmSendEmailDialog = ({
 }: ConfirmSendEmailDialogProps): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
+  const [mailRecipients, setMailRecipients] = useState({})
+
   const {
     mutate: sendEmails,
     isPending,
@@ -51,6 +55,14 @@ export const ConfirmSendEmailDialog = ({
     onClose()
   }
 
+  useEffect(() => {
+    const fetchMailRecipientsCount = async () => {
+      const data = await getCoursePhaseParticipationStatusCounts(phaseId ?? '')
+      setMailRecipients(data)
+    }
+    fetchMailRecipientsCount()
+  }, [phaseId])
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
@@ -69,6 +81,14 @@ export const ConfirmSendEmailDialog = ({
               !isError &&
               !data &&
               `Are you sure you want to send an Email to ALL students that ${emailType === PassStatus.PASSED ? 'have been accepted' : 'have been rejected'}?`}
+          </DialogDescription>
+          <DialogDescription>
+            {!isPending && !isError && !data && (
+              <>
+                This will send out an email to{' '}
+                <span className='font-bold'>{mailRecipients[emailType] ?? 0} recipients</span>
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
 
