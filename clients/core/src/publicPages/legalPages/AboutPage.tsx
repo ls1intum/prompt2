@@ -68,9 +68,9 @@ export default function AboutPage() {
     },
     {
       icon: UserCheck,
-      title: 'Assessment & Feedback Phase',
+      title: 'Assessment Phase',
       description:
-        'Conduct structured peer, self, and instructor assessments using a configurable framework. Supports competency-based evaluation and transparent feedback delivery to enhance fairness and learning outcomes.',
+        'Conduct structured peer, self, and instructor assessments using a configurable assessment framework.',
     },
   ]
 
