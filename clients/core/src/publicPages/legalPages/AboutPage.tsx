@@ -66,6 +66,12 @@ export default function AboutPage() {
       description:
         'Assign students to teams and projects, and manage project work throughout the course.',
     },
+    {
+      icon: UserCheck,
+      title: 'Assessment & Feedback Phase',
+      description:
+        'Conduct structured peer, self, and instructor assessments using a configurable framework. Supports competency-based evaluation and transparent feedback delivery to enhance fairness and learning outcomes.',
+    },
   ]
 
   return (
