@@ -3,7 +3,7 @@
 ## 0. General
 
 **Project Context:**  
-This project follows a microservices architecture using Go (Golang) as the primary backend language. Please adhere to Go best practices, the project's architectural patterns, and the conventions described in the [Architecture Documentation](../architecture/index.md).
+This project follows a microservices architecture using Go (Golang) as the primary backend language. Please adhere to Go best practices, the project's architectural patterns, and the conventions described in the [Architecture Documentation](../architecture.md).
 
 **Shared Code:**  
 Utilities shared between microservices should be implemented in the [Prompt SDK](https://github.com/ls1intum/Prompt-SDK).
@@ -21,8 +21,7 @@ Utilities shared between microservices should be implemented in the [Prompt SDK]
   - Unexported (private) functions and methods (e.g., `setupRouter`)
   - Local variables and function parameters (e.g., `courseID`)
   - Struct fields that are not exported
-
-- **SCREAMING_SNAKE_CASE** should be used for unexported constants (function-level or package-private).
+  - Unexported constants (e.g., `maxRetryAttempts`)
 
 - **snake_case** should be used for:
 
@@ -45,8 +44,8 @@ servers/
 │   │   ├── main.go                 -- Setup module and middleware, initialize service as singletons
 │   │   ├── router.go               -- HTTP endpoint definitions and middleware setup
 │   │   ├── router_test.go          -- Router tests
-│   │   ├── service.go              -- Core business logic and data processing
-│   │   ├── service_test.go         -- Service tests
+│   │   ├── service.go              -- Core business logic using standalone functions with singleton dependencies
+│   │   ├── service_test.go         -- Service tests for standalone functions
 │   │   ├── validation.go           -- Input validation logic
 │   │   └── validation_test.go      -- Validation tests
 │   ├── db/                         -- Database layer
@@ -61,6 +60,9 @@ servers/
 │   └── sqlc.yaml                   -- SQLC configuration
 └── [other microservices]
 ```
+
+**Architectural Pattern Note:**  
+Services in this project use standalone functions rather than methods on service structs. Dependencies (database connections, queries, etc.) are initialized as singletons in `main.go` and passed to functions as needed. This pattern promotes simplicity, testability, and consistency across the codebase.
 
 ## 3. Dependency Management
 
@@ -159,7 +161,7 @@ sql:
   - Use HTTP methods semantically: GET (read), POST (create), PUT (update), DELETE (remove)
 - all servers must use the `/api/course_phase/:coursePhaseID` prefix for all endpoints to use the Prompt-SDK authentication middleware
 
-For error response format and handling, see [Error Handling](#71-error-handling-policy).
+For error response format and handling, see [Error Handling](#61-error-handling-policy).
 
 ### 5.2 Swagger Documentation
 
@@ -167,24 +169,6 @@ For error response format and handling, see [Error Handling](#71-error-handling-
 - Add Swagger comments to all public endpoints
 - Include examples and proper status codes in documentation
 - Generate and serve documentation automatically
-
-**Example Swagger comments:**
-
-```go
-// CreateCourse godoc
-// @Summary Create a new course
-// @Description Create a new course with the provided details
-// @Tags courses
-// @Accept json
-// @Produce json
-// @Param course body courseDTO.CreateCourse true "Course to create"
-// @Success 201 {object} courseDTO.Course
-// @Failure 400 {object} utils.ErrorResponse "Validation failed"
-// @Router /api/courses [post]
-func createCourse(c *gin.Context) {
-    // Implementation
-}
-```
 
 ### 5.3 Data Transfer Objects (DTOs)
 
@@ -239,46 +223,4 @@ func processAssessment(ctx context.Context, id uuid.UUID) error {
 log.Info("Assessment service started on port 8085")
 log.WithField("coursePhaseID", coursePhaseID).Warn("No assessments found for course phase")
 log.WithError(err).Error("Database connection failed")
-```
-
-## 7. Testing
-
-### 7.1 Test Structure
-
-- Use `testify/suite` for integration tests
-- Place test files alongside implementation: `*_test.go`
-- Use TestContainers for database integration tests
-- Mock external dependencies using dependency injection
-
-```go
-type AssessmentServiceTestSuite struct {
-    suite.Suite
-    ctx     context.Context
-    cleanup func()
-    service AssessmentService
-}
-
-func (suite *AssessmentServiceTestSuite) SetupSuite() {
-    testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/test_data.sql")
-    require.NoError(suite.T(), err)
-
-    suite.cleanup = cleanup
-    suite.service = AssessmentService{
-        queries: *testDB.Queries,
-        conn:    testDB.Conn,
-    }
-}
-```
-
-### 7.2 Mocking Strategy
-
-- Use dependency injection for external services
-- Mock authentication middleware in tests
-- Test error scenarios and edge cases
-
-```go
-// Mock auth middleware for testing
-testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
-    return testutils.MockAuthMiddlewareWithEmail(allowedRoles, "test@example.com", "12345", "testid")
-}
 ```
