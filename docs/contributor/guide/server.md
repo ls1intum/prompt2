@@ -3,7 +3,7 @@
 ## 0. General
 
 **Project Context:**  
-This project follows a microservices architecture using Go (Golang) as the primary backend language. Please adhere to Go best practices, the project's architectural patterns, and the conventions described in the [Architecture Documentation](../architecture.md).
+This project follows a microservices architecture using Go (Golang) as the primary backend language. Please adhere to Go best practices, the project's architectural patterns, and the conventions described in the Architecture Documentation.
 
 **Shared Code:**  
 Utilities shared between microservices should be implemented in the [Prompt SDK](https://github.com/ls1intum/Prompt-SDK).
