@@ -159,9 +159,7 @@ sql:
   - Use plural nouns for collections: `/courses`, `/assessments`
   - Use specific resource IDs for individual items: `/courses/{courseId}`
   - Use HTTP methods semantically: GET (read), POST (create), PUT (update), DELETE (remove)
-- all servers must use the `/api/course_phase/:coursePhaseID` prefix for all endpoints to use the Prompt-SDK authentication middleware
-
-For error response format and handling, see [Error Handling](#61-error-handling-policy).
+- All servers must expose routes under `<server>/api/course_phase/:coursePhaseID` to use the Prompt-SDK authentication middleware (e.g., `assessment/api/course_phase/:coursePhaseID`).
 
 ### 5.2 Swagger Documentation
 
@@ -199,23 +197,7 @@ func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {/*...*/}
 - Use consistent error response format across all services
 - Log errors with appropriate context using logrus
 - Return structured `utils.ErrorResponse` for client-facing errors
-
-```go
-func handleError(c *gin.Context, statusCode int, err error) {
-    log.Error(err)
-    c.JSON(statusCode, utils.ErrorResponse{Error: err.Error()})
-}
-
-// For internal errors with context
-func processAssessment(ctx context.Context, id uuid.UUID) error {
-    assessment, err := GetAssessment(ctx, id)
-    if err != nil {
-        log.WithError(err).WithField("assessmentID", id).Error("Failed to retrieve assessment")
-        return err
-    }
-    return nil
-}
-```
+- Never expose internal error details to clients; use generic user-friendly messages
 
 ### 6.2 Logging Levels
 
