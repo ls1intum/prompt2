@@ -1,0 +1,67 @@
+import { UseFormReturn } from 'react-hook-form'
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+  Input,
+  Switch,
+  Separator,
+} from '@tumaet/prompt-ui-components'
+import { QuestionConfigFormData } from '@core/validations/questionConfig'
+
+interface ExportSettingsFieldsProps {
+  form: UseFormReturn<QuestionConfigFormData>
+}
+
+export const ExportSettingsFields = ({ form }: ExportSettingsFieldsProps) => {
+  return (
+    <>
+      <Separator />
+      <div className='space-y-2'>
+        <h2 className='text-lg font-semibold'>Export Settings</h2>
+        <FormField
+          control={form.control}
+          name='accessibleForOtherPhases'
+          render={({ field }) => (
+            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+              <div className='space-y-0.5'>
+                <FormLabel className='text-base'>Accessible for Other Phases</FormLabel>
+                <FormDescription>
+                  Allow this question to be accessed in other application phases
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  aria-label='Toggle accessibility for other phases'
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        {form.watch('accessibleForOtherPhases') && (
+          <FormField
+            control={form.control}
+            name='accessKey'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Access Key</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder='Enter access key' />
+                </FormControl>
+                <FormDescription>
+                  Provide a unique key to identify this question when accessing it from other phases
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+    </>
+  )
+}

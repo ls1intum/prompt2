@@ -8,35 +8,33 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  Input,
-  Checkbox,
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
   Button,
-  TooltipProvider,
-  Switch,
-  Separator,
+  Form,
+  Collapsible,
+  CollapsibleContent,
 } from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
 import {
   QuestionConfigFormData,
   QuestionConfigFormDataMultiSelect,
-  QuestionConfigFormDataText,
   questionConfigSchema,
 } from '@core/validations/questionConfig'
 import { MultiSelectConfig } from './MultiSelectConfig'
-import { TextConfig } from './TextConfig'
 import { DeleteConfirmation } from '../components/DeleteConfirmation'
 import { questionsEqual } from '../handlers/computeQuestionsModified'
 import { QuestionStatus, QuestionStatusBadge } from '../components/QuestionStatusBadge'
 import { checkCheckBoxQuestion } from '@core/publicPages/application/pages/ApplicationForm/utils/CheckBoxRequirements'
-import { DescriptionMinimalTiptapEditor } from '@tumaet/prompt-ui-components'
+import {
+  TitleField,
+  DescriptionField,
+  RequiredField,
+  AllowedLengthField,
+  PlaceholderField,
+  ErrorMessageField,
+  ValidationRegexField,
+  ExportSettingsFields,
+} from './FormFields'
 
 // If you plan to expose methods via this ref, define them here:
 export interface ApplicationQuestionCardRef {
@@ -65,8 +63,7 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  // if a rich text is entered -> start with rich text editor
-  const [useRichInput, setUseRichInput] = useState(question.description?.startsWith('<'))
+  const [isOpen, setIsOpen] = useState(false)
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -152,172 +149,57 @@ export const ApplicationQuestionCard = forwardRef<
         {isExpanded && (
           <CardContent>
             <Form {...form}>
-              <form className='space-y-4'>
+              <div className='space-y-4'>
                 {/** For multi-select question the isRequired is controlled by min-select */}
-                {!isActualMultiSelect && (
-                  <FormField
-                    control={form.control}
-                    name='isRequired'
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className='space-y-1 leading-none'>
-                          <FormLabel>Question is required to be answered</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                )}
-                <FormField
-                  control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Title <span className='text-destructive'> *</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder='Enter question title' />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className='flex items-center justify-between'>
-                        <FormLabel>Description</FormLabel>
-                        <div className='flex items-center space-x-2'>
-                          <Switch
-                            checked={useRichInput}
-                            onCheckedChange={setUseRichInput}
-                            aria-label='Toggle between standard and rich input'
-                          />
-                          <span className='text-sm text-muted-foreground'>Rich Text Editor</span>
-                        </div>
-                      </div>
-                      <FormControl>
-                        {useRichInput ? (
-                          <TooltipProvider>
-                            <DescriptionMinimalTiptapEditor
-                              {...field}
-                              className='w-full'
-                              editorContentClassName='p-3'
-                              output='html'
-                              placeholder='Type your description here...'
-                              autofocus={false}
-                              editable={true}
-                              editorClassName='focus:outline-none'
-                            />
-                          </TooltipProvider>
-                        ) : (
-                          <Input {...field} placeholder='Enter description text' />
-                        )}
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!isActualMultiSelect && <RequiredField form={form} />}
 
-                {/** Checkbox Questions do not have a placeholder */}
-                {!isCheckboxQuestion && (
-                  <FormField
-                    control={form.control}
-                    name='placeholder'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Placeholder</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder='Enter placeholder text' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
-                {!isActualMultiSelect && (
-                  <FormField
-                    control={form.control}
-                    name='errorMessage'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Custom Error Message</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder='Enter error message' />
-                        </FormControl>
-                        <FormDescription>
-                          {isCheckboxQuestion &&
-                            'This message will be shown if the checkbox is not checked'}
-                          {!isMultiSelectType &&
-                            'This error message will be shown if the question does not match the validation regex. If regex is empty, this has no effect.'}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                <TitleField form={form} />
 
-                {isMultiSelectType ? (
-                  !isCheckboxQuestion && (
-                    <MultiSelectConfig
-                      form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
-                    />
-                  )
-                ) : (
-                  <TextConfig form={form as UseFormReturn<QuestionConfigFormDataText>} />
-                )}
+                <DescriptionField form={form} initialDescription={question.description} />
 
-                <Separator />
-                <div className='space-y-2'>
-                  <h2 className='text-lg font-semibold'>Export Settings</h2>
-                  <FormField
-                    control={form.control}
-                    name='accessibleForOtherPhases'
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                        <div className='space-y-0.5'>
-                          <FormLabel className='text-base'>Accessible for Other Phases</FormLabel>
-                          <FormDescription>
-                            Allow this question to be accessed in other application phases
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            aria-label='Toggle accessibility for other phases'
-                          />
-                        </FormControl>
-                      </FormItem>
+                {!isMultiSelectType && <AllowedLengthField form={form} />}
+
+                <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                  <div
+                    className='flex items-center justify-between cursor-pointer'
+                    onClick={() => {
+                      setIsOpen((p) => !p)
+                    }}
+                  >
+                    <p className='mt-3 mb-2'>Advanced Settings</p>
+                    {isOpen ? (
+                      <ChevronUp className='h-4 w-4' />
+                    ) : (
+                      <ChevronDown className='h-4 w-4' />
                     )}
-                  />
-                  {form.watch('accessibleForOtherPhases') && (
-                    <FormField
-                      control={form.control}
-                      name='accessKey'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Access Key</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder='Enter access key' />
-                          </FormControl>
-                          <FormDescription>
-                            Provide a unique key to identify this question when accessing it from
-                            other phases
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-              </form>
+                  </div>
+                  <CollapsibleContent className='flex flex-col gap-5'>
+                    {/** Checkbox Questions do not have a placeholder */}
+                    {!isCheckboxQuestion && <PlaceholderField form={form} />}
+
+                    {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
+                    {!isActualMultiSelect && (
+                      <ErrorMessageField
+                        form={form}
+                        isCheckboxQuestion={isCheckboxQuestion}
+                        isMultiSelectType={isMultiSelectType}
+                      />
+                    )}
+
+                    {isMultiSelectType ? (
+                      !isCheckboxQuestion && (
+                        <MultiSelectConfig
+                          form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
+                        />
+                      )
+                    ) : (
+                      <ValidationRegexField form={form} />
+                    )}
+
+                    <ExportSettingsFields form={form} />
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </Form>
           </CardContent>
         )}
