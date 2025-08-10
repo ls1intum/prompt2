@@ -57,8 +57,8 @@ export const ConfirmSendEmailDialog = ({
 
   useEffect(() => {
     const fetchMailRecipientsCount = async () => {
-      const data = await getCoursePhaseParticipationStatusCounts(phaseId ?? '')
-      setMailRecipients(data)
+      const d = await getCoursePhaseParticipationStatusCounts(phaseId ?? '')
+      setMailRecipients(d)
     }
     fetchMailRecipientsCount()
   }, [phaseId])
