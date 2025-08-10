@@ -12,7 +12,6 @@ import {
   Form,
   Collapsible,
   CollapsibleContent,
-  Separator,
 } from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
@@ -64,7 +63,7 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false)
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -82,6 +81,8 @@ export const ApplicationQuestionCard = forwardRef<
     const subscription = form.watch((value) => {
       onUpdate({ ...question, ...value })
     })
+    console.log('JGS form')
+    console.log(form.getValues())
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, question, onUpdate, form])
@@ -165,15 +166,15 @@ export const ApplicationQuestionCard = forwardRef<
             </CardContent>
             <CardContent className='bg-[#fafafa] dark:bg-[#18181c] pt-2 -mt-1'>
               <Form {...form}>
-                <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                <Collapsible open={advancedSettingsOpen} onOpenChange={setAdvancedSettingsOpen}>
                   <div
                     className='flex items-center justify-between cursor-pointer'
                     onClick={() => {
-                      setIsOpen((p) => !p)
+                      setAdvancedSettingsOpen((p) => !p)
                     }}
                   >
                     <h3 className='text-xl mt-2 mb-2 font-medium'>Advanced Settings</h3>
-                    {isOpen ? (
+                    {advancedSettingsOpen ? (
                       <ChevronUp className='h-4 w-4' />
                     ) : (
                       <ChevronDown className='h-4 w-4' />
