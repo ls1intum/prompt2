@@ -12,6 +12,7 @@ import {
   Form,
   Collapsible,
   CollapsibleContent,
+  Separator,
 } from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
@@ -103,7 +104,7 @@ export const ApplicationQuestionCard = forwardRef<
   return (
     <>
       <Card
-        className={`mb-4 ${submitAttempted && !form.formState.isValid ? 'border-red-500' : ''}`}
+        className={`mb-4 overflow-hidden ${submitAttempted && !form.formState.isValid ? 'border-red-500' : ''}`}
       >
         <CardHeader
           className='cursor-pointer'
@@ -147,18 +148,23 @@ export const ApplicationQuestionCard = forwardRef<
           </div>
         </CardHeader>
         {isExpanded && (
-          <CardContent>
-            <Form {...form}>
-              <div className='space-y-4'>
-                {/** For multi-select question the isRequired is controlled by min-select */}
-                {!isActualMultiSelect && <RequiredField form={form} />}
+          <div>
+            <CardContent>
+              <Form {...form}>
+                <div className='space-y-4'>
+                  {/** For multi-select question the isRequired is controlled by min-select */}
+                  {!isActualMultiSelect && <RequiredField form={form} />}
 
-                <TitleField form={form} />
+                  <TitleField form={form} />
 
-                <DescriptionField form={form} initialDescription={question.description} />
+                  <DescriptionField form={form} initialDescription={question.description} />
 
-                {!isMultiSelectType && <AllowedLengthField form={form} />}
-
+                  {!isMultiSelectType && <AllowedLengthField form={form} />}
+                </div>
+              </Form>
+            </CardContent>
+            <CardContent className='bg-[#fafafa] dark:bg-[#18181c] pt-2 -mt-1'>
+              <Form {...form}>
                 <Collapsible open={isOpen} onOpenChange={setIsOpen}>
                   <div
                     className='flex items-center justify-between cursor-pointer'
@@ -166,25 +172,16 @@ export const ApplicationQuestionCard = forwardRef<
                       setIsOpen((p) => !p)
                     }}
                   >
-                    <p className='mt-3 mb-2'>Advanced Settings</p>
+                    <h3 className='text-xl mt-2 mb-2 font-medium'>Advanced Settings</h3>
                     {isOpen ? (
                       <ChevronUp className='h-4 w-4' />
                     ) : (
                       <ChevronDown className='h-4 w-4' />
                     )}
                   </div>
-                  <CollapsibleContent className='flex flex-col gap-5'>
+                  <CollapsibleContent className='space-y-4'>
                     {/** Checkbox Questions do not have a placeholder */}
                     {!isCheckboxQuestion && <PlaceholderField form={form} />}
-
-                    {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
-                    {!isActualMultiSelect && (
-                      <ErrorMessageField
-                        form={form}
-                        isCheckboxQuestion={isCheckboxQuestion}
-                        isMultiSelectType={isMultiSelectType}
-                      />
-                    )}
 
                     {isMultiSelectType ? (
                       !isCheckboxQuestion && (
@@ -196,12 +193,21 @@ export const ApplicationQuestionCard = forwardRef<
                       <ValidationRegexField form={form} />
                     )}
 
+                    {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
+                    {!isActualMultiSelect && (
+                      <ErrorMessageField
+                        form={form}
+                        isCheckboxQuestion={isCheckboxQuestion}
+                        isMultiSelectType={isMultiSelectType}
+                      />
+                    )}
+
                     <ExportSettingsFields form={form} />
                   </CollapsibleContent>
                 </Collapsible>
-              </div>
-            </Form>
-          </CardContent>
+              </Form>
+            </CardContent>
+          </div>
         )}
       </Card>
       {deleteDialogOpen && (

@@ -8,7 +8,6 @@ import {
   FormDescription,
   Input,
   Switch,
-  Separator,
 } from '@tumaet/prompt-ui-components'
 import { QuestionConfigFormData } from '@core/validations/questionConfig'
 
@@ -19,14 +18,13 @@ interface ExportSettingsFieldsProps {
 export const ExportSettingsFields = ({ form }: ExportSettingsFieldsProps) => {
   return (
     <>
-      <Separator />
       <div className='space-y-2'>
-        <h2 className='text-lg font-semibold'>Export Settings</h2>
+        <label className='text-sm font-medium leading-none'>Export Settings</label>
         <FormField
           control={form.control}
           name='accessibleForOtherPhases'
           render={({ field }) => (
-            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-white dark:bg-black'>
               <div className='space-y-0.5'>
                 <FormLabel className='text-base'>Accessible for Other Phases</FormLabel>
                 <FormDescription>
