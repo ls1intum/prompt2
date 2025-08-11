@@ -3,11 +3,11 @@ import translations from '@/lib/translations.json'
 import { SortableHeader } from '@/components/table/SortableHeader'
 import { getStatusBadge } from '../../utils/getStatusBadge'
 import { getGenderString } from '@tumaet/prompt-shared-state'
-import { Checkbox } from '@tumaet/prompt-ui-components'
 import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
 import { numericRangeFilter } from '../../utils/numericRangeFilter'
 import { AdditionalScore } from '../../../../interfaces/additionalScore/additionalScore'
 import { ActionMenu } from './menus/ActionMenu'
+import { VerticallyCenteredCheckbox } from '../../utils/VerticallyCenteredCheckbox'
 
 export const columns = (
   onViewApplication: (courseParticipationID: string) => void,
@@ -29,7 +29,7 @@ export const columns = (
     {
       id: 'select',
       header: ({ table }) => (
-        <Checkbox
+        <VerticallyCenteredCheckbox
           checked={
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && 'indeterminate')
@@ -39,7 +39,7 @@ export const columns = (
         />
       ),
       cell: ({ row }) => (
-        <Checkbox
+        <VerticallyCenteredCheckbox
           checked={row.getIsSelected()}
           onClick={(event) => {
             event.stopPropagation()
@@ -116,6 +116,16 @@ export const columns = (
       header: ({ column }) => (
         <SortableHeader column={column} title={translations.university['login-name']} />
       ),
+    },
+    {
+      id: `studyProgram`,
+      accessorKey: 'student.studyProgram',
+      header: ({ column }) => <SortableHeader column={column} title='Study Program' />,
+    },
+    {
+      id: `studyDegree`,
+      accessorKey: 'student.studyDegree',
+      header: ({ column }) => <SortableHeader column={column} title='Study Degree' />,
     },
     {
       id: `gender`,

@@ -47,7 +47,10 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
   ])
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({ gender: false })
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    gender: false,
+    studyDegree: false,
+  })
   const [rowSelection, setRowSelection] = useState({})
 
   const [dialogOpen, setDialogOpen] = useState(false)
