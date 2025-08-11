@@ -14,7 +14,7 @@ export const RequiredField = ({ form }: RequiredFieldProps) => {
       render={({ field }) => (
         <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
           <FormControl>
-            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+            <Checkbox checked={!!field.value} onCheckedChange={field.onChange} />
           </FormControl>
           <div className='space-y-1 leading-none'>
             <FormLabel>Question is required to be answered</FormLabel>

@@ -11,6 +11,7 @@ import {
   Button,
   Form,
   Collapsible,
+  CollapsibleTrigger,
   CollapsibleContent,
 } from '@tumaet/prompt-ui-components'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
@@ -81,8 +82,6 @@ export const ApplicationQuestionCard = forwardRef<
     const subscription = form.watch((value) => {
       onUpdate({ ...question, ...value })
     })
-    console.log('JGS form')
-    console.log(form.getValues())
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, question, onUpdate, form])
@@ -167,19 +166,14 @@ export const ApplicationQuestionCard = forwardRef<
             <CardContent className='bg-[#fafafa] dark:bg-[#18181c] pt-2 -mt-1'>
               <Form {...form}>
                 <Collapsible open={advancedSettingsOpen} onOpenChange={setAdvancedSettingsOpen}>
-                  <div
-                    className='flex items-center justify-between cursor-pointer'
-                    onClick={() => {
-                      setAdvancedSettingsOpen((p) => !p)
-                    }}
-                  >
+                  <CollapsibleTrigger className='flex w-full items-center justify-between cursor-pointer'>
                     <h3 className='text-xl mt-2 mb-2 font-medium'>Advanced Settings</h3>
                     {advancedSettingsOpen ? (
                       <ChevronUp className='h-4 w-4' />
                     ) : (
                       <ChevronDown className='h-4 w-4' />
                     )}
-                  </div>
+                  </CollapsibleTrigger>
                   <CollapsibleContent className='space-y-4'>
                     {/** Checkbox Questions do not have a placeholder */}
                     {!isCheckboxQuestion && <PlaceholderField form={form} />}
