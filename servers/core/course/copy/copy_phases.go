@@ -48,12 +48,20 @@ func copyCoursePhases(c *gin.Context, qtx *db.Queries, sourceID, targetID uuid.U
 			return nil, fmt.Errorf("failed to get course phase by ID %s: %w", oldID, err)
 		}
 
+		restrictedData := phase.RestrictedData
+		if restrictedData["applicationStartDate"] != nil {
+			delete(restrictedData, "applicationStartDate")
+		}
+		if restrictedData["applicationEndDate"] != nil {
+			delete(restrictedData, "applicationEndDate")
+		}
+
 		newPhase := coursePhaseDTO.CreateCoursePhase{
 			Name:                phase.Name,
 			IsInitialPhase:      phase.IsInitialPhase,
 			CourseID:            targetID,
 			CoursePhaseTypeID:   phase.CoursePhaseTypeID,
-			RestrictedData:      phase.RestrictedData,
+			RestrictedData:      restrictedData,
 			StudentReadableData: phase.StudentReadableData,
 		}
 		dbModel, err := newPhase.GetDBModel()
