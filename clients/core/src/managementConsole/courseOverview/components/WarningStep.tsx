@@ -192,7 +192,11 @@ export const WarningStep = ({
               ? 'Creating Template...'
               : isCopying
                 ? 'Copying Course...'
-                : 'Proceed And Apply'}
+                : useTemplateCopy && !createTemplate
+                  ? 'Proceed And Apply Template'
+                  : createTemplate
+                    ? 'Proceed And Create Template'
+                    : 'Proceed And Copy Course'}
         </Button>
       </DialogFooter>
     </>
