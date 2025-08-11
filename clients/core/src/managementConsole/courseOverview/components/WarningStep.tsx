@@ -41,13 +41,13 @@ export const WarningStep = ({
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Checking Course Compatibility</DialogTitle>
+          <DialogTitle>Checking Compatibility</DialogTitle>
           <DialogDescription>
             {useTemplateCopy && !createTemplate
-              ? 'Please wait while we check if all course phases can be applied...'
+              ? 'Checking if all phases can be applied from the template...'
               : createTemplate
-                ? 'Please wait while we check if the course phases can be made into a template...'
-                : 'Please wait while we check if all course phases can be copied...'}
+                ? 'Checking if all phases can be saved in the template...'
+                : 'Checking if all phases can be copied...'}
           </DialogDescription>
         </DialogHeader>
         <div className='flex items-center justify-center py-8'>
@@ -61,21 +61,19 @@ export const WarningStep = ({
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Error Checking Compatibility</DialogTitle>
+          <DialogTitle>Compatibility Check Failed</DialogTitle>
           <DialogDescription>
             {useTemplateCopy && !createTemplate
-              ? 'There was an error checking if the template can be applied.'
+              ? 'Could not check if the template can be applied.'
               : createTemplate
-                ? 'There was an error checking if the course can be made into a template.'
-                : 'There was an error checking if the course can be copied.'}
+                ? 'Could not check if the course can be made into a template.'
+                : 'Could not check if the course can be copied.'}
           </DialogDescription>
         </DialogHeader>
         <Alert variant='destructive'>
           <AlertTriangle className='h-4 w-4' />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to check course compatibility. Please try again.
-          </AlertDescription>
+          <AlertDescription>Something went wrong. Please try again.</AlertDescription>
         </Alert>
         <DialogFooter>
           <Button variant='outline' onClick={onBack}>
@@ -110,21 +108,21 @@ export const WarningStep = ({
           </DialogTitle>
           <DialogDescription>
             {useTemplateCopy && !createTemplate
-              ? 'All template phases support configuration templates. The template will be fully applied.'
+              ? 'All phases and settings can be applied from the template.'
               : createTemplate
-                ? 'The course with all its course phase configurations can be made into a template.'
-                : 'All course phases support configuration copying. The course will be fully duplicated.'}
+                ? 'All phases and settings will be saved in the template.'
+                : 'All phases and settings will be copied.'}
           </DialogDescription>
         </DialogHeader>
         <Alert>
           <Info className='h-4 w-4' />
-          <AlertTitle>Everything Looks Good</AlertTitle>
+          <AlertTitle>All Good</AlertTitle>
           <AlertDescription>
             {useTemplateCopy && !createTemplate
-              ? 'All template phases and their configurations will be applied automatically.'
+              ? 'All phases and their settings will be applied automatically.'
               : createTemplate
-                ? 'All course phase configurations will be preserved in the template.'
-                : 'All phases and their configurations will be copied automatically.'}
+                ? 'All phases and their settings will be saved in the template.'
+                : 'All phases and their settings will be copied automatically.'}
           </AlertDescription>
         </Alert>
         <DialogFooter>
@@ -134,9 +132,9 @@ export const WarningStep = ({
           <Button onClick={onProceed} disabled={isCopying}>
             {isCopying && useTemplateCopy && !createTemplate
               ? 'Applying Template...'
-              : isCopying && useTemplateCopy && createTemplate
+              : isCopying && createTemplate
                 ? 'Creating Template...'
-                : isCopying && !useTemplateCopy
+                : isCopying
                   ? 'Copying Course...'
                   : useTemplateCopy && !createTemplate
                     ? 'Apply Template'
@@ -154,48 +152,33 @@ export const WarningStep = ({
       <DialogHeader>
         <DialogTitle>
           {useTemplateCopy && !createTemplate
-            ? 'Warning: Partial Template Application Only'
+            ? 'Some Template Phases Need Setup'
             : createTemplate
-              ? 'Warning: Partial Template Creation Only'
-              : 'Warning: Partial Course Copy Only'}
+              ? 'Some Template Phases Need Setup'
+              : 'Some Copied Phases Need Setup'}
         </DialogTitle>
         <DialogDescription>
           {useTemplateCopy && !createTemplate
-            ? 'Some phases of this template cannot be fully applied. Please review the details below before continuing.'
+            ? 'Not all phases in this template include their settings. See details below.'
             : createTemplate
-              ? 'Some phases of this course cannot be fully made into a template. Please review the details below before continuing.'
-              : 'Some phases of this course cannot be fully copied. Please review the details below before continuing.'}
+              ? 'Not all phases will keep their settings in the template. See details below.'
+              : 'Not all copied phases will include their settings. See details below.'}
         </DialogDescription>
       </DialogHeader>
-      <Alert variant='destructive'>
+      <Alert className='bg-yellow-50 border-yellow-400'>
         <AlertTriangle className='h-4 w-4' />
-        <AlertTitle>Missing Configuration Support</AlertTitle>
+        <AlertTitle>Manual Setup Required</AlertTitle>
         <AlertDescription>
           {useTemplateCopy && !createTemplate
-            ? 'The following course phases do not support templating of their configurations:'
+            ? 'These phases will be included in the template, but their settings won’t be. You’ll need to set them up manually afterwards:'
             : createTemplate
-              ? 'The following course phases do not support templating of their configurations:'
-              : 'The following course phases do not support automatic copying of their configurations:'}
+              ? 'These phases will be in the template, but their settings won’t be saved. You’ll need to set them up manually afterwards:'
+              : 'These phases will be copied, but their settings won’t be. You’ll need to set them up manually afterwards:'}
           <ul className='list-disc list-inside mt-2'>
             {missingPhaseTypes.map((phaseType, index) => (
               <li key={index}>{phaseType}</li>
             ))}
           </ul>
-        </AlertDescription>
-      </Alert>
-      <Alert>
-        <Info className='h-4 w-4' />
-        <AlertTitle>What Will Happen</AlertTitle>
-        <AlertDescription>
-          {useTemplateCopy && !createTemplate
-            ? 'The template will still be applied, but the listed phases will not have their internal configurations applied. ' +
-              'You will need to configure those manually after applying the template.'
-            : createTemplate
-              ? 'The course will still be made into a template, but the listed phases will not have their internal configurations preserved. ' +
-                'You will need to configure those manually after creating the template.'
-              : 'The course and its phases will still be copied, including their structure and dependencies. However, the listed phases ' +
-                'will not have their internal configurations copied. You will need to configure ' +
-                'those manually after the copy.'}
         </AlertDescription>
       </Alert>
       <DialogFooter>
@@ -205,11 +188,11 @@ export const WarningStep = ({
         <Button onClick={onProceed} disabled={isCopying}>
           {isCopying && useTemplateCopy && !createTemplate
             ? 'Applying Template...'
-            : isCopying && useTemplateCopy && createTemplate
+            : isCopying && createTemplate
               ? 'Creating Template...'
-              : isCopying && !useTemplateCopy
+              : isCopying
                 ? 'Copying Course...'
-                : 'Proceed Anyway'}
+                : 'Proceed And Apply'}
         </Button>
       </DialogFooter>
     </>
