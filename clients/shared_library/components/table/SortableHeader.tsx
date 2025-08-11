@@ -2,7 +2,8 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
 export const SortableHeader = ({ column, title }: { column: any; title: string }) => {
   return (
-    <div
+    <button
+      type='button'
       onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       className='flex items-center hover:cursor-pointer'
     >
@@ -14,6 +15,6 @@ export const SortableHeader = ({ column, title }: { column: any; title: string }
       ) : (
         <ArrowUpDown className='ml-2 h-4 w-4' />
       )}
-    </div>
+    </button>
   )
 }
