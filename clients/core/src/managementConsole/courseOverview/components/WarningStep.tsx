@@ -165,15 +165,17 @@ export const WarningStep = ({
               : 'Not all copied phases will include their settings. See details below.'}
         </DialogDescription>
       </DialogHeader>
-      <Alert className='bg-yellow-50 border-yellow-400'>
-        <AlertTriangle className='h-4 w-4' />
-        <AlertTitle>Manual Setup Required</AlertTitle>
-        <AlertDescription>
+      <Alert className='bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 dark:border-yellow-600'>
+        <AlertTriangle className='h-4 w-4 text-yellow-600 dark:text-yellow-400' />
+        <AlertTitle className='text-yellow-800 dark:text-yellow-200'>
+          Manual Setup Required
+        </AlertTitle>
+        <AlertDescription className='text-yellow-700 dark:text-yellow-300'>
           {useTemplateCopy && !createTemplate
-            ? 'These phases will be included in the template, but their settings won’t be. You’ll need to set them up manually afterwards:'
+            ? "These phases will be included in the template, but their settings won't be. You'll need to set them up manually afterwards:"
             : createTemplate
-              ? 'These phases will be in the template, but their settings won’t be saved. You’ll need to set them up manually afterwards:'
-              : 'These phases will be copied, but their settings won’t be. You’ll need to set them up manually afterwards:'}
+              ? "These phases will be in the template, but their settings won't be saved. You'll need to set them up manually afterwards:"
+              : "These phases will be copied, but their settings won't be. You'll need to set them up manually afterwards:"}
           <ul className='list-disc list-inside mt-2'>
             {missingPhaseTypes.map((phaseType, index) => (
               <li key={index}>{phaseType}</li>
