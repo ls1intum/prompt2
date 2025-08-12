@@ -59,6 +59,14 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
         setNodes((nds) => nds.concat(newNode))
       }
     },
-    [coursePhaseTypes, reactFlowWrapper, screenToFlowPosition, setNodes],
+    [
+      coursePhaseTypes,
+      reactFlowWrapper,
+      screenToFlowPosition,
+      setNodes,
+      appendCoursePhase,
+      courseId,
+      setIsModified,
+    ],
   )
 }

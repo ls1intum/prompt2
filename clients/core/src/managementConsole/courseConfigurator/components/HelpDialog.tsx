@@ -15,7 +15,11 @@ export const HelpDialog = (): JSX.Element => {
     <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
       <DialogTrigger asChild>
         <button
-          className='flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 font-medium border border-gray-200 dark:border-gray-600 transition-colors'
+          className={
+            'flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 ' +
+            'dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 font-medium border border-gray-200 ' +
+            'dark:border-gray-600 transition-colors'
+          }
           aria-label='Open Help Dialog'
         >
           <HelpCircle className='h-4 w-4' />
