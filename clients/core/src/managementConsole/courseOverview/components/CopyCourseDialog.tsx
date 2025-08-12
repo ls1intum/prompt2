@@ -24,7 +24,7 @@ export const CopyCourseDialog = ({
     isCopying,
     handleProceedWithCopy,
     queryClient,
-  } = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, useTemplateCopy)
+  } = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, createTemplate)
 
   const {
     form: copyForm,
