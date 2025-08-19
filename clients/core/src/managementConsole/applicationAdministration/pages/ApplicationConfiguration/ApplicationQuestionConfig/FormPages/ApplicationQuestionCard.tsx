@@ -78,10 +78,24 @@ export const ApplicationQuestionCard = forwardRef<
     mode: 'onTouched',
   })
 
+  function shouldCollapseAdvancedOptions(formValues): boolean {
+    function fVEmpty(key) {
+      const v = formValues[key]
+      return v == undefined || v == null || v == ''
+    }
+    return (
+      fVEmpty('placeholder') &&
+      fVEmpty('validationRegex') &&
+      fVEmpty('errorMessage') &&
+      fVEmpty('accessKey')
+    )
+  }
+
   useEffect(() => {
     const subscription = form.watch((value) => {
       onUpdate({ ...question, ...value })
     })
+    setAdvancedSettingsOpen(!shouldCollapseAdvancedOptions(form.getValues()))
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, question, onUpdate, form])
