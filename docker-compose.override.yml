@@ -100,27 +100,27 @@ services:
       - CGO_ENABLED=0
     command: ["air", "-c", ".air.toml"]
 
-  # Mark static client containers as prod-only to avoid port conflicts in dev
+  # Mark production client containers to avoid port conflicts with unified clients-dev
   client-core:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-template-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-assessment-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-devops-challenge-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-intro-course-developer-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-interview-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-matching-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-team-allocation-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   client-self-team-allocation-component:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
   clients-base:
-    profiles: ["prod-ui"]
+    profiles: ["prod"]
 
 volumes:
   go-mod-cache:
