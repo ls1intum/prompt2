@@ -1,0 +1,129 @@
+services:
+  # Run all client apps in one dev container using Yarn workspaces + Lerna
+  clients-dev:
+    image: node:23
+    container_name: prompt-clients-dev
+    working_dir: /app/clients
+    command: ["sh", "-lc", "corepack enable && yarn install && yarn dev"]
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_CORE_HOST=http://localhost:8080
+      - KEYCLOAK_HOST=http://localhost:8081
+      - KEYCLOAK_REALM_NAME=${KEYCLOAK_REALM_NAME}
+      - CORE_HOST=http://localhost:3000
+    volumes:
+      - ./clients:/app/clients
+      - clients-node-modules:/app/clients/node_modules
+      - clients-yarn-cache:/app/clients/.yarn
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+      - "3004:3004"
+      - "3005:3005"
+      - "3006:3006"
+      - "3007:3007"
+      - "3008:3008"
+      - "3009:3009"
+    depends_on:
+      - server-core
+      - server-intro-course
+      - server-team-allocation
+      - server-self-team-allocation
+      - server-assessment
+
+  server-core:
+    build:
+      context: ./servers/core
+      dockerfile: ../Dockerfile
+      target: dev
+    volumes:
+      - ./servers/core:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    environment:
+      - CGO_ENABLED=0
+    command: ["air", "-c", ".air.toml"]
+
+  server-intro-course:
+    build:
+      context: ./servers/intro_course
+      dockerfile: ../Dockerfile
+      target: dev
+    volumes:
+      - ./servers/intro_course:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    environment:
+      - CGO_ENABLED=0
+    command: ["air", "-c", ".air.toml"]
+
+  server-team-allocation:
+    build:
+      context: ./servers/team_allocation
+      dockerfile: ../Dockerfile
+      target: dev
+    volumes:
+      - ./servers/team_allocation:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    environment:
+      - CGO_ENABLED=0
+    command: ["air", "-c", ".air.toml"]
+
+  server-self-team-allocation:
+    build:
+      context: ./servers/self_team_allocation
+      dockerfile: ../Dockerfile
+      target: dev
+    volumes:
+      - ./servers/self_team_allocation:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    environment:
+      - CGO_ENABLED=0
+    command: ["air", "-c", ".air.toml"]
+
+  server-assessment:
+    build:
+      context: ./servers/assessment
+      dockerfile: ../Dockerfile
+      target: dev
+    volumes:
+      - ./servers/assessment:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    environment:
+      - CGO_ENABLED=0
+    command: ["air", "-c", ".air.toml"]
+
+  # Mark static client containers as prod-only to avoid port conflicts in dev
+  client-core:
+    profiles: ["prod-ui"]
+  client-template-component:
+    profiles: ["prod-ui"]
+  client-assessment-component:
+    profiles: ["prod-ui"]
+  client-devops-challenge-component:
+    profiles: ["prod-ui"]
+  client-intro-course-developer-component:
+    profiles: ["prod-ui"]
+  client-interview-component:
+    profiles: ["prod-ui"]
+  client-matching-component:
+    profiles: ["prod-ui"]
+  client-team-allocation-component:
+    profiles: ["prod-ui"]
+  client-self-team-allocation-component:
+    profiles: ["prod-ui"]
+  clients-base:
+    profiles: ["prod-ui"]
+
+volumes:
+  go-mod-cache:
+  go-build-cache:
+  clients-node-modules:
+  clients-yarn-cache:

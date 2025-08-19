@@ -1,8 +1,30 @@
-# Stage 1: Build
+########################
+# Dev (hot reload)
+########################
+FROM golang:1.24-alpine AS dev
+
+WORKDIR /app
+RUN apk add --no-cache git ca-certificates curl
+# Install migrate (app expects it on PATH)
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz && \
+    mv migrate /usr/local/bin/
+# Pre-cache modules for faster startup when building the dev image
+COPY go.mod go.sum ./
+RUN go mod download
+# Air reloader
+RUN go install github.com/air-verse/air@latest
+# Copy the rest of the source (bind mount will override in dev)
+COPY . .
+EXPOSE 8080
+CMD ["air", "-c", ".air.toml"]
+
+########################
+# Stage 1: Build (prod)
+########################
 FROM golang:1.24-alpine AS build
 
-# Install dependencies
-RUN apk add --no-cache curl
+# Install dependencies needed for build tools
+RUN apk add --no-cache curl ca-certificates
 
 # Install migrate
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz && \
