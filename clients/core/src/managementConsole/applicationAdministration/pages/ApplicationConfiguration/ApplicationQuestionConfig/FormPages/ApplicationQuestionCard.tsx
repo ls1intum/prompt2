@@ -160,6 +160,12 @@ export const ApplicationQuestionCard = forwardRef<
                   <DescriptionField form={form} initialDescription={question.description} />
 
                   {!isMultiSelectType && <AllowedLengthField form={form} />}
+
+                  {isMultiSelectType && !isCheckboxQuestion && (
+                    <MultiSelectConfig
+                      form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
+                    />
+                  )}
                 </div>
               </Form>
             </CardContent>
@@ -178,15 +184,7 @@ export const ApplicationQuestionCard = forwardRef<
                     {/** Checkbox Questions do not have a placeholder */}
                     {!isCheckboxQuestion && <PlaceholderField form={form} />}
 
-                    {isMultiSelectType ? (
-                      !isCheckboxQuestion && (
-                        <MultiSelectConfig
-                          form={form as UseFormReturn<QuestionConfigFormDataMultiSelect>}
-                        />
-                      )
-                    ) : (
-                      <ValidationRegexField form={form} />
-                    )}
+                    {!isMultiSelectType && <ValidationRegexField form={form} />}
 
                     {/** For multi-select question there is no need to specify an error message - it will be determined by max and min error */}
                     {!isActualMultiSelect && (
