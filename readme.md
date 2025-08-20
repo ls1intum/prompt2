@@ -141,6 +141,27 @@ To run the server in Docker alongside these services:
 docker-compose up
 ```
 
+### Docker Development Workflow (Hot Reload)
+
+For the best development experience with hot reload across all services:
+
+```bash
+docker compose up
+```
+
+**What this gives you:**
+
+- **Go servers**: Hot reload via Air, shared module/build caches for faster rebuilds
+- **React clients**: Single Node container running all micro-frontends via Yarn workspaces + Lerna  
+- **Databases**: All PostgreSQL databases and Keycloak automatically started with proper dependencies
+- **Ports**: Servers on 8080, 8082-8085; clients start from port 3000 (varies by active packages)
+
+**Alternative - Production client containers:**
+
+```bash
+docker compose --profile prod up
+```
+
 ---
 
 ## Configuration
