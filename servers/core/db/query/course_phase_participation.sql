@@ -75,6 +75,11 @@ WHERE
   AND pass_status != sqlc.arg(pass_status)::pass_status
 RETURNING course_participation_id;
 
+-- name: GetCoursePhaseParticipationStatusCounts :many
+SELECT pass_status, COUNT(*) AS count
+FROM course_phase_participation
+WHERE course_phase_id = $1
+GROUP BY pass_status;
 
 -- name: GetAllCoursePhaseParticipationsForCoursePhaseIncludingPrevious :many
 WITH 
