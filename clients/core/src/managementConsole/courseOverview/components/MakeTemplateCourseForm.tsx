@@ -9,7 +9,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
   Input,
   Button,
 } from '@tumaet/prompt-ui-components'
@@ -46,22 +45,6 @@ export const MakeTemplateCourseForm = ({
                 <FormControl>
                   <Input placeholder='Enter template name' {...field} className='w-full' />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='semesterTag'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Template Tag</FormLabel>
-                <FormControl>
-                  <Input placeholder='Enter template tag' {...field} className='w-full' />
-                </FormControl>
-                <FormDescription>
-                  e.g. templateios (lowercase letters and numbers only)
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

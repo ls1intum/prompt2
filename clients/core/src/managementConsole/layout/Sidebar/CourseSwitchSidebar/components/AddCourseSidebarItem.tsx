@@ -10,7 +10,7 @@ export const AddCourseButton = (): JSX.Element => {
         <SidebarMenuButton
           size='lg'
           tooltip={{
-            children: 'Add a new course',
+            children: 'Add new course or template',
             hidden: false,
           }}
           className='min-w-12 min-h-12 p-0'
