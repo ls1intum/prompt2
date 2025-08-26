@@ -1,4 +1,4 @@
-import { UseFormReturn } from 'react-hook-form'
+import { UseFormReturn, useWatch } from 'react-hook-form'
 import {
   FormField,
   FormItem,
@@ -16,6 +16,7 @@ interface ExportSettingsFieldsProps {
 }
 
 export const ExportSettingsFields = ({ form }: ExportSettingsFieldsProps) => {
+  const accessible = useWatch({ control: form.control, name: 'accessibleForOtherPhases' })
   return (
     <>
       <div className='space-y-2'>
@@ -33,15 +34,20 @@ export const ExportSettingsFields = ({ form }: ExportSettingsFieldsProps) => {
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  checked={!!field.value}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked)
+                    if (!checked) {
+                      form.setValue('accessKey', '')
+                    }
+                  }}
                   aria-label='Toggle accessibility for other phases'
                 />
               </FormControl>
             </FormItem>
           )}
         />
-        {form.watch('accessibleForOtherPhases') && (
+        {accessible && (
           <FormField
             control={form.control}
             name='accessKey'

@@ -64,7 +64,9 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false)
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(
+    () => !shouldCollapseAdvancedOptions(question),
+  )
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -95,7 +97,6 @@ export const ApplicationQuestionCard = forwardRef<
     const subscription = form.watch((value) => {
       onUpdate({ ...question, ...value })
     })
-    setAdvancedSettingsOpen(!shouldCollapseAdvancedOptions(form.getValues()))
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, question, onUpdate, form])
