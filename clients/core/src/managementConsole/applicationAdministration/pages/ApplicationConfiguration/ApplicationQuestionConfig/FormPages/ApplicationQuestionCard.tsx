@@ -64,9 +64,7 @@ export const ApplicationQuestionCard = forwardRef<
   const [isExpanded, setIsExpanded] = useState(isNewQuestion)
   const isMultiSelectType = 'options' in question
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(
-    () => !shouldCollapseAdvancedOptions(question),
-  )
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false)
 
   const status: QuestionStatus = originalQuestion
     ? questionsEqual(question, originalQuestion)
@@ -80,23 +78,34 @@ export const ApplicationQuestionCard = forwardRef<
     mode: 'onTouched',
   })
 
-  function shouldCollapseAdvancedOptions(formValues): boolean {
-    function fVEmpty(key) {
-      const v = formValues[key]
-      return v == undefined || v == null || v == ''
-    }
-    return (
-      fVEmpty('placeholder') &&
-      fVEmpty('validationRegex') &&
-      fVEmpty('errorMessage') &&
-      fVEmpty('accessKey')
-    )
+  function shouldCollapseAdvancedOptions(
+    formValues: Partial<
+      Pick<
+        QuestionConfigFormData & { validationRegex?: string },
+        | 'placeholder'
+        | 'validationRegex'
+        | 'errorMessage'
+        | 'accessKey'
+        | 'accessibleForOtherPhases'
+      >
+    >,
+  ): boolean {
+    const isEmpty = (v: unknown) => v == null || (typeof v === 'string' && v.trim() === '')
+    const hasAnyAdvanced =
+      !!formValues.accessibleForOtherPhases ||
+      !isEmpty(formValues.placeholder) ||
+      !isEmpty(formValues.validationRegex) ||
+      !isEmpty(formValues.errorMessage) ||
+      !isEmpty(formValues.accessKey)
+
+    return !hasAnyAdvanced
   }
 
   useEffect(() => {
     const subscription = form.watch((value) => {
       onUpdate({ ...question, ...value })
     })
+    setAdvancedSettingsOpen(!shouldCollapseAdvancedOptions(form.getValues()))
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe()
   }, [form.watch, question, onUpdate, form])
