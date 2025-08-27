@@ -37,6 +37,30 @@ export const WarningStep = ({
   useTemplateCopy,
   createTemplate,
 }: WarningStepProps) => {
+  const getButtonLabel = (
+    isCopyingButton: boolean,
+    useTemplateCopyButton?: boolean,
+    createTemplateButton?: boolean,
+    context: 'ready' | 'warning' = 'ready',
+  ): string => {
+    if (isCopyingButton) {
+      if (useTemplateCopyButton && !createTemplateButton) return 'Applying Template...'
+      if (createTemplateButton) return 'Creating Template...'
+      return 'Copying Course...'
+    }
+
+    if (context === 'warning') {
+      if (useTemplateCopyButton && !createTemplateButton) return 'Proceed And Apply Template'
+      if (createTemplateButton) return 'Proceed And Create Template'
+      return 'Proceed And Copy Course'
+    }
+
+    // ready context
+    if (useTemplateCopyButton && !createTemplateButton) return 'Apply Template'
+    if (createTemplateButton) return 'Create Template'
+    return 'Copy Course'
+  }
+
   if (isCheckingCopyability) {
     return (
       <>
@@ -130,17 +154,7 @@ export const WarningStep = ({
             Back
           </Button>
           <Button onClick={onProceed} disabled={isCopying}>
-            {isCopying && useTemplateCopy && !createTemplate
-              ? 'Applying Template...'
-              : isCopying && createTemplate
-                ? 'Creating Template...'
-                : isCopying
-                  ? 'Copying Course...'
-                  : useTemplateCopy && !createTemplate
-                    ? 'Apply Template'
-                    : createTemplate
-                      ? 'Create Template'
-                      : 'Copy Course'}
+            {getButtonLabel(isCopying, useTemplateCopy, createTemplate, 'ready')}
           </Button>
         </DialogFooter>
       </>
@@ -188,17 +202,7 @@ export const WarningStep = ({
           Back
         </Button>
         <Button onClick={onProceed} disabled={isCopying}>
-          {isCopying && useTemplateCopy && !createTemplate
-            ? 'Applying Template...'
-            : isCopying && createTemplate
-              ? 'Creating Template...'
-              : isCopying
-                ? 'Copying Course...'
-                : useTemplateCopy && !createTemplate
-                  ? 'Proceed And Apply Template'
-                  : createTemplate
-                    ? 'Proceed And Create Template'
-                    : 'Proceed And Copy Course'}
+          {getButtonLabel(isCopying, useTemplateCopy, createTemplate, 'warning')}
         </Button>
       </DialogFooter>
     </>
