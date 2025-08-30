@@ -5,7 +5,6 @@ import {
   Input,
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -38,7 +37,7 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
       name: initialValues?.name || '',
       courseType: initialValues?.courseType || '',
       ects: initialValues?.ects ?? undefined,
-      semesterTag: initialValues?.semesterTag || '',
+      semesterTag: 'template',
     },
   })
 
@@ -55,11 +54,6 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
       form.setValue('ects', ectsValue as number, { shouldValidate: true })
     }
   }, [selectedCourseType, form])
-
-  const handleSemesterTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const filteredValue = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
-    form.setValue('semesterTag', filteredValue, { shouldValidate: true })
-  }
 
   return (
     <Form {...form}>
@@ -127,27 +121,6 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name='semesterTag'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Template Tag</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder='Enter a template tag'
-                  value={field.value}
-                  onChange={handleSemesterTagChange}
-                  className='w-full'
-                />
-              </FormControl>
-              <FormDescription>
-                e.g. templateios (lowercase letters and numbers only)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <div className='flex justify-between space-x-4 pt-4'>
           <Button type='button' variant='outline' onClick={onCancel}>
             Cancel

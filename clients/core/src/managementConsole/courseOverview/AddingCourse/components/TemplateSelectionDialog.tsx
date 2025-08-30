@@ -5,7 +5,7 @@ import { getTemplateCourses } from '@core/network/queries/getTemplateCourses'
 import { CopyCourseDialog } from '@managementConsole/courseOverview/components/CopyCourseDialog'
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
-import { FileIcon, Calendar, BookOpen } from 'lucide-react'
+import { FileIcon, BookOpen } from 'lucide-react'
 import type { CourseWithTemplateInfo } from '@core/interfaces/courseWithTemplateInfo'
 import { CourseTemplateIcon } from './CourseTemplateIcon'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
@@ -75,10 +75,6 @@ export const TemplateSelectionDialog = ({
                       <div className='flex flex-col flex-1 min-w-0'>
                         <span className='font-semibold text-lg truncate'>{template.name}</span>
                         <div className='flex items-center gap-4 text-sm text-muted-foreground mt-1'>
-                          <div className='flex items-center gap-1'>
-                            <Calendar className='w-3 h-3' />
-                            <span>{template.semesterTag}</span>
-                          </div>
                           <div className='flex items-center gap-1'>
                             <BookOpen className='w-3 h-3' />
                             <span>{template.ects} ECTS</span>

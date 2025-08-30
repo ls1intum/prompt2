@@ -24,7 +24,7 @@ export const CopyCourseDialog = ({
     isCopying,
     handleProceedWithCopy,
     queryClient,
-  } = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, useTemplateCopy)
+  } = useCopyCourse(courseId, currentStep, onClose, setCurrentStep, createTemplate)
 
   const {
     form: copyForm,
@@ -57,7 +57,8 @@ export const CopyCourseDialog = ({
     if (!copyFormData && !templateFormData) return
     if (createTemplate) {
       if (templateFormData) {
-        const { name, semesterTag } = templateFormData
+        const name = templateFormData.name
+        const semesterTag = templateFormData.semesterTag || 'template'
         const dateRange = copyFormData?.dateRange || { from: new Date(), to: new Date() }
         handleProceedWithCopy({ name, semesterTag, dateRange })
       }
@@ -99,6 +100,7 @@ export const CopyCourseDialog = ({
             onProceed={handleProceed}
             queryClient={queryClient}
             useTemplateCopy={useTemplateCopy}
+            createTemplate={createTemplate}
           />
         )}
       </DialogContent>
