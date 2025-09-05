@@ -152,7 +152,6 @@ func createOrUpdateEvaluation(c *gin.Context) {
 		return
 	}
 
-	// TODO also check if the assessee is the same as the author or a team member
 	statusCode, err := utils.ValidateStudentOwnership(c, request.AuthorCourseParticipationID)
 	if err != nil {
 		c.JSON(statusCode, gin.H{"error": "Students can only create evaluations as the author"})

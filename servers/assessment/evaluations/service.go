@@ -43,6 +43,7 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 		CompetencyID:                req.CompetencyID,
 		ScoreLevel:                  scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
 		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
 		log.Error("could not create or update evaluation: ", err)
@@ -160,5 +161,5 @@ func GetEvaluationByID(ctx context.Context, id uuid.UUID) (evaluationDTO.Evaluat
 		log.Error("could not get evaluation by ID: ", err)
 		return evaluationDTO.Evaluation{}, errors.New("could not get evaluation by ID")
 	}
-	return evaluationDTO.MapToEvaluationDTO(evaluation), nil
+	return evaluationDTO.MapDBToEvaluationDTO(evaluation), nil
 }

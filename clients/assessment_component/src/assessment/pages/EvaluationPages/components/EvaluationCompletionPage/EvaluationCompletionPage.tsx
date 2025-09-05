@@ -62,12 +62,14 @@ export const EvaluationCompletionPage = ({
             courseParticipationID: courseParticipationID,
             coursePhaseID: phaseId ?? '',
             authorCourseParticipationID: authorCourseParticipationID,
+            type: type,
           })
         } else {
           await markAsComplete({
             courseParticipationID: courseParticipationID,
             coursePhaseID: phaseId ?? '',
             authorCourseParticipationID: authorCourseParticipationID,
+            type: type,
           })
         }
         setDialogOpen(false)

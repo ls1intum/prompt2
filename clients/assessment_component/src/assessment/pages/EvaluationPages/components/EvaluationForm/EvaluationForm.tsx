@@ -17,6 +17,7 @@ import { useCreateOrUpdateEvaluation } from './hooks/useCreateOrUpdateEvaluation
 import { useDeleteEvaluation } from './hooks/useDeleteEvaluation'
 
 interface EvaluationFormProps {
+  type: AssessmentType
   courseParticipationID: string
   authorCourseParticipationID: string
   competency: Competency
@@ -25,6 +26,7 @@ interface EvaluationFormProps {
 }
 
 export const EvaluationForm = ({
+  type,
   courseParticipationID,
   authorCourseParticipationID,
   competency,
@@ -37,9 +39,6 @@ export const EvaluationForm = ({
   const form = useForm<CreateOrUpdateEvaluationRequest>({
     mode: 'onChange',
     defaultValues: {
-      courseParticipationID,
-      authorCourseParticipationID: authorCourseParticipationID,
-      competencyID: competency.id,
       scoreLevel: evaluation?.scoreLevel,
     },
   })
@@ -50,24 +49,35 @@ export const EvaluationForm = ({
 
   useEffect(() => {
     form.reset({
-      courseParticipationID,
-      authorCourseParticipationID: authorCourseParticipationID,
-      competencyID: competency.id,
       scoreLevel: evaluation?.scoreLevel,
     })
-  }, [form, courseParticipationID, authorCourseParticipationID, competency.id, evaluation])
+  }, [form, evaluation])
 
   useEffect(() => {
     if (completed) return
 
     const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        const data = form.getValues()
-        createOrUpdateEvaluation(data)
+        const scoreLevel = form.getValues().scoreLevel
+        createOrUpdateEvaluation({
+          courseParticipationID: courseParticipationID,
+          competencyID: competency.id,
+          scoreLevel: scoreLevel as ScoreLevel,
+          authorCourseParticipationID: authorCourseParticipationID,
+          type: type,
+        })
       }
     })
     return () => subscription.unsubscribe()
-  }, [form, createOrUpdateEvaluation, completed])
+  }, [
+    form,
+    createOrUpdateEvaluation,
+    completed,
+    courseParticipationID,
+    competency.id,
+    authorCourseParticipationID,
+    type,
+  ])
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
@@ -81,9 +91,6 @@ export const EvaluationForm = ({
           setDeleteDialogOpen(false)
 
           form.reset({
-            courseParticipationID: courseParticipationID,
-            authorCourseParticipationID: authorCourseParticipationID,
-            competencyID: competency.id,
             scoreLevel: undefined,
           })
         },
@@ -105,11 +112,7 @@ export const EvaluationForm = ({
           competencyScore={evaluation}
           completed={completed}
           onResetClick={() => setDeleteDialogOpen(true)}
-          assessmentType={
-            courseParticipationID === authorCourseParticipationID
-              ? AssessmentType.SELF
-              : AssessmentType.PEER
-          }
+          assessmentType={type}
         />
 
         <ScoreLevelSelector
@@ -118,7 +121,7 @@ export const EvaluationForm = ({
           selectedScore={selectedScoreLevel}
           onScoreChange={handleScoreChange}
           completed={completed}
-          assessmentType={AssessmentType.SELF}
+          assessmentType={type}
         />
       </div>
 

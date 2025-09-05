@@ -58,6 +58,7 @@ export const PeerEvaluationPage = () => {
       {peerEvaluationCategories.map((category) => (
         <CategoryEvaluation
           key={category.id}
+          type={AssessmentType.PEER}
           courseParticipationID={courseParticipationID ?? ''}
           category={category}
           evaluations={evaluations.filter(

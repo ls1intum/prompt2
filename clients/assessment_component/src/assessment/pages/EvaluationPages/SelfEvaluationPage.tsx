@@ -37,6 +37,7 @@ export const SelfEvaluationPage = () => {
       {selfEvaluationCategories.map((category) => (
         <CategoryEvaluation
           key={category.id}
+          type={AssessmentType.SELF}
           courseParticipationID={myParticipation?.courseParticipationID ?? ''}
           category={category}
           evaluations={evaluations}

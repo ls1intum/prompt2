@@ -3,12 +3,14 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 
 import { useMyParticipationStore } from '../../../zustand/useMyParticipationStore'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
 import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Evaluation } from '../../../interfaces/evaluation'
 
 import { EvaluationForm } from './EvaluationForm/EvaluationForm'
 
 interface CategoryEvaluationProps {
+  type: AssessmentType
   courseParticipationID: string
   category: CategoryWithCompetencies
   evaluations: Evaluation[]
@@ -16,6 +18,7 @@ interface CategoryEvaluationProps {
 }
 
 export const CategoryEvaluation = ({
+  type,
   courseParticipationID,
   category,
   evaluations,
@@ -57,6 +60,7 @@ export const CategoryEvaluation = ({
                 return (
                   <div key={competency.id}>
                     <EvaluationForm
+                      type={type}
                       courseParticipationID={courseParticipationID}
                       authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
                       competency={competency}
