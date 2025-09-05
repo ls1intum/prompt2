@@ -101,44 +101,14 @@ func GetEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]eval
 	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
 }
 
-func GetSelfEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetSelfEvaluationsByPhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get self evaluations by phase: ", err)
-		return nil, errors.New("could not get self evaluations by phase")
-	}
-	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
-}
-
-func GetSelfEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetSelfEvaluationsForParticipantInPhase(ctx, db.GetSelfEvaluationsForParticipantInPhaseParams{
+func GetEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
+	evaluations, err := EvaluationServiceSingleton.queries.GetEvaluationsForParticipantInPhase(ctx, db.GetEvaluationsForParticipantInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not get self evaluations for participant in phase: ", err)
-		return nil, errors.New("could not get self evaluations for participant in phase")
-	}
-	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
-}
-
-func GetPeerEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetPeerEvaluationsByPhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluations by phase: ", err)
-		return nil, errors.New("could not get peer evaluations by phase")
-	}
-	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
-}
-
-func GetPeerEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetPeerEvaluationsForParticipantInPhase(ctx, db.GetPeerEvaluationsForParticipantInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not get peer evaluations for participant in phase: ", err)
-		return nil, errors.New("could not get peer evaluations for participant in phase")
+		log.Error("could not get evaluations for participant in phase: ", err)
+		return nil, errors.New("could not get evaluations for participant in phase")
 	}
 	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
 }

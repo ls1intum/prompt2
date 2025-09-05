@@ -21,37 +21,11 @@ SELECT *
 FROM evaluation
 WHERE course_phase_id = $1;
 
--- name: GetSelfEvaluationsByPhase :many
-SELECT *
-FROM evaluation
-WHERE course_phase_id = $1
-  AND type = 'self';
-
--- name: GetSelfEvaluationsForParticipantInPhase :many
+-- name: GetEvaluationsForParticipantInPhase :many
 SELECT *
 FROM evaluation
 WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'self';
-
--- name: GetPeerEvaluationsByPhase :many
-SELECT *
-FROM evaluation
-WHERE course_phase_id = $1
-  AND type = 'peer';
-
--- name: GetPeerEvaluationsForParticipantInPhase :many
-SELECT *
-FROM evaluation
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'peer';
-
--- name: GetTutorEvaluationsByPhase :many
-SELECT *
-FROM evaluation
-WHERE course_phase_id = $1
-  AND type = 'tutor';
+  AND course_phase_id = $2;
 
 -- name: GetEvaluationsForAuthorInPhase :many
 SELECT *

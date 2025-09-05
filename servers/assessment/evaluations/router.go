@@ -16,10 +16,7 @@ func setupEvaluationRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 
 	// Admin/Lecturer/Editor endpoints - overview of all evaluations
 	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllEvaluationsByPhase)
-	evaluationRouter.GET("/self", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationsByPhase)
-	evaluationRouter.GET("/peer", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationsByPhase)
-	evaluationRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationsForParticipant)
-	evaluationRouter.GET("/peer/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationsForParticipant)
+	evaluationRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getEvaluationsForAuthorInPhase)
 
 	// Student endpoints - access to own evaluations only
 	evaluationRouter.GET("/my-evaluations", authMiddleware(promptSDK.CourseStudent), getMyEvaluations)
@@ -42,77 +39,25 @@ func getAllEvaluationsByPhase(c *gin.Context) {
 	c.JSON(http.StatusOK, evaluations)
 }
 
-func getSelfEvaluationsByPhase(c *gin.Context) {
+func getEvaluationsForAuthorInPhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	evaluations, err := GetSelfEvaluationsByPhase(c, coursePhaseID)
+	authorID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	evaluations, err := GetEvaluationsForAuthorInPhase(c, authorID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, evaluations)
-}
 
-func getPeerEvaluationsByPhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetPeerEvaluationsByPhase(c, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluations)
-}
-
-func getSelfEvaluationsForParticipant(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluations)
-}
-
-func getPeerEvaluationsForParticipant(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetPeerEvaluationsForParticipantInPhase(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
 	c.JSON(http.StatusOK, evaluations)
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -106,6 +107,7 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemValid() {
 		CourseParticipationID:       studentID,
 		CoursePhaseID:               phaseID,
 		AuthorCourseParticipationID: authorID,
+		Type:                        assessmentType.Self,
 	}
 	body, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items", bytes.NewBuffer(body))
@@ -127,6 +129,7 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemUnauthorizedAuth
 		CourseParticipationID:       studentID,
 		CoursePhaseID:               phaseID,
 		AuthorCourseParticipationID: wrongAuthorID,
+		Type:                        assessmentType.Self,
 	}
 	body, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items", bytes.NewBuffer(body))

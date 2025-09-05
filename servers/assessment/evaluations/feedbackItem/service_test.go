@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -57,6 +58,7 @@ func (suite *FeedbackItemServiceTestSuite) TestCreateFeedbackItem() {
 		CourseParticipationID:       suite.testCourseParticipationID,
 		CoursePhaseID:               suite.testCoursePhaseID,
 		AuthorCourseParticipationID: suite.testAuthorID,
+		Type:                        assessmentType.Self,
 	}
 
 	err := CreateFeedbackItem(suite.suiteCtx, req)
@@ -96,6 +98,7 @@ func (suite *FeedbackItemServiceTestSuite) TestDeleteFeedbackItem() {
 		CourseParticipationID:       suite.testCourseParticipationID,
 		CoursePhaseID:               suite.testCoursePhaseID,
 		AuthorCourseParticipationID: suite.testAuthorID,
+		Type:                        assessmentType.Self,
 	}
 
 	// Insert directly using the database

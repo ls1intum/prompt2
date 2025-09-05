@@ -150,16 +150,10 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		}
 	}
 
-	selfEvaluations, err := evaluations.GetSelfEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
+	evaluations, err := evaluations.GetEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
-		log.Error("could not get self evaluations: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get self evaluations")
-	}
-
-	peerEvaluations, err := evaluations.GetPeerEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluations: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get peer evaluations")
+		log.Error("could not get evaluations: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get evaluations")
 	}
 
 	return assessmentDTO.StudentAssessment{
@@ -167,8 +161,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		AssessmentCompletion:  completion,
 		StudentScore:          studentScore,
-		SelfEvaluations:       selfEvaluations,
-		PeerEvaluations:       peerEvaluations,
+		Evaluations:           evaluations,
 	}, nil
 }
 

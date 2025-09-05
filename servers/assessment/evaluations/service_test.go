@@ -72,76 +72,15 @@ func TestEvaluationServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(EvaluationServiceTestSuite))
 }
 
-// Test getting evaluations by phase
 func (suite *EvaluationServiceTestSuite) TestGetEvaluationsByPhase() {
 	evaluations, err := GetEvaluationsByPhase(suite.suiteCtx, suite.testCoursePhaseID)
 
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), evaluations)
-	assert.GreaterOrEqual(suite.T(), len(evaluations), 5) // We expect at least 5 evaluations in phase 1
+	assert.GreaterOrEqual(suite.T(), len(evaluations), 5)
 
-	// Verify all evaluations belong to the correct phase
 	for _, evaluation := range evaluations {
 		assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
-	}
-}
-
-// Test getting self evaluations by phase
-func (suite *EvaluationServiceTestSuite) TestGetSelfEvaluationsByPhase() {
-	evaluations, err := GetSelfEvaluationsByPhase(suite.suiteCtx, suite.testCoursePhaseID)
-
-	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), evaluations)
-
-	// Verify all evaluations are self-evaluations (author == participant)
-	for _, evaluation := range evaluations {
-		assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
-		assert.Equal(suite.T(), evaluation.CourseParticipationID, evaluation.AuthorCourseParticipationID)
-	}
-}
-
-// Test getting self evaluations for a specific participant
-func (suite *EvaluationServiceTestSuite) TestGetSelfEvaluationsForParticipantInPhase() {
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID1, suite.testCoursePhaseID)
-
-	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), evaluations)
-	assert.GreaterOrEqual(suite.T(), len(evaluations), 2) // We expect at least 2 self-evaluations for participant 1
-
-	// Verify all evaluations are for the correct participant and are self-evaluations
-	for _, evaluation := range evaluations {
-		assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
-		assert.Equal(suite.T(), suite.testParticipantID1, evaluation.CourseParticipationID)
-		assert.Equal(suite.T(), suite.testParticipantID1, evaluation.AuthorCourseParticipationID)
-	}
-}
-
-// Test getting peer evaluations by phase
-func (suite *EvaluationServiceTestSuite) TestGetPeerEvaluationsByPhase() {
-	evaluations, err := GetPeerEvaluationsByPhase(suite.suiteCtx, suite.testCoursePhaseID)
-
-	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), evaluations)
-
-	// Verify all evaluations are peer evaluations (author != participant)
-	for _, evaluation := range evaluations {
-		assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
-		assert.NotEqual(suite.T(), evaluation.CourseParticipationID, evaluation.AuthorCourseParticipationID)
-	}
-}
-
-// Test getting peer evaluations for a specific participant
-func (suite *EvaluationServiceTestSuite) TestGetPeerEvaluationsForParticipantInPhase() {
-	evaluations, err := GetPeerEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID1, suite.testCoursePhaseID)
-
-	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), evaluations)
-
-	// Verify all evaluations are for the correct participant and are peer evaluations
-	for _, evaluation := range evaluations {
-		assert.Equal(suite.T(), suite.testCoursePhaseID, evaluation.CoursePhaseID)
-		assert.Equal(suite.T(), suite.testParticipantID1, evaluation.CourseParticipationID)
-		assert.NotEqual(suite.T(), suite.testParticipantID1, evaluation.AuthorCourseParticipationID)
 	}
 }
 
@@ -194,7 +133,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Create() {
 	assert.NoError(suite.T(), err)
 
 	// Verify the evaluation was created by retrieving all evaluations for this participant
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID3, suite.testCoursePhaseID)
+	evaluations, err := GetEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID3, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 
 	// Find the newly created evaluation
@@ -227,7 +166,7 @@ func (suite *EvaluationServiceTestSuite) TestCreateOrUpdateEvaluation_Update() {
 	assert.NoError(suite.T(), err)
 
 	// Verify the evaluation was updated
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID2, suite.testCoursePhaseID)
+	evaluations, err := GetEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID2, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 
 	// Find the updated evaluation
@@ -255,7 +194,7 @@ func (suite *EvaluationServiceTestSuite) TestDeleteEvaluation() {
 	assert.NoError(suite.T(), err)
 
 	// Get the evaluation to find its ID
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID1, suite.testCoursePhaseID)
+	evaluations, err := GetEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID1, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 
 	var evaluationToDelete evaluationDTO.Evaluation
@@ -291,7 +230,7 @@ func (suite *EvaluationServiceTestSuite) TestCreatePeerEvaluation() {
 	assert.NoError(suite.T(), err)
 
 	// Verify the peer evaluation was created
-	evaluations, err := GetPeerEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID2, suite.testCoursePhaseID)
+	evaluations, err := GetEvaluationsForParticipantInPhase(suite.suiteCtx, suite.testParticipantID2, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 
 	found := false

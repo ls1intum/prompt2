@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
@@ -88,34 +89,10 @@ func (suite *EvaluationRouterTestSuite) TestGetAllEvaluationsByPhase() {
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *EvaluationRouterTestSuite) TestGetSelfEvaluationsByPhase() {
-	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/self", nil)
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusOK, w.Code)
-
-	var evaluations []evaluationDTO.Evaluation
-	err := json.Unmarshal(w.Body.Bytes(), &evaluations)
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *EvaluationRouterTestSuite) TestGetPeerEvaluationsByPhase() {
-	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/peer", nil)
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusOK, w.Code)
-
-	var evaluations []evaluationDTO.Evaluation
-	err := json.Unmarshal(w.Body.Bytes(), &evaluations)
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *EvaluationRouterTestSuite) TestGetSelfEvaluationsForParticipant() {
+func (suite *EvaluationRouterTestSuite) TestGetEvaluationsForParticipant() {
 	// Use existing participant ID from test data
 	participantID := "01234567-1234-1234-1234-123456789012"
-	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/self/course-participation/"+participantID, nil)
+	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/course-participation/"+participantID, nil)
 	w := httptest.NewRecorder()
 	suite.router.ServeHTTP(w, req)
 
@@ -145,6 +122,7 @@ func (suite *EvaluationRouterTestSuite) TestCreateOrUpdateEvaluation() {
 		CompetencyID:                uuid.MustParse("c1234567-1234-1234-1234-123456789012"), // Valid from test data
 		ScoreLevel:                  scoreLevelDTO.ScoreLevelGood,
 		AuthorCourseParticipationID: uuid.MustParse("01234567-1234-1234-1234-123456789012"), // Must match test middleware
+		Type:                        assessmentType.Self,
 	}
 
 	body, _ := json.Marshal(requestBody)
@@ -178,6 +156,7 @@ func (suite *EvaluationRouterTestSuite) TestCreateOrUpdateEvaluationForbiddenAut
 		CompetencyID:                uuid.MustParse("c1234567-1234-1234-1234-123456789012"), // Valid from test data
 		ScoreLevel:                  scoreLevelDTO.ScoreLevelGood,
 		AuthorCourseParticipationID: uuid.MustParse("02234567-1234-1234-1234-123456789012"), // Different from test middleware user
+		Type:                        assessmentType.Self,
 	}
 
 	body, _ := json.Marshal(requestBody)

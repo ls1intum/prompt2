@@ -27,6 +27,13 @@ CREATE TYPE public.score_level AS ENUM (
     'very_good'
 );
 
+CREATE TYPE public.assessment_type AS ENUM (
+    'self',
+    'peer',
+    'tutor',
+    'assessment'
+);
+
 -- Create tables
 CREATE TABLE public.course_phase (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -73,6 +80,7 @@ CREATE TABLE public.evaluation (
     score_level public.score_level NOT NULL,
     author_course_participation_id uuid NOT NULL,
     evaluated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    type public.assessment_type NOT NULL DEFAULT 'self',
     CONSTRAINT evaluation_pkey PRIMARY KEY (id),
     CONSTRAINT evaluation_course_participation_id_fkey FOREIGN KEY (course_participation_id) REFERENCES public.course_participation(id) ON DELETE CASCADE,
     CONSTRAINT evaluation_course_phase_id_fkey FOREIGN KEY (course_phase_id) REFERENCES public.course_phase(id) ON DELETE CASCADE,
@@ -88,6 +96,7 @@ CREATE TABLE public.evaluation_completion (
     author_course_participation_id uuid NOT NULL,
     completed_at timestamp with time zone NOT NULL,
     completed boolean DEFAULT false NOT NULL,
+    type public.assessment_type NOT NULL DEFAULT 'self',
     CONSTRAINT evaluation_completion_pkey PRIMARY KEY (id),
     CONSTRAINT evaluation_completion_course_participation_id_fkey FOREIGN KEY (course_participation_id) REFERENCES public.course_participation(id) ON DELETE CASCADE,
     CONSTRAINT evaluation_completion_course_phase_id_fkey FOREIGN KEY (course_phase_id) REFERENCES public.course_phase(id) ON DELETE CASCADE,
