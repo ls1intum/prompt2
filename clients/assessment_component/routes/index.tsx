@@ -5,6 +5,7 @@ import { EvaluationDataShell } from '../src/assessment/pages/EvaluationDataShell
 import { EvaluationOverviewPage } from '../src/assessment/pages/EvaluationOverviewPage/EvaluationOverviewPage'
 import { SelfEvaluationPage } from '../src/assessment/pages/EvaluationPages/SelfEvaluationPage'
 import { PeerEvaluationPage } from '../src/assessment/pages/EvaluationPages/PeerEvaluationPage'
+import { TutorEvaluationPage } from '../src/assessment/pages/EvaluationPages/TutorEvaluationPage'
 
 import { AssessmentDataShell } from '../src/assessment/pages/AssessmentDataShell'
 import { AssessmentParticipantsPage } from '../src/assessment/pages/AssessmentParticipantsPage/AssessmentParticipantsPage'
@@ -46,6 +47,20 @@ const routes: ExtendedRouteObject[] = [
     element: (
       <EvaluationDataShell>
         <PeerEvaluationPage />
+      </EvaluationDataShell>
+    ),
+    requiredPermissions: [
+      Role.PROMPT_ADMIN,
+      Role.COURSE_LECTURER,
+      Role.COURSE_EDITOR,
+      Role.COURSE_STUDENT,
+    ],
+  },
+  {
+    path: '/tutor-evaluation/:courseParticipationID',
+    element: (
+      <EvaluationDataShell>
+        <TutorEvaluationPage />
       </EvaluationDataShell>
     ),
     requiredPermissions: [

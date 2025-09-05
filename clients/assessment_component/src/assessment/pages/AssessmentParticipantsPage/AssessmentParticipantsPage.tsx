@@ -14,11 +14,12 @@ import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
 import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
-import { getAllSelfEvaluationCompletionsInPhase } from '../../network/queries/getAllSelfEvaluationCompletionsInPhase'
-import { getAllPeerEvaluationCompletionsInPhase } from '../../network/queries/getAllPeerEvaluationCompletionsInPhase'
+import { getAllEvaluationCompletionsInPhase } from '../../network/queries/getAllEvaluationCompletionsInPhase'
 
-import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
+import { AssessmentType } from '../../interfaces/assessmentType'
 import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
+import { mapScoreLevelToNumber, ScoreLevel } from '../../interfaces/scoreLevel'
+
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
@@ -53,38 +54,33 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
   })
 
   const {
-    data: selfEvaluationCompletions,
-    isPending: isSelfEvaluationCompletionsPending,
-    isError: isSelfEvaluationCompletionsError,
-    refetch: refetchSelfEvaluationCompletions,
+    data: evaluationCompletions,
+    isPending: isEvaluationCompletionsPending,
+    isError: isEvaluationCompletionsError,
+    refetch: refetchEvaluationCompletions,
   } = useQuery({
-    queryKey: ['selfEvaluationCompletions', phaseId],
-    queryFn: () => getAllSelfEvaluationCompletionsInPhase(phaseId ?? ''),
+    queryKey: ['evaluationCompletions', phaseId],
+    queryFn: () => getAllEvaluationCompletionsInPhase(phaseId ?? ''),
   })
 
-  const {
-    data: peerEvaluationCompletions,
-    isPending: isPeerEvaluationCompletionsPending,
-    isError: isPeerEvaluationCompletionsError,
-    refetch: refetchPeerEvaluationCompletions,
-  } = useQuery({
-    queryKey: ['peerEvaluationCompletions', phaseId],
-    queryFn: () => getAllPeerEvaluationCompletionsInPhase(phaseId ?? ''),
-  })
-
-  const isError =
-    isAssessmentCompletionsError ||
-    isSelfEvaluationCompletionsError ||
-    isPeerEvaluationCompletionsError
-  const isPending =
-    isAssessmentCompletionsPending ||
-    isSelfEvaluationCompletionsPending ||
-    isPeerEvaluationCompletionsPending
+  const isError = isAssessmentCompletionsError || isEvaluationCompletionsError
+  const isPending = isAssessmentCompletionsPending || isEvaluationCompletionsPending
   const refetch = () => {
     refetchAssessmentCompletions()
-    refetchSelfEvaluationCompletions()
-    refetchPeerEvaluationCompletions()
+    refetchEvaluationCompletions()
   }
+
+  const selfEvaluationCompletions = useMemo(() => {
+    return (
+      evaluationCompletions?.filter((evaluation) => evaluation.type === AssessmentType.SELF) ?? []
+    )
+  }, [evaluationCompletions])
+
+  const peerEvaluationCompletions = useMemo(() => {
+    return (
+      evaluationCompletions?.filter((evaluation) => evaluation.type === AssessmentType.PEER) ?? []
+    )
+  }, [evaluationCompletions])
 
   const teamsWithStudents = useMemo(() => {
     return teams.map((team) => ({
@@ -349,7 +345,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
               }
             }),
           }
-        : undefined,
+        : undefined, // TODO Tutor Evaluation Status
     ].filter((column) => column !== undefined)
   }, [
     participations,

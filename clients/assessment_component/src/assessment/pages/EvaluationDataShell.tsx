@@ -26,8 +26,7 @@ import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
 import { useGetTutorEvaluationCategoriesWithCompetencies } from './hooks/useGetTutorEvaluationCategoriesWithCompetencies'
-import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluationCompletion'
-import { useGetMyPeerEvaluationCompletions } from './hooks/useGetMyPeerEvaluationCompletions'
+import { useGetMyEvaluationCompletions } from './hooks/useGetMyEvaluationCompletions'
 import { useGetMyEvaluations } from './hooks/useGetMyEvaluations'
 
 interface EvaluationDataShellProps {
@@ -48,8 +47,10 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
   const {
     setSelfEvaluationCompletion,
     setPeerEvaluationCompletions,
+    setTutorEvaluationCompletions,
     setSelfEvaluations,
     setPeerEvaluations,
+    setTutorEvaluations,
   } = useEvaluationStore()
 
   const {
@@ -99,22 +100,18 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
   })
 
   const {
-    data: selfEvaluationCompletion,
+    selfEvaluationCompletion: selfEvaluationCompletion,
+    peerEvaluationCompletions: peerEvaluationCompletions,
+    tutorEvaluationCompletions: tutorEvaluationCompletions,
     isPending: isCompletionPending,
     isError: isCompletionError,
     refetch: refetchCompletion,
-  } = useGetMySelfEvaluationCompletion({ enabled: isStudent })
-
-  const {
-    data: peerEvaluationCompletions,
-    isPending: isPeerEvaluationsPending,
-    isError: isPeerEvaluationsError,
-    refetch: refetchPeerEvaluations,
-  } = useGetMyPeerEvaluationCompletions({ enabled: isStudent })
+  } = useGetMyEvaluationCompletions({ enabled: isStudent })
 
   const {
     selfEvaluations: selfEvaluations,
     peerEvaluations: peerEvaluations,
+    tutorEvaluations: tutorEvaluations,
     isPending: isMyEvaluationsPending,
     isError: isMyEvaluationsError,
     refetch: refetchMyEvaluations,
@@ -128,7 +125,6 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
     isCoursePhaseConfigError ||
     (isStudent && isParticipationsError) ||
     (isStudent && isCompletionError) ||
-    (isStudent && isPeerEvaluationsError) ||
     (isStudent && isMyEvaluationsError)
   const isPending =
     isSelfEvaluationCategoriesPending ||
@@ -138,7 +134,6 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
     isCoursePhaseConfigPending ||
     (isStudent && isParticipationsPending) ||
     (isStudent && isCompletionPending) ||
-    (isStudent && isPeerEvaluationsPending) ||
     (isStudent && isMyEvaluationsPending)
   const refetch = () => {
     refetchSelfEvaluationCategories()
@@ -149,7 +144,6 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
     if (isStudent) {
       refetchCoursePhaseParticipations()
       refetchCompletion()
-      refetchPeerEvaluations()
       refetchMyEvaluations()
     }
   }
@@ -203,6 +197,12 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
   }, [peerEvaluationCompletions, setPeerEvaluationCompletions, isStudent])
 
   useEffect(() => {
+    if (tutorEvaluationCompletions && isStudent) {
+      setTutorEvaluationCompletions(tutorEvaluationCompletions)
+    }
+  }, [tutorEvaluationCompletions, setTutorEvaluationCompletions, isStudent])
+
+  useEffect(() => {
     if (selfEvaluations && isStudent) {
       setSelfEvaluations(selfEvaluations)
     }
@@ -213,6 +213,12 @@ export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
       setPeerEvaluations(peerEvaluations)
     }
   }, [peerEvaluations, setPeerEvaluations, isStudent])
+
+  useEffect(() => {
+    if (tutorEvaluations && isStudent) {
+      setTutorEvaluations(tutorEvaluations)
+    }
+  }, [tutorEvaluations, setTutorEvaluations, isStudent])
 
   if (isError)
     return (

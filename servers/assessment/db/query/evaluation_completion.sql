@@ -59,64 +59,17 @@ SELECT EXISTS (SELECT 1
                  AND course_phase_id = $2
                  AND author_course_participation_id = $3);
 
--- name: GetSelfEvaluationCompletionsByCoursePhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_phase_id = $1
-  AND type = 'self';
-
--- name: GetPeerEvaluationCompletionsByCoursePhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_phase_id = $1
-  AND type = 'peer';
-
--- name: GetTutorEvaluationCompletionsByCoursePhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_phase_id = $1
-  AND type = 'tutor';
-
 -- name: GetEvaluationCompletionsForParticipantInPhase :many
 SELECT *
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2;
 
--- name: GetPeerEvaluationCompletionsForAuthorInPhase :many
+-- name: GetEvaluationCompletionsForAuthorInPhase :many
 SELECT *
 FROM evaluation_completion
 WHERE author_course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'peer';
-
--- name: GetPeerEvaluationCompletionsForParticipantInPhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'peer';
-
--- name: GetTutorEvaluationCompletionsForAuthorInPhase :many
-SELECT *
-FROM evaluation_completion
-WHERE author_course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'tutor';
-
--- name: GetTutorEvaluationCompletionsForParticipantInPhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'tutor';
-
--- name: GetSelfEvaluationCompletionsForParticipantInPhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'self';
+  AND course_phase_id = $2;
 
 -- name: GetEvaluationCompletionByType :one
 SELECT *

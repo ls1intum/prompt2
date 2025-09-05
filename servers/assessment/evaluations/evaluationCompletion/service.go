@@ -238,33 +238,6 @@ func ListEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID u
 	return completions, nil
 }
 
-func ListSelfEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetSelfEvaluationCompletionsByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get self evaluation completions by course phase: ", err)
-		return nil, errors.New("could not get self evaluation completions by course phase")
-	}
-	return completions, nil
-}
-
-func ListPeerEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluation completions by course phase: ", err)
-		return nil, errors.New("could not get peer evaluation completions by course phase")
-	}
-	return completions, nil
-}
-
-func ListTutorEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetTutorEvaluationCompletionsByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get tutor evaluation completions by course phase: ", err)
-		return nil, errors.New("could not get tutor evaluation completions by course phase")
-	}
-	return completions, nil
-}
-
 func GetEvaluationCompletion(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) (db.EvaluationCompletion, error) {
 	completion, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletion(ctx, db.GetEvaluationCompletionParams{
 		CourseParticipationID:       courseParticipationID,
@@ -283,50 +256,26 @@ func GetEvaluationCompletion(ctx context.Context, courseParticipationID, courseP
 	return completion, nil
 }
 
-func ListPeerEvaluationCompletionsForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsForParticipantInPhase(ctx, db.GetPeerEvaluationCompletionsForParticipantInPhaseParams{
+func GetEvaluationCompletionForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
+	completions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForParticipantInPhase(ctx, db.GetEvaluationCompletionsForParticipantInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not get peer evaluation completions for participant in phase: ", err)
-		return nil, errors.New("could not get peer evaluation completions for participant in phase")
+		log.Error("could not get evaluation completions for participant in phase: ", err)
+		return nil, errors.New("could not get evaluation completions for participant in phase")
 	}
 	return completions, nil
 }
 
 func GetEvaluationCompletionsForAuthorInPhase(ctx context.Context, authorCourseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsForAuthorInPhase(ctx, db.GetPeerEvaluationCompletionsForAuthorInPhaseParams{
+	completions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForAuthorInPhase(ctx, db.GetEvaluationCompletionsForAuthorInPhaseParams{
 		AuthorCourseParticipationID: authorCourseParticipationID,
 		CoursePhaseID:               coursePhaseID,
 	})
 	if err != nil {
 		log.Error("could not get evaluation completions for author in phase: ", err)
 		return nil, errors.New("could not get evaluation completions for author in phase")
-	}
-	return completions, nil
-}
-
-func ListTutorEvaluationCompletionsForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetTutorEvaluationCompletionsForParticipantInPhase(ctx, db.GetTutorEvaluationCompletionsForParticipantInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not get tutor evaluation completions for participant in phase: ", err)
-		return nil, errors.New("could not get tutor evaluation completions for participant in phase")
-	}
-	return completions, nil
-}
-
-func GetTutorEvaluationCompletionsForAuthorInPhase(ctx context.Context, authorCourseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetTutorEvaluationCompletionsForAuthorInPhase(ctx, db.GetTutorEvaluationCompletionsForAuthorInPhaseParams{
-		AuthorCourseParticipationID: authorCourseParticipationID,
-		CoursePhaseID:               coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not get tutor evaluation completions for author in phase: ", err)
-		return nil, errors.New("could not get tutor evaluation completions for author in phase")
 	}
 	return completions, nil
 }
