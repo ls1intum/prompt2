@@ -30,13 +30,11 @@ import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluation
 import { useGetMyPeerEvaluationCompletions } from './hooks/useGetMyPeerEvaluationCompletions'
 import { useGetMyEvaluations } from './hooks/useGetMyEvaluations'
 
-interface SelfAndPeerAssessmentDataShellProps {
+interface EvaluationDataShellProps {
   children: React.ReactNode
 }
 
-export const SelfAndPeerEvaluationDataShell = ({
-  children,
-}: SelfAndPeerAssessmentDataShellProps) => {
+export const EvaluationDataShell = ({ children }: EvaluationDataShellProps) => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')

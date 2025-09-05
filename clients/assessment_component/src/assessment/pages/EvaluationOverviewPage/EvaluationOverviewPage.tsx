@@ -19,7 +19,7 @@ import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 import { ActionItemsAndGradeSuggestion } from './components/ActionItemsAndGradeSuggestion'
 import { TeamBadge } from '../components/badges'
 
-export const SelfAndPeerEvaluationOverviewPage = () => {
+export const EvaluationOverviewPage = () => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')

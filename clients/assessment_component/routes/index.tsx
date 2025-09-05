@@ -1,8 +1,8 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 
-import { SelfAndPeerEvaluationDataShell } from '../src/assessment/pages/SelfAndPeerEvaluationDataShell'
-import { SelfAndPeerEvaluationOverviewPage } from '../src/assessment/pages/SelfAndPeerEvaluationOverviewPage/SelfAndPeerEvaluationOverviewPage'
+import { EvaluationDataShell } from '../src/assessment/pages/EvaluationDataShell'
+import { EvaluationOverviewPage } from '../src/assessment/pages/EvaluationOverviewPage/EvaluationOverviewPage'
 import { SelfEvaluationPage } from '../src/assessment/pages/EvaluationPages/SelfEvaluationPage'
 import { PeerEvaluationPage } from '../src/assessment/pages/EvaluationPages/PeerEvaluationPage'
 
@@ -16,9 +16,9 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '',
     element: (
-      <SelfAndPeerEvaluationDataShell>
-        <SelfAndPeerEvaluationOverviewPage />
-      </SelfAndPeerEvaluationDataShell>
+      <EvaluationDataShell>
+        <EvaluationOverviewPage />
+      </EvaluationDataShell>
     ),
     requiredPermissions: [
       Role.PROMPT_ADMIN,
@@ -30,9 +30,9 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '/self-evaluation',
     element: (
-      <SelfAndPeerEvaluationDataShell>
+      <EvaluationDataShell>
         <SelfEvaluationPage />
-      </SelfAndPeerEvaluationDataShell>
+      </EvaluationDataShell>
     ),
     requiredPermissions: [
       Role.PROMPT_ADMIN,
@@ -44,9 +44,9 @@ const routes: ExtendedRouteObject[] = [
   {
     path: '/peer-evaluation/:courseParticipationID',
     element: (
-      <SelfAndPeerEvaluationDataShell>
+      <EvaluationDataShell>
         <PeerEvaluationPage />
-      </SelfAndPeerEvaluationDataShell>
+      </EvaluationDataShell>
     ),
     requiredPermissions: [
       Role.PROMPT_ADMIN,
