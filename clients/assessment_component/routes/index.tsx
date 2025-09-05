@@ -3,8 +3,8 @@ import { Role } from '@tumaet/prompt-shared-state'
 
 import { SelfAndPeerEvaluationDataShell } from '../src/assessment/pages/SelfAndPeerEvaluationDataShell'
 import { SelfAndPeerEvaluationOverviewPage } from '../src/assessment/pages/SelfAndPeerEvaluationOverviewPage/SelfAndPeerEvaluationOverviewPage'
-import { SelfEvaluationPage } from '../src/assessment/pages/SelfAndPeerEvaluationPage/SelfEvaluationPage'
-import { PeerEvaluationPage } from '../src/assessment/pages/SelfAndPeerEvaluationPage/PeerEvaluationPage'
+import { SelfEvaluationPage } from '../src/assessment/pages/EvaluationPages/SelfEvaluationPage'
+import { PeerEvaluationPage } from '../src/assessment/pages/EvaluationPages/PeerEvaluationPage'
 
 import { AssessmentDataShell } from '../src/assessment/pages/AssessmentDataShell'
 import { AssessmentParticipantsPage } from '../src/assessment/pages/AssessmentParticipantsPage/AssessmentParticipantsPage'
