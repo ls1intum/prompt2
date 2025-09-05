@@ -15,6 +15,7 @@ import { useUnmarkMyEvaluationAsCompleted } from './hooks/useUnmarkMyEvaluationA
 import { FeedbackItemPanel } from './components/FeedbackItemPanel'
 
 interface EvaluationCompletionPageProps {
+  type: AssessmentType
   deadline: Date
   courseParticipationID: string
   authorCourseParticipationID: string
@@ -23,6 +24,7 @@ interface EvaluationCompletionPageProps {
 }
 
 export const EvaluationCompletionPage = ({
+  type,
   deadline,
   courseParticipationID,
   authorCourseParticipationID,
@@ -81,12 +83,14 @@ export const EvaluationCompletionPage = ({
     <div>
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <FeedbackItemPanel
+          assessmentType={type}
           feedbackType='negative'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
           completed={completed}
         />
         <FeedbackItemPanel
+          assessmentType={type}
           feedbackType='positive'
           courseParticipationID={courseParticipationID}
           authorCourseParticipationID={authorCourseParticipationID}
@@ -104,14 +108,7 @@ export const EvaluationCompletionPage = ({
         <div className='flex flex-col'>
           {deadline && (
             <div className='text-muted-foreground'>
-              <DeadlineBadge
-                deadline={deadline}
-                type={
-                  courseParticipationID === authorCourseParticipationID
-                    ? AssessmentType.SELF
-                    : AssessmentType.PEER
-                }
-              />
+              <DeadlineBadge deadline={deadline} type={type} />
             </div>
           )}
           {isDeadlinePassed && completed && (

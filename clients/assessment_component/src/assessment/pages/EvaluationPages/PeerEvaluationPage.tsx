@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
+
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { usePeerEvaluationCategoryStore } from '../../zustand/usePeerEvaluationCategoryStore'
@@ -66,6 +68,7 @@ export const PeerEvaluationPage = () => {
       ))}
 
       <EvaluationCompletionPage
+        type={AssessmentType.PEER}
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
         courseParticipationID={courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}

@@ -51,7 +51,7 @@ func (suite *FeedbackItemServiceTestSuite) TearDownSuite() {
 }
 
 func (suite *FeedbackItemServiceTestSuite) TestCreateFeedbackItem() {
-	req := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	req := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypePositive,
 		FeedbackText:                "Great work on this task!",
 		CourseParticipationID:       suite.testCourseParticipationID,
@@ -66,8 +66,8 @@ func (suite *FeedbackItemServiceTestSuite) TestCreateFeedbackItem() {
 func (suite *FeedbackItemServiceTestSuite) TestUpdateFeedbackItem() {
 	// Use the second feedback item ID to avoid interfering with other tests
 	updateFeedbackItemID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
-	req := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
-		ID:                          &updateFeedbackItemID,
+	req := feedbackItemDTO.UpdateFeedbackItemRequest{
+		ID:                          updateFeedbackItemID,
 		FeedbackType:                db.FeedbackTypePositive, // Change from negative to positive
 		FeedbackText:                "Updated feedback text",
 		CourseParticipationID:       suite.testCourseParticipationID,
@@ -76,35 +76,6 @@ func (suite *FeedbackItemServiceTestSuite) TestUpdateFeedbackItem() {
 	}
 
 	err := UpdateFeedbackItem(suite.suiteCtx, req)
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestCreateOrUpdateFeedbackItem_Create() {
-	req := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
-		FeedbackType:                db.FeedbackTypePositive,
-		FeedbackText:                "New feedback item",
-		CourseParticipationID:       suite.testCourseParticipationID,
-		CoursePhaseID:               suite.testCoursePhaseID,
-		AuthorCourseParticipationID: suite.testAuthorID,
-	}
-
-	err := CreateOrUpdateFeedbackItem(suite.suiteCtx, req)
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestCreateOrUpdateFeedbackItem_Update() {
-	// Use a different feedback item ID to avoid interfering with other tests
-	updateFeedbackItemID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
-	req := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
-		ID:                          &updateFeedbackItemID,
-		FeedbackType:                db.FeedbackTypePositive,
-		FeedbackText:                "Updated via CreateOrUpdate",
-		CourseParticipationID:       suite.testCourseParticipationID,
-		CoursePhaseID:               suite.testCoursePhaseID,
-		AuthorCourseParticipationID: suite.testAuthorID,
-	}
-
-	err := CreateOrUpdateFeedbackItem(suite.suiteCtx, req)
 	assert.NoError(suite.T(), err)
 }
 
@@ -119,7 +90,7 @@ func (suite *FeedbackItemServiceTestSuite) TestGetFeedbackItem() {
 func (suite *FeedbackItemServiceTestSuite) TestDeleteFeedbackItem() {
 	// First create a feedback item to delete
 	newID := uuid.New()
-	req := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	req := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypeNegative,
 		FeedbackText:                "Feedback to be deleted",
 		CourseParticipationID:       suite.testCourseParticipationID,
@@ -163,22 +134,6 @@ func (suite *FeedbackItemServiceTestSuite) TestListFeedbackItemsByAuthorInPhase(
 	feedbackItems, err := ListFeedbackItemsByAuthorInPhase(suite.suiteCtx, suite.testAuthorID, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(feedbackItems), 1)
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestListPositiveFeedbackItemsForStudentInPhase() {
-	feedbackItems, err := ListPositiveFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	for _, item := range feedbackItems {
-		assert.Equal(suite.T(), db.FeedbackTypePositive, item.FeedbackType)
-	}
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestListNegativeFeedbackItemsForStudentInPhase() {
-	feedbackItems, err := ListNegativeFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	for _, item := range feedbackItems {
-		assert.Equal(suite.T(), db.FeedbackTypeNegative, item.FeedbackType)
-	}
 }
 
 func (suite *FeedbackItemServiceTestSuite) TestCountFeedbackItemsForStudentInPhase() {

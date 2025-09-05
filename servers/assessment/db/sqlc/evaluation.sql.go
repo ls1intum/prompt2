@@ -91,10 +91,10 @@ SELECT (SELECT total FROM total_competencies) - (SELECT evaluated FROM evaluated
 `
 
 type CountRemainingEvaluationsForStudentByTypeParams struct {
-	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
-	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
-	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
-	Column4                     EvaluationType `json:"column_4"`
+	CourseParticipationID       uuid.UUID   `json:"course_participation_id"`
+	AuthorCourseParticipationID uuid.UUID   `json:"author_course_participation_id"`
+	CoursePhaseID               uuid.UUID   `json:"course_phase_id"`
+	Column4                     interface{} `json:"column_4"`
 }
 
 func (q *Queries) CountRemainingEvaluationsForStudentByType(ctx context.Context, arg CountRemainingEvaluationsForStudentByTypeParams) (int32, error) {
@@ -129,7 +129,7 @@ type CreateOrUpdateEvaluationParams struct {
 	CompetencyID                uuid.UUID      `json:"competency_id"`
 	ScoreLevel                  ScoreLevel     `json:"score_level"`
 	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
-	Type                        EvaluationType `json:"type"`
+	Type                        AssessmentType `json:"type"`
 }
 
 func (q *Queries) CreateOrUpdateEvaluation(ctx context.Context, arg CreateOrUpdateEvaluationParams) error {
@@ -418,48 +418,6 @@ WHERE course_phase_id = $1
 
 func (q *Queries) GetTutorEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]Evaluation, error) {
 	rows, err := q.db.Query(ctx, getTutorEvaluationsByPhase, coursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Evaluation
-	for rows.Next() {
-		var i Evaluation
-		if err := rows.Scan(
-			&i.ID,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
-			&i.CompetencyID,
-			&i.ScoreLevel,
-			&i.AuthorCourseParticipationID,
-			&i.EvaluatedAt,
-			&i.Type,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getTutorEvaluationsForParticipantInPhase = `-- name: GetTutorEvaluationsForParticipantInPhase :many
-SELECT id, course_participation_id, course_phase_id, competency_id, score_level, author_course_participation_id, evaluated_at, type
-FROM evaluation
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'tutor'
-`
-
-type GetTutorEvaluationsForParticipantInPhaseParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) GetTutorEvaluationsForParticipantInPhase(ctx context.Context, arg GetTutorEvaluationsForParticipantInPhaseParams) ([]Evaluation, error) {
-	rows, err := q.db.Query(ctx, getTutorEvaluationsForParticipantInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
 	if err != nil {
 		return nil, err
 	}

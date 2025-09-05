@@ -10,7 +10,7 @@ export const useUpdateFeedbackItem = (setError: (error: string | undefined) => v
 
   return useMutation({
     mutationFn: (feedbackItem: UpdateFeedbackItemRequest) => {
-      return updateFeedbackItem(phaseId ?? '', feedbackItem)
+      return updateFeedbackItem(phaseId ?? '', feedbackItem.id, feedbackItem)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-feedback-items', phaseId] })

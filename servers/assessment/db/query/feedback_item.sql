@@ -48,22 +48,6 @@ WHERE author_course_participation_id = $1
   AND course_phase_id = $2
 ORDER BY created_at;
 
--- name: ListPositiveFeedbackItemsForStudentInPhase :many
-SELECT *
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'positive'
-ORDER BY created_at;
-
--- name: ListNegativeFeedbackItemsForStudentInPhase :many
-SELECT *
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'negative'
-ORDER BY created_at;
-
 -- name: CountFeedbackItemsForStudentInPhase :one
 SELECT COUNT(*) AS feedback_item_count
 FROM feedback_items

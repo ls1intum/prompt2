@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
+
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../../zustand/useSelfEvaluationCategoryStore'
@@ -43,6 +45,7 @@ export const SelfEvaluationPage = () => {
       ))}
 
       <EvaluationCompletionPage
+        type={AssessmentType.SELF}
         deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
         courseParticipationID={myParticipation?.courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}

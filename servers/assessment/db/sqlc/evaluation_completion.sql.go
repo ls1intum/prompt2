@@ -54,7 +54,7 @@ type CreateOrUpdateEvaluationCompletionParams struct {
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
 	Completed                   bool               `json:"completed"`
-	Type                        EvaluationType     `json:"type"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 func (q *Queries) CreateOrUpdateEvaluationCompletion(ctx context.Context, arg CreateOrUpdateEvaluationCompletionParams) error {
@@ -130,7 +130,7 @@ type GetEvaluationCompletionByTypeParams struct {
 	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
 	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
-	Type                        EvaluationType `json:"type"`
+	Type                        AssessmentType `json:"type"`
 }
 
 func (q *Queries) GetEvaluationCompletionByType(ctx context.Context, arg GetEvaluationCompletionByTypeParams) (EvaluationCompletion, error) {
@@ -557,7 +557,7 @@ type MarkEvaluationAsFinishedParams struct {
 	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
-	Type                        EvaluationType     `json:"type"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 func (q *Queries) MarkEvaluationAsFinished(ctx context.Context, arg MarkEvaluationAsFinishedParams) error {

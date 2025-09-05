@@ -88,7 +88,7 @@ type CreateFeedbackItemParams struct {
 	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
 	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
-	Type                        EvaluationType `json:"type"`
+	Type                        AssessmentType `json:"type"`
 }
 
 func (q *Queries) CreateFeedbackItem(ctx context.Context, arg CreateFeedbackItemParams) error {
@@ -257,92 +257,6 @@ func (q *Queries) ListFeedbackItemsForStudentInPhase(ctx context.Context, arg Li
 	return items, nil
 }
 
-const listNegativeFeedbackItemsForStudentInPhase = `-- name: ListNegativeFeedbackItemsForStudentInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'negative'
-ORDER BY created_at
-`
-
-type ListNegativeFeedbackItemsForStudentInPhaseParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) ListNegativeFeedbackItemsForStudentInPhase(ctx context.Context, arg ListNegativeFeedbackItemsForStudentInPhaseParams) ([]FeedbackItem, error) {
-	rows, err := q.db.Query(ctx, listNegativeFeedbackItemsForStudentInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []FeedbackItem
-	for rows.Next() {
-		var i FeedbackItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.FeedbackType,
-			&i.FeedbackText,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
-			&i.AuthorCourseParticipationID,
-			&i.CreatedAt,
-			&i.Type,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listPositiveFeedbackItemsForStudentInPhase = `-- name: ListPositiveFeedbackItemsForStudentInPhase :many
-SELECT id, feedback_type, feedback_text, course_participation_id, course_phase_id, author_course_participation_id, created_at, type
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'positive'
-ORDER BY created_at
-`
-
-type ListPositiveFeedbackItemsForStudentInPhaseParams struct {
-	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
-}
-
-func (q *Queries) ListPositiveFeedbackItemsForStudentInPhase(ctx context.Context, arg ListPositiveFeedbackItemsForStudentInPhaseParams) ([]FeedbackItem, error) {
-	rows, err := q.db.Query(ctx, listPositiveFeedbackItemsForStudentInPhase, arg.CourseParticipationID, arg.CoursePhaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []FeedbackItem
-	for rows.Next() {
-		var i FeedbackItem
-		if err := rows.Scan(
-			&i.ID,
-			&i.FeedbackType,
-			&i.FeedbackText,
-			&i.CourseParticipationID,
-			&i.CoursePhaseID,
-			&i.AuthorCourseParticipationID,
-			&i.CreatedAt,
-			&i.Type,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const updateFeedbackItem = `-- name: UpdateFeedbackItem :exec
 UPDATE feedback_items
 SET feedback_type                  = $2,
@@ -361,7 +275,7 @@ type UpdateFeedbackItemParams struct {
 	CourseParticipationID       uuid.UUID      `json:"course_participation_id"`
 	CoursePhaseID               uuid.UUID      `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID      `json:"author_course_participation_id"`
-	Type                        EvaluationType `json:"type"`
+	Type                        AssessmentType `json:"type"`
 }
 
 func (q *Queries) UpdateFeedbackItem(ctx context.Context, arg UpdateFeedbackItemParams) error {

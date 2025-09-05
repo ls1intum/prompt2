@@ -12,47 +12,48 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type EvaluationType string
+type AssessmentType string
 
 const (
-	EvaluationTypeSelf  EvaluationType = "self"
-	EvaluationTypePeer  EvaluationType = "peer"
-	EvaluationTypeTutor EvaluationType = "tutor"
+	AssessmentTypeSelf       AssessmentType = "self"
+	AssessmentTypePeer       AssessmentType = "peer"
+	AssessmentTypeTutor      AssessmentType = "tutor"
+	AssessmentTypeAssessment AssessmentType = "assessment"
 )
 
-func (e *EvaluationType) Scan(src interface{}) error {
+func (e *AssessmentType) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = EvaluationType(s)
+		*e = AssessmentType(s)
 	case string:
-		*e = EvaluationType(s)
+		*e = AssessmentType(s)
 	default:
-		return fmt.Errorf("unsupported scan type for EvaluationType: %T", src)
+		return fmt.Errorf("unsupported scan type for AssessmentType: %T", src)
 	}
 	return nil
 }
 
-type NullEvaluationType struct {
-	EvaluationType EvaluationType `json:"evaluation_type"`
-	Valid          bool           `json:"valid"` // Valid is true if EvaluationType is not NULL
+type NullAssessmentType struct {
+	AssessmentType AssessmentType `json:"assessment_type"`
+	Valid          bool           `json:"valid"` // Valid is true if AssessmentType is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullEvaluationType) Scan(value interface{}) error {
+func (ns *NullAssessmentType) Scan(value interface{}) error {
 	if value == nil {
-		ns.EvaluationType, ns.Valid = "", false
+		ns.AssessmentType, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.EvaluationType.Scan(value)
+	return ns.AssessmentType.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullEvaluationType) Value() (driver.Value, error) {
+func (ns NullAssessmentType) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.EvaluationType), nil
+	return string(ns.AssessmentType), nil
 }
 
 type FeedbackType string
@@ -247,7 +248,7 @@ type Evaluation struct {
 	ScoreLevel                  ScoreLevel         `json:"score_level"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	EvaluatedAt                 pgtype.Timestamptz `json:"evaluated_at"`
-	Type                        EvaluationType     `json:"type"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type EvaluationCompletion struct {
@@ -257,7 +258,7 @@ type EvaluationCompletion struct {
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
 	Completed                   bool               `json:"completed"`
-	Type                        EvaluationType     `json:"type"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type FeedbackItem struct {
@@ -268,7 +269,7 @@ type FeedbackItem struct {
 	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CreatedAt                   pgtype.Timestamptz `json:"created_at"`
-	Type                        EvaluationType     `json:"type"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type WeightedParticipantScore struct {

@@ -100,7 +100,7 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemValid() {
 	studentID := uuid.MustParse("da42e447-60f9-4fe0-b297-2dae3f924fd7") // target student
 	authorID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")  // current student
 
-	payload := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	payload := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypePositive,
 		FeedbackText:                "Test positive feedback",
 		CourseParticipationID:       studentID,
@@ -121,7 +121,7 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemUnauthorizedAuth
 	studentID := uuid.MustParse("da42e447-60f9-4fe0-b297-2dae3f924fd7")
 	wrongAuthorID := uuid.MustParse("ea42e447-60f9-4fe0-b297-2dae3f924fd7") // different author
 
-	payload := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	payload := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypePositive,
 		FeedbackText:                "Test feedback",
 		CourseParticipationID:       studentID,

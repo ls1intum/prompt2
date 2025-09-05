@@ -53,13 +53,6 @@ FROM evaluation
 WHERE course_phase_id = $1
   AND type = 'tutor';
 
--- name: GetTutorEvaluationsForParticipantInPhase :many
-SELECT *
-FROM evaluation
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND type = 'tutor';
-
 -- name: GetEvaluationsForAuthorInPhase :many
 SELECT *
 FROM evaluation

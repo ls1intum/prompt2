@@ -3,11 +3,12 @@ import { UpdateFeedbackItemRequest } from '../../interfaces/feedbackItem'
 
 export const updateFeedbackItem = async (
   coursePhaseID: string,
+  feedbackItemID: string,
   feedbackItem: UpdateFeedbackItemRequest,
 ): Promise<void> => {
   try {
-    await assessmentAxiosInstance.post(
-      `assessment/api/course_phase/${coursePhaseID}/evaluation/feedback-items`,
+    await assessmentAxiosInstance.put<UpdateFeedbackItemRequest>(
+      `assessment/api/course_phase/${coursePhaseID}/evaluation/feedback-items/${feedbackItemID}`,
       {
         ...feedbackItem,
         coursePhaseID,

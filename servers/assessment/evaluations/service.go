@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion"
@@ -31,7 +32,7 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 
 	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
 
-	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID)
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID, req.Type)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func DeleteEvaluation(ctx context.Context, id uuid.UUID) error {
 		return errors.New("could not get evaluation by ID")
 	}
 
-	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID)
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID, assessmentType.MapDBAssessmentTypeToDTO(evaluation.Type))
 	if err != nil {
 		return err
 	}

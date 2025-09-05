@@ -3,17 +3,18 @@ package evaluationCompletionDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
 type EvaluationCompletion struct {
-	ID                          uuid.UUID          `json:"id"`
-	CourseParticipationID       uuid.UUID          `json:"courseParticipationID"`
-	CoursePhaseID               uuid.UUID          `json:"coursePhaseID"`
-	AuthorCourseParticipationID uuid.UUID          `json:"authorCourseParticipationID"`
-	CompletedAt                 pgtype.Timestamptz `json:"completedAt"`
-	Completed                   bool               `json:"completed"`
-	Type                        string             `json:"type"`
+	ID                          uuid.UUID                     `json:"id"`
+	CourseParticipationID       uuid.UUID                     `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID                     `json:"coursePhaseID"`
+	AuthorCourseParticipationID uuid.UUID                     `json:"authorCourseParticipationID"`
+	CompletedAt                 pgtype.Timestamptz            `json:"completedAt"`
+	Completed                   bool                          `json:"completed"`
+	Type                        assessmentType.AssessmentType `json:"type"`
 }
 
 // GetEvaluationCompletionDTOsFromDBModels converts a slice of db.EvaluationCompletion to DTOs.
@@ -33,6 +34,6 @@ func MapDBEvaluationCompletionToEvaluationCompletionDTO(dbEvaluationCompletion d
 		AuthorCourseParticipationID: dbEvaluationCompletion.AuthorCourseParticipationID,
 		CompletedAt:                 dbEvaluationCompletion.CompletedAt,
 		Completed:                   dbEvaluationCompletion.Completed,
-		Type:                        string(dbEvaluationCompletion.Type),
+		Type:                        assessmentType.MapDBAssessmentTypeToDTO(dbEvaluationCompletion.Type),
 	}
 }

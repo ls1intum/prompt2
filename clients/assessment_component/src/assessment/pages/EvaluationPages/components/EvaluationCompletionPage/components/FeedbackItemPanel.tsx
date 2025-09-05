@@ -10,6 +10,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Plus, Loader2, AlertCircle, MessageCircle } from 'lucide-react'
 
+import { AssessmentType } from '../../../../../interfaces/assessmentType'
 import type {
   FeedbackType,
   UpdateFeedbackItemRequest,
@@ -25,6 +26,7 @@ import { DeleteFeedbackItemDialog } from './DeleteFeedbackItemDialog'
 import { ItemRow } from '../../../../components/ItemRow'
 
 interface FeedbackItemPanelProps {
+  assessmentType: AssessmentType
   feedbackType: FeedbackType
   courseParticipationID: string
   authorCourseParticipationID: string
@@ -32,6 +34,7 @@ interface FeedbackItemPanelProps {
 }
 
 export function FeedbackItemPanel({
+  assessmentType,
   feedbackType,
   courseParticipationID,
   authorCourseParticipationID,
@@ -52,7 +55,6 @@ export function FeedbackItemPanel({
     refetch,
   } = useGetMyFeedbackItems()
 
-  // Filter feedback items by type and course participation
   const feedbackItems = allFeedbackItems.filter(
     (item) =>
       item.feedbackType === feedbackType && item.courseParticipationID === courseParticipationID,
@@ -82,6 +84,7 @@ export function FeedbackItemPanel({
       courseParticipationID,
       authorCourseParticipationID,
       feedbackText: '',
+      type: assessmentType,
     })
   }
 
@@ -104,6 +107,7 @@ export function FeedbackItemPanel({
         feedbackType: item.feedbackType,
         courseParticipationID: item.courseParticipationID,
         authorCourseParticipationID: item.authorCourseParticipationID,
+        type: item.type,
       }
 
       updateFeedbackItem(updateRequest, {
