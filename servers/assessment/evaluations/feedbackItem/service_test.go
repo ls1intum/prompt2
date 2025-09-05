@@ -109,6 +109,7 @@ func (suite *FeedbackItemServiceTestSuite) TestDeleteFeedbackItem() {
 		CourseParticipationID:       req.CourseParticipationID,
 		CoursePhaseID:               req.CoursePhaseID,
 		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	assert.NoError(suite.T(), err)
 
