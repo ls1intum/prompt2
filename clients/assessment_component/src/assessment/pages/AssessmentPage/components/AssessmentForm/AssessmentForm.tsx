@@ -86,15 +86,32 @@ export const AssessmentForm = ({
 
     const subscription = form.watch(async (_, { name }) => {
       if (name) {
-        const isValid = await form.trigger('comment')
-        if (isValid) {
-          const data = form.getValues()
-          createOrUpdateAssessment(data)
+        // Only save immediately for non-text fields (like scoreLevel)
+        if (name !== 'comment' && name !== 'examples') {
+          const isValid = await form.trigger()
+          if (isValid) {
+            const data = form.getValues()
+            createOrUpdateAssessment(data)
+          }
         }
+        // Text fields will be saved on blur - no API calls while typing
       }
     })
-    return () => subscription.unsubscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [form, createOrUpdateAssessment, completed])
+
+  const handleTextFieldBlur = async () => {
+    if (completed) return
+
+    const isValid = await form.trigger()
+    if (isValid) {
+      const data = form.getValues()
+      createOrUpdateAssessment(data)
+    }
+  }
 
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
@@ -245,6 +262,10 @@ export const AssessmentForm = ({
                     disabled={completed}
                     readOnly={completed}
                     {...field}
+                    onBlur={() => {
+                      field.onBlur()
+                      handleTextFieldBlur()
+                    }}
                   />
                 </FormControl>
                 {!completed && <FormMessage />}
@@ -271,6 +292,10 @@ export const AssessmentForm = ({
                     disabled={completed}
                     readOnly={completed}
                     {...field}
+                    onBlur={() => {
+                      field.onBlur()
+                      handleTextFieldBlur()
+                    }}
                   />
                 </FormControl>
                 {!completed && <FormMessage />}

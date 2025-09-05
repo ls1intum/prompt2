@@ -7,10 +7,11 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import { useStudentEvaluationStore } from '../../zustand/useStudentEvaluationStore'
-
 import { Competency } from '../../interfaces/competency'
 import { CompetencyScore } from '../../interfaces/competencyScore'
+import { AssessmentType } from '../../interfaces/assessmentType'
+
+import { useStudentEvaluationStore } from '../../zustand/useStudentEvaluationStore'
 
 interface CompetencyHeaderProps {
   className?: string
@@ -18,8 +19,7 @@ interface CompetencyHeaderProps {
   competencyScore?: CompetencyScore
   completed: boolean
   onResetClick: () => void
-  isEvaluation?: boolean
-  isPeerEvaluation?: boolean
+  assessmentType?: AssessmentType
 }
 
 export const CompetencyHeader = ({
@@ -28,13 +28,13 @@ export const CompetencyHeader = ({
   competencyScore,
   completed,
   onResetClick,
-  isEvaluation = false,
-  isPeerEvaluation = false,
+  assessmentType = AssessmentType.ASSESSMENT,
 }: CompetencyHeaderProps) => {
   const { studentName } = useStudentEvaluationStore()
-  const competencyName = isPeerEvaluation
-    ? competency.name.replace(/This person|this person/g, studentName ?? 'This Person')
-    : competency.name
+  const competencyName =
+    assessmentType === AssessmentType.PEER
+      ? competency.name.replace(/This person|this person/g, studentName ?? 'This Person')
+      : competency.name
 
   return (
     <div className={className}>
@@ -58,7 +58,7 @@ export const CompetencyHeader = ({
           </TooltipProvider>
         )}
       </div>
-      {!isEvaluation && (
+      {assessmentType === AssessmentType.ASSESSMENT && (
         <p className='text-xs text-muted-foreground line-clamp-2'>{competency.description}</p>
       )}
     </div>

@@ -19,9 +19,10 @@ import type { CopyCourseFormValues } from '@core/validations/copyCourse'
 
 interface CopyCourseFormProps {
   form: UseFormReturn<CopyCourseFormValues>
-  courseName?: string
+  courseName: string
   onSubmit: (data: CopyCourseFormValues) => void
   onClose: () => void
+  useTemplateCopy?: boolean
 }
 
 export const CopyCourseForm = ({
@@ -29,13 +30,18 @@ export const CopyCourseForm = ({
   courseName,
   onSubmit,
   onClose,
+  useTemplateCopy,
 }: CopyCourseFormProps): JSX.Element => {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Copy {courseName}</DialogTitle>
+        <DialogTitle>
+          {useTemplateCopy ? `Create Course from Template: ${courseName}` : `Copy: ${courseName}`}
+        </DialogTitle>
         <DialogDescription>
-          Create a copy of this course with a new name and semester tag.
+          {useTemplateCopy
+            ? 'Create a new course based on this template.'
+            : 'Create a complete copy of this course.'}
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
@@ -62,6 +68,9 @@ export const CopyCourseForm = ({
                 <FormControl>
                   <Input placeholder='Enter semester tag' {...field} className='w-full' />
                 </FormControl>
+                <FormDescription>
+                  e.g. ios2425 or ws2425 (lowercase letters and numbers only)
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -73,7 +82,11 @@ export const CopyCourseForm = ({
               <FormItem>
                 <FormLabel>Course Duration</FormLabel>
                 <DatePickerWithRange
-                  date={field.value}
+                  date={
+                    field.value && ('from' in field.value || 'to' in field.value)
+                      ? { from: field.value.from ?? undefined, to: field.value.to ?? undefined }
+                      : undefined
+                  }
                   setDate={field.onChange}
                   className='w-full'
                 />

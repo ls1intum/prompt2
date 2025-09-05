@@ -45,7 +45,7 @@ export const ScoreDistributionBar = (props: any) => {
         y1={averageY}
         x2={x + width}
         y2={averageY}
-        stroke='#ffffff' /* Light grey color */
+        stroke='#ffffff'
         strokeWidth={2}
         strokeOpacity={0.8}
       />

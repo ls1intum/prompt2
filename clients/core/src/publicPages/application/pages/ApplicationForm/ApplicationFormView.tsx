@@ -58,12 +58,13 @@ export const ApplicationFormView = ({
   const [validationFailed, setValidationFailed] = useState(false)
 
   // correctly propagate student data changes
+  const hasInitialized = useRef(false)
+
   useEffect(() => {
-    if (student) {
+    if (!hasInitialized.current && student) {
       setStudentData(student)
-      if (studentRef.current) {
-        studentRef.current.rerender(student)
-      }
+      studentRef.current?.rerender(student)
+      hasInitialized.current = true
     }
   }, [student])
 

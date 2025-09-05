@@ -26,10 +26,12 @@ func validateCreateCourse(c courseDTO.CreateCourse) error {
 		log.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
-	if c.StartDate.Time.After(c.EndDate.Time) {
-		errorMessage := "start date must be before end date"
-		log.Error(errorMessage)
-		return errors.New(errorMessage)
+	if !c.Template {
+		if c.StartDate.Time.After(c.EndDate.Time) {
+			errorMessage := "start date must be before end date"
+			log.Error(errorMessage)
+			return errors.New(errorMessage)
+		}
 	}
 	if !c.SemesterTag.Valid || c.SemesterTag.String == "" {
 		errorMessage := "semester tag is required"

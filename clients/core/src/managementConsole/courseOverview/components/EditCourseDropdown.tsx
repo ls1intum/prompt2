@@ -97,6 +97,8 @@ export const EditCourseDropdown = (): JSX.Element => {
           courseId={courseId ?? ''}
           isOpen={copyCourseDialogOpen}
           onClose={() => setCopyCourseDialogOpen(false)}
+          useTemplateCopy={false}
+          createTemplate={false}
         />
       )}
     </>

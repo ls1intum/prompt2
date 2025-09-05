@@ -1,17 +1,19 @@
 import { CheckCircle, Clock, CircleCheck } from 'lucide-react'
 import { cn, Badge } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
+
 interface AssessmentStatusBadgeProps {
   className?: string
   remainingAssessments: number
-  isEvaluation?: boolean
+  assessmentType?: AssessmentType
   isFinalized?: boolean
 }
 
 export function AssessmentStatusBadge({
   className,
   remainingAssessments,
-  isEvaluation = false,
+  assessmentType = AssessmentType.ASSESSMENT,
   isFinalized,
 }: AssessmentStatusBadgeProps) {
   const isCompleted = remainingAssessments === 0
@@ -60,13 +62,13 @@ export function AssessmentStatusBadge({
           <Clock className='h-3.5 w-3.5' />
           <span>
             {remainingAssessments}{' '}
-            {isEvaluation
+            {assessmentType === AssessmentType.ASSESSMENT
               ? remainingAssessments === 1
-                ? 'question'
-                : 'questions'
-              : remainingAssessments === 1
                 ? 'assessment'
-                : 'assessments'}{' '}
+                : 'assessments'
+              : remainingAssessments === 1
+                ? 'question'
+                : 'questions'}{' '}
             left
           </span>
         </>

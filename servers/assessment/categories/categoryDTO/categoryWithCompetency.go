@@ -19,7 +19,7 @@ type CategoryWithCompetencies struct {
 }
 
 func MapToCategoryWithCompetenciesDTO(rows []db.GetCategoriesWithCompetenciesRow) []CategoryWithCompetencies {
-	var result []CategoryWithCompetencies
+	var result = make([]CategoryWithCompetencies, 0, len(rows))
 
 	for _, row := range rows {
 		var competencies []competencyDTO.CompetencyWithMappedCompetencies

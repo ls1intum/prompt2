@@ -57,7 +57,7 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	student.InitStudentModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	courseParticipation.InitCourseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(suite.router.Group("/api"), *testDB.Queries, testDB.Conn)
-	mailing.InitMailingModule(api, *testDB.Queries, testDB.Conn, "localhost", "25", "test@test.de", "Test-Email-Sender", "localhost")
+	mailing.InitMailingModule(api, *testDB.Queries, testDB.Conn, "localhost", "25", "", "", "Test-Email-Sender", "test@test.de", "localhost")
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TearDownSuite() {

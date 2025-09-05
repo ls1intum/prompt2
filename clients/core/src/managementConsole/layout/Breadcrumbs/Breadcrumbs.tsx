@@ -59,10 +59,16 @@ export const Breadcrumbs: React.FC = () => {
             }
             pathSegments.slice(4).forEach((segment, index) => {
               // TODO: this might require a more sophisticated process in the future!
-              // we assume that longer items are ids
+              // we assume that longer items are courseParticipationIDs
               if (segment.length < 20) {
                 breadcrumbs.push({
                   title: capitalizeFirstLetter(segment),
+                  path: `/management/course/${courseId}/${phaseId}/${pathSegments.slice(4, index + 5).join('/')}`,
+                })
+              } else {
+                // This is likely a courseParticipationID (long UUID)
+                breadcrumbs.push({
+                  title: 'Participant',
                   path: `/management/course/${courseId}/${phaseId}/${pathSegments.slice(4, index + 5).join('/')}`,
                 })
               }

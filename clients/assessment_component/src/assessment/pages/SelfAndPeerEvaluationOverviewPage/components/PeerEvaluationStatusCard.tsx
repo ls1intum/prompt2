@@ -1,7 +1,10 @@
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
-import { DeadlineBadge } from '../../components/DeadlineBadge'
+
+import { AssessmentType } from '../../../interfaces/assessmentType'
+
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
+
+import { AssessmentStatusBadge, DeadlineBadge } from '../../components/badges'
 
 interface PeerEvaluationStatusCardProps {
   completedEvaluations: number
@@ -24,7 +27,10 @@ export const PeerEvaluationStatusCard = ({
           {isCompleted ? (
             <AssessmentStatusBadge remainingAssessments={0} isFinalized={true} />
           ) : (
-            <DeadlineBadge deadline={coursePhaseConfig?.peerEvaluationDeadline ?? ''} type='peer' />
+            <DeadlineBadge
+              deadline={coursePhaseConfig?.peerEvaluationDeadline ?? ''}
+              type={AssessmentType.PEER}
+            />
           )}
         </div>
         <div className='text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1'>
