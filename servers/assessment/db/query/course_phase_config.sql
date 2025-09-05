@@ -110,9 +110,10 @@ INSERT INTO course_phase_config (assessment_template_id,
                                  peer_evaluation_start,
                                  peer_evaluation_deadline,
                                  tutor_evaluation_enabled,
+                                 tutor_evaluation_template,
                                  tutor_evaluation_start,
                                  tutor_evaluation_deadline)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_template_id    = EXCLUDED.assessment_template_id,
                   start                     = EXCLUDED.start,
@@ -126,5 +127,6 @@ ON CONFLICT (course_phase_id)
                   peer_evaluation_start     = EXCLUDED.peer_evaluation_start,
                   peer_evaluation_deadline  = EXCLUDED.peer_evaluation_deadline,
                   tutor_evaluation_enabled  = EXCLUDED.tutor_evaluation_enabled,
+                  tutor_evaluation_template = EXCLUDED.tutor_evaluation_template,
                   tutor_evaluation_start    = EXCLUDED.tutor_evaluation_start,
                   tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline;

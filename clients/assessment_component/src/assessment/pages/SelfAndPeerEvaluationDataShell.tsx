@@ -18,12 +18,14 @@ import { useTeamStore } from '../zustand/useTeamStore'
 import { useMyParticipationStore } from '../zustand/useMyParticipationStore'
 import { useSelfEvaluationCategoryStore } from '../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../zustand/usePeerEvaluationCategoryStore'
+import { useTutorEvaluationCategoryStore } from '../zustand/useTutorEvaluationCategoryStore'
 import { useEvaluationStore } from '../zustand/useEvaluationStore'
 
 import { useGetCoursePhaseConfig } from './hooks/useGetCoursePhaseConfig'
 import { useGetAllTeams } from './hooks/useGetAllTeams'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
+import { useGetTutorEvaluationCategoriesWithCompetencies } from './hooks/useGetTutorEvaluationCategoriesWithCompetencies'
 import { useGetMySelfEvaluationCompletion } from './hooks/useGetMySelfEvaluationCompletion'
 import { useGetMyPeerEvaluationCompletions } from './hooks/useGetMyPeerEvaluationCompletions'
 import { useGetMyEvaluations } from './hooks/useGetMyEvaluations'
@@ -42,6 +44,7 @@ export const SelfAndPeerEvaluationDataShell = ({
   const { setCoursePhaseConfig } = useCoursePhaseConfigStore()
   const { setSelfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { setPeerEvaluationCategories } = usePeerEvaluationCategoryStore()
+  const { setTutorEvaluationCategories } = useTutorEvaluationCategoryStore()
   const { setTeams } = useTeamStore()
   const { setMyParticipation } = useMyParticipationStore()
   const {
@@ -71,6 +74,13 @@ export const SelfAndPeerEvaluationDataShell = ({
     isError: isPeerEvaluationCategoriesError,
     refetch: refetchPeerEvaluationCategories,
   } = useGetPeerEvaluationCategoriesWithCompetencies()
+
+  const {
+    data: tutorEvaluationCategories,
+    isPending: isTutorEvaluationCategoriesPending,
+    isError: isTutorEvaluationCategoriesError,
+    refetch: refetchTutorEvaluationCategories,
+  } = useGetTutorEvaluationCategoriesWithCompetencies()
 
   const {
     data: teams,
@@ -115,6 +125,7 @@ export const SelfAndPeerEvaluationDataShell = ({
   const isError =
     isSelfEvaluationCategoriesError ||
     isPeerEvaluationCategoriesError ||
+    isTutorEvaluationCategoriesError ||
     isTeamsError ||
     isCoursePhaseConfigError ||
     (isStudent && isParticipationsError) ||
@@ -124,6 +135,7 @@ export const SelfAndPeerEvaluationDataShell = ({
   const isPending =
     isSelfEvaluationCategoriesPending ||
     isPeerEvaluationCategoriesPending ||
+    isTutorEvaluationCategoriesPending ||
     isTeamsPending ||
     isCoursePhaseConfigPending ||
     (isStudent && isParticipationsPending) ||
@@ -133,6 +145,7 @@ export const SelfAndPeerEvaluationDataShell = ({
   const refetch = () => {
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
+    refetchTutorEvaluationCategories()
     refetchTeams()
     refetchCoursePhaseConfig()
     if (isStudent) {
@@ -174,6 +187,12 @@ export const SelfAndPeerEvaluationDataShell = ({
   }, [peerEvaluationCategories, setPeerEvaluationCategories])
 
   useEffect(() => {
+    if (tutorEvaluationCategories) {
+      setTutorEvaluationCategories(tutorEvaluationCategories)
+    }
+  }, [tutorEvaluationCategories, setTutorEvaluationCategories])
+
+  useEffect(() => {
     if (selfEvaluationCompletion && isStudent) {
       setSelfEvaluationCompletion(selfEvaluationCompletion)
     }
@@ -201,7 +220,7 @@ export const SelfAndPeerEvaluationDataShell = ({
     return (
       <ErrorPage
         onRetry={refetch}
-        description='Could not fetch self and peer evaluation categories'
+        description='Could not fetch self, peer, or tutor evaluation categories'
       />
     )
   if (isPending) return <LoadingPage />

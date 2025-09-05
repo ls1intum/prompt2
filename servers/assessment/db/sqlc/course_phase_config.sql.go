@@ -36,9 +36,10 @@ INSERT INTO course_phase_config (assessment_template_id,
                                  peer_evaluation_start,
                                  peer_evaluation_deadline,
                                  tutor_evaluation_enabled,
+                                 tutor_evaluation_template,
                                  tutor_evaluation_start,
                                  tutor_evaluation_deadline)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_template_id    = EXCLUDED.assessment_template_id,
                   start                     = EXCLUDED.start,
@@ -52,6 +53,7 @@ ON CONFLICT (course_phase_id)
                   peer_evaluation_start     = EXCLUDED.peer_evaluation_start,
                   peer_evaluation_deadline  = EXCLUDED.peer_evaluation_deadline,
                   tutor_evaluation_enabled  = EXCLUDED.tutor_evaluation_enabled,
+                  tutor_evaluation_template = EXCLUDED.tutor_evaluation_template,
                   tutor_evaluation_start    = EXCLUDED.tutor_evaluation_start,
                   tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline
 `
@@ -70,6 +72,7 @@ type CreateOrUpdateCoursePhaseConfigParams struct {
 	PeerEvaluationStart     pgtype.Timestamptz `json:"peer_evaluation_start"`
 	PeerEvaluationDeadline  pgtype.Timestamptz `json:"peer_evaluation_deadline"`
 	TutorEvaluationEnabled  bool               `json:"tutor_evaluation_enabled"`
+	TutorEvaluationTemplate uuid.UUID          `json:"tutor_evaluation_template"`
 	TutorEvaluationStart    pgtype.Timestamptz `json:"tutor_evaluation_start"`
 	TutorEvaluationDeadline pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
 }
@@ -89,6 +92,7 @@ func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg Creat
 		arg.PeerEvaluationStart,
 		arg.PeerEvaluationDeadline,
 		arg.TutorEvaluationEnabled,
+		arg.TutorEvaluationTemplate,
 		arg.TutorEvaluationStart,
 		arg.TutorEvaluationDeadline,
 	)
@@ -96,7 +100,7 @@ func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg Creat
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
-SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline
+SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_template
 FROM course_phase_config
 WHERE course_phase_id = $1
 `
@@ -120,6 +124,7 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 		&i.TutorEvaluationEnabled,
 		&i.TutorEvaluationStart,
 		&i.TutorEvaluationDeadline,
+		&i.TutorEvaluationTemplate,
 	)
 	return i, err
 }
@@ -333,7 +338,7 @@ func (q *Queries) IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.
 }
 
 const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline
+SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_template
 FROM course_phase_config
 ORDER BY assessment_template_id, course_phase_id
 `
@@ -363,6 +368,7 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 			&i.TutorEvaluationEnabled,
 			&i.TutorEvaluationStart,
 			&i.TutorEvaluationDeadline,
+			&i.TutorEvaluationTemplate,
 		); err != nil {
 			return nil, err
 		}

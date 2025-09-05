@@ -1,5 +1,6 @@
 export enum AssessmentType {
-  SELF = 'SELF',
-  PEER = 'PEER',
-  ASSESSMENT = 'ASSESSMENT',
+  SELF = 'self',
+  PEER = 'peer',
+  TUTOR = 'tutor',
+  ASSESSMENT = 'assessment',
 }

@@ -11,6 +11,10 @@ export interface CoursePhaseConfig {
   peerEvaluationTemplate: string // UUID as string
   peerEvaluationStart: Date
   peerEvaluationDeadline: Date
+  tutorEvaluationEnabled: boolean
+  tutorEvaluationTemplate: string // UUID as string
+  tutorEvaluationStart: Date
+  tutorEvaluationDeadline: Date
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {
@@ -25,4 +29,8 @@ export interface CreateOrUpdateCoursePhaseConfigRequest {
   peerEvaluationTemplate?: string
   peerEvaluationStart?: Date
   peerEvaluationDeadline?: Date
+  tutorEvaluationEnabled: boolean
+  tutorEvaluationTemplate?: string
+  tutorEvaluationStart?: Date
+  tutorEvaluationDeadline?: Date
 }

@@ -1,16 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+
+import { useQuery } from '@tanstack/react-query'
 
 import { AssessmentType } from '../../interfaces/assessmentType'
 import { CategoryWithCompetencies } from '../../interfaces/category'
 
 import { getAllCategoriesWithCompetencies } from '../../network/queries/getAllCategoriesWithCompetencies'
 
-export const useGetAllCategoriesWithCompetencies = () => {
+export const useGetTutorEvaluationCategoriesWithCompetencies = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   return useQuery<CategoryWithCompetencies[]>({
-    queryKey: ['categories', phaseId],
-    queryFn: () => getAllCategoriesWithCompetencies(phaseId ?? '', AssessmentType.ASSESSMENT),
+    queryKey: ['tutorEvaluationCategories', phaseId],
+    queryFn: () => getAllCategoriesWithCompetencies(phaseId ?? '', AssessmentType.TUTOR),
   })
 }

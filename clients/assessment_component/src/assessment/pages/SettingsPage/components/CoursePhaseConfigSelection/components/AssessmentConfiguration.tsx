@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
   Label,
-  DatePicker,
+  DatePickerWithRange,
 } from '@tumaet/prompt-ui-components'
 import { FileText, Calendar } from 'lucide-react'
 
@@ -41,13 +41,14 @@ export const AssessmentConfiguration = ({
   setError,
 }: AsssessmentConfigurationProps) => {
   return (
-    <div className='grid xl:grid-cols-4 gap-4'>
+    <div className='grid xl:grid-cols-3 gap-4'>
       <div className='xl:col-span-2 space-y-4'>
         <div className='flex items-center gap-2'>
           <FileText className='h-4 w-4' />
           <Label className='text-sm font-medium'>
             {type === AssessmentType.SELF && 'Self Evaluation Template'}
             {type === AssessmentType.PEER && 'Peer Evaluation Template'}
+            {type === AssessmentType.TUTOR && 'Tutor Evaluation Template'}
             {type === AssessmentType.ASSESSMENT && 'Assessment Template'}
           </Label>
         </div>
@@ -76,36 +77,28 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <Calendar className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Start'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Start'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Start'}
+            {type === AssessmentType.SELF && 'Self Evaluation Timeframe'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Timeframe'}
+            {type === AssessmentType.TUTOR && 'Tutor Evaluation Timeframe'}
+            {type === AssessmentType.ASSESSMENT && 'Assessment Timeframe'}
           </Label>
         </div>
         <div className='flex items-center gap-2'>
-          <DatePicker
-            date={startDate}
-            onSelect={(date) =>
-              setStartDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-            }
-          />
-        </div>
-      </div>
-
-      <div className='space-y-4'>
-        <div className='flex items-center gap-2'>
-          <Calendar className='h-4 w-4' />
-          <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Deadline'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Deadline'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Deadline'}
-          </Label>
-        </div>
-        <div className='flex items-center gap-2'>
-          <DatePicker
-            date={deadline}
-            onSelect={(date) =>
-              setDeadline(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-            }
+          <DatePickerWithRange
+            date={{
+              from: startDate,
+              to: deadline,
+            }}
+            setDate={(dateRange) => {
+              setStartDate(
+                dateRange?.from ? new Date(format(dateRange.from, 'yyyy-MM-dd')) : undefined,
+              )
+              setDeadline(
+                dateRange?.to
+                  ? new Date(format(dateRange.to, 'yyyy-MM-dd') + 'T23:59:59')
+                  : undefined,
+              )
+            }}
           />
         </div>
       </div>

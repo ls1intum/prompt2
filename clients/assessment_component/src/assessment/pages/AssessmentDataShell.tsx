@@ -9,6 +9,7 @@ import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useGetCoursePhaseConfig } from './hooks/useGetCoursePhaseConfig'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
+import { useGetTutorEvaluationCategoriesWithCompetencies } from './hooks/useGetTutorEvaluationCategoriesWithCompetencies' // New hook
 
 import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useTeamStore } from '../zustand/useTeamStore'
@@ -17,6 +18,7 @@ import { useScoreLevelStore } from '../zustand/useScoreLevelStore'
 import { useCoursePhaseConfigStore } from '../zustand/useCoursePhaseConfigStore'
 import { useSelfEvaluationCategoryStore } from '../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../zustand/usePeerEvaluationCategoryStore'
+import { useTutorEvaluationCategoryStore } from '../zustand/useTutorEvaluationCategoryStore' // New Zustand store
 
 interface AssessmentDataShellProps {
   children: React.ReactNode
@@ -30,6 +32,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   const { setCoursePhaseConfig } = useCoursePhaseConfigStore()
   const { setSelfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { setPeerEvaluationCategories } = usePeerEvaluationCategoryStore()
+  const { setTutorEvaluationCategories } = useTutorEvaluationCategoryStore() // New setter
 
   const {
     data: coursePhaseParticipations,
@@ -80,6 +83,13 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetch: refetchPeerEvaluationCategories,
   } = useGetPeerEvaluationCategoriesWithCompetencies()
 
+  const {
+    data: tutorEvaluationCategories, // New data
+    isPending: isTutorEvaluationCategoriesPending, // New pending state
+    isError: isTutorEvaluationCategoriesError, // New error state
+    refetch: refetchTutorEvaluationCategories, // New refetch function
+  } = useGetTutorEvaluationCategoriesWithCompetencies()
+
   const isError =
     isParticipationsError ||
     isTeamsError ||
@@ -87,7 +97,8 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isScoreLevelsError ||
     isCoursePhaseConfigError ||
     isSelfEvaluationCategoriesError ||
-    isPeerEvaluationCategoriesError
+    isPeerEvaluationCategoriesError ||
+    isTutorEvaluationCategoriesError // Include new error state
   const isPending =
     isCoursePhaseParticipationsPending ||
     isTeamsPending ||
@@ -95,7 +106,8 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isScoreLevelsPending ||
     isCoursePhaseConfigPending ||
     isSelfEvaluationCategoriesPending ||
-    isPeerEvaluationCategoriesPending
+    isPeerEvaluationCategoriesPending ||
+    isTutorEvaluationCategoriesPending // Include new pending state
 
   const refetch = () => {
     refetchTeams()
@@ -105,6 +117,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetchCoursePhaseConfig()
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
+    refetchTutorEvaluationCategories() // Include new refetch
   }
 
   useEffect(() => {
@@ -148,6 +161,12 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
       setPeerEvaluationCategories(peerEvaluationCategories)
     }
   }, [peerEvaluationCategories, setPeerEvaluationCategories])
+
+  useEffect(() => {
+    if (tutorEvaluationCategories) {
+      setTutorEvaluationCategories(tutorEvaluationCategories) // New effect
+    }
+  }, [tutorEvaluationCategories, setTutorEvaluationCategories])
 
   return (
     <>{isError ? <ErrorPage onRetry={refetch} /> : isPending ? <LoadingPage /> : <>{children}</>}</>

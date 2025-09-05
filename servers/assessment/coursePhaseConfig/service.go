@@ -71,18 +71,22 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
 
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentTemplateID:   req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-		Start:                  pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
-		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
-		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
-		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
-		SelfEvaluationStart:    pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
-		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
-		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
-		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
-		PeerEvaluationStart:    pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
-		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+		AssessmentTemplateID:    req.AssessmentTemplateID,
+		CoursePhaseID:           coursePhaseID,
+		Start:                   pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
+		Deadline:                pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfEvaluationEnabled:   req.SelfEvaluationEnabled,
+		SelfEvaluationTemplate:  req.SelfEvaluationTemplate,
+		SelfEvaluationStart:     pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
+		SelfEvaluationDeadline:  pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
+		PeerEvaluationEnabled:   req.PeerEvaluationEnabled,
+		PeerEvaluationTemplate:  req.PeerEvaluationTemplate,
+		PeerEvaluationStart:     pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
+		PeerEvaluationDeadline:  pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+		TutorEvaluationEnabled:  req.TutorEvaluationEnabled,
+		TutorEvaluationTemplate: req.TutorEvaluationTemplate,
+		TutorEvaluationStart:    pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
+		TutorEvaluationDeadline: pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)

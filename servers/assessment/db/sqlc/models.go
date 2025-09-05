@@ -236,6 +236,7 @@ type CoursePhaseConfig struct {
 	TutorEvaluationEnabled  bool               `json:"tutor_evaluation_enabled"`
 	TutorEvaluationStart    pgtype.Timestamptz `json:"tutor_evaluation_start"`
 	TutorEvaluationDeadline pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
+	TutorEvaluationTemplate uuid.UUID          `json:"tutor_evaluation_template"`
 }
 
 type Evaluation struct {
