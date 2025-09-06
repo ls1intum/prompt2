@@ -147,7 +147,7 @@ export function FeedbackItemPanel({
     isGetFeedbackItemsPending || isCreatePending || isUpdatePending || isDeletePending
 
   const panelTitle =
-    courseParticipationID === authorCourseParticipationID
+    assessmentType === AssessmentType.SELF
       ? feedbackType === 'positive'
         ? 'What did you do particularly well?'
         : 'Where can you still improve?'
@@ -156,7 +156,7 @@ export function FeedbackItemPanel({
         : `Where can ${studentName} still improve?`
   const addButtonText = 'Add Item'
   const placeholderText =
-    courseParticipationID === authorCourseParticipationID
+    assessmentType === AssessmentType.SELF
       ? feedbackType === 'positive'
         ? 'What did you do particularly well?'
         : 'What could you improve?'
