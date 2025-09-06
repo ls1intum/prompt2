@@ -2,10 +2,12 @@ import { Loader2 } from 'lucide-react'
 
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 
-import { FeedbackItemDisplayPanel } from './components/FeedbackItemDisplayPanel'
-import { useGetFeedbackItemsForStudent } from './hooks/useGetFeedbackItemsForStudent'
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
+
+import { FeedbackItemDisplayPanel } from '../../../components/FeedbackItemDisplayPanel/FeedbackItemDisplayPanel'
+
+import { useGetFeedbackItemsForStudent } from './hooks/useGetFeedbackItemsForStudent'
 
 export const FeedbackItemsPanel = () => {
   const { assessmentParticipation } = useStudentAssessmentStore()

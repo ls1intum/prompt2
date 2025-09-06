@@ -128,34 +128,10 @@ func (suite *FeedbackItemServiceTestSuite) TestListFeedbackItemsForCoursePhase()
 	assert.GreaterOrEqual(suite.T(), len(feedbackItems), 2) // We have at least 2 in test data
 }
 
-func (suite *FeedbackItemServiceTestSuite) TestListFeedbackItemsForStudentInPhase() {
-	feedbackItems, err := ListFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
+func (suite *FeedbackItemServiceTestSuite) TestListFeedbackItemsForParticipantInPhase() {
+	feedbackItems, err := ListFeedbackItemsForParticipantInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(feedbackItems), 1)
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestListFeedbackItemsByAuthorInPhase() {
-	feedbackItems, err := ListFeedbackItemsByAuthorInPhase(suite.suiteCtx, suite.testAuthorID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	assert.GreaterOrEqual(suite.T(), len(feedbackItems), 1)
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestCountFeedbackItemsForStudentInPhase() {
-	count, err := CountFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	assert.GreaterOrEqual(suite.T(), count, int64(1))
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestCountPositiveFeedbackItemsForStudentInPhase() {
-	count, err := CountPositiveFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	assert.GreaterOrEqual(suite.T(), count, int64(1))
-}
-
-func (suite *FeedbackItemServiceTestSuite) TestCountNegativeFeedbackItemsForStudentInPhase() {
-	count, err := CountNegativeFeedbackItemsForStudentInPhase(suite.suiteCtx, suite.testCourseParticipationID, suite.testCoursePhaseID)
-	assert.NoError(suite.T(), err)
-	assert.GreaterOrEqual(suite.T(), count, int64(1))
 }
 
 func (suite *FeedbackItemServiceTestSuite) TestIsFeedbackItemAuthor() {

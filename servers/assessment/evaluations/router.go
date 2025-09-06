@@ -15,8 +15,8 @@ func setupEvaluationRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	evaluationRouter := routerGroup.Group("/evaluation")
 
 	// Admin/Lecturer/Editor endpoints - overview of all evaluations
-	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllEvaluationsByPhase)
-	evaluationRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getEvaluationsForAuthorInPhase)
+	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllEvaluationsByPhase)
+	evaluationRouter.GET("/tutor/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getEvaluationsForTutorInPhase)
 
 	// Student endpoints - access to own evaluations only
 	evaluationRouter.GET("/my-evaluations", authMiddleware(promptSDK.CourseStudent), getMyEvaluations)
@@ -39,20 +39,19 @@ func getAllEvaluationsByPhase(c *gin.Context) {
 	c.JSON(http.StatusOK, evaluations)
 }
 
-func getEvaluationsForAuthorInPhase(c *gin.Context) {
+func getEvaluationsForTutorInPhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-
-	authorID, err := uuid.Parse(c.Param("courseParticipationID"))
+	tutorID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	evaluations, err := GetEvaluationsForAuthorInPhase(c, authorID, coursePhaseID)
+	evaluations, err := GetEvaluationsForTutorInPhase(c, tutorID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

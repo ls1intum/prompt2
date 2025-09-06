@@ -34,6 +34,7 @@ interface CoursePhaseParticipationsTablePageProps {
   prevDataKeys: string[]
   restrictedDataKeys: string[]
   studentReadableDataKeys: string[]
+  hideActions?: boolean
   extraColumns?: ExtraParticipationTableColumn[]
   onClickRowAction: (student: CoursePhaseParticipationWithStudent) => void
   customActions?: GroupAction[]
@@ -44,6 +45,7 @@ export const CoursePhaseParticipationsTablePage = ({
   prevDataKeys = [],
   restrictedDataKeys = [],
   studentReadableDataKeys = [],
+  hideActions = false,
   extraColumns,
   onClickRowAction,
   customActions = [],
@@ -140,22 +142,24 @@ export const CoursePhaseParticipationsTablePage = ({
                   getDisplay: (v) => v,
                 }))}
             />
-            <GroupActionsMenu
-              disabled={table.getSelectedRowModel().rows.length === 0}
-              selectedRows={table.getSelectedRowModel()}
-              onClose={() => table.resetRowSelection()}
-              onExport={() => {
-                downloadParticipations(
-                  table.getSelectedRowModel().rows.map((row) => row.original),
-                  prevDataKeys,
-                  restrictedDataKeys,
-                  studentReadableDataKeys,
-                  extraColumns,
-                )
-                table.resetRowSelection()
-              }}
-              customActions={customActions}
-            />
+            {!hideActions && (
+              <GroupActionsMenu
+                disabled={table.getSelectedRowModel().rows.length === 0}
+                selectedRows={table.getSelectedRowModel()}
+                onClose={() => table.resetRowSelection()}
+                onExport={() => {
+                  downloadParticipations(
+                    table.getSelectedRowModel().rows.map((row) => row.original),
+                    prevDataKeys,
+                    restrictedDataKeys,
+                    studentReadableDataKeys,
+                    extraColumns,
+                  )
+                  table.resetRowSelection()
+                }}
+                customActions={customActions}
+              />
+            )}
           </div>
         </div>
       </div>

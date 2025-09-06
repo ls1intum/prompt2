@@ -11,6 +11,8 @@ import { AssessmentDataShell } from '../src/assessment/pages/AssessmentDataShell
 import { AssessmentParticipantsPage } from '../src/assessment/pages/AssessmentParticipantsPage/AssessmentParticipantsPage'
 import { AssessmentPage } from '../src/assessment/pages/AssessmentPage/AssessmentPage'
 import { AssessmentStatisticsPage } from '../src/assessment/pages/AssessmentStatisticsPage/AssessmentStatisticsPage'
+import { TutorOverviewPage } from '../src/assessment/pages/TutorOverviewPage/TutorOverviewPage'
+import { TutorEvaluationResultsPage } from '../src/assessment/pages/TutorEvaluationResultsPage/TutorEvaluationResultsPage'
 import { SettingsPage } from '../src/assessment/pages/SettingsPage/SettingsPage'
 
 const routes: ExtendedRouteObject[] = [
@@ -93,6 +95,24 @@ const routes: ExtendedRouteObject[] = [
     element: (
       <AssessmentDataShell>
         <AssessmentStatisticsPage />
+      </AssessmentDataShell>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/tutors',
+    element: (
+      <AssessmentDataShell>
+        <TutorOverviewPage />
+      </AssessmentDataShell>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/tutors/:tutorId',
+    element: (
+      <AssessmentDataShell>
+        <TutorEvaluationResultsPage />
       </AssessmentDataShell>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

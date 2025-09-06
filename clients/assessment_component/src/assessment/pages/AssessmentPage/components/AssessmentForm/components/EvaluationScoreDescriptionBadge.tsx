@@ -4,6 +4,7 @@ import { Competency } from '../../../../../interfaces/competency'
 import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
 
 import { getLevelConfig } from '../../../../utils/getLevelConfig'
+import { getScoreLevelDescription } from '../../../../utils/getScoreLevelDescription'
 
 interface EvaluationScoreDescriptionBadgeProps {
   name: string
@@ -18,23 +19,6 @@ export const EvaluationScoreDescriptionBadge = ({
 }: EvaluationScoreDescriptionBadgeProps) => {
   const config = getLevelConfig(scoreLevel || ScoreLevel.VeryBad)
 
-  const answerText = (() => {
-    switch (scoreLevel) {
-      case ScoreLevel.VeryBad:
-        return competency?.descriptionVeryBad
-      case ScoreLevel.Bad:
-        return competency?.descriptionBad
-      case ScoreLevel.Ok:
-        return competency?.descriptionOk
-      case ScoreLevel.Good:
-        return competency?.descriptionGood
-      case ScoreLevel.VeryGood:
-        return competency?.descriptionVeryGood
-      default:
-        return 'No description available'
-    }
-  })()
-
   return (
     <div className='flex items-center gap-2'>
       <span className='font-medium'>{name}:</span>
@@ -42,7 +26,7 @@ export const EvaluationScoreDescriptionBadge = ({
         className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
         style={{ whiteSpace: 'nowrap' }}
       >
-        {answerText}
+        {getScoreLevelDescription(scoreLevel || ScoreLevel.VeryBad, competency!) || ''}
       </Badge>
     </div>
   )

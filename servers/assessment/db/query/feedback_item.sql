@@ -28,11 +28,20 @@ DELETE
 FROM feedback_items
 WHERE id = $1;
 
--- name: ListFeedbackItemsForStudentInPhase :many
+-- name: ListFeedbackItemsForParticipantInPhase :many
 SELECT *
 FROM feedback_items
 WHERE course_participation_id = $1
   AND course_phase_id = $2
+  AND type != 'tutor'
+ORDER BY created_at;
+
+-- name: ListFeedbackItemsForTutorInPhase :many
+SELECT *
+FROM feedback_items
+WHERE feedback_items.course_participation_id = $1
+  AND course_phase_id = $2
+  AND type = 'tutor'
 ORDER BY created_at;
 
 -- name: ListFeedbackItemsForCoursePhase :many
@@ -47,23 +56,3 @@ FROM feedback_items
 WHERE author_course_participation_id = $1
   AND course_phase_id = $2
 ORDER BY created_at;
-
--- name: CountFeedbackItemsForStudentInPhase :one
-SELECT COUNT(*) AS feedback_item_count
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2;
-
--- name: CountPositiveFeedbackItemsForStudentInPhase :one
-SELECT COUNT(*) AS positive_feedback_count
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'positive';
-
--- name: CountNegativeFeedbackItemsForStudentInPhase :one
-SELECT COUNT(*) AS negative_feedback_count
-FROM feedback_items
-WHERE course_participation_id = $1
-  AND course_phase_id = $2
-  AND feedback_type = 'negative';

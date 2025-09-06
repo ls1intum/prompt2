@@ -9,7 +9,7 @@ import { useGetAllScoreLevels } from './hooks/useGetAllScoreLevels'
 import { useGetCoursePhaseConfig } from './hooks/useGetCoursePhaseConfig'
 import { useGetSelfEvaluationCategoriesWithCompetencies } from './hooks/useGetSelfEvaluationCategoriesWithCompetencies'
 import { useGetPeerEvaluationCategoriesWithCompetencies } from './hooks/useGetPeerEvaluationCategoriesWithCompetencies'
-import { useGetTutorEvaluationCategoriesWithCompetencies } from './hooks/useGetTutorEvaluationCategoriesWithCompetencies' // New hook
+import { useGetTutorEvaluationCategoriesWithCompetencies } from './hooks/useGetTutorEvaluationCategoriesWithCompetencies'
 
 import { useParticipationStore } from '../zustand/useParticipationStore'
 import { useTeamStore } from '../zustand/useTeamStore'
@@ -18,7 +18,7 @@ import { useScoreLevelStore } from '../zustand/useScoreLevelStore'
 import { useCoursePhaseConfigStore } from '../zustand/useCoursePhaseConfigStore'
 import { useSelfEvaluationCategoryStore } from '../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../zustand/usePeerEvaluationCategoryStore'
-import { useTutorEvaluationCategoryStore } from '../zustand/useTutorEvaluationCategoryStore' // New Zustand store
+import { useTutorEvaluationCategoryStore } from '../zustand/useTutorEvaluationCategoryStore'
 
 interface AssessmentDataShellProps {
   children: React.ReactNode
@@ -32,7 +32,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   const { setCoursePhaseConfig } = useCoursePhaseConfigStore()
   const { setSelfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { setPeerEvaluationCategories } = usePeerEvaluationCategoryStore()
-  const { setTutorEvaluationCategories } = useTutorEvaluationCategoryStore() // New setter
+  const { setTutorEvaluationCategories } = useTutorEvaluationCategoryStore()
 
   const {
     data: coursePhaseParticipations,
@@ -84,10 +84,10 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   } = useGetPeerEvaluationCategoriesWithCompetencies()
 
   const {
-    data: tutorEvaluationCategories, // New data
-    isPending: isTutorEvaluationCategoriesPending, // New pending state
-    isError: isTutorEvaluationCategoriesError, // New error state
-    refetch: refetchTutorEvaluationCategories, // New refetch function
+    data: tutorEvaluationCategories,
+    isPending: isTutorEvaluationCategoriesPending,
+    isError: isTutorEvaluationCategoriesError,
+    refetch: refetchTutorEvaluationCategories,
   } = useGetTutorEvaluationCategoriesWithCompetencies()
 
   const isError =
@@ -98,7 +98,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isCoursePhaseConfigError ||
     isSelfEvaluationCategoriesError ||
     isPeerEvaluationCategoriesError ||
-    isTutorEvaluationCategoriesError // Include new error state
+    isTutorEvaluationCategoriesError
   const isPending =
     isCoursePhaseParticipationsPending ||
     isTeamsPending ||
@@ -107,7 +107,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isCoursePhaseConfigPending ||
     isSelfEvaluationCategoriesPending ||
     isPeerEvaluationCategoriesPending ||
-    isTutorEvaluationCategoriesPending // Include new pending state
+    isTutorEvaluationCategoriesPending
 
   const refetch = () => {
     refetchTeams()
@@ -117,7 +117,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetchCoursePhaseConfig()
     refetchSelfEvaluationCategories()
     refetchPeerEvaluationCategories()
-    refetchTutorEvaluationCategories() // Include new refetch
+    refetchTutorEvaluationCategories()
   }
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
 
   useEffect(() => {
     if (tutorEvaluationCategories) {
-      setTutorEvaluationCategories(tutorEvaluationCategories) // New effect
+      setTutorEvaluationCategories(tutorEvaluationCategories)
     }
   }, [tutorEvaluationCategories, setTutorEvaluationCategories])
 

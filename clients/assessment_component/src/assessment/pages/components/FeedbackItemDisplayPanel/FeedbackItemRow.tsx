@@ -6,8 +6,8 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import type { FeedbackItem } from '../../../../../interfaces/feedbackItem'
-import { useTeamStore } from '../../../../../zustand/useTeamStore'
+import type { FeedbackItem } from '../../../interfaces/feedbackItem'
+import { useTeamStore } from '../../../zustand/useTeamStore'
 
 interface FeedbackItemRowProps {
   feedbackItem: FeedbackItem

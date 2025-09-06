@@ -2,7 +2,7 @@ import { MessageCircle } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
 
-import type { FeedbackItem, FeedbackType } from '../../../../../interfaces/feedbackItem'
+import type { FeedbackItem, FeedbackType } from '../../../interfaces/feedbackItem'
 import { FeedbackItemRow } from './FeedbackItemRow'
 
 interface FeedbackItemDisplayPanelProps {

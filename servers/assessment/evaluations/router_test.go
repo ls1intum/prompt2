@@ -89,20 +89,6 @@ func (suite *EvaluationRouterTestSuite) TestGetAllEvaluationsByPhase() {
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *EvaluationRouterTestSuite) TestGetEvaluationsForParticipant() {
-	// Use existing participant ID from test data
-	participantID := "01234567-1234-1234-1234-123456789012"
-	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/course-participation/"+participantID, nil)
-	w := httptest.NewRecorder()
-	suite.router.ServeHTTP(w, req)
-
-	assert.Equal(suite.T(), http.StatusOK, w.Code)
-
-	var evaluations []evaluationDTO.Evaluation
-	err := json.Unmarshal(w.Body.Bytes(), &evaluations)
-	assert.NoError(suite.T(), err)
-}
-
 // Test Student endpoints
 func (suite *EvaluationRouterTestSuite) TestGetMyEvaluations() {
 	req, _ := http.NewRequest(http.MethodGet, "/assessment/api/course_phase/"+suite.testCoursePhaseID.String()+"/evaluation/my-evaluations", nil)
