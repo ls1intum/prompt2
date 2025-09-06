@@ -31,7 +31,7 @@ export const SelfEvaluationStatusCard = ({ isCompleted }: SelfEvaluationStatusCa
           {isCompleted ? 'Completed' : 'Open'}
         </div>
         <p className='text-sm text-gray-500 dark:text-gray-400'>
-          Self Evaluation completion status
+          Self Evaluation {isCompleted ? 'completed' : 'open'}
         </p>
       </CardContent>
     </Card>

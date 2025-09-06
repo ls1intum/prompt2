@@ -98,16 +98,12 @@ export const EvaluationOverviewPage = () => {
   const isPeerEvaluationCompleted = completedPeerEvaluations === totalPeerEvaluations
 
   const completedTutorEvaluations =
-    team?.members
-      .filter((member) => member.id !== myParticipation?.courseParticipationID)
-      .filter(
-        (member) =>
-          tutorEvaluationCompletions.find((c) => c.courseParticipationID === member.id)?.completed,
-      ).length ?? 0
+    team?.tutors.filter(
+      (tutor) =>
+        tutorEvaluationCompletions.find((c) => c.courseParticipationID === tutor.id)?.completed,
+    ).length ?? 0
 
-  const totalTutorEvaluations =
-    team?.members.filter((member) => member.id !== myParticipation?.courseParticipationID).length ??
-    0
+  const totalTutorEvaluations = team?.tutors.length ?? 0
 
   const isTutorEvaluationCompleted = completedTutorEvaluations === totalTutorEvaluations
 
@@ -125,11 +121,11 @@ export const EvaluationOverviewPage = () => {
           {isAssessmentDeadlinePassed ? 'Your Action Items and Grade Suggestion' : 'Evaluation'}
         </ManagementPageHeader>
 
-        <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} team={team} />
+        <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} />
 
         {!isAssessmentDeadlinePassed && (
           <div>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
+            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8'>
               {selfEvaluationStarted && (
                 <SelfEvaluationStatusCard isCompleted={isSelfEvaluationCompleted} />
               )}
@@ -215,7 +211,7 @@ export const EvaluationOverviewPage = () => {
               <div className='mb-8'>
                 <div className='flex items-center gap-3 mb-6'>
                   <div className='flex items-center gap-2'>
-                    <GraduationCap className='h-6 w-6 text-green-600 dark:text-green-400' />
+                    <GraduationCap className='h-6 w-6 text-pruple-600 dark:text-purple-400' />
                     <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
                       Tutor Evaluation
                     </h1>

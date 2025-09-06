@@ -23,7 +23,7 @@ export const PeerEvaluationStatusCard = ({
     <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
       <CardContent className='p-6'>
         <div className='flex items-center justify-between mb-4'>
-          <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>Peer Evaluations</h3>
+          <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>Peer Evaluation</h3>
           {isCompleted ? (
             <AssessmentStatusBadge remainingAssessments={0} isFinalized={true} />
           ) : (

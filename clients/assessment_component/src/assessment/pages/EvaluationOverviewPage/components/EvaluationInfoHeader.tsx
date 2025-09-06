@@ -1,20 +1,14 @@
-import { AlertCircle, CheckCircle2, Clock, User, Users, Calendar } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Calendar } from 'lucide-react'
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
 import { format } from 'date-fns'
-
-import { Team } from '../../../interfaces/team'
 
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface EvaluationInfoHeaderProps {
   allEvaluationsCompleted: boolean
-  team: Team | undefined
 }
 
-export const EvaluationInfoHeader = ({
-  allEvaluationsCompleted,
-  team,
-}: EvaluationInfoHeaderProps) => {
+export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfoHeaderProps) => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const now = new Date()
@@ -103,27 +97,8 @@ export const EvaluationInfoHeader = ({
             ) : (
               <div className='space-y-3'>
                 <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                  Please complete your self-evaluation
-                  {coursePhaseConfig?.peerEvaluationEnabled && ' and peer evaluations'} before the
-                  specified deadlines. These evaluations are important and provide valuable
-                  feedback.
+                  Please complete your assigned evaluations before the specified deadlines.
                 </p>
-                <div className='flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400'>
-                  <div className='flex items-center gap-2'>
-                    <Clock className='h-4 w-4' />
-                    <span>Complete before deadline</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <User className='h-4 w-4' />
-                    <span>Self-evaluation required</span>
-                  </div>
-                  {team && (
-                    <div className='flex items-center gap-2'>
-                      <Users className='h-4 w-4' />
-                      <span>Evaluate all team members</span>
-                    </div>
-                  )}
-                </div>
               </div>
             )}
           </div>

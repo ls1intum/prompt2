@@ -13,8 +13,7 @@ export const useMarkMyEvaluationAsCompleted = (setError: (error: string | undefi
       return markMyEvaluationAsCompleted(phaseId ?? '', evaluationCompletion)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-self-evaluation-completion', phaseId] })
-      queryClient.invalidateQueries({ queryKey: ['my-peer-evaluation-completions', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['my-evaluation-completions', phaseId] })
       setError(undefined)
     },
     onError: (error: any) => {
