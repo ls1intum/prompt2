@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 
 import {
   Card,
@@ -6,14 +7,15 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
+  Button,
 } from '@tumaet/prompt-ui-components'
 
 import { useCategoryStore } from '../../../../zustand/useCategoryStore'
 import { useSelfEvaluationCategoryStore } from '../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../zustand/usePeerEvaluationCategoryStore'
 
+import { AssessmentType } from '../../../../interfaces/assessmentType'
 import type { CategoryWithCompetencies } from '../../../../interfaces/category'
-import { AssessmentType } from '../../interfaces/assessmentType'
 
 import { CategoryItem } from './components/CategoryItem'
 import { EditCategoryDialog } from './components/EditCategoryDialog'
@@ -31,6 +33,7 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
     undefined,
   )
   const [categoryToDelete, setCategoryToDelete] = useState<string | undefined>(undefined)
+  const [showAddCategoryForm, setShowAddCategoryForm] = useState(false)
 
   const { categories: assessmentCategories } = useCategoryStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
@@ -93,10 +96,25 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                   category={category}
                   setCategoryToEdit={setCategoryToEdit}
                   setCategoryToDelete={setCategoryToDelete}
+                  assessmentType={assessmentType}
                 />
               ))}
 
-              <CreateCategoryForm assessmentTemplateID={assessmentTemplateID} />
+              {showAddCategoryForm ? (
+                <CreateCategoryForm
+                  assessmentTemplateID={assessmentTemplateID}
+                  onCancel={() => setShowAddCategoryForm(false)}
+                />
+              ) : (
+                <Button
+                  variant='outline'
+                  className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
+                  onClick={() => setShowAddCategoryForm(true)}
+                >
+                  <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
+                  <span className='text-muted-foreground'>Add Category</span>
+                </Button>
+              )}
 
               <EditCategoryDialog
                 open={!!categoryToEdit}

@@ -7,8 +7,8 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
-import { getLevelConfig } from '../utils/getLevelConfig'
-import { mapNumberToScoreLevel } from '../../interfaces/scoreLevel'
+import { getLevelConfig } from '../../utils/getLevelConfig'
+import { mapNumberToScoreLevel } from '../../../interfaces/scoreLevel'
 
 interface GradeSuggestionBadgeProps {
   gradeSuggestion: number | undefined

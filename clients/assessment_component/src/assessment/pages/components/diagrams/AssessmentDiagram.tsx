@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Label, Pie, PieChart } from 'recharts'
 
-import { PassStatus } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -14,62 +13,90 @@ import {
   ChartTooltipContent,
 } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../../interfaces/assessmentType'
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
+import { CompetencyScoreCompletion } from '../../../interfaces/competencyScoreCompletion'
 
 const chartConfig = {
-  assessments: {
-    label: 'Assessments',
-  },
   notAssessed: {
     label: 'Not Assessed',
     color: 'hsl(var(--muted))',
   },
-  completed: {
-    label: 'Completed waiting for acceptance',
+  inProgress: {
+    label: 'In Progress',
     color: '#63B3ED', // Light blue
   },
-  accepted: {
-    label: 'Accepted',
+  completed: {
+    label: 'Completed',
     color: 'hsl(var(--success))',
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'hsl(var(--destructive))',
   },
 } satisfies ChartConfig
 
 interface AssessmentDiagramProps {
   participations: AssessmentParticipationWithStudent[]
   scoreLevels: ScoreLevelWithParticipation[]
+  completions: CompetencyScoreCompletion[]
+  assessmentType?: AssessmentType
 }
 
 export const AssessmentDiagram = ({
   participations,
   scoreLevels,
+  completions,
+  assessmentType = AssessmentType.ASSESSMENT,
 }: AssessmentDiagramProps): JSX.Element => {
   const { chartData, totalAssessments } = React.useMemo(() => {
-    const accepted = participations.filter((app) => app.passStatus === PassStatus.PASSED).length
-    const rejected = participations.filter((app) => app.passStatus === PassStatus.FAILED).length
-    const notAssessed = participations.length - scoreLevels.length
-    const completed = Math.max(0, participations.length - notAssessed - accepted - rejected)
+    const completed = participations.filter((p) =>
+      completions?.find((c) => c.courseParticipationID === p.courseParticipationID && c.completed),
+    ).length
+
+    const inProgress = participations.filter(
+      (p) =>
+        scoreLevels.some((sl) => sl.courseParticipationID === p.courseParticipationID) &&
+        !completions?.find((c) => c.courseParticipationID === p.courseParticipationID)?.completed,
+    ).length
+
+    const notAssessed = participations.length - completed - inProgress
 
     return {
       chartData: [
         { status: 'notAssessed', applications: notAssessed, fill: chartConfig.notAssessed.color },
-        { status: 'accepted', applications: accepted, fill: chartConfig.accepted.color },
-        { status: 'rejected', applications: rejected, fill: chartConfig.rejected.color },
+        { status: 'inProgress', applications: inProgress, fill: chartConfig.inProgress.color },
         { status: 'completed', applications: completed, fill: chartConfig.completed.color },
       ],
       totalAssessments: participations.length,
     }
-  }, [participations, scoreLevels])
+  }, [participations, completions, scoreLevels])
 
   return (
     <Card className='flex flex-col'>
       <CardHeader className='items-center pb-0'>
-        <CardTitle>Assessments</CardTitle>
-        <CardDescription>All assessments and their status</CardDescription>
+        <CardTitle>
+          {(() => {
+            switch (assessmentType) {
+              case AssessmentType.SELF:
+                return 'Self Evaluation'
+              case AssessmentType.PEER:
+                return 'Peer Evaluation'
+              default:
+                return 'Assessments'
+            }
+          })()}
+        </CardTitle>
+        <CardDescription>
+          {(() => {
+            switch (assessmentType) {
+              case AssessmentType.SELF:
+                return 'self evaluations'
+              case AssessmentType.PEER:
+                return 'peer evaluations'
+              default:
+                return 'assessments'
+            }
+          })()}
+          and their status
+        </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0'>
         <ChartContainer config={chartConfig} className='mx-auto aspect-square max-h-[250px]'>

@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 
-import { StudentScoreBadge } from '../../components/StudentScoreBadge'
-import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
+import {
+  StudentScoreBadge,
+  GradeSuggestionBadge,
+  AssessmentStatusBadge,
+} from '../../components/badges'
 
 interface AssessmentProfileProps {
   participant: AssessmentParticipationWithStudent

@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardFooter,
+  CardHeader,
   Form,
   FormControl,
   FormField,
@@ -17,7 +18,8 @@ import {
   FormMessage,
   Input,
   Separator,
-  ManagementPageHeader,
+  CardTitle,
+  CardDescription,
 } from '@tumaet/prompt-ui-components'
 import { useCourseStore, CourseMailingSettings } from '@tumaet/prompt-shared-state'
 import { type CourseMailingFormValues, courseMailingSchema } from '@core/validations/courseMailing'
@@ -101,8 +103,22 @@ export const MailingConfigPage = (): JSX.Element => {
 
   return (
     <div>
-      <ManagementPageHeader>Mailing Settings</ManagementPageHeader>
       <Card className='w-full'>
+        <CardHeader className='pb-4'>
+          <div className='flex items-center gap-3'>
+            <div className='p-2 bg-gray-50 dark:bg-gray-900/30 rounded-lg'>
+              <Mail className='h-5 w-5 text-gray-600 dark:text-gray-400' />
+            </div>
+            <div>
+              <CardTitle className='text-lg text-gray-900 dark:text-gray-100'>
+                Mailing Settings
+              </CardTitle>
+              <CardDescription className='mt-1 text-gray-600 dark:text-gray-400'>
+                Configure the mailing settings for this course.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
         <div className='pt-6'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} onChange={() => setIsModified(true)}>

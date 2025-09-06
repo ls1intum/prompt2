@@ -76,6 +76,7 @@ func (suite *CourseCopyRouterTestSuite) TestCopyCourse() {
 		SemesterTag: pgtype.Text{String: "ws2425", Valid: true},
 		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},
 		EndDate:     pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+		Template:    false,
 	}
 
 	body, _ := json.Marshal(copyCourseRequest)

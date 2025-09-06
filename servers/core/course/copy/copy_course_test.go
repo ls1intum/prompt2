@@ -64,6 +64,7 @@ func (suite *CopyCourseTestSuite) TestCopyCourseInternal() {
 		SemesterTag: pgtype.Text{Valid: true, String: newTag},
 		StartDate:   newStartDate,
 		EndDate:     newEndDate,
+		Template:    false,
 	}
 
 	// Create a dummy *gin.Context for testing

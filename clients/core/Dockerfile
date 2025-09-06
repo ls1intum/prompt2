@@ -10,9 +10,6 @@ RUN yarn install
 RUN yarn build
 
 FROM nginx:stable-alpine
-COPY --from=core-base /app/core/build /usr/share/nginx/html
-COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
 
 COPY --from=core-base /app/core/build /usr/share/nginx/html
 COPY --from=core-base /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf

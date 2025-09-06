@@ -39,9 +39,14 @@ const subtleColors = [
 interface AddCourseAppearanceProps {
   onBack: () => void
   onSubmit: (data: CourseAppearanceFormValues) => void
+  createTemplate?: boolean
 }
 
-export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({ onBack, onSubmit }) => {
+export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({
+  onBack,
+  onSubmit,
+  createTemplate,
+}) => {
   const form = useForm<CourseAppearanceFormValues>({
     resolver: zodResolver(courseAppearanceFormSchema),
     defaultValues: {
@@ -74,8 +79,15 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({ onBack
           </div>
         </div>
         <span className='text-sm text-gray-600'>
-          This is how your course icon will appear in the sidebar. <br />
-          <b>Please note:</b> it will only be displayed while the course is active.
+          {createTemplate ? (
+            'This is how your template icon will appear in the sidebar.'
+          ) : (
+            <>
+              This is how your course icon will appear in the sidebar.
+              <br />
+              <b>Please note:</b> it will only be displayed while the course is active.
+            </>
+          )}
         </span>
       </div>
 
@@ -129,7 +141,7 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({ onBack
           <Button type='button' variant='outline' onClick={onBack}>
             Back
           </Button>
-          <Button type='submit'>Add Course</Button>
+          <Button type='submit'>{createTemplate ? 'Add Template' : 'Add Course'}</Button>
         </div>
       </form>
     </Form>
