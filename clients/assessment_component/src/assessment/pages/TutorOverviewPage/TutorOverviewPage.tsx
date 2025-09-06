@@ -94,8 +94,9 @@ export const TutorOverviewPage = (): JSX.Element => {
       <ManagementPageHeader>Tutor Overview</ManagementPageHeader>
 
       <p className='text-sm text-muted-foreground mb-4'>
-        {coursePhaseConfig?.tutorEvaluationEnabled ??
-          'Click on a tutor to view their evaluation results from students.'}
+        {coursePhaseConfig?.tutorEvaluationEnabled
+          ? 'Click on a tutor to view their evaluation results from students.'
+          : undefined}
       </p>
 
       <div className='w-full'>
