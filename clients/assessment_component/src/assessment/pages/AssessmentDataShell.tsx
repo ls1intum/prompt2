@@ -74,21 +74,27 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isPending: isSelfEvaluationCategoriesPending,
     isError: isSelfEvaluationCategoriesError,
     refetch: refetchSelfEvaluationCategories,
-  } = useGetSelfEvaluationCategoriesWithCompetencies()
+  } = useGetSelfEvaluationCategoriesWithCompetencies(
+    coursePhaseConfig?.selfEvaluationEnabled ?? false,
+  )
 
   const {
     data: peerEvaluationCategories,
     isPending: isPeerEvaluationCategoriesPending,
     isError: isPeerEvaluationCategoriesError,
     refetch: refetchPeerEvaluationCategories,
-  } = useGetPeerEvaluationCategoriesWithCompetencies()
+  } = useGetPeerEvaluationCategoriesWithCompetencies(
+    coursePhaseConfig?.peerEvaluationEnabled ?? false,
+  )
 
   const {
     data: tutorEvaluationCategories,
     isPending: isTutorEvaluationCategoriesPending,
     isError: isTutorEvaluationCategoriesError,
     refetch: refetchTutorEvaluationCategories,
-  } = useGetTutorEvaluationCategoriesWithCompetencies()
+  } = useGetTutorEvaluationCategoriesWithCompetencies(
+    coursePhaseConfig?.tutorEvaluationEnabled ?? false,
+  )
 
   const isError =
     isParticipationsError ||
@@ -96,18 +102,18 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     isCategoriesError ||
     isScoreLevelsError ||
     isCoursePhaseConfigError ||
-    isSelfEvaluationCategoriesError ||
-    isPeerEvaluationCategoriesError ||
-    isTutorEvaluationCategoriesError
+    (coursePhaseConfig?.selfEvaluationEnabled && isSelfEvaluationCategoriesError) ||
+    (coursePhaseConfig?.peerEvaluationEnabled && isPeerEvaluationCategoriesError) ||
+    (coursePhaseConfig?.tutorEvaluationEnabled && isTutorEvaluationCategoriesError)
   const isPending =
     isCoursePhaseParticipationsPending ||
     isTeamsPending ||
     isCategoriesPending ||
     isScoreLevelsPending ||
     isCoursePhaseConfigPending ||
-    isSelfEvaluationCategoriesPending ||
-    isPeerEvaluationCategoriesPending ||
-    isTutorEvaluationCategoriesPending
+    (coursePhaseConfig?.selfEvaluationEnabled && isSelfEvaluationCategoriesPending) ||
+    (coursePhaseConfig?.peerEvaluationEnabled && isPeerEvaluationCategoriesPending) ||
+    (coursePhaseConfig?.tutorEvaluationEnabled && isTutorEvaluationCategoriesPending)
 
   const refetch = () => {
     refetchTeams()
@@ -115,9 +121,15 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
     refetchCategories()
     refetchScoreLevels()
     refetchCoursePhaseConfig()
-    refetchSelfEvaluationCategories()
-    refetchPeerEvaluationCategories()
-    refetchTutorEvaluationCategories()
+    if (coursePhaseConfig?.selfEvaluationEnabled) {
+      refetchSelfEvaluationCategories()
+    }
+    if (coursePhaseConfig?.peerEvaluationEnabled) {
+      refetchPeerEvaluationCategories()
+    }
+    if (coursePhaseConfig?.tutorEvaluationEnabled) {
+      refetchTutorEvaluationCategories()
+    }
   }
 
   useEffect(() => {
@@ -151,22 +163,34 @@ export const AssessmentDataShell = ({ children }: AssessmentDataShellProps) => {
   }, [coursePhaseConfig, setCoursePhaseConfig])
 
   useEffect(() => {
-    if (selfEvaluationCategories) {
+    if (coursePhaseConfig?.selfEvaluationEnabled && selfEvaluationCategories) {
       setSelfEvaluationCategories(selfEvaluationCategories)
     }
-  }, [selfEvaluationCategories, setSelfEvaluationCategories])
+  }, [
+    coursePhaseConfig?.selfEvaluationEnabled,
+    selfEvaluationCategories,
+    setSelfEvaluationCategories,
+  ])
 
   useEffect(() => {
-    if (peerEvaluationCategories) {
+    if (coursePhaseConfig?.peerEvaluationEnabled && peerEvaluationCategories) {
       setPeerEvaluationCategories(peerEvaluationCategories)
     }
-  }, [peerEvaluationCategories, setPeerEvaluationCategories])
+  }, [
+    coursePhaseConfig?.peerEvaluationEnabled,
+    peerEvaluationCategories,
+    setPeerEvaluationCategories,
+  ])
 
   useEffect(() => {
-    if (tutorEvaluationCategories) {
+    if (coursePhaseConfig?.tutorEvaluationEnabled && tutorEvaluationCategories) {
       setTutorEvaluationCategories(tutorEvaluationCategories)
     }
-  }, [tutorEvaluationCategories, setTutorEvaluationCategories])
+  }, [
+    coursePhaseConfig?.tutorEvaluationEnabled,
+    tutorEvaluationCategories,
+    setTutorEvaluationCategories,
+  ])
 
   return (
     <>{isError ? <ErrorPage onRetry={refetch} /> : isPending ? <LoadingPage /> : <>{children}</>}</>

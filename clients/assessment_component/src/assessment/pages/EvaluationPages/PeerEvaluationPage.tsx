@@ -70,7 +70,7 @@ export const PeerEvaluationPage = () => {
 
       <EvaluationCompletionPage
         type={AssessmentType.PEER}
-        deadline={coursePhaseConfig?.selfEvaluationDeadline ?? new Date()}
+        deadline={coursePhaseConfig?.peerEvaluationDeadline ?? new Date()}
         courseParticipationID={courseParticipationID ?? ''}
         authorCourseParticipationID={myParticipation?.courseParticipationID ?? ''}
         completed={(completion?.completed ?? false) || !isStudent}

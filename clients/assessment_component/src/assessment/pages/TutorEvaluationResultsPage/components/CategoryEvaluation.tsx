@@ -75,14 +75,15 @@ export const CategoryEvaluation = ({
             const competencyEvaluations = evaluations.filter(
               (e) => e.competencyID === competency.id,
             )
-            const evaluationAverageScoreLevel = mapNumberToScoreLevel(
+            const avgNumeric =
               competencyEvaluations.length > 0
                 ? competencyEvaluations.reduce(
                     (sum, evaluation) => sum + mapScoreLevelToNumber(evaluation.scoreLevel),
                     0,
                   ) / competencyEvaluations.length
-                : 0,
-            )
+                : undefined
+            const evaluationAverageScoreLevel =
+              avgNumeric === undefined ? undefined : mapNumberToScoreLevel(avgNumeric)
             const studentNames = [
               () => (
                 <span>

@@ -1,40 +1,39 @@
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
-import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 
-interface TeamWithStudents {
-  name: string
-  participantIds: string[]
-}
+import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
+import { Team } from '../../../interfaces/team'
 
 export const createTeamColumn = (
-  teamsWithStudents: TeamWithStudents[],
+  teams: Team[],
   participations: AssessmentParticipationWithStudent[],
 ): ExtraParticipationTableColumn | undefined => {
-  if (teamsWithStudents.length === 0) return undefined
+  if (teams.length === 0) return undefined
 
   return {
     id: 'team',
     header: 'Team',
     accessorFn: (row) => {
-      const team = teamsWithStudents.find((t) =>
-        t.participantIds.includes(row.courseParticipationID),
+      return (
+        teams.find((t) => t.members.some((member) => member.id === row.courseParticipationID))
+          ?.name ?? ''
       )
-      return team ? team.name : ''
     },
     enableSorting: true,
     sortingFn: (rowA, rowB) => {
       const teamA =
-        teamsWithStudents.find((t) =>
-          t.participantIds.includes(rowA.original.courseParticipationID),
+        teams.find((t) =>
+          t.members.some((member) => member.id === rowA.original.courseParticipationID),
         )?.name ?? ''
       const teamB =
-        teamsWithStudents.find((t) =>
-          t.participantIds.includes(rowB.original.courseParticipationID),
+        teams.find((t) =>
+          t.members.some((member) => member.id === rowB.original.courseParticipationID),
         )?.name ?? ''
       return teamA.localeCompare(teamB)
     },
     extraData: participations.map((p) => {
-      const team = teamsWithStudents.find((t) => t.participantIds.includes(p.courseParticipationID))
+      const team = teams.find((t) =>
+        t.members.some((member) => member.id === p.courseParticipationID),
+      )
       return {
         courseParticipationID: p.courseParticipationID,
         value: team ? team.name : '',
@@ -42,13 +41,11 @@ export const createTeamColumn = (
       }
     }),
     filterFn: (row, columnId, filterValue) => {
-      const team = teamsWithStudents.find((t) =>
-        t.participantIds.includes(row.original.courseParticipationID),
+      const team = teams.find((t) =>
+        t.members.some((member) => member.id === row.original.courseParticipationID),
       )
       const teamName = team ? team.name : ''
       return Array.isArray(filterValue) ? filterValue.includes(teamName) : false
     },
   }
 }
-
-export type { TeamWithStudents }

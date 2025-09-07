@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -238,24 +237,6 @@ func ListEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID u
 		return nil, errors.New("could not get evaluation completions by course phase")
 	}
 	return completions, nil
-}
-
-func GetEvaluationCompletion(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) (db.EvaluationCompletion, error) {
-	completion, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletion(ctx, db.GetEvaluationCompletionParams{
-		CourseParticipationID:       courseParticipationID,
-		CoursePhaseID:               coursePhaseID,
-		AuthorCourseParticipationID: authorCourseParticipationID,
-	})
-	if err != nil {
-		// Check if it's a "no rows" error, which is expected when no completion exists yet
-		if errors.Is(err, pgx.ErrNoRows) {
-			// Return empty completion with default values
-			return db.EvaluationCompletion{}, nil
-		}
-		log.Error("could not get evaluation completion: ", err)
-		return db.EvaluationCompletion{}, errors.New("could not get evaluation completion")
-	}
-	return completion, nil
 }
 
 func GetEvaluationCompletionForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {

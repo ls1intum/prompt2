@@ -11,7 +11,7 @@ export const createGradeSuggestionColumn = (
 
   return {
     id: 'gradeSuggestion',
-    header: 'Grade Suggestion',
+    header: 'Grade',
     accessorFn: (row) => {
       const match = completedGradings.find(
         (a) => a.courseParticipationID === row.courseParticipationID,

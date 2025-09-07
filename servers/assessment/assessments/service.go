@@ -16,6 +16,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
+	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -130,6 +131,10 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	if err != nil {
 		log.Error("could not get evaluations: ", err)
 		return assessmentDTO.StudentAssessment{}, errors.New("could not get evaluations")
+	}
+
+	if evaluations == nil {
+		evaluations = []evaluationDTO.Evaluation{}
 	}
 
 	return assessmentDTO.StudentAssessment{

@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { startOfDay, endOfDay } from 'date-fns'
 import {
   Select,
   SelectContent,
@@ -90,14 +90,8 @@ export const AssessmentConfiguration = ({
               to: deadline,
             }}
             setDate={(dateRange) => {
-              setStartDate(
-                dateRange?.from ? new Date(format(dateRange.from, 'yyyy-MM-dd')) : undefined,
-              )
-              setDeadline(
-                dateRange?.to
-                  ? new Date(format(dateRange.to, 'yyyy-MM-dd') + 'T23:59:59')
-                  : undefined,
-              )
+              setStartDate(dateRange?.from ? startOfDay(dateRange.from) : undefined)
+              setDeadline(dateRange?.to ? endOfDay(dateRange.to) : undefined)
             }}
           />
         </div>

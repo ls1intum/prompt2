@@ -19,6 +19,10 @@ export const EvaluationScoreDescriptionBadge = ({
 }: EvaluationScoreDescriptionBadgeProps) => {
   const config = getLevelConfig(scoreLevel || ScoreLevel.VeryBad)
 
+  if (!competency) {
+    return undefined
+  }
+
   return (
     <div className='flex items-center gap-2'>
       <span className='font-medium'>{name}:</span>
@@ -26,7 +30,7 @@ export const EvaluationScoreDescriptionBadge = ({
         className={`${config.textColor} ${config.selectedBg} hover:${config.selectedBg} cursor-help`}
         style={{ whiteSpace: 'nowrap' }}
       >
-        {getScoreLevelDescription(scoreLevel || ScoreLevel.VeryBad, competency!) || ''}
+        {getScoreLevelDescription(scoreLevel || ScoreLevel.VeryBad, competency) || ''}
       </Badge>
     </div>
   )

@@ -17,7 +17,6 @@ func setupEvaluationCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	evaluationRouter := routerGroup.Group("/evaluation/completed")
 
 	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listEvaluationCompletionsByCoursePhase)
-	evaluationRouter.GET("/course-participation/:courseParticipationID/author/:authorCourseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getEvaluationCompletion)
 
 	evaluationRouter.POST("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.PUT("/my-completion", authMiddleware(promptSDK.CourseStudent), createOrUpdateMyEvaluationCompletion)
@@ -39,30 +38,6 @@ func listEvaluationCompletionsByCoursePhase(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(completions))
-}
-
-func getEvaluationCompletion(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	authorCourseParticipationID, err := uuid.Parse(c.Param("authorCourseParticipationID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-	evaluationCompletion, err := GetEvaluationCompletion(c, courseParticipationID, coursePhaseID, authorCourseParticipationID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluationCompletionDTO.MapDBEvaluationCompletionToEvaluationCompletionDTO(evaluationCompletion))
 }
 
 func createOrUpdateMyEvaluationCompletion(c *gin.Context) {

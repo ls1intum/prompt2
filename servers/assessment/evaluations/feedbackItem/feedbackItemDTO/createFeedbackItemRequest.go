@@ -7,10 +7,10 @@ import (
 )
 
 type CreateFeedbackItemRequest struct {
-	FeedbackType                db.FeedbackType               `json:"feedbackType" binding:"required"`
+	FeedbackType                db.FeedbackType               `json:"feedbackType" binding:"required,oneof='positive' 'negative'"`
 	FeedbackText                string                        `json:"feedbackText"`
-	CourseParticipationID       uuid.UUID                     `json:"courseParticipationID" binding:"required"`
-	CoursePhaseID               uuid.UUID                     `json:"coursePhaseID" binding:"required"`
-	AuthorCourseParticipationID uuid.UUID                     `json:"authorCourseParticipationID" binding:"required"`
-	Type                        assessmentType.AssessmentType `json:"type" binding:"required"`
+	CourseParticipationID       uuid.UUID                     `json:"courseParticipationID" binding:"required,uuid"`
+	CoursePhaseID               uuid.UUID                     `json:"coursePhaseID" binding:"required,uuid"`
+	AuthorCourseParticipationID uuid.UUID                     `json:"authorCourseParticipationID" binding:"required,uuid"`
+	Type                        assessmentType.AssessmentType `json:"type" binding:"required,oneof='self' 'peer' 'tutor' 'assessment'"`
 }

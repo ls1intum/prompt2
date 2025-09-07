@@ -87,15 +87,6 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     )
   }, [evaluationCompletions])
 
-  const teamsWithStudents = useMemo(() => {
-    return teams.map((team) => ({
-      name: team.name,
-      participantIds: participations
-        .filter((p) => p.teamID === team.id)
-        .map((p) => p.courseParticipationID),
-    }))
-  }, [teams, participations])
-
   const completedGrades = useMemo(() => {
     const completedGradings = assessmentCompletions?.filter((a) => a.completed) ?? []
     return completedGradings.map((completion) => completion.gradeSuggestion)
@@ -107,20 +98,19 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     const columns = [
       createScoreLevelColumn(scoreLevels),
       createGradeSuggestionColumn(assessmentCompletions),
-      createTeamColumn(teamsWithStudents, participations),
+      createTeamColumn(teams, participations),
       createSelfEvalStatusColumn(
         selfEvaluationCompletions,
         coursePhaseConfig?.selfEvaluationEnabled ?? false,
       ),
       createPeerEvalStatusColumn(
         peerEvaluationCompletions,
-        teamsWithStudents,
+        teams,
         participations,
         coursePhaseConfig?.peerEvaluationEnabled ?? false,
       ),
       createTutorEvalStatusColumn(
         tutorEvaluationCompletions,
-        teamsWithStudents,
         teams,
         participations,
         coursePhaseConfig?.tutorEvaluationEnabled ?? false,
@@ -130,7 +120,6 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     return columns.filter((column) => column !== undefined)
   }, [
     participations,
-    teamsWithStudents,
     teams,
     scoreLevels,
     assessmentCompletions,
