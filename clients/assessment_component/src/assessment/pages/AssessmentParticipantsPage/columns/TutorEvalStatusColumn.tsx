@@ -26,9 +26,7 @@ export const createTutorEvalStatusColumn = (
     header: 'Tutor Eval',
     accessorFn: (row) => {
       const team = teams.find((t) =>
-        participations
-          .filter((p) => p.courseParticipationID === row.courseParticipationID)
-          .some((p) => p.teamID === t.id),
+        t.members.some((member) => member.id === row.courseParticipationID),
       )
 
       if (!team) {

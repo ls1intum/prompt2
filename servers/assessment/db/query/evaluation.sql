@@ -6,7 +6,7 @@ INSERT INTO evaluation (course_participation_id,
                         author_course_participation_id,
                         type)
 VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (course_participation_id, course_phase_id, competency_id, author_course_participation_id, type)
+ON CONFLICT (course_participation_id, course_phase_id, competency_id, author_course_participation_id)
     DO UPDATE SET score_level  = EXCLUDED.score_level,
                   type         = EXCLUDED.type,
                   evaluated_at = CURRENT_TIMESTAMP;
