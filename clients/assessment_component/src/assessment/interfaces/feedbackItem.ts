@@ -1,3 +1,5 @@
+import { AssessmentType } from './assessmentType'
+
 export type FeedbackType = 'positive' | 'negative'
 
 export interface FeedbackItem {
@@ -8,15 +10,7 @@ export interface FeedbackItem {
   coursePhaseID: string
   authorCourseParticipationID: string
   createdAt: string
-}
-
-export interface CreateOrUpdateFeedbackItemRequest {
-  id?: string // Optional for create, required for update
-  feedbackType: FeedbackType
-  feedbackText: string
-  courseParticipationID: string
-  coursePhaseID: string
-  authorCourseParticipationID: string
+  type: AssessmentType
 }
 
 export interface CreateFeedbackItemRequest {
@@ -24,6 +18,7 @@ export interface CreateFeedbackItemRequest {
   feedbackText: string
   courseParticipationID: string
   authorCourseParticipationID: string
+  type: AssessmentType
 }
 
 export interface UpdateFeedbackItemRequest {
@@ -32,4 +27,5 @@ export interface UpdateFeedbackItemRequest {
   feedbackText?: string
   courseParticipationID?: string
   authorCourseParticipationID?: string
+  type: AssessmentType
 }

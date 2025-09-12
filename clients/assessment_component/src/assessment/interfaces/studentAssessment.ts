@@ -8,6 +8,5 @@ export type StudentAssessment = {
   assessments: Assessment[]
   assessmentCompletion: AssessmentCompletion
   studentScore: StudentScore
-  selfEvaluations: Evaluation[]
-  peerEvaluations: Evaluation[]
+  evaluations: Evaluation[]
 }

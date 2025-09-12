@@ -1,10 +1,10 @@
-import { AssessmentParticipationWithStudent } from '../interfaces/assessmentParticipationWithStudent'
-import { StudentAssessment } from '../interfaces/studentAssessment'
-
 import { Assessment } from '../interfaces/assessment'
 import { AssessmentCompletion } from '../interfaces/assessmentCompletion'
-import { StudentScore } from '../interfaces/studentScore'
+import { AssessmentParticipationWithStudent } from '../interfaces/assessmentParticipationWithStudent'
+import { AssessmentType } from '../interfaces/assessmentType'
 import { Evaluation } from '../interfaces/evaluation'
+import { StudentAssessment } from '../interfaces/studentAssessment'
+import { StudentScore } from '../interfaces/studentScore'
 
 import { create } from 'zustand'
 
@@ -34,8 +34,12 @@ export const useStudentAssessmentStore = create<StudentAssessmentStore>((set) =>
       assessments: assessment.assessments,
       assessmentCompletion: assessment.assessmentCompletion,
       studentScore: assessment.studentScore,
-      selfEvaluations: assessment.selfEvaluations,
-      peerEvaluations: assessment.peerEvaluations,
+      selfEvaluations: assessment.evaluations.filter(
+        (evaluation) => evaluation.type === AssessmentType.SELF,
+      ),
+      peerEvaluations: assessment.evaluations.filter(
+        (evaluation) => evaluation.type === AssessmentType.PEER,
+      ),
     }),
 
   assessmentParticipation: undefined,

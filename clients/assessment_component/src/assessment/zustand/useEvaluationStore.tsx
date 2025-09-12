@@ -7,10 +7,15 @@ export interface EvaluationStore {
   setSelfEvaluations: (evaluations: Evaluation[]) => void
   peerEvaluations: Evaluation[]
   setPeerEvaluations: (evaluations: Evaluation[]) => void
+  tutorEvaluations: Evaluation[]
+  setTutorEvaluations: (evaluations: Evaluation[]) => void
+
   selfEvaluationCompletion: EvaluationCompletion | undefined
-  peerEvaluationCompletions: EvaluationCompletion[]
   setSelfEvaluationCompletion: (completion: EvaluationCompletion | undefined) => void
+  peerEvaluationCompletions: EvaluationCompletion[]
   setPeerEvaluationCompletions: (completions: EvaluationCompletion[]) => void
+  tutorEvaluationCompletions: EvaluationCompletion[]
+  setTutorEvaluationCompletions: (completions: EvaluationCompletion[]) => void
 }
 
 export const useEvaluationStore = create<EvaluationStore>((set) => ({
@@ -18,8 +23,13 @@ export const useEvaluationStore = create<EvaluationStore>((set) => ({
   setSelfEvaluations: (evaluations) => set({ selfEvaluations: evaluations }),
   peerEvaluations: [],
   setPeerEvaluations: (evaluations) => set({ peerEvaluations: evaluations }),
+  tutorEvaluations: [],
+  setTutorEvaluations: (evaluations) => set({ tutorEvaluations: evaluations }),
+
   selfEvaluationCompletion: undefined,
-  peerEvaluationCompletions: [],
   setSelfEvaluationCompletion: (completion) => set({ selfEvaluationCompletion: completion }),
+  peerEvaluationCompletions: [],
   setPeerEvaluationCompletions: (completions) => set({ peerEvaluationCompletions: completions }),
+  tutorEvaluationCompletions: [],
+  setTutorEvaluationCompletions: (completions) => set({ tutorEvaluationCompletions: completions }),
 }))

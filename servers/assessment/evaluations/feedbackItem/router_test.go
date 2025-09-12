@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -100,12 +101,13 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemValid() {
 	studentID := uuid.MustParse("da42e447-60f9-4fe0-b297-2dae3f924fd7") // target student
 	authorID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")  // current student
 
-	payload := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	payload := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypePositive,
 		FeedbackText:                "Test positive feedback",
 		CourseParticipationID:       studentID,
 		CoursePhaseID:               phaseID,
 		AuthorCourseParticipationID: authorID,
+		Type:                        assessmentType.Self,
 	}
 	body, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items", bytes.NewBuffer(body))
@@ -121,12 +123,13 @@ func (suite *FeedbackItemRouterTestSuite) TestCreateFeedbackItemUnauthorizedAuth
 	studentID := uuid.MustParse("da42e447-60f9-4fe0-b297-2dae3f924fd7")
 	wrongAuthorID := uuid.MustParse("ea42e447-60f9-4fe0-b297-2dae3f924fd7") // different author
 
-	payload := feedbackItemDTO.CreateOrUpdateFeedbackItemRequest{
+	payload := feedbackItemDTO.CreateFeedbackItemRequest{
 		FeedbackType:                db.FeedbackTypePositive,
 		FeedbackText:                "Test feedback",
 		CourseParticipationID:       studentID,
 		CoursePhaseID:               phaseID,
 		AuthorCourseParticipationID: wrongAuthorID,
+		Type:                        assessmentType.Self,
 	}
 	body, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items", bytes.NewBuffer(body))
@@ -195,87 +198,6 @@ func (suite *FeedbackItemRouterTestSuite) TestLecturerGetFeedbackItemsForStudent
 	var feedbackItems []feedbackItemDTO.FeedbackItem
 	err := json.Unmarshal(resp.Body.Bytes(), &feedbackItems)
 	assert.NoError(suite.T(), err)
-}
-
-func (suite *FeedbackItemRouterTestSuite) TestLecturerGetPositiveFeedbackItemsForStudent() {
-	lecturerRouter := suite.createLecturerRouter()
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	studentID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
-
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items/positive/course-participation/"+studentID.String(), nil)
-	resp := httptest.NewRecorder()
-
-	lecturerRouter.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-
-	var feedbackItems []feedbackItemDTO.FeedbackItem
-	err := json.Unmarshal(resp.Body.Bytes(), &feedbackItems)
-	assert.NoError(suite.T(), err)
-
-	// Verify all items are positive
-	for _, item := range feedbackItems {
-		assert.Equal(suite.T(), db.FeedbackTypePositive, item.FeedbackType)
-	}
-}
-
-func (suite *FeedbackItemRouterTestSuite) TestLecturerGetNegativeFeedbackItemsForStudent() {
-	lecturerRouter := suite.createLecturerRouter()
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	studentID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
-
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items/negative/course-participation/"+studentID.String(), nil)
-	resp := httptest.NewRecorder()
-
-	lecturerRouter.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-
-	var feedbackItems []feedbackItemDTO.FeedbackItem
-	err := json.Unmarshal(resp.Body.Bytes(), &feedbackItems)
-	assert.NoError(suite.T(), err)
-
-	// Verify all items are negative
-	for _, item := range feedbackItems {
-		assert.Equal(suite.T(), db.FeedbackTypeNegative, item.FeedbackType)
-	}
-}
-
-func (suite *FeedbackItemRouterTestSuite) TestLecturerGetFeedbackItemsByAuthor() {
-	lecturerRouter := suite.createLecturerRouter()
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	authorID := uuid.MustParse("da42e447-60f9-4fe0-b297-2dae3f924fd7")
-
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items/author/"+authorID.String(), nil)
-	resp := httptest.NewRecorder()
-
-	lecturerRouter.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-
-	var feedbackItems []feedbackItemDTO.FeedbackItem
-	err := json.Unmarshal(resp.Body.Bytes(), &feedbackItems)
-	assert.NoError(suite.T(), err)
-
-	// Verify all items are from the specified author
-	for _, item := range feedbackItems {
-		assert.Equal(suite.T(), authorID, item.AuthorCourseParticipationID)
-	}
-}
-
-func (suite *FeedbackItemRouterTestSuite) TestLecturerListAllFeedbackItemsForCoursePhase() {
-	lecturerRouter := suite.createLecturerRouter()
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/evaluation/feedback-items", nil)
-	resp := httptest.NewRecorder()
-
-	lecturerRouter.ServeHTTP(resp, req)
-	assert.Equal(suite.T(), http.StatusOK, resp.Code)
-
-	var feedbackItems []feedbackItemDTO.FeedbackItem
-	err := json.Unmarshal(resp.Body.Bytes(), &feedbackItems)
-	assert.NoError(suite.T(), err)
-
-	// Should get all feedback items for this phase
-	assert.GreaterOrEqual(suite.T(), len(feedbackItems), 1)
 }
 
 func (suite *FeedbackItemRouterTestSuite) TestInvalidCoursePhaseID() {

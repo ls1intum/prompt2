@@ -16,6 +16,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
+	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -90,30 +91,6 @@ func ListAssessmentsByStudentInPhase(ctx context.Context, courseParticipationID,
 	return assessments, nil
 }
 
-func ListAssessmentsByCompetencyInPhase(ctx context.Context, competencyID, coursePhaseID uuid.UUID) ([]db.Assessment, error) {
-	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByCompetencyInPhase(ctx, db.ListAssessmentsByCompetencyInPhaseParams{
-		CompetencyID:  competencyID,
-		CoursePhaseID: coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not get assessments for competency: ", err)
-		return nil, errors.New("could not get assessments for competency")
-	}
-	return assessments, nil
-}
-
-func ListAssessmentsByCategoryInPhase(ctx context.Context, categoryID, coursePhaseID uuid.UUID) ([]db.Assessment, error) {
-	assessments, err := AssessmentServiceSingleton.queries.ListAssessmentsByCategoryInPhase(ctx, db.ListAssessmentsByCategoryInPhaseParams{
-		CategoryID:    categoryID,
-		CoursePhaseID: coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not get assessments for category: ", err)
-		return nil, errors.New("could not get assessments for category")
-	}
-	return assessments, nil
-}
-
 func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
 	assessments, err := ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
@@ -150,16 +127,14 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		}
 	}
 
-	selfEvaluations, err := evaluations.GetSelfEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
+	evaluations, err := evaluations.GetEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
-		log.Error("could not get self evaluations: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get self evaluations")
+		log.Error("could not get evaluations: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get evaluations")
 	}
 
-	peerEvaluations, err := evaluations.GetPeerEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluations: ", err)
-		return assessmentDTO.StudentAssessment{}, errors.New("could not get peer evaluations")
+	if evaluations == nil {
+		evaluations = []evaluationDTO.Evaluation{}
 	}
 
 	return assessmentDTO.StudentAssessment{
@@ -167,8 +142,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
 		AssessmentCompletion:  completion,
 		StudentScore:          studentScore,
-		SelfEvaluations:       selfEvaluations,
-		PeerEvaluations:       peerEvaluations,
+		Evaluations:           evaluations,
 	}, nil
 }
 
@@ -181,10 +155,8 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 
 	qtx := AssessmentServiceSingleton.queries.WithTx(tx)
 
-	// Get the assessment details to check if it's editable
 	assessment, err := qtx.GetAssessment(ctx, id)
 	if err != nil {
-		// If assessment doesn't exist, return nil (no error) as it's already "deleted"
 		log.Info("assessment not found, nothing to delete: ", err)
 		return nil
 	}

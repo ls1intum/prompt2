@@ -3,17 +3,19 @@ package feedbackItemDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
 type FeedbackItem struct {
-	ID                          uuid.UUID          `json:"id"`
-	FeedbackType                db.FeedbackType    `json:"feedbackType"`
-	FeedbackText                string             `json:"feedbackText"`
-	CourseParticipationID       uuid.UUID          `json:"courseParticipationID"`
-	CoursePhaseID               uuid.UUID          `json:"coursePhaseID"`
-	AuthorCourseParticipationID uuid.UUID          `json:"authorCourseParticipationID"`
-	CreatedAt                   pgtype.Timestamptz `json:"createdAt"`
+	ID                          uuid.UUID                     `json:"id"`
+	FeedbackType                db.FeedbackType               `json:"feedbackType"`
+	FeedbackText                string                        `json:"feedbackText"`
+	CourseParticipationID       uuid.UUID                     `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID                     `json:"coursePhaseID"`
+	AuthorCourseParticipationID uuid.UUID                     `json:"authorCourseParticipationID"`
+	CreatedAt                   pgtype.Timestamptz            `json:"createdAt"`
+	Type                        assessmentType.AssessmentType `json:"type"`
 }
 
 // GetFeedbackItemDTOsFromDBModels converts a slice of db.FeedbackItem to DTOs.
@@ -35,5 +37,6 @@ func MapDBFeedbackItemToFeedbackItemDTO(dbFeedbackItem db.FeedbackItem) Feedback
 		CoursePhaseID:               dbFeedbackItem.CoursePhaseID,
 		AuthorCourseParticipationID: dbFeedbackItem.AuthorCourseParticipationID,
 		CreatedAt:                   dbFeedbackItem.CreatedAt,
+		Type:                        assessmentType.MapDBAssessmentTypeToDTO(dbFeedbackItem.Type),
 	}
 }

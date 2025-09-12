@@ -24,6 +24,13 @@ CREATE TYPE public.feedback_type AS ENUM (
     'negative'
 );
 
+CREATE TYPE public.assessment_type AS ENUM (
+    'self',
+    'peer',
+    'tutor',
+    'assessment'
+);
+
 -- Create minimal tables needed for feedback items tests
 CREATE TABLE public.course_phase (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -50,7 +57,8 @@ CREATE TABLE public.feedback_items (
     course_participation_id uuid NOT NULL,
     course_phase_id uuid NOT NULL,
     author_course_participation_id uuid NOT NULL,
-    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    type public.assessment_type NOT NULL DEFAULT 'self'
 );
 
 -- Insert test data for course phases

@@ -67,23 +67,6 @@ func (suite *AssessmentServiceTestSuite) TestListAssessmentsByStudentInPhase() {
 	assert.Greater(suite.T(), len(items), 0, "Expected at least one assessment for student in phase")
 }
 
-func (suite *AssessmentServiceTestSuite) TestListAssessmentsByCompetencyInPhase() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	compID := uuid.MustParse("eb36bf49-87c2-429b-a87e-a930630a3fe3")
-	items, err := ListAssessmentsByCompetencyInPhase(suite.suiteCtx, compID, phaseID)
-	assert.NoError(suite.T(), err)
-	assert.Greater(suite.T(), len(items), 0, "Expected at least one assessment for competency in phase")
-}
-
-func (suite *AssessmentServiceTestSuite) TestListAssessmentsByCategoryInPhase() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
-	// categoryID may not map to assessments; just verify no error
-	catID := uuid.New()
-	items, err := ListAssessmentsByCategoryInPhase(suite.suiteCtx, catID, phaseID)
-	assert.NoError(suite.T(), err)
-	assert.GreaterOrEqual(suite.T(), len(items), 0, "Expected zero or more assessments for category in phase")
-}
-
 func (suite *AssessmentServiceTestSuite) TestDeleteAssessmentNonExisting() {
 	id := uuid.New()
 	err := DeleteAssessment(suite.suiteCtx, id)
