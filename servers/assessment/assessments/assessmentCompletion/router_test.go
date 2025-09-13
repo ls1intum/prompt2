@@ -443,6 +443,118 @@ func (suite *AssessmentCompletionRouterTestSuite) TestMarkAssessmentAsCompleteRe
 	assert.Contains(suite.T(), response, "error")
 }
 
+// Grade endpoint tests
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetAllGradesEndpoint() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/grade", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var grades []dto.GradeWithParticipation
+	err := json.Unmarshal(resp.Body.Bytes(), &grades)
+	assert.NoError(suite.T(), err)
+	assert.NotNil(suite.T(), grades)
+
+	// Verify structure of returned grades
+	for _, grade := range grades {
+		assert.NotEqual(suite.T(), uuid.Nil, grade.CourseParticipationID)
+		assert.GreaterOrEqual(suite.T(), grade.Grade, 0.0)
+	}
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetAllGradesEndpointInvalidPhaseID() {
+	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-phase-id/student-assessment/completed/grade", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetAllGradesEndpointNonExistentPhase() {
+	nonExistentPhaseID := uuid.New()
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+nonExistentPhaseID.String()+"/student-assessment/completed/grade", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var grades []dto.GradeWithParticipation
+	err := json.Unmarshal(resp.Body.Bytes(), &grades)
+	assert.NoError(suite.T(), err)
+	assert.Empty(suite.T(), grades) // Should return empty array for non-existent phase
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpoint() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	participationID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/grade/course-participation/"+participationID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var grade float64
+	err := json.Unmarshal(resp.Body.Bytes(), &grade)
+	assert.NoError(suite.T(), err)
+	assert.GreaterOrEqual(suite.T(), grade, 0.0)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpointInvalidPhaseID() {
+	participationID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-phase/student-assessment/completed/grade/course-participation/"+participationID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpointInvalidParticipationID() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/grade/course-participation/invalid-participation", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpointNonExistentParticipation() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	nonExistentParticipationID := uuid.New()
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/grade/course-participation/"+nonExistentParticipationID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var grade float64
+	err := json.Unmarshal(resp.Body.Bytes(), &grade)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 0.0, grade) // Should return 0 for non-existent participation
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpointNonExistentPhase() {
+	nonExistentPhaseID := uuid.New()
+	participationID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+nonExistentPhaseID.String()+"/student-assessment/completed/grade/course-participation/"+participationID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var grade float64
+	err := json.Unmarshal(resp.Body.Bytes(), &grade)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 0.0, grade) // Should return 0 for non-existent phase
+}
+
 func TestAssessmentCompletionRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(AssessmentCompletionRouterTestSuite))
 }

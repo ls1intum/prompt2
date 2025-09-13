@@ -534,6 +534,24 @@ func (q *Queries) InsertCourseProvidedApplicationAnswers(ctx context.Context, co
 	return err
 }
 
+const insertGradeOutput = `-- name: InsertGradeOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'grade',
+        1,
+        '/student-assessment/action-item/action',
+        '{
+          "type": "number"
+        }'::jsonb)
+`
+
+func (q *Queries) InsertGradeOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertGradeOutput, coursePhaseTypeID)
+	return err
+}
+
 const insertProvidedOutputDevices = `-- name: InsertProvidedOutputDevices :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
                                                                  endpoint_path, specification)

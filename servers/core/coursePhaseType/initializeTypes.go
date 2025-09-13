@@ -298,6 +298,13 @@ func initAssessment() error {
 			return err
 		}
 
+		// create grade output
+		err = qtx.InsertGradeOutput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required grade output: ", err)
+			return err
+		}
+
 		if err := tx.Commit(ctx); err != nil {
 			return fmt.Errorf("failed to commit transaction: %w", err)
 		}
