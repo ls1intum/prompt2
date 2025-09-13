@@ -406,7 +406,7 @@ VALUES (gen_random_uuid(),
         $1,
         'grade',
         1,
-        '/student-assessment/action-item/action',
+        '/student-assessment/completed/grade',
         '{
           "type": "number"
         }'::jsonb);
