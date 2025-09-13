@@ -39,6 +39,7 @@ export const CoursePhaseConfigSelection = () => {
   const [tutorEvaluationDeadline, setTutorEvaluationDeadline] = useState<Date | undefined>(
     undefined,
   )
+  const [evaluationResultsVisible, setEvaluationResultsVisible] = useState<boolean>(false)
 
   const {
     data: templates,
@@ -78,6 +79,7 @@ export const CoursePhaseConfigSelection = () => {
       setTutorEvaluationDeadline(
         config.tutorEvaluationDeadline ? new Date(config.tutorEvaluationDeadline) : undefined,
       )
+      setEvaluationResultsVisible(config.evaluationResultsVisible || false)
     }
   }, [config])
 
@@ -106,6 +108,7 @@ export const CoursePhaseConfigSelection = () => {
       tutorEvaluationTemplate: tutorEvaluationTemplate,
       tutorEvaluationStart: tutorEvaluationStart,
       tutorEvaluationDeadline: tutorEvaluationDeadline,
+      evaluationResultsVisible,
     })
   }
 
@@ -138,7 +141,8 @@ export const CoursePhaseConfigSelection = () => {
     tutorEvaluationDeadline?.getTime() !==
       (config?.tutorEvaluationDeadline
         ? new Date(config.tutorEvaluationDeadline).getTime()
-        : undefined)
+        : undefined) ||
+    evaluationResultsVisible !== (config?.evaluationResultsVisible || false)
 
   return (
     <Card>
@@ -169,6 +173,21 @@ export const CoursePhaseConfigSelection = () => {
             configMutation={configMutation}
             setError={setError}
           />
+
+          <div className='space-y-4'>
+            <div className='flex items-center space-x-2'>
+              <Checkbox
+                id='evaluation-results-visible'
+                checked={evaluationResultsVisible}
+                onCheckedChange={(checked) => setEvaluationResultsVisible(checked as boolean)}
+                disabled={configMutation.isPending}
+              />
+              <Label htmlFor='evaluation-results-visible' className='text-sm font-medium'>
+                Make evaluation results visible to assessment authors before they submit their
+                assessment
+              </Label>
+            </div>
+          </div>
 
           <div className='space-y-4'>
             <div className='flex items-center space-x-2'>

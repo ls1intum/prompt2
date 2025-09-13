@@ -222,22 +222,23 @@ type CompletedScoreLevel struct {
 }
 
 type CoursePhaseConfig struct {
-	AssessmentTemplateID    uuid.UUID          `json:"assessment_template_id"`
-	CoursePhaseID           uuid.UUID          `json:"course_phase_id"`
-	Deadline                pgtype.Timestamptz `json:"deadline"`
-	SelfEvaluationEnabled   bool               `json:"self_evaluation_enabled"`
-	SelfEvaluationTemplate  uuid.UUID          `json:"self_evaluation_template"`
-	SelfEvaluationDeadline  pgtype.Timestamptz `json:"self_evaluation_deadline"`
-	PeerEvaluationEnabled   bool               `json:"peer_evaluation_enabled"`
-	PeerEvaluationTemplate  uuid.UUID          `json:"peer_evaluation_template"`
-	PeerEvaluationDeadline  pgtype.Timestamptz `json:"peer_evaluation_deadline"`
-	Start                   pgtype.Timestamptz `json:"start"`
-	SelfEvaluationStart     pgtype.Timestamptz `json:"self_evaluation_start"`
-	PeerEvaluationStart     pgtype.Timestamptz `json:"peer_evaluation_start"`
-	TutorEvaluationEnabled  bool               `json:"tutor_evaluation_enabled"`
-	TutorEvaluationStart    pgtype.Timestamptz `json:"tutor_evaluation_start"`
-	TutorEvaluationDeadline pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
-	TutorEvaluationTemplate uuid.UUID          `json:"tutor_evaluation_template"`
+	AssessmentTemplateID     uuid.UUID          `json:"assessment_template_id"`
+	CoursePhaseID            uuid.UUID          `json:"course_phase_id"`
+	Deadline                 pgtype.Timestamptz `json:"deadline"`
+	SelfEvaluationEnabled    bool               `json:"self_evaluation_enabled"`
+	SelfEvaluationTemplate   uuid.UUID          `json:"self_evaluation_template"`
+	SelfEvaluationDeadline   pgtype.Timestamptz `json:"self_evaluation_deadline"`
+	PeerEvaluationEnabled    bool               `json:"peer_evaluation_enabled"`
+	PeerEvaluationTemplate   uuid.UUID          `json:"peer_evaluation_template"`
+	PeerEvaluationDeadline   pgtype.Timestamptz `json:"peer_evaluation_deadline"`
+	Start                    pgtype.Timestamptz `json:"start"`
+	SelfEvaluationStart      pgtype.Timestamptz `json:"self_evaluation_start"`
+	PeerEvaluationStart      pgtype.Timestamptz `json:"peer_evaluation_start"`
+	TutorEvaluationEnabled   bool               `json:"tutor_evaluation_enabled"`
+	TutorEvaluationStart     pgtype.Timestamptz `json:"tutor_evaluation_start"`
+	TutorEvaluationDeadline  pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
+	TutorEvaluationTemplate  uuid.UUID          `json:"tutor_evaluation_template"`
+	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
 }
 
 type Evaluation struct {
