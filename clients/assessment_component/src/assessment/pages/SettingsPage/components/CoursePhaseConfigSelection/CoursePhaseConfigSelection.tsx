@@ -79,8 +79,11 @@ export const CoursePhaseConfigSelection = () => {
       </div>
     )
 
-  const hasChanges = hasMainConfigChanges(originalConfig) || hasEvaluationChanges(originalConfig)
-  const handleSaveConfig = (configRequest: any) => {
+  const hasChanges =
+    originalConfig === undefined ||
+    hasMainConfigChanges(originalConfig) ||
+    hasEvaluationChanges(originalConfig)
+  const handleSaveConfig = (configRequest: Parameters<typeof configMutation.mutate>[0]) => {
     configMutation.mutate(configRequest)
   }
 

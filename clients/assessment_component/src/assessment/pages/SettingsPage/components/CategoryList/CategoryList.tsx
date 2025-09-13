@@ -71,11 +71,17 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
         <AccordionItem value='competencies' className='border-none'>
           <div className='flex items-center gap-4'>
             <div className='flex items-center gap-2'>
-              <AccordionTrigger className='py-3 hover:no-underline'></AccordionTrigger>
+              <AccordionTrigger
+                className='py-3 hover:no-underline'
+                aria-labelledby='assessment-template-header'
+              ></AccordionTrigger>
             </div>
             <div className='flex justify-between items-center'>
               <div>
-                <h2 className='text-xl font-semibold tracking-tight'>
+                <h2
+                  id='assessment-template-header'
+                  className='text-xl font-semibold tracking-tight'
+                >
                   {assessmentType === AssessmentType.SELF
                     ? 'Self-Evaluation Template'
                     : assessmentType === AssessmentType.PEER
