@@ -356,6 +356,27 @@ func (q *Queries) GetCoursePhaseTypeByID(ctx context.Context, id uuid.UUID) (Cou
 	return i, err
 }
 
+const insertActionItemsOutput = `-- name: InsertActionItemsOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'actionItems',
+        1,
+        '/student-assessment/action-item/action',
+        '{
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }'::jsonb)
+`
+
+func (q *Queries) InsertActionItemsOutput(ctx context.Context, coursePhaseTypeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, insertActionItemsOutput, coursePhaseTypeID)
+	return err
+}
+
 const insertAssessmentScoreOutput = `-- name: InsertAssessmentScoreOutput :exec
 INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
                                                                  endpoint_path, specification)
