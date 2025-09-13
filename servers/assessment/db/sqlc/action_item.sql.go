@@ -90,7 +90,7 @@ func (q *Queries) GetActionItem(ctx context.Context, id uuid.UUID) (ActionItem, 
 }
 
 const getAllActionItemsForCoursePhaseCommunication = `-- name: GetAllActionItemsForCoursePhaseCommunication :many
-SELECT course_participation_id, ARRAY_AGG(action)::TEXT[] AS action_items
+SELECT course_participation_id, ARRAY_AGG(action ORDER BY created_at)::TEXT[] AS action_items
 FROM action_item
 WHERE course_phase_id = $1
 GROUP BY course_participation_id

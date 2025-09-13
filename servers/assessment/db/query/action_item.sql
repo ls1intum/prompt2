@@ -10,7 +10,7 @@ WHERE course_phase_id = $1
 ORDER BY created_at;
 
 -- name: GetAllActionItemsForCoursePhaseCommunication :many
-SELECT course_participation_id, ARRAY_AGG(action)::TEXT[] AS action_items
+SELECT course_participation_id, ARRAY_AGG(action ORDER BY created_at)::TEXT[] AS action_items
 FROM action_item
 WHERE course_phase_id = $1
 GROUP BY course_participation_id;
