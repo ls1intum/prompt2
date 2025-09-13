@@ -2,7 +2,7 @@
 
 📺 **Video Tutorial**: Coming soon
 
-The **Assessment Phase** allows instructors to evaluate students across multiple competencies using a structured scoring system. Students can be assessed through self-evaluation, peer evaluation, and tutor evaluation methods.
+The **Assessment Phase** allows instructors to evaluate students across multiple competencies using a structured scoring system. Students can be assessed through self evaluation, peer evaluation, tutor and instructor assessment. They can also evaluate their tutors and team leads.
 
 ---
 
@@ -12,7 +12,7 @@ To configure the assessment phase, follow these steps:
 
 ### 1. Add an Assessment Phase
 
-Use the Course Configurator to add an **Assessment Phase** to your course structure. Connect the partic
+Use the Course Configurator to add an **Assessment Phase** to your course structure. Connect the participants and team data (if you want to use peer or tutor evaluations).
 
 ### 2. Open the Configuration
 
@@ -27,8 +27,8 @@ You must define the following core settings:
 | Setting                 | Description                                                                |
 | ----------------------- | -------------------------------------------------------------------------- |
 | **Assessment Template** | Select which assessment template to use (defines the competency structure) |
-| **Start Date**          | When the assessment phase begins                                           |
-| **Deadline**            | When the assessment phase ends                                             |
+| **Start Date**          | When the assessment phase begins (using the timeframe selector)            |
+| **Deadline**            | When the assessment phase ends (using the timeframe selector)              |
 
 #### Optional Evaluation Types
 
@@ -192,34 +192,6 @@ Final Score = Sum of all weighted category scores / Sum of all category weights
 - **Flexible**: Handles partial assessments (not all competencies need scores)
 - **Normalized**: Final score is normalized by the total weights of assessed categories
 
-### Example Calculation
-
-Consider a simple example:
-
-#### Category A (Weight: 3)
-
-- Competency 1 (Weight: 2): Score = Very Good (1.0)
-- Competency 2 (Weight: 1): Score = Good (2.0)
-
-#### Category B (Weight: 2)
-
-- Competency 3 (Weight: 1): Score = Ok (3.0)
-
-#### Step 1: Competency calculations
-
-- Comp 1: (1.0 × 2) / 1 / 3 = 0.67
-- Comp 2: (2.0 × 1) / 1 / 3 = 0.67
-- Comp 3: (3.0 × 1) / 1 / 1 = 3.0
-
-#### Step 2: Category calculations
-
-- Category A: (0.67 + 0.67) × 3 = 4.0
-- Category B: 3.0 × 2 = 6.0
-
-#### Step 3: Final score
-
-- Final Score: (4.0 + 6.0) / (3 + 2) = 2.0
-
 ---
 
 ## 🎯 Best Practices
@@ -229,12 +201,6 @@ Consider a simple example:
 - **Clear Descriptions**: Write specific, measurable descriptions for each score level
 - **Balanced Weights**: Distribute weights logically across categories and competencies
 - **Consistent Granularity**: Keep similar levels of detail across all competencies
-
-### Evaluation Strategy
-
-- **Multiple Methods**: Use a combination of self, peer, and tutor evaluations for comprehensive assessment
-- **Clear Instructions**: Provide students with clear guidelines on how to use the scoring system
-- **Regular Calibration**: Review and adjust score level descriptions based on usage patterns
 
 ### Competency Mapping
 
