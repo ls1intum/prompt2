@@ -11,6 +11,8 @@ import { AssessmentType } from '../../interfaces/assessmentType'
 import { Competency } from '../../interfaces/competency'
 import { ScoreLevel } from '../../interfaces/scoreLevel'
 
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
+
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 interface ScoreLevelSelectorProps {
@@ -42,6 +44,8 @@ export const ScoreLevelSelector = ({
   peerEvaluationScoreLevel,
   peerEvaluationStudentAnswers,
 }: ScoreLevelSelectorProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
   return (
     <div className={className}>
       {Object.values(ScoreLevel).map((level) => {
@@ -54,61 +58,63 @@ export const ScoreLevelSelector = ({
             key={level}
             className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
           >
-            <div className='absolute -top-6 left-0 w-full'>
-              <div className='flex justify-center items-center text-left gap-2'>
-                {selfEvaluationCompetency &&
-                  selfEvaluationScoreLevel &&
-                  level === selfEvaluationScoreLevel && (
-                    <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <User size={20} className='text-blue-500 dark:text-blue-300' />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className='font-semibold'>Self Evaluation Results</div>
-                          <div className='text-sm text-muted-foreground'>
-                            <span className='font-semibold'>Statement:</span>{' '}
-                            {selfEvaluationCompetency.name}
-                          </div>
-                          {selfEvaluationStudentAnswers &&
-                          selfEvaluationStudentAnswers.length > 0 ? (
-                            <div className='mt-2 space-y-1'>
-                              {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
-                                <div key={index}>{studentAnswer()}</div>
-                              ))}
+            {(coursePhaseConfig?.evaluationResultsVisible || selectedScore) && (
+              <div className='absolute -top-6 left-0 w-full'>
+                <div className='flex justify-center items-center text-left gap-2'>
+                  {selfEvaluationCompetency &&
+                    selfEvaluationScoreLevel &&
+                    level === selfEvaluationScoreLevel && (
+                      <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <User size={20} className='text-blue-500 dark:text-blue-300' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className='font-semibold'>Self Evaluation Results</div>
+                            <div className='text-sm text-muted-foreground'>
+                              <span className='font-semibold'>Statement:</span>{' '}
+                              {selfEvaluationCompetency.name}
                             </div>
-                          ) : null}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                {peerEvaluationCompetency &&
-                  peerEvaluationScoreLevel &&
-                  level === peerEvaluationScoreLevel && (
-                    <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Users size={20} className='text-green-500 dark:text-green-300' />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {assessmentType !== AssessmentType.TUTOR ? (
-                            <div>
-                              <div className='font-semibold'>Peer Evaluation Results</div>
-                              <div className='text-sm text-muted-foreground'>
-                                <span className='font-semibold'>Statement:</span>{' '}
-                                {peerEvaluationCompetency.name}
+                            {selfEvaluationStudentAnswers &&
+                            selfEvaluationStudentAnswers.length > 0 ? (
+                              <div className='mt-2 space-y-1'>
+                                {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
+                                  <div key={index}>{studentAnswer()}</div>
+                                ))}
                               </div>
-                            </div>
-                          ) : null}
-                          {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
-                            ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
-                            : undefined}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                            ) : null}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  {peerEvaluationCompetency &&
+                    peerEvaluationScoreLevel &&
+                    level === peerEvaluationScoreLevel && (
+                      <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Users size={20} className='text-green-500 dark:text-green-300' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {assessmentType !== AssessmentType.TUTOR ? (
+                              <div>
+                                <div className='font-semibold'>Peer Evaluation Results</div>
+                                <div className='text-sm text-muted-foreground'>
+                                  <span className='font-semibold'>Statement:</span>{' '}
+                                  {peerEvaluationCompetency.name}
+                                </div>
+                              </div>
+                            ) : null}
+                            {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
+                              ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
+                              : undefined}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                </div>
               </div>
-            </div>
+            )}
 
             <button
               type='button'
