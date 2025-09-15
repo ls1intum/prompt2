@@ -33,6 +33,12 @@ export const CoursePhaseConfigSelection = () => {
   const [peerEvaluationTemplate, setPeerEvaluationTemplate] = useState<string>('')
   const [peerEvaluationStart, setPeerEvaluationStart] = useState<Date | undefined>(undefined)
   const [peerEvaluationDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
+  const [tutorEvaluationEnabled, setTutorEvaluationEnabled] = useState<boolean>(false)
+  const [tutorEvaluationTemplate, setTutorEvaluationTemplate] = useState<string>('')
+  const [tutorEvaluationStart, setTutorEvaluationStart] = useState<Date | undefined>(undefined)
+  const [tutorEvaluationDeadline, setTutorEvaluationDeadline] = useState<Date | undefined>(
+    undefined,
+  )
 
   const {
     data: templates,
@@ -64,6 +70,14 @@ export const CoursePhaseConfigSelection = () => {
       setPeerEvaluationDeadline(
         config.peerEvaluationDeadline ? new Date(config.peerEvaluationDeadline) : undefined,
       )
+      setTutorEvaluationEnabled(config.tutorEvaluationEnabled || false)
+      setTutorEvaluationTemplate(config.tutorEvaluationTemplate || '')
+      setTutorEvaluationStart(
+        config.tutorEvaluationStart ? new Date(config.tutorEvaluationStart) : undefined,
+      )
+      setTutorEvaluationDeadline(
+        config.tutorEvaluationDeadline ? new Date(config.tutorEvaluationDeadline) : undefined,
+      )
     }
   }, [config])
 
@@ -88,6 +102,10 @@ export const CoursePhaseConfigSelection = () => {
       peerEvaluationTemplate: peerEvaluationTemplate,
       peerEvaluationStart: peerEvaluationStart,
       peerEvaluationDeadline: peerEvaluationDeadline,
+      tutorEvaluationEnabled,
+      tutorEvaluationTemplate: tutorEvaluationTemplate,
+      tutorEvaluationStart: tutorEvaluationStart,
+      tutorEvaluationDeadline: tutorEvaluationDeadline,
     })
   }
 
@@ -110,6 +128,16 @@ export const CoursePhaseConfigSelection = () => {
     peerEvaluationDeadline?.getTime() !==
       (config?.peerEvaluationDeadline
         ? new Date(config.peerEvaluationDeadline).getTime()
+        : undefined) ||
+    tutorEvaluationEnabled !== (config?.tutorEvaluationEnabled || false) ||
+    tutorEvaluationTemplate !== (config?.tutorEvaluationTemplate || '') ||
+    tutorEvaluationStart?.getTime() !==
+      (config?.tutorEvaluationStart
+        ? new Date(config.tutorEvaluationStart).getTime()
+        : undefined) ||
+    tutorEvaluationDeadline?.getTime() !==
+      (config?.tutorEvaluationDeadline
+        ? new Date(config.tutorEvaluationDeadline).getTime()
         : undefined)
 
   return (
@@ -193,6 +221,35 @@ export const CoursePhaseConfigSelection = () => {
                 setStartDate={setPeerEvaluationStart}
                 deadline={peerEvaluationDeadline}
                 setDeadline={setPeerEvaluationDeadline}
+                templates={templates ?? []}
+                configMutation={configMutation}
+                setError={setError}
+              />
+            )}
+          </div>
+
+          <div className='space-y-4'>
+            <div className='flex items-center space-x-2'>
+              <Checkbox
+                id='tutor-assessment-enabled'
+                checked={tutorEvaluationEnabled}
+                onCheckedChange={(checked) => setTutorEvaluationEnabled(checked as boolean)}
+                disabled={configMutation.isPending}
+              />
+              <Label htmlFor='tutor-assessment-enabled' className='text-sm font-medium'>
+                Enable Tutor Evaluation
+              </Label>
+            </div>
+
+            {tutorEvaluationEnabled && (
+              <AssessmentConfiguration
+                type={AssessmentType.TUTOR}
+                assessmentTemplateId={tutorEvaluationTemplate}
+                setAssessmentTemplateId={setTutorEvaluationTemplate}
+                startDate={tutorEvaluationStart}
+                setStartDate={setTutorEvaluationStart}
+                deadline={tutorEvaluationDeadline}
+                setDeadline={setTutorEvaluationDeadline}
                 templates={templates ?? []}
                 configMutation={configMutation}
                 setError={setError}

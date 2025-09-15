@@ -73,6 +73,13 @@ export const SettingsPage = (): JSX.Element => {
           assessmentType={AssessmentType.PEER}
         />
       )}
+
+      {config?.tutorEvaluationEnabled && config.tutorEvaluationTemplate && (
+        <CategoryList
+          assessmentTemplateID={config?.tutorEvaluationTemplate}
+          assessmentType={AssessmentType.TUTOR}
+        />
+      )}
     </div>
   )
 }

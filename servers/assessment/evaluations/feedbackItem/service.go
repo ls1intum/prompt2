@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
 	log "github.com/sirupsen/logrus"
@@ -27,43 +28,6 @@ func GetFeedbackItem(ctx context.Context, feedbackItemID uuid.UUID) (feedbackIte
 	return feedbackItemDTO.MapDBFeedbackItemToFeedbackItemDTO(feedbackItem), nil
 }
 
-func CreateFeedbackItem(ctx context.Context, req feedbackItemDTO.CreateOrUpdateFeedbackItemRequest) error {
-	err := FeedbackItemServiceSingleton.queries.CreateFeedbackItem(ctx, req.GetCreateDBModel())
-	if err != nil {
-		log.Error("could not create feedback item: ", err)
-		return errors.New("could not create feedback item")
-	}
-	return nil
-}
-
-func UpdateFeedbackItem(ctx context.Context, req feedbackItemDTO.CreateOrUpdateFeedbackItemRequest) error {
-	err := FeedbackItemServiceSingleton.queries.UpdateFeedbackItem(ctx, req.GetUpdateDBModel())
-	if err != nil {
-		log.Error("could not update feedback item: ", err)
-		return errors.New("could not update feedback item")
-	}
-	return nil
-}
-
-func CreateOrUpdateFeedbackItem(ctx context.Context, req feedbackItemDTO.CreateOrUpdateFeedbackItemRequest) error {
-	if req.ID != nil {
-		// Update existing feedback item
-		return UpdateFeedbackItem(ctx, req)
-	} else {
-		// Create new feedback item
-		return CreateFeedbackItem(ctx, req)
-	}
-}
-
-func DeleteFeedbackItem(ctx context.Context, feedbackItemID uuid.UUID) error {
-	err := FeedbackItemServiceSingleton.queries.DeleteFeedbackItem(ctx, feedbackItemID)
-	if err != nil {
-		log.Error("could not delete feedback item: ", err)
-		return errors.New("could not delete feedback item")
-	}
-	return nil
-}
-
 func ListFeedbackItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
 	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListFeedbackItemsForCoursePhase(ctx, coursePhaseID)
 	if err != nil {
@@ -73,14 +37,26 @@ func ListFeedbackItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUI
 	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
 }
 
-func ListFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
-	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListFeedbackItemsForStudentInPhase(ctx, db.ListFeedbackItemsForStudentInPhaseParams{
+func ListFeedbackItemsForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
+	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListFeedbackItemsForParticipantInPhase(ctx, db.ListFeedbackItemsForParticipantInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not list feedback items for student in phase: ", err)
-		return nil, errors.New("could not list feedback items for student in phase")
+		log.Error("could not list feedback items for participant in phase: ", err)
+		return nil, errors.New("could not list feedback items for participant in phase")
+	}
+	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
+}
+
+func ListFeedbackItemsForTutorInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
+	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListFeedbackItemsForTutorInPhase(ctx, db.ListFeedbackItemsForTutorInPhaseParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not list feedback items for tutor in phase: ", err)
+		return nil, errors.New("could not list feedback items for tutor in phase")
 	}
 	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
 }
@@ -97,64 +73,47 @@ func ListFeedbackItemsByAuthorInPhase(ctx context.Context, authorCourseParticipa
 	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
 }
 
-func ListPositiveFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
-	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListPositiveFeedbackItemsForStudentInPhase(ctx, db.ListPositiveFeedbackItemsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
+func CreateFeedbackItem(ctx context.Context, req feedbackItemDTO.CreateFeedbackItemRequest) error {
+	err := FeedbackItemServiceSingleton.queries.CreateFeedbackItem(ctx, db.CreateFeedbackItemParams{
+		ID:                          uuid.New(),
+		FeedbackType:                req.FeedbackType,
+		FeedbackText:                req.FeedbackText,
+		CourseParticipationID:       req.CourseParticipationID,
+		CoursePhaseID:               req.CoursePhaseID,
+		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
-		log.Error("could not list positive feedback items for student in phase: ", err)
-		return nil, errors.New("could not list positive feedback items for student in phase")
+		log.Error("could not create feedback item: ", err)
+		return errors.New("could not create feedback item")
 	}
-	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
+	return nil
 }
 
-func ListNegativeFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]feedbackItemDTO.FeedbackItem, error) {
-	feedbackItems, err := FeedbackItemServiceSingleton.queries.ListNegativeFeedbackItemsForStudentInPhase(ctx, db.ListNegativeFeedbackItemsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
+func UpdateFeedbackItem(ctx context.Context, req feedbackItemDTO.UpdateFeedbackItemRequest) error {
+	err := FeedbackItemServiceSingleton.queries.UpdateFeedbackItem(ctx, db.UpdateFeedbackItemParams{
+		ID:                          req.ID,
+		FeedbackType:                req.FeedbackType,
+		FeedbackText:                req.FeedbackText,
+		CourseParticipationID:       req.CourseParticipationID,
+		CoursePhaseID:               req.CoursePhaseID,
+		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
-		log.Error("could not list negative feedback items for student in phase: ", err)
-		return nil, errors.New("could not list negative feedback items for student in phase")
+		log.Error("could not update feedback item: ", err)
+		return errors.New("could not update feedback item")
 	}
-	return feedbackItemDTO.GetFeedbackItemDTOsFromDBModels(feedbackItems), nil
+	return nil
 }
 
-func CountFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (int64, error) {
-	count, err := FeedbackItemServiceSingleton.queries.CountFeedbackItemsForStudentInPhase(ctx, db.CountFeedbackItemsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
+func DeleteFeedbackItem(ctx context.Context, feedbackItemID uuid.UUID) error {
+	err := FeedbackItemServiceSingleton.queries.DeleteFeedbackItem(ctx, feedbackItemID)
 	if err != nil {
-		log.Error("could not count feedback items for student in phase: ", err)
-		return 0, errors.New("could not count feedback items for student in phase")
+		log.Error("could not delete feedback item: ", err)
+		return errors.New("could not delete feedback item")
 	}
-	return count, nil
-}
-
-func CountPositiveFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (int64, error) {
-	count, err := FeedbackItemServiceSingleton.queries.CountPositiveFeedbackItemsForStudentInPhase(ctx, db.CountPositiveFeedbackItemsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not count positive feedback items for student in phase: ", err)
-		return 0, errors.New("could not count positive feedback items for student in phase")
-	}
-	return count, nil
-}
-
-func CountNegativeFeedbackItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (int64, error) {
-	count, err := FeedbackItemServiceSingleton.queries.CountNegativeFeedbackItemsForStudentInPhase(ctx, db.CountNegativeFeedbackItemsForStudentInPhaseParams{
-		CourseParticipationID: courseParticipationID,
-		CoursePhaseID:         coursePhaseID,
-	})
-	if err != nil {
-		log.Error("could not count negative feedback items for student in phase: ", err)
-		return 0, errors.New("could not count negative feedback items for student in phase")
-	}
-	return count, nil
+	return nil
 }
 
 func IsFeedbackItemAuthor(ctx context.Context, feedbackItemID, authorID uuid.UUID) bool {

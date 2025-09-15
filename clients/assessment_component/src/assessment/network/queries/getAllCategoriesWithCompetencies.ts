@@ -1,13 +1,15 @@
+import { AssessmentType } from '../../interfaces/assessmentType'
 import { CategoryWithCompetencies } from '../../interfaces/category'
 import { assessmentAxiosInstance } from '../assessmentServerConfig'
 
 export const getAllCategoriesWithCompetencies = async (
   coursePhaseID: string,
+  assessmentType: AssessmentType,
 ): Promise<CategoryWithCompetencies[]> => {
   try {
     return (
       await assessmentAxiosInstance.get(
-        `assessment/api/course_phase/${coursePhaseID}/category/with-competencies`,
+        `assessment/api/course_phase/${coursePhaseID}/category/${assessmentType}/with-competencies`,
       )
     ).data
   } catch (err) {

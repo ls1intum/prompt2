@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion"
@@ -31,7 +32,7 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 
 	qtx := EvaluationServiceSingleton.queries.WithTx(tx)
 
-	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID)
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, req.CourseParticipationID, coursePhaseID, req.AuthorCourseParticipationID, req.Type)
 	if err != nil {
 		return err
 	}
@@ -42,6 +43,7 @@ func CreateOrUpdateEvaluation(ctx context.Context, coursePhaseID uuid.UUID, req 
 		CompetencyID:                req.CompetencyID,
 		ScoreLevel:                  scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
 		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
 		log.Error("could not create or update evaluation: ", err)
@@ -71,7 +73,7 @@ func DeleteEvaluation(ctx context.Context, id uuid.UUID) error {
 		return errors.New("could not get evaluation by ID")
 	}
 
-	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID)
+	err = evaluationCompletion.CheckEvaluationIsEditable(ctx, qtx, evaluation.CourseParticipationID, evaluation.CoursePhaseID, evaluation.AuthorCourseParticipationID, assessmentType.MapDBAssessmentTypeToDTO(evaluation.Type))
 	if err != nil {
 		return err
 	}
@@ -99,44 +101,26 @@ func GetEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]eval
 	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
 }
 
-func GetSelfEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetSelfEvaluationsByPhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get self evaluations by phase: ", err)
-		return nil, errors.New("could not get self evaluations by phase")
-	}
-	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
-}
-
-func GetSelfEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetSelfEvaluationsForParticipantInPhase(ctx, db.GetSelfEvaluationsForParticipantInPhaseParams{
+func GetEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
+	evaluations, err := EvaluationServiceSingleton.queries.GetEvaluationsForParticipantInPhase(ctx, db.GetEvaluationsForParticipantInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not get self evaluations for participant in phase: ", err)
-		return nil, errors.New("could not get self evaluations for participant in phase")
+		log.Error("could not get evaluations for participant in phase: ", err)
+		return nil, errors.New("could not get evaluations for participant in phase")
 	}
 	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
 }
 
-func GetPeerEvaluationsByPhase(ctx context.Context, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetPeerEvaluationsByPhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluations by phase: ", err)
-		return nil, errors.New("could not get peer evaluations by phase")
-	}
-	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
-}
-
-func GetPeerEvaluationsForParticipantInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
-	evaluations, err := EvaluationServiceSingleton.queries.GetPeerEvaluationsForParticipantInPhase(ctx, db.GetPeerEvaluationsForParticipantInPhaseParams{
+func GetEvaluationsForTutorInPhase(ctx context.Context, courseParticipationID uuid.UUID, coursePhaseID uuid.UUID) ([]evaluationDTO.Evaluation, error) {
+	evaluations, err := EvaluationServiceSingleton.queries.GetEvaluationsForTutorInPhase(ctx, db.GetEvaluationsForTutorInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not get peer evaluations for participant in phase: ", err)
-		return nil, errors.New("could not get peer evaluations for participant in phase")
+		log.Error("could not get evaluations for tutor in phase: ", err)
+		return nil, errors.New("could not get evaluations for tutor in phase")
 	}
 	return evaluationDTO.MapToEvaluationDTOs(evaluations), nil
 }
@@ -159,5 +143,5 @@ func GetEvaluationByID(ctx context.Context, id uuid.UUID) (evaluationDTO.Evaluat
 		log.Error("could not get evaluation by ID: ", err)
 		return evaluationDTO.Evaluation{}, errors.New("could not get evaluation by ID")
 	}
-	return evaluationDTO.MapToEvaluationDTO(evaluation), nil
+	return evaluationDTO.MapDBToEvaluationDTO(evaluation), nil
 }

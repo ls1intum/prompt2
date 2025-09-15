@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
 import { Evaluation } from '../../interfaces/evaluation'
 
 import { getMyEvaluations } from '../../network/queries/getMyEvaluations'
@@ -18,24 +19,24 @@ export const useGetMyEvaluations = (options?: { enabled?: boolean }) => {
   const evaluations = useMemo(() => data || [], [data])
 
   const selfEvaluations = useMemo(
-    () =>
-      evaluations.filter(
-        (evaluation) => evaluation.courseParticipationID === evaluation.authorCourseParticipationID,
-      ),
+    () => evaluations.filter((evaluation) => evaluation.type === AssessmentType.SELF),
     [evaluations],
   )
 
   const peerEvaluations = useMemo(
-    () =>
-      evaluations.filter(
-        (evaluation) => evaluation.courseParticipationID !== evaluation.authorCourseParticipationID,
-      ),
+    () => evaluations.filter((evaluation) => evaluation.type === AssessmentType.PEER),
+    [evaluations],
+  )
+
+  const tutorEvaluations = useMemo(
+    () => evaluations.filter((evaluation) => evaluation.type === AssessmentType.TUTOR),
     [evaluations],
   )
 
   return {
     selfEvaluations,
     peerEvaluations,
+    tutorEvaluations,
     evaluations,
     ...queryInfo,
   }

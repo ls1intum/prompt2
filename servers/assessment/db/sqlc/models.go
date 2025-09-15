@@ -12,6 +12,50 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AssessmentType string
+
+const (
+	AssessmentTypeSelf       AssessmentType = "self"
+	AssessmentTypePeer       AssessmentType = "peer"
+	AssessmentTypeTutor      AssessmentType = "tutor"
+	AssessmentTypeAssessment AssessmentType = "assessment"
+)
+
+func (e *AssessmentType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AssessmentType(s)
+	case string:
+		*e = AssessmentType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AssessmentType: %T", src)
+	}
+	return nil
+}
+
+type NullAssessmentType struct {
+	AssessmentType AssessmentType `json:"assessment_type"`
+	Valid          bool           `json:"valid"` // Valid is true if AssessmentType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAssessmentType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AssessmentType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AssessmentType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAssessmentType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AssessmentType), nil
+}
+
 type FeedbackType string
 
 const (
@@ -178,18 +222,22 @@ type CompletedScoreLevel struct {
 }
 
 type CoursePhaseConfig struct {
-	AssessmentTemplateID   uuid.UUID          `json:"assessment_template_id"`
-	CoursePhaseID          uuid.UUID          `json:"course_phase_id"`
-	Deadline               pgtype.Timestamptz `json:"deadline"`
-	SelfEvaluationEnabled  bool               `json:"self_evaluation_enabled"`
-	SelfEvaluationTemplate uuid.UUID          `json:"self_evaluation_template"`
-	SelfEvaluationDeadline pgtype.Timestamptz `json:"self_evaluation_deadline"`
-	PeerEvaluationEnabled  bool               `json:"peer_evaluation_enabled"`
-	PeerEvaluationTemplate uuid.UUID          `json:"peer_evaluation_template"`
-	PeerEvaluationDeadline pgtype.Timestamptz `json:"peer_evaluation_deadline"`
-	Start                  pgtype.Timestamptz `json:"start"`
-	SelfEvaluationStart    pgtype.Timestamptz `json:"self_evaluation_start"`
-	PeerEvaluationStart    pgtype.Timestamptz `json:"peer_evaluation_start"`
+	AssessmentTemplateID    uuid.UUID          `json:"assessment_template_id"`
+	CoursePhaseID           uuid.UUID          `json:"course_phase_id"`
+	Deadline                pgtype.Timestamptz `json:"deadline"`
+	SelfEvaluationEnabled   bool               `json:"self_evaluation_enabled"`
+	SelfEvaluationTemplate  uuid.UUID          `json:"self_evaluation_template"`
+	SelfEvaluationDeadline  pgtype.Timestamptz `json:"self_evaluation_deadline"`
+	PeerEvaluationEnabled   bool               `json:"peer_evaluation_enabled"`
+	PeerEvaluationTemplate  uuid.UUID          `json:"peer_evaluation_template"`
+	PeerEvaluationDeadline  pgtype.Timestamptz `json:"peer_evaluation_deadline"`
+	Start                   pgtype.Timestamptz `json:"start"`
+	SelfEvaluationStart     pgtype.Timestamptz `json:"self_evaluation_start"`
+	PeerEvaluationStart     pgtype.Timestamptz `json:"peer_evaluation_start"`
+	TutorEvaluationEnabled  bool               `json:"tutor_evaluation_enabled"`
+	TutorEvaluationStart    pgtype.Timestamptz `json:"tutor_evaluation_start"`
+	TutorEvaluationDeadline pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
+	TutorEvaluationTemplate uuid.UUID          `json:"tutor_evaluation_template"`
 }
 
 type Evaluation struct {
@@ -200,6 +248,7 @@ type Evaluation struct {
 	ScoreLevel                  ScoreLevel         `json:"score_level"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	EvaluatedAt                 pgtype.Timestamptz `json:"evaluated_at"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type EvaluationCompletion struct {
@@ -209,6 +258,7 @@ type EvaluationCompletion struct {
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CompletedAt                 pgtype.Timestamptz `json:"completed_at"`
 	Completed                   bool               `json:"completed"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type FeedbackItem struct {
@@ -219,6 +269,7 @@ type FeedbackItem struct {
 	CoursePhaseID               uuid.UUID          `json:"course_phase_id"`
 	AuthorCourseParticipationID uuid.UUID          `json:"author_course_participation_id"`
 	CreatedAt                   pgtype.Timestamptz `json:"created_at"`
+	Type                        AssessmentType     `json:"type"`
 }
 
 type WeightedParticipantScore struct {

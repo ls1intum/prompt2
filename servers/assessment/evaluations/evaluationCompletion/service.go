@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
@@ -24,8 +24,9 @@ type EvaluationCompletionService struct {
 
 var EvaluationCompletionServiceSingleton *EvaluationCompletionService
 
-func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) error {
-	if courseParticipationID == authorCourseParticipationID {
+func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID, evaluationType assessmentType.AssessmentType) error {
+	switch evaluationType {
+	case assessmentType.Self:
 		open, err := coursePhaseConfig.IsSelfEvaluationOpen(ctx, coursePhaseID)
 		if err != nil {
 			return err
@@ -33,8 +34,16 @@ func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParti
 		if !open {
 			return coursePhaseConfig.ErrNotStarted
 		}
-	} else {
+	case assessmentType.Peer:
 		open, err := coursePhaseConfig.IsPeerEvaluationOpen(ctx, coursePhaseID)
+		if err != nil {
+			return err
+		}
+		if !open {
+			return coursePhaseConfig.ErrNotStarted
+		}
+	case assessmentType.Tutor:
+		open, err := coursePhaseConfig.IsTutorEvaluationOpen(ctx, coursePhaseID)
 		if err != nil {
 			return err
 		}
@@ -72,7 +81,7 @@ func CheckEvaluationIsEditable(ctx context.Context, qtx *db.Queries, courseParti
 }
 
 func CreateOrUpdateEvaluationCompletion(ctx context.Context, req evaluationCompletionDTO.EvaluationCompletion) error {
-	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID)
+	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID, req.Type)
 	if err != nil {
 		return err
 	}
@@ -106,16 +115,17 @@ func CreateOrUpdateEvaluationCompletion(ctx context.Context, req evaluationCompl
 }
 
 func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.EvaluationCompletion) error {
-	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID)
+	err := CheckEvaluationIsEditable(ctx, &EvaluationCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID, req.AuthorCourseParticipationID, req.Type)
 	if err != nil {
 		return err
 	}
 
 	// Check if there are remaining evaluations before marking as completed
 	remainingEvaluations, err := EvaluationCompletionServiceSingleton.queries.CountRemainingEvaluationsForStudent(ctx, db.CountRemainingEvaluationsForStudentParams{
-		Column1:       req.CourseParticipationID,
-		Column2:       req.AuthorCourseParticipationID,
-		CoursePhaseID: req.CoursePhaseID,
+		CourseParticipationID:       req.CourseParticipationID,
+		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
+		CoursePhaseID:               req.CoursePhaseID,
+		Column4:                     assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
 		log.Error("could not check remaining evaluations: ", err)
@@ -140,6 +150,7 @@ func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.
 		CoursePhaseID:               req.CoursePhaseID,
 		AuthorCourseParticipationID: req.AuthorCourseParticipationID,
 		CompletedAt:                 pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Type:                        assessmentType.MapDTOtoDBAssessmentType(req.Type),
 	})
 	if err != nil {
 		log.Error("could not mark evaluation as finished: ", err)
@@ -155,7 +166,20 @@ func MarkEvaluationAsCompleted(ctx context.Context, req evaluationCompletionDTO.
 }
 
 func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) error {
-	if courseParticipationID == authorCourseParticipationID {
+	// Get the evaluation completion to determine its type
+	dbCompletion, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletion(ctx, db.GetEvaluationCompletionParams{
+		CourseParticipationID:       courseParticipationID,
+		CoursePhaseID:               coursePhaseID,
+		AuthorCourseParticipationID: authorCourseParticipationID,
+	})
+	if err != nil {
+		log.Error("could not get evaluation completion: ", err)
+		return errors.New("could not get evaluation completion")
+	}
+
+	completion := evaluationCompletionDTO.MapDBEvaluationCompletionToEvaluationCompletionDTO(dbCompletion)
+	switch completion.Type {
+	case assessmentType.Self:
 		deadlinePassed, err := coursePhaseConfig.IsSelfEvaluationDeadlinePassed(ctx, coursePhaseID)
 		if err != nil {
 			return err
@@ -163,8 +187,16 @@ func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, cou
 		if deadlinePassed {
 			return coursePhaseConfig.ErrDeadlinePassed
 		}
-	} else {
+	case assessmentType.Peer:
 		deadlinePassed, err := coursePhaseConfig.IsPeerEvaluationDeadlinePassed(ctx, coursePhaseID)
+		if err != nil {
+			return err
+		}
+		if deadlinePassed {
+			return coursePhaseConfig.ErrDeadlinePassed
+		}
+	case assessmentType.Tutor:
+		deadlinePassed, err := coursePhaseConfig.IsTutorEvaluationDeadlinePassed(ctx, coursePhaseID)
 		if err != nil {
 			return err
 		}
@@ -173,7 +205,7 @@ func UnmarkEvaluationAsCompleted(ctx context.Context, courseParticipationID, cou
 		}
 	}
 
-	err := EvaluationCompletionServiceSingleton.queries.UnmarkEvaluationAsFinished(ctx, db.UnmarkEvaluationAsFinishedParams{
+	err = EvaluationCompletionServiceSingleton.queries.UnmarkEvaluationAsFinished(ctx, db.UnmarkEvaluationAsFinishedParams{
 		CourseParticipationID:       courseParticipationID,
 		CoursePhaseID:               coursePhaseID,
 		AuthorCourseParticipationID: authorCourseParticipationID,
@@ -207,56 +239,20 @@ func ListEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID u
 	return completions, nil
 }
 
-func ListSelfEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetSelfEvaluationCompletionsByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get self evaluation completions by course phase: ", err)
-		return nil, errors.New("could not get self evaluation completions by course phase")
-	}
-	return completions, nil
-}
-
-func ListPeerEvaluationCompletionsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsByCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not get peer evaluation completions by course phase: ", err)
-		return nil, errors.New("could not get peer evaluation completions by course phase")
-	}
-	return completions, nil
-}
-
-func GetEvaluationCompletion(ctx context.Context, courseParticipationID, coursePhaseID, authorCourseParticipationID uuid.UUID) (db.EvaluationCompletion, error) {
-	completion, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletion(ctx, db.GetEvaluationCompletionParams{
-		CourseParticipationID:       courseParticipationID,
-		CoursePhaseID:               coursePhaseID,
-		AuthorCourseParticipationID: authorCourseParticipationID,
-	})
-	if err != nil {
-		// Check if it's a "no rows" error, which is expected when no completion exists yet
-		if errors.Is(err, pgx.ErrNoRows) {
-			// Return empty completion with default values
-			return db.EvaluationCompletion{}, nil
-		}
-		log.Error("could not get evaluation completion: ", err)
-		return db.EvaluationCompletion{}, errors.New("could not get evaluation completion")
-	}
-	return completion, nil
-}
-
-func ListPeerEvaluationCompletionsForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsForParticipantInPhase(ctx, db.GetPeerEvaluationCompletionsForParticipantInPhaseParams{
+func GetEvaluationCompletionForParticipantInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
+	completions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForParticipantInPhase(ctx, db.GetEvaluationCompletionsForParticipantInPhaseParams{
 		CourseParticipationID: courseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
-		log.Error("could not get peer evaluation completions for participant in phase: ", err)
-		return nil, errors.New("could not get peer evaluation completions for participant in phase")
+		log.Error("could not get evaluation completions for participant in phase: ", err)
+		return nil, errors.New("could not get evaluation completions for participant in phase")
 	}
 	return completions, nil
 }
 
 func GetEvaluationCompletionsForAuthorInPhase(ctx context.Context, authorCourseParticipationID, coursePhaseID uuid.UUID) ([]db.EvaluationCompletion, error) {
-	completions, err := EvaluationCompletionServiceSingleton.queries.GetPeerEvaluationCompletionsForAuthorInPhase(ctx, db.GetPeerEvaluationCompletionsForAuthorInPhaseParams{
+	completions, err := EvaluationCompletionServiceSingleton.queries.GetEvaluationCompletionsForAuthorInPhase(ctx, db.GetEvaluationCompletionsForAuthorInPhaseParams{
 		AuthorCourseParticipationID: authorCourseParticipationID,
 		CoursePhaseID:               coursePhaseID,
 	})

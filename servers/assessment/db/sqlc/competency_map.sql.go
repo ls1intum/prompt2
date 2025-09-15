@@ -93,7 +93,7 @@ func (q *Queries) GetCompetencyMappings(ctx context.Context, fromCompetencyID uu
 }
 
 const getEvaluationsByMappedCompetency = `-- name: GetEvaluationsByMappedCompetency :many
-SELECT e.id, e.course_participation_id, e.course_phase_id, e.competency_id, e.score_level, e.author_course_participation_id, e.evaluated_at
+SELECT e.id, e.course_participation_id, e.course_phase_id, e.competency_id, e.score_level, e.author_course_participation_id, e.evaluated_at, e.type
 FROM evaluation e
 JOIN competency_map cm ON e.competency_id = cm.from_competency_id
 WHERE cm.to_competency_id = $1
@@ -116,6 +116,7 @@ func (q *Queries) GetEvaluationsByMappedCompetency(ctx context.Context, toCompet
 			&i.ScoreLevel,
 			&i.AuthorCourseParticipationID,
 			&i.EvaluatedAt,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}

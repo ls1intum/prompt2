@@ -170,7 +170,7 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategoryInvalidID() {
 
 func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category/with-competencies", nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category/assessment/with-competencies", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)

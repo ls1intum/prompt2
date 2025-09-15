@@ -13,6 +13,7 @@ import {
 import { useCategoryStore } from '../../../../zustand/useCategoryStore'
 import { useSelfEvaluationCategoryStore } from '../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../zustand/usePeerEvaluationCategoryStore'
+import { useTutorEvaluationCategoryStore } from '../../../../zustand/useTutorEvaluationCategoryStore'
 
 import { AssessmentType } from '../../../../interfaces/assessmentType'
 import type { CategoryWithCompetencies } from '../../../../interfaces/category'
@@ -38,6 +39,7 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
   const { categories: assessmentCategories } = useCategoryStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
+  const { tutorEvaluationCategories } = useTutorEvaluationCategoryStore()
 
   const [categories, setCategories] = useState<CategoryWithCompetencies[]>([])
 
@@ -49,10 +51,19 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
       case AssessmentType.PEER:
         setCategories(peerEvaluationCategories)
         break
+      case AssessmentType.TUTOR:
+        setCategories(tutorEvaluationCategories)
+        break
       default:
         setCategories(assessmentCategories)
     }
-  }, [assessmentType, selfEvaluationCategories, peerEvaluationCategories, assessmentCategories])
+  }, [
+    assessmentType,
+    selfEvaluationCategories,
+    peerEvaluationCategories,
+    tutorEvaluationCategories,
+    assessmentCategories,
+  ])
 
   return (
     <Card className='p-6 overflow-hidden'>
@@ -65,7 +76,9 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                   ? 'Self-Evaluation Template'
                   : assessmentType === AssessmentType.PEER
                     ? 'Peer-Evaluation Template'
-                    : 'Assessment Template'}
+                    : assessmentType === AssessmentType.TUTOR
+                      ? 'Tutor-Evaluation Template'
+                      : 'Assessment Template'}
               </h2>
 
               <p className='text-muted-foreground text-sm mt-1'>
@@ -73,7 +86,9 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                   ? 'Define the Self-Evaluation Categories and Competencies here'
                   : assessmentType === AssessmentType.PEER
                     ? 'Define the Peer-Evaluation Categories and Competencies here'
-                    : 'Define the Assessment Categories and Competencies here'}
+                    : assessmentType === AssessmentType.TUTOR
+                      ? 'Define the Tutor-Evaluation Categories and Competencies here'
+                      : 'Define the Assessment Categories and Competencies here'}
               </p>
             </div>
             <div className='flex items-center gap-2'>
@@ -83,7 +98,9 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                     ? 'Show Self-Evaluation Categories'
                     : assessmentType === AssessmentType.PEER
                       ? 'Show Peer-Evaluation Categories'
-                      : 'Show Assessment Categories'}
+                      : assessmentType === AssessmentType.TUTOR
+                        ? 'Show Tutor-Evaluation Categories'
+                        : 'Show Assessment Categories'}
                 </span>
               </AccordionTrigger>
             </div>

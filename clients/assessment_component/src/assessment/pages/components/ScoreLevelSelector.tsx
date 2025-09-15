@@ -91,11 +91,15 @@ export const ScoreLevelSelector = ({
                           <Users size={20} className='text-green-500 dark:text-green-300' />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <div className='font-semibold'>Peer Evaluation Results</div>
-                          <div className='text-sm text-muted-foreground'>
-                            <span className='font-semibold'>Statement:</span>{' '}
-                            {peerEvaluationCompetency.name}
-                          </div>
+                          {assessmentType !== AssessmentType.TUTOR ? (
+                            <div>
+                              <div className='font-semibold'>Peer Evaluation Results</div>
+                              <div className='text-sm text-muted-foreground'>
+                                <span className='font-semibold'>Statement:</span>{' '}
+                                {peerEvaluationCompetency.name}
+                              </div>
+                            </div>
+                          ) : null}
                           {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
                             ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
                             : undefined}

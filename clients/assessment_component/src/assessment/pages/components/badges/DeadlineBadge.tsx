@@ -31,6 +31,10 @@ export const DeadlineBadge = ({ deadline, type = AssessmentType.SELF }: Deadline
         badgeClassName =
           'bg-green-200 text-green-800 border-green-300 hover:bg-green-100 flex items-center gap-1'
         break
+      case AssessmentType.TUTOR:
+        badgeClassName =
+          'bg-purple-200 text-purple-800 border-purple-300 hover:bg-purple-100 flex items-center gap-1'
+        break
       default:
         badgeClassName =
           'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-100 flex items-center gap-1'

@@ -43,9 +43,14 @@ CREATE TABLE public.course_phase_config (
     start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     peer_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tutor_evaluation_enabled boolean NOT NULL DEFAULT false,
+    tutor_evaluation_start timestamp with time zone,
+    tutor_evaluation_deadline timestamp with time zone,
+    tutor_evaluation_template uuid,
     FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
+    FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
+    FOREIGN KEY (tutor_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
 );
 
 --
@@ -55,7 +60,8 @@ CREATE TABLE public.course_phase_config (
 INSERT INTO public.assessment_template (id, name, description) VALUES
 ('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Template', 'Test template for unit tests'),
 ('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Template', 'This is the default self evaluation template.'),
-('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Template', 'This is the default peer evaluation template.');
+('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Template', 'This is the default peer evaluation template.'),
+('550e8400-e29b-41d4-a716-446655440003', 'Tutor Evaluation Template', 'This is the default tutor evaluation template.');
 
 --
 -- Data for Name: course_phase_config; Type: TABLE DATA; Schema: public; Owner: -
