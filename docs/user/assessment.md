@@ -1,10 +1,32 @@
 # 📊 Assessment Course Phase
 
-📺 **Video Tutorial**: Coming soon
-
 The **Assessment Phase** allows instructors to evaluate students across multiple competencies using a structured scoring system. Students can be assessed through self-evaluation, peer evaluation, and tutor/instructor evaluation. Students may also evaluate their tutors and team leads.
 
 ---
+
+## 📝 Using the Assessment Phase
+
+Once the assessment phase is set up, students and instructors can begin evaluations. Here's how to navigate and complete assessments effectively.
+
+### For Students
+
+1. **Access the Phase**: Log in and navigate to the assessment phase in your course dashboard.
+2. **Self-Evaluation**: If enabled, rate your own competencies using the provided template.
+3. **Peer Evaluation**: Evaluate team members based on the peer template (if applicable).
+4. **Tutor Evaluation**: Provide feedback on tutors or leads using the designated template.
+5. **Submit**: Ensure all evaluations are submitted and _marked as final_ before the deadline.
+
+### For Instructors/Tutors
+
+1. **Review Submissions**: Monitor student progress and submissions in the phase overview.
+2. **Conduct Assessments**: Use the tutor template to assess students.
+3. **Provide Feedback**: Offer constructive comments to support student development.
+
+> 💡 **Tip**: Regularly check for updates and communicate with your team to ensure timely submissions.
+
+This section guides you through the practical use of the assessment phase for a smooth evaluation process.
+
+📺 **Video Tutorial**: Coming soon
 
 ## ⚙️ Setting Up the Assessment Phase
 
@@ -38,7 +60,7 @@ You can enable additional evaluation methods
 | -------------------- | ------------------------------------------------------------------ |
 | **Self Evaluation**  | Students evaluate themselves using a separate competency template  |
 | **Peer Evaluation**  | Students evaluate their peers using a separate competency template |
-| **Tutor Evaluation** | Student evaluate tutors using a separate competency template       |
+| **Tutor Evaluation** | Students evaluate tutors using a separate competency template      |
 
 Each evaluation type has its own:
 
@@ -46,7 +68,7 @@ Each evaluation type has its own:
 - **Start Date**: When this evaluation becomes available
 - **Deadline**: When this evaluation closes
 
-> ⚠️ **Note**: All timestamps use **system time (Europe/Berlin) with deadlines ending on 23:59**.
+> ⚠️ **Note**: All timestamps use **system time (Europe/Berlin) with deadlines ending at 23:59**.
 
 ---
 
@@ -114,6 +136,8 @@ Competencies are individual skills within categories:
 - **Edit Competencies**: Click the edit icon next to any competency
 - **Delete Items**: Click the trash icon (⚠️ this cannot be undone)
 
+📺 **Video Tutorial**: Coming soon
+
 ---
 
 ## 🗺️ Setting Up the Competency Map
@@ -139,6 +163,8 @@ This enables them to show up in the main assessment view to be taken into accoun
 4. **Save Changes**: Mappings are saved automatically
 
 ⚠️ **Note**: You can map only one self and one peer competency to each assessment competency.
+
+📺 **Video Tutorial**: Coming soon
 
 ---
 
