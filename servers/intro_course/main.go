@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/intro_course/config"
 	"github.com/ls1intum/prompt2/servers/intro_course/copy"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/developerProfile"
@@ -88,6 +89,8 @@ func main() {
 
 	copyApi := router.Group("intro-course/api")
 	copy.InitCopyModule(copyApi, *query, conn)
+
+	config.InitConfigModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	err = router.Run(serverAddress)
