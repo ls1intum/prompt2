@@ -12,7 +12,7 @@ import { TeamSettings } from './components/TeamSettings'
 import { SkillSettings } from './components/SkillSettings'
 import { SurveyTimeframeSettings } from './components/SurveyTimeframeSettings'
 import { getConfig } from '../../network/queries/getConfig'
-import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
+import { MissingSettings, MissingSettingsItem } from '@/components/MissingSettings'
 import { useEffect, useState } from 'react'
 
 export const SurveySettingsPage = (): JSX.Element => {
@@ -58,7 +58,7 @@ export const SurveySettingsPage = (): JSX.Element => {
     queryFn: () => getConfig(phaseId ?? ''),
   })
 
-  const [missingConfigs, setMissingConfigs] = useState<MissingConfigItem[]>([])
+  const [missingConfigs, setMissingConfigs] = useState<MissingSettingsItem[]>([])
 
   const isPending = isSkillsPending || isTeamsPending || isSurveyTimeframePending || isConfigPending
   const isError = isSkillsError || isTeamsError || isSurveyTimeframeError || isConfigError
@@ -98,7 +98,7 @@ export const SurveySettingsPage = (): JSX.Element => {
   useEffect(() => {
     for (const [key, value] of Object.entries(fetchedConfig || {})) {
       if (!value) {
-        setMissingConfigs((prev: MissingConfigItem[]) => [
+        setMissingConfigs((prev: MissingSettingsItem[]) => [
           ...prev,
           {
             title: configToReadableTitle(key),
@@ -106,10 +106,10 @@ export const SurveySettingsPage = (): JSX.Element => {
             description: `The ${configToReadableDescription(key)} configuration is missing.`,
             link: ``,
             hide: (): void =>
-              setMissingConfigs((prevConfigs: MissingConfigItem[]) =>
-                prevConfigs.filter((item: MissingConfigItem) => item.title !== key),
+              setMissingConfigs((prevConfigs: MissingSettingsItem[]) =>
+                prevConfigs.filter((item: MissingSettingsItem) => item.title !== key),
               ),
-          } as MissingConfigItem,
+          } as MissingSettingsItem,
         ])
       }
     }
@@ -130,7 +130,7 @@ export const SurveySettingsPage = (): JSX.Element => {
   return (
     <>
       <ManagementPageHeader>Survey Settings</ManagementPageHeader>
-      <MissingConfig elements={missingConfigs} />
+      <MissingSettings elements={missingConfigs} />
       {/* 1. Set the survey timeframe, skills and teams for this phase. */}
       <SurveyTimeframeSettings surveyTimeframe={fetchedSurveyTimeframe} />
       {/* 2. Set up the teams */}
