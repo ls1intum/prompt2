@@ -15,6 +15,7 @@ export interface CoursePhaseConfig {
   tutorEvaluationTemplate: string // UUID as string
   tutorEvaluationStart: Date
   tutorEvaluationDeadline: Date
+  evaluationResultsVisible: boolean
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {
@@ -33,4 +34,5 @@ export interface CreateOrUpdateCoursePhaseConfigRequest {
   tutorEvaluationTemplate?: string
   tutorEvaluationStart?: Date
   tutorEvaluationDeadline?: Date
+  evaluationResultsVisible: boolean
 }

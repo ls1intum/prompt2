@@ -69,40 +69,38 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
     <Card className='p-6 overflow-hidden'>
       <Accordion type='single' collapsible className='w-full'>
         <AccordionItem value='competencies' className='border-none'>
-          <div className='flex justify-between items-center'>
-            <div>
-              <h2 className='text-xl font-semibold tracking-tight'>
-                {assessmentType === AssessmentType.SELF
-                  ? 'Self-Evaluation Template'
-                  : assessmentType === AssessmentType.PEER
-                    ? 'Peer-Evaluation Template'
-                    : assessmentType === AssessmentType.TUTOR
-                      ? 'Tutor-Evaluation Template'
-                      : 'Assessment Template'}
-              </h2>
-
-              <p className='text-muted-foreground text-sm mt-1'>
-                {assessmentType === AssessmentType.SELF
-                  ? 'Define the Self-Evaluation Categories and Competencies here'
-                  : assessmentType === AssessmentType.PEER
-                    ? 'Define the Peer-Evaluation Categories and Competencies here'
-                    : assessmentType === AssessmentType.TUTOR
-                      ? 'Define the Tutor-Evaluation Categories and Competencies here'
-                      : 'Define the Assessment Categories and Competencies here'}
-              </p>
-            </div>
+          <div className='flex items-center gap-4'>
             <div className='flex items-center gap-2'>
-              <AccordionTrigger className='py-3 hover:no-underline'>
-                <span className='text-sm font-medium'>
+              <AccordionTrigger
+                className='py-3 hover:no-underline'
+                aria-labelledby='assessment-template-header'
+              ></AccordionTrigger>
+            </div>
+            <div className='flex justify-between items-center'>
+              <div>
+                <h2
+                  id='assessment-template-header'
+                  className='text-xl font-semibold tracking-tight'
+                >
                   {assessmentType === AssessmentType.SELF
-                    ? 'Show Self-Evaluation Categories'
+                    ? 'Self-Evaluation Template'
                     : assessmentType === AssessmentType.PEER
-                      ? 'Show Peer-Evaluation Categories'
+                      ? 'Peer-Evaluation Template'
                       : assessmentType === AssessmentType.TUTOR
-                        ? 'Show Tutor-Evaluation Categories'
-                        : 'Show Assessment Categories'}
-                </span>
-              </AccordionTrigger>
+                        ? 'Tutor-Evaluation Template'
+                        : 'Assessment Template'}
+                </h2>
+
+                <p className='text-muted-foreground text-sm mt-1'>
+                  {assessmentType === AssessmentType.SELF
+                    ? 'Define the Self-Evaluation Categories and Competencies here'
+                    : assessmentType === AssessmentType.PEER
+                      ? 'Define the Peer-Evaluation Categories and Competencies here'
+                      : assessmentType === AssessmentType.TUTOR
+                        ? 'Define the Tutor-Evaluation Categories and Competencies here'
+                        : 'Define the Assessment Categories and Competencies here'}
+                </p>
+              </div>
             </div>
           </div>
           <AccordionContent className='pt-4 pb-2 space-y-5 border-t mt-2'>
