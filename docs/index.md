@@ -16,6 +16,7 @@ user/course_configurator
 user/application
 user/assessment
 user/mailing
+user/templates
 
 ```
 
@@ -29,6 +30,7 @@ contributor/setup
 contributor/new_microfrontend
 contributor/ui_guidelines
 contributor/reusable_components
+contributor/templating
 ```
 
 ```{toctree}
