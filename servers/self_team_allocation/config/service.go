@@ -25,7 +25,8 @@ func (h *ConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]boo
 		return nil, err
 	}
 
-	surveyTimeframe, err := ConfigServiceSingleton.queries.GetTimeframe(c, coursePhaseID)
+	ctx := c.Request.Context()
+	surveyTimeframe, err := ConfigServiceSingleton.queries.GetTimeframe(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return map[string]bool{
 			"surveyTimeframe": false,

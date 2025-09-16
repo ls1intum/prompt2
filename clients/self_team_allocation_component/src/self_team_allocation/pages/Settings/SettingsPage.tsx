@@ -59,23 +59,18 @@ export const SettingsPage = () => {
   }
 
   useEffect(() => {
-    for (const [key, value] of Object.entries(fetchedConfig || {})) {
-      if (!value) {
-        setMissingConfigs((prev: MissingSettingsItem[]) => [
-          ...prev,
-          {
-            title: configToReadableTitle(key),
-            icon: Loader2,
-            description: `The ${configToReadableDescription(key)} configuration is missing.`,
-            link: ``,
-            hide: (): void =>
-              setMissingConfigs((prevConfigs: MissingSettingsItem[]) =>
-                prevConfigs.filter((item: MissingSettingsItem) => item.title !== key),
-              ),
-          } as MissingSettingsItem,
-        ])
-      }
+    if (!fetchedConfig) {
+      setMissingConfigs([])
+      return
     }
+    const items: MissingSettingsItem[] = Object.entries(fetchedConfig)
+      .filter(([, isSet]) => !isSet)
+      .map(([key]) => ({
+        title: configToReadableTitle(key),
+        icon: Loader2,
+        description: `The ${configToReadableDescription(key)} configuration is missing.`,
+      }))
+    setMissingConfigs(items)
   }, [fetchedConfig])
 
   if (isPending) {

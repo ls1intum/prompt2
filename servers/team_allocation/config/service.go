@@ -23,18 +23,19 @@ func (h *ConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]boo
 		return nil, err
 	}
 
-	surveyTimeframe, err := survey.GetSurveyTimeframe(c, coursePhaseID)
+	ctx := c.Request.Context()
+	surveyTimeframe, err := survey.GetSurveyTimeframe(ctx, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
 
-	teams, err := ConfigServiceSingleton.queries.GetTeamsByCoursePhase(c, coursePhaseID)
+	teams, err := ConfigServiceSingleton.queries.GetTeamsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
 	teamsExist := len(teams) > 0
 
-	skills, err := ConfigServiceSingleton.queries.GetSkillsByCoursePhase(c, coursePhaseID)
+	skills, err := ConfigServiceSingleton.queries.GetSkillsByCoursePhase(ctx, coursePhaseID)
 	if err != nil {
 		return nil, err
 	}
