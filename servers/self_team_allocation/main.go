@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/self_team_allocation/config"
 	"github.com/ls1intum/prompt2/servers/self_team_allocation/copy"
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 	teams "github.com/ls1intum/prompt2/servers/self_team_allocation/team"
@@ -91,6 +92,8 @@ func main() {
 	timeframe.InitTimeframeModule(api, *query, conn)
 	copyApi := router.Group("self-team-allocation/api")
 	copy.InitCopyModule(copyApi, *query, conn)
+
+	config.InitConfigModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8084")
 	err = router.Run(serverAddress)
