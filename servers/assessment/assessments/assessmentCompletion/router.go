@@ -16,6 +16,10 @@ import (
 func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentCompletionRouter := routerGroup.Group("/student-assessment/completed")
 
+	// course phase communication
+	assessmentCompletionRouter.GET("grade", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllGrades)
+	assessmentCompletionRouter.GET("grade/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentGrade)
+
 	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentCompletionsByCoursePhase)
 	assessmentCompletionRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
 	assessmentCompletionRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createOrUpdateAssessmentCompletion)
@@ -25,6 +29,39 @@ func setupAssessmentCompletionRouter(routerGroup *gin.RouterGroup, authMiddlewar
 	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteAssessmentCompletion)
 
 	assessmentCompletionRouter.GET("/my-grade-suggestion", authMiddleware(promptSDK.CourseStudent), getMyGradeSuggestion)
+}
+
+func getAllGrades(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	grades, err := GetAllGrades(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, grades)
+}
+
+func getStudentGrade(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	grade, err := GetStudentGrade(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, grade)
 }
 
 func listAssessmentCompletionsByCoursePhase(c *gin.Context) {

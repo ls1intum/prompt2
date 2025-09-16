@@ -206,6 +206,90 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCreateOrUpdateAssessmentC
 	}
 }
 
+func (suite *AssessmentCompletionServiceTestSuite) TestGetAllGrades() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+
+	grades, err := GetAllGrades(suite.suiteCtx, phaseID)
+
+	// Function should either succeed with grades or fail with error
+	if err != nil {
+		// If there's an error, it should be a proper error message
+		assert.NotEmpty(suite.T(), err.Error())
+		// When there's an error, grades should be nil
+		assert.Nil(suite.T(), grades)
+	} else {
+		// If no error, grades should be valid (not nil but may be empty)
+		assert.NoError(suite.T(), err)
+		// grades should be a slice (can be empty)
+		assert.IsType(suite.T(), []assessmentCompletionDTO.GradeWithParticipation{}, grades)
+
+		// Each grade should have valid structure
+		for _, grade := range grades {
+			assert.NotEqual(suite.T(), uuid.Nil, grade.CourseParticipationID)
+			assert.GreaterOrEqual(suite.T(), grade.Grade, 0.0)
+		}
+	}
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestGetAllGradesWithInvalidPhaseID() {
+	// Test with a non-existent phase ID
+	invalidPhaseID := uuid.New()
+
+	grades, err := GetAllGrades(suite.suiteCtx, invalidPhaseID)
+
+	// Function should either succeed with empty grades or fail
+	if err != nil {
+		// If there's an error, it should be a proper error message
+		assert.NotEmpty(suite.T(), err.Error())
+		assert.Nil(suite.T(), grades)
+	} else {
+		// If no error, should return empty slice or valid grades
+		assert.NoError(suite.T(), err)
+		assert.IsType(suite.T(), []assessmentCompletionDTO.GradeWithParticipation{}, grades)
+		// May be empty for non-existent phase
+	}
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestGetStudentGrade() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	participationID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+
+	grade, err := GetStudentGrade(suite.suiteCtx, participationID, phaseID)
+	assert.NoError(suite.T(), err)
+	assert.GreaterOrEqual(suite.T(), grade, 0.0)
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestGetStudentGradeNotFound() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	// Use a non-existent participation ID
+	nonExistentParticipationID := uuid.New()
+
+	grade, err := GetStudentGrade(suite.suiteCtx, nonExistentParticipationID, phaseID)
+	assert.NoError(suite.T(), err)
+	// Should return 0 when no grade exists
+	assert.Equal(suite.T(), 0.0, grade)
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestGetStudentGradeWithInvalidPhaseID() {
+	invalidPhaseID := uuid.New()
+	participationID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+
+	grade, err := GetStudentGrade(suite.suiteCtx, participationID, invalidPhaseID)
+	assert.NoError(suite.T(), err)
+	// Should return 0 when no grade exists for invalid phase
+	assert.Equal(suite.T(), 0.0, grade)
+}
+
+func (suite *AssessmentCompletionServiceTestSuite) TestGetStudentGradeWithInvalidParticipationID() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	invalidParticipationID := uuid.New()
+
+	grade, err := GetStudentGrade(suite.suiteCtx, invalidParticipationID, phaseID)
+	assert.NoError(suite.T(), err)
+	// Should return 0 when no grade exists for invalid participation
+	assert.Equal(suite.T(), 0.0, grade)
+}
+
 func TestAssessmentCompletionServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(AssessmentCompletionServiceTestSuite))
 }

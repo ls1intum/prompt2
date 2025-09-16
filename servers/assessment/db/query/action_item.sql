@@ -3,6 +3,25 @@ SELECT *
 FROM action_item
 WHERE id = $1;
 
+-- name: ListActionItemsForCoursePhase :many
+SELECT *
+FROM action_item
+WHERE course_phase_id = $1
+ORDER BY created_at;
+
+-- name: GetAllActionItemsForCoursePhaseCommunication :many
+SELECT course_participation_id, ARRAY_AGG(action ORDER BY created_at)::TEXT[] AS action_items
+FROM action_item
+WHERE course_phase_id = $1
+GROUP BY course_participation_id;
+
+-- name: GetStudentActionItemsForCoursePhaseCommunication :many
+SELECT action
+FROM action_item
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+ORDER BY created_at;
+
 -- name: CreateActionItem :exec
 INSERT INTO action_item (id,
                          course_phase_id,
@@ -30,11 +49,6 @@ FROM action_item
 WHERE course_participation_id = $1
   AND course_phase_id = $2
 ORDER BY created_at;
-
--- name: ListActionItemsForCoursePhase :many
-SELECT *
-FROM action_item
-WHERE course_phase_id = $1;
 
 -- name: CountActionItemsForStudentInPhase :one
 SELECT COUNT(*) AS action_item_count

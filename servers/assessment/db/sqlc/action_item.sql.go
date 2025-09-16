@@ -89,10 +89,76 @@ func (q *Queries) GetActionItem(ctx context.Context, id uuid.UUID) (ActionItem, 
 	return i, err
 }
 
+const getAllActionItemsForCoursePhaseCommunication = `-- name: GetAllActionItemsForCoursePhaseCommunication :many
+SELECT course_participation_id, ARRAY_AGG(action ORDER BY created_at)::TEXT[] AS action_items
+FROM action_item
+WHERE course_phase_id = $1
+GROUP BY course_participation_id
+`
+
+type GetAllActionItemsForCoursePhaseCommunicationRow struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	ActionItems           []string  `json:"action_items"`
+}
+
+func (q *Queries) GetAllActionItemsForCoursePhaseCommunication(ctx context.Context, coursePhaseID uuid.UUID) ([]GetAllActionItemsForCoursePhaseCommunicationRow, error) {
+	rows, err := q.db.Query(ctx, getAllActionItemsForCoursePhaseCommunication, coursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllActionItemsForCoursePhaseCommunicationRow
+	for rows.Next() {
+		var i GetAllActionItemsForCoursePhaseCommunicationRow
+		if err := rows.Scan(&i.CourseParticipationID, &i.ActionItems); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getStudentActionItemsForCoursePhaseCommunication = `-- name: GetStudentActionItemsForCoursePhaseCommunication :many
+SELECT action
+FROM action_item
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+ORDER BY created_at
+`
+
+type GetStudentActionItemsForCoursePhaseCommunicationParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetStudentActionItemsForCoursePhaseCommunication(ctx context.Context, arg GetStudentActionItemsForCoursePhaseCommunicationParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, getStudentActionItemsForCoursePhaseCommunication, arg.CourseParticipationID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var action string
+		if err := rows.Scan(&action); err != nil {
+			return nil, err
+		}
+		items = append(items, action)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listActionItemsForCoursePhase = `-- name: ListActionItemsForCoursePhase :many
 SELECT id, course_phase_id, course_participation_id, action, created_at, author
 FROM action_item
 WHERE course_phase_id = $1
+ORDER BY created_at
 `
 
 func (q *Queries) ListActionItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]ActionItem, error) {

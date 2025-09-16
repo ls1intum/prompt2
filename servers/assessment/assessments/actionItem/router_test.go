@@ -131,6 +131,73 @@ func (suite *ActionItemRouterTestSuite) TestGetActionItemsForStudentInvalidIDs()
 	assert.Equal(suite.T(), http.StatusBadRequest, rep2.Code)
 }
 
+func (suite *ActionItemRouterTestSuite) TestGetAllActionItemsForCoursePhaseCommunication() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/action", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var items []actionItemDTO.ActionItemWithParticipation
+	err := json.Unmarshal(resp.Body.Bytes(), &items)
+	assert.NoError(suite.T(), err, "Should be able to unmarshal action items with participation")
+
+	// Verify structure of response
+	for _, item := range items {
+		assert.NotEmpty(suite.T(), item.CourseParticipationID, "CourseParticipationID should not be empty")
+		assert.NotNil(suite.T(), item.ActionItems, "ActionItems should not be nil")
+	}
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetAllActionItemsForCoursePhaseCommunicationInvalidID() {
+	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-phase-id/student-assessment/action-item/action", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetStudentActionItemsForCoursePhaseCommunication() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/action/course-participation/"+partID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	var items []string
+	err := json.Unmarshal(resp.Body.Bytes(), &items)
+	assert.NoError(suite.T(), err, "Should be able to unmarshal action items as string array")
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetStudentActionItemsForCoursePhaseCommunicationInvalidPhaseID() {
+	partID := uuid.MustParse("ca42e447-60f9-4fe0-b297-2dae3f924fd7")
+	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-phase-id/student-assessment/action-item/action/course-participation/"+partID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetStudentActionItemsForCoursePhaseCommunicationInvalidParticipationID() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/action/course-participation/invalid-participation-id", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetStudentActionItemsForCoursePhaseCommunicationBothInvalidIDs() {
+	req, _ := http.NewRequest("GET", "/api/course_phase/invalid-phase-id/student-assessment/action-item/action/course-participation/invalid-participation-id", nil)
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
 func TestActionItemRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(ActionItemRouterTestSuite))
 }

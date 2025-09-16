@@ -270,23 +270,38 @@ func initAssessment() error {
 			return err
 		}
 
-		// create the required input
+		// create the required phase input
+		err = qtx.InsertTeamRequiredInput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required team input: ", err)
+			return err
+		}
+
+		// create the required participation input
 		err = qtx.InsertTeamAllocationRequiredInput(ctx, newAssessment.ID)
 		if err != nil {
 			log.Error("failed to create required team allocation input: ", err)
 			return err
 		}
 
-		// create the output
+		// create the participation output
 		err = qtx.InsertAssessmentScoreOutput(ctx, newAssessment.ID)
 		if err != nil {
 			log.Error("failed to create required assessment output: ", err)
 			return err
 		}
 
-		err = qtx.InsertTeamRequiredInput(ctx, newAssessment.ID)
+		// create the actionItems output
+		err = qtx.InsertActionItemsOutput(ctx, newAssessment.ID)
 		if err != nil {
-			log.Error("failed to create required team input: ", err)
+			log.Error("failed to create required action items output: ", err)
+			return err
+		}
+
+		// create grade output
+		err = qtx.InsertGradeOutput(ctx, newAssessment.ID)
+		if err != nil {
+			log.Error("failed to create required grade output: ", err)
 			return err
 		}
 

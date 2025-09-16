@@ -2,6 +2,7 @@ package assessmentCompletion
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -82,6 +83,34 @@ func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipatio
 		return db.CountRemainingAssessmentsForStudentRow{}, errors.New("could not count remaining assessments")
 	}
 	return remainingAssessments, nil
+}
+
+func GetAllGrades(ctx context.Context, coursePhaseID uuid.UUID) ([]assessmentCompletionDTO.GradeWithParticipation, error) {
+	grades, err := AssessmentCompletionServiceSingleton.queries.GetAllGrades(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get grades by course phase: ", err)
+		return nil, errors.New("could not get grades by course phase")
+	}
+
+	return assessmentCompletionDTO.GetGradesWithParticipationFromDBGradesWithParticipation(grades), nil
+}
+
+func GetStudentGrade(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (float64, error) {
+	grade, err := AssessmentCompletionServiceSingleton.queries.GetStudentGrade(ctx, db.GetStudentGradeParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil
+		}
+		log.Error("could not get student grade: ", err)
+		return 0, errors.New("could not get student grade")
+	}
+	if !grade.Valid {
+		return 0, nil
+	}
+	return utils.MapNumericToFloat64(grade), nil
 }
 
 func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {

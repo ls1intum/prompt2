@@ -16,22 +16,47 @@ import (
 func setupActionItemRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	actionItemRouter := routerGroup.Group("student-assessment/action-item")
 
-	actionItemRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listActionItemsForCoursePhase)
+	// course phase communication
+	actionItemRouter.GET("/action", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllActionItemsForCoursePhaseCommunication)
+	actionItemRouter.GET("/action/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentActionItemsForCoursePhaseCommunication)
+
+	// action item management
+	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getActionItemsForStudent)
 	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), createActionItem)
 	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), updateActionItem)
 	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), deleteActionItem)
-	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getActionItemsForStudent)
 
+	// student access to own action items
 	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.CourseStudent), getMyActionItems)
 }
 
-func listActionItemsForCoursePhase(c *gin.Context) {
+func getAllActionItemsForCoursePhaseCommunication(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	actionItems, err := ListActionItemsForCoursePhase(c, coursePhaseID)
+	actionItems, err := GetAllActionItemsForCoursePhaseCommunication(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, actionItems)
+}
+
+func getStudentActionItemsForCoursePhaseCommunication(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	actionItems, err := GetStudentActionItemsForCoursePhaseCommunication(c, courseParticipationID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

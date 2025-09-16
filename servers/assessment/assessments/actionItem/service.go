@@ -18,13 +18,44 @@ type ActionItemService struct {
 
 var ActionItemServiceSingleton *ActionItemService
 
-func GetActionItem(ctx context.Context, actionItemID uuid.UUID) (actionItemDTO.ActionItem, error) {
+func GetActionItem(ctx context.Context, actionItemID uuid.UUID) (*actionItemDTO.ActionItem, error) {
 	actionItem, err := ActionItemServiceSingleton.queries.GetActionItem(ctx, actionItemID)
 	if err != nil {
 		log.Error("could not get action item: ", err)
-		return actionItemDTO.ActionItem{}, errors.New("could not get action item")
+		return nil, errors.New("could not get action item")
 	}
-	return actionItemDTO.MapDBActionItemToActionItemDTO(actionItem), nil
+	dto := actionItemDTO.MapDBActionItemToActionItemDTO(actionItem)
+	return &dto, nil
+}
+
+func ListActionItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]actionItemDTO.ActionItem, error) {
+	actionItems, err := ActionItemServiceSingleton.queries.ListActionItemsForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not list action items for course phase: ", err)
+		return nil, errors.New("could not list action items for course phase")
+	}
+	return actionItemDTO.GetActionItemDTOsFromDBModels(actionItems), nil
+}
+
+func GetAllActionItemsForCoursePhaseCommunication(ctx context.Context, coursePhaseID uuid.UUID) ([]actionItemDTO.ActionItemWithParticipation, error) {
+	actionItems, err := ActionItemServiceSingleton.queries.GetAllActionItemsForCoursePhaseCommunication(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not list action items for course phase: ", err)
+		return nil, errors.New("could not list action items for course phase")
+	}
+	return actionItemDTO.GetActionItemsFromDBActionItemsWithParticipation(actionItems), nil
+}
+
+func GetStudentActionItemsForCoursePhaseCommunication(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]string, error) {
+	actionItems, err := ActionItemServiceSingleton.queries.GetStudentActionItemsForCoursePhaseCommunication(ctx, db.GetStudentActionItemsForCoursePhaseCommunicationParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not list action items for student in phase: ", err)
+		return nil, errors.New("could not list action items for student in phase")
+	}
+	return actionItems, nil
 }
 
 func CreateActionItem(ctx context.Context, req actionItemDTO.CreateActionItemRequest) error {
@@ -52,15 +83,6 @@ func DeleteActionItem(ctx context.Context, actionItemID uuid.UUID) error {
 		return errors.New("could not delete action item")
 	}
 	return nil
-}
-
-func ListActionItemsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]actionItemDTO.ActionItem, error) {
-	actionItems, err := ActionItemServiceSingleton.queries.ListActionItemsForCoursePhase(ctx, coursePhaseID)
-	if err != nil {
-		log.Error("could not list action items for course phase: ", err)
-		return nil, errors.New("could not list action items for course phase")
-	}
-	return actionItemDTO.GetActionItemDTOsFromDBModels(actionItems), nil
 }
 
 func ListActionItemsForStudentInPhase(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) ([]actionItemDTO.ActionItem, error) {
