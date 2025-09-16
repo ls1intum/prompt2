@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	configdto "github.com/ls1intum/prompt2/servers/team_allocation/config/configDTO"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/survey"
 )
@@ -16,29 +15,34 @@ type ConfigService struct {
 
 var ConfigServiceSingleton *ConfigService
 
-func GetDefaultTeamAllocationConfig(c *gin.Context, coursePhaseID uuid.UUID) (config configdto.TeamAllocationConfig, err error) {
+type ConfigHandler struct{}
+
+func (h *ConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]bool, err error) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		return nil, err
+	}
+
 	surveyTimeframe, err := survey.GetSurveyTimeframe(c, coursePhaseID)
 	if err != nil {
-		return configdto.TeamAllocationConfig{}, err
+		return nil, err
 	}
 
 	teams, err := ConfigServiceSingleton.queries.GetTeamsByCoursePhase(c, coursePhaseID)
 	if err != nil {
-		return configdto.TeamAllocationConfig{}, err
+		return nil, err
 	}
 	teamsExist := len(teams) > 0
 
 	skills, err := ConfigServiceSingleton.queries.GetSkillsByCoursePhase(c, coursePhaseID)
 	if err != nil {
-		return configdto.TeamAllocationConfig{}, err
+		return nil, err
 	}
 	skillsExist := len(skills) > 0
 
-	return configdto.TeamAllocationConfig{
-		Configurations: map[string]bool{
-			"surveyTimeframe": surveyTimeframe.TimeframeSet,
-			"teams":           teamsExist,
-			"skills":          skillsExist,
-		},
+	return map[string]bool{
+		"surveyTimeframe": surveyTimeframe.TimeframeSet,
+		"teams":           teamsExist,
+		"skills":          skillsExist,
 	}, nil
 }

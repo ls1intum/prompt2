@@ -1,7 +1,6 @@
-import { TeamAllocationConfig } from '../../interfaces/config'
 import { teamAllocationAxiosInstance } from '../teamAllocationServerConfig'
 
-export const getConfig = async (coursePhaseID: string): Promise<TeamAllocationConfig> => {
+export const getConfig = async (coursePhaseID: string): Promise<Record<string, boolean>> => {
   try {
     return (
       await teamAllocationAxiosInstance.get(

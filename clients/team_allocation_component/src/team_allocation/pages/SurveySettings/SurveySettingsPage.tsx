@@ -11,7 +11,6 @@ import { SurveyTimeframe } from '../../interfaces/timeframe'
 import { TeamSettings } from './components/TeamSettings'
 import { SkillSettings } from './components/SkillSettings'
 import { SurveyTimeframeSettings } from './components/SurveyTimeframeSettings'
-import { TeamAllocationConfig } from '../../interfaces/config'
 import { getConfig } from '../../network/queries/getConfig'
 import { MissingConfig, MissingConfigItem } from '@/components/MissingConfig'
 import { useEffect, useState } from 'react'
@@ -54,7 +53,7 @@ export const SurveySettingsPage = (): JSX.Element => {
     isPending: isConfigPending,
     isError: isConfigError,
     refetch: refetchConfig,
-  } = useQuery<TeamAllocationConfig>({
+  } = useQuery<Record<string, boolean>>({
     queryKey: ['team_allocation_config', phaseId],
     queryFn: () => getConfig(phaseId ?? ''),
   })
@@ -97,7 +96,7 @@ export const SurveySettingsPage = (): JSX.Element => {
   }
 
   useEffect(() => {
-    for (const [key, value] of Object.entries(fetchedConfig?.configurations || {})) {
+    for (const [key, value] of Object.entries(fetchedConfig || {})) {
       if (!value) {
         setMissingConfigs((prev: MissingConfigItem[]) => [
           ...prev,
