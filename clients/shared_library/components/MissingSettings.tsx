@@ -2,7 +2,6 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-  Button,
   Card,
   CardContent,
   CardHeader,
@@ -15,7 +14,6 @@ export interface MissingSettingsItem {
   title: string
   icon: ElementType
   description?: string
-  hide?: () => void
 }
 
 interface MissingSettingsProps {
@@ -49,16 +47,6 @@ export const MissingSettings = ({ elements }: MissingSettingsProps): JSX.Element
                       </div>
                     </div>
                   </div>
-                  {config.hide && (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={config.hide}
-                      className='ml-4 mt-1 whitespace-nowrap'
-                    >
-                      Hide Warning
-                    </Button>
-                  )}
                 </Alert>
               ))}
             </div>
