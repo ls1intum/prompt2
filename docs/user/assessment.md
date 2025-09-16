@@ -26,7 +26,7 @@ Once the assessment phase is set up, students and instructors can begin evaluati
 
 This section guides you through the practical use of the assessment phase for a smooth evaluation process.
 
-📺 **Video Tutorial**: Coming soon
+📺 **Video Tutorial**: [Watch here!](https://live.rbg.tum.de/w/artemisintro/62136)
 
 ## ⚙️ Setting Up the Assessment Phase
 
