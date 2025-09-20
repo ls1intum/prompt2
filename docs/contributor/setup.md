@@ -47,6 +47,10 @@ Before you can build and run **Prompt**, you must install and configure the foll
 
 ## Development Environment
 
+You have two options to set up your development environment:
+
+### Option 1: Manual Setup (Recommended)
+
 1. **Clone the Repository**  
    - Clone (or download) the Prompt repository to your local machine:
 
@@ -137,6 +141,34 @@ Before you can build and run **Prompt**, you must install and configure the foll
 ---
 
 You should now have Keycloak (on `localhost:8081`), your PostgreSQL database, the Go backend, and the React microfrontends running. Happy coding!
+
+### Option 2: Docker Development Workflow
+
+For a simplified setup with hot reload across all services, you can use Docker:
+
+```bash
+# Clone the repository (if not done already)
+git clone https://github.com/ls1intum/prompt2.git
+cd prompt2
+
+# Start the complete development stack
+docker compose up
+```
+
+**What this gives you:**
+
+- **Go servers**: Hot reload via Air, shared module/build caches for faster rebuilds
+- **React clients**: Single Node container running all micro-frontends via Yarn workspaces + Lerna  
+- **Databases**: All PostgreSQL databases and Keycloak automatically started with proper dependencies
+- **Ports**: Servers on 8080, 8082-8085; clients start from port 3000 (varies by active packages)
+
+**Important:** You'll still need to configure Keycloak manually (step 3 from Option 1) after the containers start.
+
+**Production client containers:**
+
+```bash
+docker compose --profile prod up
+```
 
 ## Optional: IDE Configuration
 
