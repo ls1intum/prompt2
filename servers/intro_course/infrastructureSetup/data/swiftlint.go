@@ -167,7 +167,7 @@ only_rules:
     # Opening braces should be preceded by a single space and on the same line as the declaration.
   - operator_usage_whitespace
     # Operators should be surrounded by a single whitespace when they are being used.
-  - operator_whitespace
+  - function_name_whitespace
     # Operators should be surrounded by a single whitespace when defining them.
   - optional_enum_case_matching
     # Matching an enum case against an optional enum without ‘?’ is supported on Swift 5.1 and above.
@@ -205,7 +205,7 @@ only_rules:
     # nil coalescing operator is only evaluated if the lhs is nil, coalescing operator with nil as rhs is redundant
   - redundant_objc_attribute
     # Objective-C attribute (@objc) is redundant in declaration.
-  - redundant_optional_initialization
+  - implicit_optional_initialization
     # Initializing an optional variable with nil is redundant.
   - redundant_set_access_control
     # Property setter access level shouldn't be explicit if it's the same as the variable access level.
@@ -293,32 +293,32 @@ only_rules:
     # An XCTFail call should include a description of the assertion.
 
 closure_body_length: # Closure bodies should not span too many lines.
-  - 35 # warning - default: 20
-  - 35 # error - default: 100
+  - 60 # warning - default: 20
+  - 60 # error - default: 100
 
 enum_case_associated_values_count: # Number of associated values in an enum case should be low
   - 5 # warning - default: 5
   - 5 # error - default: 6
 
 file_length: # Files should not span too many lines.
-  - 500 # warning - default: 400
-  - 500 # error - default: 1000
+  - 600 # warning - default: 400
+  - 600 # error - default: 1000
 
 function_body_length: # Functions bodies should not span too many lines.
-  - 50 # warning - default: 40
-  - 50 # error - default: 100
+  - 80 # warning - default: 40
+  - 80 # error - default: 100
 
 function_parameter_count: # Number of function parameters should be low.
-  - 5 # warning - default: 5
-  - 5 # error - default: 8
+  - 6 # warning - default: 5
+  - 6 # error - default: 8
 
 large_tuple: # Tuples shouldn't have too many members. Create a custom type instead.
   - 2 # warning - default: 2
   - 2 # error - default: 3
 
-line_length: # Lines should not span too many characters.
-  warning: 120 # default: 120
-  error: 120 # default: 200
+line_length: # Lines should not wherspan too many characters.
+  warning: 150 # default: 120
+  error: 150 # default: 200
   ignores_comments: true # default: false
   ignores_urls: true # default: false
   ignores_function_declarations: false # default: false
@@ -334,8 +334,8 @@ trailing_closure:
   only_single_muted_parameter: true
 
 type_body_length: # Type bodies should not span too many lines.
-  - 250 # warning - default: 200
-  - 250 # error - default: 200
+  - 350 # warning - default: 200
+  - 350 # error - default: 200
 
 type_name:
   excluded: # excluded names
