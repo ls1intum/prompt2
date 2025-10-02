@@ -1,7 +1,10 @@
 package data
 
-func GetSwiftlint() string {
-	return `# SwiftLint file LS1 TUM
+import "strings"
+
+const (
+	swiftlintBacktickPlaceholder = "<<BT>>"
+	swiftlintTemplateRaw         = `# SwiftLint file LS1 TUM
 # Created by Paul Schmiedmayer on 08/16/18.
 # Copyright © 2020 Paul Schmiedmayer. All rights reserved.
 
@@ -36,7 +39,7 @@ only_rules:
   - contains_over_filter_is_empty
     # Prefer contains over using filter(where:).isEmpty
   - contains_over_first_not_nil
-    # Prefer ` + "`contains` over `first(where:) != nil`" + `
+    # Prefer <BT>contains<BT> over <BT>first(where:) != nil<BT>
   - contains_over_range_nil_comparison
     # Prefer contains over range(of:) != nil and range(of:) == nil
   - control_statement
@@ -58,7 +61,7 @@ only_rules:
   - empty_collection_literal
     # Prefer checking isEmpty over comparing collection to an empty array or dictionary literal.
   - empty_count
-    # Prefer checking ` + "`isEmpty` over comparing `count`" + ` to zero.
+    # Prefer checking <BT>isEmpty<BT> over comparing <BT>count<BT> to zero.
   - empty_enum_arguments
     # Arguments can be omitted when matching enums with associated types if they are not used.
   - empty_parameters
@@ -66,7 +69,7 @@ only_rules:
   - empty_parentheses_with_trailing_closure
     # When using trailing closures, empty parentheses should be avoided after the method call.
   - empty_string
-    # Prefer checking ` + "`isEmpty`" + ` over comparing string to an empty string literal.
+    # Prefer checking <BT>isEmpty<BT> over comparing string to an empty string literal.
   - empty_xctest_method
     # Empty XCTest method should be avoided.
   - enum_case_associated_values_count
@@ -79,7 +82,7 @@ only_rules:
     # Files should not span too many lines.
     # See file_length below for the exact configuration.
   - first_where
-    # Prefer using ` + "``.first(where:)`` over ``.filter { }.first`" + ` in collections.
+    # Prefer using <BT><BT>.first(where:)<BT><BT> over <BT><BT>.filter { }.first<BT> in collections.
   - flatmap_over_map_reduce
     # Prefer flatMap over map followed by reduce([], +).
   - for_where
@@ -222,7 +225,7 @@ only_rules:
   - single_test_class
     # Test files should contain a single QuickSpec or XCTestCase class.
   - sorted_first_last
-    # Prefer using ` + "`min()`` or `max()`` over `sorted().first` or `sorted().last`" + `
+    # Prefer using <BT>min()<BT><BT> or <BT>max()<BT><BT> over <BT>sorted().first<BT> or <BT>sorted().last<BT>
   - statement_position
     # Else and catch should be on the same line, one space after the previous declaration.
   - static_operator
@@ -316,7 +319,7 @@ large_tuple: # Tuples shouldn't have too many members. Create a custom type inst
   - 2 # warning - default: 2
   - 2 # error - default: 3
 
-line_length: # Lines should not span too many characters.
+line_length: # Lines should not wherspan too many characters.
   warning: 150 # default: 120
   error: 150 # default: 200
   ignores_comments: true # default: false
@@ -351,7 +354,7 @@ unused_optional_binding:
 vertical_whitespace: # Limit vertical whitespace to a single empty line.
   max_empty_lines: 2 # warning - default: 1
 
-excluded: # paths to ignore during linting. Takes precedence over ` + "`included`" + `.
+excluded: # paths to ignore during linting. Takes precedence over <BT>included<BT>.
     - Carthage
     - Pods
     - .build
@@ -360,5 +363,12 @@ excluded: # paths to ignore during linting. Takes precedence over ` + "`included
     - Tests
 
 # reporter type (xcode, json, csv, checkstyle, codeclimate, junit, html, emoji, sonarqube, markdown, github-actions-logging)
-reporter: xcode`
+reporter: xcode
+`
+)
+
+var swiftlintTemplate = strings.ReplaceAll(swiftlintTemplateRaw, swiftlintBacktickPlaceholder, "`")
+
+func GetSwiftlint() string {
+	return swiftlintTemplate
 }
