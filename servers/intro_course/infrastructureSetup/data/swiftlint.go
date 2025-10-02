@@ -316,7 +316,7 @@ large_tuple: # Tuples shouldn't have too many members. Create a custom type inst
   - 2 # warning - default: 2
   - 2 # error - default: 3
 
-line_length: # Lines should not wherspan too many characters.
+line_length: # Lines should not span too many characters.
   warning: 150 # default: 120
   error: 150 # default: 200
   ignores_comments: true # default: false
