@@ -22,6 +22,7 @@ func setupCoursePhaseRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	coursePhase := router.Group("/course_phases", authMiddleware())
 	coursePhase.GET("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getCoursePhaseByID)
 	coursePhase.GET("/:uuid/course_phase_data", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getPrevPhaseDataByCoursePhaseID)
+	coursePhase.GET("/:uuid/participation_status_counts", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getCoursePhaseParticipationStatusCounts)
 
 	// getting the course ID here to do correct rights management
 	coursePhase.POST("/course/:courseID", permissionCourseIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), createCoursePhase)
@@ -217,4 +218,30 @@ func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, utils.ErrorResponse{
 		Error: err.Error(),
 	})
+}
+
+// getCoursePhaseParticipationStatusCounts godoc
+// @Summary Get course phase participation status counts
+// @Description Get counts of participation statuses for a course phase
+// @Tags course_phases
+// @Produce json
+// @Param uuid path string true "Course Phase UUID"
+// @Success 200 {object} map[string]int "Status counts"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /course_phases/{uuid}/participation_status_counts [get]
+func getCoursePhaseParticipationStatusCounts(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	countsMap, err := GetCoursePhaseParticipationStatusCounts(c, id)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, countsMap)
 }
