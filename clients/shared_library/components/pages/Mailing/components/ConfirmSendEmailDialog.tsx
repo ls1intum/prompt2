@@ -86,7 +86,10 @@ export const ConfirmSendEmailDialog = ({
             {!isPending && !isError && !data && (
               <>
                 This will send out an email to{' '}
-                <span className='font-bold'>{mailRecipients[emailType] ?? 0} recipients</span>
+                <span className='font-bold'>
+                  {mailRecipients[emailType] ?? 0}{' '}
+                  {mailRecipients[emailType] === 1 ? 'recipient' : 'recipients'}
+                </span>
               </>
             )}
           </DialogDescription>
