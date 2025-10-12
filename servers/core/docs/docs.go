@@ -1123,6 +1123,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/course_phases/{uuid}/participation_status_counts": {
+            "get": {
+                "description": "Get counts of participation statuses for a course phase",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phases"
+                ],
+                "summary": "Get course phase participation status counts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status counts",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/course_phases/{uuid}/participations": {
             "get": {
                 "description": "Get all participations for a given course phase",
@@ -1526,6 +1570,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/template": {
+            "get": {
+                "description": "Get all courses marked as templates accessible to the user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get template courses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/courseDTO.Course"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{uuid}": {
             "get": {
                 "description": "Get a course by UUID",
@@ -1640,6 +1719,88 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/copy": {
+            "post": {
+                "description": "Copy a course by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Copy a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/copyable": {
+            "get": {
+                "description": "Returns whether the course can be copied based on the availability of the /copy endpoint in all course phases",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Check if a course is copyable",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/courseCopyDTO.CheckCourseCopyableResponse"
                         }
                     },
                     "400": {
@@ -2061,6 +2222,98 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/courseDTO.UpdateCoursePhaseGraph"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{uuid}/template": {
+            "get": {
+                "description": "Get the template status of a course",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Check course template status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CourseTemplateStatus"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update whether a course is marked as a template",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update course template status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Template status update",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CourseTemplateStatus"
                         }
                     }
                 ],
@@ -3054,6 +3307,20 @@ const docTemplate = `{
                 }
             }
         },
+        "courseCopyDTO.CheckCourseCopyableResponse": {
+            "type": "object",
+            "properties": {
+                "copyable": {
+                    "type": "boolean"
+                },
+                "missingPhaseTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "courseDTO.Course": {
             "type": "object",
             "properties": {
@@ -3083,6 +3350,9 @@ const docTemplate = `{
                 },
                 "studentReadableData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "template": {
+                    "type": "boolean"
                 }
             }
         },
@@ -3094,6 +3364,14 @@ const docTemplate = `{
                 },
                 "toCoursePhaseID": {
                     "type": "string"
+                }
+            }
+        },
+        "courseDTO.CourseTemplateStatus": {
+            "type": "object",
+            "properties": {
+                "isTemplate": {
+                    "type": "boolean"
                 }
             }
         },
@@ -3161,6 +3439,9 @@ const docTemplate = `{
                 },
                 "studentReadableData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "template": {
+                    "type": "boolean"
                 }
             }
         },
