@@ -154,16 +154,6 @@ func parseDeviceData(rawDevices interface{}) []string {
 // Maps 5-level score levels (VeryBad-VeryGood) to 4-level skill proficiency (Novice-Expert)
 func getTeaseScoreLevel(skillLevel string) string {
 	switch skillLevel {
-	// Legacy 4-level mapping (for backward compatibility)
-	case "novice":
-		return "Novice"
-	case "intermediate":
-		return "Intermediate"
-	case "advanced":
-		return "Advanced"
-	case "expert":
-		return "Expert"
-	// New 5-level to 4-level mapping
 	case "veryBad", "bad":
 		return "Novice"
 	case "ok":
