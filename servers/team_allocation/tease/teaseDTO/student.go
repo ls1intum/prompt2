@@ -151,15 +151,16 @@ func parseDeviceData(rawDevices interface{}) []string {
 }
 
 // Tease defines the Scores upper case, while the DB (and Assessment) defines them lower case
+// Maps 5-level score levels (VeryBad-VeryGood) to 4-level skill proficiency (Novice-Expert)
 func getTeaseScoreLevel(skillLevel string) string {
 	switch skillLevel {
-	case "novice":
+	case "veryBad", "bad":
 		return "Novice"
-	case "intermediate":
+	case "ok":
 		return "Intermediate"
-	case "advanced":
+	case "good":
 		return "Advanced"
-	case "expert":
+	case "veryGood":
 		return "Expert"
 	default:
 		return "Unknown"
