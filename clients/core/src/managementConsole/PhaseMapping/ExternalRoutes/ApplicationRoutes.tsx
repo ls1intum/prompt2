@@ -4,6 +4,7 @@ import { ApplicationLandingPage } from '../../applicationAdministration/pages/Ap
 import { ApplicationConfiguration } from '../../applicationAdministration/pages/ApplicationConfiguration/ApplicationConfiguration'
 import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationParticipantsPage } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPage'
+import { ApplicationParticipantsPage as ApplicationParticipantsPageRefactored } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPageRefactored'
 import { ApplicationMailingSettings } from '../../applicationAdministration/pages/Mailing/ApplicationMailingSettings'
 import { ApplicationDataWrapper } from '../../applicationAdministration/components/ApplicationDataWrapper'
 
@@ -31,6 +32,15 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
     element: (
       <ApplicationDataWrapper>
         <ApplicationParticipantsPage />
+      </ApplicationDataWrapper>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/participants-refactored',
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationParticipantsPageRefactored />
       </ApplicationDataWrapper>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
