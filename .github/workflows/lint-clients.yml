@@ -9,10 +9,19 @@ jobs:
     outputs:
       modules: ${{ steps.set-matrix.outputs.modules }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - id: set-matrix
         run: echo "modules=$(find . -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | sed 's|^\./||' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
         working-directory: ./clients
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
 
   lint-client:
     needs: set-matrix
@@ -24,8 +33,17 @@ jobs:
       matrix:
         module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
       - run: yarn install
       - name: Lint components in ${{ matrix.module }}
         run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs"
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results

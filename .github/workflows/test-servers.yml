@@ -11,6 +11,10 @@ jobs:
       core-changed: ${{ steps.changes.outputs.core }}
       team_allocation-changed: ${{ steps.changes.outputs.team_allocation }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: changes
@@ -22,6 +26,11 @@ jobs:
               - 'servers/core/**'
             team_allocation:
               - 'servers/team_allocation/**'
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
 
   test:
     runs-on: ubuntu-latest
@@ -39,6 +48,10 @@ jobs:
         exclude:
           - directory: ""
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -57,3 +70,8 @@ jobs:
         with:
           name: Go-results-${{ matrix.directory }}
           path: ./servers/${{ matrix.directory }}/TestResults-${{ matrix.directory }}.json
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results

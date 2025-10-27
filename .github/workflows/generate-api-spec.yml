@@ -12,6 +12,10 @@ jobs:
     outputs:
       core-changed: ${{ steps.changes.outputs.core }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: changes
@@ -19,6 +23,11 @@ jobs:
           filters: |
             core:
               - 'servers/core/**'
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
 
   generate-api-spec:
     runs-on: ubuntu-latest
@@ -33,6 +42,10 @@ jobs:
           - directory: ""
 
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,3 +69,8 @@ jobs:
         with:
           name: api-spec-${{ matrix.directory }}
           path: servers/${{ matrix.directory }}/docs/api/
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
