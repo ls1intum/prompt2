@@ -178,7 +178,7 @@ jobs:
             echo "KEYCLOAK_AUTHORIZED_PARTY=${{ vars.KEYCLOAK_AUTHORIZED_PARTY }}" >> .env.prod
 
             echo "GITHUB_SHA=${{ github.sha }}" >> .env.prod
-            echo "GITHUB_REF=${{ github.head_ref }}" >> .env.prod
+            echo "GITHUB_REF=${{ github.ref != '' && github.ref || github.head_ref }}" >> .env.prod
             echo "SERVER_CORE_IMAGE_TAG=${{ inputs.server_core_image_tag }}" >> .env.prod
             echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
