@@ -37,7 +37,7 @@ export const contributorMapping: {
   },
   JGStyle: {
     name: 'Josef Schmid',
-    contribution: 'Contributor',
+    contribution: 'Student History and Data Management',
     position: 7,
   },
   robertjndw: {
