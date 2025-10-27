@@ -64,6 +64,10 @@ jobs:
       name: ${{ inputs.environment }}
       url: "https://${{ vars.CORE_HOST }}"
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
         uses: appleboy/ssh-action@v1.0.3
@@ -217,3 +221,8 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             docker compose -f docker-compose.prod.yml --env-file=.env.prod up --pull=always -d
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results

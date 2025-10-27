@@ -52,9 +52,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: clients-base
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - name: Debug
         run: |
           echo "base_image_tag: ${{ needs.clients-base.outputs.image_tag }}"
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
 
   core:
     needs: clients-base
