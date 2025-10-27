@@ -35,19 +35,24 @@ export const contributorMapping: {
     contribution: 'TEASE - Team Allocation Decision Support System',
     position: 6,
   },
+  JGStyle: {
+    name: 'Josef Schmid',
+    contribution: 'Contributor',
+    position: 7,
+  },
   robertjndw: {
     name: 'Robert Jandow',
     contribution: 'Server-side contributor',
-    position: 7,
+    position: 8,
   },
   bgeisb: {
     name: 'Benedikt Geisberger',
     contribution: 'UI/UX Design',
-    position: 8,
+    position: 9,
   },
   maximiliansoelch: {
     name: 'Maximilian Sölch',
     contribution: 'Contributor',
-    position: 9,
+    position: 10,
   },
 }
