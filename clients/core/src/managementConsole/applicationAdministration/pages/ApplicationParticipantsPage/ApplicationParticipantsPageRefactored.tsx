@@ -121,7 +121,6 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
         extraData: genderColumnData,
         enableSorting: true,
       })
-
       ;(additionalScores ?? []).forEach((additionalScore) => {
         const additionalScoreData = participations.map((app) => ({
           courseParticipationID: app.courseParticipationID,

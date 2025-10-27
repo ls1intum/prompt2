@@ -44,5 +44,3 @@ export const VisibilityMenu = ({ columns }: VisibilityMenuProps): JSX.Element =>
     </DropdownMenu>
   )
 }
-
-
