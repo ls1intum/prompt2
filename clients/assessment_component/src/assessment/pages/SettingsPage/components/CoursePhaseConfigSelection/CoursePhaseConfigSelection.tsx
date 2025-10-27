@@ -131,6 +131,12 @@ export const CoursePhaseConfigSelection = () => {
             disabled={configMutation.isPending}
           />
 
+          <div className='space-y-4'>
+            <h3 className='text-sm font-semibold text-gray-700 dark:text-gray-300'>
+              Evaluation Settings
+            </h3>
+          </div>
+
           <EvaluationOptionSection
             type={AssessmentType.SELF}
             enabled={selfEvaluationEnabled}
