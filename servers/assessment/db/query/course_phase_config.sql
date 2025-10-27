@@ -113,8 +113,10 @@ INSERT INTO course_phase_config (assessment_template_id,
                                  tutor_evaluation_template,
                                  tutor_evaluation_start,
                                  tutor_evaluation_deadline,
-                                 evaluation_results_visible)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+                                 evaluation_results_visible,
+                                 grade_suggestion_visible,
+                                 action_items_visible)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_template_id     = EXCLUDED.assessment_template_id,
                   start                      = EXCLUDED.start,
@@ -131,4 +133,6 @@ ON CONFLICT (course_phase_id)
                   tutor_evaluation_template  = EXCLUDED.tutor_evaluation_template,
                   tutor_evaluation_start     = EXCLUDED.tutor_evaluation_start,
                   tutor_evaluation_deadline  = EXCLUDED.tutor_evaluation_deadline,
-                  evaluation_results_visible = EXCLUDED.evaluation_results_visible;
+                  evaluation_results_visible = EXCLUDED.evaluation_results_visible,
+                  grade_suggestion_visible   = EXCLUDED.grade_suggestion_visible,
+                  action_items_visible       = EXCLUDED.action_items_visible;

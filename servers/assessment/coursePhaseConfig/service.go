@@ -88,6 +88,8 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		TutorEvaluationStart:     pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
 		TutorEvaluationDeadline:  pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
+		GradeSuggestionVisible:   req.GradeSuggestionVisible,
+		ActionItemsVisible:       req.ActionItemsVisible,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)

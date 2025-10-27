@@ -11,6 +11,7 @@ import {
   ErrorPage,
 } from '@tumaet/prompt-ui-components'
 
+import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 import { useGetMyActionItems } from '../hooks/useGetMyActionItems'
 import { useGetMyGradeSuggestion } from '../hooks/useGetMyGradeSuggestion'
 
@@ -18,6 +19,7 @@ export const ActionItemsAndGradeSuggestion = () => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   // Example data for non-students
   const exampleActionItems = [
@@ -73,7 +75,7 @@ export const ActionItemsAndGradeSuggestion = () => {
 
   return (
     <div className='space-y-6'>
-      {displayGradeSuggestion && (
+      {displayGradeSuggestion && (coursePhaseConfig?.gradeSuggestionVisible ?? true) && (
         <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
           <CardHeader className='pb-4'>
             <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
@@ -94,7 +96,7 @@ export const ActionItemsAndGradeSuggestion = () => {
         </Card>
       )}
 
-      {displayActionItems.length > 0 && (
+      {displayActionItems.length > 0 && (coursePhaseConfig?.actionItemsVisible ?? true) && (
         <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
           <CardHeader className='pb-4'>
             <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
