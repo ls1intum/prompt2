@@ -1,0 +1,9 @@
+announcement:
+  label: Announcement
+  permalink: /announcement
+  description: Official announcements and updates
+
+documentation:
+  label: Documentation
+  permalink: /documentation
+  description: Documentation updates and improvements
