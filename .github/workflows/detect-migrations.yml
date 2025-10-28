@@ -23,7 +23,7 @@ jobs:
           base: ${{ github.event.pull_request.base.sha }}
           filters: |
             migrations:
-              - 'servers/**/migrations/**'
+              - 'servers/**/db/migration/**'
           list-files: shell
 
       - name: Check if migrations changed
