@@ -28,7 +28,8 @@ jobs:
       - name: Check if migrations changed
         id: check
         run: |
-          if [ -n "${{ steps.changes.outputs.migrations }}" ]; then
+          # Check if migrations output contains actual files (not just "false")
+          if [ "${{ steps.changes.outputs.migrations }}" != "false" ] && [ -n "${{ steps.changes.outputs.migrations }}" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
