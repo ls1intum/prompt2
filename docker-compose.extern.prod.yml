@@ -190,6 +190,9 @@ services:
       - KEYCLOAK_REALM_NAME
       - CHAIR_NAME_SHORT
       - CHAIR_NAME_LONG
+      - GITHUB_SHA
+      - GITHUB_REF
+      - SERVER_CORE_IMAGE_TAG
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
