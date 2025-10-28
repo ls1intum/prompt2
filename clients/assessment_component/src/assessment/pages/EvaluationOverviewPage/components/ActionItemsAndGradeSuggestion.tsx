@@ -29,29 +29,39 @@ export const ActionItemsAndGradeSuggestion = () => {
   ]
   const exampleGradeSuggestion = 2.3
 
+  const shouldFetchActionItems = isStudent && (coursePhaseConfig?.actionItemsVisible ?? true)
+  const shouldFetchGradeSuggestion =
+    isStudent && (coursePhaseConfig?.gradeSuggestionVisible ?? true)
+
   const {
     data: actionItems = [],
     isPending: isActionItemsPending,
     isError: isActionItemsError,
     refetch: refetchActionItems,
-  } = useGetMyActionItems({ enabled: isStudent })
+  } = useGetMyActionItems({ enabled: shouldFetchActionItems })
 
   const {
     data: gradeSuggestion,
     isPending: isGradeSuggestionPending,
     isError: isGradeSuggestionError,
     refetch: refetchGradeSuggestion,
-  } = useGetMyGradeSuggestion({ enabled: isStudent })
+  } = useGetMyGradeSuggestion({ enabled: shouldFetchGradeSuggestion })
 
   const displayActionItems = isStudent ? actionItems : exampleActionItems
   const displayGradeSuggestion = isStudent ? gradeSuggestion : exampleGradeSuggestion
 
-  const isError = isStudent && (isActionItemsError || isGradeSuggestionError)
-  const isPending = isStudent && (isActionItemsPending || isGradeSuggestionPending)
+  const isError =
+    (shouldFetchActionItems && isActionItemsError) ||
+    (shouldFetchGradeSuggestion && isGradeSuggestionError)
+  const isPending =
+    (shouldFetchActionItems && isActionItemsPending) ||
+    (shouldFetchGradeSuggestion && isGradeSuggestionPending)
 
   const refetch = () => {
-    if (isStudent) {
+    if (shouldFetchActionItems) {
       refetchActionItems()
+    }
+    if (shouldFetchGradeSuggestion) {
       refetchGradeSuggestion()
     }
   }
