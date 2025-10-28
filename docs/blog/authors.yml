@@ -1,0 +1,6 @@
+prompt-team:
+  name: PROMPT Team
+  title: PROMPT Documentation Team
+  image_url: https://raw.githubusercontent.com/ls1intum/prompt2/main/clients/core/public/prompt_logo.svg
+  socials:
+    github: ls1intum

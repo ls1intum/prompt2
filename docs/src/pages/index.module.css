@@ -1,0 +1,163 @@
+.heroSection {
+  text-align: center;
+  padding: 4rem 0 6rem 0;
+}
+
+.heroTitle {
+  font-size: 5rem;
+  font-weight: 800;
+  margin-bottom: 0;
+}
+
+.heroTitleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  color: var(--ifm-color-primary);
+  margin-bottom: 1rem;
+}
+
+.heroDescription {
+  font-size: 1.2rem;
+  color: var(--ifm-color-content-secondary);
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.section {
+  margin: 4rem 0;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionDescription {
+  text-align: center;
+  color: var(--ifm-color-content-secondary);
+  max-width: 800px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.featureCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.featureCardCustomPhase {
+  padding: 1.5rem;
+  border: 3px dashed var(--ifm-color-primary);
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 64px rgba(0, 0, 0, 0.15);
+}
+
+.featureCardCustomPhase:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 64px rgba(0, 0, 0, 0.15);
+}
+
+.featureIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  color: rgb(24 113 194);
+}
+
+.featureCard h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  color: var(--ifm-heading-color);
+}
+
+.featureCard p {
+  color: var(--ifm-color-content-secondary);
+  margin: 0;
+}
+
+.linkCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.linkCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.linkCard .featureIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  color: rgb(24 113 194);
+}
+
+.linkCard h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  color: var(--ifm-heading-color);
+}
+
+.linkCard p {
+  color: var(--ifm-color-content-secondary);
+  margin: 0;
+}
+
+.linkCard a {
+  color: var(--ifm-link-color);
+  text-decoration: none;
+}
+
+.linkCard a:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .heroSubtitle {
+    font-size: 1.2rem;
+  }
+
+  .heroDescription {
+    font-size: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+}
