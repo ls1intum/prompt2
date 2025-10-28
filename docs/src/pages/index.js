@@ -3,8 +3,10 @@ import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import styles from './index.module.css';
 import { Layers, FileUser, UserCheck, Mic, Upload, Users, Clipboard, Bug, Lightbulb, Package, Plus } from 'lucide-react';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 export default function Home() {
+  const promptLogo = useBaseUrl('/img/prompt_logo.svg');
   return (
     <Layout
       title="PROMPT - Course Management Platform"
@@ -14,7 +16,7 @@ export default function Home() {
         {/* Hero Section */}
         <div className={styles.heroSection}>
           <div className={styles.heroTitleContainer}>
-            <img src="/img/prompt_logo.svg" alt="PROMPT Logo" className={styles.heroLogo} width={100} height={100} />
+            <img src={promptLogo} alt="PROMPT Logo" className={styles.heroLogo} width={100} height={100} />
             <Heading as="h1" className={styles.heroTitle}>
               PROMPT
             </Heading>

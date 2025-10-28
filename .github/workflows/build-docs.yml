@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - main
-    # Review GitHub Actions docs if you want to further define triggers, paths, etc
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+    paths:
+      - 'docs/**'
+      - '.github/workflows/build-docs.yml'
+  # Allow manually triggering the workflow
+  workflow_dispatch:
 
 permissions:
   contents: read
