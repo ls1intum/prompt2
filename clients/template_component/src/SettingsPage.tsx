@@ -1,10 +1,14 @@
-export const SettingsPage = (): JSX.Element => {
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
+
+export const TemplateComponentSettingsPage = (): JSX.Element => {
   return (
     <div>
-      <h1>Settings Page</h1>
-      <p>This is the settings page.</p>
+      <ManagementPageHeader>Template Component Settings</ManagementPageHeader>
+      <p className='text-sm text-muted-foreground mb-4'>
+        This is the settings page for the Template Component.
+      </p>
     </div>
   )
 }
 
-export default SettingsPage
+export default TemplateComponentSettingsPage

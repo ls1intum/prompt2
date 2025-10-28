@@ -9,7 +9,7 @@ import {
 import { Construction } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 
-export const OverviewPage = (): JSX.Element => {
+export const TemplateComponentOverviewPage = (): JSX.Element => {
   const path = useLocation().pathname
 
   return (
@@ -35,4 +35,4 @@ export const OverviewPage = (): JSX.Element => {
   )
 }
 
-export default OverviewPage
+export default TemplateComponentOverviewPage
