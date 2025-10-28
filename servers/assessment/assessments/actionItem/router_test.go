@@ -14,15 +14,18 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
 type ActionItemRouterTestSuite struct {
 	suite.Suite
-	router   *gin.Engine
-	suiteCtx context.Context
-	cleanup  func()
-	service  ActionItemService
+	router            *gin.Engine
+	suiteCtx          context.Context
+	cleanup           func()
+	service           ActionItemService
+	completionService assessmentCompletion.AssessmentCompletionService
 }
 
 func (suite *ActionItemRouterTestSuite) SetupSuite() {
@@ -38,6 +41,14 @@ func (suite *ActionItemRouterTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	ActionItemServiceSingleton = &suite.service
+
+	// Initialize the assessment completion module with the test database
+	// This creates a dummy router group just to initialize the singleton
+	dummyRouter := gin.Default()
+	dummyGroup := dummyRouter.Group("/dummy")
+	assessmentCompletion.InitAssessmentCompletionModule(dummyGroup, *testDB.Queries, testDB.Conn)
+
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
 
 	suite.router = gin.Default()
 	api := suite.router.Group("/api/course_phase/:coursePhaseID")
@@ -196,6 +207,81 @@ func (suite *ActionItemRouterTestSuite) TestGetStudentActionItemsForCoursePhaseC
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetMyActionItemsWhenVisible() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupActionItemRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/my-action-items", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+	var items []actionItemDTO.ActionItem
+	err := json.Unmarshal(resp.Body.Bytes(), &items)
+	assert.NoError(suite.T(), err)
+	assert.Greater(suite.T(), len(items), 0, "Should have at least one action item")
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetMyActionItemsWhenNotVisible() {
+	phaseID := uuid.MustParse("3517a3e3-fe60-40e0-8a5e-8f39049c12c3")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupActionItemRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/my-action-items", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusForbidden, resp.Code)
+	var errorResponse map[string]interface{}
+	err := json.Unmarshal(resp.Body.Bytes(), &errorResponse)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), errorResponse["error"], "not visible")
+}
+
+func (suite *ActionItemRouterTestSuite) TestGetMyActionItemsBeforeDeadline() {
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupActionItemRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/action-item/my-action-items", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+	var items []actionItemDTO.ActionItem
+	err := json.Unmarshal(resp.Body.Bytes(), &items)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 0, len(items), "Should return empty array before deadline")
 }
 
 func TestActionItemRouterTestSuite(t *testing.T) {
