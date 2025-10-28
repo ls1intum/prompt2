@@ -31,7 +31,7 @@ const sidebarItems: SidebarMenuItemProps = {
     {
       title: 'Settings',
       goToPath: '/settings',
-      requiredPermissions: [Role.PROMPT_ADMIN],
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
   ],
 }
