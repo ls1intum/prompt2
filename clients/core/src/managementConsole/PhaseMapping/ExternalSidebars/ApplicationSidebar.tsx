@@ -24,6 +24,11 @@ export const ApplicationSidebar = ({
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
       },
       {
+        title: 'Participants (Refactored)',
+        goToPath: '/participants-refactored',
+        requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+      },
+      {
         title: 'Configuration',
         goToPath: '/configuration',
         requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
