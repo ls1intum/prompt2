@@ -33,11 +33,19 @@ jobs:
         with:
           python-version: '3.13'
       
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r docs/requirements.txt
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Build Sphinx HTML
         run: |
           cd docs

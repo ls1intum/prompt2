@@ -14,6 +14,10 @@ jobs:
         with:
           task: start-measurement
       - uses: actions/checkout@v4
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - id: set-matrix
         run: echo "modules=$(find . -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | sed 's|^\./||' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
         working-directory: ./clients
@@ -39,7 +43,15 @@ jobs:
           task: start-measurement
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - run: yarn install
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Lint components in ${{ matrix.module }}
         run: yarn eslint "${{ matrix.module }}" --config "${{ matrix.module }}/eslint.config.mjs"
       - name: Show Energy Results

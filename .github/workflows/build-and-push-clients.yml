@@ -59,6 +59,10 @@ jobs:
       - name: Debug
         run: |
           echo "base_image_tag: ${{ needs.clients-base.outputs.image_tag }}"
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Show Energy Results
         if: always()
         uses: green-coding-solutions/eco-ci-energy-estimation@v4

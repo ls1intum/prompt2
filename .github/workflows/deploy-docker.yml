@@ -83,9 +83,17 @@ jobs:
           script: |
             docker compose -f docker-compose.prod.yml --env-file=.env.prod down --remove-orphans --rmi all
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Copy file to VM Host
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -136,6 +144,10 @@ jobs:
           source: "master.cf"
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: SSH to VM and create .env.prod file
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -209,6 +221,10 @@ jobs:
 
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: SSH to VM and Execute Docker-Compose Up
         uses: appleboy/ssh-action@v1.0.3
         with:

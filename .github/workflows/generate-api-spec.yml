@@ -23,6 +23,10 @@ jobs:
           filters: |
             core:
               - 'servers/core/**'
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Show Energy Results
         if: always()
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
@@ -54,11 +58,19 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Install swag
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
 
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Generate API spec for ${{ matrix.directory }}
         run: |
           cd servers/${{ matrix.directory }}

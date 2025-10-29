@@ -26,6 +26,10 @@ jobs:
               - 'servers/core/**'
             team_allocation:
               - 'servers/team_allocation/**'
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Show Energy Results
         if: always()
         uses: green-coding-solutions/eco-ci-energy-estimation@v4
@@ -58,8 +62,16 @@ jobs:
         with:
           go-version: 1.22
           cache-dependency-path: "**/*.sum"
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Install dependencies
         run: cd servers/${{ matrix.directory }} && go mod download
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: Test with Go
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
