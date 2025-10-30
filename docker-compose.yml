@@ -135,6 +135,31 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
 
+  # Template server (example service)
+  server-template-server:
+    build:
+      context: ./servers/template_server
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-template-server
+    depends_on:
+      db-template-server:
+        condition: service_healthy
+    ports:
+      - "8086:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST=${DB_TEMPLATE_SERVER_HOST}
+      - DB_PORT=${DB_TEMPLATE_SERVER_PORT}
+      - DB_NAME=${DB_TEMPLATE_SERVER_NAME}
+      - DB_PASSWORD=${DB_TEMPLATE_SERVER_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - DEBUG
+
   client-core:
     build:
       context: ./clients/core
@@ -302,6 +327,25 @@ services:
       retries: 5
     ports:
       - "5435:5432"
+
+  # Database for the template server
+  db-template-server:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-template-server
+    environment:
+      - POSTGRES_USER=${DB_TEMPLATE_SERVER_USER:-prompt-postgres}
+      - POSTGRES_PASSWORD=${DB_TEMPLATE_SERVER_PASSWORD:-prompt-postgres}
+      - POSTGRES_DB=${DB_TEMPLATE_SERVER_NAME:-prompt}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_template_server_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${DB_TEMPLATE_SERVER_NAME:-prompt} -U ${DB_TEMPLATE_SERVER_USER:-prompt-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5437:5432"
 
   db-self-team-allocation:
     image: "postgres:15.2-alpine"
