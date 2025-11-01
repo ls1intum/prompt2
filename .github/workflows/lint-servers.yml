@@ -9,9 +9,22 @@ jobs:
     outputs:
       modules: ${{ steps.set-matrix.outputs.modules }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - id: set-matrix
         run: echo "modules=$(find servers -mindepth 1 -maxdepth 1 -type d | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
 
   lint-server:
     needs: set-matrix
@@ -20,14 +33,27 @@ jobs:
       matrix:
         module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
     steps:
+      - name: Initialize Energy Estimation
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: start-measurement
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: stable
           cache-dependency-path: "${{ matrix.module }}/*.sum"
+      - name: Get Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: get-measurement
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64
           working-directory: ${{ matrix.module }}
           args: --timeout 5m
+      - name: Show Energy Results
+        if: always()
+        uses: green-coding-solutions/eco-ci-energy-estimation@v4
+        with:
+          task: display-results
