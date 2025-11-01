@@ -25,7 +25,10 @@ export const StudentVisibilityToggles = ({
           <Checkbox
             id='grade-suggestion-visible'
             checked={gradeSuggestionVisible}
-            onCheckedChange={(value) => onGradeSuggestionVisibleChange(value as boolean)}
+            onCheckedChange={(value) => {
+              const checked = value === true
+              onGradeSuggestionVisibleChange(checked)
+            }}
             disabled={disabled}
           />
           <Label htmlFor='grade-suggestion-visible' className='text-sm font-medium'>
@@ -36,7 +39,10 @@ export const StudentVisibilityToggles = ({
           <Checkbox
             id='action-items-visible'
             checked={actionItemsVisible}
-            onCheckedChange={(value) => onActionItemsVisibleChange(value as boolean)}
+            onCheckedChange={(value) => {
+              const checked = value === true
+              onActionItemsVisibleChange(checked)
+            }}
             disabled={disabled}
           />
           <Label htmlFor='action-items-visible' className='text-sm font-medium'>
