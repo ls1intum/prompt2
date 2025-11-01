@@ -98,7 +98,7 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 		return assessmentDTO.StudentAssessment{}, errors.New("could not get assessments for student in phase")
 	}
 
-	var completion assessmentCompletionDTO.AssessmentCompletion = assessmentCompletionDTO.AssessmentCompletion{}
+	var completion = assessmentCompletionDTO.AssessmentCompletion{}
 	var studentScore = scoreLevelDTO.StudentScore{
 		ScoreLevel:   scoreLevelDTO.ScoreLevelVeryBad,
 		ScoreNumeric: pgtype.Float8{Float64: 0.0, Valid: true},

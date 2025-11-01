@@ -62,7 +62,7 @@ func (suite *AssessmentCompletionServiceTestSuite) TestCountRemainingAssessments
 }
 
 func (suite *AssessmentCompletionServiceTestSuite) TestUnmarkAssessmentAsCompletedNonExisting() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	partID := uuid.New()
 	err := UnmarkAssessmentAsCompleted(suite.suiteCtx, partID, phaseID)
 	assert.NoError(suite.T(), err, "Unmarking non-existent completion should not error")

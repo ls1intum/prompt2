@@ -105,6 +105,8 @@ export const SaveConfigurationSection = ({
       tutorEvaluationStart: evaluationOptions.tutor.start,
       tutorEvaluationDeadline: evaluationOptions.tutor.deadline,
       evaluationResultsVisible: mainConfigState.evaluationResultsVisible,
+      gradeSuggestionVisible: mainConfigState.gradeSuggestionVisible,
+      actionItemsVisible: mainConfigState.actionItemsVisible,
     })
   }
 

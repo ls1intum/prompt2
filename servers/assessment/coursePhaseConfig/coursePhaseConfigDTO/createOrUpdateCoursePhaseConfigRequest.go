@@ -24,4 +24,6 @@ type CreateOrUpdateCoursePhaseConfigRequest struct {
 	TutorEvaluationStart     time.Time `json:"tutorEvaluationStart"`
 	TutorEvaluationDeadline  time.Time `json:"tutorEvaluationDeadline"`
 	EvaluationResultsVisible bool      `json:"evaluationResultsVisible"`
+	GradeSuggestionVisible   *bool     `json:"gradeSuggestionVisible,omitempty"`
+	ActionItemsVisible       *bool     `json:"actionItemsVisible,omitempty"`
 }

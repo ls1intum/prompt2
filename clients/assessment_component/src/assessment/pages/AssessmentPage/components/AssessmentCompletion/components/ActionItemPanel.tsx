@@ -16,6 +16,7 @@ import {
 import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
 import { getAllActionItemsForStudentInPhase } from '../../../../../network/queries/getAllActionItemsForStudentInPhase'
 
+import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhaseConfigStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
 
 import { useCreateActionItem } from '../hooks/useCreateActionItem'
@@ -35,6 +36,7 @@ export function ActionItemPanel() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { assessmentCompletion } = useStudentAssessmentStore()
 
   const completed = assessmentCompletion?.completed ?? false
@@ -140,9 +142,11 @@ export function ActionItemPanel() {
       <Card>
         <CardHeader>
           <CardTitle>Action Items</CardTitle>
-          <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-            These action items will be visible to the student after the assessment deadline.
-          </p>
+          {coursePhaseConfig?.actionItemsVisible && (
+            <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+              These action items will be visible to the student after the assessment deadline.
+            </p>
+          )}
         </CardHeader>
         <CardContent className='space-y-2'>
           {actionItems.map((item) => (
