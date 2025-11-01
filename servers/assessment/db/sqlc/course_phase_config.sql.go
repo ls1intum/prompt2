@@ -42,7 +42,9 @@ INSERT INTO course_phase_config (assessment_template_id,
                                  evaluation_results_visible,
                                  grade_suggestion_visible,
                                  action_items_visible)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
+        COALESCE($18::boolean, TRUE), 
+        COALESCE($19::boolean, TRUE))
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_template_id     = EXCLUDED.assessment_template_id,
                   start                      = EXCLUDED.start,
@@ -60,8 +62,8 @@ ON CONFLICT (course_phase_id)
                   tutor_evaluation_start     = EXCLUDED.tutor_evaluation_start,
                   tutor_evaluation_deadline  = EXCLUDED.tutor_evaluation_deadline,
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
-                  grade_suggestion_visible   = EXCLUDED.grade_suggestion_visible,
-                  action_items_visible       = EXCLUDED.action_items_visible
+                  grade_suggestion_visible   = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
+                  action_items_visible       = COALESCE(EXCLUDED.action_items_visible, TRUE)
 `
 
 type CreateOrUpdateCoursePhaseConfigParams struct {
@@ -82,8 +84,8 @@ type CreateOrUpdateCoursePhaseConfigParams struct {
 	TutorEvaluationStart     pgtype.Timestamptz `json:"tutor_evaluation_start"`
 	TutorEvaluationDeadline  pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
 	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
-	GradeSuggestionVisible   bool               `json:"grade_suggestion_visible"`
-	ActionItemsVisible       bool               `json:"action_items_visible"`
+	GradeSuggestionVisible   pgtype.Bool        `json:"grade_suggestion_visible"`
+	ActionItemsVisible       pgtype.Bool        `json:"action_items_visible"`
 }
 
 func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg CreateOrUpdateCoursePhaseConfigParams) error {

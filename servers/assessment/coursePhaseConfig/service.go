@@ -70,6 +70,18 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 
 	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
 
+	// Convert pointer bool to pgtype.Bool for GradeSuggestionVisible and ActionItemsVisible
+	// If nil, the field will not be valid, which allows COALESCE to use the DB default (true)
+	gradeSuggestionVisible := pgtype.Bool{}
+	if req.GradeSuggestionVisible != nil {
+		gradeSuggestionVisible = pgtype.Bool{Bool: *req.GradeSuggestionVisible, Valid: true}
+	}
+
+	actionItemsVisible := pgtype.Bool{}
+	if req.ActionItemsVisible != nil {
+		actionItemsVisible = pgtype.Bool{Bool: *req.ActionItemsVisible, Valid: true}
+	}
+
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
 		AssessmentTemplateID:     req.AssessmentTemplateID,
 		CoursePhaseID:            coursePhaseID,
@@ -88,8 +100,8 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		TutorEvaluationStart:     pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
 		TutorEvaluationDeadline:  pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
-		GradeSuggestionVisible:   req.GradeSuggestionVisible,
-		ActionItemsVisible:       req.ActionItemsVisible,
+		GradeSuggestionVisible:   gradeSuggestionVisible,
+		ActionItemsVisible:       actionItemsVisible,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
