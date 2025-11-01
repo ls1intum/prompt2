@@ -21,11 +21,10 @@ import (
 
 type ActionItemRouterTestSuite struct {
 	suite.Suite
-	router            *gin.Engine
-	suiteCtx          context.Context
-	cleanup           func()
-	service           ActionItemService
-	completionService assessmentCompletion.AssessmentCompletionService
+	router   *gin.Engine
+	suiteCtx context.Context
+	cleanup  func()
+	service  ActionItemService
 }
 
 func (suite *ActionItemRouterTestSuite) SetupSuite() {
