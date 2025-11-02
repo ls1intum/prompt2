@@ -1,5 +1,6 @@
 // these are just the defaults, which are overwritten via env.template.js at production
 window.env = {
+  ENVIRONMENT: 'development',
   CORE_HOST: 'http://localhost:8080',
   INTRO_COURSE_HOST: 'http://localhost:8082',
   TEAM_ALLOCATION_HOST: 'http://localhost:8083',
@@ -13,4 +14,5 @@ window.env = {
   GITHUB_SHA: 'GITHUB_SHA - Will be here in Production',
   GITHUB_REF: '$GITHUB_REF - Will be here in Production',
   SERVER_IMAGE_TAG: '$SERVER_IMAGE_TAG - Image Tag',
+  SENTRY_DSN_CLIENT: '', // Sentry DSN for core client - leave empty for local development
 }
