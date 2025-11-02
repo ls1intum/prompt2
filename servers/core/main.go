@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
@@ -132,7 +133,7 @@ func main() {
 
 	// initialize Sentry
 	initSentry()
-	defer sentry.Flush(2 * 1000) // Flush buffered events before exiting (2 seconds timeout)
+	defer sentry.Flush(2 * time.Second) // Flush buffered events before exiting (2 seconds timeout)
 
 	// establish database connection
 	databaseURL := getDatabaseURL()
