@@ -27,3 +27,20 @@ DELETE FROM assignments
 WHERE course_participation_id = $1
   AND course_phase_id = $2
   AND team_id = $3;
+
+-- name: GetAssignmentsByCoursePhase :many
+SELECT a.*
+FROM assignments a
+WHERE a.course_phase_id = $1;
+
+-- name: GetAssignmentForStudent :one
+SELECT id,
+       course_participation_id,
+       student_full_name,
+       team_id,
+       course_phase_id,
+       created_at,
+       updated_at
+FROM assignments
+WHERE course_participation_id = $1
+  AND course_phase_id = $2;
