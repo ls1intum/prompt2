@@ -108,13 +108,14 @@ func UpdateTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, newTeamNam
 	return nil
 }
 
-func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID, studentFullName string) error {
+func AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID, studentFirstName, studentLastName string) error {
 	err := AssignmentServiceSingleton.queries.CreateOrUpdateAssignment(ctx, db.CreateOrUpdateAssignmentParams{
 		ID:                    uuid.New(),
 		TeamID:                teamID,
 		CoursePhaseID:         coursePhaseID,
 		CourseParticipationID: courseParticipationID,
-		StudentFullName:       studentFullName,
+		StudentFirstName:      studentFirstName,
+		StudentLastName:       studentLastName,
 	})
 
 	if err != nil {
@@ -166,4 +167,76 @@ func ValidateTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (bool, erro
 		return false, errors.New("request is outside the allowed timeframe")
 	}
 	return true, nil
+}
+
+func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []teamDTO.Tutor) error {
+	tx, err := TeamsServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := TeamsServiceSingleton.queries.WithTx(tx)
+
+	for _, tutor := range tutors {
+		// store tutor in database
+		err := qtx.CreateTutor(ctx, db.CreateTutorParams{
+			CoursePhaseID:         coursePhaseID,
+			CourseParticipationID: tutor.CourseParticipationID,
+			FirstName:             tutor.FirstName,
+			LastName:              tutor.LastName,
+			TeamID:                tutor.TeamID,
+		})
+		if err != nil {
+			log.Error("could not create tutor: ", err)
+			return errors.New("could not create tutor")
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func CreateManualTutor(ctx context.Context, coursePhaseID uuid.UUID, firstName, lastName string, teamID uuid.UUID) error {
+	// Generate a new UUID for the course participation ID
+	courseParticipationID := uuid.New()
+
+	err := TeamsServiceSingleton.queries.CreateTutor(ctx, db.CreateTutorParams{
+		CoursePhaseID:         coursePhaseID,
+		CourseParticipationID: courseParticipationID,
+		FirstName:             firstName,
+		LastName:              lastName,
+		TeamID:                teamID,
+	})
+
+	if err != nil {
+		log.Error("could not create manual tutor: ", err)
+		return errors.New("could not create manual tutor")
+	}
+	return nil
+}
+
+func DeleteTutor(ctx context.Context, coursePhaseID, tutorID uuid.UUID) error {
+	err := TeamsServiceSingleton.queries.DeleteTutor(ctx, db.DeleteTutorParams{
+		CourseParticipationID: tutorID,
+		CoursePhaseID:         coursePhaseID,
+	})
+
+	if err != nil {
+		log.Error("could not delete tutor: ", err)
+		return errors.New("could not delete tutor")
+	}
+	return nil
+}
+
+func GetTutorsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) ([]teamDTO.Tutor, error) {
+	dbTutors, err := TeamsServiceSingleton.queries.GetTutorsByCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get tutors from database: ", err)
+		return nil, errors.New("could not get tutors from database")
+	}
+	return teamDTO.GetTutorDTOsFromDBModels(dbTutors), nil
 }

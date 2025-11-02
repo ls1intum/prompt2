@@ -9,13 +9,15 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createOrUpdateAssignment = `-- name: CreateOrUpdateAssignment :exec
 INSERT INTO assignments AS a (
   id,
   course_participation_id,
-  student_full_name,
+  student_first_name,
+  student_last_name,
   team_id,
   course_phase_id,
   created_at,
@@ -26,6 +28,7 @@ INSERT INTO assignments AS a (
   $3,
   $4,
   $5,
+  $6,
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 )
@@ -38,7 +41,8 @@ SET team_id = EXCLUDED.team_id,
 type CreateOrUpdateAssignmentParams struct {
 	ID                    uuid.UUID `json:"id"`
 	CourseParticipationID uuid.UUID `json:"course_participation_id"`
-	StudentFullName       string    `json:"student_full_name"`
+	StudentFirstName      string    `json:"student_first_name"`
+	StudentLastName       string    `json:"student_last_name"`
 	TeamID                uuid.UUID `json:"team_id"`
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
@@ -47,7 +51,8 @@ func (q *Queries) CreateOrUpdateAssignment(ctx context.Context, arg CreateOrUpda
 	_, err := q.db.Exec(ctx, createOrUpdateAssignment,
 		arg.ID,
 		arg.CourseParticipationID,
-		arg.StudentFullName,
+		arg.StudentFirstName,
+		arg.StudentLastName,
 		arg.TeamID,
 		arg.CoursePhaseID,
 	)
@@ -75,7 +80,8 @@ func (q *Queries) DeleteAssignment(ctx context.Context, arg DeleteAssignmentPara
 const getAssignmentForStudent = `-- name: GetAssignmentForStudent :one
 SELECT id,
        course_participation_id,
-       student_full_name,
+       student_first_name,
+       student_last_name,
        team_id,
        course_phase_id,
        created_at,
@@ -90,13 +96,25 @@ type GetAssignmentForStudentParams struct {
 	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
 }
 
-func (q *Queries) GetAssignmentForStudent(ctx context.Context, arg GetAssignmentForStudentParams) (Assignment, error) {
+type GetAssignmentForStudentRow struct {
+	ID                    uuid.UUID        `json:"id"`
+	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
+	StudentFirstName      string           `json:"student_first_name"`
+	StudentLastName       string           `json:"student_last_name"`
+	TeamID                uuid.UUID        `json:"team_id"`
+	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
+}
+
+func (q *Queries) GetAssignmentForStudent(ctx context.Context, arg GetAssignmentForStudentParams) (GetAssignmentForStudentRow, error) {
 	row := q.db.QueryRow(ctx, getAssignmentForStudent, arg.CourseParticipationID, arg.CoursePhaseID)
-	var i Assignment
+	var i GetAssignmentForStudentRow
 	err := row.Scan(
 		&i.ID,
 		&i.CourseParticipationID,
-		&i.StudentFullName,
+		&i.StudentFirstName,
+		&i.StudentLastName,
 		&i.TeamID,
 		&i.CoursePhaseID,
 		&i.CreatedAt,
@@ -106,7 +124,7 @@ func (q *Queries) GetAssignmentForStudent(ctx context.Context, arg GetAssignment
 }
 
 const getAssignmentsByCoursePhase = `-- name: GetAssignmentsByCoursePhase :many
-SELECT a.id, a.course_participation_id, a.student_full_name, a.team_id, a.course_phase_id, a.created_at, a.updated_at
+SELECT a.id, a.course_participation_id, a.team_id, a.course_phase_id, a.created_at, a.updated_at, a.student_first_name, a.student_last_name
 FROM assignments a
 WHERE a.course_phase_id = $1
 `
@@ -123,11 +141,12 @@ func (q *Queries) GetAssignmentsByCoursePhase(ctx context.Context, coursePhaseID
 		if err := rows.Scan(
 			&i.ID,
 			&i.CourseParticipationID,
-			&i.StudentFullName,
 			&i.TeamID,
 			&i.CoursePhaseID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.StudentFirstName,
+			&i.StudentLastName,
 		); err != nil {
 			return nil, err
 		}

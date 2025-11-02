@@ -23,6 +23,12 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 
 	// this is required to comply with the inter phase communication protocol
 	teamRouter.GET("/:teamID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTeamByID)
+
+	// Tutor management endpoints
+	teamRouter.POST("/tutors", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), importTutors)
+	teamRouter.POST("/:teamID/tutor", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createManualTutor)
+	teamRouter.DELETE("/tutor/:tutorID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteTutor)
+	teamRouter.GET("/tutors", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTutors)
 }
 
 func getAllTeams(c *gin.Context) {
@@ -193,9 +199,7 @@ func assignTeam(c *gin.Context) {
 		return
 	}
 
-	studentFullName := firstName.(string) + " " + lastName.(string)
-
-	err = AssignTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID), studentFullName)
+	err = AssignTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID), firstName.(string), lastName.(string))
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -264,6 +268,106 @@ func deleteTeam(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func importTutors(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var tutors []teamDTO.Tutor
+	if err := c.BindJSON(&tutors); err != nil {
+		log.Error("Error binding tutors: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := ImportTutors(c, coursePhaseID, tutors); err != nil {
+		log.Error("Error importing tutors: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
+func createManualTutor(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		log.Error("Error parsing teamID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var request struct {
+		FirstName string `json:"firstName" binding:"required"`
+		LastName  string `json:"lastName" binding:"required"`
+	}
+
+	if err := c.BindJSON(&request); err != nil {
+		log.Error("Error binding request: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := CreateManualTutor(c, coursePhaseID, request.FirstName, request.LastName, teamID); err != nil {
+		log.Error("Error creating manual tutor: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
+func deleteTutor(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tutorID, err := uuid.Parse(c.Param("tutorID"))
+	if err != nil {
+		log.Error("Error parsing tutorID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := DeleteTutor(c, coursePhaseID, tutorID); err != nil {
+		log.Error("Error deleting tutor: ", err)
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func getTutors(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.Error("Error parsing coursePhaseID: ", err)
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tutors, err := GetTutorsByCoursePhase(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, tutors)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
