@@ -29,12 +29,9 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
   const gradeSuggestionVisible = coursePhaseConfig?.gradeSuggestionVisible ?? true
   const actionItemsVisible = coursePhaseConfig?.actionItemsVisible ?? true
   const bothVisible = gradeSuggestionVisible && actionItemsVisible
-  const noneVisible = !gradeSuggestionVisible && !actionItemsVisible
 
   const getResultsAvailableText = () => {
-    if (noneVisible) {
-      return 'The assessment deadline has passed. '
-    } else if (bothVisible) {
+    if (bothVisible) {
       return (
         'The assessment deadline has passed and your results are now available. ' +
         'You can view your action items and grade suggestions below to understand areas for improvement.'
@@ -52,7 +49,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
     }
     return (
       'The assessment deadline has passed and your results are now available. ' +
-      'For more information about your assessment, please contact your tutor / instructor.'
+      'You will receive further information about your assessment from your tutor / instructor.'
     )
   }
 
