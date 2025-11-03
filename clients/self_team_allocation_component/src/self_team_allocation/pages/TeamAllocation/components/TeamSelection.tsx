@@ -4,6 +4,7 @@ import { RefreshCw, Users } from 'lucide-react'
 import type { Team } from '../../../interfaces/team'
 import { Button, ManagementPageHeader, DeleteConfirmation } from '@tumaet/prompt-ui-components'
 import { TeamCreationDialog } from './TeamCreationDialog'
+import { TutorImportDialog } from './TutorImportDialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { TeamCard } from './TeamCard'
@@ -94,17 +95,14 @@ export const TeamSelection: React.FC<Props> = ({
       </div>
 
       {!disabled && (
-        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3'>
+        <div className='flex flex-col sm:flex-row items-start gap-3'>
           <TeamCreationDialog
             onCreate={(name) => createMutation.mutate(name)}
             teams={teams}
             disabled={myTeam?.id !== undefined || isLecturer}
           />
-          <Button
-            variant='outline'
-            onClick={refetchTeams}
-            className='flex items-center gap-2 w-full sm:w-auto order-2 sm:order-1 sm mt-4'
-          >
+          {isLecturer && <TutorImportDialog />}
+          <Button variant='outline' onClick={refetchTeams}>
             <RefreshCw className='h-4 w-4' />
             Refresh Teams
           </Button>
