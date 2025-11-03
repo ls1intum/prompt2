@@ -13,6 +13,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/template_server/config"
 	"github.com/ls1intum/prompt2/servers/template_server/copy"
 	db "github.com/ls1intum/prompt2/servers/template_server/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/template_server/template"
 	"github.com/ls1intum/prompt2/servers/template_server/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -81,7 +82,7 @@ func main() {
 	router := gin.Default()
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
-	api := router.Group("template-server/api/course_phase/:coursePhaseID")
+	api := router.Group("template-service/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
 	api.GET("/hello", func(c *gin.Context) {
@@ -89,10 +90,12 @@ func main() {
 			"message": "Hello from the template service"})
 	})
 
-	copyApi := router.Group("template-server/api")
+	copyApi := router.Group("template-service/api")
 	copy.InitCopyModule(copyApi, *query, conn)
 
 	config.InitConfigModule(api, *query, conn)
+
+	template.InitTemplateModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8086")
 	err = router.Run(serverAddress)

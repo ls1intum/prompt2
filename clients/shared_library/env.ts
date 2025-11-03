@@ -18,5 +18,6 @@ type EnvType = {
   GITHUB_REF: string
   SERVER_IMAGE_TAG: string
   SELF_TEAM_ALLOCATION_HOST: string
+  TEMPLATE_HOST: string
 }
 export const env: EnvType = { ...window.env }
