@@ -29,42 +29,6 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-/* Sidebar category styling - make category headings more distinct */
-.menu__link--sublist {
-  font-weight: 600;
-  color: var(--ifm-color-content);
-}
-
-.menu__link--sublist-caret {
-  margin-left: 0.25rem;
-}
-
-/* Make category items more visually distinct */
-.menu__list-item.menu__list-item--collapsed > .menu__link {
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.menu__list-item:not(.menu__list-item--collapsed) > .menu__link {
-  opacity: 1;
-}
-
-/* Add subtle background to active category */
-.menu__list-item--collapsed > .menu__link.menu__link--active,
-.menu__list-item:not(.menu__list-item--collapsed) > .menu__link.menu__link--active {
-  background-color: var(--ifm-menu-color-background-active);
-}
-
-/* Better spacing for top-level categories */
-.theme-doc-sidebar-container .menu > .menu__list > .menu__list-item {
-  margin-bottom: 0.5rem;
-}
-
-/* Make nested items more visually distinct from categories */
-.menu__list .menu__list .menu__link {
-  font-weight: normal;
-  padding-left: 2rem;
-}
 
 /*
  Ensure the Docusaurus ThemedImage used for the navbar logo is visible.
