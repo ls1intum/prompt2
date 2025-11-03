@@ -18,8 +18,15 @@ ALTER TABLE assignments
     ADD COLUMN student_last_name  TEXT NOT NULL DEFAULT '';
 
 UPDATE assignments
-SET student_first_name = COALESCE(SPLIT_PART(student_full_name, ' ', 1), ''),
-    student_last_name = COALESCE(TRIM(SUBSTRING(student_full_name FROM POSITION(' ' IN student_full_name) + 1)), '')
+SET student_first_name = COALESCE(
+        NULLIF(TRIM(SPLIT_PART(TRIM(regexp_replace(student_full_name, '\s+', ' ', 'g')), ' ', 1)), ''),
+        student_full_name,
+        ''
+    ),
+    student_last_name = COALESCE(
+        NULLIF(TRIM(SUBSTRING(TRIM(regexp_replace(student_full_name, '\s+', ' ', 'g')) FROM POSITION(' ' IN TRIM(regexp_replace(student_full_name, '\s+', ' ', 'g'))) + 1)), ''),
+        ''
+    )
 WHERE student_full_name IS NOT NULL AND student_full_name != '';
 
 -- Now drop the old column
