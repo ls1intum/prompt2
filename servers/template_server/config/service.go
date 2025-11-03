@@ -17,6 +17,9 @@ var ConfigServiceSingleton *ConfigService
 
 type TemplateServerConfigHandler struct{}
 
+// HandlePhaseConfig is a placeholder implementation demonstrating the expected
+// method signature for phase config handlers. It currently returns 404 until
+// the actual functionality is implemented.
 func (h *TemplateServerConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]bool, err error) {
 	c.AbortWithStatus(http.StatusNotFound)
 	return nil, nil

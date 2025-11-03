@@ -10,7 +10,7 @@ func CORS() gin.HandlerFunc {
 	localHost := "http://localhost:3000"
 	clientHost := GetEnv("CORE_HOST", localHost)
 	// if not localhost add https
-	if clientHost != localHost && !strings.HasPrefix(clientHost, "https://") {
+	if clientHost != localHost && !strings.HasPrefix(clientHost, "http://") && !strings.HasPrefix(clientHost, "https://") {
 		clientHost = "https://" + clientHost
 	}
 

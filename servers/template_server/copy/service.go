@@ -18,6 +18,9 @@ var CopyServiceSingleton *CopyService
 
 type TemplateServerCopyHandler struct{}
 
+// HandlePhaseCopy is a placeholder implementation demonstrating the expected
+// method signature for phase copy handlers. It currently returns 404 until
+// the actual functionality is implemented.
 func (h *TemplateServerCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
 	c.AbortWithStatus(http.StatusNotFound)
 	return nil
