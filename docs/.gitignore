@@ -4,3 +4,6 @@ _build/
 __pycache__/
 .env
 venv
+
+# Dependencies
+/node_modules
