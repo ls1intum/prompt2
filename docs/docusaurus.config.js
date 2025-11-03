@@ -48,17 +48,6 @@ const config = {
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/docs/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/blog/',
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -87,7 +76,6 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/ls1intum/prompt2/tree/main',
             label: 'GitHub',
@@ -127,10 +115,6 @@ const config = {
           {
             title: 'More',
             items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
               {
                 label: 'GitHub',
                 href: 'https://github.com/ls1intum/prompt2/tree/main',
