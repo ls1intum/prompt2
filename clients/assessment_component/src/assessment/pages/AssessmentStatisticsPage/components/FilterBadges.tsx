@@ -74,7 +74,7 @@ export const FilterBadges = ({ filters, onRemoveFilter, teams }: FilterBadgesPro
   }
 
   return (
-    <div className='flex flex-wrap gap-2'>
+    <div className='flex flex-wrap gap-2 h-5'>
       {activeBadges.map(({ key, label, onRemove }) => (
         <FilterBadge key={key} label={label} onRemove={onRemove} />
       ))}
