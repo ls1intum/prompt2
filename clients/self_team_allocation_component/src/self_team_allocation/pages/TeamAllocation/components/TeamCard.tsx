@@ -59,7 +59,8 @@ export const TeamCard: React.FC<TeamCardProps> = ({
       {team.members.length > 0 ? (
         <ul className='space-y-2 h-[120px] overflow-y-auto'>
           {team.members.map((m, idx) => {
-            const isCurrent = m.courseParticipationID === courseParticipationID
+            const isCurrent =
+              courseParticipationID && m.courseParticipationID === courseParticipationID
             return (
               <li
                 key={idx}
@@ -68,7 +69,9 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                 }`}
               >
                 <Users size={16} className={isCurrent ? 'text-primary' : ''} />
-                <span className='truncate'>{m.studentName}</span>
+                <span className='truncate'>
+                  {m.firstName} {m.lastName}
+                </span>
                 {isCurrent && (
                   <Badge variant='outline' className='ml-auto text-xs'>
                     You
