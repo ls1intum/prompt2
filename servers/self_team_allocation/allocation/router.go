@@ -1,6 +1,7 @@
 package allocation
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,10 @@ func getAllocationByCourseParticipationID(c *gin.Context) {
 
 	allocation, err := GetAllocationByCourseParticipationID(c, courseParticipationID, coursePhaseID)
 	if err != nil {
+		if errors.Is(err, ErrAssignmentNotFound) {
+			handleError(c, http.StatusNotFound, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
