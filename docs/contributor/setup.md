@@ -15,13 +15,14 @@ Welcome to the **Prompt** setup guide! In this document, you will learn how to c
 
 ## Prerequisites
 
-```{admonition} Read the Contributor Guidelines
-:class: warning
+:::warning
+Read the Contributor Guidelines
+
 ![notPass](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHE5d3drMjQ2b2hidGdlYzM3azcyanhvZnZpNWF6bGl4cGdidGhvdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xULW8MYvpNOfMXfDH2/giphy.gif)
 
+Before you continue, please make sure to read the [contributor guidelines](./index.md).
 
-Before you continue, please make sure to read the [contributor guidelines](#contributor.guidelines).
-```
+:::
 
 Before you can build and run **Prompt**, you must install and configure the following dependencies on your machine:
 
