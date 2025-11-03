@@ -1,7 +1,7 @@
 import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
 import { StatisticsFilter } from './FilterMenu'
 import { Team } from '../../../interfaces/team'
-import { FilterBadge } from '../../../../../../shared_library/components/FilterBadge'
+import { FilterBadge } from '@/components/FilterBadge'
 
 interface FilterBadgesProps {
   filters: StatisticsFilter
