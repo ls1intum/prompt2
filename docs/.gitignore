@@ -7,3 +7,4 @@ venv
 
 # Dependencies
 /node_modules
+/.docusaurus
