@@ -44,14 +44,48 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
-        docs: {
-          sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/docs/',
-        },
+        // We disable the single `docs` preset instance below and register
+        // multiple instances of the docs plugin (user, contributor, admin)
+        // so each section can live at a top-level route.
+        docs: false,
         theme: {
           customCss: './src/css/custom.css',
         },
       }),
+    ],
+  ],
+
+  // Register separate docs plugin instances for each top-level guide.
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'user',
+        path: 'user',
+        routeBasePath: 'user',
+        sidebarPath: './sidebars.js',
+        editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/user/',
+      },
+    ],
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'contributor',
+        path: 'contributor',
+        routeBasePath: 'contributor',
+        sidebarPath: './sidebars.js',
+        editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/contributor/',
+      },
+    ],
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'admin',
+        path: 'admin',
+        routeBasePath: 'admin',
+        sidebarPath: './sidebars.js',
+        editUrl: 'https://github.com/ls1intum/prompt2/tree/main/docs/admin/',
+      },
     ],
   ],
 
@@ -68,13 +102,29 @@ const config = {
         logo: {
           alt: 'Prompt Logo',
           src: 'img/prompt_logo.svg',
+          // dark-theme variant (falls back to `src` if missing)
+          srcDark: 'img/prompt_logo.svg',
+          // make the logo a reasonable size in the navbar
+          width: 32,
+          height: 32,
+          // clicking the logo should go to the site root (baseUrl will be applied)
+          href: '/',
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'docsSidebar',
+            to: '/user',
+            label: 'User Guide',
             position: 'left',
-            label: 'Documentation',
+          },
+          {
+            to: '/contributor',
+            label: 'Contributor Guide',
+            position: 'left',
+          },
+          {
+            to: '/admin',
+            label: 'Administrator Guide',
+            position: 'left',
           },
           {
             href: 'https://github.com/ls1intum/prompt2/tree/main',
@@ -91,15 +141,15 @@ const config = {
             items: [
               {
                 label: 'User Guide',
-                to: '/docs/category/user-guide',
+                to: '/user',
               },
               {
                 label: 'Contributor Guide',
-                to: '/docs/category/contributor-guide',
+                to: '/contributor',
               },
               {
                 label: 'Administrator Guide',
-                to: '/docs/category/administrator-guide',
+                to: '/admin',
               },
             ],
           },

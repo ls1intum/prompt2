@@ -65,3 +65,22 @@
   font-weight: normal;
   padding-left: 2rem;
 }
+
+/*
+ Ensure the Docusaurus ThemedImage used for the navbar logo is visible.
+ Docusaurus generates CSS-module class names like `themedComponent_<hash>` and
+ `themedComponent--light_<hash>` / `themedComponent--dark_<hash>`. Some
+ generated rules hide the base class; here we force the navbar logo image to
+ display and then hide the unused theme variant based on the site's
+ `data-theme` attribute.
+*/
+.navbar__brand .navbar__logo img[class*="themedComponent"] {
+  display: inline-block !important;
+  width: 32px;
+  height: 32px;
+}
+
+/* Remove extra spacing so the logo is closer to the site title */
+.navbar__brand .navbar__logo {
+  margin-right: 0 !important;
+}

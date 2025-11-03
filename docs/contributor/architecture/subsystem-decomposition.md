@@ -15,9 +15,11 @@ The PROMPT platform is composed of two main subsystems:
 
 These components form the foundation of the course management platform. Both client and server are integrated with **Keycloak** for identity and access management.
 
-```{figure} ./subsystem.png
-Subsystem Decomposition for the PROMPT Core. The grey color represents off-the-shelf external components. The green color represents a course phase type implemented as an independent service, which is a placeholder for a concrete course phase type, such as intro course or team allocation. Blue highlights the core components.
-```
+import SubsystemImage from './img/subsystem.png';
+
+<img src={SubsystemImage} alt="Subsystem Decomposition for the PROMPT Core" />
+
+> Subsystem Decomposition for the PROMPT Core. The grey color represents off-the-shelf external components. The green color represents a course phase type implemented as an independent service, which is a placeholder for a concrete course phase type, such as intro course or team allocation. Blue highlights the core components.
 
 ## ⚙️ Core Subsystems
 

@@ -8,9 +8,11 @@ This section provides an overview of the **deployment structure** for the PROMPT
 
 
 
-```{figure} ./deployment.png
-Deployment Diagram of the PROMPT 2 System. The system follows a client-server architecture with the core server running on a virtual machine alongside its database and mail service. The core client runs in the browser and dynamically loads microfrontends from course phase services. Blue indicates core components, green represents course phase service components, and grey denotes external tools or off-the-shelf systems.
-```
+import DeploymentImage from './img/deployment.png';
+
+<img src={DeploymentImage} alt="Deployment Diagram of the PROMPT 2 System" />
+
+> Deployment Diagram of the PROMPT 2 System. The system follows a client-server architecture with the core server running on a virtual machine alongside its database and mail service. The core client runs in the browser and dynamically loads microfrontends from course phase services. Blue indicates core components, green represents course phase service components, and grey denotes external tools or off-the-shelf systems.
 
 ## 🧱 Core Components
 

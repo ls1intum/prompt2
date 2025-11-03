@@ -1,4 +1,3 @@
-(contributor.setup-guide)=
 ---
 sidebar_position: 3
 ---

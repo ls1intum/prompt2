@@ -47,7 +47,9 @@ To support this, the **Core Server provides an endpoint** that returns the corre
 
 ### 🧪 Example: Course Lecturer Access Flow
 
-![PROMPT 2 Access Control Flow for Course Lecturers](./prompt_2_access_control_lecturer.png)
+import LecturerAccess from './img/prompt_2_access_control_lecturer.png';
+
+<img src={LecturerAccess} alt="PROMPT 2 Access Control Flow for Course Lecturers" />
 
 In this flow:
 
@@ -70,7 +72,9 @@ Instead, the **Core Server maintains authoritative information** about which stu
 
 ### 🧪 Example: Course Student Access Flow
 
-![PROMPT 2 Access Control Flow for Course Students](./prompt_2_access_control_student.png)
+import StudentAccess from './img/prompt_2_access_control_student.png';
+
+<img src={StudentAccess} alt="PROMPT 2 Access Control Flow for Course Students" />
 
 In this flow:
 
