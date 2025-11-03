@@ -2,6 +2,7 @@ package allocation
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -9,6 +10,9 @@ import (
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
+
+// ErrAssignmentNotFound is returned when an assignment is not found in the database
+var ErrAssignmentNotFound = errors.New("assignment not found")
 
 type AllocationService struct {
 	queries db.Queries
