@@ -18,6 +18,6 @@ var ConfigServiceSingleton *ConfigService
 type TemplateServerConfigHandler struct{}
 
 func (h *TemplateServerConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]bool, err error) {
-	http.NotFound(c.Writer, c.Request)
+	c.AbortWithStatus(http.StatusNotFound)
 	return nil, nil
 }

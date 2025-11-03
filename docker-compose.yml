@@ -152,10 +152,11 @@ services:
       - CORE_HOST
       - SERVER_CORE_HOST
       - SERVER_ADDRESS
-      - DB_HOST=${DB_TEMPLATE_SERVER_HOST}
-      - DB_PORT=${DB_TEMPLATE_SERVER_PORT}
-      - DB_NAME=${DB_TEMPLATE_SERVER_NAME}
-      - DB_PASSWORD=${DB_TEMPLATE_SERVER_PASSWORD}
+      - DB_HOST=${DB_TEMPLATE_HOST}  
+      - DB_PORT=${DB_TEMPLATE_PORT}
+      - DB_NAME=${DB_TEMPLATE_NAME}
+      - DB_USER=${DB_TEMPLATE_USER}
+      - DB_PASSWORD=${DB_TEMPLATE_PASSWORD}
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - DEBUG
@@ -333,15 +334,14 @@ services:
     image: "postgres:15.2-alpine"
     container_name: prompt-db-template-server
     environment:
-      - POSTGRES_USER=${DB_TEMPLATE_SERVER_USER:-prompt-postgres}
-      - POSTGRES_PASSWORD=${DB_TEMPLATE_SERVER_PASSWORD:-prompt-postgres}
-      - POSTGRES_DB=${DB_TEMPLATE_SERVER_NAME:-prompt}
+      - POSTGRES_USER=${DB_TEMPLATE_USER:-prompt-postgres}
+      - POSTGRES_PASSWORD=${DB_TEMPLATE_PASSWORD:-prompt-postgres}
+      - POSTGRES_DB=${DB_TEMPLATE_NAME:-prompt}
       - TZ=Europe/Berlin
     volumes:
       - ./postgres_template_server_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${DB_TEMPLATE_SERVER_NAME:-prompt} -U ${DB_TEMPLATE_SERVER_USER:-prompt-postgres}"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -d ${DB_TEMPLATE_NAME:-prompt} -U ${DB_TEMPLATE_USER:-prompt-postgres}"]
       timeout: 5s
       retries: 5
     ports:

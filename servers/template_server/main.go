@@ -57,7 +57,12 @@ func initKeycloak(queries db.Queries) {
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
-	log.Debug("Connecting to database at:", databaseURL)
+	dbUser := promptSDK.GetEnv("DB_USER", "prompt-postgres")
+	dbHost := promptSDK.GetEnv("DB_HOST_TEMPLATE_SERVER", "localhost")
+	dbPort := promptSDK.GetEnv("DB_PORT_TEMPLATE_SERVER", "5437")
+	dbName := promptSDK.GetEnv("DB_NAME", "prompt")
+	sslMode := promptSDK.GetEnv("SSL_MODE", "disable")
+	log.Debugf("Connecting to database at host=%s port=%s db=%s user=%s sslmode=%s", dbHost, dbPort, dbName, dbUser, sslMode)
 
 	// run migrations
 	runMigrations(databaseURL)

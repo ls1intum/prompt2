@@ -19,6 +19,6 @@ var CopyServiceSingleton *CopyService
 type TemplateServerCopyHandler struct{}
 
 func (h *TemplateServerCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
-	http.NotFound(c.Writer, c.Request)
+	c.AbortWithStatus(http.StatusNotFound)
 	return nil
 }

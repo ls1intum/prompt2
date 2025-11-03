@@ -1,8 +1,9 @@
 BEGIN;
 
-CREATE TABLE template_table
-(
-    name VARCHAR(255) NOT NULL
-);
+CREATE TABLE
+    template_table (
+        course_phase_id uuid PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+    );
 
 COMMIT;
