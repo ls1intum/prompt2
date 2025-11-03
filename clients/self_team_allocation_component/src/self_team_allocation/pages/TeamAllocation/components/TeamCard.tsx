@@ -59,8 +59,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
       {team.members.length > 0 ? (
         <ul className='space-y-2 h-[120px] overflow-y-auto'>
           {team.members.map((m, idx) => {
-            const isCurrent =
-              courseParticipationID && m.courseParticipationID === courseParticipationID
+            const isCurrent = courseParticipationID && m.id === courseParticipationID
             return (
               <li
                 key={idx}

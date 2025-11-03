@@ -45,45 +45,6 @@ func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
 	return err
 }
 
-const getTeamWithStudentNamesByID = `-- name: GetTeamWithStudentNamesByID :one
-SELECT
-  t.id,
-  t.name,
-  -- build a JSON array of {courseParticipationID, studentName}
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  assignments a
-  ON t.id = a.team_id
-WHERE
-  t.id = $1
-GROUP BY
-  t.id, t.name
-`
-
-type GetTeamWithStudentNamesByIDRow struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	TeamMembers []byte    `json:"team_members"`
-}
-
-func (q *Queries) GetTeamWithStudentNamesByID(ctx context.Context, id uuid.UUID) (GetTeamWithStudentNamesByIDRow, error) {
-	row := q.db.QueryRow(ctx, getTeamWithStudentNamesByID, id)
-	var i GetTeamWithStudentNamesByIDRow
-	err := row.Scan(&i.ID, &i.Name, &i.TeamMembers)
-	return i, err
-}
-
 const getTeamWithStudentNamesByTeamID = `-- name: GetTeamWithStudentNamesByTeamID :one
 SELECT
   t.id,
@@ -188,7 +149,7 @@ FROM
 LEFT JOIN LATERAL (
   SELECT jsonb_agg(
     jsonb_build_object(
-      'courseParticipationID', a.course_participation_id,
+      'id', a.course_participation_id,
       'firstName', a.student_first_name,
       'lastName', a.student_last_name
     )
@@ -200,7 +161,7 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL (
   SELECT jsonb_agg(
     jsonb_build_object(
-      'courseParticipationID', tu.course_participation_id,
+      'id', tu.course_participation_id,
       'firstName', tu.first_name,
       'lastName', tu.last_name
     )

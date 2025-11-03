@@ -73,10 +73,7 @@ export const TeamSelection: React.FC<Props> = ({
   })
 
   const myTeam = useMemo(
-    () =>
-      teams.find((team) =>
-        team.members.some((m) => m.courseParticipationID === courseParticipationID),
-      ),
+    () => teams.find((team) => team.members.some((m) => m.id === courseParticipationID)),
     [teams, courseParticipationID],
   )
 
