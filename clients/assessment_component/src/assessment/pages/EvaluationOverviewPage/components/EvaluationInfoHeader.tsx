@@ -33,24 +33,27 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
 
   const getResultsAvailableText = () => {
     if (noneVisible) {
-      return 'The assessment deadline has passed and your evaluation results are now available.'
+      return 'The assessment deadline has passed. '
     } else if (bothVisible) {
       return (
-        'The assessment deadline has passed and your evaluation results are now available. ' +
+        'The assessment deadline has passed and your results are now available. ' +
         'You can view your action items and grade suggestions below to understand areas for improvement.'
       )
     } else if (gradeSuggestionVisible) {
       return (
-        'The assessment deadline has passed and your evaluation results are now available. ' +
+        'The assessment deadline has passed and your results are now available. ' +
         'You can view your grade suggestion below to understand your performance.'
       )
     } else if (actionItemsVisible) {
       return (
-        'The assessment deadline has passed and your evaluation results are now available. ' +
+        'The assessment deadline has passed and your results are now available. ' +
         'You can view your action items below to understand areas for improvement.'
       )
     }
-    return 'The assessment deadline has passed and your evaluation results are now available.'
+    return (
+      'The assessment deadline has passed and your results are now available. ' +
+      'For more information about your assessment, please contact your tutor / instructor.'
+    )
   }
 
   return (
