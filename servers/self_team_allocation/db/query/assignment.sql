@@ -2,7 +2,8 @@
 INSERT INTO assignments AS a (
   id,
   course_participation_id,
-  student_full_name,
+  student_first_name,
+  student_last_name,
   team_id,
   course_phase_id,
   created_at,
@@ -13,6 +14,7 @@ INSERT INTO assignments AS a (
   $3,
   $4,
   $5,
+  $6,
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 )
@@ -36,7 +38,8 @@ WHERE a.course_phase_id = $1;
 -- name: GetAssignmentForStudent :one
 SELECT id,
        course_participation_id,
-       student_full_name,
+       student_first_name,
+       student_last_name,
        team_id,
        course_phase_id,
        created_at,

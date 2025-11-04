@@ -36,14 +36,13 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!teams) return []
 
-    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
     const teamNameExtraData = teams.flatMap(({ id, members }) => {
       const teamName = teamNameById.get(id) ?? 'No Team'
 
       return members.map((member) => ({
-        courseParticipationID: member.courseParticipationID,
+        courseParticipationID: member.id || '',
         value: teamName,
         stringValue: teamName,
       }))

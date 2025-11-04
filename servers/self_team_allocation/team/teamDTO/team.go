@@ -9,8 +9,12 @@ import (
 
 func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (promptTypes.Team, error) {
 	var members []promptTypes.Person
+	var tutors []promptTypes.Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
+		return promptTypes.Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
 		return promptTypes.Team{}, err
 	}
 
@@ -18,13 +22,18 @@ func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (promptTypes.T
 		ID:      dbTeam.ID,
 		Name:    dbTeam.Name,
 		Members: members,
+		Tutors:  tutors,
 	}, nil
 }
 
 func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (promptTypes.Team, error) {
 	var members []promptTypes.Person
+	var tutors []promptTypes.Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
+		return promptTypes.Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
 		return promptTypes.Team{}, err
 	}
 
@@ -32,6 +41,7 @@ func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByT
 		ID:      dbTeam.ID,
 		Name:    dbTeam.Name,
 		Members: members,
+		Tutors:  tutors,
 	}, nil
 }
 

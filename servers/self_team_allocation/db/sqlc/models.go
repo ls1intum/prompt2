@@ -12,11 +12,12 @@ import (
 type Assignment struct {
 	ID                    uuid.UUID        `json:"id"`
 	CourseParticipationID uuid.UUID        `json:"course_participation_id"`
-	StudentFullName       string           `json:"student_full_name"`
 	TeamID                uuid.UUID        `json:"team_id"`
 	CoursePhaseID         uuid.UUID        `json:"course_phase_id"`
 	CreatedAt             pgtype.Timestamp `json:"created_at"`
 	UpdatedAt             pgtype.Timestamp `json:"updated_at"`
+	StudentFirstName      string           `json:"student_first_name"`
+	StudentLastName       string           `json:"student_last_name"`
 }
 
 type Team struct {
@@ -30,4 +31,12 @@ type Timeframe struct {
 	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
 	Starttime     pgtype.Timestamp `json:"starttime"`
 	Endtime       pgtype.Timestamp `json:"endtime"`
+}
+
+type Tutor struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	FirstName             string    `json:"first_name"`
+	LastName              string    `json:"last_name"`
+	TeamID                uuid.UUID `json:"team_id"`
 }
