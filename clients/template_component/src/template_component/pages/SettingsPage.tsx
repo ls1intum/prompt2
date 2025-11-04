@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
 
-export const TemplateComponentSettingsPage = (): JSX.Element => {
+export const SettingsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -45,4 +45,4 @@ export const TemplateComponentSettingsPage = (): JSX.Element => {
   )
 }
 
-export default TemplateComponentSettingsPage
+export default SettingsPage

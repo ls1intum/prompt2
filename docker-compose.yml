@@ -136,11 +136,11 @@ services:
       - DEBUG
 
   # Template server (example service)
-  server-template-server:
+  server-template:
     build:
       context: ./servers/template_server
       dockerfile: ../Dockerfile
-    container_name: prompt-server-template-server
+    container_name: prompt-server-template
     depends_on:
       db-template-server:
         condition: service_healthy

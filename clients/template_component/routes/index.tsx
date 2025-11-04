@@ -1,23 +1,23 @@
-import { TemplateComponentOverviewPage } from '../src/OverviewPage'
-import { TemplateComponentSettingsPage } from '../src/template_component/pages/SettingsPage'
+import { OverviewPage } from '../src/OverviewPage'
+import { SettingsPage } from '../src/template_component/pages/SettingsPage'
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
-import { TemplateComponentParticipantsPage } from '../src/template_component/pages/ParticipantsPage'
+import { ParticipantsPage } from '../src/template_component/pages/ParticipantsPage'
 
 const routes: ExtendedRouteObject[] = [
   {
     path: '',
-    element: <TemplateComponentOverviewPage />,
+    element: <OverviewPage />,
     requiredPermissions: [], // empty means no permissions required
   },
   {
     path: '/participants',
-    element: <TemplateComponentParticipantsPage />,
+    element: <ParticipantsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
     path: '/settings',
-    element: <TemplateComponentSettingsPage />,
+    element: <SettingsPage />,
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   // Add more routes here as needed
