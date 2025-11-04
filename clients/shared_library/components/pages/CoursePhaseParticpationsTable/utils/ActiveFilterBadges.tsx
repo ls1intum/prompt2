@@ -24,7 +24,7 @@ export const ActiveFilterBadges = ({
   const hasAnyActiveFilters = Boolean(globalFilter) || hasActiveColumnFilters
 
   return (
-    <div className='mt-4 mb-2 flex flex-wrap items-center gap-2 min-h-[1.2rem]'>
+    <div className='mt-4 mb-2 flex flex-wrap items-center gap-2 min-h-[1.3rem]'>
       {globalFilter && (
         <FilterBadge label={`Search: "${globalFilter}"`} onRemove={() => setGlobalFilter('')} />
       )}
