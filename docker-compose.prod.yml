@@ -502,7 +502,6 @@ services:
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
       - "traefik.http.routers.core.entrypoints=websecure"
       - "traefik.http.routers.core.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.core.priority=100"
       - "traefik.http.middlewares.core-compress.compress=true"
     expose:
       - "80"
