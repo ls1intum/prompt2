@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 
 export const ParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
