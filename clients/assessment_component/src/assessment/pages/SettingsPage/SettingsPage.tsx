@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react'
 
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import { useAuthStore, Role, getPermissionString } from '@tumaet/prompt-shared-state'
 
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -21,6 +22,9 @@ export const SettingsPage = (): JSX.Element => {
   const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
   const { categories } = useCategoryStore()
   const { scoreLevels } = useScoreLevelStore()
+  const { permissions } = useAuthStore()
+
+  const isPromptAdmin = permissions.includes(getPermissionString(Role.PROMPT_ADMIN))
 
   const {
     data: assessments,
@@ -53,32 +57,36 @@ export const SettingsPage = (): JSX.Element => {
 
       <CoursePhaseConfigSelection />
 
-      {config?.assessmentTemplateID && (
-        <CategoryList
-          assessmentTemplateID={config?.assessmentTemplateID}
-          assessmentType={AssessmentType.ASSESSMENT}
-        />
-      )}
+      {isPromptAdmin && (
+        <>
+          {config?.assessmentTemplateID && (
+            <CategoryList
+              assessmentTemplateID={config?.assessmentTemplateID}
+              assessmentType={AssessmentType.ASSESSMENT}
+            />
+          )}
 
-      {config?.selfEvaluationEnabled && config.selfEvaluationTemplate && (
-        <CategoryList
-          assessmentTemplateID={config?.selfEvaluationTemplate}
-          assessmentType={AssessmentType.SELF}
-        />
-      )}
+          {config?.selfEvaluationEnabled && config.selfEvaluationTemplate && (
+            <CategoryList
+              assessmentTemplateID={config?.selfEvaluationTemplate}
+              assessmentType={AssessmentType.SELF}
+            />
+          )}
 
-      {config?.peerEvaluationEnabled && config.peerEvaluationTemplate && (
-        <CategoryList
-          assessmentTemplateID={config?.peerEvaluationTemplate}
-          assessmentType={AssessmentType.PEER}
-        />
-      )}
+          {config?.peerEvaluationEnabled && config.peerEvaluationTemplate && (
+            <CategoryList
+              assessmentTemplateID={config?.peerEvaluationTemplate}
+              assessmentType={AssessmentType.PEER}
+            />
+          )}
 
-      {config?.tutorEvaluationEnabled && config.tutorEvaluationTemplate && (
-        <CategoryList
-          assessmentTemplateID={config?.tutorEvaluationTemplate}
-          assessmentType={AssessmentType.TUTOR}
-        />
+          {config?.tutorEvaluationEnabled && config.tutorEvaluationTemplate && (
+            <CategoryList
+              assessmentTemplateID={config?.tutorEvaluationTemplate}
+              assessmentType={AssessmentType.TUTOR}
+            />
+          )}
+        </>
       )}
     </div>
   )
