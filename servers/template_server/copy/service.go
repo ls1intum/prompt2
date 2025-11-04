@@ -9,6 +9,15 @@ import (
 	db "github.com/ls1intum/prompt2/servers/template_server/db/sqlc"
 )
 
+// CopyService handles phase-level data duplication.
+//
+// It implements the `/copy` endpoint for a phase server, used during course
+// deep copy operations to replicate all phase-specific data from a source
+// course phase to a new target phase. Each phase server defines its own
+// copy handler to duplicate relevant entities (e.g. skills, teams, or configs)
+// and persist them under the target phase ID.
+// It is also the functionality called when a course is templated to set up
+// a new phase based on an existing one.
 type CopyService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool

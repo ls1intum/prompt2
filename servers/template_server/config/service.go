@@ -8,6 +8,12 @@ import (
 	db "github.com/ls1intum/prompt2/servers/template_server/db/sqlc"
 )
 
+// ConfigService provides phase-level configuration status.
+//
+// It exposes a GET endpoint used by the template component to check which
+// required configurations for a phase are already set and which are still missing.
+// The response helps the phase settings page indicate incomplete setup steps
+// (e.g. missing survey timeframe, teams, or skills) before activation.
 type ConfigService struct {
 	queries db.Queries
 	conn    *pgxpool.Pool
