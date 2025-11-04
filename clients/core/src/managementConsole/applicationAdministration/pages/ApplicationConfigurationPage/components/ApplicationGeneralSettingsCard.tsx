@@ -3,29 +3,22 @@ import { useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format, set, parse, formatISO } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import type { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
 import type { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
   Button,
   Label,
   Switch,
   DatePicker,
   Input,
+  Card,
+  CardContent,
 } from '@tumaet/prompt-ui-components'
 import { updateCoursePhase } from '@core/network/mutations/updateCoursePhase'
 import { ApplicationConfigDialogError } from './ApplicationConfigDialogError'
-import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 
 interface ApplicationConfigDialogProps {
-  isOpen: boolean
-  onClose: () => void
   initialData: ApplicationMetaData
 }
 
@@ -33,11 +26,7 @@ const getTimeString = (date: Date) => {
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
-export function ApplicationConfigDialog({
-  isOpen,
-  onClose,
-  initialData,
-}: ApplicationConfigDialogProps) {
+export function ApplicationGeneralSettingsCard({ initialData }: ApplicationConfigDialogProps) {
   const queryClient = useQueryClient()
   const { phaseId } = useParams<{ phaseId: string }>()
 
@@ -49,35 +38,35 @@ export function ApplicationConfigDialog({
   const [externalStudentsAllowed, setExternalStudentsAllowed] = useState(false)
   const [universityLoginAvailable, setUniversityLoginAvailable] = useState(false)
   const [autoAccept, setAutoAccept] = useState(false)
+  const [useCustomScores, setUseCustomScores] = useState(false)
   const [dateError, setDateError] = useState<string | null>(null)
 
   const timeZone = 'Europe/Berlin'
 
-  // Effect to reinitialize form values on dialog open (or when initialData changes)
+  // Initialize form values when initialData changes
   useEffect(() => {
-    if (isOpen) {
-      setStartDate(
-        initialData.applicationStartDate ? new Date(initialData.applicationStartDate) : undefined,
-      )
-      setEndDate(
-        initialData.applicationEndDate ? new Date(initialData.applicationEndDate) : undefined,
-      )
-      setStartTime(
-        initialData.applicationStartDate
-          ? getTimeString(new Date(initialData.applicationStartDate))
-          : '00:00',
-      )
-      setEndTime(
-        initialData.applicationEndDate
-          ? getTimeString(new Date(initialData.applicationEndDate))
-          : '23:59',
-      )
-      setAutoAccept(initialData?.autoAccept ?? false)
-      setExternalStudentsAllowed(initialData?.externalStudentsAllowed ?? false)
-      setUniversityLoginAvailable(initialData?.universityLoginAvailable ?? false)
-      setDateError(null)
-    }
-  }, [isOpen, initialData])
+    setStartDate(
+      initialData.applicationStartDate ? new Date(initialData.applicationStartDate) : undefined,
+    )
+    setEndDate(
+      initialData.applicationEndDate ? new Date(initialData.applicationEndDate) : undefined,
+    )
+    setStartTime(
+      initialData.applicationStartDate
+        ? getTimeString(new Date(initialData.applicationStartDate))
+        : '00:00',
+    )
+    setEndTime(
+      initialData.applicationEndDate
+        ? getTimeString(new Date(initialData.applicationEndDate))
+        : '23:59',
+    )
+    setAutoAccept(initialData?.autoAccept ?? false)
+    setExternalStudentsAllowed(initialData?.externalStudentsAllowed ?? false)
+    setUniversityLoginAvailable(initialData?.universityLoginAvailable ?? false)
+    setUseCustomScores(initialData?.useCustomScores ?? false)
+    setDateError(null)
+  }, [initialData])
 
   const {
     mutate: mutatePhase,
@@ -90,7 +79,6 @@ export function ApplicationConfigDialog({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course_phase', phaseId] })
-      onClose()
     },
   })
 
@@ -133,6 +121,7 @@ export function ApplicationConfigDialog({
         externalStudentsAllowed,
         universityLoginAvailable,
         autoAccept,
+        useCustomScores,
       },
     }
 
@@ -140,23 +129,25 @@ export function ApplicationConfigDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Card className='max-w-4xl'>
+      <CardContent>
         {isPending ? (
-          <DialogLoadingDisplay customMessage='Saving application config...' />
+          <div className='flex items-center gap-2'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            <span>Saving application config...</span>
+          </div>
         ) : isMutateError ? (
           <div className='space-y-4'>
             <ApplicationConfigDialogError error={error} />
-            <Button onClick={onClose}>Close</Button>
           </div>
         ) : (
           <>
-            <DialogHeader>
-              <DialogTitle>Configure Application Phase</DialogTitle>
-            </DialogHeader>
-            <DialogDescription>
-              Note: All times are in German time (Europe/Berlin).
-            </DialogDescription>
+            <div className='mb-2 mt-5'>
+              <h3 className='text-lg font-semibold'>General Settings</h3>
+              <p className='text-sm text-muted-foreground'>
+                Note: All times are in German time (Europe/Berlin).
+              </p>
+            </div>
 
             {/* Display validation error if present */}
             {dateError && (
@@ -220,30 +211,29 @@ export function ApplicationConfigDialog({
                 </div>
 
                 {/* University Login Available */}
-                <div className='grid grid-cols-4 items-start gap-4'>
-                  <Label htmlFor='universityLoginAvailable' className='text-right pt-2'>
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='universityLoginAvailable' className='text-right'>
                     Enforce Student Login
                   </Label>
-                  <div className='col-span-3 flex flex-col gap-2'>
+                  <div className='col-span-3 flex items-center gap-4'>
                     <Switch
                       id='universityLoginAvailable'
                       checked={universityLoginAvailable}
                       onCheckedChange={setUniversityLoginAvailable}
                     />
                     <p className='text-sm text-muted-foreground'>
-                      This option is highly recommended. But, it requires a Keycloak Login for
-                      Students which provides Matriculation number and University Login in the token
-                      data.
+                      This option is highly recommended. It requires a Keycloak login for students
+                      and provides matriculation number and university login data.
                     </p>
                   </div>
                 </div>
 
                 {/* External Students Allowed */}
-                <div className='grid grid-cols-4 items-start gap-4'>
-                  <Label htmlFor='externalStudentsAllowed' className='text-right pt-2'>
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='externalStudentsAllowed' className='text-right'>
                     Allow External Students
                   </Label>
-                  <div className='col-span-3 flex flex-col gap-2'>
+                  <div className='col-span-3 flex items-center gap-4'>
                     <Switch
                       id='externalStudentsAllowed'
                       checked={externalStudentsAllowed}
@@ -257,11 +247,11 @@ export function ApplicationConfigDialog({
                 </div>
 
                 {/* Auto Accept */}
-                <div className='grid grid-cols-4 items-start gap-4'>
-                  <Label htmlFor='autoAccept' className='text-right pt-2'>
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='autoAccept' className='text-right'>
                     Auto Accept
                   </Label>
-                  <div className='col-span-3 flex flex-col gap-2'>
+                  <div className='col-span-3 flex items-center gap-4'>
                     <Switch id='autoAccept' checked={autoAccept} onCheckedChange={setAutoAccept} />
                     <p className='text-sm text-muted-foreground'>
                       This option will automatically accept all applications without any manual
@@ -269,15 +259,32 @@ export function ApplicationConfigDialog({
                     </p>
                   </div>
                 </div>
+
+                {/* Custom Scores */}
+                <div className='grid grid-cols-4 items-center gap-4'>
+                  <Label htmlFor='customScores' className='text-right'>
+                    Enable Custom Scores
+                  </Label>
+                  <div className='col-span-3 flex items-center gap-4'>
+                    <Switch
+                      id='customScores'
+                      checked={useCustomScores}
+                      onCheckedChange={setUseCustomScores}
+                    />
+                    <p className='text-sm text-muted-foreground'>
+                      Enable custom scoring options for application assessment.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <DialogFooter>
+              <div className='flex justify-end'>
                 <Button type='submit'>Save changes</Button>
-              </DialogFooter>
+              </div>
             </form>
           </>
         )}
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   )
 }

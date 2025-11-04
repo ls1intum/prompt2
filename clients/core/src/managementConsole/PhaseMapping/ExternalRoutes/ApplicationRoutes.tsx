@@ -1,10 +1,10 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { ApplicationLandingPage } from '../../applicationAdministration/pages/ApplicationLandingPage/ApplicationLandingPage'
-import { ApplicationConfiguration } from '../../applicationAdministration/pages/ApplicationConfiguration/ApplicationConfiguration'
+import { ApplicationConfiguration } from '../../applicationAdministration/pages/ApplicationConfigurationPage/ApplicationConfiguration'
+import { ApplicationQuestionConfig } from '../../applicationAdministration/pages/ApplicationQuestionConfigPage/ApplicationQuestionConfig'
 import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationParticipantsPage } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPage'
-import { ApplicationParticipantsPage as ApplicationParticipantsPageRefactored } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPageRefactored'
 import { ApplicationMailingSettings } from '../../applicationAdministration/pages/Mailing/ApplicationMailingSettings'
 import { ApplicationDataWrapper } from '../../applicationAdministration/components/ApplicationDataWrapper'
 
@@ -28,19 +28,19 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
-    path: '/participants',
+    path: '/questions',
     element: (
       <ApplicationDataWrapper>
-        <ApplicationParticipantsPage />
+        <ApplicationQuestionConfig />
       </ApplicationDataWrapper>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
-    path: '/participants-refactored',
+    path: '/participants',
     element: (
       <ApplicationDataWrapper>
-        <ApplicationParticipantsPageRefactored />
+        <ApplicationParticipantsPage />
       </ApplicationDataWrapper>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

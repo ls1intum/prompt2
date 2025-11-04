@@ -1,5 +1,5 @@
-import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
-import { UpdateApplicationForm } from '../../../../interfaces/form/updateApplicationForm'
+import { ApplicationForm } from '../../../interfaces/form/applicationForm'
+import { UpdateApplicationForm } from '../../../interfaces/form/updateApplicationForm'
 
 import { ApplicationQuestionCardRef } from '../FormPages/ApplicationQuestionCard'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'

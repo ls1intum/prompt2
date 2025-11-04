@@ -28,6 +28,7 @@ import { VisibilityMenu } from './components/VisibilityMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 import { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
 import { GroupAction } from './interfaces/GroupAction'
+import ActiveFilterBadges from './utils/ActiveFilterBadges'
 
 interface CoursePhaseParticipationsTablePageProps {
   participants: CoursePhaseParticipationWithStudent[]
@@ -40,6 +41,9 @@ interface CoursePhaseParticipationsTablePageProps {
   onClickRowAction?: (student: CoursePhaseParticipationWithStudent) => void
   customActions?: GroupAction[]
   toolbarActions?: React.ReactNode
+  columnFilters?: ColumnFiltersState
+  setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
+  customFilterMenu?: () => React.ReactNode
 }
 
 export const CoursePhaseParticipationsTablePage = ({
@@ -53,9 +57,14 @@ export const CoursePhaseParticipationsTablePage = ({
   onClickRowAction,
   customActions = [],
   toolbarActions,
+  columnFilters,
+  setColumnFilters,
+  customFilterMenu,
 }: CoursePhaseParticipationsTablePageProps): JSX.Element => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'lastName', desc: false }])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [internalColumnFilters, setInternalColumnFilters] = useState<ColumnFiltersState>([])
+  const columnFiltersState = columnFilters ?? internalColumnFilters
+  const setColumnFiltersFn = setColumnFilters ?? setInternalColumnFilters
   const [globalFilter, setGlobalFilter] = useState<string>('')
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
@@ -108,7 +117,7 @@ export const CoursePhaseParticipationsTablePage = ({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: setColumnFiltersFn,
     onColumnVisibilityChange: setColumnVisibility,
     globalFilterFn: (row, columnId, filterValue) => {
       const { student } = row.original
@@ -123,13 +132,14 @@ export const CoursePhaseParticipationsTablePage = ({
     state: {
       sorting,
       globalFilter,
-      columnFilters,
+      columnFilters: columnFiltersState,
       columnVisibility,
     },
   })
 
   const filteredRowsCount = table.getFilteredRowModel().rows.length
   const totalRowsCount = participants.length
+  const selectedCount = table.getSelectedRowModel().rows.length
 
   return (
     <>
@@ -146,22 +156,27 @@ export const CoursePhaseParticipationsTablePage = ({
           </div>
 
           <div className='flex items-center gap-2 flex-none'>
-            <FilterMenu
-              columnFilters={columnFilters}
-              setColumnFilters={setColumnFilters}
-              extraFilters={extraColumns
-                ?.filter((col) => col.filterFn)
-                .map((col) => ({
-                  id: col.id,
-                  label: col.header,
-                  options: Array.from(
-                    new Set(col.extraData.map((d) => String(d.stringValue ?? d.value ?? ''))),
-                  )
-                    .filter((v) => v !== '')
-                    .sort((a, b) => a.localeCompare(b)),
-                  getDisplay: (v) => v,
-                }))}
-            />
+            {/* render custom filter menu from parent if provided, otherwise use built-in simple FilterMenu */}
+            {customFilterMenu ? (
+              customFilterMenu()
+            ) : (
+              <FilterMenu
+                columnFilters={columnFiltersState}
+                setColumnFilters={setColumnFiltersFn}
+                extraFilters={extraColumns
+                  ?.filter((col) => col.filterFn)
+                  .map((col) => ({
+                    id: col.id,
+                    label: col.header,
+                    options: Array.from(
+                      new Set(col.extraData.map((d) => String(d.stringValue ?? d.value ?? ''))),
+                    )
+                      .filter((v) => v !== '')
+                      .sort((a, b) => a.localeCompare(b)),
+                    getDisplay: (v) => v,
+                  }))}
+              />
+            )}
 
             <VisibilityMenu columns={table.getAllColumns()} />
 
@@ -187,10 +202,24 @@ export const CoursePhaseParticipationsTablePage = ({
             )}
           </div>
         </div>
+
+        <ActiveFilterBadges
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          columnFiltersState={columnFiltersState}
+          setColumnFiltersFn={setColumnFiltersFn}
+          table={table}
+        />
       </div>
 
-      <div className='text-sm text-muted-foreground mb-2 mt-6'>
-        Showing {filteredRowsCount} of {totalRowsCount} participants
+      <div className='mb-2 mt-6 flex gap-2'>
+        {selectedCount > 0 && (
+          <div className='text-sm text-foreground'>{selectedCount} selected</div>
+        )}
+
+        <div className='text-sm text-muted-foreground'>
+          Showing {filteredRowsCount} of {totalRowsCount} participants
+        </div>
       </div>
 
       <div className='rounded-md border overflow-x-scroll' style={{ width: `${tableWidth}px` }}>

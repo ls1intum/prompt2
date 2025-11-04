@@ -22,7 +22,7 @@ export const ApplicationConfigurationHeader = ({
     <CardHeader>
       <div className='flex items-center justify-between'>
         <div className='flex items-center space-x-2'>
-          <CardTitle className='text-2xl'>General Settings</CardTitle>
+          <CardTitle className='text-2xl'>Overview</CardTitle>
         </div>
         <TooltipProvider>
           <Tooltip>
