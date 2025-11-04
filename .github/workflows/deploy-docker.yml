@@ -77,7 +77,12 @@ jobs:
           proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
-            docker compose -f docker-compose.prod.yml --env-file=.env.prod down --remove-orphans --rmi all
+            # Stop all services except reverse-proxy and maintenance (keep fallback active)
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod stop server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component
+            # Remove stopped containers and clean up images
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod rm -f server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component
+            # Remove old images (excluding nginx:alpine for maintenance)
+            docker images 'ghcr.io/ls1intum/prompt2/*' -q | xargs -r docker rmi || true
 
       - name: checkout
         uses: actions/checkout@v4

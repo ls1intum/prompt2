@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="30" />
+    <title>PROMPT - System Maintenance</title>
+    <link rel="icon" href="/prompt_logo.svg" />
+    <link rel="stylesheet" href="/maintenance.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="content">
+        <!-- Logo -->
+        <div class="logo-container">
+          <img src="/prompt_logo.svg" alt="PROMPT Logo" class="logo" />
+          <h2 class="logo-title">PROMPT</h2>
+        </div>
+
+        <!-- Main Status -->
+        <div class="status-section">
+          <div class="spinner"></div>
+          <h1>System Maintenance in Progress</h1>
+        </div>
+
+        <!-- Information Card -->
+        <div class="info-card">
+          <div class="info-item">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div>
+              <h3>Expected Duration</h3>
+              <p>Usually takes 5-10 minutes</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <div>
+              <h3>What's Happening</h3>
+              <p>Deploying updates and improvements</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <div>
+              <h3>What to Do</h3>
+              <p>Please refresh the page in a few minutes</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+
+        <div class="footer">
+          <p class="timestamp">Last Timestamp: <span id="current-time"></span></p>
+          <p class="branding">
+            <strong>PROMPT</strong> - Project-Oriented Modular Platform for Teaching
+            <br />
+            <small>TUM Research Group for Applied Education Technologies</small>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Update current time
+      function updateTime() {
+        const now = new Date()
+        const timeString = now.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
+        const dateString = now.toLocaleDateString('en-US', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+        document.getElementById('current-time').textContent = `${dateString} ${timeString}`
+      }
+
+      updateTime()
+      setInterval(updateTime, 1000)
+
+      // Console message
+      console.log(
+        '%cPROMPT Maintenance Mode',
+        'font-size: 20px; font-weight: bold; color: #3b82f6;',
+      )
+      console.log(
+        '%cSystem is being updated. Please check back in a few minutes.',
+        'font-size: 14px; color: #64748b;',
+      )
+    </script>
+  </body>
+</html>
