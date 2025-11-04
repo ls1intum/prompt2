@@ -8,6 +8,11 @@ const sidebarItems: SidebarMenuItemProps = {
   goToPath: '',
   subitems: [
     {
+      title: 'Participants',
+      goToPath: '/participants',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
       title: 'Settings',
       goToPath: '/settings',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

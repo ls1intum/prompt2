@@ -1,4 +1,4 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { StudentScoreBadge } from '../../components/badges'
 import { mapScoreLevelToNumber, ScoreLevel } from '../../../interfaces/scoreLevel'
 import { getLevelConfig } from '../../utils/getLevelConfig'

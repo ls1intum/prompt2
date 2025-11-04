@@ -8,81 +8,74 @@ ORDER BY name;
 SELECT
   t.id,
   t.name,
-  -- build a JSON array of {courseParticipationID, studentName}
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
+  COALESCE(members.team_members, '[]'::jsonb) AS team_members,
+  COALESCE(tutors.team_tutors, '[]'::jsonb) AS team_tutors
 FROM
   team t
-LEFT JOIN
-  assignments a
-  ON t.id = a.team_id
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', a.course_participation_id,
+      'firstName', a.student_first_name,
+      'lastName', a.student_last_name
+    )
+    ORDER BY a.student_first_name, a.student_last_name
+  ) AS team_members
+  FROM assignments a
+  WHERE a.team_id = t.id
+) members ON TRUE
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', tu.course_participation_id,
+      'firstName', tu.first_name,
+      'lastName', tu.last_name
+    )
+    ORDER BY tu.first_name, tu.last_name
+  ) AS team_tutors
+  FROM tutor tu
+  WHERE tu.team_id = t.id
+) tutors ON TRUE
 WHERE
   t.course_phase_id = $1
-GROUP BY
-  t.id, t.name
 ORDER BY
   t.name;
-
--- name: GetTeamWithStudentNamesByID :one
-SELECT
-  t.id,
-  t.name,
-  -- build a JSON array of {courseParticipationID, studentName}
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
-FROM
-  team t
-LEFT JOIN
-  assignments a
-  ON t.id = a.team_id
-WHERE
-  t.id = $1
-GROUP BY
-  t.id, t.name;
 
 -- name: GetTeamWithStudentNamesByTeamID :one
 SELECT
   t.id,
   t.name,
-  -- build a JSON array of {courseParticipationID, studentName}
-  COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'courseParticipationID', a.course_participation_id,
-        'studentName',           a.student_full_name
-      )
-      ORDER BY a.student_full_name
-    ) FILTER (WHERE a.id IS NOT NULL),
-    '[]'::jsonb
-  )::jsonb AS team_members
+  COALESCE(members.team_members, '[]'::jsonb) AS team_members,
+  COALESCE(tutors.team_tutors, '[]'::jsonb) AS team_tutors
 FROM
   team t
-LEFT JOIN
-  assignments a
-  ON t.id = a.team_id
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', a.course_participation_id,
+      'firstName', a.student_first_name,
+      'lastName', a.student_last_name
+    )
+    ORDER BY a.student_first_name, a.student_last_name
+  ) AS team_members
+  FROM assignments a
+  WHERE a.team_id = t.id
+) members ON TRUE
+LEFT JOIN LATERAL (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', tu.course_participation_id,
+      'firstName', tu.first_name,
+      'lastName', tu.last_name
+    )
+    ORDER BY tu.first_name, tu.last_name
+  ) AS team_tutors
+  FROM tutor tu
+  WHERE tu.team_id = t.id
+) tutors ON TRUE
 WHERE
   t.course_phase_id = $1
-  AND t.id = $2
-GROUP BY
-  t.id, t.name
-ORDER BY
-  t.name;
+  AND t.id = $2;
 
 
 -- name: CreateTeam :exec

@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE course_phase_config
+    ADD COLUMN IF NOT EXISTS grade_suggestion_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS action_items_visible BOOLEAN NOT NULL DEFAULT TRUE;
+
+COMMIT;

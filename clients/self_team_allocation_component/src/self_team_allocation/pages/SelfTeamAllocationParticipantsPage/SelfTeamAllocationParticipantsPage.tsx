@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 import { Team } from '../../interfaces/team'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 
 export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -36,14 +36,13 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
   const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
     if (!teams) return []
 
-    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
     const teamNameExtraData = teams.flatMap(({ id, members }) => {
       const teamName = teamNameById.get(id) ?? 'No Team'
 
       return members.map((member) => ({
-        courseParticipationID: member.courseParticipationID,
+        courseParticipationID: member.id || '',
         value: teamName,
         stringValue: teamName,
       }))

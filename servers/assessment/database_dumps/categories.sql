@@ -106,6 +106,8 @@ CREATE TABLE public.course_phase_config (
     tutor_evaluation_deadline timestamp with time zone,
     tutor_evaluation_template uuid,
     evaluation_results_visible boolean NOT NULL DEFAULT true,
+    grade_suggestion_visible boolean NOT NULL DEFAULT true,
+    action_items_visible boolean NOT NULL DEFAULT true,
     FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,

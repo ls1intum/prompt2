@@ -26,6 +26,33 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
     ? now >= new Date(coursePhaseConfig.deadline)
     : false
 
+  const gradeSuggestionVisible = coursePhaseConfig?.gradeSuggestionVisible ?? true
+  const actionItemsVisible = coursePhaseConfig?.actionItemsVisible ?? true
+  const bothVisible = gradeSuggestionVisible && actionItemsVisible
+
+  const getResultsAvailableText = () => {
+    if (bothVisible) {
+      return (
+        'The assessment deadline has passed and your results are now available. ' +
+        'You can view your action items and grade suggestions below to understand areas for improvement.'
+      )
+    } else if (gradeSuggestionVisible) {
+      return (
+        'The assessment deadline has passed and your results are now available. ' +
+        'You can view your grade suggestion below to understand your performance.'
+      )
+    } else if (actionItemsVisible) {
+      return (
+        'The assessment deadline has passed and your results are now available. ' +
+        'You can view your action items below to understand areas for improvement.'
+      )
+    }
+    return (
+      'The assessment deadline has passed and your results are now available. ' +
+      'You will receive further information about your assessment from your tutor / instructor.'
+    )
+  }
+
   return (
     <Card className='mb-8 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
       <CardContent className='p-6'>
@@ -44,7 +71,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
           <div className='flex-1'>
             <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
               {isAssessmentDeadlinePassed
-                ? 'Assessment Results Available'
+                ? 'Assessment Completed'
                 : allEvaluationsCompleted
                   ? 'All Evaluations Completed!'
                   : evaluationsNotStarted
@@ -53,9 +80,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
             </h2>
             {isAssessmentDeadlinePassed ? (
               <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                The assessment deadline has passed and your evaluation results are now available.
-                You can view your action items and grade suggestions below to understand areas for
-                improvement.
+                {getResultsAvailableText()}
               </p>
             ) : allEvaluationsCompleted ? (
               <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
