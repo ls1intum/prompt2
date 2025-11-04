@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 
 export const MatchingParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
