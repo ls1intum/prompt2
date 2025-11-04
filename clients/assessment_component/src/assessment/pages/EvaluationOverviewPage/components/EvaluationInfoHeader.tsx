@@ -71,7 +71,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
           <div className='flex-1'>
             <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
               {isAssessmentDeadlinePassed
-                ? 'Assessment Results Available'
+                ? 'Assessment Completed'
                 : allEvaluationsCompleted
                   ? 'All Evaluations Completed!'
                   : evaluationsNotStarted
