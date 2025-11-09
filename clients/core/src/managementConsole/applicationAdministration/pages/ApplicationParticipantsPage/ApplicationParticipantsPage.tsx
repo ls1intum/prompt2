@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { FileUser, Trash2 } from 'lucide-react'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { GroupAction } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/GroupAction'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
@@ -42,6 +43,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
     return [
       {
         label: 'View Application',
+        icon: <FileUser className='h-4 w-4' />,
         onAction: (ids: string[]) => {
           if (ids.length > 0) viewApplication(ids[0])
         },
@@ -49,6 +51,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
       },
       {
         label: 'Delete Application',
+        icon: <Trash2 className='h-4 w-4 text-red-600' />,
         onAction: (ids: string[]) => {
           mutateDeleteApplications(ids)
         },
