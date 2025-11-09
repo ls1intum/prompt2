@@ -13,7 +13,7 @@ export const useParseApplicationMetaData = (
       const applicationEndDate = coursePhase?.restrictedData?.['applicationEndDate']
       const universityLoginAvailable = coursePhase?.restrictedData?.['universityLoginAvailable']
       const autoAccept = coursePhase?.restrictedData?.['autoAccept']
-      const customScores = coursePhase?.restrictedData?.['customScores']
+      const customScores = coursePhase?.restrictedData?.['useCustomScores']
 
       const parsedMetaData: ApplicationMetaData = {
         applicationStartDate: applicationStartDate ? new Date(applicationStartDate) : undefined,

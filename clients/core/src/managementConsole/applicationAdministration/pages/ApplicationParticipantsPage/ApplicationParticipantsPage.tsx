@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { GroupAction } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/GroupAction'
-import { ManagementPageHeader, useCustomElementWidth } from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { FilterMenu as ApplicationFilterMenu } from './components/table/filtering/FilterMenu'
 import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
@@ -67,7 +67,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
   )
 
   const toolbarActions = useMemo(() => {
-    const customScoresEnabled = Boolean(coursePhase?.restrictedData?.['customScores'])
+    const customScoresEnabled = Boolean(coursePhase?.restrictedData?.['useCustomScores'])
     return (
       <>
         {participations && customScoresEnabled && (
