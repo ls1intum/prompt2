@@ -36,7 +36,6 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
     [participations],
   )
 
-  const tableWidth = useCustomElementWidth('table-view')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const customActions: GroupAction[] = useMemo(() => {
@@ -46,6 +45,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
         onAction: (ids: string[]) => {
           if (ids.length > 0) viewApplication(ids[0])
         },
+        singleRecordOnly: true,
       },
       {
         label: 'Delete Application',
@@ -82,7 +82,6 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
     <div className='relative flex flex-col min-w-0'>
       <ManagementPageHeader>Application Participants</ManagementPageHeader>
       <CoursePhaseParticipationsTablePage
-        tableWidth={tableWidth}
         participants={convertedParticipations}
         prevDataKeys={[]}
         restrictedDataKeys={[]}

@@ -82,23 +82,28 @@ export const GroupActionsMenu = ({
           </DropdownMenuItem>
 
           {/* Custom actions */}
-          {customActions?.map((action, idx) => (
-            <DropdownMenuItem
-              key={idx}
-              onClick={() => {
-                const ids = selectedRows.rows.map((r) => r.original.courseParticipationID)
-                if (action.confirm) {
-                  setCustomDialog({ isOpen: true, action, ids })
-                } else {
-                  action.onAction(ids)
-                  onClose()
-                }
-              }}
-            >
-              {action.icon && <span className='mr-2'>{action.icon}</span>}
-              {action.label}
-            </DropdownMenuItem>
-          ))}
+          {customActions?.map((action, idx) => {
+            const ids = selectedRows.rows.map((r) => r.original.courseParticipationID)
+            const disabledBySelection = action.singleRecordOnly && ids.length !== 1
+            return (
+              <DropdownMenuItem
+                key={idx}
+                disabled={disabledBySelection}
+                onClick={() => {
+                  if (disabledBySelection) return
+                  if (action.confirm) {
+                    setCustomDialog({ isOpen: true, action, ids })
+                  } else {
+                    action.onAction(ids)
+                    onClose()
+                  }
+                }}
+              >
+                {action.icon && <span className='mr-2'>{action.icon}</span>}
+                {action.label}
+              </DropdownMenuItem>
+            )
+          })}
 
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onExport}>

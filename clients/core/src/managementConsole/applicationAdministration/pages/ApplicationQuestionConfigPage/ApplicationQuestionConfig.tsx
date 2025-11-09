@@ -116,7 +116,7 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
 
   if (isApplicationFormPending || isApplicationFormError || isMutatePending || isMutateError) {
     return (
-      <div className='space-y-6 max-w-4xl mx-auto'>
+      <div className='space-y-6 w-full mx-auto'>
         <div className='flex justify-between items-center'>
           <h2 className='text-2xl font-semibold'>Application Questions</h2>
         </div>
@@ -144,10 +144,10 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
   }
 
   return (
-    <div className='w-full flex flex-col items-center'>
-      <h1 className='text-4xl font-bold text-center mb-8'>Application Questions</h1>
-      <div className='w-full max-w-4xl mt-5'>
-        <div className={`space-y-6 max-w-4xl mx-auto  ${questionsModified ? 'pb-10' : ''}`}>
+    <div className='w-full'>
+      <h1 className='text-4xl font-bold mb-8'>Application Questions</h1>
+      <div className='w-full mt-5'>
+        <div className={`space-y-6 w-full mx-auto  ${questionsModified ? 'pb-10' : ''}`}>
           <div className='flex justify-between items-center'>
             <ApplicationPreview
               questionsMultiSelect={applicationQuestions.filter(

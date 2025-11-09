@@ -24,6 +24,7 @@ import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state
 import { columns as baseColumns } from './components/columns'
 import { FilterMenu } from './components/FilterMenu'
 import { GroupActionsMenu } from './components/GroupActionsMenu'
+import { RowActionsMenu } from './components/RowActionsMenu'
 import { VisibilityMenu } from './components/VisibilityMenu'
 import { downloadParticipations } from './utils/downloadParticipations'
 import { ExtraParticipationTableColumn } from './interfaces/ExtraParticipationTableColumn'
@@ -37,7 +38,6 @@ interface CoursePhaseParticipationsTablePageProps {
   studentReadableDataKeys: string[]
   hideActions?: boolean
   extraColumns?: ExtraParticipationTableColumn[]
-  tableWidth?: number
   onClickRowAction?: (student: CoursePhaseParticipationWithStudent) => void
   customActions?: GroupAction[]
   toolbarActions?: React.ReactNode
@@ -53,7 +53,6 @@ export const CoursePhaseParticipationsTablePage = ({
   studentReadableDataKeys = [],
   hideActions = false,
   extraColumns,
-  tableWidth,
   onClickRowAction,
   customActions = [],
   toolbarActions,
@@ -110,9 +109,29 @@ export const CoursePhaseParticipationsTablePage = ({
     return [...baseCols, ...extraDefs]
   }, [baseCols, extraColumns, extraDataMaps])
 
+  const tableColumnsWithRowActions = useMemo(() => {
+    const rowActionsCol: ColumnDef<CoursePhaseParticipationWithStudent> = {
+      id: 'rowActions',
+      header: '',
+      cell: ({ row }) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <RowActionsMenu
+            row={row.original}
+            customActions={customActions}
+            onActionPerformed={() => {}}
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    }
+
+    return [...tableColumns, rowActionsCol]
+  }, [tableColumns, customActions])
+
   const table = useReactTable({
     data: participants,
-    columns: tableColumns,
+    columns: tableColumnsWithRowActions,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
