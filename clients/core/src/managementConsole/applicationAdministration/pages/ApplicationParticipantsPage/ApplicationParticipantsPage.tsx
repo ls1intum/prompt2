@@ -79,7 +79,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
   }, [participations, coursePhase])
 
   return (
-    <div id='table-view' className='relative flex flex-col min-w-0'>
+    <div className='relative flex flex-col min-w-0'>
       <ManagementPageHeader>Application Participants</ManagementPageHeader>
       <CoursePhaseParticipationsTablePage
         tableWidth={tableWidth}

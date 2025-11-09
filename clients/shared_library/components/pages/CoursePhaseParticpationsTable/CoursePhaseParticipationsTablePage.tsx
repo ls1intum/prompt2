@@ -222,7 +222,7 @@ export const CoursePhaseParticipationsTablePage = ({
         </div>
       </div>
 
-      <div className='rounded-md border overflow-x-scroll' style={{ width: `${tableWidth}px` }}>
+      <div className='rounded-md border overflow-x-scroll w-full'>
         <Table className='table-auto w-full relative'>
           <TableHeader className='bg-muted/100'>
             {table.getHeaderGroups().map((headerGroup) => (
