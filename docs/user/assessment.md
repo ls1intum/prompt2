@@ -52,6 +52,23 @@ You must define the following core settings:
 | **Start Date**          | When the assessment phase begins (using the timeframe selector)            |
 | **Deadline**            | When the assessment phase ends (using the timeframe selector)              |
 
+#### Visibility Settings
+
+Control when students can see their assessment results:
+
+| Setting                       | Description                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Grade Suggestions Visible** | When enabled, students can view their grade suggestions after the deadline has passed             |
+| **Action Items Visible**      | When enabled, students can see their action items (feedback points) after the deadline has passed |
+
+> 💡 **Note**: Both visibility settings only take effect **after the assessment deadline**. Before the deadline, grade suggestions and action items are never visible to students, regardless of these settings. This ensures students cannot see preliminary results during the active assessment phase.
+
+**Use Cases:**
+
+- **Grade Suggestions**: Enable this when you want students to see their overall performance score
+- **Action Items**: Enable this to share specific feedback points and improvement suggestions with students
+- **Both Disabled**: Use when you want to keep all assessment results private (e.g., for administrative purposes only)
+
 #### Optional Evaluation Types
 
 You can enable additional evaluation methods

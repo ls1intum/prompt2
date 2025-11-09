@@ -5,6 +5,7 @@ declare global {
 }
 
 type EnvType = {
+  ENVIRONMENT: 'development' | 'staging' | 'production'
   CORE_HOST: string
   INTRO_COURSE_HOST: string
   TEAM_ALLOCATION_HOST: string
@@ -18,5 +19,7 @@ type EnvType = {
   GITHUB_REF: string
   SERVER_IMAGE_TAG: string
   SELF_TEAM_ALLOCATION_HOST: string
+  TEMPLATE_HOST: string
+  SENTRY_DSN_CLIENT: string
 }
 export const env: EnvType = { ...window.env }

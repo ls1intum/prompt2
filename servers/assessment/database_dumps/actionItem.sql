@@ -31,9 +31,10 @@ CREATE TABLE public.action_item (
 -- Data for Name: action_item; Type: TABLE DATA; Schema: public; Owner: -
 --
 
--- Sample data can be inserted here if needed for tests
--- INSERT INTO public.action_item (id, course_phase_id, course_participation_id, action, author) VALUES
--- ('123e4567-e89b-12d3-a456-426614174000', '123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002', 'Sample action', 'test@example.com');
+-- Test data for visibility tests
+INSERT INTO public.action_item (id, course_phase_id, course_participation_id, action, author) VALUES
+    ('a1111111-1111-1111-1111-111111111111', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', 'ca42e447-60f9-4fe0-b297-2dae3f924fd7', 'Test action item for visible scenario', 'tester'),
+    ('a2222222-2222-2222-2222-222222222222', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', 'ca42e447-60f9-4fe0-b297-2dae3f924fd7', 'Test action item for not visible scenario', 'tester');
 
 --
 -- PostgreSQL database dump complete

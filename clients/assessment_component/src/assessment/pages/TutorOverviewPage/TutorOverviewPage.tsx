@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 import {
   CoursePhaseParticipationWithStudent,
   PassStatus,
