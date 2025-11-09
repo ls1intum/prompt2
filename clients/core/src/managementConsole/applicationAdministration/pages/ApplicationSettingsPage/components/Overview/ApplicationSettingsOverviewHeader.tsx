@@ -7,14 +7,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
-import { ApplicationStatusBadge } from '../../../components/ApplicationStatusBadge'
+import { ApplicationStatusBadge } from '../../../../components/ApplicationStatusBadge'
 
 interface ApplicationConfigurationHeaderProps {
   applicationPhaseIsConfigured: boolean
   applicationStatus: string
 }
 
-export const ApplicationConfigurationHeader = ({
+export const ApplicationSettingsOverviewHeader = ({
   applicationPhaseIsConfigured,
   applicationStatus,
 }: ApplicationConfigurationHeaderProps) => {

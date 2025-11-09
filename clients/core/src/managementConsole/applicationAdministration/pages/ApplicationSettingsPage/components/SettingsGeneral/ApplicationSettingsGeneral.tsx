@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format, set, parse, formatISO } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
 import { AlertCircle, Loader2 } from 'lucide-react'
-import type { ApplicationMetaData } from '../../../interfaces/applicationMetaData'
+import type { ApplicationMetaData } from '../../../../interfaces/applicationMetaData'
 import type { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import {
   Button,
@@ -16,7 +16,7 @@ import {
   CardContent,
 } from '@tumaet/prompt-ui-components'
 import { updateCoursePhase } from '@core/network/mutations/updateCoursePhase'
-import { ApplicationConfigDialogError } from './ApplicationConfigDialogError'
+import { ApplicationConfigDialogError } from './ApplicationSettingsGeneralErrorMessage'
 
 interface ApplicationConfigDialogProps {
   initialData: ApplicationMetaData
@@ -26,7 +26,7 @@ const getTimeString = (date: Date) => {
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
-export function ApplicationGeneralSettingsCard({ initialData }: ApplicationConfigDialogProps) {
+export function ApplicationGeneralSettings({ initialData }: ApplicationConfigDialogProps) {
   const queryClient = useQueryClient()
   const { phaseId } = useParams<{ phaseId: string }>()
 
@@ -129,7 +129,7 @@ export function ApplicationGeneralSettingsCard({ initialData }: ApplicationConfi
   }
 
   return (
-    <Card className='max-w-4xl'>
+    <Card className='w-full'>
       <CardContent>
         {isPending ? (
           <div className='flex items-center gap-2'>
@@ -256,23 +256,6 @@ export function ApplicationGeneralSettingsCard({ initialData }: ApplicationConfi
                     <p className='text-sm text-muted-foreground'>
                       This option will automatically accept all applications without any manual
                       review.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Custom Scores */}
-                <div className='grid grid-cols-4 items-center gap-4'>
-                  <Label htmlFor='customScores' className='text-right'>
-                    Enable Custom Scores
-                  </Label>
-                  <div className='col-span-3 flex items-center gap-4'>
-                    <Switch
-                      id='customScores'
-                      checked={useCustomScores}
-                      onCheckedChange={setUseCustomScores}
-                    />
-                    <p className='text-sm text-muted-foreground'>
-                      Enable custom scoring options for application assessment.
                     </p>
                   </div>
                 </div>
