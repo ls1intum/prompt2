@@ -9,6 +9,18 @@ Welcome to the Contributor Guide. This guide covers setup, architecture, and dev
 
 See the following pages:
 
-- [Setup](setup.md)
-- [Client guide](guide/client.md)
-- [Server guide](guide/server.md)
+- Architecture
+	- [Overview](architecture/index.md)
+	- [Subsystem Decomposition](architecture/subsystem-decomposition.md)
+	- [Deployment Architecture](architecture/deployment.md)
+	- [Access Control](architecture/access-control.md)
+	- [Data Storage & Inter-Phase Communication](architecture/data-storage.md)
+- Guidelines
+	- [Contributor Guidelines](guide/index.md)
+	- [Client Guidelines](guide/client.md)
+	- [Server Guidelines](guide/server.md)
+- [Setup Guide](setup.md)
+- [How to Add a New Microfrontend](new_microfrontend.md)
+- [UI Integration Guidelines](ui_guidelines.md)
+- [Reusable UI Components](reusable_components.md)
+- [Templating System (Developer Guide)](templating.md)

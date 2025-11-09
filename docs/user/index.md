@@ -9,6 +9,11 @@ Welcome to the User Guide. This section helps instructors and students use the p
 
 See the following pages:
 
-- [Creating a course](creating_course.md)
-- [Assessment](assessment.md)
+- Getting Started
+	- [Creating a Course](creating_course.md)
+	- [Course Configurator](course_configurator.md)
+- Course Phases
+	- [Application Phase](application.md)
+	- [Assessment Phase](assessment.md)
+- [Mailing](mailing.md)
 - [Templates](templates.md)

@@ -28,18 +28,6 @@ export default function Home() {
             A flexible course management tool designed for project-based university courses. 
             Streamline administrative tasks and enhance the learning experience for both students and instructors.
           </p>
-          <div className={styles.buttons}>
-            <Link className="button button--primary button--lg" to="/docs">
-              Get Started
-            </Link>
-            <Link 
-              className="button button--outline button--lg"
-              href="https://github.com/ls1intum/prompt2"
-              target="_blank"
-              rel="noopener noreferrer">
-              View on GitHub
-            </Link>
-          </div>
         </div>
 
         {/* Core Features */}
