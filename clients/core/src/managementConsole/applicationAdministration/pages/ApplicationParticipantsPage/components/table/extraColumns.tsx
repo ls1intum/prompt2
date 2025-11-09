@@ -1,4 +1,4 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { ApplicationParticipation } from '../../../../interfaces/applicationParticipation'
 
 // define filter function for extra columns - use lowercase to avoid mismatch of f.e. 'Male' and 'male'

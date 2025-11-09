@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { FileUser, Trash2 } from 'lucide-react'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-import { GroupAction } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/GroupAction'
+import { GroupAction } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/GroupAction'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { FilterMenu as ApplicationFilterMenu } from './components/table/filtering/FilterMenu'
@@ -11,7 +11,7 @@ import { ApplicationDetailsDialog } from './components/ApplicationDetailsDialog/
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 import { useDeleteApplications } from './hooks/useDeleteApplications'
 import { convertApplicationToCoursePhaseParticipation } from './utils/convertApplicationToCoursePhaseParticipation'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 import { getApplicationExtraColumns } from './components/table/extraColumns'
 
 export const ApplicationParticipantsPage = (): JSX.Element => {
