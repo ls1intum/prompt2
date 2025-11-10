@@ -4,7 +4,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 import { InterviewDataShell } from '../src/interview/pages/InterviewDataShell'
 import { ProfileDetailPage } from '../src/interview/pages/ProfileDetail/ProfileDetailPage'
 import { MailingPage } from '../src/interview/pages/Mailing/MailingPage'
-import { QuestionConfiguration } from '../src/interview/pages/QuestionConfiguration/QuestionConfiguration'
+import { QuestionConfiguration } from '../src/interview/pages/Settings/QuestionConfiguration'
 
 const interviewRoutes: ExtendedRouteObject[] = [
   {
@@ -26,15 +26,6 @@ const interviewRoutes: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
-    path: '/question-configuration',
-    element: (
-      <InterviewDataShell>
-        <QuestionConfiguration />
-      </InterviewDataShell>
-    ),
-    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
-  },
-  {
     path: '/mailing',
     element: (
       <InterviewDataShell>
@@ -43,7 +34,15 @@ const interviewRoutes: ExtendedRouteObject[] = [
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
-  // Add more routes here as needed
+  {
+    path: '/settings',
+    element: (
+      <InterviewDataShell>
+        <QuestionConfiguration />
+      </InterviewDataShell>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
 ]
 
 export default interviewRoutes
