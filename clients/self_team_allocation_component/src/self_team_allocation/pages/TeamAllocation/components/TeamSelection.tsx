@@ -1,7 +1,7 @@
 import type React from 'react'
 import { useMemo, useState } from 'react'
 import { RefreshCw, Users } from 'lucide-react'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import { Button, ManagementPageHeader, DeleteConfirmation } from '@tumaet/prompt-ui-components'
 import { TeamCreationDialog } from './TeamCreationDialog'
 import { TutorImportDialog } from './TutorImportDialog'

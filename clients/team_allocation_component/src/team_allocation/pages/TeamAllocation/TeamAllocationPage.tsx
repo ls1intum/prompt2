@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom'
 import { Loader2, Users } from 'lucide-react'
 
 import type { CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
-import type { Team } from '../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import type { Allocation } from '../../interfaces/allocation'
 
 import { getAllTeams } from '../../network/queries/getAllTeams'
@@ -158,10 +158,7 @@ export const TeamAllocationPage: React.FC = () => {
                   ) : (
                     <ul className='space-y-2'>
                       {team.tutors.map((tutor) => (
-                        <li
-                          key={tutor.courseParticipationID}
-                          className='text-sm flex items-center gap-2'
-                        >
+                        <li key={tutor.id} className='text-sm flex items-center gap-2'>
                           <Avatar className='h-6 w-6'>
                             <AvatarFallback className='text-xs font-medium'>
                               {tutor.firstName[0]}

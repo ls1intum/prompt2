@@ -3469,19 +3469,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^0.0.21":
-  version: 0.0.21
-  resolution: "@tumaet/prompt-shared-state@npm:0.0.21"
+"@tumaet/prompt-shared-state@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.3"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/7b13e17043975db7a5ad5b4d91bf99a867dea487aa4802def1c3a4be5b4f0e30c71d5a3a42b08b67d06b8e180d8f83359f14d592a32070e28e67735a8d68ae4c
+  checksum: 10c0/c912ea48216dad338bdf8bab89addcba7b04c5280414c392e33b61536db5dcd8130efee0d404cb5f20f18f74d514aedd60962f2e3f7cfd03ac85a2e2e21d5dbe
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-ui-components@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@tumaet/prompt-ui-components@npm:0.0.15"
+"@tumaet/prompt-ui-components@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@tumaet/prompt-ui-components@npm:1.0.3"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -3540,7 +3540,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.15"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/8a23c8e3aab12a5901091409f869d019e373faf9eb7617924d373cb796455097b9901d9b8805c35f78ca949814481234dbc665f63da16d5e16b5b25f69dd5cbe
+  checksum: 10c0/72776f81dbe6560f72d5ffbc0aebfd53ce5caaefe86f7529bccca9b555fbbfe47c7d0bb821c34c65a39f704dae5dd22d15f84cde62e58ff8e62814e60f586a61
   languageName: node
   linkType: hard
 
@@ -12916,8 +12916,8 @@ __metadata:
     "@tiptap/pm": "npm:^2.10.4"
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
-    "@tumaet/prompt-shared-state": "npm:^0.0.21"
-    "@tumaet/prompt-ui-components": "npm:^0.0.15"
+    "@tumaet/prompt-shared-state": "npm:^1.0.3"
+    "@tumaet/prompt-ui-components": "npm:^1.0.3"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"

@@ -5,7 +5,7 @@ import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-s
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
-import { Team } from '../../interfaces/team'
+import { Team } from '@tumaet/prompt-shared-state'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'

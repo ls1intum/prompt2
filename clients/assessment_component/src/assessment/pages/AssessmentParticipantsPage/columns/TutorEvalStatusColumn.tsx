@@ -1,11 +1,10 @@
 import { Row } from '@tanstack/table-core'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+import { CoursePhaseParticipationWithStudent, Team } from '@tumaet/prompt-shared-state'
 
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
-import { Team } from '../../../interfaces/team'
 
 import { PeerEvaluationCompletionBadge } from '../../components/badges'
 
@@ -33,7 +32,9 @@ export const createTutorEvalStatusColumn = (
         return <PeerEvaluationCompletionBadge completed={0} total={0} />
       }
 
-      const tutorIds = team.tutors.map((tutor) => tutor.id)
+      const tutorIds = team.tutors
+        .map((tutor) => tutor.id)
+        .filter((id): id is string => id !== undefined)
       const counts = getEvaluationCounts(row.courseParticipationID, tutorIds, evaluationLookup)
 
       return <PeerEvaluationCompletionBadge completed={counts.completed} total={counts.total} />
@@ -47,7 +48,9 @@ export const createTutorEvalStatusColumn = (
 
         if (!team) return 0
 
-        const tutorIds = team.tutors.map((tutor) => tutor.id)
+        const tutorIds = team.tutors
+          .map((tutor) => tutor.id)
+          .filter((id): id is string => id !== undefined)
         const counts = getEvaluationCounts(
           row.original.courseParticipationID,
           tutorIds,
@@ -70,7 +73,9 @@ export const createTutorEvalStatusColumn = (
         }
       }
 
-      const tutorIds = team.tutors.map((tutor) => tutor.id)
+      const tutorIds = team.tutors
+        .map((tutor) => tutor.id)
+        .filter((id): id is string => id !== undefined)
       const counts = getEvaluationCounts(p.courseParticipationID, tutorIds, evaluationLookup)
 
       const statusText = `${counts.completed}/${counts.total}`
