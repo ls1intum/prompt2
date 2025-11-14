@@ -21,6 +21,13 @@ type TimeframeService struct {
 
 var TimeframeServiceSingleton *TimeframeService
 
+func NewTimeframeService(queries db.Queries, conn *pgxpool.Pool) *TimeframeService {
+	return &TimeframeService{
+		queries: queries,
+		conn:    conn,
+	}
+}
+
 func GetTimeframe(ctx context.Context, coursePhaseID uuid.UUID) (timeframeDTO.Timeframe, error) {
 	timeframe, err := TimeframeServiceSingleton.queries.GetTimeframe(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

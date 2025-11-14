@@ -9,8 +9,5 @@ import (
 
 func InitTimeframeModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool) {
 	setupTimeframeRouter(routerGroup, promptSDK.AuthenticationMiddleware)
-	TimeframeServiceSingleton = &TimeframeService{
-		queries: queries,
-		conn:    conn,
-	}
+	TimeframeServiceSingleton = NewTimeframeService(queries, conn)
 }
