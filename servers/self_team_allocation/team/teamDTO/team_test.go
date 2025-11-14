@@ -45,12 +45,7 @@ func TestGetTeamDTOFromDBModel(t *testing.T) {
 
 func TestGetTeamWithFullNamesByIdDTOFromDBModel(t *testing.T) {
 	source := sampleTeamRow(t)
-	row := db.GetTeamWithStudentNamesByTeamIDRow{
-		ID:          source.ID,
-		Name:        source.Name,
-		TeamMembers: source.TeamMembers,
-		TeamTutors:  source.TeamTutors,
-	}
+	row := db.GetTeamWithStudentNamesByTeamIDRow(source)
 
 	team, err := GetTeamWithFullNamesByIdDTOFromDBModel(row)
 	require.NoError(t, err)
