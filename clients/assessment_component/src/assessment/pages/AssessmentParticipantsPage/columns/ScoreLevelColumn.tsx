@@ -1,6 +1,6 @@
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { StudentScoreBadge } from '../../components/badges'
-import { mapScoreLevelToNumber, ScoreLevel } from '../../../interfaces/scoreLevel'
+import { mapScoreLevelToNumber, ScoreLevel } from '@tumaet/prompt-shared-state'
 import { getLevelConfig } from '../../utils/getLevelConfig'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
 

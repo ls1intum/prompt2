@@ -1,4 +1,4 @@
-import { ScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 export interface ScoreDistributionDataPoint {
   shortLabel: string

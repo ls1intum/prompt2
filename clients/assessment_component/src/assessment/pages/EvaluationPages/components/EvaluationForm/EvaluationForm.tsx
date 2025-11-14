@@ -7,7 +7,7 @@ import { Form, cn } from '@tumaet/prompt-ui-components'
 import { AssessmentType } from '../../../../interfaces/assessmentType'
 import { Competency } from '../../../../interfaces/competency'
 import { Evaluation, CreateOrUpdateEvaluationRequest } from '../../../../interfaces/evaluation'
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'

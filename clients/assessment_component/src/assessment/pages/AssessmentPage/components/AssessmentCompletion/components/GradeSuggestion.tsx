@@ -14,7 +14,7 @@ import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhase
 import { useSelfEvaluationCategoryStore } from '../../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../../zustand/usePeerEvaluationCategoryStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
-import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
 import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'

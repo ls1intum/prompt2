@@ -1,4 +1,4 @@
-import { ScoreLevel, mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { ScoreLevel, mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { ScoreDistributionDataPoint } from '../interfaces/ScoreDistributionDataPoint'
 
