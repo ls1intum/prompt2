@@ -11,10 +11,6 @@ interface ActiveFilterBadgesProps {
   table: any
 }
 
-// ---------------------------------------------
-// Helpers
-// ---------------------------------------------
-
 /** Convert a column's header to a user-facing string */
 function getHeaderLabel(column: any, table: any): string {
   if (!column) return ''
@@ -33,7 +29,7 @@ function getHeaderLabel(column: any, table: any): string {
     } catch {}
   }
 
-  // fallback: convert camelCase → "Camel Case"
+  // fallback: camelCase → "Camel Case"
   return column.id.replace(/([A-Z])/g, ' $1').replace(/^./, (c: string) => c.toUpperCase())
 }
 
@@ -106,10 +102,6 @@ function renderDefaultBadges(
     return <FilterBadge key={key} label={`${headerLabel}: ${valueLabel}`} onRemove={remove} />
   })
 }
-
-// ---------------------------------------------
-// Component
-// ---------------------------------------------
 
 export const ActiveFilterBadges = ({
   globalFilter,
