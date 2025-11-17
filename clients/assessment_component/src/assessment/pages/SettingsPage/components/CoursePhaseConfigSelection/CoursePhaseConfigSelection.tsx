@@ -13,6 +13,7 @@ import { useEvaluationOptions } from './hooks/useEvaluationOptions'
 import { AssessmentConfiguration } from './components/AssessmentConfiguration'
 import { ErrorDisplay } from './components/ErrorDisplay'
 import { EvaluationVisibilityToggle } from './components/EvaluationVisibilityToggle'
+import { StudentVisibilityToggles } from './components/StudentVisibilityToggles'
 import { EvaluationOptionSection } from './components/EvaluationOptionSection'
 import { SaveConfigurationSection } from './components/SaveConfigurationSection'
 
@@ -30,6 +31,10 @@ export const CoursePhaseConfigSelection = () => {
     setDeadline,
     evaluationResultsVisible,
     setEvaluationResultsVisible,
+    gradeSuggestionVisible,
+    setGradeSuggestionVisible,
+    actionItemsVisible,
+    setActionItemsVisible,
     mainConfigState,
     hasMainConfigChanges,
   } = useCoursePhaseConfigForm()
@@ -117,6 +122,20 @@ export const CoursePhaseConfigSelection = () => {
             onCheckedChange={setEvaluationResultsVisible}
             disabled={configMutation.isPending}
           />
+
+          <StudentVisibilityToggles
+            gradeSuggestionVisible={gradeSuggestionVisible}
+            onGradeSuggestionVisibleChange={setGradeSuggestionVisible}
+            actionItemsVisible={actionItemsVisible}
+            onActionItemsVisibleChange={setActionItemsVisible}
+            disabled={configMutation.isPending}
+          />
+
+          <div className='space-y-4'>
+            <h3 className='text-sm font-semibold text-gray-700 dark:text-gray-300'>
+              Evaluation Settings
+            </h3>
+          </div>
 
           <EvaluationOptionSection
             type={AssessmentType.SELF}

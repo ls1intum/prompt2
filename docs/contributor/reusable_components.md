@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Reusable UI Components
 
 The shared library provides a range of reusable UI components you can easily incorporate into your code.

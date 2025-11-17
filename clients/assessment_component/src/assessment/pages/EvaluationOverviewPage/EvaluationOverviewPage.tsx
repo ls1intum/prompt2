@@ -118,7 +118,7 @@ export const EvaluationOverviewPage = () => {
     <div className='min-h-screen transition-colors'>
       <div className='max-w-6xl mx-auto px-4 py-6'>
         <ManagementPageHeader>
-          {isAssessmentDeadlinePassed ? 'Your Action Items and Grade Suggestion' : 'Evaluation'}
+          {isAssessmentDeadlinePassed ? 'Results' : 'Evaluation'}
         </ManagementPageHeader>
 
         <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} />

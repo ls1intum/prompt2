@@ -11,7 +11,7 @@ SELECT
     c.name AS course_name,
     c.start_date AS course_start_date,
     c.end_date AS course_end_date,
-    (p.restricted_data->>'applicationEndDate')::text AS application_end_date,
+    COALESCE((p.restricted_data->>'applicationEndDate'), '')::text AS application_end_date,
     COALESCE((p.restricted_data->'mailingSettings'->>'confirmationMailSubject'), '')::text AS confirmation_mail_subject,
     COALESCE((p.restricted_data->'mailingSettings'->>'confirmationMailContent'), '')::text AS confirmation_mail_content,
     COALESCE((p.restricted_data->'mailingSettings'->>'sendConfirmationMail')::boolean, false)::boolean AS send_confirmation_mail

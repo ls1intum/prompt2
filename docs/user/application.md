@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # 📋 Application Course Phase
 
 🎥 **Video Tutorial**: [Watch here](https://live.rbg.tum.de/w/artemisintro/60491)
@@ -18,23 +22,13 @@ Use the Course Configurator to add an **Application Phase** to your course struc
 
 In the course sidebar, select the newly added application phase, then click on: `Configure Course Phase`
 
-```{figure} ./images/application_1.png
----
-width: 800px
----
-````
+![Application Phase Configuration](./images/application_1.png)
 
 This opens a dialog for setting the phase's behavior and schedule.
 
 ### 3. Configure General Application Settings
 
-```{figure} ./images/application_2.png
----
-alt: Application General Settings
-width: 600px
-name: Application General Settings
----
-````
+![Application General Settings](./images/application_2.png)
 
 You must define a start and end date. These timestamps use the **system time (Europe/Berlin)**. If students access the application from other time zones, a note will be shown to clarify that deadlines refer to the German time zone.
 
@@ -72,11 +66,7 @@ Below are details and configuration options for each available question type:
 
 Use this for open-ended answers such as motivation, experience, or personal information.
 
-```{figure} ./images/application_3.png
----
-width: 600px
----
-````
+![Text Question Configuration](./images/application_3.png)
 
 **Fields:**
 
@@ -98,11 +88,7 @@ width: 600px
 
 Use this to allow students to choose one or more options from a predefined list.
 
-```{figure} ./images/application_4.png
----
-width: 600px
----
-````
+![Multi-Select Question Configuration](./images/application_4.png)
 
 **Fields:**
 
@@ -117,13 +103,9 @@ width: 600px
 
 ### ☑️ Checkbox Question
 
-Use this for confirmations, declarations, or consent (e.g., “I agree to the terms”).
+Use this for confirmations, declarations, or consent (e.g., "I agree to the terms").
 
-```{figure} ./images/application_5.png
----
-width: 600px
----
-````
+![Checkbox Question Configuration](./images/application_5.png)
 
 **Fields:**
 

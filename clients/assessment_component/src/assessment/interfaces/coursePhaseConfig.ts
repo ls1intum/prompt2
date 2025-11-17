@@ -16,6 +16,8 @@ export interface CoursePhaseConfig {
   tutorEvaluationStart: Date
   tutorEvaluationDeadline: Date
   evaluationResultsVisible: boolean
+  gradeSuggestionVisible: boolean
+  actionItemsVisible: boolean
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {
@@ -35,4 +37,6 @@ export interface CreateOrUpdateCoursePhaseConfigRequest {
   tutorEvaluationStart?: Date
   tutorEvaluationDeadline?: Date
   evaluationResultsVisible: boolean
+  gradeSuggestionVisible: boolean
+  actionItemsVisible: boolean
 }

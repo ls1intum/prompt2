@@ -1,4 +1,4 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { AssessmentStatusBadge } from '../../components/badges'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
 
