@@ -11,6 +11,106 @@ interface ActiveFilterBadgesProps {
   table: any
 }
 
+// ---------------------------------------------
+// Helpers
+// ---------------------------------------------
+
+/** Convert a column's header to a user-facing string */
+function getHeaderLabel(column: any, table: any): string {
+  if (!column) return ''
+
+  const header = column.columnDef?.header
+
+  if (typeof header === 'string') return header
+
+  if (typeof header === 'function') {
+    try {
+      const rendered = header({ table, column, header: column })
+      if (rendered?.props?.title) return rendered.props.title
+      if (typeof rendered?.props?.children === 'string') {
+        return rendered.props.children
+      }
+    } catch {}
+  }
+
+  // fallback: convert camelCase → "Camel Case"
+  return column.id.replace(/([A-Z])/g, ' $1').replace(/^./, (c: string) => c.toUpperCase())
+}
+
+/** Format score filter display */
+function formatScoreLabel(value: { min?: string; max?: string; noScore?: boolean }): string {
+  const { min, max, noScore } = value
+
+  if (noScore) return 'No score'
+  if (min && max) return `${min}–${max}`
+  if (min) return `≥ ${min}`
+  if (max) return `≤ ${max}`
+  return ''
+}
+
+/** Render the score filter badge */
+function renderScoreBadge(
+  value: any,
+  headerLabel: string,
+  setColumnFiltersFn: React.Dispatch<React.SetStateAction<ColumnFiltersState>>,
+) {
+  const label = formatScoreLabel(value)
+  if (!label) return null
+
+  return (
+    <FilterBadge
+      key='score-filter'
+      label={`${headerLabel}: ${label}`}
+      onRemove={() => setColumnFiltersFn((prev) => prev.filter((p) => p.id !== 'score'))}
+    />
+  )
+}
+
+/** Render badges for simple array-based filters */
+function renderDefaultBadges(
+  filter: any,
+  headerLabel: string,
+  setColumnFiltersFn: React.Dispatch<React.SetStateAction<ColumnFiltersState>>,
+) {
+  const values = Array.isArray(filter.value) ? filter.value : [filter.value]
+
+  return values.map((val: any, idx: number) => {
+    let valueLabel = String(val)
+
+    // Pretty-print status values
+    if (filter.id === 'passStatus') {
+      try {
+        valueLabel = getStatusString(val)
+      } catch {}
+    }
+
+    const key = `${filter.id}-${idx}-${valueLabel}`
+
+    const remove = () => {
+      setColumnFiltersFn((prev) => {
+        const existing = prev.find((f) => f.id === filter.id)
+        if (!existing) return prev
+
+        const existingValues = Array.isArray(existing.value) ? existing.value : [existing.value]
+
+        const newValues = existingValues.filter((v) => String(v) !== String(val))
+
+        if (newValues.length === 0) {
+          return prev.filter((f) => f.id !== filter.id)
+        }
+
+        return prev.map((f) => (f.id === filter.id ? { ...f, value: newValues } : f))
+      })
+    }
+
+    return <FilterBadge key={key} label={`${headerLabel}: ${valueLabel}`} onRemove={remove} />
+  })
+}
+
+// ---------------------------------------------
+// Component
+// ---------------------------------------------
+
 export const ActiveFilterBadges = ({
   globalFilter,
   setGlobalFilter,
@@ -25,90 +125,26 @@ export const ActiveFilterBadges = ({
 
   return (
     <div className='mt-2 mb-2 flex flex-wrap items-center gap-2 min-h-[1.3rem]'>
+      {/* Global filter badge */}
       {globalFilter && (
         <FilterBadge label={`Search: "${globalFilter}"`} onRemove={() => setGlobalFilter('')} />
       )}
 
+      {/* Column filter badges */}
       {hasAnyActiveFilters &&
-        columnFiltersState.map((f) => {
-          if (f.value == null) return null
+        columnFiltersState.map((filter) => {
+          if (!filter.value) return null
 
-          // case: object based (like for score)
-          if (f.id === 'score') {
-            const { min, max, noScore } = f.value as {
-              min?: string
-              max?: string
-              noScore?: boolean
-            }
+          const column = table.getColumn(filter.id)
+          const headerLabel = getHeaderLabel(column, table)
 
-            // If filter object is empty, skip
-            if (!min && !max && !noScore) return null
-
-            let valueLabel = ''
-            if (noScore) {
-              valueLabel = 'No score'
-            } else if (min && max) {
-              valueLabel = `${min}–${max}`
-            } else if (min) {
-              valueLabel = `≥ ${min}`
-            } else if (max) {
-              valueLabel = `≤ ${max}`
-            }
-
-            return (
-              <FilterBadge
-                key='score-filter'
-                label={`Score: ${valueLabel}`}
-                onRemove={() => setColumnFiltersFn((prev) => prev.filter((p) => p.id !== 'score'))}
-              />
-            )
+          // Score object-based filter
+          if (filter.id === 'score') {
+            return renderScoreBadge(filter.value, headerLabel, setColumnFiltersFn)
           }
 
-          // default case
-          const values = Array.isArray(f.value) ? f.value : [f.value]
-
-          const column = table.getColumn(f.id)
-          let headerLabel: string = f.id
-
-          if (column) {
-            const headerDef = column.columnDef.header
-            if (typeof headerDef === 'string') headerLabel = headerDef
-          }
-
-          return values.map((val, idx) => {
-            let valueLabel = String(val)
-
-            if (f.id === 'passStatus') {
-              try {
-                valueLabel = getStatusString(val as any)
-              } catch {}
-            }
-
-            const key = `${f.id}-${idx}-${valueLabel}`
-
-            const onRemove = () => {
-              setColumnFiltersFn((prev) => {
-                const existing = prev.find((p) => p.id === f.id)
-                if (!existing) return prev
-
-                const existingValues = Array.isArray(existing.value)
-                  ? existing.value
-                  : [existing.value]
-
-                const newValues = existingValues.filter((v) => String(v) !== String(val))
-
-                if (newValues.length === 0) {
-                  return prev.filter((p) => p.id !== f.id)
-                }
-
-                return prev.map((p) => (p.id === f.id ? { ...p, value: newValues } : p))
-              })
-            }
-
-            return (
-              <FilterBadge key={key} label={`${headerLabel}: ${valueLabel}`} onRemove={onRemove} />
-            )
-          })
+          // Default badges (arrays or single)
+          return renderDefaultBadges(filter, headerLabel, setColumnFiltersFn)
         })}
     </div>
   )
