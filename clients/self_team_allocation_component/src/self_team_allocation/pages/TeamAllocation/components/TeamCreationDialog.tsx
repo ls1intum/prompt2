@@ -11,7 +11,7 @@ import {
   Input,
 } from '@tumaet/prompt-ui-components'
 import { PlusCircle } from 'lucide-react'
-import { Team } from '../../../interfaces/team'
+import { Team } from '@tumaet/prompt-shared-state'
 
 interface Props {
   disabled?: boolean

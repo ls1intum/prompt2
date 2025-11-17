@@ -1,6 +1,6 @@
 import { Rectangle } from 'recharts'
 
-import { mapNumberToScoreLevel, ScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel, ScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getBarColor } from '../../utils/chartConfig'
 

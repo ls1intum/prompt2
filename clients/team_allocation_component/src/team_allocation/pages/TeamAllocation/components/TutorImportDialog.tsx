@@ -24,7 +24,7 @@ import {
   Label,
 } from '@tumaet/prompt-ui-components'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 
 export function TutorImportDialog() {
   const { phaseId } = useParams<{ phaseId: string }>()

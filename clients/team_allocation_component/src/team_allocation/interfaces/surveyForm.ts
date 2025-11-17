@@ -1,5 +1,6 @@
+import { Team } from '@tumaet/prompt-shared-state'
+
 import { Skill } from './skill'
-import { Team } from './team'
 
 export type SurveyForm = {
   teams: Team[]

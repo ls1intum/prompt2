@@ -1,8 +1,9 @@
+import { Team } from '@tumaet/prompt-shared-state'
+
 import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
-import { Team } from '../../../interfaces/team'
 
 import { PeerEvaluationCompletionBadge } from '../../components/badges'
 
@@ -32,7 +33,7 @@ export const createPeerEvalStatusColumn = (
 
       const teamMemberIds = team.members
         .map((member) => member.id)
-        .filter((id) => id !== row.courseParticipationID)
+        .filter((id): id is string => id !== undefined && id !== row.courseParticipationID)
 
       const counts = getEvaluationCounts(row.courseParticipationID, teamMemberIds, evaluationLookup)
 
@@ -48,7 +49,9 @@ export const createPeerEvalStatusColumn = (
 
         const teamMemberIds = team.members
           .map((member) => member.id)
-          .filter((id) => id !== row.original.courseParticipationID)
+          .filter(
+            (id): id is string => id !== undefined && id !== row.original.courseParticipationID,
+          )
 
         const counts = getEvaluationCounts(
           row.original.courseParticipationID,
@@ -73,7 +76,7 @@ export const createPeerEvalStatusColumn = (
 
       const teamMemberIds = team.members
         .map((member) => member.id)
-        .filter((id) => id !== p.courseParticipationID)
+        .filter((id): id is string => id !== undefined && id !== p.courseParticipationID)
 
       const counts = getEvaluationCounts(p.courseParticipationID, teamMemberIds, evaluationLookup)
 

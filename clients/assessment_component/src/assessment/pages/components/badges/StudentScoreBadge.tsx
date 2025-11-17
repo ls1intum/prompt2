@@ -8,7 +8,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { getLevelConfig } from '../../utils/getLevelConfig'
-import { mapNumberToScoreLevel, ScoreLevel } from '../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel, ScoreLevel } from '@tumaet/prompt-shared-state'
 
 interface ScoreLevelBadgeProps {
   scoreLevel?: ScoreLevel

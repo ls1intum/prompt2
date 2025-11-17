@@ -17,7 +17,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
 import { getAllSkills } from '../../../network/queries/getAllSkills'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import { getLevelConfig } from './ProficiencyBadge'
 
 interface StudentDetailDialogProps {

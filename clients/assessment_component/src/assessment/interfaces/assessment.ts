@@ -1,5 +1,5 @@
 import { CompetencyScore } from './competencyScore'
-import { ScoreLevel } from './scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 export type Assessment = CompetencyScore & {
   examples: string

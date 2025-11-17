@@ -4,7 +4,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 
 import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
-import { mapNumberToScoreLevel } from '../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
 
