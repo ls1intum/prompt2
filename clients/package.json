@@ -55,6 +55,7 @@
     "dompurify": "^3.2.4",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.4.1",
+    "js-yaml": "3.14.2",
     "jwt-decode": "^4.0.0",
     "keycloak-js": "25.0.6",
     "lowlight": "^3.3.0",
