@@ -8,7 +8,6 @@ The shared library provides a range of reusable UI components you can easily inc
 
 ---
 
-(managementpageheader)=
 
 ## ManagementPageHeader
 
