@@ -101,9 +101,9 @@ jobs:
           script: |
             # Ensure maintenance directory exists and is writable by the deploy user
             mkdir -p /home/${{ vars.VM_USERNAME }}/maintenance
-            OWNER=$(stat -c '%U' /home/${{ vars.VM_USERNAME }}/maintenance || stat -f '%Su' /home/${{ vars.VM_USERNAME }}/maintenance)
+            OWNER=$(stat -c '%U' /home/${{ vars.VM_USERNAME }}/maintenance)
             if [ "$OWNER" != "${{ vars.VM_USERNAME }}" ]; then
-              chown $USER:$USER /home/${{ vars.VM_USERNAME }}/maintenance
+              chown ${{ vars.VM_USERNAME }}:${{ vars.VM_USERNAME }} /home/${{ vars.VM_USERNAME }}/maintenance || sudo chown ${{ vars.VM_USERNAME }}:${{ vars.VM_USERNAME }} /home/${{ vars.VM_USERNAME }}/maintenance
             fi
 
       - name: Copy file to VM Host
