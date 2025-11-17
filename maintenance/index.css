@@ -81,22 +81,6 @@ body {
   margin-bottom: 3rem;
 }
 
-.spinner {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 1.5rem;
-  border: 4px solid #e2e8f0;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -188,13 +172,6 @@ h1 {
   text-align: center;
   border-top: 1px solid #e2e8f0;
   padding-top: 2rem;
-}
-
-.timestamp {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin-bottom: 1rem;
-  font-family: 'Courier New', monospace;
 }
 
 .support {
