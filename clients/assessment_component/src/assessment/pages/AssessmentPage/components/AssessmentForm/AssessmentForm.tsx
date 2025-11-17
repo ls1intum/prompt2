@@ -24,7 +24,7 @@ import {
   ScoreLevel,
   mapNumberToScoreLevel,
   mapScoreLevelToNumber,
-} from '../../../../interfaces/scoreLevel'
+} from '@tumaet/prompt-shared-state'
 
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'

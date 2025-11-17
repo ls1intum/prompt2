@@ -1,4 +1,4 @@
-import { ScoreLevel } from './scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 export type StudentScore = {
   scoreNumeric: number

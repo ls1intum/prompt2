@@ -1,4 +1,5 @@
-import { Team } from '../../interfaces/team'
+import { Team } from '@tumaet/prompt-shared-state'
+
 import { selfTeamAllocationAxiosInstance } from '../selfTeamAllocationServerConfig'
 
 export const getAllTeams = async (coursePhaseID: string): Promise<Team[]> => {

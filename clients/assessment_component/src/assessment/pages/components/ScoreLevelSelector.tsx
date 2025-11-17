@@ -9,7 +9,7 @@ import {
 
 import { AssessmentType } from '../../interfaces/assessmentType'
 import { Competency } from '../../interfaces/competency'
-import { ScoreLevel } from '../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 

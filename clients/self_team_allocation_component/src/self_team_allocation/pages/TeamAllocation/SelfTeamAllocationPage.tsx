@@ -2,14 +2,15 @@ import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, TriangleAlert } from 'lucide-react'
+
 import { Alert, AlertDescription, AlertTitle, ErrorPage } from '@tumaet/prompt-ui-components'
+import { CoursePhaseParticipationWithStudent, Team } from '@tumaet/prompt-shared-state'
+
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { getOwnCoursePhaseParticipation } from '@/network/queries/getOwnCoursePhaseParticipation'
-import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 
 import { TeamSelection } from './components/TeamSelection'
 import { getAllTeams } from '../../network/queries/getAllTeams'
-import { Team } from '../../interfaces/team'
 import { Timeframe } from '../../interfaces/timeframe'
 import { getTimeframe } from '../../network/queries/getSurveyTimeframe'
 

@@ -1,6 +1,6 @@
 import type React from 'react'
 import { Users, UserPlus, LogOut, Trash2, GraduationCap } from 'lucide-react'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,

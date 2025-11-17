@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # 🛠️ Course Configurator Guide
 
 📺 **Video Tutorial**: [Watch here](https://live.rbg.tum.de/w/artemisintro/60490)
@@ -13,13 +17,7 @@ The Course Configurator allows you to build and customize your course using a **
 * The **order students progress through the course**
 * The **flow of data** between course phases
 
-```{figure} ./images/course_configurator.png
----
-alt: Course Configurator
-width: 800px
-name: Course Configurator
----
-````
+![Course Configurator](./images/course_configurator.png)
 
 ---
 

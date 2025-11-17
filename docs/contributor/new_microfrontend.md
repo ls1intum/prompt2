@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # How to Add a New Microfrontend
 
 This guide explains how to add a new microfrontend component (ending with `_component`) to this repository, using our existing template structure.

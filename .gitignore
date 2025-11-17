@@ -11,3 +11,4 @@ postgres_self_team_allocation_data/
 postgres_template_server_data/
 
 **/*/.DS_Store
+**/.gocache/

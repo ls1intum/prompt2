@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # 📊 Assessment Course Phase
 
 The **Assessment Phase** allows instructors to evaluate students across multiple competencies using a structured scoring system. Students can be assessed through self-evaluation, peer evaluation, and tutor/instructor evaluation. Students may also evaluate their tutors and team leads.

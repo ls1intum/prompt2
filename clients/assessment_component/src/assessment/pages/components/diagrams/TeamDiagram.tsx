@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@tumaet/prompt-ui-components'
+import { Team } from '@tumaet/prompt-shared-state'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
 import { GradeDistributionBarChart } from './gradeDistributionBarChart/GradeDistributionBarChart'
@@ -13,7 +14,6 @@ import { createGradeDistributionDataPoint } from './gradeDistributionBarChart/ut
 
 import { getGridSpanClass } from './utils/getGridSpanClass'
 import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
-import { Team } from '../../../interfaces/team'
 
 import { groupBy } from './utils/groupBy'
 

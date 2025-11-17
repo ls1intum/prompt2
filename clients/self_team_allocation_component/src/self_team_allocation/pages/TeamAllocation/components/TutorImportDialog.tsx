@@ -6,7 +6,7 @@ import { useCourseStore, Student } from '@tumaet/prompt-shared-state'
 import { getStudentsOfCoursePhase } from '../../../network/queries/getStudentsOfCoursePhase'
 import { importTutors } from '../../../network/mutations/importTutors'
 import { Tutor } from '../../../interfaces/tutor'
-import { Team } from '../../../interfaces/team'
+import { Team } from '@tumaet/prompt-shared-state'
 import { getAllTeams } from '../../../network/queries/getAllTeams'
 import {
   Button,
