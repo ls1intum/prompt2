@@ -21,20 +21,8 @@ import {
 } from '@core/validations/courseAppearance'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IconSelector } from './components/IconSelector'
-import DynamicIcon from '@/components/DynamicIcon'
-
-const subtleColors = [
-  'bg-red-100',
-  'bg-yellow-100',
-  'bg-green-100',
-  'bg-blue-100',
-  'bg-indigo-100',
-  'bg-purple-100',
-  'bg-pink-100',
-  'bg-orange-100',
-  'bg-teal-100',
-  'bg-cyan-100',
-]
+import { CourseAppearancePreview } from '../components/CourseAppearancePreview'
+import { courseAppearanceColors } from '@core/managementConsole/courseOverview/constants/courseAppearance'
 
 interface AddCourseAppearanceProps {
   onBack: () => void
@@ -60,37 +48,11 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({
 
   return (
     <Form {...form}>
-      <h3 className='text-lg font-semibold mb-2'>Preview</h3>
-      <div className='flex items-center space-x-4'>
-        <div
-          className={`
-                relative flex aspect-square size-12 items-center justify-center
-                after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary
-              `}
-        >
-          <div
-            className={`
-                  flex aspect-square items-center justify-center rounded-lg text-gray-800
-                  size-12 
-                  ${selectedColor || 'bg-gray-100'}
-                `}
-          >
-            <DynamicIcon name={selectedIcon || 'circle-help'} />
-          </div>
-        </div>
-        <span className='text-sm text-gray-600'>
-          {createTemplate ? (
-            'This is how your template icon will appear in the sidebar.'
-          ) : (
-            <>
-              This is how your course icon will appear in the sidebar.
-              <br />
-              <b>Please note:</b> it will only be displayed while the course is active.
-            </>
-          )}
-        </span>
-      </div>
-
+      <CourseAppearancePreview
+        color={selectedColor}
+        icon={selectedIcon}
+        createTemplate={createTemplate}
+      />
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
         <FormField
           control={form.control}
@@ -105,7 +67,7 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {subtleColors.map((color) => (
+                  {courseAppearanceColors.map((color) => (
                     <SelectItem key={color} value={color}>
                       <div className='flex items-center'>
                         <div className={`w-4 h-4 rounded mr-2 ${color}`}></div>

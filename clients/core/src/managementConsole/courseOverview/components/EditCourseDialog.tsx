@@ -34,6 +34,13 @@ import {
 } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
+import { IconSelector } from '../AddingCourse/components/IconSelector'
+import { CourseAppearancePreview } from './CourseAppearancePreview'
+import {
+  DEFAULT_COURSE_COLOR,
+  DEFAULT_COURSE_ICON,
+  courseAppearanceColors,
+} from '@core/managementConsole/courseOverview/constants/courseAppearance'
 
 interface CourseEditDialogProps {
   isOpen: boolean
@@ -46,6 +53,8 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   const course = courses.find((c) => c.id === courseId)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const initialColor = (course?.studentReadableData?.['bg-color'] as string) || DEFAULT_COURSE_COLOR
+  const initialIcon = (course?.studentReadableData?.['icon'] as string) || DEFAULT_COURSE_ICON
 
   const form = useForm<EditCourseFormValues>({
     resolver: zodResolver(editCourseSchema),
@@ -56,10 +65,14 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
       },
       courseType: course?.courseType,
       ects: course?.ects ?? 0,
+      color: initialColor,
+      icon: initialIcon,
     },
   })
 
   const selectedCourseType = form.watch('courseType')
+  const selectedColor = form.watch('color')
+  const selectedIcon = form.watch('icon')
   const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
 
   useEffect(() => {
@@ -94,6 +107,10 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
       endDate: data.dateRange.to,
       courseType: data.courseType,
       ects: data.ects,
+      studentReadableData: {
+        icon: data.icon,
+        'bg-color': data.color,
+      },
     }
     mutateCourse(updateData)
     onClose()
@@ -163,6 +180,52 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
                       className='w-full'
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <CourseAppearancePreview color={selectedColor} icon={selectedIcon} />
+            <FormField
+              control={form.control}
+              name='color'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sidebar Color</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select a color' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {courseAppearanceColors.map((color) => (
+                        <SelectItem key={color} value={color}>
+                          <div className='flex items-center'>
+                            <div className={`w-4 h-4 rounded mr-2 ${color}`}></div>
+                            {color.split('-')[1]}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='icon'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sidebar Icon</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select an icon' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <IconSelector />
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
