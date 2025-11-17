@@ -15,7 +15,7 @@ export const InsideSidebar = (): JSX.Element => {
     <Sidebar collapsible='none' className='flex'>
       <SidebarHeader className='flex h-14 border-b justify-center items-center'>
         <div className='flex items-center'>
-          <img src='/prompt_logo.svg' alt='Home' className='size-8 -mr-1' />
+          <img src='/prompt_logo.svg' alt='Prompt logo' className='size-8 -mr-1' />
           <div className='relative flex items-baseline'>
             <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
               PROMPT
