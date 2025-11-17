@@ -48,64 +48,70 @@ export const AddCourseAppearance: React.FC<AddCourseAppearanceProps> = ({
 
   return (
     <Form {...form}>
-      <CourseAppearancePreview
-        color={selectedColor}
-        icon={selectedIcon}
-        createTemplate={createTemplate}
-      />
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-        <FormField
-          control={form.control}
-          name='color'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select a Color</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a color' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {courseAppearanceColors.map((color) => (
-                    <SelectItem key={color} value={color}>
-                      <div className='flex items-center'>
-                        <div className={`w-4 h-4 rounded mr-2 ${color}`}></div>
-                        {color.split('-')[1]}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className='space-y-5'>
+        <CourseAppearancePreview
+          color={selectedColor}
+          icon={selectedIcon}
+          createTemplate={createTemplate}
         />
-        <FormField
-          control={form.control}
-          name='icon'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select an Icon</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select an icon' />
-                  </SelectTrigger>
-                </FormControl>
-                <IconSelector />
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className='flex justify-between space-x-2'>
-          <Button type='button' variant='outline' onClick={onBack}>
-            Back
-          </Button>
-          <Button type='submit'>{createTemplate ? 'Add Template' : 'Add Course'}</Button>
-        </div>
-      </form>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+          <div className='grid grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='color'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className='text-sm font-medium'>Color</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select a color' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {courseAppearanceColors.map((color) => (
+                        <SelectItem key={color} value={color}>
+                          <div className='flex items-center gap-2'>
+                            <div className={`w-5 h-5 rounded border border-border ${color}`}></div>
+                            <span className='capitalize'>{color.split('-')[1]}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='icon'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className='text-sm font-medium'>Icon</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select an icon' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <IconSelector />
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className='flex justify-between gap-3 pt-2'>
+            <Button type='button' variant='outline' onClick={onBack}>
+              Back
+            </Button>
+            <Button type='submit'>{createTemplate ? 'Add Template' : 'Add Course'}</Button>
+          </div>
+        </form>
+      </div>
     </Form>
   )
 }
