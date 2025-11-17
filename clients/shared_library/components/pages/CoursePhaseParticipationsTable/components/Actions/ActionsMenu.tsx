@@ -17,7 +17,7 @@ interface ActionsMenuProps {
   rows: string[]
   trigger: React.ReactNode
   customActions?: ActionOnParticipants[]
-  onExport?: (ids: string[]) => void
+  onExport?: () => void
   onFinish: () => void
 }
 
@@ -43,7 +43,7 @@ export const ActionsMenu = ({
         {
           label: 'Export',
           icon: <FileDown className='mr-2 h-4 w-4' />,
-          onAction: (ids) => onExport(ids),
+          onAction: () => onExport(),
         } satisfies ActionOnParticipants,
       ]
     : defaultActions
