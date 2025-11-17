@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { FileUser, Trash2 } from 'lucide-react'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-import { GroupAction } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/GroupAction'
+import { ActionOnParticipants } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ActionOnParticipants'
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { ColumnFiltersState } from '@tanstack/react-table'
 import { FilterMenu as ApplicationFilterMenu } from './components/table/filtering/FilterMenu'
@@ -39,11 +39,11 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const customActions: GroupAction[] = useMemo(() => {
+  const customActions: ActionOnParticipants[] = useMemo(() => {
     return [
       {
         label: 'View Application',
-        icon: <FileUser className='h-4 w-4' />,
+        icon: <FileUser className='h-4 w-4 mr-2' />,
         onAction: (ids: string[]) => {
           if (ids.length > 0) viewApplication(ids[0])
         },
@@ -51,7 +51,7 @@ export const ApplicationParticipantsPage = (): JSX.Element => {
       },
       {
         label: 'Delete Application',
-        icon: <Trash2 className='h-4 w-4 text-red-600' />,
+        icon: <Trash2 className='h-4 w-4 mr-2 text-red-600' />,
         onAction: (ids: string[]) => {
           mutateDeleteApplications(ids)
         },

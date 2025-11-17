@@ -14,7 +14,30 @@ const genderFilterFn = (row: any, columnId: string, filterValue: any) => {
 
 // extra columns definition
 export const baseApplicationExtraColumns = [
-  { id: 'score', header: 'Score', enableSorting: true },
+  {
+    id: 'score',
+    header: 'Score',
+    enableSorting: true,
+    filterFn: (row, columnId, filterValue) => {
+      const value = row.getValue(columnId)
+      const score = value === '-' ? null : Number(value)
+
+      const { min, max, noScore } = filterValue || {}
+
+      if (!min && !max && !noScore) return true
+
+      if (noScore) {
+        return score === null || Number.isNaN(score)
+      }
+
+      if (score === null || Number.isNaN(score)) return false
+
+      if (min && score < Number(min)) return false
+      if (max && score > Number(max)) return false
+
+      return true
+    },
+  },
   { id: 'email', header: 'Email', enableSorting: true },
   { id: 'studyProgram', header: 'Study Program', enableSorting: true },
   { id: 'studyDegree', header: 'Study Degree', enableSorting: true },
