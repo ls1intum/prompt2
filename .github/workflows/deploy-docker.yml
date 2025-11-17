@@ -171,12 +171,6 @@ jobs:
           script: |
             cd /home/${{ vars.VM_USERNAME }}
             mkdir -p maintenance
-            OWNER=$(stat -c '%U' maintenance)
-            if [ "$OWNER" != "${{ vars.VM_USERNAME }}" ]; then
-              chown ${{ vars.VM_USERNAME }}:${{ vars.VM_USERNAME }} maintenance 2>/dev/null || \
-              sudo -n chown ${{ vars.VM_USERNAME }}:${{ vars.VM_USERNAME }} maintenance 2>/dev/null || \
-              echo "Warning: could not chown maintenance directory; continuing"
-            fi
             sha256sum -c maintenance.tar.gz.sha256
             tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
 
