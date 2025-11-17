@@ -1,3 +1,6 @@
+---
+sidebar_position: 0
+---
 
 # Architecture
 
@@ -12,14 +15,10 @@ The platform consists of:
 
 Each chapter below describes a key architectural concern.
 
----
+For detailed information about the architecture, see:
 
-
-```{toctree}
-
-architecture/subsystem-decomposition
-architecture/deployment
-architecture/access-control
-architecture/data-storage
-```
+- [Subsystem Decomposition](./subsystem-decomposition.md)
+- [Deployment Architecture](./deployment.md)
+- [Access Control](./access-control.md)
+- [Data Storage and Inter-Phase Communication](./data-storage.md)
 

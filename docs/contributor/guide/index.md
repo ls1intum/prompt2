@@ -1,21 +1,25 @@
-(contributor.guidelines)=
+---
+sidebar_position: 2
+---
+
 # Contributor Guidelines
+
 ## The 3 Golden Rules
 Contributor Guidelines can be a lot to digest—so if you only remember one thing from this guide, let it be these three golden rules.
 1. **🧹 Leave It Cleaner Than You Found It**  
-   ![cleanup](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3ZmdDY4NWkxdXB4cjRxZnp1ejM0c2swOHg1MXVxNW93a3M1d3g3NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0uVfAhfFv7U5VLJaNx/giphy.gif){.bg-warning h=100px}
+   ![cleanup](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3ZmdDY4NWkxdXB4cjRxZnp1ejM0c2swOHg1MXVxNW93a3M1d3g3NiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0uVfAhfFv7U5VLJaNx/giphy.gif)
 
    Every time you touch a piece of code, make sure you leave it in a better state than you found it. Think of the codebase as a shared workspace—tidy up as you go, and everyone will appreciate it.
 
 2. **🔍 Do It Right the First Time**  
    "I'll do it quickly now, and fix it later."  
 
-   ![no](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjZlem40YWdnOGs1ajJ4bHBvNWY1dXZpYzIxYnN1eHdlMm13ZnJvZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/hyyV7pnbE0FqLNBAzs/giphy.gif){.bg-warning h=100px}
+   ![no](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjZlem40YWdnOGs1ajJ4bHBvNWY1dXZpYzIxYnN1eHdlMm13ZnJvZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/hyyV7pnbE0FqLNBAzs/giphy.gif)
 
    Let’s be honest—you’re unlikely to come back and clean it up later. Aim for quality from the start, and spare yourself (and your fellow developers) a later headache.
 
 3. **🤓 Take Pride in Your Work: Write Code That’s a Joy to Read and Pay Attention to the Detail**  
-  ![cleanCode](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHRneGZ5eXU0NHNtNWF3dDNvaTcwbjZiZ2JkMmxiemsyOGlqMjZiYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fdyZ3qI0GVZC0/giphy.gif){.bg-warning h=100px}
+  ![cleanCode](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHRneGZ5eXU0NHNtNWF3dDNvaTcwbjZiZ2JkMmxiemsyOGlqMjZiYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fdyZ3qI0GVZC0/giphy.gif)
 
    Be proud of every line you write. Craft code that’s not only functional but also a delight to read and review.
    Our project thrives on the passion and dedication of its contributors—your enthusiasm makes all the difference.
@@ -56,20 +60,14 @@ Think of our course management tool as our baby—it needs proper care to grow i
 
 Next to the general golden rules and best practices, the following defines strict guidelines that should be followed throughout the codebase. 
 
-```{toctree}
-:caption: Coding Guidelines
-:includehidden:
-:maxdepth: 2
-
-guide/client
-guide/server
-```
+- [Client Guidelines](./client.md)
+- [Server Guidelines](./server.md)
 
 
 ---
 
 **Your read through the whole guide.** 
 
-![thankYou](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzl5OHl4cHR2OXY2Y2Z2Y3BmdHVuMWhvbmdubHRqdzZrZmRkaDAyNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M9NbzZjAcxq9jS9LZJ/giphy.gif){.bg-warning h=150px}
+![thankYou](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzl5OHl4cHR2OXY2Y2Z2Y3BmdHVuMWhvbmdubHRqdzZrZmRkaDAyNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M9NbzZjAcxq9jS9LZJ/giphy.gif)
 
 Now, you are ready to write AWESOME Prompt Code!

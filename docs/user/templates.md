@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Templates
 
 Templates let instructors save a course setup once and reuse it to create new courses quickly. A template is just a special course (template = true) that provides a blueprint: phases, graphs, configurations, and (if present) the application form are copied into a new course.

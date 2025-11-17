@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # 🗃️ Data Storage and Inter-Phase Communication
 
 The PROMPT 2 platform provides a structured and flexible system for storing course data and enabling communication between course phases. Each **course phase service** can either rely on the core platform for data storage or use its own persistence layer. Additionally, a declarative communication model allows services to request and share data across phases via well-defined contracts.
