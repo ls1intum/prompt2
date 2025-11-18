@@ -1352,12 +1352,12 @@ VALUES (
         'Maximilian Rapp'
     );
 
--- Insert test assessment templates
+-- Insert test assessment schemas
 INSERT INTO public.assessment_schema (id, name, description) VALUES
-('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Template', 'Test template for unit tests'),
-('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Template', 'This is the default self evaluation template.'),
-('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Template', 'This is the default peer evaluation template.'),
-('550e8400-e29b-41d4-a716-446655440003', 'Tutor Evaluation Template', 'This is the default tutor evaluation template.');
+('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Schema', 'Test schema for unit tests'),
+('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Schema', 'This is the default self evaluation schema.'),
+('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Schema', 'This is the default peer evaluation schema.'),
+('550e8400-e29b-41d4-a716-446655440003', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
 
 -- Insert test course_phase_config entries for visibility tests
 -- Course phase config for visible scenario (both grade suggestions and action items visible, deadline passed)

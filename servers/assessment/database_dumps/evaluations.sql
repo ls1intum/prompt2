@@ -171,11 +171,11 @@ INSERT INTO evaluation (id, course_participation_id, course_phase_id, competency
     ('e5234567-1234-1234-1234-123456789012', '02234567-1234-1234-1234-123456789012', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'c2234567-1234-1234-1234-123456789012', 'bad', '02234567-1234-1234-1234-123456789012', '2024-01-17 10:00:00+00'),
     ('e6234567-1234-1234-1234-123456789012', '03234567-1234-1234-1234-123456789012', '5179d58a-d00d-4fa7-94a5-397bc69fab03', 'c3234567-1234-1234-1234-123456789012', 'very_bad', '03234567-1234-1234-1234-123456789012', '2024-01-18 10:00:00+00');
 
--- Insert test assessment templates
+-- Insert test assessment schemas
 INSERT INTO assessment_schema (id, name, description) VALUES
-    ('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Template', 'Test template for unit tests'),
-    ('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Template', 'This is the default self evaluation template.'),
-    ('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Template', 'This is the default peer evaluation template.');
+    ('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Schema', 'Test schema for unit tests'),
+    ('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Schema', 'This is the default self evaluation schema.'),
+    ('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Schema', 'This is the default peer evaluation schema.');
 
 -- Insert test course phase configurations  
 INSERT INTO course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start) VALUES

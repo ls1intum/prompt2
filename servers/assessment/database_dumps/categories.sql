@@ -130,13 +130,13 @@ CREATE TABLE public.competency (
 
 CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
 
--- Insert the default assessment template
+-- Insert the default assessment schema
 INSERT INTO public.assessment_schema (id, name, description)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Schema', 'This is the default assessment schema.');
 
--- Insert the default tutor evaluation template
+-- Insert the default tutor evaluation schema
 INSERT INTO public.assessment_schema (id, name, description)
-VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Template', 'This is the default tutor evaluation template.');
+VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
 
 -- Insert some sample course_phase_config records
 INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema)

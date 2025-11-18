@@ -43,14 +43,14 @@ interface EditCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   category?: CategoryWithCompetencies
-  assessmentTemplateID: string
+  assessmentSchemaID: string
 }
 
 export function EditCategoryDialog({
   open,
   onOpenChange,
   category,
-  assessmentTemplateID,
+  assessmentSchemaID,
 }: EditCategoryDialogProps) {
   const [error, setError] = useState<string | undefined>(undefined)
   const { mutate, isPending: isUpdating } = useUpdateCategory(setError)
@@ -62,7 +62,7 @@ export function EditCategoryDialog({
       shortName: category?.shortName,
       description: category?.description,
       weight: category?.weight,
-      assessmentTemplateID: assessmentTemplateID,
+      assessmentSchemaID: assessmentSchemaID,
     },
     resolver: zodResolver(updateCategorySchema),
   })
@@ -75,10 +75,10 @@ export function EditCategoryDialog({
         shortName: category.shortName,
         description: category.description || '',
         weight: category.weight,
-        assessmentTemplateID: assessmentTemplateID,
+        assessmentSchemaID: assessmentSchemaID,
       })
     }
-  }, [category, form, assessmentTemplateID])
+  }, [category, form, assessmentSchemaID])
 
   useEffect(() => {
     if (!open || !category) return

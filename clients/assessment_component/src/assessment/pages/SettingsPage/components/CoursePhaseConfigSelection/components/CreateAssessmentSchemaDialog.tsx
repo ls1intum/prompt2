@@ -13,29 +13,27 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
 
-import { useCreateAssessmentTemplate } from '../hooks/useCreateAssessmentTemplate'
-import { CreateAssessmentTemplateRequest } from '../../../../../interfaces/assessmentTemplate'
+import { useCreateAssessmentSchema } from '../hooks/useCreateAssessmentSchema'
+import { CreateAssessmentSchemaRequest } from '../../../../../interfaces/assessmentSchema'
 
-interface CreateAssessmentTemplateDialogProps {
+interface CreateAssessmentSchemaDialogProps {
   onError: (error: string | undefined) => void
 }
 
-export const CreateAssessmentTemplateDialog = ({
-  onError,
-}: CreateAssessmentTemplateDialogProps) => {
+export const CreateAssessmentSchemaDialog = ({ onError }: CreateAssessmentSchemaDialogProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const createTemplateMutation = useCreateAssessmentTemplate(onError)
+  const createSchemaMutation = useCreateAssessmentSchema(onError)
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CreateAssessmentTemplateRequest>()
+  } = useForm<CreateAssessmentSchemaRequest>()
 
-  const onSubmitNewTemplate = (data: CreateAssessmentTemplateRequest) => {
-    createTemplateMutation.mutate(data, {
+  const onSubmitNewSchema = (data: CreateAssessmentSchemaRequest) => {
+    createSchemaMutation.mutate(data, {
       onSuccess: () => {
         reset()
         setIsDialogOpen(false)
@@ -60,15 +58,15 @@ export const CreateAssessmentTemplateDialog = ({
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>Create New Assessment Template</DialogTitle>
+          <DialogTitle>Create New Assessment Schema</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmitNewTemplate)} className='space-y-4'>
+        <form onSubmit={handleSubmit(onSubmitNewSchema)} className='space-y-4'>
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
               id='name'
               {...register('name', { required: 'Name is required' })}
-              placeholder='Template name'
+              placeholder='Schema name'
             />
             {errors.name && <p className='text-sm text-red-600'>{errors.name.message}</p>}
           </div>
@@ -78,7 +76,7 @@ export const CreateAssessmentTemplateDialog = ({
             <Textarea
               id='description'
               {...register('description', { required: 'Description is required' })}
-              placeholder='Template description'
+              placeholder='Schema description'
               rows={3}
             />
             {errors.description && (
@@ -90,8 +88,8 @@ export const CreateAssessmentTemplateDialog = ({
             <Button type='button' variant='outline' onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type='submit' disabled={createTemplateMutation.isPending}>
-              {createTemplateMutation.isPending ? 'Creating...' : 'Create'}
+            <Button type='submit' disabled={createSchemaMutation.isPending}>
+              {createSchemaMutation.isPending ? 'Creating...' : 'Create'}
             </Button>
           </div>
         </form>

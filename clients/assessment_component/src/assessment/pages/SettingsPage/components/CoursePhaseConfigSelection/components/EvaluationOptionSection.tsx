@@ -1,19 +1,19 @@
 import { Checkbox, Label } from '@tumaet/prompt-ui-components'
 import { AssessmentType } from '../../../../../interfaces/assessmentType'
-import { AssessmentTemplate } from '../../../../../interfaces/assessmentTemplate'
+import { AssessmentSchema } from '../../../../../interfaces/assessmentSchema'
 import { AssessmentConfiguration } from './AssessmentConfiguration'
 
 interface EvaluationOptionSectionProps {
   type: AssessmentType
   enabled: boolean
   onEnabledChange: (enabled: boolean) => void
-  templateId: string
-  onTemplateIdChange: (templateId: string) => void
+  schemaId: string
+  onSchemaIdChange: (schemaId: string) => void
   startDate?: Date
   onStartDateChange: (date: Date | undefined) => void
   deadline?: Date
   onDeadlineChange: (date: Date | undefined) => void
-  templates: AssessmentTemplate[]
+  schemas: AssessmentSchema[]
   configMutation: any
   setError: (error: string | undefined) => void
   disabled?: boolean
@@ -49,13 +49,13 @@ export const EvaluationOptionSection = ({
   type,
   enabled,
   onEnabledChange,
-  templateId,
-  onTemplateIdChange,
+  schemaId,
+  onSchemaIdChange,
   startDate,
   onStartDateChange,
   deadline,
   onDeadlineChange,
-  templates,
+  schemas,
   configMutation,
   setError,
   disabled = false,
@@ -80,13 +80,13 @@ export const EvaluationOptionSection = ({
       {enabled && (
         <AssessmentConfiguration
           type={type}
-          assessmentTemplateId={templateId}
-          setAssessmentTemplateId={onTemplateIdChange}
+          assessmentSchemaId={schemaId}
+          setAssessmentSchemaId={onSchemaIdChange}
           startDate={startDate}
           setStartDate={onStartDateChange}
           deadline={deadline}
           setDeadline={onDeadlineChange}
-          templates={templates}
+          schemas={schemas}
           configMutation={configMutation}
           setError={setError}
         />

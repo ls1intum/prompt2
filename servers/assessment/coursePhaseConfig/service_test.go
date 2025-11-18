@@ -63,17 +63,17 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 	}
 	CoursePhaseConfigSingleton = &suite.coursePhaseConfigService
 
-	// Generate a test course phase ID and insert it with a template
+	// Generate a test course phase ID and insert it with a schema
 	suite.testCoursePhaseID = uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")     // From our test data
-	selfTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001") // Self assessment template
-	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment schema
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")     // From our test data
+	selfSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001") // Self assessment schema
+	peerSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment schema
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
 		`INSERT INTO course_phase_config (assessment_schema_id, course_phase_id, self_evaluation_schema, peer_evaluation_schema) 
 		 VALUES ($1, $2, $3, $4)`,
-		templateID, suite.testCoursePhaseID, selfTemplateID, peerTemplateID)
+		schemaID, suite.testCoursePhaseID, selfSchemaID, peerSchemaID)
 	if err != nil {
 		suite.T().Fatalf("Failed to insert test course phase config: %v", err)
 	}

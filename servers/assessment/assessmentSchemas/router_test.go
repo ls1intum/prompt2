@@ -18,9 +18,9 @@ import (
 
 type AssessmentSchemaRouterTestSuite struct {
 	suite.Suite
-	router                    *gin.Engine
-	suiteCtx                  context.Context
-	cleanup                   func()
+	router                  *gin.Engine
+	suiteCtx                context.Context
+	cleanup                 func()
 	assessmentSchemaService AssessmentSchemaService
 }
 
@@ -58,17 +58,17 @@ func (suite *AssessmentSchemaRouterTestSuite) TestGetAllAssessmentSchemas() {
 
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	var templates []assessmentSchemaDTO.AssessmentSchema
-	err := json.Unmarshal(resp.Body.Bytes(), &templates)
+	var schemas []assessmentSchemaDTO.AssessmentSchema
+	err := json.Unmarshal(resp.Body.Bytes(), &schemas)
 	assert.NoError(suite.T(), err)
 	// Should return a list (might be empty)
-	assert.NotNil(suite.T(), templates)
+	assert.NotNil(suite.T(), schemas)
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchema() {
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Test Assessment Template",
-		Description: "This is a test template for router testing",
+		Name:        "Test Assessment Schema",
+		Description: "This is a test schema for router testing",
 	}
 	body, _ := json.Marshal(createReq)
 	req, _ := http.NewRequest("POST", "/api/assessment-schema", bytes.NewBuffer(body))
@@ -78,12 +78,12 @@ func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchema() {
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 
-	var template assessmentSchemaDTO.AssessmentSchema
-	err := json.Unmarshal(resp.Body.Bytes(), &template)
+	var schema assessmentSchemaDTO.AssessmentSchema
+	err := json.Unmarshal(resp.Body.Bytes(), &schema)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), createReq.Name, template.Name)
-	assert.Equal(suite.T(), createReq.Description, template.Description)
-	assert.NotEqual(suite.T(), uuid.Nil, template.ID)
+	assert.Equal(suite.T(), createReq.Name, schema.Name)
+	assert.Equal(suite.T(), createReq.Description, schema.Description)
+	assert.NotEqual(suite.T(), uuid.Nil, schema.ID)
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchemaInvalidJSON() {
@@ -102,27 +102,27 @@ func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchemaInvalidJ
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchema() {
-	// First create a template to retrieve
+	// First create a schema to retrieve
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Test Template for Get",
-		Description: "Template to test GET endpoint",
+		Name:        "Test Schema for Get",
+		Description: "Schema to test GET endpoint",
 	}
-	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test GET endpoint
-	req, _ := http.NewRequest("GET", "/api/assessment-schema/"+template.ID.String(), nil)
+	req, _ := http.NewRequest("GET", "/api/assessment-schema/"+schema.ID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	var retrievedTemplate assessmentSchemaDTO.AssessmentSchema
-	err = json.Unmarshal(resp.Body.Bytes(), &retrievedTemplate)
+	var retrievedSchema assessmentSchemaDTO.AssessmentSchema
+	err = json.Unmarshal(resp.Body.Bytes(), &retrievedSchema)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), template.ID, retrievedTemplate.ID)
-	assert.Equal(suite.T(), template.Name, retrievedTemplate.Name)
-	assert.Equal(suite.T(), template.Description, retrievedTemplate.Description)
+	assert.Equal(suite.T(), schema.ID, retrievedSchema.ID)
+	assert.Equal(suite.T(), schema.Name, retrievedSchema.Name)
+	assert.Equal(suite.T(), schema.Description, retrievedSchema.Description)
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchemaInvalidUUID() {
@@ -148,21 +148,21 @@ func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchemaNotFound() 
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchema() {
-	// First create a template to update
+	// First create a schema to update
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Original Template",
+		Name:        "Original Schema",
 		Description: "Original description",
 	}
-	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test update
 	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
-		Name:        "Updated Template",
+		Name:        "Updated Schema",
 		Description: "Updated description",
 	}
 	body, _ := json.Marshal(updateReq)
-	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+template.ID.String(), bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+schema.ID.String(), bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -177,7 +177,7 @@ func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchema() {
 
 func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidUUID() {
 	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
-		Name:        "Updated Template",
+		Name:        "Updated Schema",
 		Description: "Updated description",
 	}
 	body, _ := json.Marshal(updateReq)
@@ -190,8 +190,8 @@ func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidU
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidJSON() {
-	templateID := uuid.New()
-	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+templateID.String(), bytes.NewBuffer([]byte("invalid json")))
+	schemaID := uuid.New()
+	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+schemaID.String(), bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -200,16 +200,16 @@ func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidJ
 }
 
 func (suite *AssessmentSchemaRouterTestSuite) TestDeleteAssessmentSchema() {
-	// First create a template to delete
+	// First create a schema to delete
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Template to Delete",
-		Description: "This template will be deleted",
+		Name:        "Schema to Delete",
+		Description: "This schema will be deleted",
 	}
-	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test delete
-	req, _ := http.NewRequest("DELETE", "/api/assessment-schema/"+template.ID.String(), nil)
+	req, _ := http.NewRequest("DELETE", "/api/assessment-schema/"+schema.ID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)

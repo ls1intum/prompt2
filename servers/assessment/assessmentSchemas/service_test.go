@@ -14,8 +14,8 @@ import (
 
 type AssessmentSchemaServiceTestSuite struct {
 	suite.Suite
-	suiteCtx                  context.Context
-	cleanup                   func()
+	suiteCtx                context.Context
+	cleanup                 func()
 	assessmentSchemaService AssessmentSchemaService
 }
 
@@ -40,107 +40,107 @@ func (suite *AssessmentSchemaServiceTestSuite) TearDownSuite() {
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestListAssessmentSchemas() {
-	templates, err := ListAssessmentSchemas(suite.suiteCtx)
+	schemas, err := ListAssessmentSchemas(suite.suiteCtx)
 	assert.NoError(suite.T(), err)
-	assert.Greater(suite.T(), len(templates), 0, "Expected at least one assessment template")
+	assert.Greater(suite.T(), len(schemas), 0, "Expected at least one assessment schema")
 
-	// Check that the default template from the dump exists
+	// Check that the default schema from the dump exists
 	found := false
-	for _, template := range templates {
-		if template.Name == "Intro Course Assessment Template" {
+	for _, schema := range schemas {
+		if schema.Name == "Intro Course Assessment Schema" {
 			found = true
-			assert.Equal(suite.T(), "This is the default assessment template.", template.Description)
+			assert.Equal(suite.T(), "This is the default assessment schema.", schema.Description)
 			break
 		}
 	}
-	assert.True(suite.T(), found, "Default assessment template should be found")
+	assert.True(suite.T(), found, "Default assessment schema should be found")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestGetAssessmentSchema() {
-	// Use the default assessment template ID from the database dump
+	// Use the default assessment schema ID from the database dump
 	defaultID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
-	template, err := GetAssessmentSchema(suite.suiteCtx, defaultID)
+	schema, err := GetAssessmentSchema(suite.suiteCtx, defaultID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), defaultID, template.ID)
-	assert.Equal(suite.T(), "Intro Course Assessment Template", template.Name)
-	assert.Equal(suite.T(), "This is the default assessment template.", template.Description)
+	assert.Equal(suite.T(), defaultID, schema.ID)
+	assert.Equal(suite.T(), "Intro Course Assessment Schema", schema.Name)
+	assert.Equal(suite.T(), "This is the default assessment schema.", schema.Description)
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestCreateAssessmentSchema() {
 	req := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Test Template",
+		Name:        "Test Schema",
 		Description: "Test Description",
 	}
 
-	template, err := CreateAssessmentSchema(suite.suiteCtx, req)
-	assert.NoError(suite.T(), err, "Should be able to create assessment template")
-	assert.NotEqual(suite.T(), uuid.Nil, template.ID, "Should have a valid ID")
-	assert.Equal(suite.T(), req.Name, template.Name, "Name should match")
-	assert.Equal(suite.T(), req.Description, template.Description, "Description should match")
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, req)
+	assert.NoError(suite.T(), err, "Should be able to create assessment schema")
+	assert.NotEqual(suite.T(), uuid.Nil, schema.ID, "Should have a valid ID")
+	assert.Equal(suite.T(), req.Name, schema.Name, "Name should match")
+	assert.Equal(suite.T(), req.Description, schema.Description, "Description should match")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestGetAssessmentSchemaNotFound() {
 	nonExistentID := uuid.New()
 
 	_, err := GetAssessmentSchema(suite.suiteCtx, nonExistentID)
-	assert.Error(suite.T(), err, "Should return error for non-existent template")
+	assert.Error(suite.T(), err, "Should return error for non-existent schema")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestUpdateAssessmentSchema() {
-	// First create a template
+	// First create a schema
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Original Template",
+		Name:        "Original Schema",
 		Description: "Original Description",
 	}
 
-	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
-	assert.NoError(suite.T(), err, "Should be able to create assessment template")
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
+	assert.NoError(suite.T(), err, "Should be able to create assessment schema")
 
 	// Now update it
 	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
-		Name:        "Updated Template",
+		Name:        "Updated Schema",
 		Description: "Updated Description",
 	}
 
-	err = UpdateAssessmentSchema(suite.suiteCtx, template.ID, updateReq)
-	assert.NoError(suite.T(), err, "Should be able to update assessment template")
+	err = UpdateAssessmentSchema(suite.suiteCtx, schema.ID, updateReq)
+	assert.NoError(suite.T(), err, "Should be able to update assessment schema")
 
 	// Verify the update
-	updatedTemplate, err := GetAssessmentSchema(suite.suiteCtx, template.ID)
-	assert.NoError(suite.T(), err, "Should be able to retrieve updated template")
-	assert.Equal(suite.T(), updateReq.Name, updatedTemplate.Name, "Name should be updated")
-	assert.Equal(suite.T(), updateReq.Description, updatedTemplate.Description, "Description should be updated")
+	updatedSchema, err := GetAssessmentSchema(suite.suiteCtx, schema.ID)
+	assert.NoError(suite.T(), err, "Should be able to retrieve updated schema")
+	assert.Equal(suite.T(), updateReq.Name, updatedSchema.Name, "Name should be updated")
+	assert.Equal(suite.T(), updateReq.Description, updatedSchema.Description, "Description should be updated")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestUpdateAssessmentSchemaNotFound() {
 	nonExistentID := uuid.New()
 	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
-		Name:        "Updated Template",
+		Name:        "Updated Schema",
 		Description: "Updated Description",
 	}
 
 	err := UpdateAssessmentSchema(suite.suiteCtx, nonExistentID, updateReq)
-	assert.Error(suite.T(), err, "Should return error for non-existent template")
+	assert.Error(suite.T(), err, "Should return error for non-existent schema")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestDeleteAssessmentSchema() {
-	// First create a template
+	// First create a schema
 	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
-		Name:        "Template to Delete",
+		Name:        "Schema to Delete",
 		Description: "Will be deleted",
 	}
 
-	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
-	assert.NoError(suite.T(), err, "Should be able to create assessment template")
+	schema, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
+	assert.NoError(suite.T(), err, "Should be able to create assessment schema")
 
 	// Now delete it
-	err = DeleteAssessmentSchema(suite.suiteCtx, template.ID)
-	assert.NoError(suite.T(), err, "Should be able to delete assessment template")
+	err = DeleteAssessmentSchema(suite.suiteCtx, schema.ID)
+	assert.NoError(suite.T(), err, "Should be able to delete assessment schema")
 
 	// Verify it's gone
-	_, err = GetAssessmentSchema(suite.suiteCtx, template.ID)
-	assert.Error(suite.T(), err, "Should return error for deleted template")
+	_, err = GetAssessmentSchema(suite.suiteCtx, schema.ID)
+	assert.Error(suite.T(), err, "Should return error for deleted schema")
 }
 
 func (suite *AssessmentSchemaServiceTestSuite) TestDeleteAssessmentSchemaNotFound() {

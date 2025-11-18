@@ -7,20 +7,20 @@ import (
 )
 
 type CreateOrUpdateCoursePhaseConfigRequest struct {
-	AssessmentSchemaID     uuid.UUID `json:"assessmentTemplateId"`
+	AssessmentSchemaID       uuid.UUID `json:"assessmentTemplateId"`
 	CoursePhaseID            uuid.UUID `json:"coursePhaseId"`
 	Start                    time.Time `json:"start"`
 	Deadline                 time.Time `json:"deadline"`
 	SelfEvaluationEnabled    bool      `json:"selfEvaluationEnabled"`
-	SelfEvaluationSchema   uuid.UUID `json:"selfEvaluationTemplate"`
+	SelfEvaluationSchema     uuid.UUID `json:"selfEvaluationTemplate"`
 	SelfEvaluationStart      time.Time `json:"selfEvaluationStart"`
 	SelfEvaluationDeadline   time.Time `json:"selfEvaluationDeadline"`
 	PeerEvaluationEnabled    bool      `json:"peerEvaluationEnabled"`
-	PeerEvaluationSchema   uuid.UUID `json:"peerEvaluationTemplate"`
+	PeerEvaluationSchema     uuid.UUID `json:"peerEvaluationTemplate"`
 	PeerEvaluationStart      time.Time `json:"peerEvaluationStart"`
 	PeerEvaluationDeadline   time.Time `json:"peerEvaluationDeadline"`
 	TutorEvaluationEnabled   bool      `json:"tutorEvaluationEnabled"`
-	TutorEvaluationSchema  uuid.UUID `json:"tutorEvaluationTemplate"`
+	TutorEvaluationSchema    uuid.UUID `json:"tutorEvaluationTemplate"`
 	TutorEvaluationStart     time.Time `json:"tutorEvaluationStart"`
 	TutorEvaluationDeadline  time.Time `json:"tutorEvaluationDeadline"`
 	EvaluationResultsVisible bool      `json:"evaluationResultsVisible"`

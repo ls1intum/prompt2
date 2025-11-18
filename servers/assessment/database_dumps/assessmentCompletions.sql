@@ -264,9 +264,9 @@ VALUES (
         true
     );
 
--- Insert the default assessment template
+-- Insert the default assessment schema
 INSERT INTO public.assessment_schema (id, name, description)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Schema', 'This is the default assessment schema.');
 
 -- Insert some sample course_phase_config records
 INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
