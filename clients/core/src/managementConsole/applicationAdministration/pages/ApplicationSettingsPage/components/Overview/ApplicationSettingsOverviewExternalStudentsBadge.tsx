@@ -4,7 +4,7 @@ interface ExternalStudentsStatusProps {
   externalStudentsAllowed: boolean
 }
 
-export const ExternalStudentsStatus: React.FC<ExternalStudentsStatusProps> = ({
+export const ExternalStudentsStatusBadge: React.FC<ExternalStudentsStatusProps> = ({
   externalStudentsAllowed,
 }: ExternalStudentsStatusProps) => {
   return (

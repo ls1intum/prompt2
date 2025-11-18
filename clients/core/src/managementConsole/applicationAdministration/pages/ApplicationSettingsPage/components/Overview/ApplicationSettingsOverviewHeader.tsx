@@ -7,14 +7,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
-import { ApplicationStatusBadge } from '../../../components/ApplicationStatusBadge'
+import { ApplicationStatusBadge } from '../../../../components/ApplicationStatusBadge'
 
 interface ApplicationConfigurationHeaderProps {
   applicationPhaseIsConfigured: boolean
   applicationStatus: string
 }
 
-export const ApplicationConfigurationHeader = ({
+export const ApplicationSettingsOverviewHeader = ({
   applicationPhaseIsConfigured,
   applicationStatus,
 }: ApplicationConfigurationHeaderProps) => {
@@ -22,7 +22,7 @@ export const ApplicationConfigurationHeader = ({
     <CardHeader>
       <div className='flex items-center justify-between'>
         <div className='flex items-center space-x-2'>
-          <CardTitle className='text-2xl'>General Settings</CardTitle>
+          <CardTitle className='text-2xl'>Overview</CardTitle>
         </div>
         <TooltipProvider>
           <Tooltip>
