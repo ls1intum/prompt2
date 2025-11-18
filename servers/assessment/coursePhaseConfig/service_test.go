@@ -21,20 +21,20 @@ func createTestCoursePhaseConfigRequest(templateID, coursePhaseID uuid.UUID) cou
 	tutorTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440003") // From test data
 
 	return coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest{
-		AssessmentTemplateID:     templateID,
+		AssessmentSchemaID:       templateID,
 		CoursePhaseID:            coursePhaseID,
 		Start:                    now,
 		Deadline:                 now.Add(7 * 24 * time.Hour),
 		SelfEvaluationEnabled:    false,
-		SelfEvaluationTemplate:   selfTemplateID,
+		SelfEvaluationSchema:     selfTemplateID,
 		SelfEvaluationStart:      now,
 		SelfEvaluationDeadline:   now.Add(14 * 24 * time.Hour),
 		PeerEvaluationEnabled:    false,
-		PeerEvaluationTemplate:   peerTemplateID,
+		PeerEvaluationSchema:     peerTemplateID,
 		PeerEvaluationStart:      now,
 		PeerEvaluationDeadline:   now.Add(21 * 24 * time.Hour),
 		TutorEvaluationEnabled:   false,
-		TutorEvaluationTemplate:  tutorTemplateID,
+		TutorEvaluationSchema:    tutorTemplateID,
 		TutorEvaluationStart:     now,
 		TutorEvaluationDeadline:  now.Add(28 * 24 * time.Hour),
 		EvaluationResultsVisible: false,
@@ -67,11 +67,11 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 	suite.testCoursePhaseID = uuid.New()
 	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")     // From our test data
 	selfTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001") // Self assessment template
-	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment template
+	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002") // Peer assessment schema
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
-		`INSERT INTO course_phase_config (assessment_template_id, course_phase_id, self_evaluation_template, peer_evaluation_template) 
+		`INSERT INTO course_phase_config (assessment_schema_id, course_phase_id, self_evaluation_schema, peer_evaluation_schema) 
 		 VALUES ($1, $2, $3, $4)`,
 		templateID, suite.testCoursePhaseID, selfTemplateID, peerTemplateID)
 	if err != nil {
@@ -92,7 +92,7 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
 
 	// Insert a course phase config entry first
 	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
-		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
+		"INSERT INTO course_phase_config (assessment_schema_id, course_phase_id) VALUES ($1, $2)",
 		templateID, testID)
 	assert.NoError(suite.T(), err)
 

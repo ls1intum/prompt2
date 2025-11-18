@@ -1,4 +1,4 @@
-package assessmentTemplates
+package assessmentSchemas
 
 import (
 	"bytes"
@@ -10,75 +10,75 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/assessment/assessmentTemplates/assessmentTemplateDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas/assessmentSchemaDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
-type AssessmentTemplateRouterTestSuite struct {
+type AssessmentSchemaRouterTestSuite struct {
 	suite.Suite
 	router                    *gin.Engine
 	suiteCtx                  context.Context
 	cleanup                   func()
-	assessmentTemplateService AssessmentTemplateService
+	assessmentSchemaService AssessmentSchemaService
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) SetupSuite() {
+func (suite *AssessmentSchemaRouterTestSuite) SetupSuite() {
 	suite.suiteCtx = context.Background()
 	testDB, cleanup, err := testutils.SetupTestDB(suite.suiteCtx, "../database_dumps/categories.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 	suite.cleanup = cleanup
-	suite.assessmentTemplateService = AssessmentTemplateService{
+	suite.assessmentSchemaService = AssessmentSchemaService{
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 	}
-	AssessmentTemplateServiceSingleton = &suite.assessmentTemplateService
+	AssessmentSchemaServiceSingleton = &suite.assessmentSchemaService
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
 	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
 		return testutils.MockAuthMiddlewareWithEmail(allowedRoles, "admin@example.com", "12345678", "admin123")
 	}
-	SetupAssessmentTemplateRouter(api, testMiddleware)
+	SetupAssessmentSchemaRouter(api, testMiddleware)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TearDownSuite() {
+func (suite *AssessmentSchemaRouterTestSuite) TearDownSuite() {
 	if suite.cleanup != nil {
 		suite.cleanup()
 	}
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestGetAllAssessmentTemplates() {
-	req, _ := http.NewRequest("GET", "/api/assessment-template", nil)
+func (suite *AssessmentSchemaRouterTestSuite) TestGetAllAssessmentSchemas() {
+	req, _ := http.NewRequest("GET", "/api/assessment-schema", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	var templates []assessmentTemplateDTO.AssessmentTemplate
+	var templates []assessmentSchemaDTO.AssessmentSchema
 	err := json.Unmarshal(resp.Body.Bytes(), &templates)
 	assert.NoError(suite.T(), err)
 	// Should return a list (might be empty)
 	assert.NotNil(suite.T(), templates)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestCreateAssessmentTemplate() {
-	createReq := assessmentTemplateDTO.CreateAssessmentTemplateRequest{
+func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchema() {
+	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
 		Name:        "Test Assessment Template",
 		Description: "This is a test template for router testing",
 	}
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/assessment-template", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/assessment-schema", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 
-	var template assessmentTemplateDTO.AssessmentTemplate
+	var template assessmentSchemaDTO.AssessmentSchema
 	err := json.Unmarshal(resp.Body.Bytes(), &template)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), createReq.Name, template.Name)
@@ -86,8 +86,8 @@ func (suite *AssessmentTemplateRouterTestSuite) TestCreateAssessmentTemplate() {
 	assert.NotEqual(suite.T(), uuid.Nil, template.ID)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestCreateAssessmentTemplateInvalidJSON() {
-	req, _ := http.NewRequest("POST", "/api/assessment-template", bytes.NewBuffer([]byte("invalid json")))
+func (suite *AssessmentSchemaRouterTestSuite) TestCreateAssessmentSchemaInvalidJSON() {
+	req, _ := http.NewRequest("POST", "/api/assessment-schema", bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -101,23 +101,23 @@ func (suite *AssessmentTemplateRouterTestSuite) TestCreateAssessmentTemplateInva
 	assert.Contains(suite.T(), errResp, "error")
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestGetAssessmentTemplate() {
+func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchema() {
 	// First create a template to retrieve
-	createReq := assessmentTemplateDTO.CreateAssessmentTemplateRequest{
+	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
 		Name:        "Test Template for Get",
 		Description: "Template to test GET endpoint",
 	}
-	template, err := CreateAssessmentTemplate(suite.suiteCtx, createReq)
+	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test GET endpoint
-	req, _ := http.NewRequest("GET", "/api/assessment-template/"+template.ID.String(), nil)
+	req, _ := http.NewRequest("GET", "/api/assessment-schema/"+template.ID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 
-	var retrievedTemplate assessmentTemplateDTO.AssessmentTemplate
+	var retrievedTemplate assessmentSchemaDTO.AssessmentSchema
 	err = json.Unmarshal(resp.Body.Bytes(), &retrievedTemplate)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), template.ID, retrievedTemplate.ID)
@@ -125,8 +125,8 @@ func (suite *AssessmentTemplateRouterTestSuite) TestGetAssessmentTemplate() {
 	assert.Equal(suite.T(), template.Description, retrievedTemplate.Description)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestGetAssessmentTemplateInvalidUUID() {
-	req, _ := http.NewRequest("GET", "/api/assessment-template/invalid-uuid", nil)
+func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchemaInvalidUUID() {
+	req, _ := http.NewRequest("GET", "/api/assessment-schema/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -138,31 +138,31 @@ func (suite *AssessmentTemplateRouterTestSuite) TestGetAssessmentTemplateInvalid
 	assert.Contains(suite.T(), errResp, "error")
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestGetAssessmentTemplateNotFound() {
+func (suite *AssessmentSchemaRouterTestSuite) TestGetAssessmentSchemaNotFound() {
 	nonExistentID := uuid.New()
-	req, _ := http.NewRequest("GET", "/api/assessment-template/"+nonExistentID.String(), nil)
+	req, _ := http.NewRequest("GET", "/api/assessment-schema/"+nonExistentID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusInternalServerError, resp.Code)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplate() {
+func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchema() {
 	// First create a template to update
-	createReq := assessmentTemplateDTO.CreateAssessmentTemplateRequest{
+	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
 		Name:        "Original Template",
 		Description: "Original description",
 	}
-	template, err := CreateAssessmentTemplate(suite.suiteCtx, createReq)
+	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test update
-	updateReq := assessmentTemplateDTO.UpdateAssessmentTemplateRequest{
+	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
 		Name:        "Updated Template",
 		Description: "Updated description",
 	}
 	body, _ := json.Marshal(updateReq)
-	req, _ := http.NewRequest("PUT", "/api/assessment-template/"+template.ID.String(), bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+template.ID.String(), bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -175,13 +175,13 @@ func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplate() {
 	assert.Contains(suite.T(), successResp["message"], "updated successfully")
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplateInvalidUUID() {
-	updateReq := assessmentTemplateDTO.UpdateAssessmentTemplateRequest{
+func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidUUID() {
+	updateReq := assessmentSchemaDTO.UpdateAssessmentSchemaRequest{
 		Name:        "Updated Template",
 		Description: "Updated description",
 	}
 	body, _ := json.Marshal(updateReq)
-	req, _ := http.NewRequest("PUT", "/api/assessment-template/invalid-uuid", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/assessment-schema/invalid-uuid", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -189,9 +189,9 @@ func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplateInva
 	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplateInvalidJSON() {
+func (suite *AssessmentSchemaRouterTestSuite) TestUpdateAssessmentSchemaInvalidJSON() {
 	templateID := uuid.New()
-	req, _ := http.NewRequest("PUT", "/api/assessment-template/"+templateID.String(), bytes.NewBuffer([]byte("invalid json")))
+	req, _ := http.NewRequest("PUT", "/api/assessment-schema/"+templateID.String(), bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -199,17 +199,17 @@ func (suite *AssessmentTemplateRouterTestSuite) TestUpdateAssessmentTemplateInva
 	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestDeleteAssessmentTemplate() {
+func (suite *AssessmentSchemaRouterTestSuite) TestDeleteAssessmentSchema() {
 	// First create a template to delete
-	createReq := assessmentTemplateDTO.CreateAssessmentTemplateRequest{
+	createReq := assessmentSchemaDTO.CreateAssessmentSchemaRequest{
 		Name:        "Template to Delete",
 		Description: "This template will be deleted",
 	}
-	template, err := CreateAssessmentTemplate(suite.suiteCtx, createReq)
+	template, err := CreateAssessmentSchema(suite.suiteCtx, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now test delete
-	req, _ := http.NewRequest("DELETE", "/api/assessment-template/"+template.ID.String(), nil)
+	req, _ := http.NewRequest("DELETE", "/api/assessment-schema/"+template.ID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -221,17 +221,17 @@ func (suite *AssessmentTemplateRouterTestSuite) TestDeleteAssessmentTemplate() {
 	assert.Contains(suite.T(), successResp["message"], "deleted successfully")
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestDeleteAssessmentTemplateInvalidUUID() {
-	req, _ := http.NewRequest("DELETE", "/api/assessment-template/invalid-uuid", nil)
+func (suite *AssessmentSchemaRouterTestSuite) TestDeleteAssessmentSchemaInvalidUUID() {
+	req, _ := http.NewRequest("DELETE", "/api/assessment-schema/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
 }
 
-func (suite *AssessmentTemplateRouterTestSuite) TestDeleteAssessmentTemplateNotFound() {
+func (suite *AssessmentSchemaRouterTestSuite) TestDeleteAssessmentSchemaNotFound() {
 	nonExistentID := uuid.New()
-	req, _ := http.NewRequest("DELETE", "/api/assessment-template/"+nonExistentID.String(), nil)
+	req, _ := http.NewRequest("DELETE", "/api/assessment-schema/"+nonExistentID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -240,6 +240,6 @@ func (suite *AssessmentTemplateRouterTestSuite) TestDeleteAssessmentTemplateNotF
 	assert.True(suite.T(), resp.Code == http.StatusOK || resp.Code == http.StatusInternalServerError)
 }
 
-func TestAssessmentTemplateRouterTestSuite(t *testing.T) {
-	suite.Run(t, new(AssessmentTemplateRouterTestSuite))
+func TestAssessmentSchemaRouterTestSuite(t *testing.T) {
+	suite.Run(t, new(AssessmentSchemaRouterTestSuite))
 }

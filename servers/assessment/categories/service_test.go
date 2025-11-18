@@ -74,7 +74,7 @@ func (suite *CategoryServiceTestSuite) TestCreateCategory() {
 		ShortName:            "TC",
 		Description:          "A test category",
 		Weight:               5,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := CreateCategory(suite.suiteCtx, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Creating category should not produce an error")
@@ -103,7 +103,7 @@ func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
 		ShortName:            "UC",
 		Description:          "Updated description",
 		Weight:               2,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating category should not produce an error")
@@ -124,7 +124,7 @@ func (suite *CategoryServiceTestSuite) TestUpdateNonExistentCategory() {
 		ShortName:            "NE",
 		Description:          "Should not fail",
 		Weight:               1,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := UpdateCategory(suite.suiteCtx, id, coursePhaseID, req)
 	assert.NoError(suite.T(), err, "Updating non-existent category should not error")
@@ -139,7 +139,7 @@ func (suite *CategoryServiceTestSuite) TestDeleteCategory() {
 		ShortName:            "TD",
 		Description:          "To be deleted",
 		Weight:               1,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := CreateCategory(suite.suiteCtx, coursePhaseID, reqCreate)
 	assert.NoError(suite.T(), err)

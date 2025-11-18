@@ -83,7 +83,7 @@ CREATE TABLE public.assessment_completion (
     completed boolean DEFAULT false NOT NULL
 );
 
-CREATE TABLE public.assessment_template (
+CREATE TABLE public.assessment_schema (
     id uuid PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
@@ -92,14 +92,14 @@ CREATE TABLE public.assessment_template (
 );
 
 CREATE TABLE public.course_phase_config (
-    assessment_template_id uuid NOT NULL,
+    assessment_schema_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
     deadline timestamp with time zone DEFAULT NULL,
     self_evaluation_enabled boolean NOT NULL DEFAULT false,
-    self_evaluation_template uuid,
+    self_evaluation_schema uuid,
     self_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     peer_evaluation_enabled boolean NOT NULL DEFAULT false,
-    peer_evaluation_template uuid,
+    peer_evaluation_schema uuid,
     peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -107,14 +107,14 @@ CREATE TABLE public.course_phase_config (
     tutor_evaluation_enabled boolean NOT NULL DEFAULT false,
     tutor_evaluation_start timestamp with time zone,
     tutor_evaluation_deadline timestamp with time zone,
-    tutor_evaluation_template uuid,
+    tutor_evaluation_schema uuid,
     evaluation_results_visible boolean NOT NULL DEFAULT true,
     grade_suggestion_visible boolean NOT NULL DEFAULT true,
     action_items_visible boolean NOT NULL DEFAULT true,
-    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
-    FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    FOREIGN KEY (tutor_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
+    FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
+    FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (tutor_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE public.category (
@@ -123,7 +123,7 @@ CREATE TABLE public.category (
     description text,
     weight integer DEFAULT 1 NOT NULL,
     short_name character varying(10),
-    assessment_template_id uuid NOT NULL
+    assessment_schema_id uuid NOT NULL
 );
 
 CREATE TABLE public.competency (
@@ -265,22 +265,22 @@ VALUES (
     );
 
 -- Insert the default assessment template
-INSERT INTO public.assessment_template (id, name, description)
+INSERT INTO public.assessment_schema (id, name, description)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
 
 -- Insert some sample course_phase_config records
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-01-01 00:00:00+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, true);
 
 -- Course phase config for not visible scenario (both grade suggestions and action items hidden)
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2025-01-01 00:00:00+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', false, false);
 
 -- Course phase config for before deadline scenario (deadline in the future)
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, grade_suggestion_visible, action_items_visible)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2099-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, true);
 
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '319f28d4-8877-400e-9450-d49077aae7fe', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00');
 
 INSERT INTO public.category
@@ -449,15 +449,15 @@ SELECT c.id AS category_id,
        cpc.course_phase_id
 FROM category c
          INNER JOIN course_phase_config cpc
-                    ON c.assessment_template_id = cpc.assessment_template_id;
+                    ON c.assessment_schema_id = cpc.assessment_schema_id;
 
 CREATE INDEX idx_assessment_completion_participation_phase ON public.assessment_completion USING btree (course_participation_id, course_phase_id);
 
 ALTER TABLE ONLY public.category
-ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
+ADD CONSTRAINT category_assessment_schema_id_fkey FOREIGN KEY (assessment_schema_id) REFERENCES public.assessment_schema (id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.course_phase_config
-ADD CONSTRAINT course_phase_config_template_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE CASCADE;
+ADD CONSTRAINT course_phase_config_template_fkey FOREIGN KEY (assessment_schema_id) REFERENCES public.assessment_schema (id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.assessment
 ADD CONSTRAINT assessment_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency(id) ON DELETE CASCADE;
