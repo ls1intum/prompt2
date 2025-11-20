@@ -36,7 +36,7 @@ func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDT
 		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
 		Description:          pgtype.Text{String: req.Description, Valid: true},
 		Weight:               req.Weight,
-		AssessmentTemplateID: req.AssessmentTemplateID,
+		AssessmentSchemaID: req.AssessmentSchemaID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -76,7 +76,7 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
 		Description:          pgtype.Text{String: req.Description, Valid: true},
 		Weight:               req.Weight,
-		AssessmentTemplateID: req.AssessmentTemplateID,
+		AssessmentSchemaID: req.AssessmentSchemaID,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
@@ -94,8 +94,8 @@ func DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func GetCategoriesWithCompetencies(ctx context.Context, assessmentTemplateID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
-	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, assessmentTemplateID)
+func GetCategoriesWithCompetencies(ctx context.Context, assessmentSchemaID uuid.UUID) ([]categoryDTO.CategoryWithCompetencies, error) {
+	dbRows, err := CategoryServiceSingleton.queries.GetCategoriesWithCompetencies(ctx, assessmentSchemaID)
 	if err != nil {
 		log.Error("could not get categories with competencies: ", err)
 		return nil, errors.New("could not get categories with competencies")

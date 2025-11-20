@@ -13,17 +13,17 @@ import (
 )
 
 const createCategory = `-- name: CreateCategory :exec
-INSERT INTO category (id, name, short_name, description, weight, assessment_template_id)
+INSERT INTO category (id, name, short_name, description, weight, assessment_schema_id)
 VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type CreateCategoryParams struct {
-	ID                   uuid.UUID   `json:"id"`
-	Name                 string      `json:"name"`
-	ShortName            pgtype.Text `json:"short_name"`
-	Description          pgtype.Text `json:"description"`
-	Weight               int32       `json:"weight"`
-	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+	ID                 uuid.UUID   `json:"id"`
+	Name               string      `json:"name"`
+	ShortName          pgtype.Text `json:"short_name"`
+	Description        pgtype.Text `json:"description"`
+	Weight             int32       `json:"weight"`
+	AssessmentSchemaID uuid.UUID   `json:"assessment_schema_id"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) error {
@@ -33,7 +33,7 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 		arg.ShortName,
 		arg.Description,
 		arg.Weight,
-		arg.AssessmentTemplateID,
+		arg.AssessmentSchemaID,
 	)
 	return err
 }
@@ -95,7 +95,7 @@ SELECT c.id,
        )::json AS competencies
 FROM category c
          LEFT JOIN competency cmp ON c.id = cmp.category_id
-WHERE c.assessment_template_id = $1
+WHERE c.assessment_schema_id = $1
 GROUP BY c.id, c.name, c.short_name, c.description, c.weight
 ORDER BY c.name ASC
 `
@@ -109,8 +109,8 @@ type GetCategoriesWithCompetenciesRow struct {
 	Competencies []byte      `json:"competencies"`
 }
 
-func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context, assessmentTemplateID uuid.UUID) ([]GetCategoriesWithCompetenciesRow, error) {
-	rows, err := q.db.Query(ctx, getCategoriesWithCompetencies, assessmentTemplateID)
+func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context, assessmentSchemaID uuid.UUID) ([]GetCategoriesWithCompetenciesRow, error) {
+	rows, err := q.db.Query(ctx, getCategoriesWithCompetencies, assessmentSchemaID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (q *Queries) GetCategoriesWithCompetencies(ctx context.Context, assessmentT
 }
 
 const getCategory = `-- name: GetCategory :one
-SELECT id, name, description, weight, short_name, assessment_template_id
+SELECT id, name, description, weight, short_name, assessment_schema_id
 FROM category
 WHERE id = $1
 `
@@ -151,13 +151,13 @@ func (q *Queries) GetCategory(ctx context.Context, id uuid.UUID) (Category, erro
 		&i.Description,
 		&i.Weight,
 		&i.ShortName,
-		&i.AssessmentTemplateID,
+		&i.AssessmentSchemaID,
 	)
 	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, description, weight, short_name, assessment_template_id
+SELECT id, name, description, weight, short_name, assessment_schema_id
 FROM category
 ORDER BY name ASC
 `
@@ -177,7 +177,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 			&i.Description,
 			&i.Weight,
 			&i.ShortName,
-			&i.AssessmentTemplateID,
+			&i.AssessmentSchemaID,
 		); err != nil {
 			return nil, err
 		}
@@ -191,21 +191,21 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 
 const updateCategory = `-- name: UpdateCategory :exec
 UPDATE category
-SET name                   = $2,
-    short_name             = $3,
-    description            = $4,
-    weight                 = $5,
-    assessment_template_id = $6
+SET name                  = $2,
+    short_name            = $3,
+    description           = $4,
+    weight                = $5,
+    assessment_schema_id  = $6
 WHERE id = $1
 `
 
 type UpdateCategoryParams struct {
-	ID                   uuid.UUID   `json:"id"`
-	Name                 string      `json:"name"`
-	ShortName            pgtype.Text `json:"short_name"`
-	Description          pgtype.Text `json:"description"`
-	Weight               int32       `json:"weight"`
-	AssessmentTemplateID uuid.UUID   `json:"assessment_template_id"`
+	ID                 uuid.UUID   `json:"id"`
+	Name               string      `json:"name"`
+	ShortName          pgtype.Text `json:"short_name"`
+	Description        pgtype.Text `json:"description"`
+	Weight             int32       `json:"weight"`
+	AssessmentSchemaID uuid.UUID   `json:"assessment_schema_id"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
@@ -215,7 +215,7 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 		arg.ShortName,
 		arg.Description,
 		arg.Weight,
-		arg.AssessmentTemplateID,
+		arg.AssessmentSchemaID,
 	)
 	return err
 }

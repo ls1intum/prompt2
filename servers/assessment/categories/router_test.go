@@ -78,7 +78,7 @@ func (suite *CategoryRouterTestSuite) TestCreateCategory() {
 		ShortName:            "RTC",
 		Description:          "Testing create via router",
 		Weight:               3,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	body, _ := json.Marshal(createReq)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+coursePhaseID+"/category", bytes.NewBuffer(body))
@@ -114,7 +114,7 @@ func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
 		ShortName:            "RU",
 		Description:          "Router update description",
 		Weight:               2,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	body, _ := json.Marshal(updateReq)
 	req, _ := http.NewRequest("PUT", "/api/course_phase/"+coursePhaseID+"/category/"+id.String(), bytes.NewBuffer(body))
@@ -134,7 +134,7 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategory() {
 		ShortName:            "RD",
 		Description:          "To delete via router",
 		Weight:               1,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := CreateCategory(suite.suiteCtx, coursePhaseID, createReq)
 	assert.NoError(suite.T(), err)

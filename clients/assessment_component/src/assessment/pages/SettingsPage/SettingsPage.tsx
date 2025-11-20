@@ -59,30 +59,30 @@ export const SettingsPage = (): JSX.Element => {
 
       {isPromptAdmin && (
         <>
-          {config?.assessmentTemplateID && (
+          {config?.assessmentSchemaID && (
             <CategoryList
-              assessmentTemplateID={config?.assessmentTemplateID}
+              assessmentSchemaID={config?.assessmentSchemaID}
               assessmentType={AssessmentType.ASSESSMENT}
             />
           )}
 
-          {config?.selfEvaluationEnabled && config.selfEvaluationTemplate && (
+          {config?.selfEvaluationEnabled && config.selfEvaluationSchema && (
             <CategoryList
-              assessmentTemplateID={config?.selfEvaluationTemplate}
+              assessmentSchemaID={config?.selfEvaluationSchema}
               assessmentType={AssessmentType.SELF}
             />
           )}
 
-          {config?.peerEvaluationEnabled && config.peerEvaluationTemplate && (
+          {config?.peerEvaluationEnabled && config.peerEvaluationSchema && (
             <CategoryList
-              assessmentTemplateID={config?.peerEvaluationTemplate}
+              assessmentSchemaID={config?.peerEvaluationSchema}
               assessmentType={AssessmentType.PEER}
             />
           )}
 
-          {config?.tutorEvaluationEnabled && config.tutorEvaluationTemplate && (
+          {config?.tutorEvaluationEnabled && config.tutorEvaluationSchema && (
             <CategoryList
-              assessmentTemplateID={config?.tutorEvaluationTemplate}
+              assessmentSchemaID={config?.tutorEvaluationSchema}
               assessmentType={AssessmentType.TUTOR}
             />
           )}

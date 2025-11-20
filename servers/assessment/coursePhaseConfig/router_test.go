@@ -43,7 +43,7 @@ func (suite *CoursePhaseConfigRouterTestSuite) SetupSuite() {
 
 	// Insert a course phase config entry to enable updates
 	_, err = testDB.Conn.Exec(suite.suiteCtx,
-		"INSERT INTO course_phase_config (assessment_template_id, course_phase_id) VALUES ($1, $2)",
+		"INSERT INTO course_phase_config (assessment_schema_id, course_phase_id) VALUES ($1, $2)",
 		templateID, suite.testCoursePhaseID)
 	if err != nil {
 		suite.T().Fatalf("Failed to insert test course phase config: %v", err)

@@ -5,7 +5,7 @@ import { Loader2, Settings } from 'lucide-react'
 import { AssessmentType } from '../../../../interfaces/assessmentType'
 
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
-import { useGetAllAssessmentTemplates } from './hooks/useGetAllAssessmentTemplates'
+import { useGetAllAssessmentSchemas } from './hooks/useGetAllAssessmentSchemas'
 import { useCreateOrUpdateCoursePhaseConfig } from './hooks/useCreateOrUpdateCoursePhaseConfig'
 import { useCoursePhaseConfigForm } from './hooks/useCoursePhaseConfigForm'
 import { useEvaluationOptions } from './hooks/useEvaluationOptions'
@@ -23,8 +23,8 @@ export const CoursePhaseConfigSelection = () => {
   const { coursePhaseConfig: originalConfig } = useCoursePhaseConfigStore()
 
   const {
-    assessmentTemplateId,
-    setAssessmentTemplateId,
+    assessmentSchemaId,
+    setAssessmentSchemaId,
     start,
     setStart,
     deadline,
@@ -42,24 +42,24 @@ export const CoursePhaseConfigSelection = () => {
   const {
     selfEvaluationEnabled,
     setSelfEvaluationEnabled,
-    selfEvaluationTemplate,
-    setSelfEvaluationTemplate,
+    selfEvaluationSchema,
+    setSelfEvaluationSchema,
     selfEvaluationStart,
     setSelfEvaluationStart,
     selfEvaluationDeadline,
     setSelfEvaluationDeadline,
     peerEvaluationEnabled,
     setPeerEvaluationEnabled,
-    peerEvaluationTemplate,
-    setPeerEvaluationTemplate,
+    peerEvaluationSchema,
+    setPeerEvaluationSchema,
     peerEvaluationStart,
     setPeerEvaluationStart,
     peerEvaluationDeadline,
     setPeerEvaluationDeadline,
     tutorEvaluationEnabled,
     setTutorEvaluationEnabled,
-    tutorEvaluationTemplate,
-    setTutorEvaluationTemplate,
+    tutorEvaluationSchema,
+    setTutorEvaluationSchema,
     tutorEvaluationStart,
     setTutorEvaluationStart,
     tutorEvaluationDeadline,
@@ -69,15 +69,15 @@ export const CoursePhaseConfigSelection = () => {
   } = useEvaluationOptions()
 
   const {
-    data: templates,
-    isPending: isTemplatesPending,
-    isError: isTemplatesError,
-  } = useGetAllAssessmentTemplates()
+    data: schemas,
+    isPending: isSchemasPending,
+    isError: isSchemasError,
+  } = useGetAllAssessmentSchemas()
 
   const configMutation = useCreateOrUpdateCoursePhaseConfig(setError)
 
-  if (isTemplatesError) return <ErrorPage />
-  if (isTemplatesPending)
+  if (isSchemasError) return <ErrorPage />
+  if (isSchemasPending)
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -106,13 +106,13 @@ export const CoursePhaseConfigSelection = () => {
 
           <AssessmentConfiguration
             type={AssessmentType.ASSESSMENT}
-            assessmentTemplateId={assessmentTemplateId}
-            setAssessmentTemplateId={setAssessmentTemplateId}
+            assessmentSchemaId={assessmentSchemaId}
+            setAssessmentSchemaId={setAssessmentSchemaId}
             startDate={start}
             setStartDate={setStart}
             deadline={deadline}
             setDeadline={setDeadline}
-            templates={templates ?? []}
+            schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
           />
@@ -141,13 +141,13 @@ export const CoursePhaseConfigSelection = () => {
             type={AssessmentType.SELF}
             enabled={selfEvaluationEnabled}
             onEnabledChange={setSelfEvaluationEnabled}
-            templateId={selfEvaluationTemplate}
-            onTemplateIdChange={setSelfEvaluationTemplate}
+            schemaId={selfEvaluationSchema}
+            onSchemaIdChange={setSelfEvaluationSchema}
             startDate={selfEvaluationStart}
             onStartDateChange={setSelfEvaluationStart}
             deadline={selfEvaluationDeadline}
             onDeadlineChange={setSelfEvaluationDeadline}
-            templates={templates ?? []}
+            schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}
@@ -157,13 +157,13 @@ export const CoursePhaseConfigSelection = () => {
             type={AssessmentType.PEER}
             enabled={peerEvaluationEnabled}
             onEnabledChange={setPeerEvaluationEnabled}
-            templateId={peerEvaluationTemplate}
-            onTemplateIdChange={setPeerEvaluationTemplate}
+            schemaId={peerEvaluationSchema}
+            onSchemaIdChange={setPeerEvaluationSchema}
             startDate={peerEvaluationStart}
             onStartDateChange={setPeerEvaluationStart}
             deadline={peerEvaluationDeadline}
             onDeadlineChange={setPeerEvaluationDeadline}
-            templates={templates ?? []}
+            schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}
@@ -173,13 +173,13 @@ export const CoursePhaseConfigSelection = () => {
             type={AssessmentType.TUTOR}
             enabled={tutorEvaluationEnabled}
             onEnabledChange={setTutorEvaluationEnabled}
-            templateId={tutorEvaluationTemplate}
-            onTemplateIdChange={setTutorEvaluationTemplate}
+            schemaId={tutorEvaluationSchema}
+            onSchemaIdChange={setTutorEvaluationSchema}
             startDate={tutorEvaluationStart}
             onStartDateChange={setTutorEvaluationStart}
             deadline={tutorEvaluationDeadline}
             onDeadlineChange={setTutorEvaluationDeadline}
-            templates={templates ?? []}
+            schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}

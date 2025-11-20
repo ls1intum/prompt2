@@ -11,7 +11,7 @@ type Category struct {
 	ShortName            string    `json:"shortName"`
 	Description          string    `json:"description"`
 	Weight               int32     `json:"weight"`
-	AssessmentTemplateID uuid.UUID `json:"assessmentTemplateID"`
+	AssessmentSchemaID uuid.UUID `json:"assessmentSchemaID"`
 }
 
 func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
@@ -23,7 +23,7 @@ func GetCategoryDTOsFromDBModels(dbCategories []db.Category) []Category {
 			ShortName:            c.ShortName.String,
 			Description:          c.Description.String,
 			Weight:               c.Weight,
-			AssessmentTemplateID: c.AssessmentTemplateID,
+			AssessmentSchemaID: c.AssessmentSchemaID,
 		})
 	}
 	return categories

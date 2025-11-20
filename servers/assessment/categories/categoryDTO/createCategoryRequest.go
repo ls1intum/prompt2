@@ -7,5 +7,5 @@ type CreateCategoryRequest struct {
 	ShortName            string    `json:"shortName"`
 	Description          string    `json:"description"`
 	Weight               int32     `json:"weight"`
-	AssessmentTemplateID uuid.UUID `json:"assessmentTemplateID"`
+	AssessmentSchemaID uuid.UUID `json:"assessmentSchemaID"`
 }

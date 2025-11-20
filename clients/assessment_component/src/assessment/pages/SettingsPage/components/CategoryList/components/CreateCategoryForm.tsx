@@ -18,10 +18,10 @@ import { CreateCategoryRequest } from '../../../../../interfaces/category'
 import { useCreateCategory } from '../hooks/useCreateCategory'
 
 export const CreateCategoryForm = ({
-  assessmentTemplateID,
+  assessmentSchemaID,
   onCancel,
 }: {
-  assessmentTemplateID: string
+  assessmentSchemaID: string
   onCancel?: () => void
 }) => {
   const [error, setError] = useState<string | undefined>(undefined)
@@ -30,7 +30,7 @@ export const CreateCategoryForm = ({
 
   const onSubmit = (data: CreateCategoryRequest) => {
     mutate(
-      { ...data, assessmentTemplateID },
+      { ...data, assessmentSchemaID },
       {
         onSuccess: () => {
           reset()

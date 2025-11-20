@@ -1,18 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 
-import { createAssessmentTemplate } from '../../../../../network/mutations/createAssessmentTemplate'
-import { CreateAssessmentTemplateRequest } from '../../../../../interfaces/assessmentTemplate'
+import { createAssessmentSchema } from '../../../../../network/mutations/createAssessmentSchema'
+import { CreateAssessmentSchemaRequest } from '../../../../../interfaces/assessmentSchema'
 
-export const useCreateAssessmentTemplate = (setError: (error: string | undefined) => void) => {
+export const useCreateAssessmentSchema = (setError: (error: string | undefined) => void) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (assessmentTemplate: CreateAssessmentTemplateRequest) =>
-      createAssessmentTemplate(phaseId ?? '', assessmentTemplate),
+    mutationFn: (assessmentSchema: CreateAssessmentSchemaRequest) =>
+      createAssessmentSchema(phaseId ?? '', assessmentSchema),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessmentTemplates'] })
+      queryClient.invalidateQueries({ queryKey: ['assessmentSchemas'] })
       setError(undefined)
     },
     onError: (error: any) => {

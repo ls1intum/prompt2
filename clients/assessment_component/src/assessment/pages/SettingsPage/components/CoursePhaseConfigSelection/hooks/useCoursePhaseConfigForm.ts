@@ -3,7 +3,7 @@ import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhase
 import { CoursePhaseConfig } from '../../../../../interfaces/coursePhaseConfig'
 
 export interface MainConfigState {
-  assessmentTemplateId: string
+  assessmentSchemaId: string
   start?: Date
   deadline?: Date
   evaluationResultsVisible: boolean
@@ -12,7 +12,7 @@ export interface MainConfigState {
 }
 
 export const useCoursePhaseConfigForm = () => {
-  const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
+  const [assessmentSchemaId, setAssessmentSchemaId] = useState<string>('')
   const [start, setStart] = useState<Date | undefined>(undefined)
   const [deadline, setDeadline] = useState<Date | undefined>(undefined)
   const [evaluationResultsVisible, setEvaluationResultsVisible] = useState<boolean>(false)
@@ -23,7 +23,7 @@ export const useCoursePhaseConfigForm = () => {
 
   useEffect(() => {
     if (config) {
-      setAssessmentTemplateId(config.assessmentTemplateID || '')
+      setAssessmentSchemaId(config.assessmentSchemaID || '')
       setStart(config.start ? new Date(config.start) : undefined)
       setDeadline(config.deadline ? new Date(config.deadline) : undefined)
       setEvaluationResultsVisible(config.evaluationResultsVisible || false)
@@ -33,7 +33,7 @@ export const useCoursePhaseConfigForm = () => {
   }, [config])
 
   const mainConfigState: MainConfigState = {
-    assessmentTemplateId,
+    assessmentSchemaId,
     start,
     deadline,
     evaluationResultsVisible,
@@ -45,7 +45,7 @@ export const useCoursePhaseConfigForm = () => {
     if (!originalConfig) return true // Changed from false to true to enable saving when no config exists yet
 
     return (
-      assessmentTemplateId !== (originalConfig.assessmentTemplateID || '') ||
+      assessmentSchemaId !== (originalConfig.assessmentSchemaID || '') ||
       start?.getTime() !==
         (originalConfig.start ? new Date(originalConfig.start).getTime() : undefined) ||
       deadline?.getTime() !==
@@ -57,8 +57,8 @@ export const useCoursePhaseConfigForm = () => {
   }
 
   return {
-    assessmentTemplateId,
-    setAssessmentTemplateId,
+    assessmentSchemaId,
+    setAssessmentSchemaId,
     start,
     setStart,
     deadline,

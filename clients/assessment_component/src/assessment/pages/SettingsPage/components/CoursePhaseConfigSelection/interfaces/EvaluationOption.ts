@@ -1,6 +1,6 @@
 export interface EvaluationOption {
   enabled: boolean
-  template: string
+  schema: string
   start?: Date
   deadline?: Date
 }
