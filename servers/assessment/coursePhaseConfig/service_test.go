@@ -14,27 +14,27 @@ import (
 )
 
 // Helper function to create a test course phase config request
-func createTestCoursePhaseConfigRequest(templateID, coursePhaseID uuid.UUID) coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest {
+func createTestCoursePhaseConfigRequest(schemaID, coursePhaseID uuid.UUID) coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest {
 	now := time.Now()
-	selfTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")  // From test data
-	peerTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002")  // From test data
-	tutorTemplateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440003") // From test data
+	selfSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")  // From test data
+	peerSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002")  // From test data
+	tutorSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440003") // From test data
 
 	return coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest{
-		AssessmentSchemaID:       templateID,
+		AssessmentSchemaID:       schemaID,
 		CoursePhaseID:            coursePhaseID,
 		Start:                    now,
 		Deadline:                 now.Add(7 * 24 * time.Hour),
 		SelfEvaluationEnabled:    false,
-		SelfEvaluationSchema:     selfTemplateID,
+		SelfEvaluationSchema:     selfSchemaID,
 		SelfEvaluationStart:      now,
 		SelfEvaluationDeadline:   now.Add(14 * 24 * time.Hour),
 		PeerEvaluationEnabled:    false,
-		PeerEvaluationSchema:     peerTemplateID,
+		PeerEvaluationSchema:     peerSchemaID,
 		PeerEvaluationStart:      now,
 		PeerEvaluationDeadline:   now.Add(21 * 24 * time.Hour),
 		TutorEvaluationEnabled:   false,
-		TutorEvaluationSchema:    tutorTemplateID,
+		TutorEvaluationSchema:    tutorSchemaID,
 		TutorEvaluationStart:     now,
 		TutorEvaluationDeadline:  now.Add(28 * 24 * time.Hour),
 		EvaluationResultsVisible: false,
@@ -88,12 +88,12 @@ func (suite *CoursePhaseConfigServiceTestSuite) TearDownSuite() {
 func (suite *CoursePhaseConfigServiceTestSuite) TestGetCoursePhaseConfig() {
 	// Test getting course phase config
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Insert a course phase config entry first
 	_, err := suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
 		"INSERT INTO course_phase_config (assessment_schema_id, course_phase_id) VALUES ($1, $2)",
-		templateID, testID)
+		schemaID, testID)
 	assert.NoError(suite.T(), err)
 
 	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
@@ -105,10 +105,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseCon
 	// Test that when GradeSuggestionVisible and ActionItemsVisible are nil (not provided),
 	// they default to TRUE as per database defaults
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Create request with nil visibility settings (using pointer fields)
-	req := createTestCoursePhaseConfigRequest(templateID, testID)
+	req := createTestCoursePhaseConfigRequest(schemaID, testID)
 	// Both fields are nil by default in the test helper
 
 	err := CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, req)
@@ -125,10 +125,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseCon
 	// Test that when GradeSuggestionVisible and ActionItemsVisible are explicitly set to false,
 	// they are stored as FALSE (not overridden by defaults)
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Create request with explicit false values
-	req := createTestCoursePhaseConfigRequest(templateID, testID)
+	req := createTestCoursePhaseConfigRequest(schemaID, testID)
 	falseValue := false
 	req.GradeSuggestionVisible = &falseValue
 	req.ActionItemsVisible = &falseValue
@@ -147,10 +147,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseCon
 	// Test that when GradeSuggestionVisible and ActionItemsVisible are explicitly set to true,
 	// they are stored as TRUE
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Create request with explicit true values
-	req := createTestCoursePhaseConfigRequest(templateID, testID)
+	req := createTestCoursePhaseConfigRequest(schemaID, testID)
 	trueValue := true
 	req.GradeSuggestionVisible = &trueValue
 	req.ActionItemsVisible = &trueValue
@@ -168,10 +168,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseCon
 func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_PreservesDefaults() {
 	// Test that updating a config with nil visibility settings preserves the defaults (TRUE)
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// First, create with defaults
-	req := createTestCoursePhaseConfigRequest(templateID, testID)
+	req := createTestCoursePhaseConfigRequest(schemaID, testID)
 	err := CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, req)
 	assert.NoError(suite.T(), err)
 
@@ -182,7 +182,7 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_Pres
 	assert.True(suite.T(), config.ActionItemsVisible)
 
 	// Update with nil values (should preserve TRUE)
-	updateReq := createTestCoursePhaseConfigRequest(templateID, testID)
+	updateReq := createTestCoursePhaseConfigRequest(schemaID, testID)
 	err = CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, updateReq)
 	assert.NoError(suite.T(), err, "Should successfully update config")
 
@@ -196,10 +196,10 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_Pres
 func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_CanToggleFalseToTrue() {
 	// Test that we can update from FALSE to TRUE
 	testID := uuid.New()
-	templateID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	schemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 
 	// Create with explicit false values
-	req := createTestCoursePhaseConfigRequest(templateID, testID)
+	req := createTestCoursePhaseConfigRequest(schemaID, testID)
 	falseValue := false
 	req.GradeSuggestionVisible = &falseValue
 	req.ActionItemsVisible = &falseValue
@@ -213,7 +213,7 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_CanT
 	assert.False(suite.T(), config.ActionItemsVisible)
 
 	// Update to TRUE
-	updateReq := createTestCoursePhaseConfigRequest(templateID, testID)
+	updateReq := createTestCoursePhaseConfigRequest(schemaID, testID)
 	trueValue := true
 	updateReq.GradeSuggestionVisible = &trueValue
 	updateReq.ActionItemsVisible = &trueValue

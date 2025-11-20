@@ -32,7 +32,7 @@ tags:
   - name: ScoreLevel
     description: Aggregated score levels per student
   - name: AssessmentSchema
-    description: Templates describing category/competency structures
+    description: Schemas describing category/competency structures
   - name: CoursePhaseConfig
     description: Configuration for an assessment course phase
   - name: Evaluation
@@ -232,7 +232,7 @@ paths:
           description: Category deleted
   /category/assessment/with-competencies:
     get:
-      summary: List assessment categories with competencies for the configured template
+      summary: List assessment categories with competencies for the configured schema
       tags: [Category]
       responses:
         "200":
@@ -1413,7 +1413,7 @@ components:
           format: date-time
         selfEvaluationEnabled:
           type: boolean
-        selfEvaluationTemplate:
+        selfEvaluationSchema:
           type: string
           format: uuid
         selfEvaluationStart:
@@ -1424,7 +1424,7 @@ components:
           format: date-time
         peerEvaluationEnabled:
           type: boolean
-        peerEvaluationTemplate:
+        peerEvaluationSchema:
           type: string
           format: uuid
         peerEvaluationStart:
@@ -1435,7 +1435,7 @@ components:
           format: date-time
         tutorEvaluationEnabled:
           type: boolean
-        tutorEvaluationTemplate:
+        tutorEvaluationSchema:
           type: string
           format: uuid
         tutorEvaluationStart:
@@ -1453,12 +1453,12 @@ components:
     CreateOrUpdateCoursePhaseConfigRequest:
       type: object
       required:
-        - assessmentTemplateId
+        - assessmentSchemaId
         - coursePhaseId
         - start
         - deadline
       properties:
-        assessmentTemplateId:
+        assessmentSchemaId:
           type: string
           format: uuid
         coursePhaseId:
@@ -1472,7 +1472,7 @@ components:
           format: date-time
         selfEvaluationEnabled:
           type: boolean
-        selfEvaluationTemplate:
+        selfEvaluationSchema:
           type: string
           format: uuid
         selfEvaluationStart:
@@ -1483,7 +1483,7 @@ components:
           format: date-time
         peerEvaluationEnabled:
           type: boolean
-        peerEvaluationTemplate:
+        peerEvaluationSchema:
           type: string
           format: uuid
         peerEvaluationStart:
@@ -1494,7 +1494,7 @@ components:
           format: date-time
         tutorEvaluationEnabled:
           type: boolean
-        tutorEvaluationTemplate:
+        tutorEvaluationSchema:
           type: string
           format: uuid
         tutorEvaluationStart:
