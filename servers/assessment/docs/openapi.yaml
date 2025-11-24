@@ -73,7 +73,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AssessmentSchema'
+                  $ref: "#/components/schemas/AssessmentSchema"
     post:
       summary: Create an assessment schema
       tags: [AssessmentSchema]
@@ -82,38 +82,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAssessmentSchemaRequest'
+              $ref: "#/components/schemas/CreateAssessmentSchemaRequest"
       responses:
         "201":
           description: Assessment schema created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssessmentSchema'
+                $ref: "#/components/schemas/AssessmentSchema"
   /assessment-schema/{schemaID}:
     get:
       summary: Get an assessment schema
       tags: [AssessmentSchema]
       parameters:
-        - $ref: '#/components/parameters/SchemaID'
+        - $ref: "#/components/parameters/SchemaID"
       responses:
         "200":
           description: Assessment schema
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssessmentSchema'
+                $ref: "#/components/schemas/AssessmentSchema"
     put:
       summary: Update an assessment schema
       tags: [AssessmentSchema]
       parameters:
-        - $ref: '#/components/parameters/SchemaID'
+        - $ref: "#/components/parameters/SchemaID"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateAssessmentSchemaRequest'
+              $ref: "#/components/schemas/UpdateAssessmentSchemaRequest"
       responses:
         "200":
           description: Assessment schema updated
@@ -121,7 +121,7 @@ paths:
       summary: Delete an assessment schema
       tags: [AssessmentSchema]
       parameters:
-        - $ref: '#/components/parameters/SchemaID'
+        - $ref: "#/components/parameters/SchemaID"
       responses:
         "200":
           description: Assessment schema deleted
@@ -139,7 +139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CoursePhaseConfig'
+                $ref: "#/components/schemas/CoursePhaseConfig"
     put:
       summary: Create or update course phase configuration
       tags: [CoursePhaseConfig]
@@ -148,7 +148,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateCoursePhaseConfigRequest'
+              $ref: "#/components/schemas/CreateOrUpdateCoursePhaseConfigRequest"
       responses:
         "200":
           description: Course phase configuration saved
@@ -164,7 +164,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AssessmentParticipationWithStudent'
+                  $ref: "#/components/schemas/AssessmentParticipationWithStudent"
   /config/teams:
     get:
       summary: List teams for a course phase
@@ -177,7 +177,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Team'
+                  $ref: "#/components/schemas/Team"
 
   ############################
   # Category Endpoints
@@ -194,7 +194,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Category'
+                  $ref: "#/components/schemas/Category"
     post:
       summary: Create a new category
       tags: [Category]
@@ -203,7 +203,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCategoryRequest'
+              $ref: "#/components/schemas/CreateCategoryRequest"
       responses:
         "201":
           description: Category created
@@ -212,13 +212,13 @@ paths:
       summary: Update a category
       tags: [Category]
       parameters:
-        - $ref: '#/components/parameters/CategoryID'
+        - $ref: "#/components/parameters/CategoryID"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateCategoryRequest'
+              $ref: "#/components/schemas/UpdateCategoryRequest"
       responses:
         "200":
           description: Category updated
@@ -226,7 +226,7 @@ paths:
       summary: Delete a category
       tags: [Category]
       parameters:
-        - $ref: '#/components/parameters/CategoryID'
+        - $ref: "#/components/parameters/CategoryID"
       responses:
         "200":
           description: Category deleted
@@ -242,7 +242,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CategoryWithCompetencies'
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
   /category/self/with-competencies:
     get:
       summary: List self-evaluation categories with competencies
@@ -255,7 +255,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CategoryWithCompetencies'
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
   /category/peer/with-competencies:
     get:
       summary: List peer-evaluation categories with competencies
@@ -268,7 +268,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CategoryWithCompetencies'
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
   /category/tutor/with-competencies:
     get:
       summary: List tutor-evaluation categories with competencies
@@ -281,7 +281,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CategoryWithCompetencies'
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
 
   ############################
   # Competency Endpoints
@@ -298,7 +298,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Competency'
+                  $ref: "#/components/schemas/Competency"
     post:
       summary: Create a new competency
       tags: [Competency]
@@ -307,7 +307,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCompetencyRequest'
+              $ref: "#/components/schemas/CreateCompetencyRequest"
       responses:
         "201":
           description: Competency created
@@ -316,25 +316,25 @@ paths:
       summary: Get a competency by ID
       tags: [Competency]
       parameters:
-        - $ref: '#/components/parameters/CompetencyID'
+        - $ref: "#/components/parameters/CompetencyID"
       responses:
         "200":
           description: The requested competency
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Competency'
+                $ref: "#/components/schemas/Competency"
     put:
       summary: Update a competency
       tags: [Competency]
       parameters:
-        - $ref: '#/components/parameters/CompetencyID'
+        - $ref: "#/components/parameters/CompetencyID"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateCompetencyRequest'
+              $ref: "#/components/schemas/UpdateCompetencyRequest"
       responses:
         "200":
           description: Competency updated
@@ -342,7 +342,7 @@ paths:
       summary: Delete a competency
       tags: [Competency]
       parameters:
-        - $ref: '#/components/parameters/CompetencyID'
+        - $ref: "#/components/parameters/CompetencyID"
       responses:
         "200":
           description: Competency deleted
@@ -351,7 +351,7 @@ paths:
       summary: Get all competencies for a particular category
       tags: [Competency]
       parameters:
-        - $ref: '#/components/parameters/CategoryID'
+        - $ref: "#/components/parameters/CategoryID"
       responses:
         "200":
           description: List of competencies
@@ -360,7 +360,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Competency'
+                  $ref: "#/components/schemas/Competency"
 
   ############################
   # Assessment Endpoints
@@ -377,7 +377,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Assessment'
+                  $ref: "#/components/schemas/Assessment"
     post:
       summary: Create or update an assessment
       tags: [Assessment]
@@ -386,7 +386,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateAssessmentRequest'
+              $ref: "#/components/schemas/CreateOrUpdateAssessmentRequest"
       responses:
         "200":
           description: Assessment created or updated
@@ -403,20 +403,20 @@ paths:
       description: Pass the student's courseParticipationID as the path value.
       tags: [Assessment]
       parameters:
-        - $ref: '#/components/parameters/GenericUUID'
+        - $ref: "#/components/parameters/GenericUUID"
       responses:
         "200":
           description: Assessments, completions and scores for the student
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentAssessment'
+                $ref: "#/components/schemas/StudentAssessment"
     delete:
       summary: Delete an assessment
       description: Pass the assessmentID as the path value.
       tags: [Assessment]
       parameters:
-        - $ref: '#/components/parameters/GenericUUID'
+        - $ref: "#/components/parameters/GenericUUID"
       responses:
         "200":
           description: Assessment deleted
@@ -425,7 +425,7 @@ paths:
       summary: Get all assessments for a student in the course phase
       tags: [Assessment]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Assessments for the specified student
@@ -434,7 +434,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Assessment'
+                  $ref: "#/components/schemas/Assessment"
 
   ############################
   # Assessment completions & grading
@@ -451,7 +451,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AssessmentCompletion'
+                  $ref: "#/components/schemas/AssessmentCompletion"
     post:
       summary: Create or update assessment completion
       tags: [AssessmentCompletion]
@@ -460,7 +460,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssessmentCompletion'
+              $ref: "#/components/schemas/AssessmentCompletion"
       responses:
         "200":
           description: Completion saved
@@ -479,7 +479,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssessmentCompletion'
+              $ref: "#/components/schemas/AssessmentCompletion"
       responses:
         "200":
           description: Completion updated
@@ -492,7 +492,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssessmentCompletion'
+              $ref: "#/components/schemas/AssessmentCompletion"
       responses:
         "200":
           description: Assessments marked as completed
@@ -508,19 +508,19 @@ paths:
       summary: Get assessment completion for a student
       tags: [AssessmentCompletion]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Assessment completion details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssessmentCompletion'
+                $ref: "#/components/schemas/AssessmentCompletion"
     put:
       summary: Unmark an assessment completion
       tags: [AssessmentCompletion]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Completion unmarked
@@ -528,7 +528,7 @@ paths:
       summary: Delete an assessment completion
       tags: [AssessmentCompletion]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Completion deleted
@@ -544,13 +544,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GradeWithParticipation'
+                  $ref: "#/components/schemas/GradeWithParticipation"
   /student-assessment/completed/grade/course-participation/{courseParticipationID}:
     get:
       summary: Get grade suggestion for a student
       tags: [AssessmentCompletion]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Grade suggestion (may be empty when not available)
@@ -587,13 +587,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionItem'
+                  $ref: "#/components/schemas/ActionItem"
   /student-assessment/action-item/action/course-participation/{courseParticipationID}:
     get:
       summary: List action items for a student for communication
       tags: [ActionItem]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Action items for the student
@@ -602,7 +602,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionItem'
+                  $ref: "#/components/schemas/ActionItem"
   /student-assessment/action-item:
     post:
       summary: Create an action item
@@ -612,7 +612,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateActionItemRequest'
+              $ref: "#/components/schemas/CreateActionItemRequest"
       responses:
         "201":
           description: Action item created
@@ -628,13 +628,13 @@ paths:
       summary: Update an action item
       tags: [ActionItem]
       parameters:
-        - $ref: '#/components/parameters/GenericUUID'
+        - $ref: "#/components/parameters/GenericUUID"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateActionItemRequest'
+              $ref: "#/components/schemas/UpdateActionItemRequest"
       responses:
         "200":
           description: Action item updated
@@ -642,7 +642,7 @@ paths:
       summary: Delete an action item
       tags: [ActionItem]
       parameters:
-        - $ref: '#/components/parameters/GenericUUID'
+        - $ref: "#/components/parameters/GenericUUID"
       responses:
         "200":
           description: Action item deleted
@@ -651,7 +651,7 @@ paths:
       summary: List action items for a student
       tags: [ActionItem]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Action items for the student
@@ -660,7 +660,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionItem'
+                  $ref: "#/components/schemas/ActionItem"
   /student-assessment/action-item/my-action-items:
     get:
       summary: List action items for the current student
@@ -673,7 +673,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionItem'
+                  $ref: "#/components/schemas/ActionItem"
         "204":
           description: No action items visible
 
@@ -692,20 +692,20 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ScoreLevelWithParticipation'
+                  $ref: "#/components/schemas/ScoreLevelWithParticipation"
   /student-assessment/scoreLevel/{courseParticipationID}:
     get:
       summary: Get the score level for a student
       tags: [ScoreLevel]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Score level for the specified student
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScoreLevelWithParticipation'
+                $ref: "#/components/schemas/ScoreLevelWithParticipation"
 
   ############################
   # Evaluations
@@ -722,7 +722,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Evaluation'
+                  $ref: "#/components/schemas/Evaluation"
     post:
       summary: Create or update an evaluation
       tags: [Evaluation]
@@ -731,7 +731,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrUpdateEvaluationRequest'
+              $ref: "#/components/schemas/CreateOrUpdateEvaluationRequest"
       responses:
         "201":
           description: Evaluation created or updated
@@ -740,12 +740,7 @@ paths:
       summary: Delete an evaluation
       tags: [Evaluation]
       parameters:
-        - name: evaluationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/EvaluationID"
       responses:
         "200":
           description: Evaluation deleted
@@ -754,7 +749,7 @@ paths:
       summary: List evaluations for a tutor in the course phase
       tags: [Evaluation]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Evaluations for the tutor
@@ -763,7 +758,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Evaluation'
+                  $ref: "#/components/schemas/Evaluation"
   /evaluation/my-evaluations:
     get:
       summary: List evaluations authored by the current student
@@ -776,7 +771,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Evaluation'
+                  $ref: "#/components/schemas/Evaluation"
 
   ############################
   # Evaluation completions
@@ -793,7 +788,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EvaluationCompletion'
+                  $ref: "#/components/schemas/EvaluationCompletion"
   /evaluation/completed/my-completion:
     post:
       summary: Create or update the caller's evaluation completion
@@ -803,7 +798,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EvaluationCompletion'
+              $ref: "#/components/schemas/EvaluationCompletion"
       responses:
         "200":
           description: Completion saved
@@ -822,7 +817,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EvaluationCompletion'
+              $ref: "#/components/schemas/EvaluationCompletion"
       responses:
         "200":
           description: Completion updated
@@ -835,7 +830,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EvaluationCompletion'
+              $ref: "#/components/schemas/EvaluationCompletion"
       responses:
         "200":
           description: Evaluation marked as completed
@@ -855,7 +850,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UnmarkEvaluationRequest'
+              $ref: "#/components/schemas/UnmarkEvaluationRequest"
       responses:
         "200":
           description: Completion unmarked
@@ -871,7 +866,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EvaluationCompletion'
+                  $ref: "#/components/schemas/EvaluationCompletion"
 
   ############################
   # Feedback items
@@ -888,7 +883,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FeedbackItem'
+                  $ref: "#/components/schemas/FeedbackItem"
     post:
       summary: Create a feedback item
       tags: [FeedbackItem]
@@ -897,7 +892,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateFeedbackItemRequest'
+              $ref: "#/components/schemas/CreateFeedbackItemRequest"
       responses:
         "201":
           description: Feedback item created
@@ -906,18 +901,13 @@ paths:
       summary: Update a feedback item
       tags: [FeedbackItem]
       parameters:
-        - name: feedbackItemID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/FeedbackItemID"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateFeedbackItemRequest'
+              $ref: "#/components/schemas/UpdateFeedbackItemRequest"
       responses:
         "200":
           description: Feedback item updated
@@ -925,12 +915,7 @@ paths:
       summary: Delete a feedback item
       tags: [FeedbackItem]
       parameters:
-        - name: feedbackItemID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/FeedbackItemID"
       responses:
         "200":
           description: Feedback item deleted
@@ -939,7 +924,7 @@ paths:
       summary: List feedback items for a participant
       tags: [FeedbackItem]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Feedback items for the student
@@ -948,13 +933,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FeedbackItem'
+                  $ref: "#/components/schemas/FeedbackItem"
   /evaluation/feedback-items/tutor/{courseParticipationID}:
     get:
       summary: List feedback items authored for a tutor
       tags: [FeedbackItem]
       parameters:
-        - $ref: '#/components/parameters/CourseParticipationID'
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
           description: Feedback items for the tutor
@@ -963,7 +948,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FeedbackItem'
+                  $ref: "#/components/schemas/FeedbackItem"
   /evaluation/feedback-items/my-feedback:
     get:
       summary: List feedback items created by the current student
@@ -976,7 +961,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FeedbackItem'
+                  $ref: "#/components/schemas/FeedbackItem"
 
 components:
   parameters:
@@ -1010,6 +995,20 @@ components:
         format: uuid
     GenericUUID:
       name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EvaluationID:
+      name: evaluationID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FeedbackItemID:
+      name: feedbackItemID
       in: path
       required: true
       schema:
@@ -1097,7 +1096,7 @@ components:
         competencies:
           type: array
           items:
-            $ref: '#/components/schemas/CompetencyWithMappedCompetencies'
+            $ref: "#/components/schemas/CompetencyWithMappedCompetencies"
 
     ############################
     # Competency Schemas
@@ -1131,7 +1130,7 @@ components:
           type: integer
     CompetencyWithMappedCompetencies:
       allOf:
-        - $ref: '#/components/schemas/Competency'
+        - $ref: "#/components/schemas/Competency"
         - type: object
           properties:
             mappedFromCompetencies:
@@ -1140,7 +1139,16 @@ components:
                 type: string
     CreateCompetencyRequest:
       type: object
-      required: [categoryID, name, descriptionVeryBad, descriptionBad, descriptionOk, descriptionGood, descriptionVeryGood]
+      required:
+        [
+          categoryID,
+          name,
+          descriptionVeryBad,
+          descriptionBad,
+          descriptionOk,
+          descriptionGood,
+          descriptionVeryGood,
+        ]
       properties:
         categoryID:
           type: string
@@ -1208,7 +1216,7 @@ components:
           type: string
           format: uuid
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         comment:
           type: string
         examples:
@@ -1220,7 +1228,8 @@ components:
           type: string
     CreateOrUpdateAssessmentRequest:
       type: object
-      required: [courseParticipationID, coursePhaseID, competencyID, scoreLevel, author]
+      required:
+        [courseParticipationID, coursePhaseID, competencyID, scoreLevel, author]
       properties:
         courseParticipationID:
           type: string
@@ -1232,7 +1241,7 @@ components:
           type: string
           format: uuid
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         comment:
           type: string
         examples:
@@ -1275,7 +1284,7 @@ components:
       type: object
       properties:
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         scoreNumeric:
           type: number
           nullable: true
@@ -1288,15 +1297,15 @@ components:
         assessments:
           type: array
           items:
-            $ref: '#/components/schemas/Assessment'
+            $ref: "#/components/schemas/Assessment"
         assessmentCompletion:
-          $ref: '#/components/schemas/AssessmentCompletion'
+          $ref: "#/components/schemas/AssessmentCompletion"
         studentScore:
-          $ref: '#/components/schemas/StudentScore'
+          $ref: "#/components/schemas/StudentScore"
         evaluations:
           type: array
           items:
-            $ref: '#/components/schemas/Evaluation'
+            $ref: "#/components/schemas/Evaluation"
 
     ############################
     # Action item Schemas
@@ -1336,7 +1345,7 @@ components:
           type: string
     UpdateActionItemRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateActionItemRequest'
+        - $ref: "#/components/schemas/CreateActionItemRequest"
         - type: object
           required: [id]
           properties:
@@ -1354,7 +1363,7 @@ components:
           type: string
           format: uuid
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         scoreNumeric:
           type: number
 
@@ -1532,7 +1541,7 @@ components:
           type: object
           additionalProperties: true
         student:
-          $ref: '#/components/schemas/Student'
+          $ref: "#/components/schemas/Student"
         teamID:
           type: string
           format: uuid
@@ -1548,11 +1557,11 @@ components:
         members:
           type: array
           items:
-            $ref: '#/components/schemas/Person'
+            $ref: "#/components/schemas/Person"
         tutors:
           type: array
           items:
-            $ref: '#/components/schemas/Person'
+            $ref: "#/components/schemas/Person"
     Person:
       type: object
       properties:
@@ -1565,7 +1574,7 @@ components:
           type: string
     Student:
       allOf:
-        - $ref: '#/components/schemas/Person'
+        - $ref: "#/components/schemas/Person"
         - type: object
           properties:
             email:
@@ -1609,7 +1618,7 @@ components:
           type: string
           format: uuid
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         authorCourseParticipationID:
           type: string
           format: uuid
@@ -1617,10 +1626,17 @@ components:
           type: string
           format: date-time
         type:
-          $ref: '#/components/schemas/AssessmentType'
+          $ref: "#/components/schemas/AssessmentType"
     CreateOrUpdateEvaluationRequest:
       type: object
-      required: [courseParticipationID, competencyID, scoreLevel, authorCourseParticipationID, type]
+      required:
+        [
+          courseParticipationID,
+          competencyID,
+          scoreLevel,
+          authorCourseParticipationID,
+          type,
+        ]
       properties:
         courseParticipationID:
           type: string
@@ -1629,12 +1645,12 @@ components:
           type: string
           format: uuid
         scoreLevel:
-          $ref: '#/components/schemas/ScoreLevel'
+          $ref: "#/components/schemas/ScoreLevel"
         authorCourseParticipationID:
           type: string
           format: uuid
         type:
-          $ref: '#/components/schemas/AssessmentType'
+          $ref: "#/components/schemas/AssessmentType"
     EvaluationCompletion:
       type: object
       properties:
@@ -1656,10 +1672,11 @@ components:
         completed:
           type: boolean
         type:
-          $ref: '#/components/schemas/AssessmentType'
+          $ref: "#/components/schemas/AssessmentType"
     UnmarkEvaluationRequest:
       type: object
-      required: [courseParticipationID, coursePhaseID, authorCourseParticipationID]
+      required:
+        [courseParticipationID, coursePhaseID, authorCourseParticipationID]
       properties:
         courseParticipationID:
           type: string
@@ -1681,7 +1698,7 @@ components:
           type: string
           format: uuid
         feedbackType:
-          $ref: '#/components/schemas/FeedbackType'
+          $ref: "#/components/schemas/FeedbackType"
         feedbackText:
           type: string
         courseParticipationID:
@@ -1697,13 +1714,20 @@ components:
           type: string
           format: date-time
         type:
-          $ref: '#/components/schemas/AssessmentType'
+          $ref: "#/components/schemas/AssessmentType"
     CreateFeedbackItemRequest:
       type: object
-      required: [feedbackType, courseParticipationID, coursePhaseID, authorCourseParticipationID, type]
+      required:
+        [
+          feedbackType,
+          courseParticipationID,
+          coursePhaseID,
+          authorCourseParticipationID,
+          type,
+        ]
       properties:
         feedbackType:
-          $ref: '#/components/schemas/FeedbackType'
+          $ref: "#/components/schemas/FeedbackType"
         feedbackText:
           type: string
         courseParticipationID:
@@ -1716,10 +1740,10 @@ components:
           type: string
           format: uuid
         type:
-          $ref: '#/components/schemas/AssessmentType'
+          $ref: "#/components/schemas/AssessmentType"
     UpdateFeedbackItemRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateFeedbackItemRequest'
+        - $ref: "#/components/schemas/CreateFeedbackItemRequest"
         - type: object
           required: [id, feedbackText]
           properties:
