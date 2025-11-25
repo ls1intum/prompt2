@@ -150,7 +150,6 @@ export const AssessmentForm = ({
     selfEvaluations: allSelfEvaluationsForThisStudent,
     peerEvaluations: allPeerEvaluationsForThisStudent,
     assessmentParticipation,
-    assessmentCompletion,
   } = useStudentAssessmentStore()
 
   const { teams } = useTeamStore()
@@ -204,13 +203,11 @@ export const AssessmentForm = ({
       })
       .filter((item) => item !== undefined) ?? []
 
-  const hasAssessmentEverBeenFinalized = Boolean(assessmentCompletion?.completedAt)
-
   return (
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
@@ -228,7 +225,6 @@ export const AssessmentForm = ({
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
-          showEvaluationResults={hasAssessmentEverBeenFinalized}
           selfEvaluationCompetency={selfEvaluationCompetency}
           selfEvaluationScoreLevel={selfEvaluationScoreLevel}
           selfEvaluationStudentAnswers={selfEvaluationStudentAnswers}
