@@ -1,4 +1,4 @@
-import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
+import { ApplicationForm } from '../../../interfaces/form/applicationForm'
 import { ApplicationQuestionMultiSelect } from '@core/interfaces/application/applicationQuestion/applicationQuestionMultiSelect'
 import { ApplicationQuestionText } from '@core/interfaces/application/applicationQuestion/applicationQuestionText'
 

@@ -210,7 +210,7 @@ export const AssessmentForm = ({
     <Form {...form}>
       <div
         className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
+          'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md',
           completed ?? 'bg-gray-700 border-gray-700',
         )}
       >
