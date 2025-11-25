@@ -48,7 +48,7 @@ export const ScoreLevelSelector = ({
 }: ScoreLevelSelectorProps) => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const shouldDisplayEvaluationResults =
-    (coursePhaseConfig?.evaluationResultsVisible ?? false) || showEvaluationResults
+    Boolean(coursePhaseConfig?.evaluationResultsVisible) || showEvaluationResults
 
   return (
     <div className={className}>

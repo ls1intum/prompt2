@@ -23,6 +23,7 @@ interface EvaluationFormProps {
   competency: Competency
   evaluation?: Evaluation
   completed?: boolean
+  showEvaluationResults?: boolean
 }
 
 export const EvaluationForm = ({
@@ -32,6 +33,7 @@ export const EvaluationForm = ({
   competency,
   evaluation,
   completed = false,
+  showEvaluationResults = false,
 }: EvaluationFormProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -122,6 +124,7 @@ export const EvaluationForm = ({
           onScoreChange={handleScoreChange}
           completed={completed}
           assessmentType={type}
+          showEvaluationResults={showEvaluationResults}
         />
       </div>
 
