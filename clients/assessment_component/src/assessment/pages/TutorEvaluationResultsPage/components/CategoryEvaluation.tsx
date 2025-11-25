@@ -121,6 +121,7 @@ export const CategoryEvaluation = ({
                     onScoreChange={() => {}}
                     completed={false}
                     selectedScore={evaluationAverageScoreLevel}
+                    showEvaluationResults={true}
                     peerEvaluationCompetency={competency}
                     peerEvaluationScoreLevel={evaluationAverageScoreLevel}
                     peerEvaluationStudentAnswers={studentNames}

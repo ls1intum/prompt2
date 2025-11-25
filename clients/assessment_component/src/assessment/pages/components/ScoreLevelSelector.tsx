@@ -22,6 +22,7 @@ interface ScoreLevelSelectorProps {
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
   assessmentType?: AssessmentType
+  showEvaluationResults?: boolean
   selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
   selfEvaluationStudentAnswers?: (() => JSX.Element)[]
@@ -37,6 +38,7 @@ export const ScoreLevelSelector = ({
   onScoreChange,
   completed,
   assessmentType = AssessmentType.ASSESSMENT,
+  showEvaluationResults = false,
   selfEvaluationCompetency,
   selfEvaluationScoreLevel,
   selfEvaluationStudentAnswers,
@@ -45,6 +47,8 @@ export const ScoreLevelSelector = ({
   peerEvaluationStudentAnswers,
 }: ScoreLevelSelectorProps) => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
+  const shouldDisplayEvaluationResults =
+    (coursePhaseConfig?.evaluationResultsVisible ?? false) || showEvaluationResults
 
   return (
     <div className={className}>
@@ -58,7 +62,7 @@ export const ScoreLevelSelector = ({
             key={level}
             className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
           >
-            {(coursePhaseConfig?.evaluationResultsVisible || selectedScore) && (
+            {shouldDisplayEvaluationResults && (
               <div className='absolute -top-6 left-0 w-full'>
                 <div className='flex justify-center items-center text-left gap-2'>
                   {selfEvaluationCompetency &&
