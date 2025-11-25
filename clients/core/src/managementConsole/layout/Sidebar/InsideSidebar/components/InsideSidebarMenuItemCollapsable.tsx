@@ -66,7 +66,7 @@ export const InsideSidebarMenuItemCollapsable = (
                   onClick={() => navigate(subitem.goToPath)}
                   isActive={subitem.goToPath === pathname}
                 >
-                  <span>{subitem.title}</span>
+                  <span className='truncate block'>{subitem.title}</span>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
