@@ -58,7 +58,7 @@ export const InsideSidebarMenuItemCollapsable = (
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          <SidebarMenuSub>
+          <SidebarMenuSub className='mr-0 pr-0'>
             {props.subitems?.map((subitem) => (
               <SidebarMenuSubItem key={subitem.title}>
                 <SidebarMenuSubButton
