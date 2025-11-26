@@ -36,9 +36,7 @@ export const TutorEvaluationPage = () => {
   const { teams } = useTeamStore()
   const { setStudentName } = useStudentEvaluationStore()
 
-  const tutor = teams
-    .flatMap((team) => team.tutors)
-    .find((tutor) => tutor.id === courseParticipationID)
+  const tutor = teams.flatMap((team) => team.tutors).find((t) => t.id === courseParticipationID)
 
   const tutorName = tutor ? `${tutor.firstName} ${tutor.lastName}` : undefined
 
