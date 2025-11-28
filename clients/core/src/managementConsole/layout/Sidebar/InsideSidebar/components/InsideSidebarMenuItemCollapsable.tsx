@@ -58,15 +58,16 @@ export const InsideSidebarMenuItemCollapsable = (
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          <SidebarMenuSub>
+          <SidebarMenuSub className='mr-0 pr-0'>
             {props.subitems?.map((subitem) => (
               <SidebarMenuSubItem key={subitem.title}>
                 <SidebarMenuSubButton
                   asChild
                   onClick={() => navigate(subitem.goToPath)}
                   isActive={subitem.goToPath === pathname}
+                  className='cursor-pointer'
                 >
-                  <span>{subitem.title}</span>
+                  <span className='truncate block'>{subitem.title}</span>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
