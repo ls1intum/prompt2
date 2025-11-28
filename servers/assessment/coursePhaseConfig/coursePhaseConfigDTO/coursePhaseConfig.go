@@ -9,19 +9,19 @@ import (
 
 type CoursePhaseConfig struct {
 	CoursePhaseID            uuid.UUID `json:"coursePhaseID"`
-	AssessmentTemplateID     uuid.UUID `json:"assessmentTemplateID"`
+	AssessmentSchemaID       uuid.UUID `json:"assessmentSchemaID"`
 	Start                    time.Time `json:"start"`
 	Deadline                 time.Time `json:"deadline"`
 	SelfEvaluationEnabled    bool      `json:"selfEvaluationEnabled"`
-	SelfEvaluationTemplate   uuid.UUID `json:"selfEvaluationTemplate"`
+	SelfEvaluationSchema     uuid.UUID `json:"selfEvaluationSchema"`
 	SelfEvaluationStart      time.Time `json:"selfEvaluationStart"`
 	SelfEvaluationDeadline   time.Time `json:"selfEvaluationDeadline"`
 	PeerEvaluationEnabled    bool      `json:"peerEvaluationEnabled"`
-	PeerEvaluationTemplate   uuid.UUID `json:"peerEvaluationTemplate"`
+	PeerEvaluationSchema     uuid.UUID `json:"peerEvaluationSchema"`
 	PeerEvaluationStart      time.Time `json:"peerEvaluationStart"`
 	PeerEvaluationDeadline   time.Time `json:"peerEvaluationDeadline"`
 	TutorEvaluationEnabled   bool      `json:"tutorEvaluationEnabled"`
-	TutorEvaluationTemplate  uuid.UUID `json:"tutorEvaluationTemplate"`
+	TutorEvaluationSchema    uuid.UUID `json:"tutorEvaluationSchema"`
 	TutorEvaluationStart     time.Time `json:"tutorEvaluationStart"`
 	TutorEvaluationDeadline  time.Time `json:"tutorEvaluationDeadline"`
 	EvaluationResultsVisible bool      `json:"evaluationResultsVisible"`
@@ -32,19 +32,19 @@ type CoursePhaseConfig struct {
 func MapDBCoursePhaseConfigToDTOCoursePhaseConfig(dbConfig db.CoursePhaseConfig) CoursePhaseConfig {
 	return CoursePhaseConfig{
 		CoursePhaseID:            dbConfig.CoursePhaseID,
-		AssessmentTemplateID:     dbConfig.AssessmentTemplateID,
+		AssessmentSchemaID:       dbConfig.AssessmentSchemaID,
 		Start:                    dbConfig.Start.Time,
 		Deadline:                 dbConfig.Deadline.Time,
 		SelfEvaluationEnabled:    dbConfig.SelfEvaluationEnabled,
-		SelfEvaluationTemplate:   dbConfig.SelfEvaluationTemplate,
+		SelfEvaluationSchema:     dbConfig.SelfEvaluationSchema,
 		SelfEvaluationStart:      dbConfig.SelfEvaluationStart.Time,
 		SelfEvaluationDeadline:   dbConfig.SelfEvaluationDeadline.Time,
 		PeerEvaluationEnabled:    dbConfig.PeerEvaluationEnabled,
-		PeerEvaluationTemplate:   dbConfig.PeerEvaluationTemplate,
+		PeerEvaluationSchema:     dbConfig.PeerEvaluationSchema,
 		PeerEvaluationStart:      dbConfig.PeerEvaluationStart.Time,
 		PeerEvaluationDeadline:   dbConfig.PeerEvaluationDeadline.Time,
 		TutorEvaluationEnabled:   dbConfig.TutorEvaluationEnabled,
-		TutorEvaluationTemplate:  dbConfig.TutorEvaluationTemplate,
+		TutorEvaluationSchema:    dbConfig.TutorEvaluationSchema,
 		TutorEvaluationStart:     dbConfig.TutorEvaluationStart.Time,
 		TutorEvaluationDeadline:  dbConfig.TutorEvaluationDeadline.Time,
 		EvaluationResultsVisible: dbConfig.EvaluationResultsVisible,

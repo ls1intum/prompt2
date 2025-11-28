@@ -17,7 +17,7 @@ export interface CreateCategoryRequest {
   shortName: string
   description?: string
   weight: number
-  assessmentTemplateID: string
+  assessmentSchemaID: string
 }
 
 export interface UpdateCategoryRequest {
@@ -26,5 +26,5 @@ export interface UpdateCategoryRequest {
   shortName?: string
   description?: string
   weight?: number
-  assessmentTemplateID: string
+  assessmentSchemaID: string
 }

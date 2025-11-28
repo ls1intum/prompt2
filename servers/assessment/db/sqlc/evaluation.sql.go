@@ -18,13 +18,13 @@ WITH total_competencies AS (SELECT COUNT(*) AS total
                                      INNER JOIN course_phase_config cpc ON
                                 CASE
                                     WHEN $4::assessment_type = 'self' THEN
-                                        cat.assessment_template_id = cpc.self_evaluation_template
+                                        cat.assessment_schema_id = cpc.self_evaluation_schema
                                     WHEN $4::assessment_type = 'peer' THEN
-                                        cat.assessment_template_id = cpc.peer_evaluation_template
+                                        cat.assessment_schema_id = cpc.peer_evaluation_schema
                                     WHEN $4::assessment_type = 'tutor' THEN
-                                        cat.assessment_template_id = cpc.tutor_evaluation_template
+                                        cat.assessment_schema_id = cpc.tutor_evaluation_schema
                                     ELSE
-                                        cat.assessment_template_id = cpc.assessment_template_id
+                                        cat.assessment_schema_id = cpc.assessment_schema_id
                                     END
                             WHERE cpc.course_phase_id = $3),
      evaluated_competencies AS (SELECT COUNT(*) AS evaluated
@@ -34,13 +34,13 @@ WITH total_competencies AS (SELECT COUNT(*) AS total
                                          INNER JOIN course_phase_config cpc ON
                                     CASE
                                         WHEN $4::assessment_type = 'self' THEN
-                                            cat.assessment_template_id = cpc.self_evaluation_template
+                                            cat.assessment_schema_id = cpc.self_evaluation_schema
                                         WHEN $4::assessment_type = 'peer' THEN
-                                            cat.assessment_template_id = cpc.peer_evaluation_template
+                                            cat.assessment_schema_id = cpc.peer_evaluation_schema
                                         WHEN $4::assessment_type = 'tutor' THEN
-                                            cat.assessment_template_id = cpc.tutor_evaluation_template
+                                            cat.assessment_schema_id = cpc.tutor_evaluation_schema
                                         ELSE
-                                            cat.assessment_template_id = cpc.assessment_template_id
+                                            cat.assessment_schema_id = cpc.assessment_schema_id
                                         END
                                 WHERE e.course_participation_id = $1
                                   AND e.course_phase_id = $3

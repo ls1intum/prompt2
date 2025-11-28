@@ -23,20 +23,20 @@ func (q *Queries) CreateDefaultCoursePhaseConfig(ctx context.Context, coursePhas
 }
 
 const createOrUpdateCoursePhaseConfig = `-- name: CreateOrUpdateCoursePhaseConfig :exec
-INSERT INTO course_phase_config (assessment_template_id,
+INSERT INTO course_phase_config (assessment_schema_id,
                                  course_phase_id,
                                  start,
                                  deadline,
                                  self_evaluation_enabled,
-                                 self_evaluation_template,
+                                 self_evaluation_schema,
                                  self_evaluation_start,
                                  self_evaluation_deadline,
                                  peer_evaluation_enabled,
-                                 peer_evaluation_template,
+                                 peer_evaluation_schema,
                                  peer_evaluation_start,
                                  peer_evaluation_deadline,
                                  tutor_evaluation_enabled,
-                                 tutor_evaluation_template,
+                                 tutor_evaluation_schema,
                                  tutor_evaluation_start,
                                  tutor_evaluation_deadline,
                                  evaluation_results_visible,
@@ -46,41 +46,41 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $
         COALESCE($18::boolean, TRUE), 
         COALESCE($19::boolean, TRUE))
 ON CONFLICT (course_phase_id)
-    DO UPDATE SET assessment_template_id     = EXCLUDED.assessment_template_id,
-                  start                      = EXCLUDED.start,
-                  deadline                   = EXCLUDED.deadline,
-                  self_evaluation_enabled    = EXCLUDED.self_evaluation_enabled,
-                  self_evaluation_template   = EXCLUDED.self_evaluation_template,
-                  self_evaluation_start      = EXCLUDED.self_evaluation_start,
-                  self_evaluation_deadline   = EXCLUDED.self_evaluation_deadline,
-                  peer_evaluation_enabled    = EXCLUDED.peer_evaluation_enabled,
-                  peer_evaluation_template   = EXCLUDED.peer_evaluation_template,
-                  peer_evaluation_start      = EXCLUDED.peer_evaluation_start,
-                  peer_evaluation_deadline   = EXCLUDED.peer_evaluation_deadline,
-                  tutor_evaluation_enabled   = EXCLUDED.tutor_evaluation_enabled,
-                  tutor_evaluation_template  = EXCLUDED.tutor_evaluation_template,
-                  tutor_evaluation_start     = EXCLUDED.tutor_evaluation_start,
-                  tutor_evaluation_deadline  = EXCLUDED.tutor_evaluation_deadline,
+    DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
+                  start                     = EXCLUDED.start,
+                  deadline                  = EXCLUDED.deadline,
+                  self_evaluation_enabled   = EXCLUDED.self_evaluation_enabled,
+                  self_evaluation_schema    = EXCLUDED.self_evaluation_schema,
+                  self_evaluation_start     = EXCLUDED.self_evaluation_start,
+                  self_evaluation_deadline  = EXCLUDED.self_evaluation_deadline,
+                  peer_evaluation_enabled   = EXCLUDED.peer_evaluation_enabled,
+                  peer_evaluation_schema    = EXCLUDED.peer_evaluation_schema,
+                  peer_evaluation_start     = EXCLUDED.peer_evaluation_start,
+                  peer_evaluation_deadline  = EXCLUDED.peer_evaluation_deadline,
+                  tutor_evaluation_enabled  = EXCLUDED.tutor_evaluation_enabled,
+                  tutor_evaluation_schema   = EXCLUDED.tutor_evaluation_schema,
+                  tutor_evaluation_start    = EXCLUDED.tutor_evaluation_start,
+                  tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline,
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
-                  grade_suggestion_visible   = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
-                  action_items_visible       = COALESCE(EXCLUDED.action_items_visible, TRUE)
+                  grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
+                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE)
 `
 
 type CreateOrUpdateCoursePhaseConfigParams struct {
-	AssessmentTemplateID     uuid.UUID          `json:"assessment_template_id"`
+	AssessmentSchemaID       uuid.UUID          `json:"assessment_schema_id"`
 	CoursePhaseID            uuid.UUID          `json:"course_phase_id"`
 	Start                    pgtype.Timestamptz `json:"start"`
 	Deadline                 pgtype.Timestamptz `json:"deadline"`
 	SelfEvaluationEnabled    bool               `json:"self_evaluation_enabled"`
-	SelfEvaluationTemplate   uuid.UUID          `json:"self_evaluation_template"`
+	SelfEvaluationSchema     uuid.UUID          `json:"self_evaluation_schema"`
 	SelfEvaluationStart      pgtype.Timestamptz `json:"self_evaluation_start"`
 	SelfEvaluationDeadline   pgtype.Timestamptz `json:"self_evaluation_deadline"`
 	PeerEvaluationEnabled    bool               `json:"peer_evaluation_enabled"`
-	PeerEvaluationTemplate   uuid.UUID          `json:"peer_evaluation_template"`
+	PeerEvaluationSchema     uuid.UUID          `json:"peer_evaluation_schema"`
 	PeerEvaluationStart      pgtype.Timestamptz `json:"peer_evaluation_start"`
 	PeerEvaluationDeadline   pgtype.Timestamptz `json:"peer_evaluation_deadline"`
 	TutorEvaluationEnabled   bool               `json:"tutor_evaluation_enabled"`
-	TutorEvaluationTemplate  uuid.UUID          `json:"tutor_evaluation_template"`
+	TutorEvaluationSchema    uuid.UUID          `json:"tutor_evaluation_schema"`
 	TutorEvaluationStart     pgtype.Timestamptz `json:"tutor_evaluation_start"`
 	TutorEvaluationDeadline  pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
 	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
@@ -90,20 +90,20 @@ type CreateOrUpdateCoursePhaseConfigParams struct {
 
 func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg CreateOrUpdateCoursePhaseConfigParams) error {
 	_, err := q.db.Exec(ctx, createOrUpdateCoursePhaseConfig,
-		arg.AssessmentTemplateID,
+		arg.AssessmentSchemaID,
 		arg.CoursePhaseID,
 		arg.Start,
 		arg.Deadline,
 		arg.SelfEvaluationEnabled,
-		arg.SelfEvaluationTemplate,
+		arg.SelfEvaluationSchema,
 		arg.SelfEvaluationStart,
 		arg.SelfEvaluationDeadline,
 		arg.PeerEvaluationEnabled,
-		arg.PeerEvaluationTemplate,
+		arg.PeerEvaluationSchema,
 		arg.PeerEvaluationStart,
 		arg.PeerEvaluationDeadline,
 		arg.TutorEvaluationEnabled,
-		arg.TutorEvaluationTemplate,
+		arg.TutorEvaluationSchema,
 		arg.TutorEvaluationStart,
 		arg.TutorEvaluationDeadline,
 		arg.EvaluationResultsVisible,
@@ -114,7 +114,7 @@ func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg Creat
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
-SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_template, evaluation_results_visible, grade_suggestion_visible, action_items_visible
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible
 FROM course_phase_config
 WHERE course_phase_id = $1
 `
@@ -123,14 +123,14 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 	row := q.db.QueryRow(ctx, getCoursePhaseConfig, coursePhaseID)
 	var i CoursePhaseConfig
 	err := row.Scan(
-		&i.AssessmentTemplateID,
+		&i.AssessmentSchemaID,
 		&i.CoursePhaseID,
 		&i.Deadline,
 		&i.SelfEvaluationEnabled,
-		&i.SelfEvaluationTemplate,
+		&i.SelfEvaluationSchema,
 		&i.SelfEvaluationDeadline,
 		&i.PeerEvaluationEnabled,
-		&i.PeerEvaluationTemplate,
+		&i.PeerEvaluationSchema,
 		&i.PeerEvaluationDeadline,
 		&i.Start,
 		&i.SelfEvaluationStart,
@@ -138,7 +138,7 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 		&i.TutorEvaluationEnabled,
 		&i.TutorEvaluationStart,
 		&i.TutorEvaluationDeadline,
-		&i.TutorEvaluationTemplate,
+		&i.TutorEvaluationSchema,
 		&i.EvaluationResultsVisible,
 		&i.GradeSuggestionVisible,
 		&i.ActionItemsVisible,
@@ -146,14 +146,14 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 	return i, err
 }
 
-const getCoursePhasesByAssessmentTemplate = `-- name: GetCoursePhasesByAssessmentTemplate :many
+const getCoursePhasesByAssessmentSchema = `-- name: GetCoursePhasesByAssessmentSchema :many
 SELECT course_phase_id
 FROM course_phase_config
-WHERE assessment_template_id = $1
+WHERE assessment_schema_id = $1
 `
 
-func (q *Queries) GetCoursePhasesByAssessmentTemplate(ctx context.Context, assessmentTemplateID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.Query(ctx, getCoursePhasesByAssessmentTemplate, assessmentTemplateID)
+func (q *Queries) GetCoursePhasesByAssessmentSchema(ctx context.Context, assessmentSchemaID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getCoursePhasesByAssessmentSchema, assessmentSchemaID)
 	if err != nil {
 		return nil, err
 	}
@@ -354,14 +354,14 @@ func (q *Queries) IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.
 	return has_tutor_evaluation_started, err
 }
 
-const listAssessmentTemplateCoursePhaseMappings = `-- name: ListAssessmentTemplateCoursePhaseMappings :many
-SELECT assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_template, evaluation_results_visible, grade_suggestion_visible, action_items_visible
+const listAssessmentSchemaCoursePhaseMappings = `-- name: ListAssessmentSchemaCoursePhaseMappings :many
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible
 FROM course_phase_config
-ORDER BY assessment_template_id, course_phase_id
+ORDER BY assessment_schema_id, course_phase_id
 `
 
-func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context) ([]CoursePhaseConfig, error) {
-	rows, err := q.db.Query(ctx, listAssessmentTemplateCoursePhaseMappings)
+func (q *Queries) ListAssessmentSchemaCoursePhaseMappings(ctx context.Context) ([]CoursePhaseConfig, error) {
+	rows, err := q.db.Query(ctx, listAssessmentSchemaCoursePhaseMappings)
 	if err != nil {
 		return nil, err
 	}
@@ -370,14 +370,14 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 	for rows.Next() {
 		var i CoursePhaseConfig
 		if err := rows.Scan(
-			&i.AssessmentTemplateID,
+			&i.AssessmentSchemaID,
 			&i.CoursePhaseID,
 			&i.Deadline,
 			&i.SelfEvaluationEnabled,
-			&i.SelfEvaluationTemplate,
+			&i.SelfEvaluationSchema,
 			&i.SelfEvaluationDeadline,
 			&i.PeerEvaluationEnabled,
-			&i.PeerEvaluationTemplate,
+			&i.PeerEvaluationSchema,
 			&i.PeerEvaluationDeadline,
 			&i.Start,
 			&i.SelfEvaluationStart,
@@ -385,7 +385,7 @@ func (q *Queries) ListAssessmentTemplateCoursePhaseMappings(ctx context.Context)
 			&i.TutorEvaluationEnabled,
 			&i.TutorEvaluationStart,
 			&i.TutorEvaluationDeadline,
-			&i.TutorEvaluationTemplate,
+			&i.TutorEvaluationSchema,
 			&i.EvaluationResultsVisible,
 			&i.GradeSuggestionVisible,
 			&i.ActionItemsVisible,
