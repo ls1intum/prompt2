@@ -47,7 +47,13 @@ export const DropdownMenuItemForActionOnParticipants = ({
 
   return (
     <>
-      <DropdownMenuItem onClick={handleTrigger} disabled={disabled}>
+      <DropdownMenuItem
+        disabled={disabled}
+        onSelect={(event) => {
+          event.preventDefault()
+          handleTrigger()
+        }}
+      >
         {action.icon}
         {action.label}
       </DropdownMenuItem>
