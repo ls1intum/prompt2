@@ -1,6 +1,6 @@
 import { HelpCircle } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
-import { useState, useRef, useLayoutEffect, useState as useStateReact } from 'react'
+import { Card, CardContent } from '@tumaet/prompt-ui-components'
+import { useState, useRef, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface CoursePhaseTypeDescriptionProps {
@@ -13,53 +13,44 @@ export const CoursePhaseTypeDescription = ({
   description,
 }: CoursePhaseTypeDescriptionProps): JSX.Element => {
   const [open, setOpen] = useState(false)
-  const [position, setPosition] = useStateReact<{ x: number; y: number } | null>(null)
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
   const iconRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     if (!iconRef.current) return
     const rect = iconRef.current.getBoundingClientRect()
 
-    const ICON_OFFSET_LEFT = 10
-    const ICON_OFFSET_TOP = 26
-
-    setPosition({
-      x: rect.left - ICON_OFFSET_LEFT,
-      y: rect.bottom - ICON_OFFSET_TOP,
+    setPos({
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 6,
     })
   }, [])
 
   return (
     <div
       ref={iconRef}
-      className='relative inline-block'
+      className='relative'
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <HelpCircle className='h-4 w-4' />
+      <HelpCircle className='h-4 w-4 cursor-pointer' />
 
-      {position &&
+      {open &&
+        pos &&
         createPortal(
           <div
-            className={`
-              absolute z-[9999] transition-opacity duration-150
-              ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-            `}
+            className='fixed z-[9999] transition-opacity duration-150 opacity-100'
             style={{
-              position: 'absolute',
-              top: position.y,
-              left: position.x,
+              top: pos.y,
+              left: pos.x,
+              transform: 'translateX(-50%)',
             }}
           >
-            <Card className='w-64'>
-              <CardHeader className='p-4'>
-                <div className='flex items-center'>
-                  <HelpCircle className='h-4 w-4' />
-                  <span className='ml-2'>Explanation</span>
-                </div>
-                <h3 className='font-semibold text-lg'>{title}</h3>
-              </CardHeader>
-              <CardContent className='-mt-6 p-4'>{description}</CardContent>
+            <Card className='w-64 shadow-lg'>
+              <CardContent className='p-4'>
+                <p className='font-semibold'>{title}</p>
+                <p className='text-sm text-muted-foreground'>{description}</p>
+              </CardContent>
             </Card>
           </div>,
           document.body,
