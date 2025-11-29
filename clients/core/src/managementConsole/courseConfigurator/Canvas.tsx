@@ -6,13 +6,11 @@ import {
   useEdgesState,
   Controls,
   NodeTypes,
-  EdgeTypes,
   Background,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './graphComponents/phaseNode/PhaseNode'
 import { CourseConfigSidebar } from './components/CourseConfigSidebar'
-import { IconEdge } from './graphComponents/edges/IconEdge'
 import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
@@ -32,10 +30,6 @@ import { useMutations } from './handlers/useGraphMutations'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
-}
-
-const edgeTypes: EdgeTypes = {
-  iconEdge: IconEdge,
 }
 
 export function CourseConfigurator() {
@@ -176,7 +170,6 @@ export function CourseConfigurator() {
           onDrop={dropHandler}
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
           isValidConnection={useValidation()}
           colorMode={theme}
           nodesDraggable={canEdit}
