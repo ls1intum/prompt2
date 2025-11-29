@@ -69,7 +69,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         {/* 2. Phase Data Inputs (required Input DTOs) */}
         {phaseType?.requiredPhaseInputDTOs && phaseType.requiredPhaseInputDTOs.length > 0 && (
           <div className='meta-data-inputs space-y-2 mb-4 mr-16'>
-            <h4 className='text-sm font-semibold mb-2'>Required Phase Inputs:</h4>
+            <h4 className='text-sm font-semibold mb-2'>Phase Inputs:</h4>
             {phaseType.requiredPhaseInputDTOs.map((dto) => (
               <IncomingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
             ))}
@@ -92,7 +92,7 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
         {phaseType?.requiredParticipationInputDTOs &&
           phaseType.requiredParticipationInputDTOs.length > 0 && (
             <div className='meta-data-inputs space-y-2 mb-4 mr-16'>
-              <h4 className='text-sm font-semibold mb-2'>Required Participation Inputs:</h4>
+              <h4 className='text-sm font-semibold mb-2'>Participation Inputs:</h4>
               {phaseType.requiredParticipationInputDTOs.map((dto) => (
                 <IncomingDataHandle
                   key={dto.id}
