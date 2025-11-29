@@ -9,18 +9,20 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCoursePhaseType = `-- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, base_url)
-VALUES ($1, $2, $3, $4)
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateCoursePhaseTypeParams struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
-	BaseUrl      string    `json:"base_url"`
+	ID           uuid.UUID   `json:"id"`
+	Name         string      `json:"name"`
+	InitialPhase bool        `json:"initial_phase"`
+	BaseUrl      string      `json:"base_url"`
+	Description  pgtype.Text `json:"description"`
 }
 
 func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePhaseTypeParams) error {
@@ -29,6 +31,7 @@ func (q *Queries) CreateCoursePhaseType(ctx context.Context, arg CreateCoursePha
 		arg.Name,
 		arg.InitialPhase,
 		arg.BaseUrl,
+		arg.Description,
 	)
 	return err
 }
@@ -181,7 +184,7 @@ func (q *Queries) CreateRequiredDevices(ctx context.Context, coursePhaseTypeID u
 }
 
 const getAllCoursePhaseTypes = `-- name: GetAllCoursePhaseTypes :many
-SELECT id, name, initial_phase, base_url
+SELECT id, name, initial_phase, base_url, description
 FROM course_phase_type
 `
 
@@ -199,6 +202,7 @@ func (q *Queries) GetAllCoursePhaseTypes(ctx context.Context) ([]CoursePhaseType
 			&i.Name,
 			&i.InitialPhase,
 			&i.BaseUrl,
+			&i.Description,
 		); err != nil {
 			return nil, err
 		}
@@ -339,7 +343,7 @@ func (q *Queries) GetCoursePhaseRequiredPhaseInputs(ctx context.Context, courseP
 }
 
 const getCoursePhaseTypeByID = `-- name: GetCoursePhaseTypeByID :one
-SELECT id, name, initial_phase, base_url
+SELECT id, name, initial_phase, base_url, description
 FROM course_phase_type
 WHERE id = $1
 `
@@ -352,6 +356,7 @@ func (q *Queries) GetCoursePhaseTypeByID(ctx context.Context, id uuid.UUID) (Cou
 		&i.Name,
 		&i.InitialPhase,
 		&i.BaseUrl,
+		&i.Description,
 	)
 	return i, err
 }
@@ -731,7 +736,7 @@ func (q *Queries) TestInterviewPhaseTypeExists(ctx context.Context) (bool, error
 const testIntroCourseDeveloperPhaseTypeExists = `-- name: TestIntroCourseDeveloperPhaseTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
-               WHERE name = 'IntroCourseDeveloper') AS does_exist
+               WHERE name = 'Intro Course Developer') AS does_exist
 `
 
 func (q *Queries) TestIntroCourseDeveloperPhaseTypeExists(ctx context.Context) (bool, error) {

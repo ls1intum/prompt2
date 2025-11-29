@@ -60,7 +60,8 @@ func initKeycloak(router *gin.RouterGroup, queries db.Queries) {
 
 	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 	clientID := utils.GetEnv("KEYCLOAK_CLIENT_ID", "prompt-server")
-	clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
+	// clientSecret := utils.GetEnv("KEYCLOAK_CLIENT_SECRET", "")
+  clientSecret := "fiB0PrEqIAlwbjjAP7lkM1PmR35nGe4M"
 	idOfClient := utils.GetEnv("KEYCLOAK_ID_OF_CLIENT", "a584ca61-fa83-4e95-98b6-c5f3157ae4b4")
 	expectedAuthorizedParty := utils.GetEnv("KEYCLOAK_AUTHORIZED_PARTY", "prompt-client")
 
@@ -184,7 +185,7 @@ func main() {
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
-	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
+	serverAddress := utils.GetEnv("SERVER_ADDRESS", ":8080")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

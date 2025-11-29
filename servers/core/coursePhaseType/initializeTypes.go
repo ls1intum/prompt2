@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/google/uuid"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
 	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
+
 )
 
 func initInterview() error {
@@ -176,9 +178,10 @@ func initIntroCourseDeveloper() error {
 		}
 		newIntroCourseDeveloper := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
-			Name:         "IntroCourseDeveloper",
+			Name:         "Intro Course Developer",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
+      Description:  pgtype.Text{String: "Phase 'Intro Course Developer' Phase allows you to configure a mandatory technical challenge that participants have to solve to progress to the next phase", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {

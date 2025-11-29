@@ -1,6 +1,6 @@
-import { GripVertical } from 'lucide-react'
 import { useCourseConfigurationState } from '../zustand/useCourseConfigurationStore'
 import { CoursePhaseType } from '../interfaces/coursePhaseType'
+import { CourseConfigSidebarItem } from './CourseConfigSidebarItem'
 
 interface CourseConfigSidebarProps {
   canEdit: boolean
@@ -9,6 +9,7 @@ interface CourseConfigSidebarProps {
 export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.Element => {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
   const courseHasInitialPhase = coursePhases.map((phase) => phase.isInitialPhase).includes(true)
+
   const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
     if (a.initialPhase && !b.initialPhase) {
       return -1
@@ -18,11 +19,6 @@ export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.
     }
     return 0
   })
-
-  const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeType: string) => {
-    event.dataTransfer.setData('application/@xyflow/react', nodeType)
-    event.dataTransfer.effectAllowed = 'move'
-  }
 
   const isDraggable = (phase: CoursePhaseType) => {
     if (!canEdit) {
@@ -45,17 +41,11 @@ export const CourseConfigSidebar = ({ canEdit }: CourseConfigSidebarProps): JSX.
       <div className='flex-1 overflow-auto p-4'>
         <div className='space-y-2'>
           {coursePhaseTypesOrdered.map((phase) => (
-            <div
+            <CourseConfigSidebarItem
+              phase={phase}
               key={phase.id}
-              draggable={isDraggable(phase)}
-              onDragStart={(event) => isDraggable(phase) && onDragStart(event, phase.id)}
-              className={`group flex items-center rounded-md border bg-card p-2 ${
-                isDraggable(phase) ? 'cursor-move hover:bg-accent' : 'cursor-not-allowed opacity-50'
-              }`}
-            >
-              <GripVertical className='mr-2 h-4 w-4 text-muted-foreground' />
-              <span className='text-sm font-medium'>{phase.name}</span>
-            </div>
+              isDraggable={isDraggable(phase)}
+            />
           ))}
         </div>
       </div>
