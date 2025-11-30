@@ -34,6 +34,7 @@ func initInterview() error {
 			Name:         "Interview",
 			InitialPhase: false,
 			BaseUrl:      "core",
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newInterviewPhase)
 		if err != nil {
@@ -115,6 +116,7 @@ func initMatching() error {
 			Name:         "Matching",
 			InitialPhase: false,
 			BaseUrl:      "core",
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newMatchingPhase)
 		if err != nil {
@@ -181,7 +183,7 @@ func initIntroCourseDeveloper() error {
 			Name:         "Intro Course Developer",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-      Description:  pgtype.Text{String: "Phase 'Intro Course Developer' Phase allows you to configure a mandatory technical challenge that participants have to solve to progress to the next phase", Valid: true},
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {
@@ -223,6 +225,7 @@ func initDevOpsChallenge() error {
 			Name:         "DevOpsChallenge",
 			InitialPhase: false,
 			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newDevOps)
 		if err != nil {
@@ -266,6 +269,7 @@ func initAssessment() error {
 			Name:         "Assessment",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
@@ -346,6 +350,7 @@ func initTeamAllocation() error {
 			Name:         "Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {
@@ -428,6 +433,7 @@ func initSelfTeamAllocation() error {
 			Name:         "Self Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
+      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {

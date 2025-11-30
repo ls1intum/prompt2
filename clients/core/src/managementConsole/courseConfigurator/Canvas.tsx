@@ -10,16 +10,13 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PhaseNode } from './graphComponents/phaseNode/PhaseNode'
-import { CourseConfigSidebar } from './components/CourseConfigSidebar'
 import { useConnect } from './handlers/useConnect'
 import { useValidation } from './handlers/useValidation'
 import { useDrop } from './handlers/useDrop'
 import { useDarkMode } from '@/contexts/DarkModeProvider'
 import { useCourseConfigurationState } from './zustand/useCourseConfigurationStore'
-import { Alert, AlertDescription, AlertTitle } from '@tumaet/prompt-ui-components'
-import { AlertCircle } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Button, ErrorPage } from '@tumaet/prompt-ui-components'
+import { ErrorPage } from '@tumaet/prompt-ui-components'
 import { useParams } from 'react-router-dom'
 import { handleSave } from './handlers/handleSave'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
@@ -27,6 +24,8 @@ import { getPermissionString, Role } from '@tumaet/prompt-shared-state'
 import { useComputeLayoutedElements } from './handlers/useComputeLayoutedElements'
 import { useDeleteConfirmation } from './handlers/useDeleteConfirmation'
 import { useMutations } from './handlers/useGraphMutations'
+import { CoursePhaseTypePanel } from './components/CoursePhaseTypePanel'
+import { ModifiedChangesAlert } from './components/ModifiedChangesAlert'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -140,25 +139,13 @@ export function CourseConfigurator() {
 
   return (
     <>
-      <CourseConfigSidebar canEdit={canEdit} />
-      <div className='flex-grow h-full flex flex-col' ref={reactFlowWrapper}>
+      <CoursePhaseTypePanel canEdit={canEdit} />
+      <div className='flex-grow h-full flex flex-col relative' ref={reactFlowWrapper}>
         {isError && <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />}
         {(isModified || phaseNameModified) && (
-          <Alert variant='destructive' className='mb-4'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertTitle>Unsaved Changes</AlertTitle>
-            <AlertDescription className='flex items-center justify-between'>
-              <span>This board has been modified. Would you like to save your changes?</span>
-              <div className='space-x-2'>
-                <Button variant='outline' size='sm' onClick={handleRevert}>
-                  Revert
-                </Button>
-                <Button variant='default' size='sm' onClick={saveChanges}>
-                  Save
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div className='absolute top-4 right-4 z-50 w-[350px]'>
+            <ModifiedChangesAlert handleRevert={handleRevert} saveChanges={saveChanges} />
+          </div>
         )}
         <ReactFlow
           nodes={nodes}
@@ -188,7 +175,7 @@ export function CourseConfigurator() {
 
 export const Canvas = () => {
   return (
-    <div className='flex h-full'>
+    <div className='flex flex-col h-full'>
       <ReactFlowProvider>
         <CourseConfigurator />
       </ReactFlowProvider>
