@@ -48,11 +48,11 @@ export const TutorEvaluationPage = () => {
 
   return (
     <div className='flex flex-col gap-4'>
-      <ManagementPageHeader>Tutor Evaluation for {tutorName}</ManagementPageHeader>
+      <ManagementPageHeader>Evaluation for {tutorName}</ManagementPageHeader>
 
       <p className='text-sm text-gray-600 dark:text-gray-400'>
-        Please fill out the Tutor evaluation below to assess the performance and contributions of
-        your tutors.
+        Please fill out the evaluation below to assess the performance and contributions of{' '}
+        {tutorName}.
       </p>
 
       {tutorEvaluationCategories.map((category) => (
