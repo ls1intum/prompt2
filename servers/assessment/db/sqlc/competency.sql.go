@@ -69,6 +69,20 @@ func (q *Queries) DeleteCompetency(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAssessmentSchemaIDByCompetency = `-- name: GetAssessmentSchemaIDByCompetency :one
+SELECT cat.assessment_schema_id
+FROM competency comp
+INNER JOIN category cat ON comp.category_id = cat.id
+WHERE comp.id = $1
+`
+
+func (q *Queries) GetAssessmentSchemaIDByCompetency(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getAssessmentSchemaIDByCompetency, id)
+	var assessment_schema_id uuid.UUID
+	err := row.Scan(&assessment_schema_id)
+	return assessment_schema_id, err
+}
+
 const getCompetency = `-- name: GetCompetency :one
 SELECT id, category_id, name, description, weight, short_name, description_very_bad, description_bad, description_ok, description_good, description_very_good
 FROM competency
@@ -92,6 +106,22 @@ func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, 
 		&i.DescriptionVeryGood,
 	)
 	return i, err
+}
+
+const getCoursePhaseIDByCompetency = `-- name: GetCoursePhaseIDByCompetency :one
+SELECT cpc.course_phase_id
+FROM competency comp
+INNER JOIN category cat ON comp.category_id = cat.id
+INNER JOIN assessment_schema aschema ON cat.assessment_schema_id = aschema.id
+INNER JOIN course_phase_config cpc ON aschema.id = cpc.assessment_schema_id
+WHERE comp.id = $1
+`
+
+func (q *Queries) GetCoursePhaseIDByCompetency(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getCoursePhaseIDByCompetency, id)
+	var course_phase_id uuid.UUID
+	err := row.Scan(&course_phase_id)
+	return course_phase_id, err
 }
 
 const listCompetencies = `-- name: ListCompetencies :many

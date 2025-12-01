@@ -64,7 +64,22 @@ func createCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err := CreateCompetency(c, req)
+
+	// Get the coursePhaseID from the category in the request
+	category, err := CompetencyServiceSingleton.queries.GetCategory(c, req.CategoryID)
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// Get course phases using this schema
+	coursePhases, err := CompetencyServiceSingleton.queries.GetCoursePhasesByAssessmentSchema(c, category.AssessmentSchemaID)
+	if err != nil || len(coursePhases) == 0 {
+		// If no course phase found, use a zero UUID (will be handled in service)
+		coursePhases = []uuid.UUID{uuid.Nil}
+	}
+
+	err = CreateCompetency(c, coursePhases[0], req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -78,12 +93,20 @@ func updateCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+
+	// Get the coursePhaseID from the database (competency -> category -> schema -> course_phase_config)
+	coursePhaseID, err := CompetencyServiceSingleton.queries.GetCoursePhaseIDByCompetency(c, competencyID)
+	if err != nil {
+		// If competency doesn't exist or has no associated course phase, use a zero UUID (will be handled in service)
+		coursePhaseID = uuid.Nil
+	}
+
 	var req competencyDTO.UpdateCompetencyRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err = UpdateCompetency(c, competencyID, req)
+	err = UpdateCompetency(c, competencyID, coursePhaseID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -97,7 +120,16 @@ func deleteCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	if err := DeleteCompetency(c, competencyID); err != nil {
+
+	// Get the coursePhaseID from the database
+	coursePhaseID, err := CompetencyServiceSingleton.queries.GetCoursePhaseIDByCompetency(c, competencyID)
+	if err != nil {
+		// If competency doesn't exist or has no associated course phase, use a zero UUID
+		coursePhaseID = uuid.Nil
+	}
+
+	err = DeleteCompetency(c, competencyID, coursePhaseID)
+	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}

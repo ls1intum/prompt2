@@ -10,7 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies/competencyDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -21,6 +23,7 @@ type CompetencyRouterTestSuite struct {
 	router            *gin.Engine
 	ctx               context.Context
 	cleanup           func()
+	mockCoreCleanup   func()
 	competencyService CompetencyService
 }
 
@@ -32,12 +35,23 @@ func (suite *CompetencyRouterTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 	suite.cleanup = cleanup
+
+	// Set up mock core service
+	_, mockCleanup := testutils.SetupMockCoreService()
+	suite.mockCoreCleanup = mockCleanup
+
 	suite.competencyService = CompetencyService{
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 	}
 
 	CompetencyServiceSingleton = &suite.competencyService
+
+	// Initialize service modules needed for schema copy logic
+	group := gin.New().Group("")
+	assessmentSchemas.InitAssessmentSchemaModule(group, *testDB.Queries, testDB.Conn)
+	coursePhaseConfig.InitCoursePhaseConfigModule(group, *testDB.Queries, testDB.Conn)
+
 	suite.router = gin.Default()
 	api := suite.router.Group("/api")
 	testMiddleWare := func(allowedRoles ...string) gin.HandlerFunc {
@@ -47,6 +61,9 @@ func (suite *CompetencyRouterTestSuite) SetupSuite() {
 }
 
 func (suite *CompetencyRouterTestSuite) TearDownSuite() {
+	if suite.mockCoreCleanup != nil {
+		suite.mockCoreCleanup()
+	}
 	if suite.cleanup != nil {
 		suite.cleanup()
 	}
