@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -58,23 +59,28 @@ func (suite *CopyRouterTestSuite) TestCopyEndpoint_Success() {
 	targetCoursePhaseID := uuid.New()
 	assessmentSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
 	selfEvalSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+	peerEvalSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002")
+	tutorEvalSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440003")
+
+	// Create valid timestamps for NOT NULL fields
+	now := pgtype.Timestamptz{Time: time.Now(), Valid: true}
 
 	// Create source config
 	err := suite.copyService.queries.CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, db.CreateOrUpdateCoursePhaseConfigParams{
 		AssessmentSchemaID:       assessmentSchemaID,
 		CoursePhaseID:            sourceCoursePhaseID,
-		Start:                    pgtype.Timestamptz{Valid: false},
+		Start:                    now,
 		Deadline:                 pgtype.Timestamptz{Valid: false},
 		SelfEvaluationEnabled:    true,
 		SelfEvaluationSchema:     selfEvalSchemaID,
-		SelfEvaluationStart:      pgtype.Timestamptz{Valid: false},
-		SelfEvaluationDeadline:   pgtype.Timestamptz{Valid: false},
+		SelfEvaluationStart:      now,
+		SelfEvaluationDeadline:   now,
 		PeerEvaluationEnabled:    false,
-		PeerEvaluationSchema:     uuid.Nil,
-		PeerEvaluationStart:      pgtype.Timestamptz{Valid: false},
-		PeerEvaluationDeadline:   pgtype.Timestamptz{Valid: false},
+		PeerEvaluationSchema:     peerEvalSchemaID,
+		PeerEvaluationStart:      now,
+		PeerEvaluationDeadline:   now,
 		TutorEvaluationEnabled:   false,
-		TutorEvaluationSchema:    uuid.Nil,
+		TutorEvaluationSchema:    tutorEvalSchemaID,
 		TutorEvaluationStart:     pgtype.Timestamptz{Valid: false},
 		TutorEvaluationDeadline:  pgtype.Timestamptz{Valid: false},
 		EvaluationResultsVisible: true,
