@@ -12,7 +12,7 @@ export const InsideSidebar = (): JSX.Element => {
   const isCourseSidebar = location.pathname.startsWith('/management/course')
 
   return (
-    <Sidebar collapsible='none' className='flex'>
+    <Sidebar collapsible='none' className='flex max-w-sidebar'>
       <SidebarHeader className='flex h-14 border-b justify-center items-center'>
         <div className='flex items-center'>
           <img src='/prompt_logo.svg' alt='Prompt logo' className='size-8 -mr-1' />
