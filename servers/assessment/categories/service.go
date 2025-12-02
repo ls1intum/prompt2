@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -87,7 +88,7 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
 	if err != nil {
 		// If category doesn't exist, skip schema copy logic and just try to update (will be a no-op)
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
 				ID:                 id,
 				Name:               req.Name,
@@ -151,7 +152,7 @@ func DeleteCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) 
 	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
 	if err != nil {
 		// If category doesn't exist, just return success (no-op)
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
 		log.Error("could not get category: ", err)
