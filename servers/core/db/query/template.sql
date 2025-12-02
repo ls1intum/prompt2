@@ -26,15 +26,18 @@ user_course_roles AS (
     c.restricted_data,
     c.ects,
     c.template,
+    c.archived,
+    c.archived_on,
     pr.user_role
   FROM
     course c
   INNER JOIN
     parsed_roles pr
-    ON c.name = pr.course_name
-    AND c.semester_tag = pr.semester_tag
+      ON c.name = pr.course_name
+     AND c.semester_tag = pr.semester_tag
   WHERE
     c.template = TRUE
+    AND c.archived = FALSE -- don't show archived templates
 )
 SELECT
   ucr.id,
@@ -49,7 +52,9 @@ SELECT
     ELSE ucr.restricted_data::jsonb
   END AS restricted_data,
   ucr.student_readable_data,
-  ucr.template
+  ucr.template,
+  ucr.archived,
+  ucr.archived_on
 FROM
   user_course_roles ucr
 GROUP BY
@@ -62,10 +67,12 @@ GROUP BY
   ucr.student_readable_data,
   ucr.ects,
   ucr.restricted_data,
-  ucr.template
+  ucr.template,
+  ucr.archived,
+  ucr.archived_on
 ORDER BY
-  ucr.semester_tag, ucr.name DESC;
-
+  ucr.semester_tag,
+  ucr.name DESC;
 -- name: CheckCourseTemplateStatus :one
 SELECT template
 FROM course

@@ -12,6 +12,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const archiveCourse = `-- name: ArchiveCourse :exec
+UPDATE course
+SET archived = $2,
+    archived_on = $3
+WHERE id = $1
+`
+
+type ArchiveCourseParams struct {
+	ID         uuid.UUID          `json:"id"`
+	Archived   bool               `json:"archived"`
+	ArchivedOn pgtype.Timestamptz `json:"archived_on"`
+}
+
+func (q *Queries) ArchiveCourse(ctx context.Context, arg ArchiveCourseParams) error {
+	_, err := q.db.Exec(ctx, archiveCourse, arg.ID, arg.Archived, arg.ArchivedOn)
+	return err
+}
+
 const checkCoursePhasesBelongToCourse = `-- name: CheckCoursePhasesBelongToCourse :one
 WITH matched_phases AS (SELECT id
                         FROM course_phase
@@ -40,7 +58,7 @@ const createCourse = `-- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data,
                     student_readable_data, template)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
 `
 
 type CreateCourseParams struct {
@@ -81,6 +99,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.Archived,
+		&i.ArchivedOn,
 	)
 	return i, err
 }
@@ -97,7 +117,7 @@ func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
-SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template
+SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template, c.archived, c.archived_on
 FROM course c
 ORDER BY c.template,
          c.semester_tag,
@@ -124,6 +144,8 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.Archived,
+			&i.ArchivedOn,
 		); err != nil {
 			return nil, err
 		}
@@ -136,67 +158,83 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 }
 
 const getAllActiveCoursesRestricted = `-- name: GetAllActiveCoursesRestricted :many
-WITH parsed_roles AS (SELECT split_part(role, '-', 1) AS semester_tag,
-                             split_part(role, '-', 2) AS course_name,
-                             split_part(role, '-', 3) AS user_role
-                      FROM unnest($1::text[]) AS role),
-     user_course_roles AS (SELECT c.id,
-                                  c.name,
-                                  c.semester_tag,
-                                  c.start_date,
-                                  c.end_date,
-                                  c.course_type,
-                                  c.student_readable_data,
-                                  c.restricted_data,
-                                  c.ects,
-                                  c.template,
-                                  pr.user_role
-                           FROM course c
-                                    INNER JOIN
-                                parsed_roles pr
-                                ON c.name = pr.course_name
-                                    AND c.semester_tag = pr.semester_tag
-                           WHERE c.end_date >= NOW() - INTERVAL '1 month')
-SELECT ucr.id,
-       ucr.name,
-       ucr.start_date,
-       ucr.end_date,
-       ucr.semester_tag,
-       ucr.course_type,
-       ucr.ects,
-       CASE
-           WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
-           ELSE ucr.restricted_data::jsonb
-           END AS restricted_data,
-       ucr.student_readable_data,
-       ucr.template
+WITH parsed_roles AS (
+    SELECT split_part(role, '-', 1) AS semester_tag,
+           split_part(role, '-', 2) AS course_name,
+           split_part(role, '-', 3) AS user_role
+    FROM unnest($1::text[]) AS role
+),
+user_course_roles AS (
+    SELECT
+        c.id,
+        c.name,
+        c.semester_tag,
+        c.start_date,
+        c.end_date,
+        c.course_type,
+        c.student_readable_data,
+        c.restricted_data,
+        c.ects,
+        c.template,
+        c.archived,
+        c.archived_on,
+        pr.user_role
+    FROM course c
+    INNER JOIN parsed_roles pr
+        ON c.name = pr.course_name
+       AND c.semester_tag = pr.semester_tag
+    WHERE c.end_date >= NOW() - INTERVAL '1 month'
+      AND c.archived = FALSE             -- hide archived courses from restricted view
+)
+SELECT
+    ucr.id,
+    ucr.name,
+    ucr.start_date,
+    ucr.end_date,
+    ucr.semester_tag,
+    ucr.course_type,
+    ucr.ects,
+    CASE
+        WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
+        ELSE ucr.restricted_data::jsonb
+    END AS restricted_data,
+    ucr.student_readable_data,
+    ucr.template,
+    ucr.archived,
+    ucr.archived_on
 FROM user_course_roles ucr
-GROUP BY ucr.id,
-         ucr.name,
-         ucr.semester_tag,
-         ucr.start_date,
-         ucr.end_date,
-         ucr.course_type,
-         ucr.student_readable_data,
-         ucr.ects,
-         ucr.restricted_data,
-         ucr.template
-ORDER BY ucr.template,
-         ucr.semester_tag,
-         ucr.name DESC
+GROUP BY
+    ucr.id,
+    ucr.name,
+    ucr.semester_tag,
+    ucr.start_date,
+    ucr.end_date,
+    ucr.course_type,
+    ucr.student_readable_data,
+    ucr.ects,
+    ucr.restricted_data,
+    ucr.template,
+    ucr.archived,
+    ucr.archived_on
+ORDER BY
+    ucr.template,
+    ucr.semester_tag,
+    ucr.name DESC
 `
 
 type GetAllActiveCoursesRestrictedRow struct {
-	ID                  uuid.UUID   `json:"id"`
-	Name                string      `json:"name"`
-	StartDate           pgtype.Date `json:"start_date"`
-	EndDate             pgtype.Date `json:"end_date"`
-	SemesterTag         pgtype.Text `json:"semester_tag"`
-	CourseType          CourseType  `json:"course_type"`
-	Ects                pgtype.Int4 `json:"ects"`
-	RestrictedData      []byte      `json:"restricted_data"`
-	StudentReadableData []byte      `json:"student_readable_data"`
-	Template            bool        `json:"template"`
+	ID                  uuid.UUID          `json:"id"`
+	Name                string             `json:"name"`
+	StartDate           pgtype.Date        `json:"start_date"`
+	EndDate             pgtype.Date        `json:"end_date"`
+	SemesterTag         pgtype.Text        `json:"semester_tag"`
+	CourseType          CourseType         `json:"course_type"`
+	Ects                pgtype.Int4        `json:"ects"`
+	RestrictedData      []byte             `json:"restricted_data"`
+	StudentReadableData []byte             `json:"student_readable_data"`
+	Template            bool               `json:"template"`
+	Archived            bool               `json:"archived"`
+	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }
 
 // struct: Course
@@ -220,6 +258,8 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.Archived,
+			&i.ArchivedOn,
 		); err != nil {
 			return nil, err
 		}
@@ -232,7 +272,7 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
 FROM course
 WHERE id = $1
 LIMIT 1
@@ -252,6 +292,8 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.Archived,
+		&i.ArchivedOn,
 	)
 	return i, err
 }

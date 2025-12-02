@@ -19,12 +19,6 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-100'
   const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
 
-  const { data } = useQuery({
-    queryKey: ['template-status', course.id],
-    queryFn: () => checkCourseTemplateStatus(course.id),
-  })
-  const isTemplate = data?.isTemplate || false
-
   const MemoizedIcon = useMemo(() => {
     return (
       <div className='size-6'>
@@ -50,9 +44,9 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
       >
         <div
           className={`relative flex aspect-square size-12 items-center justify-center ${
-            isActive && isTemplate
+            isActive && course.template
               ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-black'
-              : isActive && !isTemplate
+              : isActive && !course.template
                 ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
                 : ''
           }`}
@@ -61,7 +55,7 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
             className={`
             relative flex aspect-square items-center justify-center rounded-lg text-gray-800
             ${isActive ? 'size-12' : 'size-10'} ${bgColor}
-            ${!isActive && isTemplate ? 'border-2 border-dashed border-black' : ''}
+            ${!isActive && course.template ? 'border-2 border-dashed border-black' : ''}
           `}
           >
             <div className='size-6'>{MemoizedIcon}</div>
