@@ -94,11 +94,10 @@ func updateCompetency(c *gin.Context) {
 		return
 	}
 
-	// Get the coursePhaseID from the database (competency -> category -> schema -> course_phase_config)
-	coursePhaseID, err := CompetencyServiceSingleton.queries.GetCoursePhaseIDByCompetency(c, competencyID)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		// If competency doesn't exist or has no associated course phase, use a zero UUID (will be handled in service)
-		coursePhaseID = uuid.Nil
+		handleError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	var req competencyDTO.UpdateCompetencyRequest
@@ -121,11 +120,10 @@ func deleteCompetency(c *gin.Context) {
 		return
 	}
 
-	// Get the coursePhaseID from the database
-	coursePhaseID, err := CompetencyServiceSingleton.queries.GetCoursePhaseIDByCompetency(c, competencyID)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		// If competency doesn't exist or has no associated course phase, use a zero UUID
-		coursePhaseID = uuid.Nil
+		handleError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	err = DeleteCompetency(c, competencyID, coursePhaseID)

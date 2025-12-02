@@ -108,22 +108,6 @@ func (q *Queries) GetCompetency(ctx context.Context, id uuid.UUID) (Competency, 
 	return i, err
 }
 
-const getCoursePhaseIDByCompetency = `-- name: GetCoursePhaseIDByCompetency :one
-SELECT cpc.course_phase_id
-FROM competency comp
-INNER JOIN category cat ON comp.category_id = cat.id
-INNER JOIN assessment_schema aschema ON cat.assessment_schema_id = aschema.id
-INNER JOIN course_phase_config cpc ON aschema.id = cpc.assessment_schema_id
-WHERE comp.id = $1
-`
-
-func (q *Queries) GetCoursePhaseIDByCompetency(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
-	row := q.db.QueryRow(ctx, getCoursePhaseIDByCompetency, id)
-	var course_phase_id uuid.UUID
-	err := row.Scan(&course_phase_id)
-	return course_phase_id, err
-}
-
 const listCompetencies = `-- name: ListCompetencies :many
 SELECT id, category_id, name, description, weight, short_name, description_very_bad, description_bad, description_ok, description_good, description_very_good
 FROM competency

@@ -23,14 +23,6 @@ FROM competency comp
 INNER JOIN category cat ON comp.category_id = cat.id
 WHERE comp.id = $1;
 
--- name: GetCoursePhaseIDByCompetency :one
-SELECT cpc.course_phase_id
-FROM competency comp
-INNER JOIN category cat ON comp.category_id = cat.id
-INNER JOIN assessment_schema aschema ON cat.assessment_schema_id = aschema.id
-INNER JOIN course_phase_config cpc ON aschema.id = cpc.assessment_schema_id
-WHERE comp.id = $1;
-
 -- name: ListCompetencies :many
 SELECT *
 FROM competency;
