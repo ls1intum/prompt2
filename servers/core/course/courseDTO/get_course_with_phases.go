@@ -17,6 +17,8 @@ type CourseWithPhases struct {
 	SemesterTag         string                               `json:"semesterTag"`
 	CourseType          db.CourseType                        `json:"courseType"`
 	ECTS                int                                  `json:"ects"`
+	ShortDescription    string                               `json:"shortDescription"`
+	LongDescription     string                               `json:"longDescription"`
 	RestrictedData      meta.MetaData                        `json:"restrictedData"`
 	StudentReadableData meta.MetaData                        `json:"studentReadableData"`
 	CoursePhases        []coursePhaseDTO.CoursePhaseSequence `json:"coursePhases"`
@@ -35,6 +37,16 @@ func GetCourseWithPhasesDTOFromDBModel(course db.Course) (CourseWithPhases, erro
 		return CourseWithPhases{}, err
 	}
 
+	shortDescription := ""
+	if course.ShortDescription.Valid {
+		shortDescription = course.ShortDescription.String
+	}
+
+	longDescription := ""
+	if course.LongDescription.Valid {
+		longDescription = course.LongDescription.String
+	}
+
 	return CourseWithPhases{
 		ID:                  course.ID,
 		Name:                course.Name,
@@ -43,6 +55,8 @@ func GetCourseWithPhasesDTOFromDBModel(course db.Course) (CourseWithPhases, erro
 		SemesterTag:         course.SemesterTag.String,
 		CourseType:          course.CourseType,
 		ECTS:                int(course.Ects.Int32),
+		ShortDescription:    shortDescription,
+		LongDescription:     longDescription,
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
 		CoursePhases:        []coursePhaseDTO.CoursePhaseSequence{},

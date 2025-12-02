@@ -1,5 +1,5 @@
-import { Course } from '@tumaet/prompt-shared-state'
+import type { CourseWithDescriptions } from '@core/interfaces/courseWithDescriptions'
 
-export interface CourseWithTemplateInfo extends Course {
+export interface CourseWithTemplateInfo extends CourseWithDescriptions {
   template: boolean
 }

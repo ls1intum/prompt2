@@ -24,16 +24,16 @@ import {
   SelectTrigger,
   SelectValue,
   Input,
+  Textarea,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import {
-  CourseType,
-  CourseTypeDetails,
-  UpdateCourseData,
-  useCourseStore,
-} from '@tumaet/prompt-shared-state'
+import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
+import type {
+  CourseWithDescriptions,
+  UpdateCourseDataWithDescriptions,
+} from '@core/interfaces/courseWithDescriptions'
 
 interface CourseEditDialogProps {
   isOpen: boolean
@@ -43,7 +43,7 @@ interface CourseEditDialogProps {
 export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
-  const course = courses.find((c) => c.id === courseId)
+  const course = courses.find((c) => c.id === courseId) as CourseWithDescriptions | undefined
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -56,6 +56,8 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
       },
       courseType: course?.courseType,
       ects: course?.ects ?? 0,
+      shortDescription: course?.shortDescription || '',
+      longDescription: course?.longDescription || '',
     },
   })
 
@@ -70,7 +72,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   }, [selectedCourseType, form])
 
   const { mutate: mutateCourse } = useMutation({
-    mutationFn: (courseData: UpdateCourseData) => {
+    mutationFn: (courseData: UpdateCourseDataWithDescriptions) => {
       return updateCourseData(courseId ?? 'undefined', courseData)
     },
     onSuccess: () => {
@@ -89,11 +91,13 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   })
 
   const onSubmit = (data: EditCourseFormValues) => {
-    const updateData: UpdateCourseData = {
+    const updateData: UpdateCourseDataWithDescriptions = {
       startDate: data.dateRange.from,
       endDate: data.dateRange.to,
       courseType: data.courseType,
       ects: data.ects,
+      shortDescription: data.shortDescription,
+      longDescription: data.longDescription,
     }
     mutateCourse(updateData)
     onClose()
@@ -139,6 +143,37 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='shortDescription'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Short Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder='One sentence summary' {...field} className='w-full' />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='longDescription'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Long Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Share more context about this course'
+                      className='w-full'
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

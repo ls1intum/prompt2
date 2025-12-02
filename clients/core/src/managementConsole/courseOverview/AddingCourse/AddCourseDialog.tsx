@@ -71,6 +71,8 @@ export const AddCourseDialog = ({
       restrictedMetaData: {},
       // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
+      shortDescription: coursePropertiesFormValues?.shortDescription || '',
+      longDescription: coursePropertiesFormValues?.longDescription || '',
       template: false,
     }
     // todo API call
