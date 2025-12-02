@@ -278,7 +278,6 @@ WHERE cat.assessment_schema_id = $1
   AND cat.name = (
     SELECT old_cat.name FROM category old_cat WHERE old_cat.id = $2
 )
-LIMIT 1
 `
 
 type GetCorrespondingCategoryInNewSchemaParams struct {
@@ -286,6 +285,11 @@ type GetCorrespondingCategoryInNewSchemaParams struct {
 	OldCategoryID uuid.UUID `json:"old_category_id"`
 }
 
+// Maps a category from an old schema to the corresponding category in a new schema
+// based on matching category names.
+// Note: This relies on UNIQUE constraint category(assessment_schema_id, name).
+// Without LIMIT 1, this query will fail if duplicates exist,
+// which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
 func (q *Queries) GetCorrespondingCategoryInNewSchema(ctx context.Context, arg GetCorrespondingCategoryInNewSchemaParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, getCorrespondingCategoryInNewSchema, arg.NewSchemaID, arg.OldCategoryID)
 	var id uuid.UUID
@@ -311,7 +315,6 @@ new_comp AS (
 SELECT nc.id AS competency_id, nc.new_cat_id AS category_id
 FROM old_comp oc
 INNER JOIN new_comp nc ON oc.cat_name = nc.cat_name AND oc.comp_name = nc.comp_name
-LIMIT 1
 `
 
 type GetCorrespondingCompetencyInNewSchemaParams struct {
@@ -324,6 +327,11 @@ type GetCorrespondingCompetencyInNewSchemaRow struct {
 	CategoryID   uuid.UUID `json:"category_id"`
 }
 
+// Maps a competency from an old schema to the corresponding competency in a new schema
+// based on matching category and competency names.
+// Note: This relies on UNIQUE constraints: category(assessment_schema_id, name) and
+// competency(category_id, name). Without LIMIT 1, this query will fail if duplicates exist,
+// which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
 func (q *Queries) GetCorrespondingCompetencyInNewSchema(ctx context.Context, arg GetCorrespondingCompetencyInNewSchemaParams) (GetCorrespondingCompetencyInNewSchemaRow, error) {
 	row := q.db.QueryRow(ctx, getCorrespondingCompetencyInNewSchema, arg.OldCompetencyID, arg.NewSchemaID)
 	var i GetCorrespondingCompetencyInNewSchemaRow

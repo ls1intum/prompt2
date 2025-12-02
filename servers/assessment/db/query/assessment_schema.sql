@@ -97,6 +97,11 @@ SELECT *
 FROM new_schema;
 
 -- name: GetCorrespondingCompetencyInNewSchema :one
+-- Maps a competency from an old schema to the corresponding competency in a new schema
+-- based on matching category and competency names.
+-- Note: This relies on UNIQUE constraints: category(assessment_schema_id, name) and
+-- competency(category_id, name). Without LIMIT 1, this query will fail if duplicates exist,
+-- which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
 WITH old_comp AS (
     SELECT comp.id, comp.name AS comp_name, comp.category_id,
            cat.name AS cat_name, cat.assessment_schema_id AS old_schema_id
@@ -113,17 +118,20 @@ new_comp AS (
 )
 SELECT nc.id AS competency_id, nc.new_cat_id AS category_id
 FROM old_comp oc
-INNER JOIN new_comp nc ON oc.cat_name = nc.cat_name AND oc.comp_name = nc.comp_name
-LIMIT 1;
+INNER JOIN new_comp nc ON oc.cat_name = nc.cat_name AND oc.comp_name = nc.comp_name;
 
 -- name: GetCorrespondingCategoryInNewSchema :one
+-- Maps a category from an old schema to the corresponding category in a new schema
+-- based on matching category names.
+-- Note: This relies on UNIQUE constraint category(assessment_schema_id, name).
+-- Without LIMIT 1, this query will fail if duplicates exist,
+-- which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
 SELECT cat.id
 FROM category cat
 WHERE cat.assessment_schema_id = sqlc.arg(new_schema_id)
   AND cat.name = (
     SELECT old_cat.name FROM category old_cat WHERE old_cat.id = sqlc.arg(old_category_id)
-)
-LIMIT 1;
+);
 
 -- name: CheckSchemaOwnership :one
 SELECT EXISTS(

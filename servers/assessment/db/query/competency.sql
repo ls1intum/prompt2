@@ -12,6 +12,13 @@ INSERT INTO competency (id,
                         weight)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
 
+-- name: CheckCompetencyNameExists :one
+-- Check if a competency name already exists within a given category
+SELECT EXISTS(
+    SELECT 1 FROM competency
+    WHERE category_id = $1 AND name = $2
+);
+
 -- name: GetCompetency :one
 SELECT *
 FROM competency

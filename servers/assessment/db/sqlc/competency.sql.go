@@ -12,6 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCompetencyNameExists = `-- name: CheckCompetencyNameExists :one
+SELECT EXISTS(
+    SELECT 1 FROM competency
+    WHERE category_id = $1 AND name = $2
+)
+`
+
+type CheckCompetencyNameExistsParams struct {
+	CategoryID uuid.UUID `json:"category_id"`
+	Name       string    `json:"name"`
+}
+
+// Check if a competency name already exists within a given category
+func (q *Queries) CheckCompetencyNameExists(ctx context.Context, arg CheckCompetencyNameExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCompetencyNameExists, arg.CategoryID, arg.Name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createCompetency = `-- name: CreateCompetency :exec
 INSERT INTO competency (id,
                         category_id,
