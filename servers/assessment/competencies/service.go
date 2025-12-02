@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -151,7 +152,7 @@ func DeleteCompetency(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID
 	currentSchemaID, err := CompetencyServiceSingleton.queries.GetAssessmentSchemaIDByCompetency(ctx, id)
 	if err != nil {
 		// If competency doesn't exist, just return success (no-op)
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
 		log.WithError(err).Error("Failed to get assessment schema ID for competency")
