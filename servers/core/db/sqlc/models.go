@@ -282,10 +282,11 @@ type CoursePhaseParticipation struct {
 }
 
 type CoursePhaseType struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
-	BaseUrl      string    `json:"base_url"`
+	ID           uuid.UUID   `json:"id"`
+	Name         string      `json:"name"`
+	InitialPhase bool        `json:"initial_phase"`
+	BaseUrl      string      `json:"base_url"`
+	Description  pgtype.Text `json:"description"`
 }
 
 type CoursePhaseTypeParticipationProvidedOutputDto struct {
