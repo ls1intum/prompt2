@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 
 )
@@ -25,7 +25,7 @@ func initInterview() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+	  defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -107,7 +107,7 @@ func initMatching() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+	  defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -170,7 +170,7 @@ func initIntroCourseDeveloper() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -254,7 +254,7 @@ func initAssessment() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -336,7 +336,7 @@ func initTeamAllocation() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -419,7 +419,7 @@ func initSelfTeamAllocation() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
