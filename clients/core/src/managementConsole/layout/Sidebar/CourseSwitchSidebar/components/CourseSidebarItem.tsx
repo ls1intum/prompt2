@@ -3,8 +3,6 @@ import type { Course } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { checkCourseTemplateStatus } from '../../../../../network/queries/checkCourseTemplateStatus'
 
 interface CourseSidebarItemProps {
   course: Course
