@@ -77,7 +77,7 @@ func PrepareSchemaForModification(
 
 	// SCENARIO 2: Consumer modifying shared schema → Copy schema for this consumer only
 	if !isOwner {
-		newSchemaID, err := copySchemaForConsumer(ctx, queries, schemaID, coursePhaseID)
+		newSchemaID, err := copySchemaForConsumer(ctx, schemaID, coursePhaseID)
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +132,7 @@ func PrepareSchemaForModification(
 
 // CopySchemaForConsumer creates a copy of the schema for a consumer phase if they are using a shared schema
 // Returns the new schema ID if a copy was created, or an error
-func copySchemaForConsumer(ctx context.Context, queries db.Queries, currentSchemaID uuid.UUID, coursePhaseID uuid.UUID) (uuid.UUID, error) {
+func copySchemaForConsumer(ctx context.Context, currentSchemaID uuid.UUID, coursePhaseID uuid.UUID) (uuid.UUID, error) {
 	schemaUsed, err := assessmentSchemas.CheckSchemaUsageInOtherPhases(ctx, currentSchemaID, coursePhaseID)
 	if err != nil {
 		log.WithError(err).Error("Failed to check schema usage in other phases")

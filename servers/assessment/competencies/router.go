@@ -105,6 +105,7 @@ func updateCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+
 	err = UpdateCompetency(c, competencyID, coursePhaseID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)

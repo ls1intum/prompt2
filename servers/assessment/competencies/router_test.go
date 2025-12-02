@@ -27,6 +27,8 @@ type CompetencyRouterTestSuite struct {
 	competencyService CompetencyService
 }
 
+const testCoursePhaseID = "4179d58a-d00d-4fa7-94a5-397bc69fab02"
+
 func (suite *CompetencyRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
@@ -53,7 +55,7 @@ func (suite *CompetencyRouterTestSuite) SetupSuite() {
 	coursePhaseConfig.InitCoursePhaseConfigModule(group, *testDB.Queries, testDB.Conn)
 
 	suite.router = gin.Default()
-	api := suite.router.Group("/api")
+	api := suite.router.Group("/api/course_phase/:coursePhaseID")
 	testMiddleWare := func(allowedRoles ...string) gin.HandlerFunc {
 		return testutils.MockAuthMiddlewareWithEmail(allowedRoles, "existingstudent@example.com", "03711111", "ab12cde")
 	}
@@ -70,7 +72,7 @@ func (suite *CompetencyRouterTestSuite) TearDownSuite() {
 }
 
 func (suite *CompetencyRouterTestSuite) TestListCompetencies() {
-	req, _ := http.NewRequest("GET", "/api/competency", nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -99,7 +101,7 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 	}
 
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/competency", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+testCoursePhaseID+"/competency", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -107,7 +109,7 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 
 	// Get list of competencies to find the created one
-	req, _ = http.NewRequest("GET", "/api/competency", nil)
+	req, _ = http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency", nil)
 	resp = httptest.NewRecorder()
 	suite.router.ServeHTTP(resp, req)
 
@@ -127,7 +129,7 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 	assert.NotZero(suite.T(), competencyID, "Created competency not found in list")
 
 	// Now test getting the specific competency
-	req, _ = http.NewRequest("GET", "/api/competency/"+competencyID.String(), nil)
+	req, _ = http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency/"+competencyID.String(), nil)
 	resp = httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -141,7 +143,7 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetency() {
 }
 
 func (suite *CompetencyRouterTestSuite) TestGetCompetencyInvalidID() {
-	req, _ := http.NewRequest("GET", "/api/competency/invalid-uuid", nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -157,7 +159,7 @@ func (suite *CompetencyRouterTestSuite) TestGetCompetencyInvalidID() {
 func (suite *CompetencyRouterTestSuite) TestListCompetenciesByCategory() {
 	categoryID := uuid.New()
 
-	req, _ := http.NewRequest("GET", "/api/competency/category/"+categoryID.String(), nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency/category/"+categoryID.String(), nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -172,7 +174,7 @@ func (suite *CompetencyRouterTestSuite) TestListCompetenciesByCategory() {
 }
 
 func (suite *CompetencyRouterTestSuite) TestListCompetenciesByCategoryInvalidID() {
-	req, _ := http.NewRequest("GET", "/api/competency/category/invalid-uuid", nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency/category/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -200,7 +202,7 @@ func (suite *CompetencyRouterTestSuite) TestCreateCompetency() {
 	}
 
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/competency", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+testCoursePhaseID+"/competency", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -210,7 +212,7 @@ func (suite *CompetencyRouterTestSuite) TestCreateCompetency() {
 }
 
 func (suite *CompetencyRouterTestSuite) TestCreateCompetencyInvalidJSON() {
-	req, _ := http.NewRequest("POST", "/api/competency", bytes.NewBuffer([]byte("invalid json")))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+testCoursePhaseID+"/competency", bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -240,7 +242,7 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 	}
 
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/competency", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+testCoursePhaseID+"/competency", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -248,7 +250,7 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 
 	// Get list of competencies to find the created one
-	req, _ = http.NewRequest("GET", "/api/competency", nil)
+	req, _ = http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency", nil)
 	resp = httptest.NewRecorder()
 	suite.router.ServeHTTP(resp, req)
 
@@ -281,7 +283,7 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetency() {
 	}
 
 	body, _ = json.Marshal(updateReq)
-	req, _ = http.NewRequest("PUT", "/api/competency/"+competencyID.String(), bytes.NewBuffer(body))
+	req, _ = http.NewRequest("PUT", "/api/course_phase/"+testCoursePhaseID+"/competency/"+competencyID.String(), bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp = httptest.NewRecorder()
 
@@ -304,7 +306,7 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetencyInvalidID() {
 	}
 
 	body, _ := json.Marshal(updateReq)
-	req, _ := http.NewRequest("PUT", "/api/competency/invalid-uuid", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/api/course_phase/"+testCoursePhaseID+"/competency/invalid-uuid", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -321,7 +323,7 @@ func (suite *CompetencyRouterTestSuite) TestUpdateCompetencyInvalidID() {
 func (suite *CompetencyRouterTestSuite) TestUpdateCompetencyInvalidJSON() {
 	competencyID := uuid.New()
 
-	req, _ := http.NewRequest("PUT", "/api/competency/"+competencyID.String(), bytes.NewBuffer([]byte("invalid json")))
+	req, _ := http.NewRequest("PUT", "/api/course_phase/"+testCoursePhaseID+"/competency/"+competencyID.String(), bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -351,7 +353,7 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 	}
 
 	body, _ := json.Marshal(createReq)
-	req, _ := http.NewRequest("POST", "/api/competency", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/api/course_phase/"+testCoursePhaseID+"/competency", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
@@ -359,7 +361,7 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 
 	// Get list of competencies to find the created one
-	req, _ = http.NewRequest("GET", "/api/competency", nil)
+	req, _ = http.NewRequest("GET", "/api/course_phase/"+testCoursePhaseID+"/competency", nil)
 	resp = httptest.NewRecorder()
 	suite.router.ServeHTTP(resp, req)
 
@@ -379,7 +381,7 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 	assert.NotZero(suite.T(), competencyID, "Created competency not found in list")
 
 	// Now delete the competency
-	req, _ = http.NewRequest("DELETE", "/api/competency/"+competencyID.String(), nil)
+	req, _ = http.NewRequest("DELETE", "/api/course_phase/"+testCoursePhaseID+"/competency/"+competencyID.String(), nil)
 	resp = httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
@@ -388,7 +390,7 @@ func (suite *CompetencyRouterTestSuite) TestDeleteCompetency() {
 }
 
 func (suite *CompetencyRouterTestSuite) TestDeleteCompetencyInvalidID() {
-	req, _ := http.NewRequest("DELETE", "/api/competency/invalid-uuid", nil)
+	req, _ := http.NewRequest("DELETE", "/api/course_phase/"+testCoursePhaseID+"/competency/invalid-uuid", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)
