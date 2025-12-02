@@ -1,18 +1,18 @@
 export interface CoursePhaseConfig {
   coursePhaseID: string // UUID as string
-  assessmentTemplateID: string // UUID as string
+  assessmentSchemaID: string // UUID as string
   start: Date
   deadline: Date
   selfEvaluationEnabled: boolean
-  selfEvaluationTemplate: string // UUID as string
+  selfEvaluationSchema: string // UUID as string
   selfEvaluationStart: Date
   selfEvaluationDeadline: Date
   peerEvaluationEnabled: boolean
-  peerEvaluationTemplate: string // UUID as string
+  peerEvaluationSchema: string // UUID as string
   peerEvaluationStart: Date
   peerEvaluationDeadline: Date
   tutorEvaluationEnabled: boolean
-  tutorEvaluationTemplate: string // UUID as string
+  tutorEvaluationSchema: string // UUID as string
   tutorEvaluationStart: Date
   tutorEvaluationDeadline: Date
   evaluationResultsVisible: boolean
@@ -21,19 +21,19 @@ export interface CoursePhaseConfig {
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {
-  assessmentTemplateId: string
+  assessmentSchemaId: string
   start?: Date
   deadline?: Date
   selfEvaluationEnabled: boolean
-  selfEvaluationTemplate?: string
+  selfEvaluationSchema?: string
   selfEvaluationStart?: Date
   selfEvaluationDeadline?: Date
   peerEvaluationEnabled: boolean
-  peerEvaluationTemplate?: string
+  peerEvaluationSchema?: string
   peerEvaluationStart?: Date
   peerEvaluationDeadline?: Date
   tutorEvaluationEnabled: boolean
-  tutorEvaluationTemplate?: string
+  tutorEvaluationSchema?: string
   tutorEvaluationStart?: Date
   tutorEvaluationDeadline?: Date
   evaluationResultsVisible: boolean

@@ -25,11 +25,11 @@ import { CreateCategoryForm } from './components/CreateCategoryForm'
 import { useEffect } from 'react'
 
 interface CategoryListProps {
-  assessmentTemplateID: string
+  assessmentSchemaID: string
   assessmentType: AssessmentType
 }
 
-export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryListProps) => {
+export const CategoryList = ({ assessmentSchemaID, assessmentType }: CategoryListProps) => {
   const [categoryToEdit, setCategoryToEdit] = useState<CategoryWithCompetencies | undefined>(
     undefined,
   )
@@ -73,22 +73,19 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
             <div className='flex items-center gap-2'>
               <AccordionTrigger
                 className='py-3 hover:no-underline'
-                aria-labelledby='assessment-template-header'
+                aria-labelledby='assessment-schema-header'
               ></AccordionTrigger>
             </div>
             <div className='flex justify-between items-center'>
               <div>
-                <h2
-                  id='assessment-template-header'
-                  className='text-xl font-semibold tracking-tight'
-                >
+                <h2 id='assessment-schema-header' className='text-xl font-semibold tracking-tight'>
                   {assessmentType === AssessmentType.SELF
-                    ? 'Self-Evaluation Template'
+                    ? 'Self-Evaluation Schema'
                     : assessmentType === AssessmentType.PEER
-                      ? 'Peer-Evaluation Template'
+                      ? 'Peer-Evaluation Schema'
                       : assessmentType === AssessmentType.TUTOR
-                        ? 'Tutor-Evaluation Template'
-                        : 'Assessment Template'}
+                        ? 'Tutor-Evaluation Schema'
+                        : 'Assessment Schema'}
                 </h2>
 
                 <p className='text-muted-foreground text-sm mt-1'>
@@ -117,7 +114,7 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
 
               {showAddCategoryForm ? (
                 <CreateCategoryForm
-                  assessmentTemplateID={assessmentTemplateID}
+                  assessmentSchemaID={assessmentSchemaID}
                   onCancel={() => setShowAddCategoryForm(false)}
                 />
               ) : (
@@ -135,7 +132,7 @@ export const CategoryList = ({ assessmentTemplateID, assessmentType }: CategoryL
                 open={!!categoryToEdit}
                 onOpenChange={(open) => !open && setCategoryToEdit(undefined)}
                 category={categoryToEdit}
-                assessmentTemplateID={assessmentTemplateID}
+                assessmentSchemaID={assessmentSchemaID}
               />
 
               {categoryToDelete && (

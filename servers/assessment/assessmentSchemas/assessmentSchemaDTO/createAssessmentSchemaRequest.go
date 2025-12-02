@@ -1,6 +1,6 @@
-package assessmentTemplateDTO
+package assessmentSchemaDTO
 
-type CreateAssessmentTemplateRequest struct {
+type CreateAssessmentSchemaRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }

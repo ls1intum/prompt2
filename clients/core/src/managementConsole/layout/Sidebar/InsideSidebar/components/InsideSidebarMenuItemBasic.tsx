@@ -14,14 +14,12 @@ export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps): JSX.Ele
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild
+        asChild={false}
         onClick={() => navigate(props.goToPath)}
         isActive={location.pathname === props.goToPath}
       >
-        <div>
-          {props.icon}
-          <span>{props.title}</span>
-        </div>
+        {props.icon}
+        <span>{props.title}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )

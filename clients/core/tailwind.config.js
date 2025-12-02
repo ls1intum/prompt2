@@ -76,6 +76,9 @@ module.exports = {
         md: `calc(var(--radius) - 2px)`,
         sm: 'calc(var(--radius) - 4px)',
       },
+      spacing: {
+        sidebar: '222px',
+      },
     },
     screens: {
       sm: '640px',

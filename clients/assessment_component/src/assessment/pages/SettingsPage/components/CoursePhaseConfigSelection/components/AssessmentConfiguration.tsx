@@ -11,32 +11,32 @@ import {
 import { FileText, Calendar } from 'lucide-react'
 
 import { AssessmentType } from '../../../../../interfaces/assessmentType'
-import { AssessmentTemplate } from '../../../../../interfaces/assessmentTemplate'
+import { AssessmentSchema } from '../../../../../interfaces/assessmentSchema'
 
-import { CreateAssessmentTemplateDialog } from './CreateAssessmentTemplateDialog'
+import { CreateAssessmentSchemaDialog } from './CreateAssessmentSchemaDialog'
 
 interface AsssessmentConfigurationProps {
   type: AssessmentType
-  assessmentTemplateId: string
-  setAssessmentTemplateId: (id: string) => void
+  assessmentSchemaId: string
+  setAssessmentSchemaId: (id: string) => void
   startDate: Date | undefined
   setStartDate: (date: Date | undefined) => void
   deadline: Date | undefined
   setDeadline: (date: Date | undefined) => void
-  templates: AssessmentTemplate[]
+  schemas: AssessmentSchema[]
   configMutation: any
   setError: (error: string | undefined) => void
 }
 
 export const AssessmentConfiguration = ({
   type,
-  assessmentTemplateId,
-  setAssessmentTemplateId,
+  assessmentSchemaId,
+  setAssessmentSchemaId,
   startDate,
   setStartDate,
   deadline,
   setDeadline,
-  templates,
+  schemas,
   configMutation,
   setError,
 }: AsssessmentConfigurationProps) => {
@@ -46,30 +46,30 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <FileText className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Template'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Template'}
-            {type === AssessmentType.TUTOR && 'Tutor Evaluation Template'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Template'}
+            {type === AssessmentType.SELF && 'Self Evaluation Schema'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Schema'}
+            {type === AssessmentType.TUTOR && 'Tutor Evaluation Schema'}
+            {type === AssessmentType.ASSESSMENT && 'Assessment Schema'}
           </Label>
         </div>
         <div className='flex gap-2'>
           <Select
-            value={assessmentTemplateId}
-            onValueChange={setAssessmentTemplateId}
+            value={assessmentSchemaId}
+            onValueChange={setAssessmentSchemaId}
             disabled={configMutation.isPending}
           >
             <SelectTrigger className='flex-1'>
-              <SelectValue placeholder='Select a template...' />
+              <SelectValue placeholder='Select a schema...' />
             </SelectTrigger>
             <SelectContent>
-              {templates?.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
+              {schemas?.map((schema) => (
+                <SelectItem key={schema.id} value={schema.id}>
+                  {schema.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <CreateAssessmentTemplateDialog onError={setError} />
+          <CreateAssessmentSchemaDialog onError={setError} />
         </div>
       </div>
 
