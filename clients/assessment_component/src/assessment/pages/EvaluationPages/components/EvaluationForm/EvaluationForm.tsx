@@ -122,6 +122,7 @@ export const EvaluationForm = ({
           onScoreChange={handleScoreChange}
           completed={completed}
           assessmentType={type}
+          showEvaluationResults={Boolean(completed)}
         />
       </div>
 

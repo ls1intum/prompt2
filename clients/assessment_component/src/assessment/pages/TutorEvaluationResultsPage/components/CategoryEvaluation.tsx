@@ -124,6 +124,7 @@ export const CategoryEvaluation = ({
                     peerEvaluationCompetency={competency}
                     peerEvaluationScoreLevel={evaluationAverageScoreLevel}
                     peerEvaluationStudentAnswers={studentNames}
+                    showEvaluationResults
                   />
                 </div>
               </div>

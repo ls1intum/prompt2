@@ -225,6 +225,7 @@ export const AssessmentForm = ({
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
           completed={completed}
+          showEvaluationResults={Boolean(completed)}
           selfEvaluationCompetency={selfEvaluationCompetency}
           selfEvaluationScoreLevel={selfEvaluationScoreLevel}
           selfEvaluationStudentAnswers={selfEvaluationStudentAnswers}
