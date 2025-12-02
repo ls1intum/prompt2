@@ -69,8 +69,9 @@ func (suite *DeveloperProfileRouterTestSuite) TestCreateDeveloperProfile() {
 		IPhoneUDID:     pgtype.Text{String: "AAAABBBB-CCCCDDDDEEEEFFFF", Valid: true},
 	}
 	body, _ := json.Marshal(request)
-	targetCoursePhase := uuid.New()
-	req, _ := http.NewRequest("POST", "/intro-course/api/course_phase/"+targetCoursePhase.String()+"/developer_profile", bytes.NewBuffer(body))
+	// Use a different course phase where the student doesn't have a profile yet
+	newCoursePhaseID := "5179d58a-d00d-4fa7-94a5-397bc69fab03"
+	req, _ := http.NewRequest("POST", "/intro-course/api/course_phase/"+newCoursePhaseID+"/developer_profile", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 

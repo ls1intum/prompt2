@@ -56,9 +56,9 @@ INSERT INTO tutor (course_phase_id, id, first_name, last_name, email, matriculat
 ('4179d58a-d00d-4fa7-94a5-397bc69fab02', '22222222-2222-2222-2222-222222222222', 'Bob', 'Tutor', 'bob@example.com', '100002', 'bob', NULL);
 
 INSERT INTO developer_profile (course_participation_id, course_phase_id, gitlab_username, apple_id, has_macbook, iphone_udid, ipad_udid, apple_watch_udid) VALUES
-('33333333-3333-3333-3333-333333333333', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'student1git', 'student1@apple.com', TRUE, 'ABCDEF12-34567890ABCDEF12', '11112222-33334444-55556666', 'AAAABBBB-CCCCDDDD-EEEEFFFF'),
+('33333333-3333-3333-3333-333333333333', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'student1git', 'student1@apple.com', TRUE, 'ABCDEF12-34567890ABCDEF12', '11112222-3333444455556666', 'AAAABBBB-CCCCDDDDEEEEFFFF'),
 ('44444444-4444-4444-4444-444444444444', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'student2git', 'student2@apple.com', TRUE, NULL, NULL, NULL),
-('55555555-5555-5555-5555-555555555555', '5179d58a-d00d-4fa7-94a5-397bc69fab03', 'student3git', 'student3@apple.com', FALSE, '12345678-90ABCDEF-12345678', NULL, NULL);
+('55555555-5555-5555-5555-555555555555', '5179d58a-d00d-4fa7-94a5-397bc69fab03', 'student3git', 'student3@apple.com', FALSE, '12345678-90ABCDEF12345678', NULL, NULL);
 
 INSERT INTO seat (course_phase_id, seat_name, has_mac, device_id, assigned_student, assigned_tutor) VALUES
 ('4179d58a-d00d-4fa7-94a5-397bc69fab02', 'Seat-1', TRUE, 'DEV-1', '33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-111111111111'),
