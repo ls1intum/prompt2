@@ -17,7 +17,7 @@ const PhaseRouter: { [key: string]: React.FC } = {
   Application: ApplicationRoutes,
   Interview: InterviewRoutes,
   Matching: MatchingRoutes,
-  IntroCourseDeveloper: IntroCourseDeveloperRoutes,
+  'Intro Course Developer': IntroCourseDeveloperRoutes,
   IntroCourseTutor: IntroCourseTutorRoutes,
   Assessment: AssessmentRoutes,
   DevOpsChallenge: DevOpsChallengeRoutes,
