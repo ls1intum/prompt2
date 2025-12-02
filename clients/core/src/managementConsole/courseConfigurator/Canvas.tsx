@@ -25,7 +25,7 @@ import { useComputeLayoutedElements } from './handlers/useComputeLayoutedElement
 import { useDeleteConfirmation } from './handlers/useDeleteConfirmation'
 import { useMutations } from './handlers/useGraphMutations'
 import { CoursePhaseTypePanel } from './components/CoursePhaseTypePanel'
-import { ModifiedChangesAlert } from './components/ModifiedChangesAlert'
+import { UnsavedChangesAlert } from './components/UnsavedChangesAlert'
 
 const nodeTypes: NodeTypes = {
   phaseNode: PhaseNode,
@@ -144,7 +144,7 @@ export function CourseConfigurator() {
         {isError && <ErrorPage message='Failed to save the changes' onRetry={handleRetry} />}
         {(isModified || phaseNameModified) && (
           <div className='absolute top-4 right-4 z-50 w-[350px]'>
-            <ModifiedChangesAlert handleRevert={handleRevert} saveChanges={saveChanges} />
+            <UnsavedChangesAlert handleRevert={handleRevert} saveChanges={saveChanges} />
           </div>
         )}
         <ReactFlow

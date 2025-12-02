@@ -26,10 +26,7 @@ export const CoursePhaseTypePanel = ({ canEdit }: CoursePhaseTypePanelProps): JS
 
   return (
     <div className='p-4 border-b bg-background'>
-      <div className='flex justify-between'>
-        <h2 className='text-lg font-semibold mb-3'>Course Phases</h2>
-        <p className='text-xs text-muted-foreground'>Drag a phase onto the canvas to add it</p>
-      </div>
+      <h2 className='text-lg font-semibold mb-3'>Course Phases</h2>
 
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
         {coursePhaseTypesOrdered.map((phase) => (

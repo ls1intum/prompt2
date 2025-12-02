@@ -1,60 +1,63 @@
 import { HelpCircle } from 'lucide-react'
 import { Card, CardContent } from '@tumaet/prompt-ui-components'
-import { useState, useRef, useLayoutEffect } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useRef } from 'react'
 
 interface CoursePhaseTypeDescriptionProps {
   title: string
   description: string
 }
 
+const DISTANCE_HOVER_TOP = 36 + 10 // 36: touch lower edge of CPTItem, 10: extra distance
+
 export const CoursePhaseTypeDescription = ({
   title,
   description,
 }: CoursePhaseTypeDescriptionProps): JSX.Element => {
   const [open, setOpen] = useState(false)
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
-  const iconRef = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState<'left' | 'right'>('right')
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  useLayoutEffect(() => {
-    if (!iconRef.current) return
-    const rect = iconRef.current.getBoundingClientRect()
+  const handleMouseEnter = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const tooltipWidth = 260 // (w-64 = 256px) + (padding = 4px)
 
-    setPos({
-      x: rect.left + rect.width / 2,
-      y: rect.bottom + 6,
-    })
-  }, [])
+      if (rect.right + tooltipWidth > viewportWidth) {
+        setPosition('left')
+      } else {
+        setPosition('right')
+      }
+    }
+    setOpen(true)
+  }
 
   return (
     <div
-      ref={iconRef}
-      className='relative'
-      onMouseEnter={() => setOpen(true)}
+      ref={containerRef}
+      className='inline-block'
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setOpen(false)}
     >
       <HelpCircle className='h-4 w-4 cursor-pointer' />
 
-      {open &&
-        pos &&
-        createPortal(
-          <div
-            className='fixed z-[9999] transition-opacity duration-150 opacity-100'
-            style={{
-              top: pos.y,
-              left: pos.x,
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <Card className='w-64 shadow-lg'>
-              <CardContent className='p-4'>
-                <p className='font-semibold'>{title}</p>
-                <p className='text-sm text-muted-foreground'>{description}</p>
-              </CardContent>
-            </Card>
-          </div>,
-          document.body,
-        )}
+      {open && (
+        <div
+          className='absolute z-[9999]'
+          style={
+            position === 'right'
+              ? { top: DISTANCE_HOVER_TOP, left: -2 }
+              : { top: DISTANCE_HOVER_TOP, right: -2 }
+          }
+        >
+          <Card className='w-64 shadow-lg'>
+            <CardContent className='p-4'>
+              <p className='font-semibold'>{title}</p>
+              <p className='text-sm text-muted-foreground'>{description}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

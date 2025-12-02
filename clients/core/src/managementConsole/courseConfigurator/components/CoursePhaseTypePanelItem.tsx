@@ -21,7 +21,7 @@ export const CoursePhaseTypePanelItem = ({
       key={phase.id}
       draggable={isDraggable}
       onDragStart={(event) => isDraggable && onDragStart(event, phase.id)}
-      className={`group flex items-center justify-between rounded-md border bg-card p-2 ${
+      className={`relative group flex items-center justify-between rounded-md border bg-card p-2 ${
         isDraggable ? 'cursor-move hover:bg-accent' : 'cursor-not-allowed opacity-50'
       }`}
     >
