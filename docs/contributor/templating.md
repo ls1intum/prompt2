@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # Templating System (Developer Guide)
 
 This document explains how the templating system works end-to-end for developers: data model, server endpoints, client flows, and expected copy semantics.

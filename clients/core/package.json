@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "2.5.3",
+  "version": "2.6.3",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.4",
+    "@sentry/react": "^10.22.0",
     "@xyflow/react": "^12.3.6",
     "date-fns-tz": "^3.2.0",
     "external-remotes-plugin": "^1.0.0",

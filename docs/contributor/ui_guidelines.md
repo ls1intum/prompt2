@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # UI Integration for Course Phase Services
 
 ## Overview

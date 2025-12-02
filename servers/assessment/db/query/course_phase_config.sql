@@ -3,15 +3,15 @@ SELECT *
 FROM course_phase_config
 WHERE course_phase_id = $1;
 
--- name: GetCoursePhasesByAssessmentTemplate :many
+-- name: GetCoursePhasesByAssessmentSchema :many
 SELECT course_phase_id
 FROM course_phase_config
-WHERE assessment_template_id = $1;
+WHERE assessment_schema_id = $1;
 
--- name: ListAssessmentTemplateCoursePhaseMappings :many
+-- name: ListAssessmentSchemaCoursePhaseMappings :many
 SELECT *
 FROM course_phase_config
-ORDER BY assessment_template_id, course_phase_id;
+ORDER BY assessment_schema_id, course_phase_id;
 
 -- name: IsAssessmentOpen :one
 SELECT CASE
@@ -97,38 +97,44 @@ INSERT INTO course_phase_config (course_phase_id)
 VALUES ($1);
 
 -- name: CreateOrUpdateCoursePhaseConfig :exec
-INSERT INTO course_phase_config (assessment_template_id,
+INSERT INTO course_phase_config (assessment_schema_id,
                                  course_phase_id,
                                  start,
                                  deadline,
                                  self_evaluation_enabled,
-                                 self_evaluation_template,
+                                 self_evaluation_schema,
                                  self_evaluation_start,
                                  self_evaluation_deadline,
                                  peer_evaluation_enabled,
-                                 peer_evaluation_template,
+                                 peer_evaluation_schema,
                                  peer_evaluation_start,
                                  peer_evaluation_deadline,
                                  tutor_evaluation_enabled,
-                                 tutor_evaluation_template,
+                                 tutor_evaluation_schema,
                                  tutor_evaluation_start,
                                  tutor_evaluation_deadline,
-                                 evaluation_results_visible)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+                                 evaluation_results_visible,
+                                 grade_suggestion_visible,
+                                 action_items_visible)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
+        COALESCE(sqlc.narg('grade_suggestion_visible')::boolean, TRUE), 
+        COALESCE(sqlc.narg('action_items_visible')::boolean, TRUE))
 ON CONFLICT (course_phase_id)
-    DO UPDATE SET assessment_template_id     = EXCLUDED.assessment_template_id,
-                  start                      = EXCLUDED.start,
-                  deadline                   = EXCLUDED.deadline,
-                  self_evaluation_enabled    = EXCLUDED.self_evaluation_enabled,
-                  self_evaluation_template   = EXCLUDED.self_evaluation_template,
-                  self_evaluation_start      = EXCLUDED.self_evaluation_start,
-                  self_evaluation_deadline   = EXCLUDED.self_evaluation_deadline,
-                  peer_evaluation_enabled    = EXCLUDED.peer_evaluation_enabled,
-                  peer_evaluation_template   = EXCLUDED.peer_evaluation_template,
-                  peer_evaluation_start      = EXCLUDED.peer_evaluation_start,
-                  peer_evaluation_deadline   = EXCLUDED.peer_evaluation_deadline,
-                  tutor_evaluation_enabled   = EXCLUDED.tutor_evaluation_enabled,
-                  tutor_evaluation_template  = EXCLUDED.tutor_evaluation_template,
-                  tutor_evaluation_start     = EXCLUDED.tutor_evaluation_start,
-                  tutor_evaluation_deadline  = EXCLUDED.tutor_evaluation_deadline,
-                  evaluation_results_visible = EXCLUDED.evaluation_results_visible;
+    DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
+                  start                     = EXCLUDED.start,
+                  deadline                  = EXCLUDED.deadline,
+                  self_evaluation_enabled   = EXCLUDED.self_evaluation_enabled,
+                  self_evaluation_schema    = EXCLUDED.self_evaluation_schema,
+                  self_evaluation_start     = EXCLUDED.self_evaluation_start,
+                  self_evaluation_deadline  = EXCLUDED.self_evaluation_deadline,
+                  peer_evaluation_enabled   = EXCLUDED.peer_evaluation_enabled,
+                  peer_evaluation_schema    = EXCLUDED.peer_evaluation_schema,
+                  peer_evaluation_start     = EXCLUDED.peer_evaluation_start,
+                  peer_evaluation_deadline  = EXCLUDED.peer_evaluation_deadline,
+                  tutor_evaluation_enabled  = EXCLUDED.tutor_evaluation_enabled,
+                  tutor_evaluation_schema   = EXCLUDED.tutor_evaluation_schema,
+                  tutor_evaluation_start    = EXCLUDED.tutor_evaluation_start,
+                  tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline,
+                  evaluation_results_visible = EXCLUDED.evaluation_results_visible,
+                  grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
+                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE);

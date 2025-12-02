@@ -9,7 +9,7 @@ import {
 
 import { AssessmentType } from '../../interfaces/assessmentType'
 import { Competency } from '../../interfaces/competency'
-import { ScoreLevel } from '../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
@@ -137,11 +137,7 @@ export const ScoreLevelSelector = ({
               )}
             >
               <div className='flex justify-between mb-1'>
-                <span className='font-semibold'>
-                  {assessmentType === AssessmentType.SELF || assessmentType === AssessmentType.PEER
-                    ? config.evaluationTitle
-                    : config.title}
-                </span>
+                <span className='font-semibold'>{config.title}</span>
 
                 {completed && isSelected && (
                   <span className='flex items-center gap-1'>

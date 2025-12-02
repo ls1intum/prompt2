@@ -6,7 +6,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
@@ -97,6 +100,22 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 	mailing.InitMailingModule(router, queries, conn, smtpHost, smtpPort, smtpUsername, smtpPassword, senderName, senderEmail, clientURL)
 }
 
+func initSentry() {
+	sentryDsn := utils.GetEnv("SENTRY_DSN_CORE", "")
+	if sentryDsn == "" {
+		log.Info("Sentry DSN not configured, skipping Sentry initialization")
+		return
+	}
+	environment := utils.GetEnv("ENVIRONMENT", "development")
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:         sentryDsn,
+		Environment: environment,
+	}); err != nil {
+		log.Errorf("Sentry initialization failed: %v", err)
+	}
+}
+
 // @title           PROMPT Core API
 // @version         1.0
 // @description     This is a core sever of PROMPT.
@@ -111,6 +130,10 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 		log.Debug("Debug mode is enabled")
 	}
+
+	// initialize Sentry
+	initSentry()
+	defer sentry.Flush(2 * time.Second) // Flush buffered events before exiting (2 seconds timeout)
 
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -130,6 +153,7 @@ func main() {
 	query := db.New(conn)
 
 	router := gin.Default()
+	router.Use(sentrygin.New(sentrygin.Options{}))
 	router.Use(utils.CORS())
 
 	api := router.Group("/api")

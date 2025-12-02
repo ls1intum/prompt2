@@ -1,5 +1,5 @@
 import { Competency } from '../../interfaces/competency'
-import { ScoreLevel } from '../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 export const getScoreLevelDescription = (scoreLevel: ScoreLevel, competency: Competency) => {
   switch (scoreLevel) {

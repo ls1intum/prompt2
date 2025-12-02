@@ -2865,6 +2865,77 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry-internal/browser-utils@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry-internal/browser-utils@npm:10.22.0"
+  dependencies:
+    "@sentry/core": "npm:10.22.0"
+  checksum: 10c0/5fca2ea28313d40bf0944f8471569b638f90537429d38e448a00289dd5bbb2366cb43c86fe19e1c7778c323d8bb2da602c7f48a9cd013a8d1d5e6fca24ddd55c
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/feedback@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry-internal/feedback@npm:10.22.0"
+  dependencies:
+    "@sentry/core": "npm:10.22.0"
+  checksum: 10c0/b3258979f5b5838f7f9342f1c394c26b0f1f2ceda8d748140066ce5d7f24a2a12ea085741eb8272fe5c34dd0e1aa61673ad1e128110681249f2c229b6aa7f5e6
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay-canvas@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry-internal/replay-canvas@npm:10.22.0"
+  dependencies:
+    "@sentry-internal/replay": "npm:10.22.0"
+    "@sentry/core": "npm:10.22.0"
+  checksum: 10c0/14e8a291af9e1ce2113cceea736cb5392b5f8d8122894858470d6715f101ceaf51a2608087037d404f9bc559d2b9130d5cb726865bb2e04c2f516e19daa7b609
+  languageName: node
+  linkType: hard
+
+"@sentry-internal/replay@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry-internal/replay@npm:10.22.0"
+  dependencies:
+    "@sentry-internal/browser-utils": "npm:10.22.0"
+    "@sentry/core": "npm:10.22.0"
+  checksum: 10c0/fce7ac2c523b2c04a476a3747fe15de5a6a1222bfd8e0044bcebcef068f73587cc07c54842237466e9381ea78311236ebe5170585c420198a866f299c759a3fa
+  languageName: node
+  linkType: hard
+
+"@sentry/browser@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry/browser@npm:10.22.0"
+  dependencies:
+    "@sentry-internal/browser-utils": "npm:10.22.0"
+    "@sentry-internal/feedback": "npm:10.22.0"
+    "@sentry-internal/replay": "npm:10.22.0"
+    "@sentry-internal/replay-canvas": "npm:10.22.0"
+    "@sentry/core": "npm:10.22.0"
+  checksum: 10c0/5be6278dce047262fbb88dd40b5dd56ecdd370bb93d68fcdc7b3eb201dd8b6ae6c9f21f6173a9caa9b13cee17f7d63b1aeb34182096f17c0286eab8b7c5ac268
+  languageName: node
+  linkType: hard
+
+"@sentry/core@npm:10.22.0":
+  version: 10.22.0
+  resolution: "@sentry/core@npm:10.22.0"
+  checksum: 10c0/bc1f46b8ec1e2621ec6fc0f1d0e853efb566acf31310b9e3cf8c9ad0b33543b07fc9a44df422edb528f830ecc924d70b2a3fcde34fa9e64f52466dc6fccdb0a9
+  languageName: node
+  linkType: hard
+
+"@sentry/react@npm:^10.22.0":
+  version: 10.22.0
+  resolution: "@sentry/react@npm:10.22.0"
+  dependencies:
+    "@sentry/browser": "npm:10.22.0"
+    "@sentry/core": "npm:10.22.0"
+    hoist-non-react-statics: "npm:^3.3.2"
+  peerDependencies:
+    react: ^16.14.0 || 17.x || 18.x || 19.x
+  checksum: 10c0/866efab01ac0c60faa65a31b24d53bf920c7efbb793ed0924e6a0a2dbb3b8f9562465d2f03394092ff3e0cd6528d60eec9f2950789b4d5c43b914796d6fd979a
+  languageName: node
+  linkType: hard
+
 "@shadcn/ui@npm:^0.0.4":
   version: 0.0.4
   resolution: "@shadcn/ui@npm:0.0.4"
@@ -3398,19 +3469,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^0.0.21":
-  version: 0.0.21
-  resolution: "@tumaet/prompt-shared-state@npm:0.0.21"
+"@tumaet/prompt-shared-state@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.3"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/7b13e17043975db7a5ad5b4d91bf99a867dea487aa4802def1c3a4be5b4f0e30c71d5a3a42b08b67d06b8e180d8f83359f14d592a32070e28e67735a8d68ae4c
+  checksum: 10c0/c912ea48216dad338bdf8bab89addcba7b04c5280414c392e33b61536db5dcd8130efee0d404cb5f20f18f74d514aedd60962f2e3f7cfd03ac85a2e2e21d5dbe
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-ui-components@npm:^0.0.15":
-  version: 0.0.15
-  resolution: "@tumaet/prompt-ui-components@npm:0.0.15"
+"@tumaet/prompt-ui-components@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@tumaet/prompt-ui-components@npm:1.0.3"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -3469,7 +3540,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.15"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/8a23c8e3aab12a5901091409f869d019e373faf9eb7617924d373cb796455097b9901d9b8805c35f78ca949814481234dbc665f63da16d5e16b5b25f69dd5cbe
+  checksum: 10c0/72776f81dbe6560f72d5ffbc0aebfd53ce5caaefe86f7529bccca9b555fbbfe47c7d0bb821c34c65a39f704dae5dd22d15f84cde62e58ff8e62814e60f586a61
   languageName: node
   linkType: hard
 
@@ -5466,6 +5537,7 @@ __metadata:
   resolution: "client@workspace:core"
   dependencies:
     "@dagrejs/dagre": "npm:^1.1.4"
+    "@sentry/react": "npm:^10.22.0"
     "@xyflow/react": "npm:^12.3.6"
     clean-webpack-plugin: "npm:^4.0.0"
     compression-webpack-plugin: "npm:^11.1.0"
@@ -9560,12 +9632,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jiti@npm:^1.20.0, jiti@npm:^1.21.6":
+"jiti@npm:^1.21.6":
   version: 1.21.7
   resolution: "jiti@npm:1.21.7"
   bin:
     jiti: bin/jiti.js
   checksum: 10c0/77b61989c758ff32407cdae8ddc77f85e18e1a13fc4977110dbd2e05fc761842f5f71bce684d9a01316e1c4263971315a111385759951080bbfe17cbb5de8f7a
+  languageName: node
+  linkType: hard
+
+"jiti@npm:^2.5.1":
+  version: 2.6.1
+  resolution: "jiti@npm:2.6.1"
+  bin:
+    jiti: lib/jiti-cli.mjs
+  checksum: 10c0/79b2e96a8e623f66c1b703b98ec1b8be4500e1d217e09b09e343471bbb9c105381b83edbb979d01cef18318cc45ce6e153571b6c83122170eefa531c64b6789b
   languageName: node
   linkType: hard
 
@@ -9583,26 +9664,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:4.1.0, js-yaml@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "js-yaml@npm:4.1.0"
-  dependencies:
-    argparse: "npm:^2.0.1"
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: 10c0/184a24b4eaacfce40ad9074c64fd42ac83cf74d8c8cd137718d456ced75051229e5061b8633c3366b8aada17945a7a356b337828c19da92b51ae62126575018f
-  languageName: node
-  linkType: hard
-
-"js-yaml@npm:^3.10.0, js-yaml@npm:^3.13.1":
-  version: 3.14.1
-  resolution: "js-yaml@npm:3.14.1"
+"js-yaml@npm:3.14.2":
+  version: 3.14.2
+  resolution: "js-yaml@npm:3.14.2"
   dependencies:
     argparse: "npm:^1.0.7"
     esprima: "npm:^4.0.0"
   bin:
     js-yaml: bin/js-yaml.js
-  checksum: 10c0/6746baaaeac312c4db8e75fa22331d9a04cccb7792d126ed8ce6a0bbcfef0cedaddd0c5098fade53db067c09fe00aa1c957674b4765610a8b06a5a189e46433b
+  checksum: 10c0/3261f25912f5dd76605e5993d0a126c2b6c346311885d3c483706cd722efe34f697ea0331f654ce27c00a42b426e524518ec89d65ed02ea47df8ad26dcc8ce69
   languageName: node
   linkType: hard
 
@@ -12190,13 +12260,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-loader@npm:^8.1.1":
-  version: 8.1.1
-  resolution: "postcss-loader@npm:8.1.1"
+"postcss-loader@npm:8.2.0":
+  version: 8.2.0
+  resolution: "postcss-loader@npm:8.2.0"
   dependencies:
     cosmiconfig: "npm:^9.0.0"
-    jiti: "npm:^1.20.0"
-    semver: "npm:^7.5.4"
+    jiti: "npm:^2.5.1"
+    semver: "npm:^7.6.2"
   peerDependencies:
     "@rspack/core": 0.x || 1.x
     postcss: ^7.0.0 || ^8.0.1
@@ -12206,7 +12276,7 @@ __metadata:
       optional: true
     webpack:
       optional: true
-  checksum: 10c0/86cde94cd4c7c39892ef9bd4bf09342f422a21789654038694cf2b23c37c0ed9550c73608f656426a6631f0ade1eca82022781831e93d5362afe2f191388b85e
+  checksum: 10c0/471f9a1c313522580f3385b92ab847cf161c6972bedc73525126a3c0a08733f0f6444d04ca9e0a8b1e36b44123e103dfcd8f53378b7e5afc95fa6d9ab423c480
   languageName: node
   linkType: hard
 
@@ -12844,8 +12914,8 @@ __metadata:
     "@tiptap/pm": "npm:^2.10.4"
     "@tiptap/react": "npm:^2.10.4"
     "@tiptap/starter-kit": "npm:^2.10.4"
-    "@tumaet/prompt-shared-state": "npm:^0.0.21"
-    "@tumaet/prompt-ui-components": "npm:^0.0.15"
+    "@tumaet/prompt-shared-state": "npm:^1.0.3"
+    "@tumaet/prompt-ui-components": "npm:^1.0.3"
     "@types/copy-webpack-plugin": "npm:^10.1.0"
     "@types/dotenv-webpack": "npm:^7.0.7"
     "@types/eslint": "npm:^8.56.10"
@@ -12879,7 +12949,7 @@ __metadata:
     lowlight: "npm:^3.3.0"
     lucide-react: "npm:^0.460.0"
     postcss: "npm:^8.4.49"
-    postcss-loader: "npm:^8.1.1"
+    postcss-loader: "npm:8.2.0"
     postcss-preset-env: "npm:^10.1.1"
     prettier: "npm:^3.3.3"
     react: "npm:^18.3.1"
@@ -14120,6 +14190,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10c0/aca305edfbf2383c22571cb7714f48cadc7ac95371b4b52362fb8eeffdfbc0de0669368b82b2b15978f8848f01d7114da65697e56cd8c37b0dab8c58e543f9ea
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.6.2":
+  version: 7.7.3
+  resolution: "semver@npm:7.7.3"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/4afe5c986567db82f44c8c6faef8fe9df2a9b1d98098fc1721f57c696c4c21cebd572f297fc21002f81889492345b8470473bc6f4aff5fb032a6ea59ea2bc45e
   languageName: node
   linkType: hard
 

@@ -7,5 +7,5 @@ type UpdateCategoryRequest struct {
 	ShortName            string    `json:"shortName"`
 	Description          string    `json:"description"`
 	Weight               int32     `json:"weight"`
-	AssessmentTemplateID uuid.UUID `json:"assessmentTemplateID"` // This field is required for the update operation
+	AssessmentSchemaID uuid.UUID `json:"assessmentSchemaID"` // This field is required for the update operation
 }

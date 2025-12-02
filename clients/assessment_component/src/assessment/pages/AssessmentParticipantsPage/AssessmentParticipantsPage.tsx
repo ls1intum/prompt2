@@ -4,9 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'

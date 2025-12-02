@@ -116,7 +116,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetAssessmentCompletionInv
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedNonExisting() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	partID := uuid.New()
 	req, _ := http.NewRequest("DELETE", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/course-participation/"+partID.String(), nil)
 	resp := httptest.NewRecorder()
@@ -326,7 +326,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestListAssessmentCompletionsI
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpoint() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	partID := uuid.New()
 
 	// First create an assessment completion to unmark
@@ -357,7 +357,7 @@ func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsComplete
 }
 
 func (suite *AssessmentCompletionRouterTestSuite) TestUnmarkAssessmentAsCompletedEndpointNonExisting() {
-	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 	partID := uuid.New()
 
 	// Test PUT /unmark endpoint on non-existing completion
@@ -553,6 +553,77 @@ func (suite *AssessmentCompletionRouterTestSuite) TestGetStudentGradeEndpointNon
 	err := json.Unmarshal(resp.Body.Bytes(), &grade)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 0.0, grade) // Should return 0 for non-existent phase
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetMyGradeSuggestionWhenVisible() {
+	phaseID := uuid.MustParse("24461b6b-3c3a-4bc6-ba42-69eeb1514da9")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupAssessmentCompletionRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/my-grade-suggestion", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+	var grade float64
+	err := json.Unmarshal(resp.Body.Bytes(), &grade)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 4.5, grade)
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetMyGradeSuggestionWhenNotVisible() {
+	phaseID := uuid.MustParse("3517a3e3-fe60-40e0-8a5e-8f39049c12c3")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupAssessmentCompletionRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/my-grade-suggestion", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusForbidden, resp.Code)
+	var errorResponse map[string]interface{}
+	err := json.Unmarshal(resp.Body.Bytes(), &errorResponse)
+	assert.NoError(suite.T(), err)
+	assert.Contains(suite.T(), errorResponse["error"], "not visible")
+}
+
+func (suite *AssessmentCompletionRouterTestSuite) TestGetMyGradeSuggestionBeforeDeadline() {
+	phaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	partID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+
+	customRouter := gin.Default()
+	api := customRouter.Group("/api/course_phase/:coursePhaseID")
+	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", partID)
+			testutils.MockAuthMiddlewareWithEmail(allowedRoles, "user@example.com", "1234", "id")(c)
+		}
+	}
+	setupAssessmentCompletionRouter(api, testMiddleware)
+
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+phaseID.String()+"/student-assessment/completed/my-grade-suggestion", nil)
+	resp := httptest.NewRecorder()
+	customRouter.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusNoContent, resp.Code)
 }
 
 func TestAssessmentCompletionRouterTestSuite(t *testing.T) {

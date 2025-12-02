@@ -1,6 +1,7 @@
 package actionItem
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -141,6 +142,16 @@ func getMyActionItems(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	config, err := coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !config.ActionItemsVisible {
+		handleError(c, http.StatusForbidden, fmt.Errorf("action items are not visible to students"))
 		return
 	}
 

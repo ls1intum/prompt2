@@ -36,19 +36,19 @@ export const TutorEvaluationPage = () => {
   const { teams } = useTeamStore()
   const { setStudentName } = useStudentEvaluationStore()
 
-  const studentName = teams
-    .flatMap((team) => team.members)
-    .find((participant) => participant.id === courseParticipationID)?.firstName
+  const tutor = teams.flatMap((team) => team.tutors).find((t) => t.id === courseParticipationID)
+
+  const tutorName = tutor ? `${tutor.firstName} ${tutor.lastName}` : undefined
 
   useEffect(() => {
-    if (studentName) {
-      setStudentName(studentName)
+    if (tutorName) {
+      setStudentName(tutorName)
     }
-  }, [studentName, setStudentName])
+  }, [tutorName, setStudentName])
 
   return (
     <div className='flex flex-col gap-4'>
-      <ManagementPageHeader>Tutor Evaluation for {studentName}</ManagementPageHeader>
+      <ManagementPageHeader>Tutor Evaluation for {tutorName}</ManagementPageHeader>
 
       <p className='text-sm text-gray-600 dark:text-gray-400'>
         Please fill out the Tutor evaluation below to assess the performance and contributions of

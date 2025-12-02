@@ -10,10 +10,11 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 
+import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhaseConfigStore'
 import { useSelfEvaluationCategoryStore } from '../../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../../zustand/usePeerEvaluationCategoryStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
-import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
 import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'
@@ -25,6 +26,7 @@ interface GradeSuggestionProps {
 }
 
 export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
@@ -83,6 +85,11 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
         <p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
           Your Grade Suggestion
         </p>
+        {coursePhaseConfig?.gradeSuggestionVisible && (
+          <p className='text-xs text-gray-500 dark:text-gray-400 my-1'>
+            Your suggestion will be visible to the student after the assessment deadline.
+          </p>
+        )}
         <Select
           value={assessmentCompletion?.gradeSuggestion.toFixed(1) ?? ''}
           onValueChange={onGradeSuggestionChange}
@@ -99,9 +106,6 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
             ))}
           </SelectContent>
         </Select>
-        <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-          Your suggestion will be visible to the student after the assessment deadline.
-        </p>
       </CardContent>
     </Card>
   )

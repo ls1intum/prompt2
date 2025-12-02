@@ -1,7 +1,7 @@
 import { Skill } from '../../interfaces/skill'
 import { getAllSkills } from '../../network/queries/getAllSkills'
 import { useParams } from 'react-router-dom'
-import { Team } from '../../interfaces/team'
+import { Team } from '@tumaet/prompt-shared-state'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { Loader2 } from 'lucide-react'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'

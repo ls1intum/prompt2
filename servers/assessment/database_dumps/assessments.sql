@@ -83,6 +83,41 @@ CREATE TABLE public.assessment_completion (
     completed boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE public.assessment_schema (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT assessment_schema_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.course_phase_config (
+    assessment_schema_id uuid NOT NULL,
+    course_phase_id uuid PRIMARY KEY NOT NULL,
+    deadline timestamp with time zone DEFAULT NULL,
+    self_evaluation_enabled boolean NOT NULL DEFAULT false,
+    self_evaluation_schema uuid,
+    self_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_evaluation_enabled boolean NOT NULL DEFAULT false,
+    peer_evaluation_schema uuid,
+    peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    peer_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tutor_evaluation_enabled boolean NOT NULL DEFAULT false,
+    tutor_evaluation_start timestamp with time zone,
+    tutor_evaluation_deadline timestamp with time zone,
+    tutor_evaluation_schema uuid,
+    evaluation_results_visible boolean NOT NULL DEFAULT true,
+    grade_suggestion_visible boolean NOT NULL DEFAULT true,
+    action_items_visible boolean NOT NULL DEFAULT true,
+    FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
+    FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (tutor_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT
+);
+
 CREATE TABLE public.category (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
@@ -1287,14 +1322,6 @@ VALUES (
 
 INSERT INTO public.assessment_completion
 VALUES (
-        'ca42e447-60f9-4fe0-b297-2dae3f924fd7',
-        '24461b6b-3c3a-4bc6-ba42-69eeb1514da9',
-        '2025-05-13 16:36:46.782123+02',
-        'Maximilian Rapp'
-    );
-
-INSERT INTO public.assessment_completion
-VALUES (
         '0d92c377-bf5c-49f3-b5f9-ce2faed4215b',
         '24461b6b-3c3a-4bc6-ba42-69eeb1514da9',
         '2025-05-13 16:36:54.860814+02',
@@ -1324,6 +1351,37 @@ VALUES (
         '2025-05-26 15:08:27.83436+02',
         'Maximilian Rapp'
     );
+
+-- Insert test assessment schemas
+INSERT INTO public.assessment_schema (id, name, description) VALUES
+('550e8400-e29b-41d4-a716-446655440000', 'Test Assessment Schema', 'Test schema for unit tests'),
+('550e8400-e29b-41d4-a716-446655440001', 'Self Evaluation Schema', 'This is the default self evaluation schema.'),
+('550e8400-e29b-41d4-a716-446655440002', 'Peer Evaluation Schema', 'This is the default peer evaluation schema.'),
+('550e8400-e29b-41d4-a716-446655440003', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
+
+-- Insert test course_phase_config entries for visibility tests
+-- Course phase config for visible scenario (both grade suggestions and action items visible, deadline passed)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-01-01 00:00:00+00', true, true);
+
+-- Course phase config for not visible scenario (both grade suggestions and action items hidden, deadline passed)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2025-01-01 00:00:00+00', false, false);
+
+-- Course phase config for before deadline scenario (deadline in the future)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2099-12-31 23:59:59+00', true, true);
+
+-- Insert test assessment_completion entries for visibility tests
+-- Using different course_participation_id to avoid conflicts with other tests
+INSERT INTO public.assessment_completion VALUES
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-05-13 16:36:46.782123+02', 'Visibility Test Author', 'Test comment for visible scenario', 4.5, true),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2025-05-13 16:36:46.782123+02', 'Visibility Test Author', 'Test comment for not visible scenario', 3.5, true);
+
+-- Insert test action_item entries for visibility tests
+INSERT INTO public.action_item (id, course_phase_id, course_participation_id, action, author) VALUES
+('a1111111-1111-1111-1111-111111111111', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Test action item for visible scenario', 'tester'),
+('a2222222-2222-2222-2222-222222222222', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Test action item for not visible scenario', 'tester');
 
 INSERT INTO public.category
 VALUES (

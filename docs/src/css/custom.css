@@ -1,0 +1,50 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: rgb(24 113 194);
+  --ifm-color-primary-dark: rgb(20 96 166);
+  --ifm-color-primary-darker: rgb(19 91 156);
+  --ifm-color-primary-darkest: rgb(15 75 129);
+  --ifm-color-primary-light: rgb(41 128 214);
+  --ifm-color-primary-lighter: rgb(50 135 219);
+  --ifm-color-primary-lightest: rgb(75 154 230);
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: rgb(75 154 230);
+  --ifm-color-primary-dark: rgb(50 135 219);
+  --ifm-color-primary-darker: rgb(41 128 214);
+  --ifm-color-primary-darkest: rgb(24 113 194);
+  --ifm-color-primary-light: rgb(100 173 243);
+  --ifm-color-primary-lighter: rgb(125 192 255);
+  --ifm-color-primary-lightest: rgb(150 211 255);
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+
+/*
+ Ensure the Docusaurus ThemedImage used for the navbar logo is visible.
+ Docusaurus generates CSS-module class names like `themedComponent_<hash>` and
+ `themedComponent--light_<hash>` / `themedComponent--dark_<hash>`. Some
+ generated rules hide the base class; here we force the navbar logo image to
+ display and then hide the unused theme variant based on the site's
+ `data-theme` attribute.
+*/
+.navbar__brand .navbar__logo img[class*="themedComponent"] {
+  display: inline-block !important;
+  width: 32px;
+  height: 32px;
+}
+
+/* Remove extra spacing so the logo is closer to the site title */
+.navbar__brand .navbar__logo {
+  margin-right: 0 !important;
+}

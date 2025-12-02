@@ -11,6 +11,7 @@ import {
   ErrorPage,
 } from '@tumaet/prompt-ui-components'
 
+import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 import { useGetMyActionItems } from '../hooks/useGetMyActionItems'
 import { useGetMyGradeSuggestion } from '../hooks/useGetMyGradeSuggestion'
 
@@ -18,6 +19,7 @@ export const ActionItemsAndGradeSuggestion = () => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   // Example data for non-students
   const exampleActionItems = [
@@ -27,29 +29,39 @@ export const ActionItemsAndGradeSuggestion = () => {
   ]
   const exampleGradeSuggestion = 2.3
 
+  const shouldFetchActionItems = isStudent && (coursePhaseConfig?.actionItemsVisible ?? true)
+  const shouldFetchGradeSuggestion =
+    isStudent && (coursePhaseConfig?.gradeSuggestionVisible ?? true)
+
   const {
     data: actionItems = [],
     isPending: isActionItemsPending,
     isError: isActionItemsError,
     refetch: refetchActionItems,
-  } = useGetMyActionItems({ enabled: isStudent })
+  } = useGetMyActionItems({ enabled: shouldFetchActionItems })
 
   const {
     data: gradeSuggestion,
     isPending: isGradeSuggestionPending,
     isError: isGradeSuggestionError,
     refetch: refetchGradeSuggestion,
-  } = useGetMyGradeSuggestion({ enabled: isStudent })
+  } = useGetMyGradeSuggestion({ enabled: shouldFetchGradeSuggestion })
 
   const displayActionItems = isStudent ? actionItems : exampleActionItems
   const displayGradeSuggestion = isStudent ? gradeSuggestion : exampleGradeSuggestion
 
-  const isError = isStudent && (isActionItemsError || isGradeSuggestionError)
-  const isPending = isStudent && (isActionItemsPending || isGradeSuggestionPending)
+  const isError =
+    (shouldFetchActionItems && isActionItemsError) ||
+    (shouldFetchGradeSuggestion && isGradeSuggestionError)
+  const isPending =
+    (shouldFetchActionItems && isActionItemsPending) ||
+    (shouldFetchGradeSuggestion && isGradeSuggestionPending)
 
   const refetch = () => {
-    if (isStudent) {
+    if (shouldFetchActionItems) {
       refetchActionItems()
+    }
+    if (shouldFetchGradeSuggestion) {
       refetchGradeSuggestion()
     }
   }
@@ -73,7 +85,7 @@ export const ActionItemsAndGradeSuggestion = () => {
 
   return (
     <div className='space-y-6'>
-      {displayGradeSuggestion && (
+      {displayGradeSuggestion && (coursePhaseConfig?.gradeSuggestionVisible ?? true) && (
         <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
           <CardHeader className='pb-4'>
             <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
@@ -94,7 +106,7 @@ export const ActionItemsAndGradeSuggestion = () => {
         </Card>
       )}
 
-      {displayActionItems.length > 0 && (
+      {displayActionItems.length > 0 && (coursePhaseConfig?.actionItemsVisible ?? true) && (
         <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
           <CardHeader className='pb-4'>
             <CardTitle className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>

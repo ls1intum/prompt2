@@ -5,17 +5,17 @@ import { EvaluationOptions } from '../interfaces/EvaluationOption'
 
 export const useEvaluationOptions = () => {
   const [selfEvaluationEnabled, setSelfEvaluationEnabled] = useState<boolean>(false)
-  const [selfEvaluationTemplate, setSelfEvaluationTemplate] = useState<string>('')
+  const [selfEvaluationSchema, setSelfEvaluationSchema] = useState<string>('')
   const [selfEvaluationStart, setSelfEvaluationStart] = useState<Date | undefined>(undefined)
   const [selfEvaluationDeadline, setSelfEvaluationDeadline] = useState<Date | undefined>(undefined)
 
   const [peerEvaluationEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
-  const [peerEvaluationTemplate, setPeerEvaluationTemplate] = useState<string>('')
+  const [peerEvaluationSchema, setPeerEvaluationSchema] = useState<string>('')
   const [peerEvaluationStart, setPeerEvaluationStart] = useState<Date | undefined>(undefined)
   const [peerEvaluationDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
 
   const [tutorEvaluationEnabled, setTutorEvaluationEnabled] = useState<boolean>(false)
-  const [tutorEvaluationTemplate, setTutorEvaluationTemplate] = useState<string>('')
+  const [tutorEvaluationSchema, setTutorEvaluationSchema] = useState<string>('')
   const [tutorEvaluationStart, setTutorEvaluationStart] = useState<Date | undefined>(undefined)
   const [tutorEvaluationDeadline, setTutorEvaluationDeadline] = useState<Date | undefined>(
     undefined,
@@ -27,7 +27,7 @@ export const useEvaluationOptions = () => {
     if (config) {
       // Self evaluation
       setSelfEvaluationEnabled(config.selfEvaluationEnabled || false)
-      setSelfEvaluationTemplate(config.selfEvaluationTemplate || '')
+      setSelfEvaluationSchema(config.selfEvaluationSchema || '')
       setSelfEvaluationStart(
         config.selfEvaluationStart ? new Date(config.selfEvaluationStart) : undefined,
       )
@@ -37,7 +37,7 @@ export const useEvaluationOptions = () => {
 
       // Peer evaluation
       setPeerEvaluationEnabled(config.peerEvaluationEnabled || false)
-      setPeerEvaluationTemplate(config.peerEvaluationTemplate || '')
+      setPeerEvaluationSchema(config.peerEvaluationSchema || '')
       setPeerEvaluationStart(
         config.peerEvaluationStart ? new Date(config.peerEvaluationStart) : undefined,
       )
@@ -47,7 +47,7 @@ export const useEvaluationOptions = () => {
 
       // Tutor evaluation
       setTutorEvaluationEnabled(config.tutorEvaluationEnabled || false)
-      setTutorEvaluationTemplate(config.tutorEvaluationTemplate || '')
+      setTutorEvaluationSchema(config.tutorEvaluationSchema || '')
       setTutorEvaluationStart(
         config.tutorEvaluationStart ? new Date(config.tutorEvaluationStart) : undefined,
       )
@@ -60,19 +60,19 @@ export const useEvaluationOptions = () => {
   const evaluationOptions: EvaluationOptions = {
     self: {
       enabled: selfEvaluationEnabled,
-      template: selfEvaluationTemplate,
+      schema: selfEvaluationSchema,
       start: selfEvaluationStart,
       deadline: selfEvaluationDeadline,
     },
     peer: {
       enabled: peerEvaluationEnabled,
-      template: peerEvaluationTemplate,
+      schema: peerEvaluationSchema,
       start: peerEvaluationStart,
       deadline: peerEvaluationDeadline,
     },
     tutor: {
       enabled: tutorEvaluationEnabled,
-      template: tutorEvaluationTemplate,
+      schema: tutorEvaluationSchema,
       start: tutorEvaluationStart,
       deadline: tutorEvaluationDeadline,
     },
@@ -84,7 +84,7 @@ export const useEvaluationOptions = () => {
     return (
       // Self evaluation changes
       selfEvaluationEnabled !== (originalConfig.selfEvaluationEnabled || false) ||
-      selfEvaluationTemplate !== (originalConfig.selfEvaluationTemplate || '') ||
+      selfEvaluationSchema !== (originalConfig.selfEvaluationSchema || '') ||
       selfEvaluationStart?.getTime() !==
         (originalConfig.selfEvaluationStart
           ? new Date(originalConfig.selfEvaluationStart).getTime()
@@ -95,7 +95,7 @@ export const useEvaluationOptions = () => {
           : undefined) ||
       // Peer evaluation changes
       peerEvaluationEnabled !== (originalConfig.peerEvaluationEnabled || false) ||
-      peerEvaluationTemplate !== (originalConfig.peerEvaluationTemplate || '') ||
+      peerEvaluationSchema !== (originalConfig.peerEvaluationSchema || '') ||
       peerEvaluationStart?.getTime() !==
         (originalConfig.peerEvaluationStart
           ? new Date(originalConfig.peerEvaluationStart).getTime()
@@ -106,7 +106,7 @@ export const useEvaluationOptions = () => {
           : undefined) ||
       // Tutor evaluation changes
       tutorEvaluationEnabled !== (originalConfig.tutorEvaluationEnabled || false) ||
-      tutorEvaluationTemplate !== (originalConfig.tutorEvaluationTemplate || '') ||
+      tutorEvaluationSchema !== (originalConfig.tutorEvaluationSchema || '') ||
       tutorEvaluationStart?.getTime() !==
         (originalConfig.tutorEvaluationStart
           ? new Date(originalConfig.tutorEvaluationStart).getTime()
@@ -122,8 +122,8 @@ export const useEvaluationOptions = () => {
     // Self evaluation
     selfEvaluationEnabled,
     setSelfEvaluationEnabled,
-    selfEvaluationTemplate,
-    setSelfEvaluationTemplate,
+    selfEvaluationSchema,
+    setSelfEvaluationSchema,
     selfEvaluationStart,
     setSelfEvaluationStart,
     selfEvaluationDeadline,
@@ -132,8 +132,8 @@ export const useEvaluationOptions = () => {
     // Peer evaluation
     peerEvaluationEnabled,
     setPeerEvaluationEnabled,
-    peerEvaluationTemplate,
-    setPeerEvaluationTemplate,
+    peerEvaluationSchema,
+    setPeerEvaluationSchema,
     peerEvaluationStart,
     setPeerEvaluationStart,
     peerEvaluationDeadline,
@@ -142,8 +142,8 @@ export const useEvaluationOptions = () => {
     // Tutor evaluation
     tutorEvaluationEnabled,
     setTutorEvaluationEnabled,
-    tutorEvaluationTemplate,
-    setTutorEvaluationTemplate,
+    tutorEvaluationSchema,
+    setTutorEvaluationSchema,
     tutorEvaluationStart,
     setTutorEvaluationStart,
     tutorEvaluationDeadline,

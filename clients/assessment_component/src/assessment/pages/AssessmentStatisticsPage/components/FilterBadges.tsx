@@ -1,8 +1,6 @@
-import { Badge } from '@tumaet/prompt-ui-components'
-import { X } from 'lucide-react'
-import { Gender, getGenderString } from '@tumaet/prompt-shared-state'
+import { Gender, getGenderString, Team } from '@tumaet/prompt-shared-state'
 import { StatisticsFilter } from './FilterMenu'
-import { Team } from '../../../interfaces/team'
+import { FilterBadge } from '@/components/FilterBadge'
 
 interface FilterBadgesProps {
   filters: StatisticsFilter
@@ -75,17 +73,9 @@ export const FilterBadges = ({ filters, onRemoveFilter, teams }: FilterBadgesPro
   }
 
   return (
-    <div className='flex flex-wrap gap-2'>
+    <div className='flex flex-wrap gap-2 h-5'>
       {activeBadges.map(({ key, label, onRemove }) => (
-        <Badge
-          variant='secondary'
-          key={key}
-          className='cursor-pointer flex items-center gap-1'
-          onClick={onRemove}
-        >
-          <X className='h-3 w-3' />
-          {label}
-        </Badge>
+        <FilterBadge key={key} label={label} onRemove={onRemove} />
       ))}
     </div>
   )

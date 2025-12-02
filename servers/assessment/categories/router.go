@@ -112,7 +112,7 @@ func getCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
-	result, err := GetCategoriesWithCompetencies(c, config.AssessmentTemplateID)
+	result, err := GetCategoriesWithCompetencies(c, config.AssessmentSchemaID)
 	if err != nil {
 		log.Error("Error getting categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)
@@ -135,7 +135,7 @@ func getSelfEvaluationCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
-	result, err := GetCategoriesWithCompetencies(c, config.SelfEvaluationTemplate)
+	result, err := GetCategoriesWithCompetencies(c, config.SelfEvaluationSchema)
 	if err != nil {
 		log.Error("Error getting self evaluation categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)
@@ -158,7 +158,7 @@ func getPeerEvaluationCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
-	result, err := GetCategoriesWithCompetencies(c, config.PeerEvaluationTemplate)
+	result, err := GetCategoriesWithCompetencies(c, config.PeerEvaluationSchema)
 	if err != nil {
 		log.Error("Error getting peer evaluation categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)
@@ -181,7 +181,7 @@ func getTutorEvaluationCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
-	result, err := GetCategoriesWithCompetencies(c, config.TutorEvaluationTemplate)
+	result, err := GetCategoriesWithCompetencies(c, config.TutorEvaluationSchema)
 	if err != nil {
 		log.Error("Error getting tutor evaluation categories with competencies: ", err)
 		handleError(c, http.StatusInternalServerError, err)

@@ -1,6 +1,7 @@
 import * as z from 'zod'
+import { courseAppearanceFormSchema } from './courseAppearance'
 
-export const editCourseSchema = z.object({
+const editCourseBaseSchema = z.object({
   dateRange: z.object({
     from: z.date(),
     to: z.date(),
@@ -18,5 +19,7 @@ export const editCourseSchema = z.object({
     .optional()
     .or(z.literal('')),
 })
+
+export const editCourseSchema = editCourseBaseSchema.merge(courseAppearanceFormSchema)
 
 export type EditCourseFormValues = z.infer<typeof editCourseSchema>

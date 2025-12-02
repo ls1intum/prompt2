@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/assessment/assessmentTemplates"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
@@ -92,7 +92,7 @@ func main() {
 	competencies.InitCompetencyModule(api, *query, conn)
 	categories.InitCategoryModule(api, *query, conn)
 	coursePhaseConfig.InitCoursePhaseConfigModule(api, *query, conn)
-	assessmentTemplates.InitAssessmentTemplateModule(api, *query, conn)
+	assessmentSchemas.InitAssessmentSchemaModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 	evaluations.InitEvaluationModule(api, *query, conn)
 

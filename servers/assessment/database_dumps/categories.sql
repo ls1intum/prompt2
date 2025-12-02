@@ -76,27 +76,27 @@ CREATE TABLE public.category (
     description text,
     weight integer DEFAULT 1 NOT NULL,
     short_name character varying(10),
-    assessment_template_id uuid NOT NULL
+    assessment_schema_id uuid NOT NULL
 );
 
-CREATE TABLE public.assessment_template (
+CREATE TABLE public.assessment_schema (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     description text,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT assessment_template_pkey PRIMARY KEY (id)
+    CONSTRAINT assessment_schema_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE public.course_phase_config (
-    assessment_template_id uuid NOT NULL,
+    assessment_schema_id uuid NOT NULL,
     course_phase_id uuid PRIMARY KEY NOT NULL,
     deadline timestamp with time zone DEFAULT NULL,
     self_evaluation_enabled boolean NOT NULL DEFAULT false,
-    self_evaluation_template uuid,
+    self_evaluation_schema uuid,
     self_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     peer_evaluation_enabled boolean NOT NULL DEFAULT false,
-    peer_evaluation_template uuid,
+    peer_evaluation_schema uuid,
     peer_evaluation_deadline timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     self_evaluation_start timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -104,12 +104,14 @@ CREATE TABLE public.course_phase_config (
     tutor_evaluation_enabled boolean NOT NULL DEFAULT false,
     tutor_evaluation_start timestamp with time zone,
     tutor_evaluation_deadline timestamp with time zone,
-    tutor_evaluation_template uuid,
+    tutor_evaluation_schema uuid,
     evaluation_results_visible boolean NOT NULL DEFAULT true,
-    FOREIGN KEY (assessment_template_id) REFERENCES assessment_template (id) ON DELETE CASCADE,
-    FOREIGN KEY (self_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    FOREIGN KEY (peer_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT,
-    FOREIGN KEY (tutor_evaluation_template) REFERENCES assessment_template (id) ON DELETE RESTRICT
+    grade_suggestion_visible boolean NOT NULL DEFAULT true,
+    action_items_visible boolean NOT NULL DEFAULT true,
+    FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
+    FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
+    FOREIGN KEY (tutor_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE public.competency (
@@ -128,16 +130,16 @@ CREATE TABLE public.competency (
 
 CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
 
--- Insert the default assessment template
-INSERT INTO public.assessment_template (id, name, description)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Template', 'This is the default assessment template.');
+-- Insert the default assessment schema
+INSERT INTO public.assessment_schema (id, name, description)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Intro Course Assessment Schema', 'This is the default assessment schema.');
 
--- Insert the default tutor evaluation template
-INSERT INTO public.assessment_template (id, name, description)
-VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Template', 'This is the default tutor evaluation template.');
+-- Insert the default tutor evaluation schema
+INSERT INTO public.assessment_schema (id, name, description)
+VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
 
 -- Insert some sample course_phase_config records
-INSERT INTO public.course_phase_config (assessment_template_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_template, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_template, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_template)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, '2024-01-01 00:00:00+00', '2025-12-31 23:59:59+00', 'd5e6f7a8-b9c0-1234-5678-90abcdef1234');
 
 INSERT INTO public.category
@@ -278,9 +280,9 @@ VALUES (
 INSERT INTO public.schema_migrations
 VALUES (8, false);
 
--- Add foreign key constraint for category assessment_template_id
+-- Add foreign key constraint for category assessment_schema_id
 ALTER TABLE ONLY public.category
-ADD CONSTRAINT category_assessment_template_id_fkey FOREIGN KEY (assessment_template_id) REFERENCES public.assessment_template (id) ON DELETE SET NULL;
+ADD CONSTRAINT category_assessment_schema_id_fkey FOREIGN KEY (assessment_schema_id) REFERENCES public.assessment_schema (id) ON DELETE SET NULL;
 
 -- Create the view
 CREATE VIEW category_course_phase AS
@@ -288,7 +290,7 @@ SELECT c.id AS category_id,
        cpc.course_phase_id
 FROM category c
          INNER JOIN course_phase_config cpc
-                    ON c.assessment_template_id = cpc.assessment_template_id;
+                    ON c.assessment_schema_id = cpc.assessment_schema_id;
 
 ALTER TABLE ONLY public.category
 ADD CONSTRAINT category_pkey PRIMARY KEY (id);

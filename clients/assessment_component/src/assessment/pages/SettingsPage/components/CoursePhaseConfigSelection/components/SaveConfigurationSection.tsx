@@ -34,15 +34,15 @@ export const SaveConfigurationSection = ({
       }
     }
 
-    // Validate enabled evaluations have templates
-    if (evaluationOptions.self.enabled && !evaluationOptions.self.template) {
-      errors.push('Self-evaluation template is required when self-evaluation is enabled')
+    // Validate enabled evaluations have schemas
+    if (evaluationOptions.self.enabled && !evaluationOptions.self.schema) {
+      errors.push('Self-evaluation schema is required when self-evaluation is enabled')
     }
-    if (evaluationOptions.peer.enabled && !evaluationOptions.peer.template) {
-      errors.push('Peer-evaluation template is required when peer-evaluation is enabled')
+    if (evaluationOptions.peer.enabled && !evaluationOptions.peer.schema) {
+      errors.push('Peer-evaluation schema is required when peer-evaluation is enabled')
     }
-    if (evaluationOptions.tutor.enabled && !evaluationOptions.tutor.template) {
-      errors.push('Tutor-evaluation template is required when tutor-evaluation is enabled')
+    if (evaluationOptions.tutor.enabled && !evaluationOptions.tutor.schema) {
+      errors.push('Tutor-evaluation schema is required when tutor-evaluation is enabled')
     }
 
     // Validate evaluation start/deadline relationships
@@ -89,29 +89,31 @@ export const SaveConfigurationSection = ({
       return // Short-circuit if validation fails
     }
     onSave({
-      assessmentTemplateId: mainConfigState.assessmentTemplateId,
+      assessmentSchemaId: mainConfigState.assessmentSchemaId,
       start: mainConfigState.start,
       deadline: mainConfigState.deadline,
       selfEvaluationEnabled: evaluationOptions.self.enabled,
-      selfEvaluationTemplate: evaluationOptions.self.template,
+      selfEvaluationSchema: evaluationOptions.self.schema,
       selfEvaluationStart: evaluationOptions.self.start,
       selfEvaluationDeadline: evaluationOptions.self.deadline,
       peerEvaluationEnabled: evaluationOptions.peer.enabled,
-      peerEvaluationTemplate: evaluationOptions.peer.template,
+      peerEvaluationSchema: evaluationOptions.peer.schema,
       peerEvaluationStart: evaluationOptions.peer.start,
       peerEvaluationDeadline: evaluationOptions.peer.deadline,
       tutorEvaluationEnabled: evaluationOptions.tutor.enabled,
-      tutorEvaluationTemplate: evaluationOptions.tutor.template,
+      tutorEvaluationSchema: evaluationOptions.tutor.schema,
       tutorEvaluationStart: evaluationOptions.tutor.start,
       tutorEvaluationDeadline: evaluationOptions.tutor.deadline,
       evaluationResultsVisible: mainConfigState.evaluationResultsVisible,
+      gradeSuggestionVisible: mainConfigState.gradeSuggestionVisible,
+      actionItemsVisible: mainConfigState.actionItemsVisible,
     })
   }
 
   const isDisabled =
     !hasChanges ||
     configMutation.isPending ||
-    !mainConfigState.assessmentTemplateId ||
+    !mainConfigState.assessmentSchemaId ||
     disabled ||
     validationErrors.length > 0
 

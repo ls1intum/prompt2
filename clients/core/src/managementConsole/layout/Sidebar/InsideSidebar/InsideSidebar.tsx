@@ -12,13 +12,16 @@ export const InsideSidebar = (): JSX.Element => {
   const isCourseSidebar = location.pathname.startsWith('/management/course')
 
   return (
-    <Sidebar collapsible='none' className='flex'>
+    <Sidebar collapsible='none' className='flex max-w-sidebar'>
       <SidebarHeader className='flex h-14 border-b justify-center items-center'>
-        <div className='relative flex items-baseline'>
-          <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
-            PROMPT
-          </span>
-          <span className='ml-1 text-xs font-normal text-gray-400'>{version}</span>
+        <div className='flex items-center'>
+          <img src='/prompt_logo.svg' alt='Prompt logo' className='size-8 -mr-1' />
+          <div className='relative flex items-baseline'>
+            <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
+              PROMPT
+            </span>
+            <span className='ml-1 text-xs font-normal text-gray-400'>{version}</span>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>

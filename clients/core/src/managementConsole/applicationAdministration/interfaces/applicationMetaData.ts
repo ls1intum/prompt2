@@ -4,4 +4,5 @@ export type ApplicationMetaData = {
   externalStudentsAllowed?: boolean
   universityLoginAvailable?: boolean
   autoAccept?: boolean
+  useCustomScores?: boolean
 }

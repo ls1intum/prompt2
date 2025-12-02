@@ -1,5 +1,5 @@
 import { AssessmentParticipationWithStudent } from '../../../../interfaces/assessmentParticipationWithStudent'
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 import { AssessmentCompletion } from '../../../../interfaces/assessmentCompletion'
 import { Assessment } from '../../../../interfaces/assessment'
 

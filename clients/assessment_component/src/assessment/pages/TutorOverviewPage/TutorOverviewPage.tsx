@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 import {
   CoursePhaseParticipationWithStudent,
   PassStatus,
@@ -22,13 +22,15 @@ export const TutorOverviewPage = (): JSX.Element => {
   // Extract tutors from teams
   const tutors = useMemo(() => {
     return teams.flatMap((team) =>
-      team.tutors.map((tutor) => ({
-        id: tutor.id,
-        firstName: tutor.firstName,
-        lastName: tutor.lastName,
-        teamName: team.name,
-        teamId: team.id,
-      })),
+      team.tutors
+        .filter((tutor) => tutor.id !== undefined)
+        .map((tutor) => ({
+          id: tutor.id!,
+          firstName: tutor.firstName,
+          lastName: tutor.lastName,
+          teamName: team.name,
+          teamId: team.id,
+        })),
     )
   }, [teams])
 

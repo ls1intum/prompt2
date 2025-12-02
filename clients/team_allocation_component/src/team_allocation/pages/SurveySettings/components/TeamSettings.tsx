@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import { createTeams } from '../../../network/mutations/createTeams'
 import { deleteTeam } from '../../../network/mutations/deleteTeam'
 import { updateTeam } from '../../../network/mutations/updateTeam'
