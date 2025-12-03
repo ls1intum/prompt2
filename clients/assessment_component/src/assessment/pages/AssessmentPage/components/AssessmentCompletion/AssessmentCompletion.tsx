@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
 
@@ -42,10 +42,19 @@ export const AssessmentCompletion = () => {
     assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
   useEffect(() => {
     setGeneralRemarks(assessmentCompletion?.comment || '')
     setGradeSuggestion(assessmentCompletion?.gradeSuggestion?.toString() || '')
   }, [assessmentCompletion])
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [generalRemarks])
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -140,8 +149,10 @@ export const AssessmentCompletion = () => {
             </CardHeader>
             <CardContent className='flex flex-col flex-grow'>
               <Textarea
+                ref={textareaRef}
                 placeholder='What did this person do particularly well?'
-                className='resize-none h-full min-h-[100px]'
+                className='w-full resize-none min-h-[100px] overflow-hidden'
+                rows={4}
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
                 onBlur={() => handleSaveFormData(generalRemarks, gradeSuggestion)}
