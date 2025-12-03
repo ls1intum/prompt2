@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  Button,
 } from '@tumaet/prompt-ui-components'
 
 import type { FeedbackItem } from '../../../interfaces/feedbackItem'
@@ -58,26 +59,22 @@ export const FeedbackItemRow = ({ feedbackItem }: FeedbackItemRowProps) => {
         </div>
       )}
 
-      <div className='flex items-start justify-between gap-2'>
+      <div className='flex items-start items-center justify-between gap-2'>
         <p className='text-sm text-foreground whitespace-pre-wrap flex-1'>
           {feedbackItem.feedbackText}
         </p>
 
         <div className='flex-shrink-0 mt-1 flex items-center gap-1.5'>
-          <button
+          <Button
             onClick={handleCopyToClipboard}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleCopyToClipboard()
-              }
-            }}
-            className='p-1 hover:bg-muted rounded transition-colors cursor-pointer'
+            variant='ghost'
+            size='sm'
+            className='h-6 w-6 p-0'
             title='Copy to clipboard'
             aria-label='Copy to clipboard'
           >
-            <Copy className='h-3.5 w-3.5 text-muted-foreground' />
-          </button>
+            <Copy className='h-4 w-4 text-muted-foreground' />
+          </Button>
           {isSelfFeedback ? (
             <User
               className='h-4 w-4 text-blue-500 dark:text-blue-400'
