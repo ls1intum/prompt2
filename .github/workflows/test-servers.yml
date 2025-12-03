@@ -9,6 +9,7 @@ jobs:
     outputs:
       assessment-changed: ${{ steps.changes.outputs.assessment }}
       core-changed: ${{ steps.changes.outputs.core }}
+      intro_course-changed: ${{ steps.changes.outputs.intro_course }}
       team_allocation-changed: ${{ steps.changes.outputs.team_allocation }}
       self_team_allocation-changed: ${{ steps.changes.outputs.self_team_allocation }}
     steps:
@@ -21,6 +22,8 @@ jobs:
               - 'servers/assessment/**'
             core:
               - 'servers/core/**'
+            intro_course:
+              - 'servers/intro_course/**'
             self_team_allocation:
               - 'servers/self_team_allocation/**'
             team_allocation:
@@ -32,6 +35,7 @@ jobs:
     if: |
       needs.detect-changes.outputs.assessment-changed == 'true' ||
       needs.detect-changes.outputs.core-changed       == 'true' ||
+      needs.detect-changes.outputs.intro_course-changed == 'true' ||
       needs.detect-changes.outputs.self_team_allocation-changed == 'true' ||
       needs.detect-changes.outputs.team_allocation-changed == 'true'
     strategy:
@@ -39,6 +43,7 @@ jobs:
         directory:
           - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
           - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
+          - ${{ needs.detect-changes.outputs.intro_course-changed == 'true' && 'intro_course' || '' }}
           - ${{ needs.detect-changes.outputs.self_team_allocation-changed == 'true' && 'self_team_allocation' || '' }}
           - ${{ needs.detect-changes.outputs.team_allocation-changed == 'true' && 'team_allocation' || '' }}
         exclude:
