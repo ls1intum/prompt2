@@ -134,14 +134,14 @@ export const AssessmentCompletion = () => {
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <div className='grid grid-cols-1 gap-4'>
-          <Card>
+          <Card className='flex flex-col flex-grow'>
             <CardHeader>
               <CardTitle>General Remarks</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='flex flex-col flex-grow'>
               <Textarea
                 placeholder='What did this person do particularly well?'
-                className='min-h-[100px]'
+                className='resize-none h-full min-h-[100px]'
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
                 onBlur={() => handleSaveFormData(generalRemarks, gradeSuggestion)}
