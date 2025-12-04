@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { AlertCircle } from 'lucide-react'
 
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import {
-  Textarea,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  cn,
-} from '@tumaet/prompt-ui-components'
+import { Form, FormMessage, cn } from '@tumaet/prompt-ui-components'
 
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 import { useTeamStore } from '../../../../zustand/useTeamStore'
@@ -31,6 +22,7 @@ import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDial
 import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
 
 import { EvaluationScoreDescriptionBadge } from './components/EvaluationScoreDescriptionBadge'
+import { AssessmentTextField } from './components/AssessmentTextField'
 
 import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
@@ -56,6 +48,8 @@ export const AssessmentForm = ({
 
   const form = useForm<CreateOrUpdateAssessmentRequest>({
     mode: 'onChange',
+    criteriaMode: 'all',
+    reValidateMode: 'onChange',
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
@@ -69,14 +63,6 @@ export const AssessmentForm = ({
   const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
-
-  const isCommentAndExampleRequired = (scoreLevel?: ScoreLevel): boolean => {
-    return (
-      scoreLevel === ScoreLevel.VeryBad ||
-      scoreLevel === ScoreLevel.Bad ||
-      scoreLevel === ScoreLevel.Ok
-    )
-  }
 
   useEffect(() => {
     form.reset({
@@ -102,7 +88,6 @@ export const AssessmentForm = ({
             createOrUpdateAssessment(data)
           }
         }
-        // Text fields will be saved on blur - no API calls while typing
       }
     })
 
@@ -121,10 +106,11 @@ export const AssessmentForm = ({
     }
   }
 
-  const handleScoreChange = (value: ScoreLevel) => {
+  const handleScoreChange = async (value: ScoreLevel) => {
     if (completed) return
     form.setValue('scoreLevel', value, { shouldValidate: true })
-    form.trigger(['comment', 'examples'])
+    // Trigger validation for both comment and examples to show errors immediately
+    await form.trigger(['comment', 'examples'])
   }
 
   const handleDelete = () => {
@@ -253,92 +239,25 @@ export const AssessmentForm = ({
           peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
-        <div className='flex flex-col h-full'>
-          <FormField
-            control={form.control}
-            name='examples'
-            rules={{
-              validate: (value) => {
-                if (isCommentAndExampleRequired(selectedScore)) {
-                  if (!value || value.trim() === '') {
-                    return 'Examples are required for Strongly Disagree, Disagree, and Neutral scores'
-                  }
-                }
-                return true
-              },
-            }}
-            render={({ field }) => (
-              <FormItem className='flex flex-col flex-grow'>
-                <FormControl className='flex-grow'>
-                  <Textarea
-                    placeholder={completed ? '' : 'Example'}
-                    className={cn(
-                      'resize-none text-xs h-full',
-                      form.formState.errors.examples &&
-                        'border border-destructive focus-visible:ring-destructive',
-                      completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
-                    )}
-                    disabled={completed}
-                    readOnly={completed}
-                    {...field}
-                    onBlur={() => {
-                      field.onBlur()
-                      handleTextFieldBlur()
-                    }}
-                  />
-                </FormControl>
-                {!completed && <FormMessage />}
-              </FormItem>
-            )}
-          />
-        </div>
+        <AssessmentTextField
+          control={form.control}
+          name='examples'
+          placeholder='Example'
+          completed={completed}
+          getScoreLevel={() => form.getValues('scoreLevel')}
+          onBlur={handleTextFieldBlur}
+        />
 
-        <div className='flex flex-col h-full'>
-          <FormField
-            control={form.control}
-            name='comment'
-            rules={{
-              validate: (value) => {
-                if (isCommentAndExampleRequired(selectedScore)) {
-                  if (!value || value.trim() === '') {
-                    return 'Comments are required for Strongly Disagree, Disagree, and Neutral scores'
-                  }
-                }
-                return true
-              },
-            }}
-            render={({ field }) => (
-              <FormItem className='flex flex-col flex-grow'>
-                <FormControl className='flex-grow'>
-                  <Textarea
-                    placeholder={completed ? '' : 'Additional comments'}
-                    className={cn(
-                      'resize-none text-xs h-full',
-                      form.formState.errors.comment &&
-                        'border border-destructive focus-visible:ring-destructive',
-                      completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
-                    )}
-                    disabled={completed}
-                    readOnly={completed}
-                    {...field}
-                    onBlur={() => {
-                      field.onBlur()
-                      handleTextFieldBlur()
-                    }}
-                  />
-                </FormControl>
-                {!completed && <FormMessage />}
-              </FormItem>
-            )}
-          />
+        <AssessmentTextField
+          control={form.control}
+          name='comment'
+          placeholder='Additional comments'
+          completed={completed}
+          getScoreLevel={() => form.getValues('scoreLevel')}
+          onBlur={handleTextFieldBlur}
+        />
 
-          {error && !completed && (
-            <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>
-              <AlertCircle className='h-3 w-3' />
-              <p>{error}</p>
-            </div>
-          )}
-        </div>
+        {error && !completed && <FormMessage className='mt-2'>{error}</FormMessage>}
 
         {assessment && (
           <DeleteAssessmentDialog
