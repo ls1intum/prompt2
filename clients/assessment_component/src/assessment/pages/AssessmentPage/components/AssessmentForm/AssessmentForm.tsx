@@ -70,6 +70,14 @@ export const AssessmentForm = ({
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
 
+  const isCommentAndExampleRequired = (scoreLevel?: ScoreLevel): boolean => {
+    return (
+      scoreLevel === ScoreLevel.VeryBad ||
+      scoreLevel === ScoreLevel.Bad ||
+      scoreLevel === ScoreLevel.Ok
+    )
+  }
+
   useEffect(() => {
     form.reset({
       courseParticipationID,
@@ -116,6 +124,7 @@ export const AssessmentForm = ({
   const handleScoreChange = (value: ScoreLevel) => {
     if (completed) return
     form.setValue('scoreLevel', value, { shouldValidate: true })
+    form.trigger(['comment', 'examples'])
   }
 
   const handleDelete = () => {
@@ -248,6 +257,16 @@ export const AssessmentForm = ({
           <FormField
             control={form.control}
             name='examples'
+            rules={{
+              validate: (value) => {
+                if (isCommentAndExampleRequired(selectedScore)) {
+                  if (!value || value.trim() === '') {
+                    return 'Examples are required for Strongly Disagree, Disagree, and Neutral scores'
+                  }
+                }
+                return true
+              },
+            }}
             render={({ field }) => (
               <FormItem className='flex flex-col flex-grow'>
                 <FormControl className='flex-grow'>
@@ -255,7 +274,7 @@ export const AssessmentForm = ({
                     placeholder={completed ? '' : 'Example'}
                     className={cn(
                       'resize-none text-xs h-full',
-                      form.formState.errors.comment &&
+                      form.formState.errors.examples &&
                         'border border-destructive focus-visible:ring-destructive',
                       completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
                     )}
@@ -278,6 +297,16 @@ export const AssessmentForm = ({
           <FormField
             control={form.control}
             name='comment'
+            rules={{
+              validate: (value) => {
+                if (isCommentAndExampleRequired(selectedScore)) {
+                  if (!value || value.trim() === '') {
+                    return 'Comments are required for Strongly Disagree, Disagree, and Neutral scores'
+                  }
+                }
+                return true
+              },
+            }}
             render={({ field }) => (
               <FormItem className='flex flex-col flex-grow'>
                 <FormControl className='flex-grow'>
