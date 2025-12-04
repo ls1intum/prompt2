@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import { Form, FormMessage, cn } from '@tumaet/prompt-ui-components'
+import { Form, FormMessage } from '@tumaet/prompt-ui-components'
 
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 import { useTeamStore } from '../../../../zustand/useTeamStore'
@@ -200,12 +200,7 @@ export const AssessmentForm = ({
 
   return (
     <Form {...form}>
-      <div
-        className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md',
-          completed ?? 'bg-gray-700 border-gray-700',
-        )}
-      >
+      <div className={'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md'}>
         <CompetencyHeader
           className='lg:col-span-2'
           competency={competency}

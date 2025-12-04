@@ -59,7 +59,7 @@ export const ScoreLevelSelector = ({
             className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
           >
             {(coursePhaseConfig?.evaluationResultsVisible || completed) && (
-              <div className='absolute -top-6 left-0 w-full'>
+              <div className='absolute -top-6 left-0 w-full z-10'>
                 <div className='flex justify-center items-center text-left gap-2'>
                   {selfEvaluationCompetency &&
                     selfEvaluationScoreLevel &&
