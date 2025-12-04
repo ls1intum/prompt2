@@ -87,7 +87,7 @@ new ModuleFederationPlugin({
 
 ```typescript
 remotes: {
-  your_component: `your_component@${yourComponentURL}/remoteEntry.js?${Date.now()}`;
+  your_component: `your_component@${yourComponentURL}/remoteEntry.js?${Date.now()}`
 }
 ```
 
