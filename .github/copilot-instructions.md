@@ -292,4 +292,4 @@ log.Error("Error occurred: ", err)
 
 - **User/Admin Docs:** `docs/` (Docusaurus) - run with `yarn start`
 - **API Docs:** Swagger annotations in Go code (`@Summary`, `@Tags`, etc.)
-- **Live Instance:** https://prompt.aet.cit.tum.de/
+- **Live Instance:** <https://prompt.aet.cit.tum.de/>
