@@ -26,7 +26,8 @@ SET default_table_access_method = heap;
 
 CREATE TABLE course_phase_type (
     id uuid NOT NULL,
-    name text NOT NULL
+    name text NOT NULL,
+    description text
 );
 
 
@@ -39,8 +40,8 @@ CREATE TABLE course_phase (
     course_phase_type_id uuid NOT NULL
 );
 
-INSERT INTO course_phase_type (id, name) VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744b', 'application');
-INSERT INTO course_phase_type (id, name) VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744c', 'template_component');
+INSERT INTO course_phase_type (id, name, description) VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744b', 'application', 'Test Description');
+INSERT INTO course_phase_type (id, name, description) VALUES ('7dc1c4e8-4255-4874-80a0-0c12b958744c', 'template_component', 'Test Description');
 
 
 --

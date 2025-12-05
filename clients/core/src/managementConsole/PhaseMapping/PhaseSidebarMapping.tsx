@@ -16,7 +16,7 @@ export const PhaseSidebarMapping: {
   Application: ApplicationSidebar,
   Interview: InterviewSidebar,
   Matching: MatchingSidebar,
-  IntroCourseDeveloper: IntroCourseDeveloperSidebar,
+  'Intro Course Developer': IntroCourseDeveloperSidebar,
   IntroCourseTutor: IntroCourseTutorSidebar,
   Assessment: AssessmentSidebar,
   DevOpsChallenge: DevOpsChallengeSidebar,

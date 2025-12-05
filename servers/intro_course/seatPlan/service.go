@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan/seatPlanDTO"
-	"github.com/ls1intum/prompt2/servers/intro_course/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -61,7 +61,7 @@ func UpdateSeatPlan(ctx context.Context, coursePhaseID uuid.UUID, seatDTOs []sea
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+  defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := SeatPlanServiceSingleton.queries.WithTx(tx)
 
 	// validate that all seatDTOs belong to the coursePhaseID
