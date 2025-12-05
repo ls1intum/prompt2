@@ -85,6 +85,9 @@ export const AssessmentForm = ({
           const isValid = await form.trigger()
           if (isValid) {
             const data = form.getValues()
+            if (!data.scoreLevel) {
+              return
+            }
             createOrUpdateAssessment(data)
           }
         }
@@ -102,6 +105,10 @@ export const AssessmentForm = ({
     const isValid = await form.trigger()
     if (isValid) {
       const data = form.getValues()
+      // Don't save if scoreLevel is not set
+      if (!data.scoreLevel) {
+        return
+      }
       createOrUpdateAssessment(data)
     }
   }
