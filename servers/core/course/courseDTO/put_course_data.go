@@ -14,6 +14,8 @@ type UpdateCourseData struct {
 	CourseType          pgtype.Text   `json:"courseType" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	ShortDescription    pgtype.Text   `json:"shortDescription" swaggertype:"string"`
+	LongDescription     pgtype.Text   `json:"longDescription" swaggertype:"string"`
 }
 
 func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {
@@ -50,5 +52,7 @@ func (c UpdateCourseData) GetDBModel() (db.UpdateCourseParams, error) {
 		EndDate:             c.EndDate,
 		Ects:                c.Ects,
 		CourseType:          nullCourseType,
+		ShortDescription:    c.ShortDescription,
+		LongDescription:     c.LongDescription,
 	}, nil
 }

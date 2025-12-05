@@ -15,26 +15,28 @@ ORDER BY c.template,
 -- name: GetAllActiveCoursesRestricted :many
 -- struct: Course
 WITH parsed_roles AS (SELECT split_part(role, '-', 1) AS semester_tag,
-                             split_part(role, '-', 2) AS course_name,
-                             split_part(role, '-', 3) AS user_role
-                      FROM unnest($1::text[]) AS role),
-     user_course_roles AS (SELECT c.id,
-                                  c.name,
-                                  c.semester_tag,
-                                  c.start_date,
-                                  c.end_date,
-                                  c.course_type,
-                                  c.student_readable_data,
-                                  c.restricted_data,
-                                  c.ects,
-                                  c.template,
-                                  pr.user_role
-                           FROM course c
-                                    INNER JOIN
-                                parsed_roles pr
-                                ON c.name = pr.course_name
-                                    AND c.semester_tag = pr.semester_tag
-                           WHERE c.end_date >= NOW() - INTERVAL '1 month')
+               split_part(role, '-', 2) AS course_name,
+               split_part(role, '-', 3) AS user_role
+            FROM unnest($1::text[]) AS role),
+   user_course_roles AS (SELECT c.id,
+                  c.name,
+                  c.semester_tag,
+                  c.start_date,
+                  c.end_date,
+                  c.course_type,
+                  c.student_readable_data,
+                  c.restricted_data,
+                  c.ects,
+                  c.template,
+                  c.short_description,
+                  c.long_description,
+                  pr.user_role
+               FROM course c
+                  INNER JOIN
+                parsed_roles pr
+                ON c.name = pr.course_name
+                  AND c.semester_tag = pr.semester_tag
+               WHERE c.end_date >= NOW() - INTERVAL '1 month')
 SELECT ucr.id,
        ucr.name,
        ucr.start_date,
@@ -47,7 +49,9 @@ SELECT ucr.id,
            ELSE ucr.restricted_data::jsonb
            END AS restricted_data,
        ucr.student_readable_data,
-       ucr.template
+       ucr.template,
+       ucr.short_description,
+       ucr.long_description
 FROM user_course_roles ucr
 GROUP BY ucr.id,
          ucr.name,
@@ -58,7 +62,9 @@ GROUP BY ucr.id,
          ucr.student_readable_data,
          ucr.ects,
          ucr.restricted_data,
-         ucr.template
+         ucr.template,
+         ucr.short_description,
+         ucr.long_description
 ORDER BY ucr.template,
          ucr.semester_tag,
          ucr.name DESC;
@@ -66,8 +72,8 @@ ORDER BY ucr.template,
 
 -- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data,
-                    student_readable_data, template)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    student_readable_data, template, short_description, long_description)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 RETURNING *;
 
 -- name: CheckCoursePhasesBelongToCourse :one
@@ -88,7 +94,9 @@ SET restricted_data       = restricted_data || $2,
     start_date            = COALESCE($4, start_date),
     end_date              = COALESCE($5, end_date),
     ects                  = COALESCE($6, ects),
-    course_type           = COALESCE(sqlc.narg('course_type'), course_type)
+    course_type           = COALESCE(sqlc.narg('course_type'), course_type),
+    short_description     = COALESCE($7, short_description),
+    long_description      = COALESCE($8, long_description)
 WHERE id = $1;
 
 
