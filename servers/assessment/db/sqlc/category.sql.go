@@ -12,6 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkCategoryNameExists = `-- name: CheckCategoryNameExists :one
+SELECT EXISTS(
+    SELECT 1 FROM category
+    WHERE assessment_schema_id = $1 AND name = $2
+)
+`
+
+type CheckCategoryNameExistsParams struct {
+	AssessmentSchemaID uuid.UUID `json:"assessment_schema_id"`
+	Name               string    `json:"name"`
+}
+
+// Check if a category name already exists within a given assessment schema
+func (q *Queries) CheckCategoryNameExists(ctx context.Context, arg CheckCategoryNameExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkCategoryNameExists, arg.AssessmentSchemaID, arg.Name)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createCategory = `-- name: CreateCategory :exec
 INSERT INTO category (id, name, short_name, description, weight, assessment_schema_id)
 VALUES ($1, $2, $3, $4, $5, $6)

@@ -175,11 +175,12 @@ type AssessmentCompletion struct {
 }
 
 type AssessmentSchema struct {
-	ID          uuid.UUID        `json:"id"`
-	Name        string           `json:"name"`
-	Description pgtype.Text      `json:"description"`
-	CreatedAt   pgtype.Timestamp `json:"created_at"`
-	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+	ID            uuid.UUID        `json:"id"`
+	Name          string           `json:"name"`
+	Description   pgtype.Text      `json:"description"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+	SourcePhaseID pgtype.UUID      `json:"source_phase_id"`
 }
 
 type Category struct {

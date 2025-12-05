@@ -23,7 +23,8 @@ CREATE TABLE public.assessment_schema (
     name text NOT NULL,
     description text,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    source_phase_id uuid
 );
 
 --

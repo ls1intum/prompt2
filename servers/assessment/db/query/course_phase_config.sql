@@ -96,6 +96,40 @@ WHERE course_phase_id = $1;
 INSERT INTO course_phase_config (course_phase_id)
 VALUES ($1);
 
+-- name: CheckAssessmentSchemaUsageInOtherPhases :one
+SELECT EXISTS(
+    SELECT 1
+    FROM course_phase_config cpc
+    WHERE (
+        cpc.assessment_schema_id = $1
+        OR cpc.self_evaluation_schema = $1
+        OR cpc.peer_evaluation_schema = $1
+        OR cpc.tutor_evaluation_schema = $1
+    )
+    AND cpc.course_phase_id != $2
+    AND EXISTS(
+        SELECT 1
+        FROM assessment a
+        WHERE a.course_phase_id = cpc.course_phase_id
+        AND a.competency_id IN (
+            SELECT co.id
+            FROM competency co
+            INNER JOIN category cat ON co.category_id = cat.id
+            WHERE cat.assessment_schema_id = $1
+        )
+        UNION
+        SELECT 1
+        FROM evaluation e
+        WHERE e.course_phase_id = cpc.course_phase_id
+        AND e.competency_id IN (
+            SELECT co.id
+            FROM competency co
+            INNER JOIN category cat ON co.category_id = cat.id
+            WHERE cat.assessment_schema_id = $1
+        )
+    )
+) AS schema_used_in_other_phases;
+
 -- name: CreateOrUpdateCoursePhaseConfig :exec
 INSERT INTO course_phase_config (assessment_schema_id,
                                  course_phase_id,
@@ -138,3 +172,8 @@ ON CONFLICT (course_phase_id)
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
                   grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
                   action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE);
+
+-- name: UpdateCoursePhaseConfigAssessmentSchema :exec
+UPDATE course_phase_config
+SET assessment_schema_id = $2
+WHERE course_phase_id = $1;
