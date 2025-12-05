@@ -75,49 +75,36 @@ export const AssessmentForm = ({
     })
   }, [form, courseParticipationID, competency.id, assessment, userName])
 
+  const saveAssessment = async () => {
+    if (completed) return
+
+    const isValid = await form.trigger()
+    if (!isValid) return
+
+    const data = form.getValues()
+    if (!data.scoreLevel) return
+
+    createOrUpdateAssessment(data)
+  }
+
   useEffect(() => {
     if (completed) return
 
     const subscription = form.watch(async (_, { name }) => {
-      if (name) {
-        // Only save immediately for non-text fields (like scoreLevel)
-        if (name !== 'comment' && name !== 'examples') {
-          const isValid = await form.trigger()
-          if (isValid) {
-            const data = form.getValues()
-            if (!data.scoreLevel) {
-              return
-            }
-            createOrUpdateAssessment(data)
-          }
-        }
+      if (name === 'scoreLevel') {
+        await form.trigger(['comment', 'examples'])
       }
     })
 
     return () => {
       subscription.unsubscribe()
     }
-  }, [form, createOrUpdateAssessment, completed])
-
-  const handleTextFieldBlur = async () => {
-    if (completed) return
-
-    const isValid = await form.trigger()
-    if (isValid) {
-      const data = form.getValues()
-      // Don't save if scoreLevel is not set
-      if (!data.scoreLevel) {
-        return
-      }
-      createOrUpdateAssessment(data)
-    }
-  }
+  }, [form, completed])
 
   const handleScoreChange = async (value: ScoreLevel) => {
     if (completed) return
     form.setValue('scoreLevel', value, { shouldValidate: true })
-    // Trigger validation for both comment and examples to show errors immediately
-    await form.trigger(['comment', 'examples'])
+    await saveAssessment()
   }
 
   const handleDelete = () => {
@@ -247,7 +234,7 @@ export const AssessmentForm = ({
           placeholder='Example'
           completed={completed}
           getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={handleTextFieldBlur}
+          onBlur={saveAssessment}
         />
 
         <AssessmentTextField
@@ -256,7 +243,7 @@ export const AssessmentForm = ({
           placeholder='Additional comments'
           completed={completed}
           getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={handleTextFieldBlur}
+          onBlur={saveAssessment}
         />
 
         {error && !completed && <FormMessage className='mt-2'>{error}</FormMessage>}
