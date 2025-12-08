@@ -10,4 +10,6 @@ export interface OpenApplicationDetails {
   applicationDeadline: Date
   externalStudentsAllowed: boolean
   universityLoginAvailable: boolean
+  shortDescription?: string | null
+  longDescription?: string | null
 }

@@ -34,6 +34,12 @@ export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
       </CardHeader>
 
       <CardContent className='relative space-y-4'>
+        {courseDetails.shortDescription && (
+          <p className='text-sm text-muted-foreground leading-relaxed'>
+            {courseDetails.shortDescription}
+          </p>
+        )}
+
         {/* Course Type and ECTS Badges */}
         <div className='flex items-center justify-between gap-3'>
           <Badge variant='secondary' className='text-sm font-medium'>
