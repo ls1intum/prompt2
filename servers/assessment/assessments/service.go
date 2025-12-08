@@ -26,8 +26,22 @@ type AssessmentService struct {
 }
 
 var AssessmentServiceSingleton *AssessmentService
+var ErrValidationFailed = errors.New("validation failed: comment and examples are required for Strongly Disagree, Disagree, and Neutral scores")
+var ErrInvalidScoreLevel = errors.New("validation failed: scoreLevel is required and must be valid")
 
 func CreateOrUpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
+	// Validate scoreLevel is not empty
+	if req.ScoreLevel == "" {
+		return ErrInvalidScoreLevel
+	}
+
+	// Validate that comment and examples are provided for low score levels
+	if isLowScoreLevel(req.ScoreLevel) {
+		if req.Comment == "" || req.Examples == "" {
+			return ErrValidationFailed
+		}
+	}
+
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -179,4 +193,11 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+// isLowScoreLevel checks if a score level requires comment and examples
+func isLowScoreLevel(scoreLevel scoreLevelDTO.ScoreLevel) bool {
+	return scoreLevel == scoreLevelDTO.ScoreLevelVeryBad ||
+		scoreLevel == scoreLevelDTO.ScoreLevelBad ||
+		scoreLevel == scoreLevelDTO.ScoreLevelOk
 }
