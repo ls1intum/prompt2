@@ -35,7 +35,7 @@ export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
 
       <CardContent className='relative space-y-4'>
         {courseDetails.shortDescription && (
-          <p className='text-sm text-muted-foreground leading-relaxed'>
+          <p className='text-sm text-muted-foreground leading-relaxed whitespace-pre-line'>
             {courseDetails.shortDescription}
           </p>
         )}
