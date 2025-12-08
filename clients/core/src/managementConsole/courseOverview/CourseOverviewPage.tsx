@@ -66,7 +66,12 @@ export const CourseOverview = (): JSX.Element => {
         </CardHeader>
         <CardContent className='p-6'>
           {course.shortDescription && (
-            <p className='mb-6 text-muted-foreground leading-relaxed'>{course.shortDescription}</p>
+            <p className='mb-4 text-muted-foreground leading-relaxed'>{course.shortDescription}</p>
+          )}
+          {course.longDescription && (
+            <p className='mb-6 text-sm text-muted-foreground leading-relaxed border-l-2 border-border pl-3'>
+              {course.longDescription}
+            </p>
           )}
           <div className='grid md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
