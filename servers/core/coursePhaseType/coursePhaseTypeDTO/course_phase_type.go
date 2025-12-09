@@ -3,6 +3,7 @@ package coursePhaseTypeDTO
 import (
 	"github.com/google/uuid"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CoursePhaseType struct {
@@ -10,6 +11,7 @@ type CoursePhaseType struct {
 	Name                            string                   `json:"name"`
 	BaseUrl                         string                   `json:"baseUrl"`
 	InitialPhase                    bool                     `json:"initialPhase"`
+  Description                     pgtype.Text              `json:"description"`
 	RequiredParticipationInputDTOs  []ParticipationInputDTO  `json:"requiredParticipationInputDTOs"`
 	ProvidedParticipationOutputDTOs []ParticipationOutputDTO `json:"providedParticipationOutputDTOs"`
 	RequiredPhaseInputDTOs          []PhaseInputDTO          `json:"requiredPhaseInputDTOs"`
@@ -22,6 +24,7 @@ func GetCoursePhaseTypeDTOFromDBModel(model db.CoursePhaseType, requiredParticip
 		Name:                            model.Name,
 		BaseUrl:                         model.BaseUrl,
 		InitialPhase:                    model.InitialPhase,
+    Description:                     model.Description,
 		RequiredParticipationInputDTOs:  requiredParticipationInputs,
 		ProvidedParticipationOutputDTOs: providedParticipationOutputs,
 		RequiredPhaseInputDTOs:          requiredPhaseInputs,

@@ -29,6 +29,11 @@ export const ApplicationHeader = ({ applicationPhase, onBackClick }: Application
             Apply by {format(applicationPhase.applicationDeadline, 'MMM d, yyyy')}
           </span>
         </div>
+        {applicationPhase.longDescription && (
+          <p className='text-base text-muted-foreground leading-relaxed max-w-3xl mx-auto'>
+            {applicationPhase.longDescription}
+          </p>
+        )}
       </div>
     </div>
   )

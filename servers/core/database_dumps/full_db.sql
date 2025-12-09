@@ -171,6 +171,9 @@ CREATE TABLE course (
     ects integer,
     restricted_data jsonb,
     student_readable_data jsonb DEFAULT '{}'::jsonb,
+    template boolean NOT NULL DEFAULT FALSE,
+    short_description character varying(255),
+    long_description text,
     CONSTRAINT check_end_date_after_start_date CHECK ((end_date > start_date))
 );
 
@@ -234,7 +237,8 @@ CREATE TABLE course_phase_type (
     id uuid NOT NULL,
     name text NOT NULL,
     initial_phase boolean DEFAULT false NOT NULL,
-    base_url text DEFAULT 'core'::text NOT NULL
+    base_url text DEFAULT 'core'::text NOT NULL,
+    description text
 );
 
 
@@ -430,13 +434,54 @@ INSERT INTO application_question_text (id, course_phase_id, title, description, 
 INSERT INTO application_question_text (id, course_phase_id, title, description, placeholder, validation_regex, error_message, is_required, allowed_length, order_num, accessible_for_other_phases, access_key) VALUES ('35687df9-d180-4b37-b71d-69ca419fb8e9', '4179d58a-d00d-4fa7-94a5-397bc69fab02', 'New Test', '', '', '', '', false, 500, 10, true, 'test');
 
 
---
--- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
---
 
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('d7307be2-d3dc-496e-86f0-643bff6cc1c8', 'iPraktikum', '2024-10-13', '2024-10-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-red-100"}', '{}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('e12ffe63-448d-4469-a840-1699e9b328d1', 'iPraktikum-Test', '2024-12-15', '2025-03-14', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}', '{}');
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data) VALUES ('be780b32-a678-4b79-ae1c-80071771d254', 'TestCourse', '2024-12-19', '2025-01-24', 'ios2425', 'practical course', 10, '{"icon": "smartphone", "bg-color": "bg-blue-100"}', '{}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description) VALUES
+    (
+        'd7307be2-d3dc-496e-86f0-643bff6cc1c8',
+        'iPraktikum',
+        '2024-10-13',
+        '2024-10-14',
+        'ios2425',
+        'practical course',
+        10,
+        '{"icon": "smartphone", "bg-color": "bg-red-100"}',
+        '{}',
+        FALSE,
+        'Two-day iPraktikum intro',
+        'Compact iteration used in integration tests.'
+    );
+
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description) VALUES
+    (
+        'e12ffe63-448d-4469-a840-1699e9b328d1',
+        'iPraktikum-Test',
+        '2024-12-15',
+        '2025-03-14',
+        'ios2425',
+        'practical course',
+        10,
+        '{"icon": "smartphone", "bg-color": "bg-blue-100"}',
+        '{}',
+        FALSE,
+        'Extended practice run',
+        'Covers template-based flows for integration tests.'
+    );
+
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description) VALUES
+    (
+        'be780b32-a678-4b79-ae1c-80071771d254',
+        'TestCourse',
+        '2024-12-19',
+        '2025-01-24',
+        'ios2425',
+        'practical course',
+        10,
+        '{"icon": "smartphone", "bg-color": "bg-blue-100"}',
+        '{}',
+        FALSE,
+        'Developer bootcamp',
+        'Covers onboarding and application data for integration tests.'
+    );
 
 
 --
@@ -503,11 +548,11 @@ INSERT INTO course_phase_participation (id, course_participation_id, course_phas
 -- Data for Name: course_phase_type; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', false, 'core');
-INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', false, 'core');
-INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', true, 'core');
-INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', 'Matching', false, 'core');
-INSERT INTO course_phase_type (id, name, initial_phase, base_url) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546383', 'Interview', false, 'core');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', false, 'core', 'Introduces participants to course expectations');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', false, 'core', 'Facilitates team collaboration');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', true, 'core', 'Collects applications and materials');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abb', 'Matching', false, 'core', 'Matches students to projects');
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546383', 'Interview', false, 'core', 'Runs interview style assessments');
 
 
 --

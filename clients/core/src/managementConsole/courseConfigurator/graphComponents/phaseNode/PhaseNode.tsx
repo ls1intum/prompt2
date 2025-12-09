@@ -66,61 +66,67 @@ export function PhaseNode({ id, selected }: { id: string; selected?: boolean }) 
           />
         </div>
 
-        {/* 2. Phase Data Inputs (required Input DTOs) */}
-        {phaseType?.requiredPhaseInputDTOs && phaseType.requiredPhaseInputDTOs.length > 0 && (
-          <div className='meta-data-inputs space-y-2 mb-4 mr-16'>
-            <h4 className='text-sm font-semibold mb-2'>Required Phase Inputs:</h4>
-            {phaseType.requiredPhaseInputDTOs.map((dto) => (
-              <IncomingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
-            ))}
-          </div>
-        )}
-
-        {/* 3. Phase Data Outputs (provided Output DTOs) */}
-        {phaseType?.providedPhaseOutputDTOs && phaseType.providedPhaseOutputDTOs.length > 0 && (
-          <>
-            <h4 className='text-sm font-semibold mb-2'>Provided Phase Outputs:</h4>
-            <div className='meta-data-outputs space-y-2 ml-16'>
-              {phaseType.providedPhaseOutputDTOs.map((dto) => (
-                <OutgoingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* 4. Participation Data Inputs (required Input DTOs) */}
-        {phaseType?.requiredParticipationInputDTOs &&
-          phaseType.requiredParticipationInputDTOs.length > 0 && (
-            <div className='meta-data-inputs space-y-2 mb-4 mr-16'>
-              <h4 className='text-sm font-semibold mb-2'>Required Participation Inputs:</h4>
-              {phaseType.requiredParticipationInputDTOs.map((dto) => (
-                <IncomingDataHandle
-                  key={dto.id}
-                  phaseID={id}
-                  dto={dto}
-                  type={'participation-data'}
-                />
-              ))}
-            </div>
-          )}
-
-        {/* 5. Participation Data Outputs (provided Output DTOs) */}
-        {phaseType?.providedParticipationOutputDTOs &&
-          phaseType.providedParticipationOutputDTOs.length > 0 && (
-            <>
-              <h4 className='text-sm font-semibold mb-2'>Provided Participation Outputs:</h4>
-              <div className='meta-data-outputs space-y-2 ml-16'>
-                {phaseType.providedParticipationOutputDTOs.map((dto) => (
-                  <OutgoingDataHandle
-                    key={dto.id}
-                    phaseID={id}
-                    dto={dto}
-                    type={'participation-data'}
-                  />
+        <div className='flex flex-col gap-4'>
+          {/* 2. Phase Data Inputs (required Input DTOs) */}
+          {phaseType?.requiredPhaseInputDTOs && phaseType.requiredPhaseInputDTOs.length > 0 && (
+            <div>
+              <h4 className='text-sm font-semibold mb-2'>Phase Inputs:</h4>
+              <div className='meta-data-inputs space-y-2 mr-16'>
+                {phaseType.requiredPhaseInputDTOs.map((dto) => (
+                  <IncomingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
                 ))}
               </div>
-            </>
+            </div>
           )}
+
+          {/* 3. Phase Data Outputs (provided Output DTOs) */}
+          {phaseType?.providedPhaseOutputDTOs && phaseType.providedPhaseOutputDTOs.length > 0 && (
+            <div>
+              <h4 className='text-sm font-semibold mb-2'>Provided Phase Outputs:</h4>
+              <div className='meta-data-outputs space-y-2 ml-16'>
+                {phaseType.providedPhaseOutputDTOs.map((dto) => (
+                  <OutgoingDataHandle key={dto.id} phaseID={id} dto={dto} type={'phase-data'} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. Participation Data Inputs (required Input DTOs) */}
+          {phaseType?.requiredParticipationInputDTOs &&
+            phaseType.requiredParticipationInputDTOs.length > 0 && (
+              <div>
+                <h4 className='text-sm font-semibold mb-2'>Participation Inputs:</h4>
+                <div className='meta-data-inputs space-y-2 mr-16'>
+                  {phaseType.requiredParticipationInputDTOs.map((dto) => (
+                    <IncomingDataHandle
+                      key={dto.id}
+                      phaseID={id}
+                      dto={dto}
+                      type={'participation-data'}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* 5. Participation Data Outputs (provided Output DTOs) */}
+          {phaseType?.providedParticipationOutputDTOs &&
+            phaseType.providedParticipationOutputDTOs.length > 0 && (
+              <div>
+                <h4 className='text-sm font-semibold mb-2'>Provided Participation Outputs:</h4>
+                <div className='meta-data-outputs space-y-2 ml-16'>
+                  {phaseType.providedParticipationOutputDTOs.map((dto) => (
+                    <OutgoingDataHandle
+                      key={dto.id}
+                      phaseID={id}
+                      dto={dto}
+                      type={'participation-data'}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+        </div>
       </CardContent>
     </Card>
   )

@@ -466,6 +466,12 @@ RENAME COLUMN meta_data TO restricted_data;
 ALTER TABLE course
 ADD COLUMN student_readable_data jsonb DEFAULT '{}';
 
+ALTER TABLE course
+ADD COLUMN short_description VARCHAR(255);
+
+ALTER TABLE course
+ADD COLUMN long_description TEXT;
+
 -- 2) Adjust course_phase
 ALTER TABLE course_phase
 RENAME COLUMN meta_data TO restricted_data;

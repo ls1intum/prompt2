@@ -115,16 +115,17 @@ CREATE TABLE course_phase_type (
     name text NOT NULL,
     required_input_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
     provided_output_meta_data jsonb DEFAULT '{}'::jsonb NOT NULL,
-    initial_phase boolean DEFAULT false NOT NULL
+  initial_phase boolean DEFAULT false NOT NULL,
+  description text
 );
 
 --
 -- Data for Name: course_phase_type; Type: TABLE DATA; Schema: public; Owner: prompt-postgres
 --
 
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', '[{"name": "hasOwnMac", "type": "boolean"}]', '[{"name": "proficiency level", "type": "string"}]', false);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', '[]', '[{"name": "hasOwnMac", "type": "boolean"}, {"name": "devices", "type": "array"}]', true);
-INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', '[{"name": "proficiency level", "type": "string"}, {"name": "devices", "type": "array"}]', '[]', false);
+INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase, description) VALUES ('48d22f19-6cc0-417b-ac25-415fb40f2030', 'Intro Course', '[{"name": "hasOwnMac", "type": "boolean"}]', '[{"name": "proficiency level", "type": "string"}]', false, 'Introduces course basics');
+INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase, description) VALUES ('96fb1001-b21c-4527-8b6f-2fd5f4ba3abc', 'Application', '[]', '[{"name": "hasOwnMac", "type": "boolean"}, {"name": "devices", "type": "array"}]', true, 'Handles application intake');
+INSERT INTO course_phase_type (id, name, required_input_meta_data, provided_output_meta_data, initial_phase, description) VALUES ('627b6fb9-2106-4fce-ba6d-b68eeb546382', 'Team Phase', '[{"name": "proficiency level", "type": "string"}, {"name": "devices", "type": "array"}]', '[]', false, 'Runs team collaboration phase');
 
 
 
@@ -376,6 +377,12 @@ RENAME COLUMN meta_data TO restricted_data;
 
 ALTER TABLE course
 ADD COLUMN student_readable_data jsonb DEFAULT '{}';
+
+ALTER TABLE course
+ADD COLUMN short_description VARCHAR(255);
+
+ALTER TABLE course
+ADD COLUMN long_description TEXT;
 
 -- 2) Adjust course_phase
 ALTER TABLE course_phase

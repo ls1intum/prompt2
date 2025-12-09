@@ -3,6 +3,7 @@ package course
 import (
 	"context"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -124,11 +125,83 @@ func (suite *CourseTestSuite) TestValidateCreateCourse() {
 			},
 			expectedError: "course type is required",
 		},
+		{
+			name: "short description too long",
+			input: courseDTO.CreateCourse{
+				Name:                "Course With Long Short Description",
+				StartDate:           pgtype.Date{Valid: true, Time: time.Now()},
+				EndDate:             pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+				SemesterTag:         pgtype.Text{String: "ios2425", Valid: true},
+				RestrictedData:      meta.MetaData{"key": "value"},
+				StudentReadableData: meta.MetaData{"differentKey": "value"},
+				CourseType:          "practical course",
+				Ects:                pgtype.Int4{Int32: 10, Valid: true},
+				ShortDescription:    pgtype.Text{String: strings.Repeat("a", 260), Valid: true},
+			},
+			expectedError: "short description must be 255 characters or fewer",
+		},
+		{
+			name: "long description too long",
+			input: courseDTO.CreateCourse{
+				Name:                "Course With Extremely Long Description",
+				StartDate:           pgtype.Date{Valid: true, Time: time.Now()},
+				EndDate:             pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+				SemesterTag:         pgtype.Text{String: "ios2425", Valid: true},
+				RestrictedData:      meta.MetaData{"key": "value"},
+				StudentReadableData: meta.MetaData{"differentKey": "value"},
+				CourseType:          "practical course",
+				Ects:                pgtype.Int4{Int32: 10, Valid: true},
+				LongDescription:     pgtype.Text{String: strings.Repeat("b", 6000), Valid: true},
+			},
+			expectedError: "long description must be 5000 characters or fewer",
+		},
 	}
 
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
 			err := validateCreateCourse(tt.input)
+			if tt.expectedError == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err)
+				assert.EqualError(t, err, tt.expectedError)
+			}
+		})
+	}
+}
+
+func (suite *CourseTestSuite) TestValidateUpdateCourseData() {
+	tests := []struct {
+		name          string
+		input         courseDTO.UpdateCourseData
+		expectedError string
+	}{
+		{
+			name: "valid short description",
+			input: courseDTO.UpdateCourseData{
+				ShortDescription: pgtype.Text{String: "Concise summary", Valid: true},
+			},
+			expectedError: "",
+		},
+		{
+			name: "short description too long",
+			input: courseDTO.UpdateCourseData{
+				ShortDescription: pgtype.Text{String: strings.Repeat("x", 300), Valid: true},
+			},
+			expectedError: "short description must be 255 characters or fewer",
+		},
+		{
+			name: "long description too long",
+			input: courseDTO.UpdateCourseData{
+				LongDescription: pgtype.Text{String: strings.Repeat("y", 6000), Valid: true},
+			},
+			expectedError: "long description must be 5000 characters or fewer",
+		},
+	}
+
+	for _, tt := range tests {
+		suite.T().Run(tt.name, func(t *testing.T) {
+			err := validateUpdateCourseData(tt.input)
 			if tt.expectedError == "" {
 				assert.NoError(t, err)
 			} else {
