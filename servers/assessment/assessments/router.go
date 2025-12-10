@@ -1,6 +1,7 @@
 package assessments
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,12 @@ func createOrUpdateAssessment(c *gin.Context) {
 	}
 	err := CreateOrUpdateAssessment(c, req)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		// Check if it's a validation error
+		if errors.Is(err, ErrValidationFailed) || errors.Is(err, ErrInvalidScoreLevel) {
+			handleError(c, http.StatusBadRequest, err)
+		} else {
+			handleError(c, http.StatusInternalServerError, err)
+		}
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Assessment created/updated successfully"})
