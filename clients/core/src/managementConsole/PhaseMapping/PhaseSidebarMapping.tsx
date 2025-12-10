@@ -19,7 +19,7 @@ export const PhaseSidebarMapping: {
   'Intro Course Developer': IntroCourseDeveloperSidebar,
   IntroCourseTutor: IntroCourseTutorSidebar,
   Assessment: AssessmentSidebar,
-  DevOpsChallenge: DevOpsChallengeSidebar,
+  'DevOps Challenge': DevOpsChallengeSidebar,
   'Team Allocation': TeamAllocationSidebar,
   'Self Team Allocation': SelfTeamAllocationSidebar,
 }

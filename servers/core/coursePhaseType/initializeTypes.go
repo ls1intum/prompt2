@@ -222,7 +222,7 @@ func initDevOpsChallenge() error {
 		// 1.) Create the phase
 		newDevOps := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
-			Name:         "DevOpsChallenge",
+			Name:         "DevOps Challenge",
 			InitialPhase: false,
 			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
       Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},

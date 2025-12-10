@@ -55,7 +55,7 @@ SELECT EXISTS (SELECT 1
 -- name: TestDevOpsChallengeTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
-               WHERE name = 'DevOpsChallenge') AS does_exist;
+               WHERE name = 'DevOps Challenge') AS does_exist;
 
 -- name: TestAssessmentTypeExists :one
 SELECT EXISTS (SELECT 1
