@@ -1,9 +1,11 @@
 import { Connection, Edge, MarkerType } from '@xyflow/react'
 
+const EDGE_COLOR_BLUE = '#3b82f6'
+
 export const ParticipantEdgeProps = (params: Edge | Connection) => ({
   ...params,
   animated: false,
-  style: { stroke: '#3b82f6', strokeWidth: 3, strokeDasharray: '5,5' },
+  style: { stroke: EDGE_COLOR_BLUE, strokeWidth: 2, strokeDasharray: '5,5' },
   type: 'iconEdge',
-  markerEnd: { type: MarkerType.ArrowClosed },
+  markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR_BLUE },
 })
