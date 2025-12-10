@@ -8,23 +8,21 @@ export default function CourseConfiguratorPage() {
   const { isError, isPending, error, finishedSetup, refetchAll } = useCourseConfiguratorDataSetup()
 
   return (
-    <>
-      <div>
-        <div className='flex items-center justify-between mb-4'>
+    <div className='h-full flex flex-col min-h-0'>
+      <div className='flex items-center justify-between mb-4'>
+        <div className='-mb-6'>
           <ManagementPageHeader>Course Configurator</ManagementPageHeader>
-          <HelpDialog />
         </div>
+        <HelpDialog />
       </div>
 
-      <Card>
+      <Card className='flex-grow min-h-0 flex flex-col overflow-hidden'>
         {isError ? (
           <ErrorPage
             title='Error'
             description='Failed to fetch course phase types'
             message={error?.message}
-            onRetry={() => {
-              refetchAll()
-            }}
+            onRetry={() => refetchAll()}
           />
         ) : isPending || !finishedSetup ? (
           <div className='flex justify-center items-center h-64'>
@@ -34,6 +32,6 @@ export default function CourseConfiguratorPage() {
           <Canvas />
         )}
       </Card>
-    </>
+    </div>
   )
 }

@@ -27,7 +27,7 @@ export const DevOpsChallengeSidebar = React.lazy(() =>
     .catch((): { default: React.FC } => ({
       default: () => {
         console.warn('Failed to load challenge sidebar')
-        return <DisabledSidebarMenuItem title={'DevOpsChallenge Not Available'} />
+        return <DisabledSidebarMenuItem title={'DevOps Challenge Not Available'} />
       },
     })),
 )

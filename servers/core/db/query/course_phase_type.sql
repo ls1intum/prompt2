@@ -45,7 +45,7 @@ SELECT EXISTS (SELECT 1
 -- name: TestIntroCourseDeveloperPhaseTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
-               WHERE name = 'IntroCourseDeveloper') AS does_exist;
+               WHERE name = 'Intro Course Developer') AS does_exist;
 
 -- name: TestIntroCourseTutorPhaseTypeExists :one
 SELECT EXISTS (SELECT 1
@@ -55,7 +55,7 @@ SELECT EXISTS (SELECT 1
 -- name: TestDevOpsChallengeTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
-               WHERE name = 'DevOpsChallenge') AS does_exist;
+               WHERE name = 'DevOps Challenge') AS does_exist;
 
 -- name: TestAssessmentTypeExists :one
 SELECT EXISTS (SELECT 1
@@ -74,8 +74,8 @@ SELECT EXISTS (SELECT 1
 
 
 -- name: CreateCoursePhaseType :exec
-INSERT INTO course_phase_type (id, name, initial_phase, base_url)
-VALUES ($1, $2, $3, $4);
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: CreateCoursePhaseTypeRequiredInput :exec
 INSERT INTO course_phase_type_participation_required_input_dto (id, course_phase_type_id, dto_name, specification)

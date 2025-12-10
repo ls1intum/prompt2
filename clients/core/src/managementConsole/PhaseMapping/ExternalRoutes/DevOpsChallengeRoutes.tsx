@@ -14,7 +14,7 @@ export const DevOpsChallengeRoutes = React.lazy(() =>
     .catch((): { default: React.FC } => ({
       default: () => {
         console.warn('Failed to load challenge routes')
-        return <LoadingError phaseTitle={'DevOpsChallenge'} />
+        return <LoadingError phaseTitle={'DevOps Challenge'} />
       },
     })),
 )

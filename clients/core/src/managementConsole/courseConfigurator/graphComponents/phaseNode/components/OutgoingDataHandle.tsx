@@ -1,5 +1,6 @@
 import { ProvidedOutputDTO } from '@core/managementConsole/courseConfigurator/interfaces/providedOutputDto'
 import { Handle, Position } from '@xyflow/react'
+import { camelToTitle } from './utils/camelToTitle'
 
 interface OutgoingDataHandleProps {
   phaseID: string
@@ -22,7 +23,7 @@ export const OutgoingDataHandle = ({
         ${isParticipationEdge ? 'bg-green-50 text-green-700' : 'bg-purple-50 text-purple-700'} 
         relative shadow-sm transition-all duration-200`}
     >
-      <span className='mr-2 text-sm'>{dto.dtoName}</span>
+      <span className='mr-2 text-sm'>{camelToTitle(dto.dtoName)}</span>
       <Handle
         type='source'
         position={Position.Right}

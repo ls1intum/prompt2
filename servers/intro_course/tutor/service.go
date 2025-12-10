@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor/tutorDTO"
-	"github.com/ls1intum/prompt2/servers/intro_course/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,7 +37,7 @@ func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []tutorDT
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+  defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := TutorServiceSingleton.queries.WithTx(tx)
 
 	for _, tutor := range tutors {
