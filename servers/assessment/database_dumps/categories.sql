@@ -85,6 +85,7 @@ CREATE TABLE public.assessment_schema (
     description text,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    source_phase_id uuid,
     CONSTRAINT assessment_schema_pkey PRIMARY KEY (id)
 );
 
@@ -126,6 +127,29 @@ CREATE TABLE public.competency (
     description_very_good text NOT NULL DEFAULT '',
     weight integer DEFAULT 1 NOT NULL,
     short_name character varying(10)
+);
+
+CREATE TABLE public.assessment (
+    id uuid NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    assessed_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    author text DEFAULT ''::text NOT NULL,
+    examples text DEFAULT '' NOT NULL
+);
+
+CREATE TABLE public.evaluation (
+    id uuid NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    evaluated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    author text DEFAULT ''::text NOT NULL
 );
 
 CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
@@ -298,11 +322,23 @@ ADD CONSTRAINT category_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.competency
 ADD CONSTRAINT competency_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.assessment
+ADD CONSTRAINT assessment_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.evaluation
+ADD CONSTRAINT evaluation_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.schema_migrations
 ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
 ALTER TABLE ONLY public.competency
 ADD CONSTRAINT competency_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.category (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.assessment
+ADD CONSTRAINT assessment_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.evaluation
+ADD CONSTRAINT evaluation_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency (id) ON DELETE CASCADE;
 
 --
 -- Competency Map Table (added for GetCategoriesWithCompetencies support)

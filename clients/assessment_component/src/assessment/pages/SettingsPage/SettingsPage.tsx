@@ -66,26 +66,32 @@ export const SettingsPage = (): JSX.Element => {
             />
           )}
 
-          {config?.selfEvaluationEnabled && config.selfEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.selfEvaluationSchema}
-              assessmentType={AssessmentType.SELF}
-            />
-          )}
+          {config?.selfEvaluationEnabled &&
+            config.selfEvaluationSchema &&
+            config.selfEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.selfEvaluationSchema}
+                assessmentType={AssessmentType.SELF}
+              />
+            )}
 
-          {config?.peerEvaluationEnabled && config.peerEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.peerEvaluationSchema}
-              assessmentType={AssessmentType.PEER}
-            />
-          )}
+          {config?.peerEvaluationEnabled &&
+            config.peerEvaluationSchema &&
+            config.peerEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.peerEvaluationSchema}
+                assessmentType={AssessmentType.PEER}
+              />
+            )}
 
-          {config?.tutorEvaluationEnabled && config.tutorEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.tutorEvaluationSchema}
-              assessmentType={AssessmentType.TUTOR}
-            />
-          )}
+          {config?.tutorEvaluationEnabled &&
+            config.tutorEvaluationSchema &&
+            config.tutorEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.tutorEvaluationSchema}
+                assessmentType={AssessmentType.TUTOR}
+              />
+            )}
         </>
       )}
     </div>

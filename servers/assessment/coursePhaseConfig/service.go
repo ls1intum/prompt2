@@ -83,20 +83,20 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 	}
 
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentSchemaID:     req.AssessmentSchemaID,
+		AssessmentSchemaID:       req.AssessmentSchemaID,
 		CoursePhaseID:            coursePhaseID,
 		Start:                    pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
 		Deadline:                 pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
 		SelfEvaluationEnabled:    req.SelfEvaluationEnabled,
-		SelfEvaluationSchema:   req.SelfEvaluationSchema,
+		SelfEvaluationSchema:     req.SelfEvaluationSchema,
 		SelfEvaluationStart:      pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
 		SelfEvaluationDeadline:   pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
 		PeerEvaluationEnabled:    req.PeerEvaluationEnabled,
-		PeerEvaluationSchema:   req.PeerEvaluationSchema,
+		PeerEvaluationSchema:     req.PeerEvaluationSchema,
 		PeerEvaluationStart:      pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
 		PeerEvaluationDeadline:   pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
 		TutorEvaluationEnabled:   req.TutorEvaluationEnabled,
-		TutorEvaluationSchema:  req.TutorEvaluationSchema,
+		TutorEvaluationSchema:    req.TutorEvaluationSchema,
 		TutorEvaluationStart:     pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
 		TutorEvaluationDeadline:  pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
@@ -183,4 +183,25 @@ func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUI
 		return false, errors.New("could not check if tutor evaluation deadline has passed")
 	}
 	return deadlinePassed, nil
+}
+
+func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, newSchemaID uuid.UUID) error {
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	err = qtx.UpdateCoursePhaseConfigAssessmentSchema(ctx, db.UpdateCoursePhaseConfigAssessmentSchemaParams{
+		CoursePhaseID:      coursePhaseID,
+		AssessmentSchemaID: newSchemaID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to update course phase config assessment schema")
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

@@ -2,6 +2,13 @@
 INSERT INTO category (id, name, short_name, description, weight, assessment_schema_id)
 VALUES ($1, $2, $3, $4, $5, $6);
 
+-- name: CheckCategoryNameExists :one
+-- Check if a category name already exists within a given assessment schema
+SELECT EXISTS(
+    SELECT 1 FROM category
+    WHERE assessment_schema_id = $1 AND name = $2
+);
+
 -- name: GetCategory :one
 SELECT *
 FROM category
