@@ -108,10 +108,12 @@ func initSentry() {
 	}
 	environment := utils.GetEnv("ENVIRONMENT", "development")
 
-	if err := sentry.Init(sentry.ClientOptions{
+	err := sentry.Init(sentry.ClientOptions{
 		Dsn:         sentryDsn,
 		Environment: environment,
-	}); err != nil {
+		Debug:       true,
+	})
+	if err != nil {
 		log.Errorf("Sentry initialization failed: %v", err)
 	}
 }
@@ -134,6 +136,7 @@ func main() {
 	// initialize Sentry
 	initSentry()
 	defer sentry.Flush(2 * time.Second) // Flush buffered events before exiting (2 seconds timeout)
+	sentry.CaptureMessage("It works!")
 
 	// establish database connection
 	databaseURL := getDatabaseURL()
