@@ -24,12 +24,6 @@ export const InsideGeneralSidebar = (): JSX.Element => {
             goToPath={'/management/course_archive'}
             title='Archived Courses'
           />
-          <InsideSidebarHeading>Students</InsideSidebarHeading>
-          <InsideSidebarMenuItem
-            icon={<Users />}
-            goToPath={'/management/course_archive'}
-            title='Students'
-          />
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarMenu>
