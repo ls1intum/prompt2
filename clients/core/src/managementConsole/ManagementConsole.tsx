@@ -99,7 +99,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
       if (fetchedCourses.length === 1) {
         navigate(`/management/course/${fetchedCourses[0].id}`)
       }
-    } else if (path === '/management/general' || (courseId && !courseExists)) {
+    } else if (
+      [
+        '/management/courses',
+        '/management/course_templates',
+        '/management/course_archive',
+      ].includes(path) ||
+      (courseId && !courseExists)
+    ) {
       removeSelectedCourseID()
     } else if (courseId && courseExists) {
       setSelectedCourseID(courseId)

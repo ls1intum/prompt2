@@ -13,6 +13,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 
 export const CourseSwitchSidebar = (): JSX.Element => {
   const { courses } = useCourseStore()
+  const activeCourses = courses.filter((c) => !c.template && !c.archived)
   const { permissions } = useAuthStore()
 
   const canAddCourse = permissions.some(
@@ -29,7 +30,7 @@ export const CourseSwitchSidebar = (): JSX.Element => {
         <SidebarGroup>
           <SidebarGroupContent className='px-0'>
             <SidebarMenu>
-              {courses.map((course) => {
+              {activeCourses.map((course) => {
                 return <CourseSidebarItem key={course.id} course={course} />
               })}
               {canAddCourse && <AddCourseButton />}

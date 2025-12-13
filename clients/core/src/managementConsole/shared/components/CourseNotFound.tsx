@@ -31,7 +31,7 @@ export default function CourseNotFound({ courseId }: CourseNotFoundProps) {
           </p>
         </CardContent>
         <CardFooter className='flex justify-center'>
-          <Button onClick={() => navigate('/management/general')}>Return to Overview</Button>
+          <Button onClick={() => navigate('/management/courses')}>Return to Overview</Button>
         </CardFooter>
       </Card>
     </div>
