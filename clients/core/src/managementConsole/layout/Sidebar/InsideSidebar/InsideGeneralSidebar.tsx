@@ -1,29 +1,30 @@
 import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '@tumaet/prompt-ui-components'
-import { Archive, File, FileText, Users } from 'lucide-react'
+import { Archive, File, FileText } from 'lucide-react'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
-import { InsideSidebarHeading } from './components/InsideSidebarHeading'
+import { InsideSidebarVisualGroup } from './components/InsideSidebarHeading'
 
 export const InsideGeneralSidebar = (): JSX.Element => {
   return (
     <SidebarMenu>
       <SidebarGroup>
-        <SidebarGroupContent>
-          <InsideSidebarHeading>Courses</InsideSidebarHeading>
-          <InsideSidebarMenuItem
-            icon={<FileText />}
-            goToPath={'/management/courses'}
-            title='Courses'
-          />
-          <InsideSidebarMenuItem
-            icon={<File />}
-            goToPath={'/management/course_templates'}
-            title='Template Courses'
-          />
-          <InsideSidebarMenuItem
-            icon={<Archive />}
-            goToPath={'/management/course_archive'}
-            title='Archived Courses'
-          />
+        <SidebarGroupContent className='flex flex-col gap-5'>
+          <InsideSidebarVisualGroup title='Courses'>
+            <InsideSidebarMenuItem
+              icon={<FileText />}
+              goToPath={'/management/courses'}
+              title='Courses'
+            />
+            <InsideSidebarMenuItem
+              icon={<File />}
+              goToPath={'/management/course_templates'}
+              title='Template Courses'
+            />
+            <InsideSidebarMenuItem
+              icon={<Archive />}
+              goToPath={'/management/course_archive'}
+              title='Archived Courses'
+            />
+          </InsideSidebarVisualGroup>
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarMenu>
