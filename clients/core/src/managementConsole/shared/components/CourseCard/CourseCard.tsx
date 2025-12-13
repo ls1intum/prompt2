@@ -1,4 +1,13 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@tumaet/prompt-ui-components'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@tumaet/prompt-ui-components'
 import { Course } from '@tumaet/prompt-shared-state'
 import {
   CalendarDays,
@@ -13,6 +22,7 @@ import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useNavigate } from 'react-router-dom'
 import { archiveCourse, unarchiveCourse } from '@core/network/mutations/updateCourseArchiveStatus'
+import { formatDate } from '@core/utils/formatDate'
 
 type CourseMetaItemProps = {
   icon: React.ReactNode
@@ -46,13 +56,8 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     }
   }
 
-  const formatDate = (dateString: string): string => {
-    const [year, month, date] = dateString.split('-')
-    return `${date}.${month}.${year}`
-  }
-
   return (
-    <Card className='overflow-hidden border border-gray-200 shadow-md h-full flex flex-col'>
+    <Card className='overflow-hidden border border-gray-200 h-full flex flex-col'>
       <CardHeader className={`rounded-t-lg ${bgColor} py-6 px-6 border-b`}>
         <div className='flex items-center justify-between gap-4'>
           <div className='flex items-center gap-4'>
@@ -67,17 +72,25 @@ export const CourseCard = ({ course }: CourseCardProps) => {
             </CardTitle>
           </div>
 
-          <button
-            onClick={handleArchive}
-            className='p-2 rounded-md hover:bg-white focus-visible:ring-2 focus-visible:ring-offset-2'
-            aria-label={course.archived ? 'Unarchive course' : 'Archive course'}
-          >
-            {course.archived ? (
-              <ArchiveRestore className='w-6 h-6 text-gray-600' />
-            ) : (
-              <Archive className='w-6 h-6 text-gray-600' />
-            )}
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleArchive}
+                className='p-2 rounded-md bg-white focus-visible:ring-2 focus-visible:ring-offset-2 hover:bg-gray-100'
+                aria-label={course.archived ? 'Unarchive course' : 'Archive course'}
+              >
+                {course.archived ? (
+                  <ArchiveRestore className='w-6 h-6 text-gray-600' />
+                ) : (
+                  <Archive className='w-6 h-6 text-gray-600' />
+                )}
+              </button>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              {course.archived ? 'Unarchive this course' : 'Archive this course'}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </CardHeader>
 
@@ -113,7 +126,11 @@ export const CourseCard = ({ course }: CourseCardProps) => {
         </div>
       </CardContent>
 
-      <CardFooter className='px-6 py-4 border-t flex justify-end'>
+      <CardFooter className='px-6 py-4 border-t flex justify-between'>
+        <div className='text-xs text-gray-500'>
+          {course.archivedOn && <>Archived on {formatDate(course.archivedOn)}</>}
+        </div>
+
         <button
           onClick={() => navigate(`/management/course/${course.id}`)}
           className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded'

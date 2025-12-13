@@ -1,5 +1,6 @@
 import { axiosInstance } from '@/network/configService'
 import type { CourseArchiveStatus } from '@core/interfaces/courseArchiveStatus'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 
 const updateCourseArchiveStatus = async (
   courseId: string,
@@ -10,6 +11,13 @@ const updateCourseArchiveStatus = async (
       headers: {
         'Content-Type': 'application/json',
       },
+    })
+
+    const { updateCourse } = useCourseStore.getState()
+
+    updateCourse(courseId, {
+      archived: payload.archived,
+      archivedOn: payload.archived ? new Date().toISOString() : null,
     })
   } catch (err) {
     console.error('Failed to update course archive status', err)

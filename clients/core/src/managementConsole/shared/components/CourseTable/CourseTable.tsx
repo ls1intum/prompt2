@@ -24,16 +24,10 @@ import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal, SearchIcon } from 'luc
 import { Course, CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { CourseActionsMenu } from './CourseActionsMenu'
 import DynamicIcon from '@/components/DynamicIcon'
+import { formatDate } from '@core/utils/formatDate'
 
 interface CourseTableProps {
   courses: Course[]
-}
-
-const formatDate = (dateString?: string | Date): string => {
-  if (!dateString) return 'N/A'
-  const [year, month, day] = dateString.toString().split('-')
-  if (!year || !month || !day) return 'N/A'
-  return `${day}.${month}.${year}`
 }
 
 export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
@@ -105,12 +99,12 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
       {
         accessorKey: 'startDate',
         header: 'Start Date',
-        cell: (info) => formatDate(info.getValue() as string | Date | undefined),
+        cell: (info) => formatDate(info.getValue() as string | Date),
       },
       {
         accessorKey: 'endDate',
         header: 'End Date',
-        cell: (info) => formatDate(info.getValue() as string | Date | undefined),
+        cell: (info) => formatDate(info.getValue() as string | Date),
       },
       {
         accessorKey: 'ects',
@@ -123,7 +117,7 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
         enableSorting: false,
         cell: ({ row }) => {
           if (row.original.template) return 'Template'
-          if (row.original.archived) return 'Archived'
+          if (row.original.archived) return `Archived on ${formatDate(row.original.archivedOn!)}`
           return 'Active'
         },
       },
