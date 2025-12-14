@@ -53,8 +53,11 @@ CREATE TABLE
         semester_tag text,
         course_type course_type NOT NULL,
         ects integer,
-        meta_data jsonb,
-        template boolean NOT NULL DEFAULT FALSE
+        restricted_data jsonb,
+        student_readable_data jsonb DEFAULT '{}',
+        template boolean NOT NULL DEFAULT FALSE,
+        archived boolean NOT NULL DEFAULT FALSE,
+        archived_on timestamptz
     );
 
 --
@@ -69,8 +72,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -84,8 +90,14 @@ VALUES
         '{
           "icon": "apple",
           "bg-color": "bg-orange-100"
-        }',
-        TRUE
+                }',
+                '{
+                    "icon": "apple",
+                    "bg-color": "bg-orange-100"
+                }',
+                TRUE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -97,8 +109,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+        restricted_data,
+        student_readable_data,
+        template,
+        archived,
+        archived_on
     )
 VALUES
     (
@@ -110,7 +125,10 @@ VALUES
         'practical course',
         10,
         '{}',
-        FALSE
+        '{}',
+        FALSE,
+        FALSE,
+        NULL
     );
 
 INSERT INTO
@@ -122,8 +140,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -137,8 +158,14 @@ VALUES
         '{
           "icon": "home",
           "color": "green"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "home",
+                    "color": "green"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -150,8 +177,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -165,8 +195,14 @@ VALUES
         '{
           "icon": "smartphone",
           "bg-color": "bg-blue-100"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "smartphone",
+                    "bg-color": "bg-blue-100"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -178,8 +214,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -193,8 +232,14 @@ VALUES
         '{
           "icon": "smartphone",
           "bg-color": "bg-green-100"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "smartphone",
+                    "bg-color": "bg-green-100"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -206,8 +251,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -222,8 +270,15 @@ VALUES
           "icon": "folder",
           "bg-color": "bg-red-100",
           "some-secret-data": "secret"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "folder",
+                    "bg-color": "bg-red-100",
+                    "some-secret-data": "secret"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -235,8 +290,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -250,8 +308,14 @@ VALUES
         '{
           "icon": "monitor",
           "bg-color": "bg-cyan-100"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "monitor",
+                    "bg-color": "bg-cyan-100"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -263,8 +327,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -278,8 +345,14 @@ VALUES
         '{
           "icon": "book-open-text",
           "bg-color": "bg-orange-100"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "book-open-text",
+                    "bg-color": "bg-orange-100"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 INSERT INTO
@@ -291,8 +364,11 @@ INSERT INTO
         semester_tag,
         course_type,
         ects,
-        meta_data,
-        template
+                restricted_data,
+                student_readable_data,
+                template,
+                archived,
+                archived_on
     )
 VALUES
     (
@@ -306,8 +382,14 @@ VALUES
         '{
           "icon": "gamepad-2",
           "bg-color": "bg-green-100"
-        }',
-        FALSE
+                }',
+                '{
+                    "icon": "gamepad-2",
+                    "bg-color": "bg-green-100"
+                }',
+                FALSE,
+                FALSE,
+                NULL
     );
 
 --
@@ -326,7 +408,8 @@ CREATE TABLE
         id uuid NOT NULL,
         course_id uuid NOT NULL,
         name text,
-        meta_data jsonb,
+        restricted_data jsonb,
+        student_readable_data jsonb DEFAULT '{}',
         is_initial_phase boolean NOT NULL,
         course_phase_type_id uuid NOT NULL
     );
@@ -355,7 +438,8 @@ INSERT INTO
         id,
         course_id,
         name,
-        meta_data,
+                restricted_data,
+                student_readable_data,
         is_initial_phase,
         course_phase_type_id
     )
@@ -367,6 +451,9 @@ VALUES
         '{
           "test-key": "test-value"
         }',
+                '{
+                    "test-key": "test-value"
+                }',
         false,
         '7dc1c4e8-4255-4874-80a0-0c12b958744b'
     );
@@ -376,7 +463,8 @@ INSERT INTO
         id,
         course_id,
         name,
-        meta_data,
+        restricted_data,
+        student_readable_data,
         is_initial_phase,
         course_phase_type_id
     )
@@ -385,6 +473,7 @@ VALUES
         '92bb0532-39e5-453d-bc50-fa61ea0128b2',
         '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'Template Phase',
+        '{}',
         '{}',
         false,
         '7dc1c4e8-4255-4874-80a0-0c12b958744c'
@@ -395,7 +484,8 @@ INSERT INTO
         id,
         course_id,
         name,
-        meta_data,
+        restricted_data,
+        student_readable_data,
         is_initial_phase,
         course_phase_type_id
     )
@@ -404,6 +494,7 @@ VALUES
         '500db7ed-2eb2-42d0-82b3-8750e12afa8a',
         '3f42d322-e5bf-4faa-b576-51f2cab14c2e',
         'Application Phase',
+        '{}',
         '{}',
         true,
         '7dc1c4e8-4255-4874-80a0-0c12b958744b'
@@ -457,18 +548,3 @@ ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_from_course_phase FOREIGN 
 -- Name: course_phase_graph fk_to_course_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_to_course_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
-
--- Apply migration
--- 1) Adjust course
-ALTER TABLE course
-RENAME COLUMN meta_data TO restricted_data;
-
-ALTER TABLE course
-ADD COLUMN student_readable_data jsonb DEFAULT '{}';
-
--- 2) Adjust course_phase
-ALTER TABLE course_phase
-RENAME COLUMN meta_data TO restricted_data;
-
-ALTER TABLE course_phase
-ADD COLUMN student_readable_data jsonb DEFAULT '{}';
