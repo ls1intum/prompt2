@@ -116,9 +116,10 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_NoAssessments() {
 }
 
 // TestUpdateCategory_WithAssessmentsInOtherPhase tests updating a category when there are
-// assessments/evaluations in another course phase. In this case, the schema SHOULD be copied.
+// assessments/evaluations in another course phase. In this case, the schema SHOULD be copied
+// for the consumer phase that has assessment data, allowing the owner to modify freely.
 func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase() {
-	// Use Phase 2 (current phase, no assessments) but Phase 4 has assessments
+	// Use Phase 2 (current phase, owner, no assessments) but Phase 4 has assessments
 	currentPhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000002")
 	categoryID := uuid.MustParse("20000000-0000-0000-0000-000000000002") // Test Category 2
 	originalSchemaID := uuid.MustParse("00000000-0000-0000-0000-000000000002")
@@ -133,25 +134,25 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 	assert.NoError(suite.T(), err)
 	categoriesCountBefore := len(categoriesBefore)
 
-	// Update the category
+	// Update the category from the owner phase
 	req := categoryDTO.UpdateCategoryRequest{
 		Name:               "Updated Category With Assessments",
 		ShortName:          "UCWA",
-		Description:        "This update should trigger schema copy",
+		Description:        "This update should trigger schema copy for consumers",
 		Weight:             10,
 		AssessmentSchemaID: originalSchemaID,
 	}
 
 	err = UpdateCategory(suite.suiteCtx, categoryID, currentPhaseID, req)
-	assert.NoError(suite.T(), err, "Updating category should not produce an error")
+	assert.NoError(suite.T(), err, "Updating category from owner phase should not produce an error")
 
-	// Count schemas after update - should have one more
+	// Count schemas after update - should have one more (copied for Phase 4)
 	schemasAfter, err := assessmentSchemas.ListAssessmentSchemas(suite.suiteCtx)
 	assert.NoError(suite.T(), err)
 	schemasCountAfter := len(schemasAfter)
 
 	assert.Equal(suite.T(), schemasCountBefore+1, schemasCountAfter,
-		"A new schema should be created when there are assessments in other phases")
+		"A new schema should be created for the consumer phase with assessment data")
 
 	// Count categories after update - should have original count + copies from new schema
 	categoriesAfter, err := ListCategories(suite.suiteCtx)
@@ -160,9 +161,9 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 
 	// We had 2 categories in original schema, so new schema should have 2 more
 	assert.Equal(suite.T(), categoriesCountBefore+2, categoriesCountAfter,
-		"New schema should have copies of all categories")
+		"New schema should have copies of all categories from original")
 
-	// Verify the course phase config still points to the ORIGINAL schema (owner keeps original)
+	// Verify the owner's course phase config still points to the ORIGINAL schema
 	config, err := coursePhaseConfig.GetCoursePhaseConfig(suite.suiteCtx, currentPhaseID)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), originalSchemaID, config.AssessmentSchemaID,
@@ -178,7 +179,7 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 	assert.Equal(suite.T(), originalSchemaID, originalCategory.AssessmentSchemaID,
 		"Original category should still belong to original schema")
 
-	// Verify the other phase (Phase 4 - consumer) got a NEW copied schema
+	// Verify the consumer phase (Phase 4) got a NEW copied schema
 	otherPhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000004")
 	otherPhaseConfig, err := coursePhaseConfig.GetCoursePhaseConfig(suite.suiteCtx, otherPhaseID)
 	assert.NoError(suite.T(), err)
@@ -192,7 +193,7 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 	assert.Contains(suite.T(), copiedSchema.Name, "Test Schema 2",
 		"Copied schema name should be based on original schema")
 
-	// Verify the category in the copied schema has the OLD values (before update)
+	// Verify categories in the copied schema have the OLD values (snapshot before update)
 	allCategories, err := ListCategories(suite.suiteCtx)
 	assert.NoError(suite.T(), err)
 
@@ -225,7 +226,8 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 }
 
 // TestUpdateCategory_WithAssessmentsInSamePhase tests updating a category when there are
-// assessments in the SAME course phase. In this case, the schema should NOT be copied.
+// assessments in the SAME course phase. In this case, modifications should be BLOCKED
+// because the schema has assessment data.
 func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInSamePhase() {
 	// Use Phase 3 which has assessments in the same phase
 	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000003")
@@ -241,30 +243,34 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInSamePhase(
 	req := categoryDTO.UpdateCategoryRequest{
 		Name:               "Updated Category Same Phase",
 		ShortName:          "UCSP",
-		Description:        "Assessments in same phase, no copy",
+		Description:        "Assessments in same phase, should be blocked",
 		Weight:             3,
 		AssessmentSchemaID: originalSchemaID,
 	}
 
 	err = UpdateCategory(suite.suiteCtx, categoryID, coursePhaseID, req)
-	assert.NoError(suite.T(), err, "Updating category should not produce an error")
+	assert.Error(suite.T(), err, "Updating category should produce an error when assessment data exists")
+	assert.Contains(suite.T(), err.Error(), "modifications are not allowed",
+		"Error should indicate modifications are not allowed")
 
-	// Count schemas after update - should be the same
+	// Count schemas after failed update - should be the same
 	schemasAfter, err := assessmentSchemas.ListAssessmentSchemas(suite.suiteCtx)
 	assert.NoError(suite.T(), err)
 	schemasCountAfter := len(schemasAfter)
 
 	assert.Equal(suite.T(), schemasCountBefore, schemasCountAfter,
-		"No new schema should be created when assessments are only in the same phase")
+		"No new schema should be created when update is blocked")
 
-	// Verify the category was updated directly
-	updatedCategory, err := GetCategory(suite.suiteCtx, categoryID)
+	// Verify the category was NOT updated
+	unchangedCategory, err := GetCategory(suite.suiteCtx, categoryID)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), req.Name, updatedCategory.Name, "Category name should be updated")
-	assert.Equal(suite.T(), req.Weight, updatedCategory.Weight, "Category weight should be updated")
+	assert.Equal(suite.T(), "Test Category 3", unchangedCategory.Name,
+		"Category name should remain unchanged")
+	assert.Equal(suite.T(), int32(2), unchangedCategory.Weight,
+		"Category weight should remain unchanged")
 
 	// Verify the category still belongs to the original schema
-	assert.Equal(suite.T(), originalSchemaID, updatedCategory.AssessmentSchemaID,
+	assert.Equal(suite.T(), originalSchemaID, unchangedCategory.AssessmentSchemaID,
 		"Category should still belong to the original schema")
 
 	// Verify course phase config still points to original schema
