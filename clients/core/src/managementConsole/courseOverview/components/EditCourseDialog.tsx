@@ -129,7 +129,12 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
             {/* Course Basics Section */}
             <div className='space-y-6'>
               <div className='space-y-4'>
-                <h3 className='text-sm font-semibold text-foreground'>Course Details</h3>
+                <div>
+                  <h3 className='text-sm font-semibold text-foreground'>Course Details</h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Customize the basic information about this course
+                  </p>
+                </div>
 
                 <FormField
                   control={form.control}
