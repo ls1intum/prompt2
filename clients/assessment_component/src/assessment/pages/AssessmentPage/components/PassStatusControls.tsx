@@ -13,7 +13,7 @@ export const PassStatusControls = ({
   courseParticipationID,
 }: PassStatusControlsProps): JSX.Element | null => {
   const { permissions } = useAuthStore()
-  const { participations, setParticipations } = useParticipationStore()
+  const { participations } = useParticipationStore()
   const participant = participations.find(
     (participation) => participation.courseParticipationID === courseParticipationID,
   )
@@ -32,24 +32,13 @@ export const PassStatusControls = ({
   }
 
   const handleUpdatePassStatus = (status: PassStatus) => {
-    updateParticipation(
-      {
-        coursePhaseID: participant.coursePhaseID,
-        courseParticipationID,
-        passStatus: status,
-        restrictedData: participant.restrictedData ?? {},
-        studentReadableData: participant.studentReadableData ?? {},
-      },
-      {
-        onSuccess: () => {
-          setParticipations(
-            participations.map((p) =>
-              p.courseParticipationID === courseParticipationID ? { ...p, passStatus: status } : p,
-            ),
-          )
-        },
-      },
-    )
+    updateParticipation({
+      coursePhaseID: participant.coursePhaseID,
+      courseParticipationID,
+      passStatus: status,
+      restrictedData: participant.restrictedData ?? {},
+      studentReadableData: participant.studentReadableData ?? {},
+    })
   }
 
   return (
