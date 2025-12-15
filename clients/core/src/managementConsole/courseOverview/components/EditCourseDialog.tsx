@@ -122,56 +122,88 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} aria-hidden='true'>
-      <DialogContent className='max-w-lg max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>Edit {course?.name}</DialogTitle>
+          <DialogTitle className='text-2xl'>Edit {course?.name}</DialogTitle>
           <DialogDescription>The course name and semester tag cannot be changed.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-            <div className='space-y-4'>
-              <FormField
-                control={form.control}
-                name='dateRange'
-                render={({ field }) => (
-                  <FormItem className='flex flex-col'>
-                    <FormLabel className='text-sm font-medium'>Course Duration</FormLabel>
-                    <DatePickerWithRange date={field.value} setDate={field.onChange} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className='grid grid-cols-2 gap-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+            {/* Course Basics Section */}
+            <div className='space-y-6'>
+              <div className='space-y-4'>
+                <h3 className='text-sm font-semibold text-foreground'>Course Details</h3>
+
                 <FormField
                   control={form.control}
-                  name='courseType'
+                  name='dateRange'
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-sm font-medium'>Course Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a course type' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values(CourseType).map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {CourseTypeDetails[type as CourseType].name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <FormItem className='flex flex-col'>
+                      <FormLabel className='text-sm font-medium'>Course Duration</FormLabel>
+                      <DatePickerWithRange date={field.value} setDate={field.onChange} />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                <div className='grid grid-cols-2 gap-4'>
+                  <FormField
+                    control={form.control}
+                    name='courseType'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Course Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select a course type' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(CourseType).map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {CourseTypeDetails[type as CourseType].name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='ects'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>ECTS Credits</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='number'
+                            placeholder='Enter ECTS'
+                            {...field}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              field.onChange(value === '' ? '' : Number(value))
+                            }}
+                            value={field.value === 0 && !isEctsDisabled ? '' : field.value}
+                            disabled={isEctsDisabled}
+                            className='w-full'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name='shortDescription'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Short Description</FormLabel>
+                      <FormLabel className='text-sm font-medium'>Short Description</FormLabel>
                       <FormControl>
                         <Input placeholder='One sentence summary' {...field} className='w-full' />
                       </FormControl>
@@ -179,16 +211,17 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name='longDescription'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Long Description</FormLabel>
+                      <FormLabel className='text-sm font-medium'>Long Description</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder='Share more context about this course'
-                          className='w-full'
+                          className='w-full min-h-[100px]'
                           rows={4}
                           {...field}
                         />
@@ -197,90 +230,75 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name='ects'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-sm font-medium'>ECTS</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          placeholder='Enter ECTS'
-                          {...field}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            field.onChange(value === '' ? '' : Number(value))
-                          }}
-                          value={field.value === 0 && !isEctsDisabled ? '' : field.value}
-                          disabled={isEctsDisabled}
-                          className='w-full'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              </div>
+
+              {/* Appearance Section */}
+              <div className='border-t pt-6 space-y-4'>
+                <div>
+                  <h3 className='text-sm font-semibold text-foreground'>Course Appearance</h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Customize how this course appears to students
+                  </p>
+                </div>
+
+                <div className='bg-muted/50 rounded-lg p-4'>
+                  <CourseAppearancePreview color={selectedColor} icon={selectedIcon} />
+                </div>
+
+                <div className='grid grid-cols-2 gap-4'>
+                  <FormField
+                    control={form.control}
+                    name='color'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Background Color</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select a color' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {courseAppearanceColors.map((color) => (
+                              <SelectItem key={color} value={color}>
+                                <div className='flex items-center gap-2'>
+                                  <div
+                                    className={`w-5 h-5 rounded border border-border ${color}`}
+                                  ></div>
+                                  <span className='capitalize'>{color.split('-')[1]}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='icon'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Course Icon</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select an icon' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <IconSelector />
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className='border-t pt-5 space-y-4'>
-              <h3 className='text-sm font-semibold text-foreground/90'>Appearance</h3>
-
-              <CourseAppearancePreview color={selectedColor} icon={selectedIcon} />
-
-              <div className='grid grid-cols-2 gap-4'>
-                <FormField
-                  control={form.control}
-                  name='color'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-sm font-medium'>Color</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a color' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {courseAppearanceColors.map((color) => (
-                            <SelectItem key={color} value={color}>
-                              <div className='flex items-center gap-2'>
-                                <div
-                                  className={`w-5 h-5 rounded border border-border ${color}`}
-                                ></div>
-                                <span className='capitalize'>{color.split('-')[1]}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='icon'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-sm font-medium'>Icon</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select an icon' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <IconSelector />
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <DialogFooter className='pt-4 gap-2'>
+            <DialogFooter className='pt-2 gap-2'>
               <Button type='button' variant='outline' onClick={onClose}>
                 Cancel
               </Button>
