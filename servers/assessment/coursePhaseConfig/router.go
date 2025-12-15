@@ -1,6 +1,7 @@
 package coursePhaseConfig
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +57,7 @@ func createOrUpdateCoursePhaseConfig(c *gin.Context) {
 
 	err = CreateOrUpdateCoursePhaseConfig(c, coursePhaseID, request)
 	if err != nil {
-		if err == ErrCannotChangeSchemaWithData {
+		if errors.Is(err, ErrCannotChangeSchemaWithData) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
