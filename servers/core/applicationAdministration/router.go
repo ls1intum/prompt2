@@ -200,12 +200,23 @@ func getApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
+	firstName := c.GetString("firstName")
+	lastName := c.GetString("lastName")
+
 	applicationForm, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(c, coursePhaseID, matriculationNumber, universityLogin)
 	if err != nil {
 		log.Error(err)
 		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
 		return
 	}
+
+	// Update the student's name with the latest values from the token
+	// This ensures that recent name changes in TUMonline are always reflected
+	if applicationForm.Student != nil && firstName != "" && lastName != "" {
+		applicationForm.Student.FirstName = firstName
+		applicationForm.Student.LastName = lastName
+	}
+
 	c.IndentedJSON(http.StatusOK, applicationForm)
 
 }
@@ -367,14 +378,20 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
+	// Validate that the student identity matches the token
+	// Note: We don't validate names because they may change in TUMonline (e.g., name changes)
+	// The student identity is based on email, matriculation number, and university login
 	if application.Student.Email != userEmail ||
 		application.Student.MatriculationNumber != matriculationNumber ||
-		application.Student.UniversityLogin != universityLogin ||
-		application.Student.FirstName != firstName ||
-		application.Student.LastName != lastName {
+		application.Student.UniversityLogin != universityLogin {
 		handleError(c, http.StatusUnauthorized, errors.New("credentials do not match payload"))
 		return
 	}
+
+	// Override the names with the latest values from the token to ensure they're up to date
+	// This ensures that recent name changes in TUMonline are always reflected in the database
+	application.Student.FirstName = firstName
+	application.Student.LastName = lastName
 
 	courseParticipationID, err := PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
 	if err != nil {
