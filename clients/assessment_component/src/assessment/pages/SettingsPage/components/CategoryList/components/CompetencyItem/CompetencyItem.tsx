@@ -21,9 +21,15 @@ interface CompetencyItemProps {
   competency: Competency
   categoryID: string
   assessmentType: AssessmentType
+  disabled?: boolean
 }
 
-export const CompetencyItem = ({ competency, categoryID, assessmentType }: CompetencyItemProps) => {
+export const CompetencyItem = ({
+  competency,
+  categoryID,
+  assessmentType,
+  disabled = false,
+}: CompetencyItemProps) => {
   const [competencyToEdit, setCompetencyToEdit] = useState<Competency | undefined>(undefined)
   const [competencyToDelete, setCompetencyToDelete] = useState<
     | {
@@ -61,6 +67,7 @@ export const CompetencyItem = ({ competency, categoryID, assessmentType }: Compe
               className='h-7 w-7'
               onClick={() => setCompetencyToEdit(competency)}
               aria-label={`Edit ${competency.name}`}
+              disabled={disabled}
             >
               <Edit size={16} />
             </Button>
@@ -76,6 +83,7 @@ export const CompetencyItem = ({ competency, categoryID, assessmentType }: Compe
                 })
               }
               aria-label={`Delete ${competency.name}`}
+              disabled={disabled}
             >
               <Trash2 size={16} className='text-destructive' />
             </Button>

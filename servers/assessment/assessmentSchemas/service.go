@@ -19,6 +19,13 @@ type AssessmentSchemaService struct {
 
 var AssessmentSchemaServiceSingleton *AssessmentSchemaService
 
+func NewAssessmentSchemaService(queries db.Queries, conn *pgxpool.Pool) *AssessmentSchemaService {
+	return &AssessmentSchemaService{
+		queries: queries,
+		conn:    conn,
+	}
+}
+
 func CreateAssessmentSchema(ctx context.Context, req assessmentSchemaDTO.CreateAssessmentSchemaRequest) (assessmentSchemaDTO.AssessmentSchema, error) {
 	tx, err := AssessmentSchemaServiceSingleton.conn.Begin(ctx)
 	if err != nil {

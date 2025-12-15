@@ -76,5 +76,64 @@ INSERT INTO public.assessment_schema (id, name, description) VALUES
 -- ('550e8400-e29b-41d4-a716-446655440000', '123e4567-e89b-12d3-a456-426614174000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440001', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440002', '2025-12-31 23:59:59+00');
 
 --
+-- Additional tables for schema change validation tests
+--
+
+-- Create types
+CREATE TYPE public.score_level AS ENUM ('very_bad', 'bad', 'ok', 'good', 'very_good');
+
+-- Competency tables
+CREATE TABLE public.category (
+    id uuid PRIMARY KEY,
+    name varchar(255) NOT NULL,
+    description text,
+    weight integer DEFAULT 1 NOT NULL,
+    short_name varchar(10),
+    assessment_schema_id uuid NOT NULL,
+    FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE
+);
+
+CREATE TABLE public.competency (
+    id uuid PRIMARY KEY,
+    category_id uuid NOT NULL,
+    name varchar(255) NOT NULL,
+    description text,
+    description_very_bad text NOT NULL DEFAULT '',
+    description_bad text NOT NULL DEFAULT '',
+    description_ok text NOT NULL DEFAULT '',
+    description_good text NOT NULL DEFAULT '',
+    description_very_good text NOT NULL DEFAULT '',
+    weight integer DEFAULT 1 NOT NULL,
+    short_name varchar(10),
+    FOREIGN KEY (category_id) REFERENCES category (id) ON DELETE CASCADE
+);
+
+-- Assessment and evaluation tables
+CREATE TABLE public.assessment (
+    id uuid PRIMARY KEY,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE public.evaluation (
+    id uuid PRIMARY KEY,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    evaluation_type varchar(50) NOT NULL,
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (competency_id) REFERENCES competency (id) ON DELETE RESTRICT
+);
+
+--
 -- PostgreSQL database dump complete
 --
