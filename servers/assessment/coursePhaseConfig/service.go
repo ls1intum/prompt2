@@ -185,7 +185,7 @@ func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUI
 	return deadlinePassed, nil
 }
 
-func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, newSchemaID uuid.UUID) error {
+func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, oldSchemaID uuid.UUID, newSchemaID uuid.UUID) error {
 	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -194,12 +194,45 @@ func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID 
 
 	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
 
-	err = qtx.UpdateCoursePhaseConfigAssessmentSchema(ctx, db.UpdateCoursePhaseConfigAssessmentSchemaParams{
-		CoursePhaseID:      coursePhaseID,
-		AssessmentSchemaID: newSchemaID,
-	})
+	// Get current config to determine which schema field to update
+	config, err := qtx.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil {
-		log.WithError(err).Error("Failed to update course phase config assessment schema")
+		log.WithError(err).Error("Failed to get course phase config")
+		return errors.New("failed to get course phase config")
+	}
+
+	// Determine which schema field to update based on which one matches the old schema ID
+	switch oldSchemaID {
+	case config.AssessmentSchemaID:
+		err = qtx.UpdateCoursePhaseConfigAssessmentSchema(ctx, db.UpdateCoursePhaseConfigAssessmentSchemaParams{
+			CoursePhaseID:      coursePhaseID,
+			AssessmentSchemaID: newSchemaID,
+		})
+	case config.SelfEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigSelfEvaluationSchema(ctx, db.UpdateCoursePhaseConfigSelfEvaluationSchemaParams{
+			CoursePhaseID:          coursePhaseID,
+			SelfEvaluationSchema: newSchemaID,
+		})
+	case config.PeerEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigPeerEvaluationSchema(ctx, db.UpdateCoursePhaseConfigPeerEvaluationSchemaParams{
+			CoursePhaseID:          coursePhaseID,
+			PeerEvaluationSchema: newSchemaID,
+		})
+	case config.TutorEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigTutorEvaluationSchema(ctx, db.UpdateCoursePhaseConfigTutorEvaluationSchemaParams{
+			CoursePhaseID:           coursePhaseID,
+			TutorEvaluationSchema: newSchemaID,
+		})
+	default:
+		log.WithFields(log.Fields{
+			"oldSchemaID":    oldSchemaID,
+			"coursePhaseID":  coursePhaseID,
+		}).Error("Old schema ID does not match any schema field in course phase config")
+		return errors.New("old schema ID does not match any schema field in course phase config")
+	}
+
+	if err != nil {
+		log.WithError(err).Error("Failed to update course phase config schema")
 		return err
 	}
 

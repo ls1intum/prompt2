@@ -24,21 +24,18 @@ type CompetencyService struct {
 var CompetencyServiceSingleton *CompetencyService
 
 func CreateCompetency(ctx context.Context, coursePhaseID uuid.UUID, req competencyDTO.CreateCompetencyRequest) error {
-	// Get the schema ID from the category
 	category, err := CompetencyServiceSingleton.queries.GetCategory(ctx, req.CategoryID)
 	if err != nil {
 		log.Error("could not get category: ", err)
 		return errors.New("could not get category")
 	}
 
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CompetencyServiceSingleton.queries,
 		category.AssessmentSchemaID,
 		req.CategoryID, // Pass category ID to get it mapped if schema is copied
 		coursePhaseID,
-		nil, // No competency IDs needed for create
 	)
 	if err != nil {
 		return err
@@ -111,22 +108,17 @@ func UpdateCompetency(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID
 		return errors.New("failed to get assessment schema ID for competency")
 	}
 
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CompetencyServiceSingleton.queries,
 		currentSchemaID,
 		id,
 		coursePhaseID,
-		func(ctx context.Context, competencyID uuid.UUID) ([]uuid.UUID, error) {
-			return []uuid.UUID{competencyID}, nil
-		},
 	)
 	if err != nil {
 		return err
 	}
 
-	// Perform the update on the target entity
 	err = CompetencyServiceSingleton.queries.UpdateCompetency(ctx, db.UpdateCompetencyParams{
 		ID:                  result.TargetEntityID,
 		CategoryID:          req.CategoryID,
@@ -151,7 +143,6 @@ func UpdateCompetency(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID
 func DeleteCompetency(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) error {
 	currentSchemaID, err := CompetencyServiceSingleton.queries.GetAssessmentSchemaIDByCompetency(ctx, id)
 	if err != nil {
-		// If competency doesn't exist, just return success (no-op)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
@@ -159,22 +150,17 @@ func DeleteCompetency(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID
 		return errors.New("failed to get assessment schema ID for competency")
 	}
 
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CompetencyServiceSingleton.queries,
 		currentSchemaID,
 		id,
 		coursePhaseID,
-		func(ctx context.Context, competencyID uuid.UUID) ([]uuid.UUID, error) {
-			return []uuid.UUID{competencyID}, nil
-		},
 	)
 	if err != nil {
 		return err
 	}
 
-	// Perform the deletion on the target entity
 	err = CompetencyServiceSingleton.queries.DeleteCompetency(ctx, result.TargetEntityID)
 	if err != nil {
 		log.Error("could not delete competency: ", err)

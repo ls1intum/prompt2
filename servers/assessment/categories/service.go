@@ -24,14 +24,12 @@ type CategoryService struct {
 var CategoryServiceSingleton *CategoryService
 
 func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDTO.CreateCategoryRequest) error {
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CategoryServiceSingleton.queries,
 		req.AssessmentSchemaID,
 		uuid.Nil, // No entity ID for create operations
 		coursePhaseID,
-		nil, // No competency IDs needed for create
 	)
 	if err != nil {
 		return err
@@ -87,20 +85,7 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
 	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
 	if err != nil {
-		// If category doesn't exist, skip schema copy logic and just try to update (will be a no-op)
 		if errors.Is(err, pgx.ErrNoRows) {
-			err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-				ID:                 id,
-				Name:               req.Name,
-				ShortName:          pgtype.Text{String: req.ShortName, Valid: true},
-				Description:        pgtype.Text{String: req.Description, Valid: true},
-				Weight:             req.Weight,
-				AssessmentSchemaID: req.AssessmentSchemaID,
-			})
-			if err != nil {
-				log.Error("could not update category: ", err)
-				return errors.New("could not update category")
-			}
 			return nil
 		}
 		log.WithError(err).Error("Failed to get current category")
@@ -108,30 +93,17 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 	}
 	currentSchemaID := currentCategory.AssessmentSchemaID
 
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CategoryServiceSingleton.queries,
 		currentSchemaID,
 		id,
 		coursePhaseID,
-		func(ctx context.Context, categoryID uuid.UUID) ([]uuid.UUID, error) {
-			competencies, err := CategoryServiceSingleton.queries.ListCompetenciesByCategory(ctx, categoryID)
-			if err != nil {
-				return nil, err
-			}
-			ids := make([]uuid.UUID, len(competencies))
-			for i, comp := range competencies {
-				ids[i] = comp.ID
-			}
-			return ids, nil
-		},
 	)
 	if err != nil {
 		return err
 	}
 
-	// Perform the update on the target entity
 	err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
 		ID:                 result.TargetEntityID,
 		Name:               req.Name,
@@ -151,7 +123,6 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 func DeleteCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) error {
 	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
 	if err != nil {
-		// If category doesn't exist, just return success (no-op)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
@@ -160,30 +131,17 @@ func DeleteCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) 
 	}
 	currentSchemaID := currentCategory.AssessmentSchemaID
 
-	// Prepare schema for modification (copies if needed)
-	result, err := schemaModification.PrepareSchemaForModification(
+	result, err := schemaModification.GetOrCopySchemaForWrite(
 		ctx,
 		CategoryServiceSingleton.queries,
 		currentSchemaID,
 		id,
 		coursePhaseID,
-		func(ctx context.Context, categoryID uuid.UUID) ([]uuid.UUID, error) {
-			competencies, err := CategoryServiceSingleton.queries.ListCompetenciesByCategory(ctx, categoryID)
-			if err != nil {
-				return nil, err
-			}
-			ids := make([]uuid.UUID, len(competencies))
-			for i, comp := range competencies {
-				ids[i] = comp.ID
-			}
-			return ids, nil
-		},
 	)
 	if err != nil {
 		return err
 	}
 
-	// Perform the deletion on the target entity
 	err = CategoryServiceSingleton.queries.DeleteCategory(ctx, result.TargetEntityID)
 	if err != nil {
 		log.Error("could not delete category: ", err)

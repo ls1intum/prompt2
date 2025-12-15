@@ -462,3 +462,51 @@ func (q *Queries) UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, a
 	_, err := q.db.Exec(ctx, updateCoursePhaseConfigAssessmentSchema, arg.CoursePhaseID, arg.AssessmentSchemaID)
 	return err
 }
+
+const updateCoursePhaseConfigPeerEvaluationSchema = `-- name: UpdateCoursePhaseConfigPeerEvaluationSchema :exec
+UPDATE course_phase_config
+SET peer_evaluation_schema = $2
+WHERE course_phase_id = $1
+`
+
+type UpdateCoursePhaseConfigPeerEvaluationSchemaParams struct {
+	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
+	PeerEvaluationSchema uuid.UUID `json:"peer_evaluation_schema"`
+}
+
+func (q *Queries) UpdateCoursePhaseConfigPeerEvaluationSchema(ctx context.Context, arg UpdateCoursePhaseConfigPeerEvaluationSchemaParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhaseConfigPeerEvaluationSchema, arg.CoursePhaseID, arg.PeerEvaluationSchema)
+	return err
+}
+
+const updateCoursePhaseConfigSelfEvaluationSchema = `-- name: UpdateCoursePhaseConfigSelfEvaluationSchema :exec
+UPDATE course_phase_config
+SET self_evaluation_schema = $2
+WHERE course_phase_id = $1
+`
+
+type UpdateCoursePhaseConfigSelfEvaluationSchemaParams struct {
+	CoursePhaseID        uuid.UUID `json:"course_phase_id"`
+	SelfEvaluationSchema uuid.UUID `json:"self_evaluation_schema"`
+}
+
+func (q *Queries) UpdateCoursePhaseConfigSelfEvaluationSchema(ctx context.Context, arg UpdateCoursePhaseConfigSelfEvaluationSchemaParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhaseConfigSelfEvaluationSchema, arg.CoursePhaseID, arg.SelfEvaluationSchema)
+	return err
+}
+
+const updateCoursePhaseConfigTutorEvaluationSchema = `-- name: UpdateCoursePhaseConfigTutorEvaluationSchema :exec
+UPDATE course_phase_config
+SET tutor_evaluation_schema = $2
+WHERE course_phase_id = $1
+`
+
+type UpdateCoursePhaseConfigTutorEvaluationSchemaParams struct {
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+	TutorEvaluationSchema uuid.UUID `json:"tutor_evaluation_schema"`
+}
+
+func (q *Queries) UpdateCoursePhaseConfigTutorEvaluationSchema(ctx context.Context, arg UpdateCoursePhaseConfigTutorEvaluationSchemaParams) error {
+	_, err := q.db.Exec(ctx, updateCoursePhaseConfigTutorEvaluationSchema, arg.CoursePhaseID, arg.TutorEvaluationSchema)
+	return err
+}

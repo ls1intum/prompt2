@@ -177,3 +177,18 @@ ON CONFLICT (course_phase_id)
 UPDATE course_phase_config
 SET assessment_schema_id = $2
 WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigSelfEvaluationSchema :exec
+UPDATE course_phase_config
+SET self_evaluation_schema = $2
+WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigPeerEvaluationSchema :exec
+UPDATE course_phase_config
+SET peer_evaluation_schema = $2
+WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigTutorEvaluationSchema :exec
+UPDATE course_phase_config
+SET tutor_evaluation_schema = $2
+WHERE course_phase_id = $1;

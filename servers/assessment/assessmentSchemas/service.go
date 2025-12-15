@@ -226,7 +226,7 @@ func CheckPhaseHasAssessmentData(ctx context.Context, phaseID uuid.UUID, schemaI
 	return hasData.Bool, nil
 }
 
-func UpdateAssessmentCompetencies(ctx context.Context, coursePhaseID uuid.UUID, oldCompetencyID uuid.UUID, newCompetencyID uuid.UUID) error {
+func UpdateAssessmentAndEvaluationCompetencies(ctx context.Context, coursePhaseID uuid.UUID, oldCompetencyID uuid.UUID, newCompetencyID uuid.UUID) error {
 	tx, err := AssessmentSchemaServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
