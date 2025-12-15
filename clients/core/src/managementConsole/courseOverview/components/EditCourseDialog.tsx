@@ -35,7 +35,6 @@ import type {
   UpdateCourseDataWithDescriptions,
 } from '@core/interfaces/courseWithDescriptions'
 import { IconSelector } from '../AddingCourse/components/IconSelector'
-import { CourseAppearancePreview } from './CourseAppearancePreview'
 import {
   DEFAULT_COURSE_COLOR,
   DEFAULT_COURSE_ICON,
@@ -73,8 +72,6 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   })
 
   const selectedCourseType = form.watch('courseType')
-  const selectedColor = form.watch('color')
-  const selectedIcon = form.watch('icon')
   const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
 
   useEffect(() => {
@@ -239,10 +236,6 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
                   <p className='text-sm text-muted-foreground mt-1'>
                     Customize how this course appears to students
                   </p>
-                </div>
-
-                <div className='bg-muted/50 rounded-lg p-4'>
-                  <CourseAppearancePreview color={selectedColor} icon={selectedIcon} />
                 </div>
 
                 <div className='grid grid-cols-2 gap-4'>
