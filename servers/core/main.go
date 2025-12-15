@@ -101,17 +101,22 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 }
 
 func initSentry() {
-	sentryDsn := utils.GetEnv("SENTRY_DSN_CORE", "")
+	sentryDsn := utils.GetEnv("SENTRY_DSN_CORE", "https://42d92ed0d386a0e76a3542cb9bc6c474@sentry.aet.cit.tum.de/9")
 	if sentryDsn == "" {
 		log.Info("Sentry DSN not configured, skipping Sentry initialization")
 		return
 	}
 	environment := utils.GetEnv("ENVIRONMENT", "development")
 
+	sentrySyncTransport := sentry.NewHTTPSyncTransport()
+	sentrySyncTransport.Timeout = 2 * time.Second
+
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:         sentryDsn,
 		Environment: environment,
 		Debug:       true,
+		Transport:   sentrySyncTransport,
+		EnableLogs:  true,
 	})
 	if err != nil {
 		log.Errorf("Sentry initialization failed: %v", err)
@@ -136,7 +141,6 @@ func main() {
 	// initialize Sentry
 	initSentry()
 	defer sentry.Flush(2 * time.Second) // Flush buffered events before exiting (2 seconds timeout)
-	sentry.CaptureMessage("It works!")
 
 	// establish database connection
 	databaseURL := getDatabaseURL()
