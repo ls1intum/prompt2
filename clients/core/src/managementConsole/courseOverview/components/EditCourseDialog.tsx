@@ -118,7 +118,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} aria-hidden='true'>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle className='text-2xl'>Edit {course?.name}</DialogTitle>
