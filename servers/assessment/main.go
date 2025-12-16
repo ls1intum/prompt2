@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
@@ -17,7 +18,6 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
-	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -51,7 +51,7 @@ func initKeycloak(queries db.Queries) {
 
 	realm := promptSDK.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
 
-	coreURL := utils.GetCoreUrl()
+	coreURL := sdkUtils.GetCoreUrl()
 	err := promptSDK.InitAuthenticationMiddleware(baseURL, realm, coreURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize keycloak: %v", err)
