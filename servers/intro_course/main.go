@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/intro_course/config"
 	"github.com/ls1intum/prompt2/servers/intro_course/copy"
 	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
@@ -17,18 +18,17 @@ import (
 	"github.com/ls1intum/prompt2/servers/intro_course/infrastructureSetup"
 	"github.com/ls1intum/prompt2/servers/intro_course/seatPlan"
 	"github.com/ls1intum/prompt2/servers/intro_course/tutor"
-	"github.com/ls1intum/prompt2/servers/intro_course/utils"
 	log "github.com/sirupsen/logrus"
 )
 
 func getDatabaseURL() string {
-	dbUser := utils.GetEnv("DB_USER", "prompt-postgres")
-	dbPassword := utils.GetEnv("DB_PASSWORD", "prompt-postgres")
-	dbHost := utils.GetEnv("DB_HOST_INTRO_COURSE", "localhost")
-	dbPort := utils.GetEnv("DB_PORT_INTRO_COURSE", "5433")
-	dbName := utils.GetEnv("DB_NAME", "prompt")
-	sslMode := utils.GetEnv("SSL_MODE", "disable")
-	timeZone := utils.GetEnv("DB_TIMEZONE", "Europe/Berlin") // Add a timezone parameter
+	dbUser := sdkUtils.GetEnv("DB_USER", "prompt-postgres")
+	dbPassword := sdkUtils.GetEnv("DB_PASSWORD", "prompt-postgres")
+	dbHost := sdkUtils.GetEnv("DB_HOST_INTRO_COURSE", "localhost")
+	dbPort := sdkUtils.GetEnv("DB_PORT_INTRO_COURSE", "5433")
+	dbName := sdkUtils.GetEnv("DB_NAME", "prompt")
+	sslMode := sdkUtils.GetEnv("SSL_MODE", "disable")
+	timeZone := sdkUtils.GetEnv("DB_TIMEZONE", "Europe/Berlin") // Add a timezone parameter
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode, timeZone)
 }
@@ -43,13 +43,13 @@ func runMigrations(databaseURL string) {
 }
 
 func initKeycloak() {
-	baseURL := utils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
+	baseURL := sdkUtils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "https://" + baseURL
 	}
 
-	realm := utils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
-	coreURL := utils.GetCoreUrl()
+	realm := sdkUtils.GetEnv("KEYCLOAK_REALM_NAME", "prompt")
+	coreURL := sdkUtils.GetCoreUrl()
 	err := promptSDK.InitAuthenticationMiddleware(baseURL, realm, coreURL)
 	if err != nil {
 		log.Fatalf("Failed to initialize keycloak: %v", err)
@@ -75,7 +75,9 @@ func main() {
 	query := db.New(conn)
 
 	router := gin.Default()
-	router.Use(utils.CORS())
+	localHost := "http://localhost:3000"
+	clientHost := sdkUtils.GetEnv("CORE_HOST", localHost)
+	router.Use(sdkUtils.CORS(clientHost))
 
 	api := router.Group("intro-course/api/course_phase/:coursePhaseID")
 	initKeycloak()
@@ -84,7 +86,7 @@ func main() {
 	seatPlan.InitSeatPlanModule(api, *query, conn)
 
 	// Infrastructure Setup
-	gitlabAccessToken := utils.GetEnv("GITLAB_ACCESS_TOKEN", "")
+	gitlabAccessToken := sdkUtils.GetEnv("GITLAB_ACCESS_TOKEN", "")
 	infrastructureSetup.InitInfrastructureModule(api, *query, conn, gitlabAccessToken)
 
 	copyApi := router.Group("intro-course/api")
@@ -92,7 +94,7 @@ func main() {
 
 	config.InitConfigModule(api, *query, conn)
 
-	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8082")
+	serverAddress := sdkUtils.GetEnv("SERVER_ADDRESS", "localhost:8082")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

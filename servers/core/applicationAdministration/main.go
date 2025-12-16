@@ -7,11 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/core/meta"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
-	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,7 +48,7 @@ func initializeApplicationCoursePhaseType() error {
 		if err != nil {
 			return err
 		}
-		defer utils.DeferRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 		// 2.) create the application module

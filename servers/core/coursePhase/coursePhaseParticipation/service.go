@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution/resolutionDTO"
@@ -160,7 +161,7 @@ func UpdateBatchCoursePhaseParticipation(ctx context.Context, createOrUpdateCour
 	if err != nil {
 		return nil, err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := CoursePhaseParticipationServiceSingleton.queries.WithTx(tx)
 
 	updatedIDs := make([]uuid.UUID, 0, len(createOrUpdateCoursePhaseParticipation))
