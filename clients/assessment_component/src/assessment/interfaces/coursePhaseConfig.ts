@@ -18,6 +18,7 @@ export interface CoursePhaseConfig {
   evaluationResultsVisible: boolean
   gradeSuggestionVisible: boolean
   actionItemsVisible: boolean
+  resultsReleased: boolean
 }
 
 export interface CreateOrUpdateCoursePhaseConfigRequest {

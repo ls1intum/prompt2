@@ -150,6 +150,7 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
 		GradeSuggestionVisible:   gradeSuggestionVisible,
 		ActionItemsVisible:       actionItemsVisible,
+		ResultsReleased:          pgtype.Bool{Bool: false, Valid: true},
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
@@ -231,6 +232,59 @@ func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUI
 		return false, errors.New("could not check if tutor evaluation deadline has passed")
 	}
 	return deadlinePassed, nil
+}
+
+func ReleaseResults(ctx context.Context, coursePhaseID uuid.UUID) error {
+	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get course phase config")
+		return errors.New("failed to get course phase config")
+	}
+
+	if config.ResultsReleased {
+		log.WithField("coursePhaseID", coursePhaseID).Info("Results already released")
+		return nil
+	}
+
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentSchemaID:       config.AssessmentSchemaID,
+		CoursePhaseID:            coursePhaseID,
+		Start:                    config.Start,
+		Deadline:                 config.Deadline,
+		SelfEvaluationEnabled:    config.SelfEvaluationEnabled,
+		SelfEvaluationSchema:     config.SelfEvaluationSchema,
+		SelfEvaluationStart:      config.SelfEvaluationStart,
+		SelfEvaluationDeadline:   config.SelfEvaluationDeadline,
+		PeerEvaluationEnabled:    config.PeerEvaluationEnabled,
+		PeerEvaluationSchema:     config.PeerEvaluationSchema,
+		PeerEvaluationStart:      config.PeerEvaluationStart,
+		PeerEvaluationDeadline:   config.PeerEvaluationDeadline,
+		TutorEvaluationEnabled:   config.TutorEvaluationEnabled,
+		TutorEvaluationSchema:    config.TutorEvaluationSchema,
+		TutorEvaluationStart:     config.TutorEvaluationStart,
+		TutorEvaluationDeadline:  config.TutorEvaluationDeadline,
+		EvaluationResultsVisible: config.EvaluationResultsVisible,
+		GradeSuggestionVisible:   pgtype.Bool{Bool: config.GradeSuggestionVisible, Valid: true},
+		ActionItemsVisible:       pgtype.Bool{Bool: config.ActionItemsVisible, Valid: true},
+		ResultsReleased:          pgtype.Bool{Bool: true, Valid: true},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to release results")
+		return err
+	}
+
+	log.WithField("coursePhaseID", coursePhaseID).Info("Results released successfully")
+	return tx.Commit(ctx)
 }
 
 func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, oldSchemaID uuid.UUID, newSchemaID uuid.UUID) error {

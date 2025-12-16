@@ -149,10 +149,12 @@ INSERT INTO course_phase_config (assessment_schema_id,
                                  tutor_evaluation_deadline,
                                  evaluation_results_visible,
                                  grade_suggestion_visible,
-                                 action_items_visible)
+                                 action_items_visible,
+                                 results_released)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
         COALESCE(sqlc.narg('grade_suggestion_visible')::boolean, TRUE), 
-        COALESCE(sqlc.narg('action_items_visible')::boolean, TRUE))
+        COALESCE(sqlc.narg('action_items_visible')::boolean, TRUE),
+        COALESCE(sqlc.narg('results_released')::boolean, FALSE))
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
                   start                     = EXCLUDED.start,
@@ -171,7 +173,8 @@ ON CONFLICT (course_phase_id)
                   tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline,
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
                   grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
-                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE);
+                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE),
+                  results_released          = COALESCE(EXCLUDED.results_released, FALSE);
 
 -- name: UpdateCoursePhaseConfigAssessmentSchema :exec
 UPDATE course_phase_config

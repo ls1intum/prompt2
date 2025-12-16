@@ -242,6 +242,7 @@ type CoursePhaseConfig struct {
 	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
 	GradeSuggestionVisible   bool               `json:"grade_suggestion_visible"`
 	ActionItemsVisible       bool               `json:"action_items_visible"`
+	ResultsReleased          bool               `json:"results_released"`
 }
 
 type Evaluation struct {
