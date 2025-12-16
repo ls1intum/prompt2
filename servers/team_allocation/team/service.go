@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	"github.com/ls1intum/prompt-sdk/utils"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/team/teamDTO"
 	log "github.com/sirupsen/logrus"
@@ -133,7 +133,7 @@ func ImportTutors(ctx context.Context, coursePhaseID uuid.UUID, tutors []teamDTO
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := TeamsServiceSingleton.queries.WithTx(tx)
 
 	for _, tutor := range tutors {
