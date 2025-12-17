@@ -104,7 +104,16 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 		return err
 	}
 
-	err = CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
+	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		log.WithError(err).Error("Failed to begin transaction")
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CategoryServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.UpdateCategory(ctx, db.UpdateCategoryParams{
 		ID:                 result.TargetEntityID,
 		Name:               req.Name,
 		ShortName:          pgtype.Text{String: req.ShortName, Valid: true},
@@ -115,6 +124,11 @@ func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, 
 	if err != nil {
 		log.Error("could not update category: ", err)
 		return errors.New("could not update category")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.WithError(err).Error("Failed to commit transaction")
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
@@ -142,10 +156,24 @@ func DeleteCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) 
 		return err
 	}
 
-	err = CategoryServiceSingleton.queries.DeleteCategory(ctx, result.TargetEntityID)
+	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		log.WithError(err).Error("Failed to begin transaction")
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CategoryServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.DeleteCategory(ctx, result.TargetEntityID)
 	if err != nil {
 		log.Error("could not delete category: ", err)
 		return errors.New("could not delete category")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.WithError(err).Error("Failed to commit transaction")
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

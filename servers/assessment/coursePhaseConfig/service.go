@@ -130,6 +130,13 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		actionItemsVisible = pgtype.Bool{Bool: *req.ActionItemsVisible, Valid: true}
 	}
 
+	// Preserve existing ResultsReleased value on update, default to false for new creates
+	resultsReleased := pgtype.Bool{Bool: false, Valid: true}
+	if err == nil {
+		// Config exists - preserve the existing ResultsReleased value
+		resultsReleased = pgtype.Bool{Bool: existingConfig.ResultsReleased, Valid: true}
+	}
+
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
 		AssessmentSchemaID:       req.AssessmentSchemaID,
 		CoursePhaseID:            coursePhaseID,
@@ -150,7 +157,7 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
 		GradeSuggestionVisible:   gradeSuggestionVisible,
 		ActionItemsVisible:       actionItemsVisible,
-		ResultsReleased:          pgtype.Bool{Bool: false, Valid: true},
+		ResultsReleased:          resultsReleased,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)

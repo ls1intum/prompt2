@@ -59,27 +59,19 @@ func listCompetenciesByCategory(c *gin.Context) {
 }
 
 func createCompetency(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req competencyDTO.CreateCompetencyRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Get the coursePhaseID from the category in the request
-	category, err := CompetencyServiceSingleton.queries.GetCategory(c, req.CategoryID)
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Get course phases using this schema
-	coursePhases, err := CompetencyServiceSingleton.queries.GetCoursePhasesByAssessmentSchema(c, category.AssessmentSchemaID)
-	if err != nil || len(coursePhases) == 0 {
-		// If no course phase found, use a zero UUID (will be handled in service)
-		coursePhases = []uuid.UUID{uuid.Nil}
-	}
-
-	err = CreateCompetency(c, coursePhases[0], req)
+	err = CreateCompetency(c, coursePhaseID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

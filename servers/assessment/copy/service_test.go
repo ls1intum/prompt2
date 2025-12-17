@@ -109,6 +109,7 @@ func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_Success() {
 	assert.Equal(suite.T(), true, targetConfig.EvaluationResultsVisible)
 	assert.Equal(suite.T(), true, targetConfig.GradeSuggestionVisible)
 	assert.Equal(suite.T(), false, targetConfig.ActionItemsVisible)
+	assert.Equal(suite.T(), false, targetConfig.ResultsReleased)
 }
 
 func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_SameSourceAndTarget() {
