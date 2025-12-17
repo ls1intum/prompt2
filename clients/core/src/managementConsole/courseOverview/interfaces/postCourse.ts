@@ -1,4 +1,4 @@
-import type { UpdateCourseDataWithDescriptions } from '@core/interfaces/courseWithDescriptions'
+import type { UpdateCourseData } from '@tumaet/prompt-shared-state'
 
 export interface PostCourse {
   name: string
@@ -31,9 +31,7 @@ export function serializePostCourse(course: PostCourse): Record<string, any> {
   }
 }
 
-export function serializeUpdateCourse(
-  course: UpdateCourseDataWithDescriptions,
-): Record<string, any> {
+export function serializeUpdateCourse(course: UpdateCourseData): Record<string, any> {
   return {
     ...course,
     startDate: course.startDate ? formatDate(course.startDate) : undefined,

@@ -1,10 +1,10 @@
 import { axiosInstance } from '@/network/configService'
 import { serializeUpdateCourse } from '@core/managementConsole/courseOverview/interfaces/postCourse'
-import type { UpdateCourseDataWithDescriptions } from '@core/interfaces/courseWithDescriptions'
+import type { UpdateCourseData } from '@tumaet/prompt-shared-state'
 
 export const updateCourseData = async (
   courseID: string,
-  courseData: UpdateCourseDataWithDescriptions,
+  courseData: UpdateCourseData,
 ): Promise<void> => {
   const serializedCourse = serializeUpdateCourse(courseData)
   try {

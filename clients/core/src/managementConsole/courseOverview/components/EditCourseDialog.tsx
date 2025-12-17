@@ -30,10 +30,7 @@ import {
 import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
-import type {
-  CourseWithDescriptions,
-  UpdateCourseDataWithDescriptions,
-} from '@core/interfaces/courseWithDescriptions'
+import type { Course, UpdateCourseData } from '@tumaet/prompt-shared-state'
 import { IconSelector } from '../AddingCourse/components/IconSelector'
 import {
   DEFAULT_COURSE_COLOR,
@@ -49,7 +46,7 @@ interface CourseEditDialogProps {
 export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JSX.Element => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
-  const course = courses.find((c) => c.id === courseId) as CourseWithDescriptions | undefined
+  const course = courses.find((c) => c.id === courseId) as Course | undefined
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const initialColor = (course?.studentReadableData?.['bg-color'] as string) || DEFAULT_COURSE_COLOR
@@ -82,7 +79,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   }, [selectedCourseType, form])
 
   const { mutate: mutateCourse } = useMutation({
-    mutationFn: (courseData: UpdateCourseDataWithDescriptions) => {
+    mutationFn: (courseData: UpdateCourseData) => {
       return updateCourseData(courseId ?? 'undefined', courseData)
     },
     onSuccess: () => {
@@ -101,7 +98,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
   })
 
   const onSubmit = (data: EditCourseFormValues) => {
-    const updateData: UpdateCourseDataWithDescriptions = {
+    const updateData: UpdateCourseData = {
       startDate: data.dateRange.from,
       endDate: data.dateRange.to,
       courseType: data.courseType,
