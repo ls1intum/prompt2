@@ -5,13 +5,11 @@ import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import DynamicIcon from '@/components/DynamicIcon'
-import type { Course } from '@tumaet/prompt-shared-state'
 
 export const CourseCards = (): JSX.Element => {
   const { courses } = useCourseStore()
-  const coursesWithDescriptions = courses as Course[]
   const navigate = useNavigate()
-  const hasSingleCourse = coursesWithDescriptions.length === 1
+  const hasSingleCourse = courses.length === 1
 
   const handleCourseClick = (courseId: string) => {
     navigate(`/management/course/${courseId}`)
@@ -30,7 +28,7 @@ export const CourseCards = (): JSX.Element => {
           : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start justify-start'
       }`}
     >
-      {coursesWithDescriptions.map((course) => {
+      {courses.map((course) => {
         const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
 
         return (
