@@ -710,7 +710,7 @@ func (q *Queries) TestAssessmentTypeExists(ctx context.Context) (bool, error) {
 const testDevOpsChallengeTypeExists = `-- name: TestDevOpsChallengeTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
-               WHERE name = 'DevOpsChallenge') AS does_exist
+               WHERE name = 'DevOps Challenge') AS does_exist
 `
 
 func (q *Queries) TestDevOpsChallengeTypeExists(ctx context.Context) (bool, error) {
