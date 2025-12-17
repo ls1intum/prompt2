@@ -284,12 +284,7 @@ export function EditCompetencyDialog({
             )}
 
             <DialogFooter>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={handleClose}
-                disabled={isUpdating}
-              >
+              <Button type='button' variant='outline' onClick={handleClose} disabled={isUpdating}>
                 Cancel
               </Button>
               <Button type='submit' disabled={isUpdating}>
