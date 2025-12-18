@@ -1,20 +1,15 @@
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
-
-import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
-import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
-
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
+import { useGetAllAssessmentCompletions } from '../hooks/useGetAllAssessmentCompletions'
 
 import { useGetParticipationsWithAssessment } from '../components/diagrams/hooks/useGetParticipationsWithAssessment'
 import { useFilteredParticipations } from './hooks/useFilteredParticipations'
@@ -32,7 +27,6 @@ import { FilterMenu, StatisticsFilter } from './components/FilterMenu'
 import { FilterBadges } from './components/FilterBadges'
 
 export const AssessmentStatisticsPage = () => {
-  const { phaseId } = useParams<{ phaseId: string }>()
   const [filters, setFilters] = useState<StatisticsFilter>({})
 
   const { categories } = useCategoryStore()
@@ -52,10 +46,7 @@ export const AssessmentStatisticsPage = () => {
     isPending: isAssessmentCompletionsPending,
     isError: isAssessmentCompletionsError,
     refetch: refetchAssessmentCompletions,
-  } = useQuery<AssessmentCompletion[]>({
-    queryKey: ['assessmentCompletions', phaseId],
-    queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
-  })
+  } = useGetAllAssessmentCompletions()
 
   const participationsWithAssessments = useGetParticipationsWithAssessment(
     participations || [],

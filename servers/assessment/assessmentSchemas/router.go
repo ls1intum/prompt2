@@ -15,6 +15,7 @@ func SetupAssessmentSchemaRouter(routerGroup *gin.RouterGroup, authMiddleware fu
 
 	schemaRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllAssessmentSchemas)
 	schemaRouter.GET("/:schemaID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAssessmentSchema)
+	schemaRouter.GET("/:schemaID/has-assessment-data", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), checkSchemaHasAssessmentData)
 	schemaRouter.POST("", authMiddleware(promptSDK.PromptAdmin), createAssessmentSchema)
 	schemaRouter.PUT("/:schemaID", authMiddleware(promptSDK.PromptAdmin), updateAssessmentSchema)
 	schemaRouter.DELETE("/:schemaID", authMiddleware(promptSDK.PromptAdmin), deleteAssessmentSchema)
@@ -30,8 +31,7 @@ func getAllAssessmentSchemas(c *gin.Context) {
 }
 
 func getAssessmentSchema(c *gin.Context) {
-	schemaIDStr := c.Param("schemaID")
-	schemaID, err := uuid.Parse(schemaIDStr)
+	schemaID, err := uuid.Parse(c.Param("schemaID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
@@ -43,6 +43,31 @@ func getAssessmentSchema(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, schema)
+}
+
+func checkSchemaHasAssessmentData(c *gin.Context) {
+	schemaID, err := uuid.Parse(c.Param("schemaID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse schema ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid schema ID"})
+		return
+	}
+
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	hasData, err := CheckPhaseHasAssessmentData(c, coursePhaseID, schemaID)
+	if err != nil {
+		log.WithError(err).Error("Failed to check if schema has assessment data")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check assessment data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"hasAssessmentData": hasData})
 }
 
 func createAssessmentSchema(c *gin.Context) {
@@ -61,8 +86,7 @@ func createAssessmentSchema(c *gin.Context) {
 }
 
 func updateAssessmentSchema(c *gin.Context) {
-	schemaIDStr := c.Param("schemaID")
-	schemaID, err := uuid.Parse(schemaIDStr)
+	schemaID, err := uuid.Parse(c.Param("schemaID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
@@ -83,8 +107,7 @@ func updateAssessmentSchema(c *gin.Context) {
 }
 
 func deleteAssessmentSchema(c *gin.Context) {
-	schemaIDStr := c.Param("schemaID")
-	schemaID, err := uuid.Parse(schemaIDStr)
+	schemaID, err := uuid.Parse(c.Param("schemaID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return

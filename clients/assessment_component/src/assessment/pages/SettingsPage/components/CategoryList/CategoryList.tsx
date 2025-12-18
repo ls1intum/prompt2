@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Lock } from 'lucide-react'
 
 import {
   Card,
@@ -8,6 +8,10 @@ import {
   AccordionTrigger,
   AccordionContent,
   Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
 import { useCategoryStore } from '../../../../zustand/useCategoryStore'
@@ -27,9 +31,14 @@ import { useEffect } from 'react'
 interface CategoryListProps {
   assessmentSchemaID: string
   assessmentType: AssessmentType
+  hasAssessmentData?: boolean
 }
 
-export const CategoryList = ({ assessmentSchemaID, assessmentType }: CategoryListProps) => {
+export const CategoryList = ({
+  assessmentSchemaID,
+  assessmentType,
+  hasAssessmentData = false,
+}: CategoryListProps) => {
   const [categoryToEdit, setCategoryToEdit] = useState<CategoryWithCompetencies | undefined>(
     undefined,
   )
@@ -78,15 +87,35 @@ export const CategoryList = ({ assessmentSchemaID, assessmentType }: CategoryLis
             </div>
             <div className='flex justify-between items-center'>
               <div>
-                <h2 id='assessment-schema-header' className='text-xl font-semibold tracking-tight'>
-                  {assessmentType === AssessmentType.SELF
-                    ? 'Self-Evaluation Schema'
-                    : assessmentType === AssessmentType.PEER
-                      ? 'Peer-Evaluation Schema'
-                      : assessmentType === AssessmentType.TUTOR
-                        ? 'Tutor-Evaluation Schema'
-                        : 'Assessment Schema'}
-                </h2>
+                <div className='flex items-center gap-2'>
+                  <h2
+                    id='assessment-schema-header'
+                    className='text-xl font-semibold tracking-tight'
+                  >
+                    {assessmentType === AssessmentType.SELF
+                      ? 'Self-Evaluation Schema'
+                      : assessmentType === AssessmentType.PEER
+                        ? 'Peer-Evaluation Schema'
+                        : assessmentType === AssessmentType.TUTOR
+                          ? 'Tutor-Evaluation Schema'
+                          : 'Assessment Schema'}
+                  </h2>
+                  {hasAssessmentData && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Lock className='h-4 w-4 text-muted-foreground' />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className='max-w-xs'>
+                            Schema is locked because assessment data exists for this phase. Changes
+                            are disabled to protect existing assessments.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
 
                 <p className='text-muted-foreground text-sm mt-1'>
                   {assessmentType === AssessmentType.SELF
@@ -109,6 +138,7 @@ export const CategoryList = ({ assessmentSchemaID, assessmentType }: CategoryLis
                   setCategoryToEdit={setCategoryToEdit}
                   setCategoryToDelete={setCategoryToDelete}
                   assessmentType={assessmentType}
+                  disabled={hasAssessmentData}
                 />
               ))}
 
@@ -118,14 +148,28 @@ export const CategoryList = ({ assessmentSchemaID, assessmentType }: CategoryLis
                   onCancel={() => setShowAddCategoryForm(false)}
                 />
               ) : (
-                <Button
-                  variant='outline'
-                  className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-                  onClick={() => setShowAddCategoryForm(true)}
-                >
-                  <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
-                  <span className='text-muted-foreground'>Add Category</span>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Button
+                          variant='outline'
+                          className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
+                          onClick={() => setShowAddCategoryForm(true)}
+                          disabled={hasAssessmentData}
+                        >
+                          <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
+                          <span className='text-muted-foreground'>Add Category</span>
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    {hasAssessmentData && (
+                      <TooltipContent>
+                        <p>Cannot add categories when assessment data exists</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               )}
 
               <EditCategoryDialog

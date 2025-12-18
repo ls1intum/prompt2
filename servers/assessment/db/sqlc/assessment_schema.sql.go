@@ -12,19 +12,174 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkPhaseHasAssessmentData = `-- name: CheckPhaseHasAssessmentData :one
+SELECT EXISTS(
+    SELECT 1 FROM assessment a
+    WHERE a.course_phase_id = $1
+    AND a.competency_id IN (
+        SELECT co.id FROM competency co
+        JOIN category cat ON co.category_id = cat.id
+        WHERE cat.assessment_schema_id = $2
+    )
+) OR EXISTS(
+    SELECT 1 FROM evaluation e
+    WHERE e.course_phase_id = $1
+    AND e.competency_id IN (
+        SELECT co.id FROM competency co
+        JOIN category cat ON co.category_id = cat.id
+        WHERE cat.assessment_schema_id = $2
+    )
+)
+`
+
+type CheckPhaseHasAssessmentDataParams struct {
+	CoursePhaseID      uuid.UUID `json:"course_phase_id"`
+	AssessmentSchemaID uuid.UUID `json:"assessment_schema_id"`
+}
+
+func (q *Queries) CheckPhaseHasAssessmentData(ctx context.Context, arg CheckPhaseHasAssessmentDataParams) (pgtype.Bool, error) {
+	row := q.db.QueryRow(ctx, checkPhaseHasAssessmentData, arg.CoursePhaseID, arg.AssessmentSchemaID)
+	var column_1 pgtype.Bool
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const checkSchemaOwnership = `-- name: CheckSchemaOwnership :one
+SELECT EXISTS(
+    SELECT 1 
+    FROM assessment_schema 
+    WHERE id = $1 
+    AND (source_phase_id = $2 OR source_phase_id IS NULL)
+)
+`
+
+type CheckSchemaOwnershipParams struct {
+	ID            uuid.UUID   `json:"id"`
+	SourcePhaseID pgtype.UUID `json:"source_phase_id"`
+}
+
+func (q *Queries) CheckSchemaOwnership(ctx context.Context, arg CheckSchemaOwnershipParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkSchemaOwnership, arg.ID, arg.SourcePhaseID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const copyAssessmentSchema = `-- name: CopyAssessmentSchema :one
+WITH cfg AS (SELECT assessment_schema_id
+             FROM course_phase_config
+             WHERE course_phase_id = $1),
+     src_schema AS (SELECT s.id, s.name, s.description, s.created_at, s.updated_at, s.source_phase_id
+                    FROM assessment_schema s
+                             JOIN cfg ON s.id = cfg.assessment_schema_id),
+     new_schema AS (
+         INSERT INTO assessment_schema (id, name, description, created_at, updated_at, source_phase_id)
+             SELECT gen_random_uuid()    AS id,
+                    $2 || ' ' || s.name  AS name,
+                    s.description        AS description,
+                    CURRENT_TIMESTAMP    AS created_at,
+                    CURRENT_TIMESTAMP    AS updated_at,
+                    $1 AS source_phase_id
+             FROM src_schema s
+             RETURNING id, name, description, created_at, updated_at, source_phase_id),
+     cat_map AS (SELECT c.id              AS old_id,
+                        gen_random_uuid() AS new_id,
+                        c.name,
+                        c.description,
+                        c.weight,
+                        c.short_name
+                 FROM category c
+                          JOIN cfg ON c.assessment_schema_id = cfg.assessment_schema_id),
+     inserted_categories AS (
+         INSERT INTO category (id, name, description, weight, short_name, assessment_schema_id)
+             SELECT cm.new_id,
+                    cm.name,
+                    cm.description,
+                    cm.weight,
+                    cm.short_name,
+                    ns.id
+             FROM cat_map cm
+                      CROSS JOIN new_schema ns
+             RETURNING id),
+     inserted_competencies AS (
+         INSERT INTO competency (
+                                 id,
+                                 category_id,
+                                 name,
+                                 description,
+                                 weight,
+                                 short_name,
+                                 description_very_bad,
+                                 description_bad,
+                                 description_ok,
+                                 description_good,
+                                 description_very_good
+             )
+             SELECT gen_random_uuid(),
+                    cm.new_id,
+                    co.name,
+                    co.description,
+                    co.weight,
+                    co.short_name,
+                    co.description_very_bad,
+                    co.description_bad,
+                    co.description_ok,
+                    co.description_good,
+                    co.description_very_good
+             FROM competency co
+                      JOIN cat_map cm ON co.category_id = cm.old_id
+             RETURNING id)
+SELECT id, name, description, created_at, updated_at, source_phase_id
+FROM new_schema
+`
+
+type CopyAssessmentSchemaParams struct {
+	CoursePhaseID          uuid.UUID   `json:"course_phase_id"`
+	CourseIdentifierPrefix pgtype.Text `json:"course_identifier_prefix"`
+}
+
+type CopyAssessmentSchemaRow struct {
+	ID            uuid.UUID        `json:"id"`
+	Name          string           `json:"name"`
+	Description   pgtype.Text      `json:"description"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+	SourcePhaseID pgtype.UUID      `json:"source_phase_id"`
+}
+
+func (q *Queries) CopyAssessmentSchema(ctx context.Context, arg CopyAssessmentSchemaParams) (CopyAssessmentSchemaRow, error) {
+	row := q.db.QueryRow(ctx, copyAssessmentSchema, arg.CoursePhaseID, arg.CourseIdentifierPrefix)
+	var i CopyAssessmentSchemaRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.SourcePhaseID,
+	)
+	return i, err
+}
+
 const createAssessmentSchema = `-- name: CreateAssessmentSchema :exec
-INSERT INTO assessment_schema (id, name, description, created_at, updated_at)
-VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO assessment_schema (id, name, description, created_at, updated_at, source_phase_id)
+VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $4)
 `
 
 type CreateAssessmentSchemaParams struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
+	ID            uuid.UUID   `json:"id"`
+	Name          string      `json:"name"`
+	Description   pgtype.Text `json:"description"`
+	SourcePhaseID pgtype.UUID `json:"source_phase_id"`
 }
 
 func (q *Queries) CreateAssessmentSchema(ctx context.Context, arg CreateAssessmentSchemaParams) error {
-	_, err := q.db.Exec(ctx, createAssessmentSchema, arg.ID, arg.Name, arg.Description)
+	_, err := q.db.Exec(ctx, createAssessmentSchema,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.SourcePhaseID,
+	)
 	return err
 }
 
@@ -40,7 +195,7 @@ func (q *Queries) DeleteAssessmentSchema(ctx context.Context, id uuid.UUID) erro
 }
 
 const getAssessmentSchema = `-- name: GetAssessmentSchema :one
-SELECT id, name, description, created_at, updated_at
+SELECT id, name, description, created_at, updated_at, source_phase_id
 FROM assessment_schema
 WHERE id = $1
 `
@@ -54,12 +209,13 @@ func (q *Queries) GetAssessmentSchema(ctx context.Context, id uuid.UUID) (Assess
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SourcePhaseID,
 	)
 	return i, err
 }
 
 const getAssessmentSchemaByName = `-- name: GetAssessmentSchemaByName :one
-SELECT id, name, description, created_at, updated_at
+SELECT id, name, description, created_at, updated_at, source_phase_id
 FROM assessment_schema
 WHERE name = $1
 `
@@ -73,12 +229,118 @@ func (q *Queries) GetAssessmentSchemaByName(ctx context.Context, name string) (A
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SourcePhaseID,
 	)
 	return i, err
 }
 
+const getConsumerPhases = `-- name: GetConsumerPhases :many
+SELECT DISTINCT cpc.course_phase_id
+FROM course_phase_config cpc
+WHERE (
+    cpc.assessment_schema_id = $1
+    OR cpc.self_evaluation_schema = $1
+    OR cpc.peer_evaluation_schema = $1
+    OR cpc.tutor_evaluation_schema = $1
+)
+AND cpc.course_phase_id != $2
+`
+
+type GetConsumerPhasesParams struct {
+	AssessmentSchemaID uuid.UUID `json:"assessment_schema_id"`
+	CoursePhaseID      uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetConsumerPhases(ctx context.Context, arg GetConsumerPhasesParams) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getConsumerPhases, arg.AssessmentSchemaID, arg.CoursePhaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var course_phase_id uuid.UUID
+		if err := rows.Scan(&course_phase_id); err != nil {
+			return nil, err
+		}
+		items = append(items, course_phase_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCorrespondingCategoryInNewSchema = `-- name: GetCorrespondingCategoryInNewSchema :one
+SELECT cat.id
+FROM category cat
+WHERE cat.assessment_schema_id = $1
+  AND cat.name = (
+    SELECT old_cat.name FROM category old_cat WHERE old_cat.id = $2
+)
+`
+
+type GetCorrespondingCategoryInNewSchemaParams struct {
+	NewSchemaID   uuid.UUID `json:"new_schema_id"`
+	OldCategoryID uuid.UUID `json:"old_category_id"`
+}
+
+// Maps a category from an old schema to the corresponding category in a new schema
+// based on matching category names.
+// Note: This relies on UNIQUE constraint category(assessment_schema_id, name).
+// Without LIMIT 1, this query will fail if duplicates exist,
+// which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
+func (q *Queries) GetCorrespondingCategoryInNewSchema(ctx context.Context, arg GetCorrespondingCategoryInNewSchemaParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, getCorrespondingCategoryInNewSchema, arg.NewSchemaID, arg.OldCategoryID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getCorrespondingCompetencyInNewSchema = `-- name: GetCorrespondingCompetencyInNewSchema :one
+WITH old_comp AS (
+    SELECT comp.id, comp.name AS comp_name, comp.category_id,
+           cat.name AS cat_name, cat.assessment_schema_id AS old_schema_id
+    FROM competency comp
+    INNER JOIN category cat ON comp.category_id = cat.id
+    WHERE comp.id = $1
+),
+new_comp AS (
+    SELECT comp.id, comp.name AS comp_name, comp.category_id,
+           cat.name AS cat_name, cat.id AS new_cat_id
+    FROM competency comp
+    INNER JOIN category cat ON comp.category_id = cat.id
+    WHERE cat.assessment_schema_id = $2
+)
+SELECT nc.id AS competency_id, nc.new_cat_id AS category_id
+FROM old_comp oc
+INNER JOIN new_comp nc ON oc.cat_name = nc.cat_name AND oc.comp_name = nc.comp_name
+`
+
+type GetCorrespondingCompetencyInNewSchemaParams struct {
+	OldCompetencyID uuid.UUID `json:"old_competency_id"`
+	NewSchemaID     uuid.UUID `json:"new_schema_id"`
+}
+
+type GetCorrespondingCompetencyInNewSchemaRow struct {
+	CompetencyID uuid.UUID `json:"competency_id"`
+	CategoryID   uuid.UUID `json:"category_id"`
+}
+
+// Maps a competency from an old schema to the corresponding competency in a new schema
+// based on matching category and competency names.
+// Note: This relies on UNIQUE constraints: category(assessment_schema_id, name) and
+// competency(category_id, name). Without LIMIT 1, this query will fail if duplicates exist,
+// which is the correct behavior (fail-fast) rather than silently returning an arbitrary match.
+func (q *Queries) GetCorrespondingCompetencyInNewSchema(ctx context.Context, arg GetCorrespondingCompetencyInNewSchemaParams) (GetCorrespondingCompetencyInNewSchemaRow, error) {
+	row := q.db.QueryRow(ctx, getCorrespondingCompetencyInNewSchema, arg.OldCompetencyID, arg.NewSchemaID)
+	var i GetCorrespondingCompetencyInNewSchemaRow
+	err := row.Scan(&i.CompetencyID, &i.CategoryID)
+	return i, err
+}
+
 const listAssessmentSchemas = `-- name: ListAssessmentSchemas :many
-SELECT id, name, description, created_at, updated_at
+SELECT id, name, description, created_at, updated_at, source_phase_id
 FROM assessment_schema
 ORDER BY name ASC
 `
@@ -98,6 +360,7 @@ func (q *Queries) ListAssessmentSchemas(ctx context.Context) ([]AssessmentSchema
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SourcePhaseID,
 		); err != nil {
 			return nil, err
 		}
@@ -107,6 +370,24 @@ func (q *Queries) ListAssessmentSchemas(ctx context.Context) ([]AssessmentSchema
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateAssessmentCompetencies = `-- name: UpdateAssessmentCompetencies :exec
+UPDATE assessment
+SET competency_id = $3
+WHERE course_phase_id = $1
+AND competency_id = $2
+`
+
+type UpdateAssessmentCompetenciesParams struct {
+	CoursePhaseID  uuid.UUID `json:"course_phase_id"`
+	CompetencyID   uuid.UUID `json:"competency_id"`
+	CompetencyID_2 uuid.UUID `json:"competency_id_2"`
+}
+
+func (q *Queries) UpdateAssessmentCompetencies(ctx context.Context, arg UpdateAssessmentCompetenciesParams) error {
+	_, err := q.db.Exec(ctx, updateAssessmentCompetencies, arg.CoursePhaseID, arg.CompetencyID, arg.CompetencyID_2)
+	return err
 }
 
 const updateAssessmentSchema = `-- name: UpdateAssessmentSchema :exec
@@ -125,5 +406,23 @@ type UpdateAssessmentSchemaParams struct {
 
 func (q *Queries) UpdateAssessmentSchema(ctx context.Context, arg UpdateAssessmentSchemaParams) error {
 	_, err := q.db.Exec(ctx, updateAssessmentSchema, arg.ID, arg.Name, arg.Description)
+	return err
+}
+
+const updateEvaluationCompetencies = `-- name: UpdateEvaluationCompetencies :exec
+UPDATE evaluation
+SET competency_id = $3
+WHERE course_phase_id = $1
+AND competency_id = $2
+`
+
+type UpdateEvaluationCompetenciesParams struct {
+	CoursePhaseID  uuid.UUID `json:"course_phase_id"`
+	CompetencyID   uuid.UUID `json:"competency_id"`
+	CompetencyID_2 uuid.UUID `json:"competency_id_2"`
+}
+
+func (q *Queries) UpdateEvaluationCompetencies(ctx context.Context, arg UpdateEvaluationCompetenciesParams) error {
+	_, err := q.db.Exec(ctx, updateEvaluationCompetencies, arg.CoursePhaseID, arg.CompetencyID, arg.CompetencyID_2)
 	return err
 }

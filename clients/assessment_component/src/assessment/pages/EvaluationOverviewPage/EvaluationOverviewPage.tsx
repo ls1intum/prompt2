@@ -110,20 +110,16 @@ export const EvaluationOverviewPage = () => {
   const allEvaluationsCompleted =
     isSelfEvaluationCompleted && isPeerEvaluationCompleted && isTutorEvaluationCompleted
 
-  const isAssessmentDeadlinePassed = coursePhaseConfig?.deadline
-    ? now >= new Date(coursePhaseConfig.deadline)
-    : false
+  const resultsReleased = coursePhaseConfig?.resultsReleased ?? false
 
   return (
     <div className='min-h-screen transition-colors'>
       <div className='max-w-6xl mx-auto px-4 py-6'>
-        <ManagementPageHeader>
-          {isAssessmentDeadlinePassed ? 'Results' : 'Evaluation'}
-        </ManagementPageHeader>
+        <ManagementPageHeader>{resultsReleased ? 'Results' : 'Evaluation'}</ManagementPageHeader>
 
         <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} />
 
-        {!isAssessmentDeadlinePassed && (
+        {!resultsReleased && (
           <div>
             <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8'>
               {selfEvaluationStarted && (
@@ -247,7 +243,7 @@ export const EvaluationOverviewPage = () => {
           </div>
         )}
 
-        {isAssessmentDeadlinePassed && <ActionItemsAndGradeSuggestion />}
+        {resultsReleased && <ActionItemsAndGradeSuggestion />}
       </div>
     </div>
   )

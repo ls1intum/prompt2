@@ -112,6 +112,7 @@ CREATE TABLE public.course_phase_config (
     evaluation_results_visible boolean NOT NULL DEFAULT true,
     grade_suggestion_visible boolean NOT NULL DEFAULT true,
     action_items_visible boolean NOT NULL DEFAULT true,
+    results_released boolean NOT NULL DEFAULT false,
     FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
@@ -1361,16 +1362,16 @@ INSERT INTO public.assessment_schema (id, name, description) VALUES
 
 -- Insert test course_phase_config entries for visibility tests
 -- Course phase config for visible scenario (both grade suggestions and action items visible, deadline passed)
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-01-01 00:00:00+00', true, true);
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible, results_released)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-01-01 00:00:00+00', true, true, true);
 
 -- Course phase config for not visible scenario (both grade suggestions and action items hidden, deadline passed)
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2025-01-01 00:00:00+00', false, false);
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible, results_released)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2025-01-01 00:00:00+00', false, false, false);
 
 -- Course phase config for before deadline scenario (deadline in the future)
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2099-12-31 23:59:59+00', true, true);
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, grade_suggestion_visible, action_items_visible, results_released)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2099-12-31 23:59:59+00', true, true, false);
 
 -- Insert test assessment_completion entries for visibility tests
 -- Using different course_participation_id to avoid conflicts with other tests

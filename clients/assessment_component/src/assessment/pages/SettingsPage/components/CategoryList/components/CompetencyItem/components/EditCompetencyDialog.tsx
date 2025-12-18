@@ -24,7 +24,6 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import {} from 'react'
 
 import type {
   Competency,
@@ -77,6 +76,27 @@ export function EditCompetencyDialog({
     resolver: zodResolver(updateCompetencySchema),
   })
 
+  const handleClose = () => {
+    onOpenChange(false)
+    setError(undefined)
+    form.reset()
+  }
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      handleClose()
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
+
+  const onSubmit = (data: UpdateCompetencyRequest) => {
+    mutate(data, {
+      onSuccess: () => handleClose(),
+    })
+  }
+
   useEffect(() => {
     if (competency) {
       form.reset({
@@ -95,28 +115,15 @@ export function EditCompetencyDialog({
     }
   }, [competency, form])
 
-  useEffect(() => {
-    if (!open || !competency) return
-
-    const subscription = form.watch((value, { name, type }) => {
-      if (name && type === 'change') {
-        const data = form.getValues() as UpdateCompetencyRequest
-        mutate(data)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [form, mutate, open, competency])
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Competency</DialogTitle>
           <DialogDescription>Update the competency details below.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <div className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='name'
@@ -277,11 +284,14 @@ export function EditCompetencyDialog({
             )}
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+              <Button type='button' variant='outline' onClick={handleClose} disabled={isUpdating}>
+                Cancel
+              </Button>
+              <Button type='submit' disabled={isUpdating}>
                 {isUpdating ? 'Saving...' : 'Save'}
               </Button>
             </DialogFooter>
-          </div>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

@@ -14,6 +14,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments"
 	"github.com/ls1intum/prompt2/servers/assessment/categories"
 	"github.com/ls1intum/prompt2/servers/assessment/competencies"
+	"github.com/ls1intum/prompt2/servers/assessment/copy"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
@@ -95,6 +96,9 @@ func main() {
 	assessmentSchemas.InitAssessmentSchemaModule(api, *query, conn)
 	assessments.InitAssessmentModule(api, *query, conn)
 	evaluations.InitEvaluationModule(api, *query, conn)
+
+	copyApi := router.Group("assessment/api")
+	copy.InitCopyModule(copyApi, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8085")
 	err = router.Run(serverAddress)

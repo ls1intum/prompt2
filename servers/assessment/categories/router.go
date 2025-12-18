@@ -83,6 +83,12 @@ func updateCategory(c *gin.Context) {
 }
 
 func deleteCategory(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	categoryID, err := uuid.Parse(c.Param("categoryID"))
 	if err != nil {
 		log.Error("Error parsing categoryID: ", err)
@@ -90,7 +96,7 @@ func deleteCategory(c *gin.Context) {
 		return
 	}
 
-	err = DeleteCategory(c, categoryID)
+	err = DeleteCategory(c, categoryID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return

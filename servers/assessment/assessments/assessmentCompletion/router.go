@@ -198,12 +198,7 @@ func getMyGradeSuggestion(c *gin.Context) {
 		return
 	}
 
-	deadlinePassed, err := coursePhaseConfig.IsAssessmentDeadlinePassed(c, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	if !deadlinePassed {
+	if !config.ResultsReleased {
 		c.Status(http.StatusNoContent)
 		return
 	}

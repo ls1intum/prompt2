@@ -4,10 +4,8 @@ import { createActionItem } from '../../../../../network/mutations/createActionI
 import { CreateActionItemRequest } from '../../../../../interfaces/actionItem'
 
 export const useCreateActionItem = (setError: (error: string | undefined) => void) => {
-  const { phaseId } = useParams<{
-    phaseId: string
-  }>()
   const queryClient = useQueryClient()
+  const { phaseId } = useParams<{ phaseId: string }>()
 
   return useMutation({
     mutationFn: (actionItem: CreateActionItemRequest) => {
