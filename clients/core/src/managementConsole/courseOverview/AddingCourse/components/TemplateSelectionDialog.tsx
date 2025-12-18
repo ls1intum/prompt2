@@ -6,7 +6,7 @@ import { CopyCourseDialog } from '@managementConsole/courseOverview/components/C
 import { DialogLoadingDisplay } from '@/components/dialog/DialogLoadingDisplay'
 import { DialogErrorDisplay } from '@/components/dialog/DialogErrorDisplay'
 import { FileIcon, BookOpen } from 'lucide-react'
-import type { CourseWithTemplateInfo } from '@core/interfaces/courseWithTemplateInfo'
+import { Course } from '@tumaet/prompt-shared-state'
 import { CourseTemplateIcon } from './CourseTemplateIcon'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 
@@ -19,7 +19,7 @@ export const TemplateSelectionDialog = ({
   open,
   onOpenChange,
 }: TemplateSelectionDialogProps): JSX.Element => {
-  const [selectedTemplate, setSelectedTemplate] = useState<CourseWithTemplateInfo | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<Course | null>(null)
   const [showCopyDialog, setShowCopyDialog] = useState(false)
 
   const {
@@ -33,7 +33,7 @@ export const TemplateSelectionDialog = ({
     enabled: open,
   })
 
-  const handleTemplateSelect = (template: CourseWithTemplateInfo) => {
+  const handleTemplateSelect = (template: Course) => {
     setSelectedTemplate(template)
     onOpenChange(false)
     setShowCopyDialog(true)
