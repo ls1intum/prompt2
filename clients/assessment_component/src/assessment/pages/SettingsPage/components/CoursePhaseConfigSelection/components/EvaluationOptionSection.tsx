@@ -17,6 +17,7 @@ interface EvaluationOptionSectionProps {
   configMutation: any
   setError: (error: string | undefined) => void
   disabled?: boolean
+  hasAssessmentData?: boolean
 }
 
 const getEvaluationTypeLabel = (type: AssessmentType): string => {
@@ -59,6 +60,7 @@ export const EvaluationOptionSection = ({
   configMutation,
   setError,
   disabled = false,
+  hasAssessmentData = false,
 }: EvaluationOptionSectionProps) => {
   const checkboxId = getEvaluationTypeId(type)
   const label = getEvaluationTypeLabel(type)
@@ -89,6 +91,7 @@ export const EvaluationOptionSection = ({
           schemas={schemas}
           configMutation={configMutation}
           setError={setError}
+          hasAssessmentData={hasAssessmentData}
         />
       )}
     </div>

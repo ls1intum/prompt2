@@ -8,6 +8,7 @@ import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigSto
 import { useCategoryStore } from '../../zustand/useCategoryStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useGetAllAssessments } from '../hooks/useGetAllAssessments'
+import { useSchemaHasAssessmentData } from './hooks/usePhaseHasAssessmentData'
 
 import { AssessmentType } from '../../interfaces/assessmentType'
 
@@ -33,6 +34,17 @@ export const SettingsPage = (): JSX.Element => {
     refetch: refetchAssessments,
   } = useGetAllAssessments()
 
+  const { data: assessmentSchemaData } = useSchemaHasAssessmentData(config?.assessmentSchemaID)
+  const { data: selfEvalSchemaData } = useSchemaHasAssessmentData(
+    config?.selfEvaluationEnabled ? config?.selfEvaluationSchema : undefined,
+  )
+  const { data: peerEvalSchemaData } = useSchemaHasAssessmentData(
+    config?.peerEvaluationEnabled ? config?.peerEvaluationSchema : undefined,
+  )
+  const { data: tutorEvalSchemaData } = useSchemaHasAssessmentData(
+    config?.tutorEvaluationEnabled ? config?.tutorEvaluationSchema : undefined,
+  )
+
   return (
     <div className='space-y-4'>
       <ManagementPageHeader>Assessment Settings</ManagementPageHeader>
@@ -55,7 +67,12 @@ export const SettingsPage = (): JSX.Element => {
         </div>
       )}
 
-      <CoursePhaseConfigSelection />
+      <CoursePhaseConfigSelection
+        hasAssessmentData={assessmentSchemaData?.hasAssessmentData ?? false}
+        hasSelfEvalData={selfEvalSchemaData?.hasAssessmentData ?? false}
+        hasPeerEvalData={peerEvalSchemaData?.hasAssessmentData ?? false}
+        hasTutorEvalData={tutorEvalSchemaData?.hasAssessmentData ?? false}
+      />
 
       {isPromptAdmin && (
         <>
@@ -63,29 +80,39 @@ export const SettingsPage = (): JSX.Element => {
             <CategoryList
               assessmentSchemaID={config?.assessmentSchemaID}
               assessmentType={AssessmentType.ASSESSMENT}
+              hasAssessmentData={assessmentSchemaData?.hasAssessmentData ?? false}
             />
           )}
 
-          {config?.selfEvaluationEnabled && config.selfEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.selfEvaluationSchema}
-              assessmentType={AssessmentType.SELF}
-            />
-          )}
+          {config?.selfEvaluationEnabled &&
+            config.selfEvaluationSchema &&
+            config.selfEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.selfEvaluationSchema}
+                assessmentType={AssessmentType.SELF}
+                hasAssessmentData={selfEvalSchemaData?.hasAssessmentData ?? false}
+              />
+            )}
 
-          {config?.peerEvaluationEnabled && config.peerEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.peerEvaluationSchema}
-              assessmentType={AssessmentType.PEER}
-            />
-          )}
+          {config?.peerEvaluationEnabled &&
+            config.peerEvaluationSchema &&
+            config.peerEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.peerEvaluationSchema}
+                assessmentType={AssessmentType.PEER}
+                hasAssessmentData={peerEvalSchemaData?.hasAssessmentData ?? false}
+              />
+            )}
 
-          {config?.tutorEvaluationEnabled && config.tutorEvaluationSchema && (
-            <CategoryList
-              assessmentSchemaID={config?.tutorEvaluationSchema}
-              assessmentType={AssessmentType.TUTOR}
-            />
-          )}
+          {config?.tutorEvaluationEnabled &&
+            config.tutorEvaluationSchema &&
+            config.tutorEvaluationSchema !== config.assessmentSchemaID && (
+              <CategoryList
+                assessmentSchemaID={config?.tutorEvaluationSchema}
+                assessmentType={AssessmentType.TUTOR}
+                hasAssessmentData={tutorEvalSchemaData?.hasAssessmentData ?? false}
+              />
+            )}
         </>
       )}
     </div>
