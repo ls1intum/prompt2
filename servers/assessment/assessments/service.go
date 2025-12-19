@@ -229,7 +229,6 @@ func GetStudentAssessmentResults(ctx context.Context, coursePhaseID, courseParti
 		selfEvalResults = aggregateEvaluations(evals, assessmentType.Self)
 	}
 
-	// Respect gradeSuggestion visibility before returning the result to the student
 	if !config.GradeSuggestionVisible {
 		completion.GradeSuggestion = utils.MapFloat64ToNumeric(0.0)
 	}
@@ -263,7 +262,6 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 		return nil
 	}
 
-	// Check if the assessment is editable before deleting
 	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, assessment.CourseParticipationID, assessment.CoursePhaseID)
 	if err != nil {
 		return err
@@ -283,7 +281,6 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// isLowScoreLevel checks if a score level requires comment and examples
 func isLowScoreLevel(scoreLevel scoreLevelDTO.ScoreLevel) bool {
 	return scoreLevel == scoreLevelDTO.ScoreLevelVeryBad ||
 		scoreLevel == scoreLevelDTO.ScoreLevelBad ||
