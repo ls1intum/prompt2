@@ -1,6 +1,7 @@
 package actionItem
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -73,6 +74,10 @@ func createActionItem(c *gin.Context) {
 	}
 	err := CreateActionItem(c, req)
 	if err != nil {
+		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -97,6 +102,10 @@ func updateActionItem(c *gin.Context) {
 
 	err = UpdateActionItem(c, req)
 	if err != nil {
+		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -112,6 +121,10 @@ func deleteActionItem(c *gin.Context) {
 
 	err = DeleteActionItem(c, actionItemID)
 	if err != nil {
+		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			handleError(c, http.StatusForbidden, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}

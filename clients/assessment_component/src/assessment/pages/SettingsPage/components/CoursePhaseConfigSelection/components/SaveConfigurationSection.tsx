@@ -107,6 +107,7 @@ export const SaveConfigurationSection = ({
       evaluationResultsVisible: mainConfigState.evaluationResultsVisible,
       gradeSuggestionVisible: mainConfigState.gradeSuggestionVisible,
       actionItemsVisible: mainConfigState.actionItemsVisible,
+      gradingSheetVisible: mainConfigState.gradingSheetVisible,
     })
   }
 

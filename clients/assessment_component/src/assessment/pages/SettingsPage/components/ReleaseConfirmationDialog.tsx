@@ -32,6 +32,7 @@ export function ReleaseConfirmationDialog({
 
   const gradeSuggestionVisible = coursePhaseConfig?.gradeSuggestionVisible ?? true
   const actionItemsVisible = coursePhaseConfig?.actionItemsVisible ?? true
+  const gradingSheetVisible = coursePhaseConfig?.gradingSheetVisible ?? false
 
   const getVisibilityDescription = () => {
     const visibleItems: string[] = []
@@ -41,6 +42,9 @@ export function ReleaseConfirmationDialog({
     }
     if (actionItemsVisible) {
       visibleItems.push('action items')
+    }
+    if (gradingSheetVisible) {
+      visibleItems.push('grading sheet')
     }
 
     if (visibleItems.length === 0) {

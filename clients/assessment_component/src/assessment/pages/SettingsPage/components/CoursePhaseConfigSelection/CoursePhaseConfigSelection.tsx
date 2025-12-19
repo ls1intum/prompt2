@@ -47,6 +47,8 @@ export const CoursePhaseConfigSelection = ({
     setGradeSuggestionVisible,
     actionItemsVisible,
     setActionItemsVisible,
+    gradingSheetVisible,
+    setGradingSheetVisible,
     mainConfigState,
     hasMainConfigChanges,
   } = useCoursePhaseConfigForm()
@@ -141,6 +143,8 @@ export const CoursePhaseConfigSelection = ({
             onGradeSuggestionVisibleChange={setGradeSuggestionVisible}
             actionItemsVisible={actionItemsVisible}
             onActionItemsVisibleChange={setActionItemsVisible}
+            gradingSheetVisible={gradingSheetVisible}
+            onGradingSheetVisibleChange={setGradingSheetVisible}
             disabled={configMutation.isPending}
           />
 

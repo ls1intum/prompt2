@@ -51,3 +51,33 @@ func MapDTOtoDBScoreLevel(scoreLevel ScoreLevel) db.ScoreLevel {
 	log.Println("Warning: Unrecognized score level in MapDTOtoDBScoreLevel:", scoreLevel)
 	return db.ScoreLevelVeryBad // Default case, should not happen
 }
+
+func MapScoreLevelToNumber(level ScoreLevel) float64 {
+	switch level {
+	case ScoreLevelVeryGood:
+		return 1
+	case ScoreLevelGood:
+		return 2
+	case ScoreLevelOk:
+		return 3
+	case ScoreLevelBad:
+		return 4
+	default:
+		return 5
+	}
+}
+
+func MapNumericToScoreLevel(score float64) ScoreLevel {
+	switch {
+	case score <= 1.5:
+		return ScoreLevelVeryGood
+	case score <= 2.5:
+		return ScoreLevelGood
+	case score <= 3.5:
+		return ScoreLevelOk
+	case score <= 4.5:
+		return ScoreLevelBad
+	default:
+		return ScoreLevelVeryBad
+	}
+}

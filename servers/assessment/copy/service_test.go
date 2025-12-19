@@ -76,6 +76,7 @@ func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_Success() {
 		EvaluationResultsVisible: true,
 		GradeSuggestionVisible:   pgtype.Bool{Bool: true, Valid: true},
 		ActionItemsVisible:       pgtype.Bool{Bool: false, Valid: true},
+		GradingSheetVisible:      pgtype.Bool{Bool: false, Valid: true},
 	})
 	assert.NoError(suite.T(), err)
 

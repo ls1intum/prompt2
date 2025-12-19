@@ -89,11 +89,13 @@ INSERT INTO course_phase_config (assessment_schema_id,
                                  evaluation_results_visible,
                                  grade_suggestion_visible,
                                  action_items_visible,
-                                 results_released)
+                                 results_released,
+                                 grading_sheet_visible)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
         COALESCE($18::boolean, TRUE), 
         COALESCE($19::boolean, TRUE),
-        COALESCE($20::boolean, FALSE))
+        COALESCE($20::boolean, FALSE),
+        COALESCE($21::boolean, FALSE))
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
                   start                     = EXCLUDED.start,
@@ -113,7 +115,8 @@ ON CONFLICT (course_phase_id)
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
                   grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
                   action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE),
-                  results_released          = COALESCE(EXCLUDED.results_released, FALSE)
+                  results_released          = COALESCE(EXCLUDED.results_released, FALSE),
+                  grading_sheet_visible     = COALESCE(EXCLUDED.grading_sheet_visible, FALSE)
 `
 
 type CreateOrUpdateCoursePhaseConfigParams struct {
@@ -137,6 +140,7 @@ type CreateOrUpdateCoursePhaseConfigParams struct {
 	GradeSuggestionVisible   pgtype.Bool        `json:"grade_suggestion_visible"`
 	ActionItemsVisible       pgtype.Bool        `json:"action_items_visible"`
 	ResultsReleased          pgtype.Bool        `json:"results_released"`
+	GradingSheetVisible      pgtype.Bool        `json:"grading_sheet_visible"`
 }
 
 func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg CreateOrUpdateCoursePhaseConfigParams) error {
@@ -161,12 +165,13 @@ func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg Creat
 		arg.GradeSuggestionVisible,
 		arg.ActionItemsVisible,
 		arg.ResultsReleased,
+		arg.GradingSheetVisible,
 	)
 	return err
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
-SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible
 FROM course_phase_config
 WHERE course_phase_id = $1
 `
@@ -195,6 +200,7 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 		&i.GradeSuggestionVisible,
 		&i.ActionItemsVisible,
 		&i.ResultsReleased,
+		&i.GradingSheetVisible,
 	)
 	return i, err
 }

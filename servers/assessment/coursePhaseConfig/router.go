@@ -38,7 +38,7 @@ func getCoursePhaseConfig(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config))
+	c.JSON(http.StatusOK, config)
 }
 
 func createOrUpdateCoursePhaseConfig(c *gin.Context) {

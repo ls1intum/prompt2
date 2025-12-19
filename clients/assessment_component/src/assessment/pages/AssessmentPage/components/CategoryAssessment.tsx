@@ -4,6 +4,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 
 import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
+import { AggregatedEvaluationResult } from '../../../interfaces/assessmentResults'
 import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
@@ -16,12 +17,18 @@ interface CategoryAssessmentProps {
   category: CategoryWithCompetencies
   assessments: Assessment[]
   completed: boolean
+  peerEvaluationResults?: AggregatedEvaluationResult[]
+  selfEvaluationResults?: AggregatedEvaluationResult[]
+  hidePeerEvaluationDetails?: boolean
 }
 
 export const CategoryAssessment = ({
   category,
   assessments,
   completed,
+  peerEvaluationResults,
+  selfEvaluationResults,
+  hidePeerEvaluationDetails = false,
 }: CategoryAssessmentProps): JSX.Element => {
   const { courseParticipationID } = useParams<{
     courseParticipationID: string
@@ -74,6 +81,12 @@ export const CategoryAssessment = ({
             <div className='grid gap-4'>
               {category.competencies.map((competency) => {
                 const assessment = assessments.find((ass) => ass.competencyID === competency.id)
+                const peerAverage = peerEvaluationResults?.find(
+                  (result) => result.competencyID === competency.id,
+                )
+                const selfAverage = selfEvaluationResults?.find(
+                  (result) => result.competencyID === competency.id,
+                )
 
                 return (
                   <div key={competency.id}>
@@ -82,6 +95,9 @@ export const CategoryAssessment = ({
                       competency={competency}
                       assessment={assessment}
                       completed={completed}
+                      peerEvaluationAverageScore={peerAverage?.averageScoreNumeric}
+                      selfEvaluationAverageScore={selfAverage?.averageScoreNumeric}
+                      hidePeerEvaluationDetails={hidePeerEvaluationDetails}
                     />
                   </div>
                 )

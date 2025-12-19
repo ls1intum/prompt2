@@ -23,9 +23,17 @@ import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
   onGradeSuggestionChange: (value: string) => void
+  readOnly?: boolean
+  selfEvaluationAverage?: number
+  peerEvaluationAverage?: number
 }
 
-export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
+export const GradeSuggestion = ({
+  onGradeSuggestionChange,
+  readOnly = false,
+  selfEvaluationAverage,
+  peerEvaluationAverage,
+}: GradeSuggestionProps) => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
@@ -36,7 +44,16 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
     <Card>
       <CardHeader>
         <CardTitle className='mb-3'>Grade</CardTitle>
-        {selfEvaluations &&
+        {selfEvaluationAverage !== undefined ? (
+          <div className='flex flex-row items-center gap-2'>
+            <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
+            <StudentScoreBadge
+              scoreLevel={mapNumberToScoreLevel(selfEvaluationAverage)}
+              scoreNumeric={selfEvaluationAverage}
+            />
+          </div>
+        ) : (
+          selfEvaluations &&
           selfEvaluations.length > 1 &&
           (() => {
             const weightedScoreLevel = getWeightedScoreLevel(
@@ -52,8 +69,18 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
                 />
               </div>
             )
-          })()}
-        {peerEvaluations &&
+          })()
+        )}
+        {peerEvaluationAverage !== undefined ? (
+          <div className='flex flex-row items-center gap-2'>
+            <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
+            <StudentScoreBadge
+              scoreLevel={mapNumberToScoreLevel(peerEvaluationAverage)}
+              scoreNumeric={peerEvaluationAverage}
+            />
+          </div>
+        ) : (
+          peerEvaluations &&
           peerEvaluations.length > 1 &&
           (() => {
             const weightedScoreLevel = getWeightedScoreLevel(
@@ -69,7 +96,8 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
                 />
               </div>
             )
-          })()}
+          })()
+        )}
         {studentScore && studentScore.scoreNumeric > 0 && (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Your Assessment Average:</p>
@@ -91,9 +119,13 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
           </p>
         )}
         <Select
-          value={assessmentCompletion?.gradeSuggestion.toFixed(1) ?? ''}
+          value={
+            assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
+              ? assessmentCompletion.gradeSuggestion.toFixed(1)
+              : ''
+          }
           onValueChange={onGradeSuggestionChange}
-          disabled={assessmentCompletion?.completed ?? false}
+          disabled={readOnly || (assessmentCompletion?.completed ?? false)}
         >
           <SelectTrigger>
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />

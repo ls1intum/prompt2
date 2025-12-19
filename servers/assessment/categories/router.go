@@ -1,6 +1,7 @@
 package categories
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 	categoryRouter := routerGroup.Group("/category")
 
 	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCategories)
-	categoryRouter.GET("/assessment/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCategoriesWithCompetencies)
+	categoryRouter.GET("/assessment/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getCategoriesWithCompetencies)
 	categoryRouter.GET("/self/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getSelfEvaluationCategoriesWithCompetencies)
 	categoryRouter.GET("/peer/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getPeerEvaluationCategoriesWithCompetencies)
 	categoryRouter.GET("/tutor/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTutorEvaluationCategoriesWithCompetencies)
@@ -118,6 +119,11 @@ func getCategoriesWithCompetencies(c *gin.Context) {
 		return
 	}
 
+	if isStudent(c) && (!config.ResultsReleased || !config.GradingSheetVisible) {
+		handleError(c, http.StatusForbidden, fmt.Errorf("assessment results are not released yet"))
+		return
+	}
+
 	result, err := GetCategoriesWithCompetencies(c, config.AssessmentSchemaID)
 	if err != nil {
 		log.Error("Error getting categories with competencies: ", err)
@@ -198,4 +204,16 @@ func getTutorEvaluationCategoriesWithCompetencies(c *gin.Context) {
 
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, gin.H{"error": err.Error()})
+}
+
+func isStudent(c *gin.Context) bool {
+	userRolesRaw, exists := c.Get("userRoles")
+	if !exists {
+		return false
+	}
+	userRoles, ok := userRolesRaw.(map[string]bool)
+	if !ok {
+		return false
+	}
+	return userRoles[promptSDK.CourseStudent]
 }
