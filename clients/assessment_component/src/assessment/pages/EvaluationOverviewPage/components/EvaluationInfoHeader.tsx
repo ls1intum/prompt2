@@ -1,14 +1,21 @@
 import { AlertCircle, CheckCircle2, Calendar } from 'lucide-react'
-import { Card, CardContent } from '@tumaet/prompt-ui-components'
+import { useNavigate } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { Card, CardContent, Button } from '@tumaet/prompt-ui-components'
 import { format } from 'date-fns'
 
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface EvaluationInfoHeaderProps {
   allEvaluationsCompleted: boolean
+  resultsLink?: string
 }
 
-export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfoHeaderProps) => {
+export const EvaluationInfoHeader = ({
+  allEvaluationsCompleted,
+  resultsLink,
+}: EvaluationInfoHeaderProps) => {
+  const navigate = useNavigate()
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const now = new Date()
@@ -77,9 +84,23 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
                     : 'Instructions'}
             </h2>
             {resultsReleased ? (
-              <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                {getResultsAvailableText()}
-              </p>
+              <>
+                <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
+                  {getResultsAvailableText()}
+                </p>
+                {resultsLink && (
+                  <div className='mt-3'>
+                    <Button
+                      variant='outline'
+                      onClick={() => navigate(resultsLink)}
+                      className='gap-2'
+                    >
+                      Go to your results
+                      <ArrowRight className='h-4 w-4' />
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : allEvaluationsCompleted ? (
               <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
                 Congratulations! You have successfully completed all required evaluations. Your

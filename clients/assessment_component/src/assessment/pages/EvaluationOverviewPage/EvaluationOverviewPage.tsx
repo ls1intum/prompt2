@@ -19,7 +19,6 @@ import { SelfEvaluationStatusCard } from './components/SelfEvaluationStatusCard'
 import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 import { TutorEvaluationStatusCard } from './components/TutorEvaluationStatusCard'
 import { TeamBadge } from '../components/badges'
-import { AssessmentResultsSection } from './components/AssessmentResultsSection'
 
 export const EvaluationOverviewPage = () => {
   const { isStudentOfCourse } = useCourseStore()
@@ -110,16 +109,15 @@ export const EvaluationOverviewPage = () => {
   const allEvaluationsCompleted =
     isSelfEvaluationCompleted && isPeerEvaluationCompleted && isTutorEvaluationCompleted
 
-  const resultsReleased = coursePhaseConfig?.resultsReleased ?? false
-
   return (
     <div className=''>
       <div className='mx-auto px-4 py-6'>
         <ManagementPageHeader>Assessment Results & Evaluation</ManagementPageHeader>
 
-        <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} />
-
-        {resultsReleased && <AssessmentResultsSection />}
+        <EvaluationInfoHeader
+          allEvaluationsCompleted={allEvaluationsCompleted}
+          resultsLink={`${path}/results`}
+        />
 
         <div>
           <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8'>

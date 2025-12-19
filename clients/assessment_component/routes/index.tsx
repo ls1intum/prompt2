@@ -3,6 +3,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 
 import { EvaluationDataShell } from '../src/assessment/pages/EvaluationDataShell'
 import { EvaluationOverviewPage } from '../src/assessment/pages/EvaluationOverviewPage/EvaluationOverviewPage'
+import { EvaluationResultsPage } from '../src/assessment/pages/EvaluationOverviewPage/EvaluationResultsPage'
 import { SelfEvaluationPage } from '../src/assessment/pages/EvaluationPages/SelfEvaluationPage'
 import { PeerEvaluationPage } from '../src/assessment/pages/EvaluationPages/PeerEvaluationPage'
 import { TutorEvaluationPage } from '../src/assessment/pages/EvaluationPages/TutorEvaluationPage'
@@ -35,6 +36,20 @@ const routes: ExtendedRouteObject[] = [
     element: (
       <EvaluationDataShell>
         <SelfEvaluationPage />
+      </EvaluationDataShell>
+    ),
+    requiredPermissions: [
+      Role.PROMPT_ADMIN,
+      Role.COURSE_LECTURER,
+      Role.COURSE_EDITOR,
+      Role.COURSE_STUDENT,
+    ],
+  },
+  {
+    path: '/results',
+    element: (
+      <EvaluationDataShell>
+        <EvaluationResultsPage />
       </EvaluationDataShell>
     ),
     requiredPermissions: [
