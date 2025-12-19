@@ -11,7 +11,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -63,7 +63,7 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer utils.DeferRollback(tx, c)
+	defer promptSDK.DeferDBRollback(tx, c)
 	qtx := CourseCopyServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := newCourse.GetDBModel()

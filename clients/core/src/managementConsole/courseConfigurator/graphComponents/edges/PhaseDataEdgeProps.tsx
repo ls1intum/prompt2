@@ -1,15 +1,11 @@
 import { Connection, Edge, MarkerType } from '@xyflow/react'
-import { Database } from 'lucide-react'
+
+const EDGE_COLOR_PURPLE = '#a855f7'
 
 export const PhaseDataEdgeProps = (params: Edge | Connection) => ({
   ...params,
   animated: false,
-  style: { stroke: '#a855f7', strokeWidth: 2, strokeDasharray: '5,5' },
+  style: { stroke: EDGE_COLOR_PURPLE, strokeWidth: 2, strokeDasharray: '5,5' },
   type: 'iconEdge',
-  markerEnd: { type: MarkerType.ArrowClosed },
-  label: (
-    <>
-      <Database className='w-5 h-5 text-purple-500' />
-    </>
-  ),
+  markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR_PURPLE },
 })
