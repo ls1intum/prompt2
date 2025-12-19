@@ -34,8 +34,6 @@ import { validateGrade } from '../../../utils/gradeConfig'
 interface AssessmentCompletionProps {
   readOnly?: boolean
   actionItems?: ActionItem[]
-  selfEvaluationAverage?: number
-  peerEvaluationAverage?: number
 }
 
 export const AssessmentCompletion = ({

@@ -53,7 +53,7 @@ export function ActionItemPanel({ readOnly = false, actionItems }: ActionItemPan
     refetch,
   } = useQuery<ActionItem[]>({
     queryKey: ['actionItems', phaseId, courseParticipationID],
-    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ' '),
+    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ''),
     enabled: !readOnly,
   })
 
