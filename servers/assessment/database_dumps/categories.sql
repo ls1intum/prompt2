@@ -110,6 +110,7 @@ CREATE TABLE public.course_phase_config (
     grade_suggestion_visible boolean NOT NULL DEFAULT true,
     action_items_visible boolean NOT NULL DEFAULT true,
     results_released boolean NOT NULL DEFAULT false,
+    grading_sheet_visible boolean NOT NULL DEFAULT false,
     FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
@@ -164,8 +165,8 @@ INSERT INTO public.assessment_schema (id, name, description)
 VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
 
 -- Insert some sample course_phase_config records
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, '2024-01-01 00:00:00+00', '2025-12-31 23:59:59+00', 'd5e6f7a8-b9c0-1234-5678-90abcdef1234');
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, '2024-01-01 00:00:00+00', '2025-12-31 23:59:59+00', 'd5e6f7a8-b9c0-1234-5678-90abcdef1234', true, true, true, true, true);
 
 INSERT INTO public.category
 VALUES (

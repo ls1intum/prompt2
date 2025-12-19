@@ -74,6 +74,7 @@ CREATE TABLE public.course_phase_config (
     grade_suggestion_visible boolean NOT NULL DEFAULT true,
     action_items_visible boolean NOT NULL DEFAULT true,
     results_released boolean NOT NULL DEFAULT false,
+    grading_sheet_visible boolean NOT NULL DEFAULT false,
     FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
@@ -102,8 +103,8 @@ INSERT INTO public.assessment_schema (id, name, description) VALUES
 --
 
 -- Config for phase where action items should be visible (results_released = true)
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, action_items_visible, results_released) VALUES
-('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', true, true);
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, start, deadline, action_items_visible, results_released) VALUES
+('550e8400-e29b-41d4-a716-446655440000', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2020-01-01 00:00:00+00', '2030-12-31 23:59:59+00', true, true);
 
 --
 -- Data for Name: assessment_completion; Type: TABLE DATA; Schema: public; Owner: -
@@ -114,8 +115,12 @@ INSERT INTO public.assessment_completion (course_participation_id, course_phase_
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '24461b6b-3c3a-4bc6-ba42-69eeb1514da9', '2025-01-15 10:00:00+00', 'test_author', 'Test completion', 4.5, true);
 
 -- Config for phase where action items should not be visible (results_released = false)
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, action_items_visible, results_released) VALUES
-('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', true, false);
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, start, deadline, action_items_visible, results_released) VALUES
+('550e8400-e29b-41d4-a716-446655440000', '3517a3e3-fe60-40e0-8a5e-8f39049c12c3', '2020-01-01 00:00:00+00', '2030-12-31 23:59:59+00', true, false);
+
+-- Config for service tests (assessment is open, allows creating/editing action items)
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, start, deadline, action_items_visible, results_released) VALUES
+('550e8400-e29b-41d4-a716-446655440000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2020-01-01 00:00:00+00', '2030-12-31 23:59:59+00', true, false);
 
 -- Test data for visibility tests
 INSERT INTO public.action_item (id, course_phase_id, course_participation_id, action, author) VALUES

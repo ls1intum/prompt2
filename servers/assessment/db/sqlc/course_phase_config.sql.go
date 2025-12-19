@@ -414,7 +414,7 @@ func (q *Queries) IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.
 }
 
 const listAssessmentSchemaCoursePhaseMappings = `-- name: ListAssessmentSchemaCoursePhaseMappings :many
-SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible
 FROM course_phase_config
 ORDER BY assessment_schema_id, course_phase_id
 `
@@ -449,6 +449,7 @@ func (q *Queries) ListAssessmentSchemaCoursePhaseMappings(ctx context.Context) (
 			&i.GradeSuggestionVisible,
 			&i.ActionItemsVisible,
 			&i.ResultsReleased,
+			&i.GradingSheetVisible,
 		); err != nil {
 			return nil, err
 		}
