@@ -39,7 +39,7 @@ export const GradeSuggestion = ({
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
     useStudentAssessmentStore()
-  const showAverages = !readOnly
+  const showAverages = !readOnly && (coursePhaseConfig?.evaluationResultsVisible ?? false)
   const isCompleted = readOnly || (assessmentCompletion?.completed ?? false)
   const gradeSuggestionValue =
     assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
