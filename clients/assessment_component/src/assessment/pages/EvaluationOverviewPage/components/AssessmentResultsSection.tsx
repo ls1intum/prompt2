@@ -115,7 +115,7 @@ export const AssessmentResultsSection = () => {
     return average > 0 ? average : undefined
   }, [peerEvaluationCategories, results])
 
-  if (!resultsReleased || !shouldFetch) return null
+  if (!resultsReleased || !isStudent) return null
   if (isError || isAssessmentCategoriesError) {
     return (
       <ErrorPage

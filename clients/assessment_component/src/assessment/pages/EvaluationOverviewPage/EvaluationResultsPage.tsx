@@ -12,7 +12,7 @@ export const EvaluationResultsPage = () => {
   const resultsReleased = coursePhaseConfig?.resultsReleased ?? false
 
   return (
-    <div className='mx-auto px-4 py-6'>
+    <div className='w-full px-4 py-6 text-left'>
       <div className='mb-4'>
         <Button variant='outline' onClick={() => navigate('..')} className='gap-2'>
           <ArrowLeft className='h-4 w-4' />

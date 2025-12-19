@@ -57,6 +57,7 @@ export const CategoryAssessment = ({
 
           <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
         </div>
+
         <div className='flex items-center justify-center gap-1'>
           {assessments.length > 0 && (
             <StudentScoreBadge
@@ -64,10 +65,12 @@ export const CategoryAssessment = ({
               scoreNumeric={categoryScore}
             />
           )}
-          <AssessmentStatusBadge
-            remainingAssessments={category.competencies.length - assessments.length}
-            isFinalized={completed}
-          />
+          {!completed && (
+            <AssessmentStatusBadge
+              remainingAssessments={category.competencies.length - assessments.length}
+              isFinalized={completed}
+            />
+          )}
         </div>
       </div>
 

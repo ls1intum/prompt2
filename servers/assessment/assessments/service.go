@@ -178,10 +178,18 @@ func GetStudentAssessmentResults(ctx context.Context, coursePhaseID, courseParti
 		}
 	}
 
-	completion, err := assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+	completion := db.AssessmentCompletion{}
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
-		log.Error("could not get assessment completion: ", err)
-		return results, errors.New("could not get assessment completion")
+		log.Error("could not check assessment completion existence: ", err)
+		return results, errors.New("could not check assessment completion existence")
+	}
+	if exists {
+		completion, err = assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get assessment completion: ", err)
+			return results, errors.New("could not get assessment completion")
+		}
 	}
 
 	studentScore := scoreLevelDTO.StudentScore{
