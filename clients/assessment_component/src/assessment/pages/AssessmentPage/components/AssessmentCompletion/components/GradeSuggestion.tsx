@@ -39,66 +39,74 @@ export const GradeSuggestion = ({
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
     useStudentAssessmentStore()
+  const showAverages = !readOnly
+  const isCompleted = readOnly || (assessmentCompletion?.completed ?? false)
+  const gradeSuggestionValue =
+    assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
+      ? assessmentCompletion.gradeSuggestion.toFixed(1)
+      : ''
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className='mb-3'>Grade</CardTitle>
-        {selfEvaluationAverage !== undefined ? (
-          <div className='flex flex-row items-center gap-2'>
-            <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
-            <StudentScoreBadge
-              scoreLevel={mapNumberToScoreLevel(selfEvaluationAverage)}
-              scoreNumeric={selfEvaluationAverage}
-            />
-          </div>
-        ) : (
-          selfEvaluations &&
-          selfEvaluations.length > 1 &&
-          (() => {
-            const weightedScoreLevel = getWeightedScoreLevel(
-              selfEvaluations,
-              selfEvaluationCategories,
-            )
-            return (
-              <div className='flex flex-row items-center gap-2'>
-                <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
-                <StudentScoreBadge
-                  scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
-                  scoreNumeric={weightedScoreLevel}
-                />
-              </div>
-            )
-          })()
-        )}
-        {peerEvaluationAverage !== undefined ? (
-          <div className='flex flex-row items-center gap-2'>
-            <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
-            <StudentScoreBadge
-              scoreLevel={mapNumberToScoreLevel(peerEvaluationAverage)}
-              scoreNumeric={peerEvaluationAverage}
-            />
-          </div>
-        ) : (
-          peerEvaluations &&
-          peerEvaluations.length > 1 &&
-          (() => {
-            const weightedScoreLevel = getWeightedScoreLevel(
-              peerEvaluations,
-              peerEvaluationCategories,
-            )
-            return (
-              <div className='flex flex-row items-center gap-2'>
-                <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
-                <StudentScoreBadge
-                  scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
-                  scoreNumeric={weightedScoreLevel}
-                />
-              </div>
-            )
-          })()
-        )}
-        {studentScore && studentScore.scoreNumeric > 0 && (
+        {showAverages &&
+          (selfEvaluationAverage !== undefined ? (
+            <div className='flex flex-row items-center gap-2'>
+              <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
+              <StudentScoreBadge
+                scoreLevel={mapNumberToScoreLevel(selfEvaluationAverage)}
+                scoreNumeric={selfEvaluationAverage}
+              />
+            </div>
+          ) : (
+            selfEvaluations &&
+            selfEvaluations.length > 1 &&
+            (() => {
+              const weightedScoreLevel = getWeightedScoreLevel(
+                selfEvaluations,
+                selfEvaluationCategories,
+              )
+              return (
+                <div className='flex flex-row items-center gap-2'>
+                  <p className='text-sm text-muted-foreground'>Self Evaluation Average:</p>
+                  <StudentScoreBadge
+                    scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
+                    scoreNumeric={weightedScoreLevel}
+                  />
+                </div>
+              )
+            })()
+          ))}
+        {showAverages &&
+          (peerEvaluationAverage !== undefined ? (
+            <div className='flex flex-row items-center gap-2'>
+              <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
+              <StudentScoreBadge
+                scoreLevel={mapNumberToScoreLevel(peerEvaluationAverage)}
+                scoreNumeric={peerEvaluationAverage}
+              />
+            </div>
+          ) : (
+            peerEvaluations &&
+            peerEvaluations.length > 1 &&
+            (() => {
+              const weightedScoreLevel = getWeightedScoreLevel(
+                peerEvaluations,
+                peerEvaluationCategories,
+              )
+              return (
+                <div className='flex flex-row items-center gap-2'>
+                  <p className='text-sm text-muted-foreground'>Peer Evaluation Average:</p>
+                  <StudentScoreBadge
+                    scoreLevel={mapNumberToScoreLevel(weightedScoreLevel)}
+                    scoreNumeric={weightedScoreLevel}
+                  />
+                </div>
+              )
+            })()
+          ))}
+        {showAverages && studentScore && studentScore.scoreNumeric > 0 && (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Your Assessment Average:</p>
             <StudentScoreBadge
@@ -113,19 +121,15 @@ export const GradeSuggestion = ({
         <p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
           Your Grade Suggestion
         </p>
-        {coursePhaseConfig?.gradeSuggestionVisible && (
+        {!readOnly && coursePhaseConfig?.gradeSuggestionVisible && (
           <p className='text-xs text-gray-500 dark:text-gray-400 my-1'>
             Your suggestion will be visible to the student after the assessment deadline.
           </p>
         )}
         <Select
-          value={
-            assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
-              ? assessmentCompletion.gradeSuggestion.toFixed(1)
-              : ''
-          }
+          value={gradeSuggestionValue}
           onValueChange={onGradeSuggestionChange}
-          disabled={readOnly || (assessmentCompletion?.completed ?? false)}
+          disabled={isCompleted}
         >
           <SelectTrigger>
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
