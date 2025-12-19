@@ -41,8 +41,6 @@ interface AssessmentCompletionProps {
 export const AssessmentCompletion = ({
   readOnly = false,
   actionItems,
-  selfEvaluationAverage,
-  peerEvaluationAverage,
 }: AssessmentCompletionProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
@@ -168,6 +166,11 @@ export const AssessmentCompletion = ({
           <Card className='flex flex-col flex-grow'>
             <CardHeader>
               <CardTitle>General Remarks</CardTitle>
+              {coursePhaseConfig?.actionItemsVisible && !readOnly && (
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  These remarks will be visible to the student once results are released.
+                </p>
+              )}
             </CardHeader>
             <CardContent className='flex flex-col flex-grow'>
               <Textarea
@@ -189,8 +192,6 @@ export const AssessmentCompletion = ({
               handleSaveFormData(generalRemarks, value)
             }}
             readOnly={readOnly}
-            selfEvaluationAverage={selfEvaluationAverage}
-            peerEvaluationAverage={peerEvaluationAverage}
           />
         </div>
 

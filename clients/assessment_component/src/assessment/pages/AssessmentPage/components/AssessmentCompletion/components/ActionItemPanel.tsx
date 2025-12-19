@@ -152,7 +152,7 @@ export function ActionItemPanel({ readOnly = false, actionItems }: ActionItemPan
           <CardTitle>Action Items</CardTitle>
           {coursePhaseConfig?.actionItemsVisible && !readOnly && (
             <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-              These action items will be visible to the student after the assessment deadline.
+              These action items will be visible to the student once results are released.
             </p>
           )}
         </CardHeader>

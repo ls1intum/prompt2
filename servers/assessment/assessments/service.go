@@ -317,8 +317,6 @@ func aggregateEvaluations(evals []evaluationDTO.Evaluation, targetType assessmen
 		results = append(results, assessmentDTO.AggregatedEvaluationResult{
 			CompetencyID:        competencyID,
 			AverageScoreNumeric: avg,
-			AverageScoreLevel:   scoreLevelDTO.MapNumericToScoreLevel(avg),
-			EvaluationCount:     acc.count,
 		})
 	}
 

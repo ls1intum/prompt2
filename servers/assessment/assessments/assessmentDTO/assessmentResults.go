@@ -9,10 +9,8 @@ import (
 
 // AggregatedEvaluationResult represents anonymized, averaged evaluation results for a competency.
 type AggregatedEvaluationResult struct {
-	CompetencyID        uuid.UUID                `json:"competencyID"`
-	AverageScoreNumeric float64                  `json:"averageScoreNumeric"`
-	AverageScoreLevel   scoreLevelDTO.ScoreLevel `json:"averageScoreLevel"`
-	EvaluationCount     int                      `json:"evaluationCount"`
+	CompetencyID        uuid.UUID `json:"competencyID"`
+	AverageScoreNumeric float64   `json:"averageScoreNumeric"`
 }
 
 // StudentAssessmentResults bundles all information a student may see once results are released.

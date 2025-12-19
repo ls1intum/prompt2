@@ -1,51 +1,20 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
 import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { ErrorPage } from '@tumaet/prompt-ui-components'
 
-import {
-  AggregatedEvaluationResult,
-  StudentAssessmentResults,
-} from '../../../interfaces/assessmentResults'
-import { CompetencyScore } from '../../../interfaces/competencyScore'
-import { StudentAssessment } from '../../../interfaces/studentAssessment'
-
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 import { useMyParticipationStore } from '../../../zustand/useMyParticipationStore'
 import { useTeamStore } from '../../../zustand/useTeamStore'
 import { useStudentAssessmentStore } from '../../../zustand/useStudentAssessmentStore'
-import { useSelfEvaluationCategoryStore } from '../../../zustand/useSelfEvaluationCategoryStore'
-import { usePeerEvaluationCategoryStore } from '../../../zustand/usePeerEvaluationCategoryStore'
 
 import { useGetMyAssessmentResults } from '../hooks/useGetMyAssessmentResults'
 import { useGetAllCategoriesWithCompetencies } from '../../hooks/useGetAllCategoriesWithCompetencies'
-import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
 
 import { CategoryAssessment } from '../../AssessmentPage/components/CategoryAssessment'
 import { AssessmentCompletion } from '../../AssessmentPage/components/AssessmentCompletion/AssessmentCompletion'
-
-const mapAggregatesToScores = (
-  results: AggregatedEvaluationResult[],
-  courseParticipationID: string,
-  coursePhaseID: string,
-): CompetencyScore[] =>
-  results.map((result) => ({
-    id: result.competencyID,
-    courseParticipationID,
-    coursePhaseID,
-    competencyID: result.competencyID,
-    scoreLevel: result.averageScoreLevel,
-  }))
-
-const buildStudentAssessment = (results: StudentAssessmentResults): StudentAssessment => ({
-  courseParticipationID: results.courseParticipationID,
-  assessments: results.assessments,
-  assessmentCompletion: results.assessmentCompletion,
-  studentScore: results.studentScore,
-  evaluations: [],
-})
 
 export const AssessmentResultsSection = () => {
   const { courseId } = useParams<{ courseId: string }>()
@@ -58,8 +27,6 @@ export const AssessmentResultsSection = () => {
   const { myParticipation } = useMyParticipationStore()
   const { teams } = useTeamStore()
   const { setStudentAssessment, setAssessmentParticipation } = useStudentAssessmentStore()
-  const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
-  const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
 
   const shouldFetch = isStudent && resultsReleased
   const shouldFetchCategories = shouldFetch && gradingSheetVisible
@@ -79,7 +46,13 @@ export const AssessmentResultsSection = () => {
 
   useEffect(() => {
     if (!results) return
-    setStudentAssessment(buildStudentAssessment(results))
+    setStudentAssessment({
+      courseParticipationID: results.courseParticipationID,
+      assessments: results.assessments,
+      assessmentCompletion: results.assessmentCompletion,
+      studentScore: results.studentScore,
+      evaluations: [],
+    })
   }, [results, setStudentAssessment])
 
   useEffect(() => {
@@ -92,28 +65,6 @@ export const AssessmentResultsSection = () => {
       teamID: team?.id ?? '',
     })
   }, [myParticipation, setAssessmentParticipation, teams])
-
-  const selfEvaluationAverage = useMemo(() => {
-    if (!results) return undefined
-    const scores = mapAggregatesToScores(
-      results.selfEvaluationResults,
-      results.courseParticipationID,
-      results.coursePhaseID,
-    )
-    const average = getWeightedScoreLevel(scores, selfEvaluationCategories)
-    return average > 0 ? average : undefined
-  }, [results, selfEvaluationCategories])
-
-  const peerEvaluationAverage = useMemo(() => {
-    if (!results) return undefined
-    const scores = mapAggregatesToScores(
-      results.peerEvaluationResults,
-      results.courseParticipationID,
-      results.coursePhaseID,
-    )
-    const average = getWeightedScoreLevel(scores, peerEvaluationCategories)
-    return average > 0 ? average : undefined
-  }, [peerEvaluationCategories, results])
 
   if (!resultsReleased || !isStudent) return null
   if (isError || isAssessmentCategoriesError) {
@@ -154,12 +105,7 @@ export const AssessmentResultsSection = () => {
         ))}
 
       {coursePhaseConfig?.actionItemsVisible || coursePhaseConfig?.gradeSuggestionVisible ? (
-        <AssessmentCompletion
-          readOnly
-          actionItems={results.actionItems}
-          selfEvaluationAverage={selfEvaluationAverage}
-          peerEvaluationAverage={peerEvaluationAverage}
-        />
+        <AssessmentCompletion readOnly actionItems={results.actionItems} />
       ) : null}
     </div>
   )

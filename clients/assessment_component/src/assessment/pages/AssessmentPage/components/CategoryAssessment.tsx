@@ -83,12 +83,20 @@ export const CategoryAssessment = ({
           ) : (
             <div className='grid gap-4'>
               {category.competencies.map((competency) => {
-                const assessment = assessments.find((ass) => ass.competencyID === competency.id)
+                const assessment = assessments.find(
+                  (ass) =>
+                    ass.competencyID === competency.id ||
+                    competency.mappedFromCompetencies.includes(ass.competencyID),
+                )
                 const peerAverage = peerEvaluationResults?.find(
-                  (result) => result.competencyID === competency.id,
+                  (result) =>
+                    result.competencyID === competency.id ||
+                    competency.mappedFromCompetencies.includes(result.competencyID),
                 )
                 const selfAverage = selfEvaluationResults?.find(
-                  (result) => result.competencyID === competency.id,
+                  (result) =>
+                    result.competencyID === competency.id ||
+                    competency.mappedFromCompetencies.includes(result.competencyID),
                 )
 
                 return (

@@ -66,18 +66,3 @@ func MapScoreLevelToNumber(level ScoreLevel) float64 {
 		return 5
 	}
 }
-
-func MapNumericToScoreLevel(score float64) ScoreLevel {
-	switch {
-	case score <= 1.5:
-		return ScoreLevelVeryGood
-	case score <= 2.5:
-		return ScoreLevelGood
-	case score <= 3.5:
-		return ScoreLevelOk
-	case score <= 4.5:
-		return ScoreLevelBad
-	default:
-		return ScoreLevelVeryBad
-	}
-}
