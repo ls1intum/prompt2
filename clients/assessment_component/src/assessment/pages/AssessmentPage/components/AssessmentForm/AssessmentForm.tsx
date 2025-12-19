@@ -69,6 +69,9 @@ export const AssessmentForm = ({
   const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
+  const hasExample = (assessment?.examples ?? '').trim().length > 0
+  const hasComment = (assessment?.comment ?? '').trim().length > 0
+  const shouldHideCommentAndExample = completed && !hasExample && !hasComment
 
   useEffect(() => {
     form.reset({
@@ -241,23 +244,27 @@ export const AssessmentForm = ({
           peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
-        <AssessmentTextField
-          control={form.control}
-          name='examples'
-          placeholder='Example'
-          completed={completed}
-          getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={saveAssessment}
-        />
+        {!shouldHideCommentAndExample && (
+          <>
+            <AssessmentTextField
+              control={form.control}
+              name='examples'
+              placeholder='Example'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
 
-        <AssessmentTextField
-          control={form.control}
-          name='comment'
-          placeholder='Additional comments'
-          completed={completed}
-          getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={saveAssessment}
-        />
+            <AssessmentTextField
+              control={form.control}
+              name='comment'
+              placeholder='Additional comments'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
+          </>
+        )}
 
         {error && !completed && <FormMessage className='mt-2'>{error}</FormMessage>}
 
