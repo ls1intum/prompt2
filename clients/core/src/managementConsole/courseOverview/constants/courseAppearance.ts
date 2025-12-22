@@ -3,7 +3,6 @@ export const DEFAULT_COURSE_ICON = 'graduation-cap'
 
 export const courseAppearanceColors = [
   DEFAULT_COURSE_COLOR,
-  'bg-gray-50',
   'bg-red-100',
   'bg-yellow-100',
   'bg-green-100',

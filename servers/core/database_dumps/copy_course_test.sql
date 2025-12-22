@@ -174,6 +174,8 @@ CREATE TABLE course (
     restricted_data jsonb,
     student_readable_data jsonb DEFAULT '{}'::jsonb,
     template boolean NOT NULL DEFAULT FALSE,
+    short_description character varying(255),
+    long_description text,
     CONSTRAINT check_end_date_after_start_date CHECK ((end_date > start_date))
 );
 
@@ -385,8 +387,39 @@ INSERT INTO application_question_multi_select VALUES ('c20829f9-d1d2-4952-95ee-1
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Master Test', '2025-05-19', '2025-06-30', 'ss25', 'practical course', 10, '{}', '{"icon": "school", "bg-color": "bg-teal-100"}', FALSE);
-INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee', 'Template Test', '2025-05-19', '2025-08-30', 'ss25', 'practical course', 10, '{}', '{"icon": "school", "bg-color": "bg-teal-100"}', TRUE);
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description)
+VALUES
+    (
+        'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd',
+        'Master Test',
+        '2025-05-19',
+        '2025-06-30',
+        'ss25',
+        'practical course',
+        10,
+        '{}',
+        '{"icon": "school", "bg-color": "bg-teal-100"}',
+        FALSE,
+        'Hands-on master course',
+        'Detailed description for the Master Test course used in copy tests.'
+    );
+
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description)
+VALUES
+    (
+        'c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee',
+        'Template Test',
+        '2025-05-19',
+        '2025-08-30',
+        'ss25',
+        'practical course',
+        10,
+        '{}',
+        '{"icon": "school", "bg-color": "bg-teal-100"}',
+        TRUE,
+        'Template for future courses',
+        'Long-form description for the template course copy flow.'
+    );
 
 
 --

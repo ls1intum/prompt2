@@ -15,11 +15,12 @@ import {
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { EditCourseDropdown } from './components/EditCourseDropdown'
+import type { Course } from '@tumaet/prompt-shared-state'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
-  const course = courses.find((c) => c.id === courseId)
+  const course = courses.find((c) => c.id === courseId) as Course | undefined
   const { permissions } = useAuthStore()
 
   const formatDate = (dateString: string): string => {
@@ -64,6 +65,14 @@ export const CourseOverview = (): JSX.Element => {
           </div>
         </CardHeader>
         <CardContent className='p-6'>
+          {course.shortDescription && (
+            <p className='mb-4 text-muted-foreground leading-relaxed'>{course.shortDescription}</p>
+          )}
+          {course.longDescription && (
+            <p className='mb-6 text-sm text-muted-foreground leading-relaxed border-l-2 border-border pl-3'>
+              {course.longDescription}
+            </p>
+          )}
           <div className='grid md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
               <div className='flex items-center space-x-3'>
