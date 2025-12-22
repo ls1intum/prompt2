@@ -40,8 +40,6 @@ func getAllTeams(c *gin.Context) {
 		return
 	}
 
-	log.Infof("Retrieved teams: %+v", teams)
-
 	c.JSON(http.StatusOK, gin.H{"teams": teams})
 }
 

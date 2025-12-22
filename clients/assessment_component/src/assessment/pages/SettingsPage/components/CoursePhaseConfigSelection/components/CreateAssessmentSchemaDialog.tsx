@@ -18,9 +18,13 @@ import { CreateAssessmentSchemaRequest } from '../../../../../interfaces/assessm
 
 interface CreateAssessmentSchemaDialogProps {
   onError: (error: string | undefined) => void
+  disabled?: boolean
 }
 
-export const CreateAssessmentSchemaDialog = ({ onError }: CreateAssessmentSchemaDialogProps) => {
+export const CreateAssessmentSchemaDialog = ({
+  onError,
+  disabled = false,
+}: CreateAssessmentSchemaDialogProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const createSchemaMutation = useCreateAssessmentSchema(onError)
@@ -52,7 +56,7 @@ export const CreateAssessmentSchemaDialog = ({ onError }: CreateAssessmentSchema
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='icon'>
+        <Button variant='outline' size='icon' disabled={disabled}>
           <Plus className='h-4 w-4' />
         </Button>
       </DialogTrigger>

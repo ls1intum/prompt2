@@ -13,7 +13,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -153,7 +153,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
@@ -189,7 +189,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -289,7 +289,7 @@ func UpdateParticipationDataGraph(ctx context.Context, courseID uuid.UUID, graph
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -324,7 +324,7 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections

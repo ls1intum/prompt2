@@ -15,6 +15,7 @@ import (
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
 	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -160,7 +161,7 @@ func UpdateBatchCoursePhaseParticipation(ctx context.Context, createOrUpdateCour
 	if err != nil {
 		return nil, err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CoursePhaseParticipationServiceSingleton.queries.WithTx(tx)
 
 	updatedIDs := make([]uuid.UUID, 0, len(createOrUpdateCoursePhaseParticipation))

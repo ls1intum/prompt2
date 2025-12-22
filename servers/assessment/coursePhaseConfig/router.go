@@ -1,6 +1,7 @@
 package coursePhaseConfig
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,10 @@ func createOrUpdateCoursePhaseConfig(c *gin.Context) {
 
 	err = CreateOrUpdateCoursePhaseConfig(c, coursePhaseID, request)
 	if err != nil {
+		if errors.Is(err, ErrCannotChangeSchemaWithData) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
 		log.WithError(err).Error("Failed to create or update course phase config")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create or update course phase config"})
 		return

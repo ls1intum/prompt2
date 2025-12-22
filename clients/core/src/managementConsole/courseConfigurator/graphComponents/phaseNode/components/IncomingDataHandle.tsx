@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
+import { camelToTitle } from './utils/camelToTitle'
 
 interface IncomingDataHandleProps {
   phaseID: string
@@ -112,7 +113,7 @@ export const IncomingDataHandle = ({
             />
             <div className='flex items-center space-x-2'>
               {icon}
-              <span className='text-sm font-medium'>{dto.dtoName}</span>
+              <span className='text-sm font-medium'>{camelToTitle(dto.dtoName)}</span>
             </div>
           </div>
         </TooltipTrigger>
