@@ -121,9 +121,12 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     (application.status === 'applied' || application.status === 'not_applied') &&
     application.student
   ) {
-    student = application.student
-    // enforcing that student has university account
-    student.hasUniversityAccount = true
+    student = {
+      ...application.student,
+      firstName: user?.firstName ?? application.student.firstName ?? '',
+      lastName: user?.lastName ?? application.student.lastName ?? '',
+      hasUniversityAccount: true,
+    }
   }
 
   return (
