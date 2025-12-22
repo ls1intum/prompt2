@@ -1,4 +1,4 @@
-import { UpdateCourseData } from '@tumaet/prompt-shared-state'
+import type { UpdateCourseData } from '@tumaet/prompt-shared-state'
 
 export interface PostCourse {
   name: string
@@ -9,6 +9,8 @@ export interface PostCourse {
   semesterTag: string
   restrictedMetaData: { [key: string]: any }
   studentReadableData: { [key: string]: any }
+  shortDescription: string
+  longDescription?: string
   template: boolean
 }
 
@@ -34,5 +36,7 @@ export function serializeUpdateCourse(course: UpdateCourseData): Record<string, 
     ...course,
     startDate: course.startDate ? formatDate(course.startDate) : undefined,
     endDate: course.endDate ? formatDate(course.endDate) : undefined,
+    shortDescription: course.shortDescription ?? undefined,
+    longDescription: course.longDescription ?? undefined,
   }
 }

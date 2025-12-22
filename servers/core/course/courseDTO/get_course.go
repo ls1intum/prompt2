@@ -18,6 +18,8 @@ type Course struct {
 	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
 	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 	CourseType          string        `json:"courseType"`
+	ShortDescription    pgtype.Text   `json:"shortDescription" swaggertype:"string"`
+	LongDescription     pgtype.Text   `json:"longDescription" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 	Template            bool          `json:"template"`
@@ -46,6 +48,8 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		SemesterTag:         model.SemesterTag,
 		Ects:                model.Ects,
 		CourseType:          string(model.CourseType),
+		ShortDescription:    model.ShortDescription,
+		LongDescription:     model.LongDescription,
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
 		Template:            model.Template,

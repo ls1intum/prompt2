@@ -16,9 +16,21 @@ type OpenApplication struct {
 	ApplicationDeadline      string      `json:"applicationDeadline"`
 	ExternalStudentsAllowed  bool        `json:"externalStudentsAllowed"`
 	UniversityLoginAvailable bool        `json:"universityLoginAvailable"`
+	ShortDescription         *string     `json:"shortDescription,omitempty"`
+	LongDescription          *string     `json:"longDescription,omitempty"`
 }
 
 func GetOpenApplicationPhaseDTO(dbModel db.GetAllOpenApplicationPhasesRow) OpenApplication {
+	var shortDesc *string
+	if dbModel.ShortDescription.Valid {
+		shortDesc = &dbModel.ShortDescription.String
+	}
+
+	var longDesc *string
+	if dbModel.LongDescription.Valid {
+		longDesc = &dbModel.LongDescription.String
+	}
+
 	return OpenApplication{
 		CourseName:               dbModel.CourseName,
 		CoursePhaseID:            dbModel.CoursePhaseID,
@@ -29,5 +41,7 @@ func GetOpenApplicationPhaseDTO(dbModel db.GetAllOpenApplicationPhasesRow) OpenA
 		ApplicationDeadline:      dbModel.ApplicationEndDate,
 		ExternalStudentsAllowed:  dbModel.ExternalStudentsAllowed,
 		UniversityLoginAvailable: dbModel.UniversityLoginAvailable,
+		ShortDescription:         shortDesc,
+		LongDescription:          longDesc,
 	}
 }

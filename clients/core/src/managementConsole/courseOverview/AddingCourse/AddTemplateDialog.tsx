@@ -89,6 +89,8 @@ export const AddTemplateDialog = ({
       restrictedMetaData: {},
       // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
+      shortDescription: templatePropertiesFormValues?.shortDescription || '',
+      longDescription: templatePropertiesFormValues?.longDescription || '',
       template: true,
     }
     // todo API call

@@ -548,3 +548,10 @@ ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_from_course_phase FOREIGN 
 -- Name: course_phase_graph fk_to_course_phase; Type: FK CONSTRAINT; Schema: public; Owner: prompt-postgres
 --
 ALTER TABLE ONLY course_phase_graph ADD CONSTRAINT fk_to_course_phase FOREIGN KEY (to_course_phase_id) REFERENCES course_phase (id) ON DELETE CASCADE;
+
+-- Apply migration adjustments for tests
+ALTER TABLE course
+ADD COLUMN short_description VARCHAR(255);
+
+ALTER TABLE course
+ADD COLUMN long_description TEXT;

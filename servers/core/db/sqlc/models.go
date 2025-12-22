@@ -247,6 +247,8 @@ type Course struct {
 	RestrictedData      []byte             `json:"restricted_data"`
 	StudentReadableData []byte             `json:"student_readable_data"`
 	Template            bool               `json:"template"`
+	ShortDescription    pgtype.Text        `json:"short_description"`
+	LongDescription     pgtype.Text        `json:"long_description"`
 	Archived            bool               `json:"archived"`
 	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }

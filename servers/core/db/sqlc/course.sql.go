@@ -17,7 +17,7 @@ UPDATE course
 SET archived = $2,
     archived_on = $3
 WHERE id = $1
-RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 `
 
 type ArchiveCourseParams struct {
@@ -40,6 +40,8 @@ func (q *Queries) ArchiveCourse(ctx context.Context, arg ArchiveCourseParams) (C
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.ShortDescription,
+		&i.LongDescription,
 		&i.Archived,
 		&i.ArchivedOn,
 	)
@@ -72,9 +74,9 @@ func (q *Queries) CheckCoursePhasesBelongToCourse(ctx context.Context, arg Check
 
 const createCourse = `-- name: CreateCourse :one
 INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data,
-                    student_readable_data, template)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
+                    student_readable_data, template, short_description, long_description)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 `
 
 type CreateCourseParams struct {
@@ -88,6 +90,8 @@ type CreateCourseParams struct {
 	RestrictedData      []byte      `json:"restricted_data"`
 	StudentReadableData []byte      `json:"student_readable_data"`
 	Template            bool        `json:"template"`
+	ShortDescription    pgtype.Text `json:"short_description"`
+	LongDescription     pgtype.Text `json:"long_description"`
 }
 
 func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Course, error) {
@@ -102,6 +106,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		arg.RestrictedData,
 		arg.StudentReadableData,
 		arg.Template,
+		arg.ShortDescription,
+		arg.LongDescription,
 	)
 	var i Course
 	err := row.Scan(
@@ -115,6 +121,8 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) (Cou
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.ShortDescription,
+		&i.LongDescription,
 		&i.Archived,
 		&i.ArchivedOn,
 	)
@@ -133,7 +141,7 @@ func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllActiveCoursesAdmin = `-- name: GetAllActiveCoursesAdmin :many
-SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template, c.archived, c.archived_on
+SELECT c.id, c.name, c.start_date, c.end_date, c.semester_tag, c.course_type, c.ects, c.restricted_data, c.student_readable_data, c.template, c.short_description, c.long_description, c.archived, c.archived_on
 FROM course c
 ORDER BY c.template,
          c.semester_tag,
@@ -160,6 +168,8 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.ShortDescription,
+			&i.LongDescription,
 			&i.Archived,
 			&i.ArchivedOn,
 		); err != nil {
@@ -174,68 +184,66 @@ func (q *Queries) GetAllActiveCoursesAdmin(ctx context.Context) ([]Course, error
 }
 
 const getAllActiveCoursesRestricted = `-- name: GetAllActiveCoursesRestricted :many
-WITH parsed_roles AS (
-    SELECT split_part(role, '-', 1) AS semester_tag,
-           split_part(role, '-', 2) AS course_name,
-           split_part(role, '-', 3) AS user_role
-    FROM unnest($1::text[]) AS role
-),
-user_course_roles AS (
-    SELECT
-        c.id,
-        c.name,
-        c.semester_tag,
-        c.start_date,
-        c.end_date,
-        c.course_type,
-        c.student_readable_data,
-        c.restricted_data,
-        c.ects,
-        c.template,
-        c.archived,
-        c.archived_on,
-        pr.user_role
-    FROM course c
-    INNER JOIN parsed_roles pr
-        ON c.name = pr.course_name
-       AND c.semester_tag = pr.semester_tag
-    WHERE c.end_date >= NOW() - INTERVAL '1 month'
-      AND c.archived = FALSE             -- hide archived courses from restricted view
-)
-SELECT
-    ucr.id,
-    ucr.name,
-    ucr.start_date,
-    ucr.end_date,
-    ucr.semester_tag,
-    ucr.course_type,
-    ucr.ects,
-    CASE
-        WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
-        ELSE ucr.restricted_data::jsonb
-    END AS restricted_data,
-    ucr.student_readable_data,
-    ucr.template,
-    ucr.archived,
-    ucr.archived_on
+ WITH parsed_roles AS (SELECT split_part(role, '-', 1) AS semester_tag,
+          split_part(role, '-', 2) AS course_name,
+          split_part(role, '-', 3) AS user_role
+        FROM unnest($1::text[]) AS role),
+  user_course_roles AS (SELECT c.id,
+            c.name,
+            c.semester_tag,
+            c.start_date,
+            c.end_date,
+            c.course_type,
+            c.student_readable_data,
+            c.restricted_data,
+            c.ects,
+            c.template,
+            c.short_description,
+            c.long_description,
+            c.archived,
+            c.archived_on,
+            pr.user_role
+          FROM course c
+            INNER JOIN
+           parsed_roles pr
+           ON c.name = pr.course_name
+            AND c.semester_tag = pr.semester_tag
+          WHERE c.archived = FALSE)
+SELECT ucr.id,
+       ucr.name,
+       ucr.start_date,
+       ucr.end_date,
+       ucr.semester_tag,
+       ucr.course_type,
+       ucr.ects,
+       CASE
+           WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
+           ELSE ucr.restricted_data::jsonb
+           END AS restricted_data,
+       ucr.student_readable_data,
+       ucr.template,
+       ucr.short_description,
+       ucr.long_description,
+       ucr.archived,
+       ucr.archived_on
 FROM user_course_roles ucr
-GROUP BY
-    ucr.id,
-    ucr.name,
-    ucr.semester_tag,
-    ucr.start_date,
-    ucr.end_date,
-    ucr.course_type,
-    ucr.student_readable_data,
-    ucr.ects,
-    ucr.restricted_data,
-    ucr.template,
-    ucr.archived,
-    ucr.archived_on
-ORDER BY
-    ucr.template,
-    ucr.semester_tag,
-    ucr.name DESC
+GROUP BY ucr.id,
+         ucr.name,
+         ucr.semester_tag,
+         ucr.start_date,
+         ucr.end_date,
+         ucr.course_type,
+         ucr.student_readable_data,
+         ucr.ects,
+         ucr.restricted_data,
+         ucr.template,
+         ucr.short_description,
+         ucr.long_description,
+         ucr.archived,
+         ucr.archived_on
+ORDER BY ucr.template,
+         ucr.semester_tag,
+         ucr.name DESC
 `
 
 type GetAllActiveCoursesRestrictedRow struct {
@@ -249,6 +257,8 @@ type GetAllActiveCoursesRestrictedRow struct {
 	RestrictedData      []byte             `json:"restricted_data"`
 	StudentReadableData []byte             `json:"student_readable_data"`
 	Template            bool               `json:"template"`
+	ShortDescription    pgtype.Text        `json:"short_description"`
+	LongDescription     pgtype.Text        `json:"long_description"`
 	Archived            bool               `json:"archived"`
 	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }
@@ -274,6 +284,8 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.ShortDescription,
+			&i.LongDescription,
 			&i.Archived,
 			&i.ArchivedOn,
 		); err != nil {
@@ -288,7 +300,7 @@ func (q *Queries) GetAllActiveCoursesRestricted(ctx context.Context, dollar_1 []
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 FROM course
 WHERE id = $1
 LIMIT 1
@@ -308,6 +320,8 @@ func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (Course, error) {
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.ShortDescription,
+		&i.LongDescription,
 		&i.Archived,
 		&i.ArchivedOn,
 	)
@@ -355,7 +369,9 @@ SET restricted_data       = restricted_data || $2,
     start_date            = COALESCE($4, start_date),
     end_date              = COALESCE($5, end_date),
     ects                  = COALESCE($6, ects),
-    course_type           = COALESCE($7, course_type)
+    course_type           = COALESCE($9, course_type),
+    short_description     = COALESCE($7, short_description),
+    long_description      = COALESCE($8, long_description)
 WHERE id = $1
 `
 
@@ -366,6 +382,8 @@ type UpdateCourseParams struct {
 	StartDate           pgtype.Date    `json:"start_date"`
 	EndDate             pgtype.Date    `json:"end_date"`
 	Ects                pgtype.Int4    `json:"ects"`
+	ShortDescription    pgtype.Text    `json:"short_description"`
+	LongDescription     pgtype.Text    `json:"long_description"`
 	CourseType          NullCourseType `json:"course_type"`
 }
 
@@ -377,6 +395,8 @@ func (q *Queries) UpdateCourse(ctx context.Context, arg UpdateCourseParams) erro
 		arg.StartDate,
 		arg.EndDate,
 		arg.Ects,
+		arg.ShortDescription,
+		arg.LongDescription,
 		arg.CourseType,
 	)
 	return err

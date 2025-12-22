@@ -26,6 +26,8 @@ user_course_roles AS (
     c.restricted_data,
     c.ects,
     c.template,
+    c.short_description,
+    c.long_description,
     c.archived,
     c.archived_on,
     pr.user_role
@@ -33,11 +35,11 @@ user_course_roles AS (
     course c
   INNER JOIN
     parsed_roles pr
-      ON c.name = pr.course_name
-     AND c.semester_tag = pr.semester_tag
+    ON c.name = pr.course_name
+    AND c.semester_tag = pr.semester_tag
   WHERE
     c.template = TRUE
-    AND c.archived = FALSE -- don't show archived templates
+    AND c.archived = FALSE
 )
 SELECT
   ucr.id,
@@ -53,6 +55,8 @@ SELECT
   END AS restricted_data,
   ucr.student_readable_data,
   ucr.template,
+  ucr.short_description,
+  ucr.long_description,
   ucr.archived,
   ucr.archived_on
 FROM
@@ -68,11 +72,13 @@ GROUP BY
   ucr.ects,
   ucr.restricted_data,
   ucr.template,
+  ucr.short_description,
+  ucr.long_description,
   ucr.archived,
   ucr.archived_on
 ORDER BY
-  ucr.semester_tag,
-  ucr.name DESC;
+  ucr.semester_tag, ucr.name DESC;
+
 -- name: CheckCourseTemplateStatus :one
 SELECT template
 FROM course

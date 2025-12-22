@@ -26,7 +26,7 @@ func (q *Queries) CheckCourseTemplateStatus(ctx context.Context, id uuid.UUID) (
 }
 
 const getTemplateCourseByID = `-- name: GetTemplateCourseByID :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 FROM course
 WHERE id = $1
   AND template = TRUE
@@ -46,6 +46,8 @@ func (q *Queries) GetTemplateCourseByID(ctx context.Context, id uuid.UUID) (Cour
 		&i.RestrictedData,
 		&i.StudentReadableData,
 		&i.Template,
+		&i.ShortDescription,
+		&i.LongDescription,
 		&i.Archived,
 		&i.ArchivedOn,
 	)
@@ -53,7 +55,7 @@ func (q *Queries) GetTemplateCourseByID(ctx context.Context, id uuid.UUID) (Cour
 }
 
 const getTemplateCoursesAdmin = `-- name: GetTemplateCoursesAdmin :many
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 FROM course
 WHERE template = TRUE
 ORDER BY semester_tag, name DESC
@@ -79,6 +81,8 @@ func (q *Queries) GetTemplateCoursesAdmin(ctx context.Context) ([]Course, error)
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.ShortDescription,
+			&i.LongDescription,
 			&i.Archived,
 			&i.ArchivedOn,
 		); err != nil {
@@ -113,6 +117,8 @@ user_course_roles AS (
     c.restricted_data,
     c.ects,
     c.template,
+    c.short_description,
+    c.long_description,
     c.archived,
     c.archived_on,
     pr.user_role
@@ -120,11 +126,11 @@ user_course_roles AS (
     course c
   INNER JOIN
     parsed_roles pr
-      ON c.name = pr.course_name
-     AND c.semester_tag = pr.semester_tag
+    ON c.name = pr.course_name
+    AND c.semester_tag = pr.semester_tag
   WHERE
     c.template = TRUE
-    AND c.archived = FALSE -- don't show archived templates
+    AND c.archived = FALSE
 )
 SELECT
   ucr.id,
@@ -140,6 +146,8 @@ SELECT
   END AS restricted_data,
   ucr.student_readable_data,
   ucr.template,
+  ucr.short_description,
+  ucr.long_description,
   ucr.archived,
   ucr.archived_on
 FROM
@@ -155,11 +163,12 @@ GROUP BY
   ucr.ects,
   ucr.restricted_data,
   ucr.template,
+  ucr.short_description,
+  ucr.long_description,
   ucr.archived,
   ucr.archived_on
 ORDER BY
-  ucr.semester_tag,
-  ucr.name DESC
+  ucr.semester_tag, ucr.name DESC
 `
 
 type GetTemplateCoursesRestrictedRow struct {
@@ -173,6 +182,8 @@ type GetTemplateCoursesRestrictedRow struct {
 	RestrictedData      []byte             `json:"restricted_data"`
 	StudentReadableData []byte             `json:"student_readable_data"`
 	Template            bool               `json:"template"`
+	ShortDescription    pgtype.Text        `json:"short_description"`
+	LongDescription     pgtype.Text        `json:"long_description"`
 	Archived            bool               `json:"archived"`
 	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }
@@ -198,6 +209,8 @@ func (q *Queries) GetTemplateCoursesRestricted(ctx context.Context, dollar_1 []s
 			&i.RestrictedData,
 			&i.StudentReadableData,
 			&i.Template,
+			&i.ShortDescription,
+			&i.LongDescription,
 			&i.Archived,
 			&i.ArchivedOn,
 		); err != nil {
