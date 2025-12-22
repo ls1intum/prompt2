@@ -160,8 +160,8 @@ VALUES
           "color": "green"
                 }',
                 '{
-                    "icon": "home",
-                    "color": "green"
+                                        "icon": "home",
+                                        "bg-color": null
                 }',
                 FALSE,
                 FALSE,
@@ -272,9 +272,8 @@ VALUES
           "some-secret-data": "secret"
                 }',
                 '{
-                    "icon": "folder",
-                    "bg-color": "bg-red-100",
-                    "some-secret-data": "secret"
+                                        "icon": "folder",
+                                        "bg-color": "bg-red-100"
                 }',
                 FALSE,
                 FALSE,
@@ -451,9 +450,7 @@ VALUES
         '{
           "test-key": "test-value"
         }',
-                '{
-                    "test-key": "test-value"
-                }',
+                                '{}',
         false,
         '7dc1c4e8-4255-4874-80a0-0c12b958744b'
     );
