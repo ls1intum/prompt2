@@ -20,7 +20,7 @@ const PhaseRouter: { [key: string]: React.FC } = {
   'Intro Course Developer': IntroCourseDeveloperRoutes,
   IntroCourseTutor: IntroCourseTutorRoutes,
   Assessment: AssessmentRoutes,
-  DevOpsChallenge: DevOpsChallengeRoutes,
+  'DevOps Challenge': DevOpsChallengeRoutes,
   'Team Allocation': TeamAllocationRoutes,
   'Self Team Allocation': SelfTeamAllocationRoutes,
 }

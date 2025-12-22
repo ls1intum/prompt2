@@ -46,6 +46,13 @@ CREATE TABLE
   course_phase_type (id uuid NOT NULL, name text NOT NULL);
 
 CREATE TABLE
+  course_phase_type (
+    id uuid NOT NULL,
+    name text NOT NULL,
+    description text
+  );
+
+CREATE TABLE
   course_phase (
     id uuid NOT NULL,
     course_id uuid NOT NULL,
@@ -56,11 +63,21 @@ CREATE TABLE
   );
 
 INSERT INTO
-  course_phase_type (id, name)
+  course_phase_type (id, name, description)
 VALUES
   (
     '7dc1c4e8-4255-4874-80a0-0c12b958744b',
-    'application'
+    'application',
+    'Test Description'
+  );
+
+INSERT INTO
+  course_phase_type (id, name, description)
+VALUES
+  (
+    '7dc1c4e8-4255-4874-80a0-0c12b958744c',
+    'template_component',
+    'Test Description'
   );
 
 INSERT INTO

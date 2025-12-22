@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
@@ -62,6 +63,9 @@ func (suite *CoursePhaseConfigServiceTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CoursePhaseConfigSingleton = &suite.coursePhaseConfigService
+
+	// Initialize assessmentSchemas singleton for validation (needed for CheckPhaseHasAssessmentData)
+	assessmentSchemas.AssessmentSchemaServiceSingleton = assessmentSchemas.NewAssessmentSchemaService(*testDB.Queries, testDB.Conn)
 
 	// Generate a test course phase ID and insert it with a schema
 	suite.testCoursePhaseID = uuid.New()
@@ -225,6 +229,76 @@ func (suite *CoursePhaseConfigServiceTestSuite) TestUpdateCoursePhaseConfig_CanT
 	assert.NoError(suite.T(), err)
 	assert.True(suite.T(), updatedConfig.GradeSuggestionVisible, "GradeSuggestionVisible should be TRUE")
 	assert.True(suite.T(), updatedConfig.ActionItemsVisible, "ActionItemsVisible should be TRUE")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseConfig_CannotChangeSchemaWithData() {
+	// Test that we cannot change schemas when assessment or evaluation data exists
+	testID := uuid.New()
+	oldSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	newSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+
+	// Create initial config
+	req := createTestCoursePhaseConfigRequest(oldSchemaID, testID)
+	err := CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, req)
+	assert.NoError(suite.T(), err, "Should successfully create initial config")
+
+	// Create test data structure: category -> competency -> assessment
+	categoryID := uuid.New()
+	competencyID := uuid.New()
+	participationID := uuid.New()
+
+	// Insert category for old schema
+	_, err = suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		`INSERT INTO category (id, name, assessment_schema_id) VALUES ($1, $2, $3)`,
+		categoryID, "Test Category", oldSchemaID)
+	assert.NoError(suite.T(), err)
+
+	// Insert competency
+	_, err = suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		`INSERT INTO competency (id, category_id, name) VALUES ($1, $2, $3)`,
+		competencyID, categoryID, "Test Competency")
+	assert.NoError(suite.T(), err)
+
+	// Insert assessment data to block schema change
+	assessmentID := uuid.New()
+	_, err = suite.coursePhaseConfigService.conn.Exec(suite.suiteCtx,
+		`INSERT INTO assessment (id, course_participation_id, course_phase_id, competency_id, score_level) 
+		 VALUES ($1, $2, $3, $4, $5)`,
+		assessmentID, participationID, testID, competencyID, "good")
+	assert.NoError(suite.T(), err)
+
+	// Try to update config with new schema - should fail
+	updateReq := createTestCoursePhaseConfigRequest(newSchemaID, testID)
+	err = CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, updateReq)
+	assert.Error(suite.T(), err, "Should fail to change schema when assessment data exists")
+	assert.Equal(suite.T(), ErrCannotChangeSchemaWithData, err, "Should return correct error type")
+
+	// Verify schema was not changed
+	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), oldSchemaID, config.AssessmentSchemaID, "Schema should not have changed")
+}
+
+func (suite *CoursePhaseConfigServiceTestSuite) TestCreateOrUpdateCoursePhaseConfig_CanChangeSchemaWithoutData() {
+	// Test that we CAN change schemas when no assessment or evaluation data exists
+	testID := uuid.New()
+	oldSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	newSchemaID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+
+	// Create initial config
+	req := createTestCoursePhaseConfigRequest(oldSchemaID, testID)
+	err := CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, req)
+	assert.NoError(suite.T(), err, "Should successfully create initial config")
+
+	// Update config with new schema - should succeed since no data exists
+	updateReq := createTestCoursePhaseConfigRequest(newSchemaID, testID)
+	err = CreateOrUpdateCoursePhaseConfig(suite.suiteCtx, testID, updateReq)
+	assert.NoError(suite.T(), err, "Should successfully change schema when no assessment data exists")
+
+	// Verify schema was changed
+	config, err := GetCoursePhaseConfig(suite.suiteCtx, testID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), newSchemaID, config.AssessmentSchemaID, "Schema should have changed")
 }
 
 // Note: GetTeamsForCoursePhase testing is limited because it requires external HTTP calls

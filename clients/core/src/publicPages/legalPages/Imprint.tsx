@@ -10,9 +10,11 @@ import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import DOMPurify from 'dompurify'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 export default function ImprintPage() {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [content, setContent] = useState('')
 
   DOMPurify.addHook('afterSanitizeAttributes', function (node) {
@@ -42,7 +44,7 @@ export default function ImprintPage() {
             variant='ghost'
             size='icon'
             className='absolute left-4 top-4'
-            onClick={() => navigate('/')}
+            onClick={() => navigate(user ? '/management' : '/')}
             aria-label='Go back'
           >
             <ArrowLeft className='h-4 w-4' />

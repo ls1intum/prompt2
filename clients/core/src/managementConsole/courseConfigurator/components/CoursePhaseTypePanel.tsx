@@ -11,7 +11,7 @@ export const CoursePhaseTypePanel = ({ canEdit }: CoursePhaseTypePanelProps): JS
 
   const courseHasInitialPhase = coursePhases.some((phase) => phase.isInitialPhase)
 
-  const coursePhaseTypesOrdered = coursePhaseTypes.sort((a, b) => {
+  const coursePhaseTypesOrdered = [...coursePhaseTypes].sort((a, b) => {
     if (a.initialPhase && !b.initialPhase) return -1
     if (!a.initialPhase && b.initialPhase) return 1
     return 0
