@@ -231,6 +231,7 @@ func GetStudentAssessmentResults(ctx context.Context, coursePhaseID, courseParti
 
 	if !config.GradeSuggestionVisible {
 		completion.GradeSuggestion = utils.MapFloat64ToNumeric(0.0)
+		completion.Comment = ""
 	}
 
 	results = assessmentDTO.StudentAssessmentResults{
