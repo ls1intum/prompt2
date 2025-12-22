@@ -15,6 +15,7 @@ import {
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { EditCourseDropdown } from './components/EditCourseDropdown'
+import { CourseStatusTag } from '../layout/Sidebar/CourseSwitchSidebar/components/CourseStatusTag'
 
 export const CourseOverview = (): JSX.Element => {
   const { courses } = useCourseStore()
@@ -58,7 +59,9 @@ export const CourseOverview = (): JSX.Element => {
           <div className='flex justify-between items-center'>
             <div>
               <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
-              <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
+              <CardDescription className='mt-2 text-black'>
+                <CourseStatusTag course={course} />
+              </CardDescription>
             </div>
             {canEdit && <EditCourseDropdown />}
           </div>
