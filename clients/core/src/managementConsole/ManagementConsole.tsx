@@ -2,7 +2,7 @@ import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
-import { EmptyPage } from './shared/components/WelcomePage'
+import { EmptyPage } from './shared/components/EmptyPage'
 import {
   SidebarInset,
   SidebarProvider,
