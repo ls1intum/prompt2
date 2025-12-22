@@ -60,14 +60,18 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     <Card className='overflow-hidden border border-gray-200 h-full flex flex-col'>
       <CardHeader className={`rounded-t-lg ${bgColor} py-6 px-6 border-b`}>
         <div className='flex items-center justify-between gap-4'>
-          <div className='flex items-center gap-4'>
-            <div className='size-6'>
+          <div className='flex items-center gap-4 min-w-0'>
+            <div className='size-6 shrink-0'>
               <DynamicIcon
                 name={course.studentReadableData?.['icon'] || 'graduation-cap'}
                 color='black'
               />
             </div>
-            <CardTitle className='text-2xl font-bold text-gray-900 leading-tight'>
+
+            <CardTitle
+              className='text-2xl font-bold text-gray-900 leading-tight truncate'
+              title={course.name}
+            >
               {course.name}
             </CardTitle>
           </div>
@@ -76,7 +80,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
             <TooltipTrigger asChild>
               <button
                 onClick={handleArchive}
-                className='p-2 rounded-md bg-white focus-visible:ring-2 focus-visible:ring-offset-2 hover:bg-gray-100'
+                className='shrink-0 p-2 rounded-md bg-white focus-visible:ring-2 focus-visible:ring-offset-2 hover:bg-gray-100'
                 aria-label={course.archived ? 'Unarchive course' : 'Archive course'}
               >
                 {course.archived ? (

@@ -2,7 +2,7 @@ import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
-import { WelcomePage } from './shared/components/WelcomePage'
+import { EmptyPage } from './shared/components/WelcomePage'
 import {
   SidebarInset,
   SidebarProvider,
@@ -157,7 +157,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
             id='management-children'
             className='flex flex-1 flex-col gap-4 p-6 pt-20 overflow-auto'
           >
-            {hasChildren ? children : <WelcomePage />}
+            {hasChildren ? children : <EmptyPage />}
           </div>
           <Footer />
         </SidebarInset>

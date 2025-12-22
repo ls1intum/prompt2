@@ -1,8 +1,8 @@
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@tumaet/prompt-ui-components'
 import type { Course } from '@tumaet/prompt-shared-state'
-import DynamicIcon from '@/components/DynamicIcon'
-import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { CourseSidebarItemTooltip } from './CourseSidebarItemTooltip'
+import { CourseAvatar } from './CourseAvatar'
 
 interface CourseSidebarItemProps {
   course: Course
@@ -17,20 +17,20 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
   const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-100'
   const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
 
-  const MemoizedIcon = useMemo(() => {
-    return (
-      <div className='size-6'>
-        <DynamicIcon name={iconName} />
-      </div>
-    )
-  }, [iconName])
+  const containerRing = isActive
+    ? course.template
+      ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-black'
+      : course.archived
+        ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-muted-foreground'
+        : 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
+    : ''
 
   return (
     <SidebarMenuItem key={course.id}>
       <SidebarMenuButton
         size='lg'
         tooltip={{
-          children: `${course.name} (${course.semesterTag})`,
+          children: <CourseSidebarItemTooltip course={course} />,
           hidden: false,
         }}
         onClick={() => {
@@ -41,23 +41,9 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         className='min-w-12 min-h-12 p-0'
       >
         <div
-          className={`relative flex aspect-square size-12 items-center justify-center ${
-            isActive && course.template
-              ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-black'
-              : isActive && !course.template
-                ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
-                : ''
-          }`}
+          className={`relative flex aspect-square size-12 items-center justify-center ${containerRing} ${course.archived ? 'opacity-60' : ''}`}
         >
-          <div
-            className={`
-            relative flex aspect-square items-center justify-center rounded-lg text-gray-800
-            ${isActive ? 'size-12' : 'size-10'} ${bgColor}
-            ${!isActive && course.template ? 'border-2 border-dashed border-black' : ''}
-          `}
-          >
-            <div className='size-6'>{MemoizedIcon}</div>
-          </div>
+          <CourseAvatar bgColor={bgColor} iconName={iconName} isActive={isActive} />
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>
