@@ -41,6 +41,7 @@ export const CategoryAssessment = ({
   }
 
   const categoryScore = getWeightedScoreLevel(assessments, [category])
+  const sortedCompetencies = [...category.competencies].sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <div key={category.id} className='mb-6'>
@@ -82,7 +83,7 @@ export const CategoryAssessment = ({
             </p>
           ) : (
             <div className='grid gap-4'>
-              {category.competencies.map((competency) => {
+              {sortedCompetencies.map((competency) => {
                 const assessment = assessments.find((ass) => ass.competencyID === competency.id)
                 const peerAverage = peerEvaluationResults?.find(
                   (result) => result.competencyID === competency.id,
