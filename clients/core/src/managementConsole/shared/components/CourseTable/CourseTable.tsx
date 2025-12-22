@@ -41,23 +41,27 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
       {
         id: 'select',
         header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && 'indeterminate')
-            }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label='Select all'
-          />
+          <div className='h-full flex flex-col items-center'>
+            <Checkbox
+              checked={
+                table.getIsAllPageRowsSelected() ||
+                (table.getIsSomePageRowsSelected() && 'indeterminate')
+              }
+              onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+              aria-label='Select all'
+            />
+          </div>
         ),
         cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label='Select row'
-            onClick={(e) => e.stopPropagation()}
-            onFocus={(e) => e.stopPropagation()}
-          />
+          <div className='h-full flex flex-col items-center'>
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label='Select row'
+              onClick={(e) => e.stopPropagation()}
+              onFocus={(e) => e.stopPropagation()}
+            />
+          </div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -73,7 +77,8 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
 
           return (
             <div
-              className={`inline-flex items-center justify-center rounded-md px-2 py-1 ${bgColor}`}
+              className={`inline-flex items-center justify-center rounded-md ${bgColor}`}
+              style={{ width: 24, height: 24 }}
             >
               <DynamicIcon name={iconName} className='h-4 w-4' />
             </div>
