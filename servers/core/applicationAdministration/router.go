@@ -210,8 +210,6 @@ func getApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	// Update the student's name with the latest values from the token
-	// This ensures that recent name changes in TUMonline are always reflected
 	if applicationForm.Student != nil && firstName != "" && lastName != "" {
 		applicationForm.Student.FirstName = firstName
 		applicationForm.Student.LastName = lastName
@@ -378,9 +376,6 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	// Validate that the student identity matches the token
-	// Note: We don't validate names because they may change in TUMonline (e.g., name changes)
-	// The student identity is based on email, matriculation number, and university login
 	if application.Student.Email != userEmail ||
 		application.Student.MatriculationNumber != matriculationNumber ||
 		application.Student.UniversityLogin != universityLogin {
