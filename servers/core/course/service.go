@@ -354,35 +354,42 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 
 }
 
-func UpdateCourseArchiveStatus(ctx context.Context, courseID uuid.UUID, archived bool) error {
+func UpdateCourseArchiveStatus(
+	ctx context.Context,
+	courseID uuid.UUID,
+	archived bool,
+) (courseDTO.Course, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
 	var archivedOn pgtype.Timestamptz
-
 	if archived {
 		archivedOn = pgtype.Timestamptz{
 			Time:  time.Now(),
 			Valid: true,
 		}
-	} else {
-		// archived_on = NULL
-		archivedOn = pgtype.Timestamptz{
-			Valid: false,
-		}
 	}
 
-	err := CourseServiceSingleton.queries.ArchiveCourse(ctxWithTimeout, db.ArchiveCourseParams{
-		ID:         courseID,
-		Archived:   archived,
-		ArchivedOn: archivedOn,
-	})
+	res, err := CourseServiceSingleton.queries.ArchiveCourse(
+		ctxWithTimeout,
+		db.ArchiveCourseParams{
+			ID:         courseID,
+			Archived:   archived,
+			ArchivedOn: archivedOn,
+		},
+	)
 	if err != nil {
 		log.Error(err)
-		return errors.New("failed to update course archive status")
+		return courseDTO.Course{}, errors.New("failed to update course archive status")
 	}
 
-	return nil
+	course, err := courseDTO.GetCourseDTOFromDBModel(res)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to map course dto")
+	}
+
+	return course, nil
 }
 
 func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData courseDTO.UpdateCourseData) error {

@@ -94,11 +94,12 @@ SELECT CASE
            END AS all_exist_and_match_course
 FROM matched_phases;
 
--- name: ArchiveCourse :exec
+-- name: ArchiveCourse :one
 UPDATE course
 SET archived = $2,
     archived_on = $3
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;
 
 
 -- name: UpdateCourse :exec

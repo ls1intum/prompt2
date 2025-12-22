@@ -362,7 +362,7 @@ func parseAndValidateMetaDataGraph(c *gin.Context) ([]courseDTO.MetaDataGraphIte
 // @Produce json
 // @Param uuid path string true "Course UUID"
 // @Param update body courseDTO.CourseArchiveStatus true "Archive status update"
-// @Success 200 {string} string "OK"
+// @Success 200 {object} courseDTO.Course "Updated course"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /courses/{uuid}/archive [put]
@@ -379,18 +379,19 @@ func archiveCourse(c *gin.Context) {
 		return
 	}
 
-	// archive = true  ? archived_on = NOW()
-	// archive = false ? archived_on = NULL
-	err = UpdateCourseArchiveStatus(c, courseID, update.Archived)
+	updatedCourse, err := UpdateCourseArchiveStatus(c, courseID, update.Archived)
 	if err != nil {
 		log.Error(err)
-		handleError(c, http.StatusInternalServerError, errors.New("failed to update archive status"))
+		handleError(
+			c,
+			http.StatusInternalServerError,
+			errors.New("failed to update course archive status"),
+		)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, updatedCourse)
 }
-
 // updateCourseData godoc
 // @Summary Update course data
 // @Description Update the data for a course

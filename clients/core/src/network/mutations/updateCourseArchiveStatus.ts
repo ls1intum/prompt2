@@ -1,13 +1,14 @@
 import { axiosInstance } from '@/network/configService'
 import type { CourseArchiveStatus } from '@core/interfaces/courseArchiveStatus'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
+import type { Course } from '@tumaet/prompt-shared-state'
 
 const updateCourseArchiveStatus = async (
   courseId: string,
   payload: CourseArchiveStatus,
 ): Promise<void> => {
   try {
-    await axiosInstance.put(`/api/courses/${courseId}/archive`, payload, {
+    const response = await axiosInstance.put<Course>(`/api/courses/${courseId}/archive`, payload, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -16,8 +17,8 @@ const updateCourseArchiveStatus = async (
     const { updateCourse } = useCourseStore.getState()
 
     updateCourse(courseId, {
-      archived: payload.archived,
-      archivedOn: payload.archived ? new Date().toISOString() : null,
+      archived: response.data.archived,
+      archivedOn: response.data.archivedOn,
     })
   } catch (err) {
     console.error('Failed to update course archive status', err)

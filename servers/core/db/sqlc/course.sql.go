@@ -12,11 +12,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const archiveCourse = `-- name: ArchiveCourse :exec
+const archiveCourse = `-- name: ArchiveCourse :one
 UPDATE course
 SET archived = $2,
     archived_on = $3
 WHERE id = $1
+RETURNING id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, archived, archived_on
 `
 
 type ArchiveCourseParams struct {
@@ -25,9 +26,24 @@ type ArchiveCourseParams struct {
 	ArchivedOn pgtype.Timestamptz `json:"archived_on"`
 }
 
-func (q *Queries) ArchiveCourse(ctx context.Context, arg ArchiveCourseParams) error {
-	_, err := q.db.Exec(ctx, archiveCourse, arg.ID, arg.Archived, arg.ArchivedOn)
-	return err
+func (q *Queries) ArchiveCourse(ctx context.Context, arg ArchiveCourseParams) (Course, error) {
+	row := q.db.QueryRow(ctx, archiveCourse, arg.ID, arg.Archived, arg.ArchivedOn)
+	var i Course
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.StartDate,
+		&i.EndDate,
+		&i.SemesterTag,
+		&i.CourseType,
+		&i.Ects,
+		&i.RestrictedData,
+		&i.StudentReadableData,
+		&i.Template,
+		&i.Archived,
+		&i.ArchivedOn,
+	)
+	return i, err
 }
 
 const checkCoursePhasesBelongToCourse = `-- name: CheckCoursePhasesBelongToCourse :one
