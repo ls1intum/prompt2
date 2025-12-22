@@ -388,8 +388,6 @@ func postApplicationAuthenticated(c *gin.Context) {
 		return
 	}
 
-	// Override the names with the latest values from the token to ensure they're up to date
-	// This ensures that recent name changes in TUMonline are always reflected in the database
 	if firstName != "" && lastName != "" {
 		application.Student.FirstName = firstName
 		application.Student.LastName = lastName

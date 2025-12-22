@@ -121,8 +121,6 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     (application.status === 'applied' || application.status === 'not_applied') &&
     application.student
   ) {
-    // Use the saved student data, but override the name fields with the latest token data
-    // This ensures that recent name changes in TUMonline are always reflected
     student = {
       ...application.student,
       firstName: user?.firstName ?? application.student.firstName ?? '',
