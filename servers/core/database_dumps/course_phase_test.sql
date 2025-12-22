@@ -43,9 +43,6 @@ SET
 -- Name: course_phase; Type: TABLE; Schema: public; Owner: prompt-postgres
 --
 CREATE TABLE
-  course_phase_type (id uuid NOT NULL, name text NOT NULL);
-
-CREATE TABLE
   course_phase_type (
     id uuid NOT NULL,
     name text NOT NULL,
@@ -78,14 +75,6 @@ VALUES
     '7dc1c4e8-4255-4874-80a0-0c12b958744c',
     'template_component',
     'Test Description'
-  );
-
-INSERT INTO
-  course_phase_type (id, name)
-VALUES
-  (
-    '7dc1c4e8-4255-4874-80a0-0c12b958744c',
-    'template_component'
   );
 
 --
