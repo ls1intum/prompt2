@@ -8,10 +8,12 @@ export const ActiveCoursesPage = (): JSX.Element => {
   const { courses } = useCourseStore()
   const [viewMode, setViewMode] = useState<CourseViewMode>('cards')
 
-  const filteredCourses = useMemo(
+  const activeCourses = useMemo(
     () => courses.filter((course) => !course.template && !course.archived),
     [courses],
   )
+
+  const isEmpty = activeCourses.length == 0
 
   return (
     <div className='flex flex-col gap-6 w-full'>
@@ -20,14 +22,12 @@ export const ActiveCoursesPage = (): JSX.Element => {
         <CourseViewToggle viewMode={viewMode} onChange={setViewMode} />
       </div>
 
-      {filteredCourses.length == 0 && <p>No active courses yet</p>}
-      {viewMode === 'cards' ? (
-        <>
-          {filteredCourses.length == 0 && <p>No template courses yet</p>}
-          <CourseCards courses={filteredCourses} />
-        </>
+      {isEmpty ? (
+        <p>No active courses yet</p>
+      ) : viewMode === 'cards' ? (
+        <CourseCards courses={activeCourses} />
       ) : (
-        <CourseTable courses={filteredCourses} />
+        <CourseTable courses={activeCourses} />
       )}
     </div>
   )
