@@ -6,10 +6,6 @@ interface CourseStatusTagProps {
   course: Course
 }
 
-// const CourseStatusTagLayout = ({ children }: PropsWithChildren): JSX.Element => {
-//   return <div className='flex items-center gap-1 bg-gray-100 rounded-2xl px-2'>{children}</div>
-// }
-
 const CourseStatusTagLayout = ({ children }: PropsWithChildren): JSX.Element => {
   return <div className='flex items-center gap-1'>{children}</div>
 }
