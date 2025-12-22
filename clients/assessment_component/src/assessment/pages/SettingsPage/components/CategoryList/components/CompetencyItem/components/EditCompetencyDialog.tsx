@@ -59,12 +59,6 @@ export function EditCompetencyDialog({
   const [error, setError] = useState<string | undefined>(undefined)
   const { mutate, isPending: isUpdating } = useUpdateCompetency(setError)
 
-  const onSubmit = (data: UpdateCompetencyRequest) => {
-    mutate(data, {
-      onSuccess: () => onOpenChange(false),
-    })
-  }
-
   const form = useForm<UpdateCompetencyRequest>({
     defaultValues: {
       id: competency?.id,
@@ -81,6 +75,27 @@ export function EditCompetencyDialog({
     },
     resolver: zodResolver(updateCompetencySchema),
   })
+
+  const handleClose = () => {
+    onOpenChange(false)
+    setError(undefined)
+    form.reset()
+  }
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      handleClose()
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
+
+  const onSubmit = (data: UpdateCompetencyRequest) => {
+    mutate(data, {
+      onSuccess: () => handleClose(),
+    })
+  }
 
   useEffect(() => {
     if (competency) {
@@ -101,7 +116,7 @@ export function EditCompetencyDialog({
   }, [competency, form])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Competency</DialogTitle>
@@ -269,12 +284,7 @@ export function EditCompetencyDialog({
             )}
 
             <DialogFooter>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={() => onOpenChange(false)}
-                disabled={isUpdating}
-              >
+              <Button type='button' variant='outline' onClick={handleClose} disabled={isUpdating}>
                 Cancel
               </Button>
               <Button type='submit' disabled={isUpdating}>

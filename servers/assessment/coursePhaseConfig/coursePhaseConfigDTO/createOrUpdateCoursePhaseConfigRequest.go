@@ -26,4 +26,5 @@ type CreateOrUpdateCoursePhaseConfigRequest struct {
 	EvaluationResultsVisible bool      `json:"evaluationResultsVisible"`
 	GradeSuggestionVisible   *bool     `json:"gradeSuggestionVisible,omitempty"`
 	ActionItemsVisible       *bool     `json:"actionItemsVisible,omitempty"`
+	GradingSheetVisible      *bool     `json:"gradingSheetVisible,omitempty"`
 }

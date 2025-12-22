@@ -9,14 +9,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations"
 	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -160,6 +165,89 @@ func GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipatio
 	}, nil
 }
 
+func GetStudentAssessmentResults(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, config coursePhaseConfigDTO.CoursePhaseConfig) (assessmentDTO.StudentAssessmentResults, error) {
+	var results assessmentDTO.StudentAssessmentResults
+	var err error
+
+	assessments := []db.Assessment{}
+	if config.GradingSheetVisible {
+		assessments, err = ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get assessments for student in phase: ", err)
+			return results, errors.New("could not get assessments for student in phase")
+		}
+	}
+
+	completion := db.AssessmentCompletion{}
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(ctx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		log.Error("could not check assessment completion existence: ", err)
+		return results, errors.New("could not check assessment completion existence")
+	}
+	if exists {
+		completion, err = assessmentCompletion.GetAssessmentCompletion(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get assessment completion: ", err)
+			return results, errors.New("could not get assessment completion")
+		}
+	}
+
+	studentScore := scoreLevelDTO.StudentScore{
+		ScoreLevel:   scoreLevelDTO.ScoreLevelVeryBad,
+		ScoreNumeric: pgtype.Float8{Float64: 0.0, Valid: true},
+	}
+	if len(assessments) > 0 {
+		studentScore, err = scoreLevel.GetStudentScore(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get score level: ", err)
+			return results, errors.New("could not get score level")
+		}
+	}
+
+	var evals []evaluationDTO.Evaluation
+	if config.GradingSheetVisible {
+		evals, err = evaluations.GetEvaluationsForParticipantInPhase(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not get evaluations for participant in phase: ", err)
+			return results, errors.New("could not get evaluations for participant in phase")
+		}
+	}
+
+	var actionItems []actionItemDTO.ActionItem
+	if config.ActionItemsVisible {
+		actionItems, err = actionItem.ListActionItemsForStudentInPhase(ctx, courseParticipationID, coursePhaseID)
+		if err != nil {
+			log.Error("could not list action items for student in phase: ", err)
+			return results, errors.New("could not list action items for student in phase")
+		}
+	}
+
+	peerEvalResults := []assessmentDTO.AggregatedEvaluationResult{}
+	selfEvalResults := []assessmentDTO.AggregatedEvaluationResult{}
+	if config.GradingSheetVisible {
+		peerEvalResults = aggregateEvaluations(evals, assessmentType.Peer)
+		selfEvalResults = aggregateEvaluations(evals, assessmentType.Self)
+	}
+
+	if !config.GradeSuggestionVisible {
+		completion.GradeSuggestion = utils.MapFloat64ToNumeric(0.0)
+		completion.Comment = ""
+	}
+
+	results = assessmentDTO.StudentAssessmentResults{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
+		AssessmentCompletion:  assessmentCompletionDTO.MapDBAssessmentCompletionToAssessmentCompletionDTO(completion),
+		StudentScore:          studentScore,
+		PeerEvaluationResults: peerEvalResults,
+		SelfEvaluationResults: selfEvalResults,
+		ActionItems:           actionItems,
+	}
+
+	return results, nil
+}
+
 func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 	tx, err := AssessmentServiceSingleton.conn.Begin(ctx)
 	if err != nil {
@@ -175,7 +263,6 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 		return nil
 	}
 
-	// Check if the assessment is editable before deleting
 	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, assessment.CourseParticipationID, assessment.CoursePhaseID)
 	if err != nil {
 		return err
@@ -195,9 +282,41 @@ func DeleteAssessment(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// isLowScoreLevel checks if a score level requires comment and examples
 func isLowScoreLevel(scoreLevel scoreLevelDTO.ScoreLevel) bool {
 	return scoreLevel == scoreLevelDTO.ScoreLevelVeryBad ||
 		scoreLevel == scoreLevelDTO.ScoreLevelBad ||
 		scoreLevel == scoreLevelDTO.ScoreLevelOk
+}
+
+func aggregateEvaluations(evals []evaluationDTO.Evaluation, targetType assessmentType.AssessmentType) []assessmentDTO.AggregatedEvaluationResult {
+	type accumulator struct {
+		sum   float64
+		count int
+	}
+
+	aggregated := make(map[uuid.UUID]accumulator)
+	for _, eval := range evals {
+		if eval.Type != targetType {
+			continue
+		}
+		num := scoreLevelDTO.MapScoreLevelToNumber(eval.ScoreLevel)
+		current := aggregated[eval.CompetencyID]
+		current.sum += num
+		current.count++
+		aggregated[eval.CompetencyID] = current
+	}
+
+	results := make([]assessmentDTO.AggregatedEvaluationResult, 0, len(aggregated))
+	for competencyID, acc := range aggregated {
+		if acc.count == 0 {
+			continue
+		}
+		avg := acc.sum / float64(acc.count)
+		results = append(results, assessmentDTO.AggregatedEvaluationResult{
+			CompetencyID:        competencyID,
+			AverageScoreNumeric: avg,
+		})
+	}
+
+	return results
 }

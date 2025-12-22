@@ -76,6 +76,7 @@ func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_Success() {
 		EvaluationResultsVisible: true,
 		GradeSuggestionVisible:   pgtype.Bool{Bool: true, Valid: true},
 		ActionItemsVisible:       pgtype.Bool{Bool: false, Valid: true},
+		GradingSheetVisible:      pgtype.Bool{Bool: false, Valid: true},
 	})
 	assert.NoError(suite.T(), err)
 
@@ -109,6 +110,7 @@ func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_Success() {
 	assert.Equal(suite.T(), true, targetConfig.EvaluationResultsVisible)
 	assert.Equal(suite.T(), true, targetConfig.GradeSuggestionVisible)
 	assert.Equal(suite.T(), false, targetConfig.ActionItemsVisible)
+	assert.Equal(suite.T(), false, targetConfig.ResultsReleased)
 }
 
 func (suite *CopyServiceTestSuite) TestHandlePhaseCopy_SameSourceAndTarget() {

@@ -7,7 +7,7 @@ SET source_phase_id = (
     SELECT cpc.course_phase_id
     FROM course_phase_config cpc
     WHERE cpc.assessment_schema_id = s.id
-    ORDER BY cpc.course_phase_id
+    ORDER BY cpc.start NULLS LAST, cpc.course_phase_id
     LIMIT 1
 )
 WHERE source_phase_id IS NULL;

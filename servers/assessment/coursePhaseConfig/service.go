@@ -56,12 +56,12 @@ func validateSchemaChange(ctx context.Context, coursePhaseID, oldSchemaID, newSc
 	return nil
 }
 
-func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.CoursePhaseConfig, error) {
+func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseConfigDTO.CoursePhaseConfig, error) {
 	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
 		if err != nil {
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 		defer promptSDK.DeferDBRollback(tx, ctx)
 
@@ -70,20 +70,20 @@ func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.Cour
 		err = qtx.CreateDefaultCoursePhaseConfig(ctx, coursePhaseID)
 		if err != nil {
 			log.WithError(err).Error("Failed to create or update course phase config")
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 
 		err = tx.Commit(ctx)
 		if err != nil {
 			log.WithError(err).Error("Failed to commit transaction for course phase config creation")
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 	} else if err != nil {
 		log.Error("could not get course phase config: ", err)
-		return db.CoursePhaseConfig{}, errors.New("could not get course phase config")
+		return coursePhaseConfigDTO.CoursePhaseConfig{}, errors.New("could not get course phase config")
 	}
 
-	return config, nil
+	return coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config), nil
 }
 
 func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
@@ -130,6 +130,18 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		actionItemsVisible = pgtype.Bool{Bool: *req.ActionItemsVisible, Valid: true}
 	}
 
+	gradingSheetVisible := pgtype.Bool{}
+	if req.GradingSheetVisible != nil {
+		gradingSheetVisible = pgtype.Bool{Bool: *req.GradingSheetVisible, Valid: true}
+	}
+
+	// Preserve existing ResultsReleased value on update, default to false for new creates
+	resultsReleased := pgtype.Bool{Bool: false, Valid: true}
+	if err == nil {
+		// Config exists - preserve the existing ResultsReleased value
+		resultsReleased = pgtype.Bool{Bool: existingConfig.ResultsReleased, Valid: true}
+	}
+
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
 		AssessmentSchemaID:       req.AssessmentSchemaID,
 		CoursePhaseID:            coursePhaseID,
@@ -150,6 +162,8 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 		EvaluationResultsVisible: req.EvaluationResultsVisible,
 		GradeSuggestionVisible:   gradeSuggestionVisible,
 		ActionItemsVisible:       actionItemsVisible,
+		ResultsReleased:          resultsReleased,
+		GradingSheetVisible:      gradingSheetVisible,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
@@ -231,6 +245,60 @@ func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUI
 		return false, errors.New("could not check if tutor evaluation deadline has passed")
 	}
 	return deadlinePassed, nil
+}
+
+func ReleaseResults(ctx context.Context, coursePhaseID uuid.UUID) error {
+	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get course phase config")
+		return errors.New("failed to get course phase config")
+	}
+
+	if config.ResultsReleased {
+		log.WithField("coursePhaseID", coursePhaseID).Info("Results already released")
+		return nil
+	}
+
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentSchemaID:       config.AssessmentSchemaID,
+		CoursePhaseID:            coursePhaseID,
+		Start:                    config.Start,
+		Deadline:                 config.Deadline,
+		SelfEvaluationEnabled:    config.SelfEvaluationEnabled,
+		SelfEvaluationSchema:     config.SelfEvaluationSchema,
+		SelfEvaluationStart:      config.SelfEvaluationStart,
+		SelfEvaluationDeadline:   config.SelfEvaluationDeadline,
+		PeerEvaluationEnabled:    config.PeerEvaluationEnabled,
+		PeerEvaluationSchema:     config.PeerEvaluationSchema,
+		PeerEvaluationStart:      config.PeerEvaluationStart,
+		PeerEvaluationDeadline:   config.PeerEvaluationDeadline,
+		TutorEvaluationEnabled:   config.TutorEvaluationEnabled,
+		TutorEvaluationSchema:    config.TutorEvaluationSchema,
+		TutorEvaluationStart:     config.TutorEvaluationStart,
+		TutorEvaluationDeadline:  config.TutorEvaluationDeadline,
+		EvaluationResultsVisible: config.EvaluationResultsVisible,
+		GradeSuggestionVisible:   pgtype.Bool{Bool: config.GradeSuggestionVisible, Valid: true},
+		ActionItemsVisible:       pgtype.Bool{Bool: config.ActionItemsVisible, Valid: true},
+		ResultsReleased:          pgtype.Bool{Bool: true, Valid: true},
+		GradingSheetVisible:      pgtype.Bool{Bool: config.GradingSheetVisible, Valid: true},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to release results")
+		return err
+	}
+
+	log.WithField("coursePhaseID", coursePhaseID).Info("Results released successfully")
+	return tx.Commit(ctx)
 }
 
 func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, oldSchemaID uuid.UUID, newSchemaID uuid.UUID) error {

@@ -64,6 +64,7 @@ func (h *AssessmentCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.
 		EvaluationResultsVisible: sourceConfig.EvaluationResultsVisible,
 		GradeSuggestionVisible:   pgtype.Bool{Bool: sourceConfig.GradeSuggestionVisible, Valid: true},
 		ActionItemsVisible:       pgtype.Bool{Bool: sourceConfig.ActionItemsVisible, Valid: true},
+		GradingSheetVisible:      pgtype.Bool{Bool: sourceConfig.GradingSheetVisible, Valid: true},
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)

@@ -16,6 +16,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 
 	coursePhaseRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getCoursePhaseConfig)
 	coursePhaseRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createOrUpdateCoursePhaseConfig)
+	coursePhaseRouter.POST("/release", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), releaseResults)
 
 	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTeamsForCoursePhase)
@@ -37,7 +38,7 @@ func getCoursePhaseConfig(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config))
+	c.JSON(http.StatusOK, config)
 }
 
 func createOrUpdateCoursePhaseConfig(c *gin.Context) {
@@ -67,6 +68,24 @@ func createOrUpdateCoursePhaseConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Course phase config created/updated successfully"})
+}
+
+func releaseResults(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	err = ReleaseResults(c, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to release results")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to release results"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Results released successfully"})
 }
 
 func getParticipationsForCoursePhase(c *gin.Context) {

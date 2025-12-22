@@ -1,14 +1,21 @@
 import { AlertCircle, CheckCircle2, Calendar } from 'lucide-react'
-import { Card, CardContent } from '@tumaet/prompt-ui-components'
+import { useNavigate } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { Card, CardContent, Button } from '@tumaet/prompt-ui-components'
 import { format } from 'date-fns'
 
 import { useCoursePhaseConfigStore } from '../../../zustand/useCoursePhaseConfigStore'
 
 interface EvaluationInfoHeaderProps {
   allEvaluationsCompleted: boolean
+  resultsLink?: string
 }
 
-export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfoHeaderProps) => {
+export const EvaluationInfoHeader = ({
+  allEvaluationsCompleted,
+  resultsLink,
+}: EvaluationInfoHeaderProps) => {
+  const navigate = useNavigate()
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
 
   const now = new Date()
@@ -22,9 +29,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
   const evaluationsNotStarted =
     !selfEvaluationStarted || (coursePhaseConfig?.peerEvaluationEnabled && !peerEvaluationStarted)
 
-  const isAssessmentDeadlinePassed = coursePhaseConfig?.deadline
-    ? now >= new Date(coursePhaseConfig.deadline)
-    : false
+  const resultsReleased = coursePhaseConfig?.resultsReleased ?? false
 
   const gradeSuggestionVisible = coursePhaseConfig?.gradeSuggestionVisible ?? true
   const actionItemsVisible = coursePhaseConfig?.actionItemsVisible ?? true
@@ -33,22 +38,22 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
   const getResultsAvailableText = () => {
     if (bothVisible) {
       return (
-        'The assessment deadline has passed and your results are now available. ' +
+        'Assessment results have been released and are now available. ' +
         'You can view your action items and grade suggestions below to understand areas for improvement.'
       )
     } else if (gradeSuggestionVisible) {
       return (
-        'The assessment deadline has passed and your results are now available. ' +
+        'Assessment results have been released and are now available. ' +
         'You can view your grade suggestion below to understand your performance.'
       )
     } else if (actionItemsVisible) {
       return (
-        'The assessment deadline has passed and your results are now available. ' +
+        'Assessment results have been released and are now available. ' +
         'You can view your action items below to understand areas for improvement.'
       )
     }
     return (
-      'The assessment deadline has passed and your results are now available. ' +
+      'Assessment results have been released and are now available. ' +
       'You will receive further information about your assessment from your tutor / instructor.'
     )
   }
@@ -58,7 +63,7 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
       <CardContent className='p-6'>
         <div className='flex items-start gap-4'>
           <div className='flex-shrink-0'>
-            {isAssessmentDeadlinePassed ? (
+            {resultsReleased ? (
               <CheckCircle2 className='h-8 w-8 text-blue-500 dark:text-blue-400' />
             ) : allEvaluationsCompleted ? (
               <CheckCircle2 className='h-8 w-8 text-green-500 dark:text-green-400' />
@@ -70,18 +75,32 @@ export const EvaluationInfoHeader = ({ allEvaluationsCompleted }: EvaluationInfo
           </div>
           <div className='flex-1'>
             <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-              {isAssessmentDeadlinePassed
-                ? 'Assessment Completed'
+              {resultsReleased
+                ? 'Assessment Results Released'
                 : allEvaluationsCompleted
                   ? 'All Evaluations Completed!'
                   : evaluationsNotStarted
                     ? 'Evaluations Not Yet Available'
                     : 'Instructions'}
             </h2>
-            {isAssessmentDeadlinePassed ? (
-              <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
-                {getResultsAvailableText()}
-              </p>
+            {resultsReleased ? (
+              <>
+                <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
+                  {getResultsAvailableText()}
+                </p>
+                {resultsLink && (
+                  <div className='mt-3'>
+                    <Button
+                      variant='outline'
+                      onClick={() => navigate(resultsLink)}
+                      className='gap-2'
+                    >
+                      Go to your results
+                      <ArrowRight className='h-4 w-4' />
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : allEvaluationsCompleted ? (
               <p className='text-gray-600 dark:text-gray-300 leading-relaxed'>
                 Congratulations! You have successfully completed all required evaluations. Your
