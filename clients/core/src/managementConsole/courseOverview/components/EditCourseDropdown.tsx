@@ -30,7 +30,7 @@ export const EditCourseDropdown = (): JSX.Element => {
     mutationFn: () => deleteCourse(courseId ?? ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] })
-      navigate('/management/general')
+      navigate('/management/courses')
     },
     onError: () => {
       toast({

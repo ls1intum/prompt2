@@ -31,6 +31,8 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getPhaseDataGraph)
 	course.PUT("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updatePhaseDataGraph)
 
+	course.PUT("/:uuid/archive", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), archiveCourse)
+
 	course.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseData)
 	course.GET("/self", getOwnCourses)
 
@@ -352,6 +354,44 @@ func parseAndValidateMetaDataGraph(c *gin.Context) ([]courseDTO.MetaDataGraphIte
 	return newGraph, courseID, nil
 }
 
+// archiveCourse godoc
+// @Summary Archive or unarchive a course
+// @Description Set archived=true (with archived_on=NOW()) or archived=false (with archived_on=NULL)
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param update body courseDTO.CourseArchiveStatus true "Archive status update"
+// @Success 200 {object} courseDTO.Course "Updated course"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/archive [put]
+func archiveCourse(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var update courseDTO.CourseArchiveStatus
+	if err := c.BindJSON(&update); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	updatedCourse, err := UpdateCourseArchiveStatus(c, courseID, update.Archived)
+	if err != nil {
+		log.Error(err)
+		handleError(
+			c,
+			http.StatusInternalServerError,
+			errors.New("failed to update course archive status"),
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedCourse)
+}
 // updateCourseData godoc
 // @Summary Update course data
 // @Description Update the data for a course

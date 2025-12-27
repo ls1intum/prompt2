@@ -1,6 +1,8 @@
 package courseDTO
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
@@ -21,6 +23,8 @@ type Course struct {
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
 	Template            bool          `json:"template"`
+	Archived            bool          `json:"archived"`
+	ArchivedOn          *time.Time    `json:"archivedOn,omitempty"`
 }
 
 func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
@@ -36,7 +40,7 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		return Course{}, err
 	}
 
-	return Course{
+	dto := Course{
 		ID:                  model.ID,
 		Name:                model.Name,
 		StartDate:           model.StartDate,
@@ -49,5 +53,13 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
 		Template:            model.Template,
-	}, nil
+		Archived:            model.Archived,
+	}
+
+	if model.ArchivedOn.Valid {
+		t := model.ArchivedOn.Time
+		dto.ArchivedOn = &t
+	}
+
+	return dto, nil
 }

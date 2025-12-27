@@ -29,14 +29,18 @@ export const Breadcrumbs: React.FC = () => {
     const breadcrumbs: BreadcrumbProps[] = []
 
     if (pathSegments[0] === 'management') {
-      if (pathSegments[1] === 'general') {
-        breadcrumbs.push({ title: 'General', path: '/management/general' })
+      if (pathSegments[1] === 'courses') {
+        breadcrumbs.push({ title: 'Courses', path: '/management/courses' })
         pathSegments.slice(2).forEach((segment, index) => {
           breadcrumbs.push({
             title: segment.toUpperCase(),
-            path: `/management/general/${pathSegments.slice(2, index + 3).join('/')}`,
+            path: `/management/courses/${pathSegments.slice(2, index + 3).join('/')}`,
           })
         })
+      } else if (pathSegments[1] === 'course_templates') {
+        breadcrumbs.push({ title: 'Template Courses', path: '/management/course_templates' })
+      } else if (pathSegments[1] === 'course_archive') {
+        breadcrumbs.push({ title: 'Archived Courses', path: '/management/course_archive' })
       } else if (pathSegments[1] === 'course' && pathSegments.length >= 3) {
         const courseId = pathSegments[2]
         const course = courses.find((c) => c.id === courseId)

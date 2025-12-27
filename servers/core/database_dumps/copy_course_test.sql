@@ -176,7 +176,12 @@ CREATE TABLE course (
     template boolean NOT NULL DEFAULT FALSE,
     short_description character varying(255),
     long_description text,
-    CONSTRAINT check_end_date_after_start_date CHECK ((end_date > start_date))
+    archived boolean NOT NULL DEFAULT FALSE,
+    archived_on timestamp with time zone,
+    CONSTRAINT check_end_date_after_start_date CHECK (
+        template = true
+            OR end_date > start_date
+        )
 );
 
 
@@ -387,7 +392,7 @@ INSERT INTO application_question_multi_select VALUES ('c20829f9-d1d2-4952-95ee-1
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description)
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on)
 VALUES
     (
         'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd',
@@ -401,10 +406,12 @@ VALUES
         '{"icon": "school", "bg-color": "bg-teal-100"}',
         FALSE,
         'Hands-on master course',
-        'Detailed description for the Master Test course used in copy tests.'
+        'Detailed description for the Master Test course used in copy tests.',
+        FALSE,
+        NULL
     );
 
-INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description)
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on)
 VALUES
     (
         'c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee',
@@ -418,7 +425,9 @@ VALUES
         '{"icon": "school", "bg-color": "bg-teal-100"}',
         TRUE,
         'Template for future courses',
-        'Long-form description for the template course copy flow.'
+        'Long-form description for the template course copy flow.',
+        FALSE,
+        NULL
     );
 
 
@@ -524,7 +533,7 @@ INSERT INTO participation_data_dependency_graph VALUES ('0bf6eb6c-ff6f-40f4-af63
 -- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO schema_migrations VALUES (13, false);
+INSERT INTO schema_migrations VALUES (16, false);
 
 
 --

@@ -26,7 +26,7 @@ func (q *Queries) CheckCourseTemplateStatus(ctx context.Context, id uuid.UUID) (
 }
 
 const getTemplateCourseByID = `-- name: GetTemplateCourseByID :one
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 FROM course
 WHERE id = $1
   AND template = TRUE
@@ -48,12 +48,14 @@ func (q *Queries) GetTemplateCourseByID(ctx context.Context, id uuid.UUID) (Cour
 		&i.Template,
 		&i.ShortDescription,
 		&i.LongDescription,
+		&i.Archived,
+		&i.ArchivedOn,
 	)
 	return i, err
 }
 
 const getTemplateCoursesAdmin = `-- name: GetTemplateCoursesAdmin :many
-SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description
+SELECT id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on
 FROM course
 WHERE template = TRUE
 ORDER BY semester_tag, name DESC
@@ -81,6 +83,8 @@ func (q *Queries) GetTemplateCoursesAdmin(ctx context.Context) ([]Course, error)
 			&i.Template,
 			&i.ShortDescription,
 			&i.LongDescription,
+			&i.Archived,
+			&i.ArchivedOn,
 		); err != nil {
 			return nil, err
 		}
@@ -93,73 +97,95 @@ func (q *Queries) GetTemplateCoursesAdmin(ctx context.Context) ([]Course, error)
 }
 
 const getTemplateCoursesRestricted = `-- name: GetTemplateCoursesRestricted :many
-WITH parsed_roles AS (SELECT split_part(role, '-', 1) AS semester_tag,
-                             split_part(role, '-', 2) AS course_name,
-                             split_part(role, '-', 3) AS user_role
-                      FROM unnest($1::text[]) AS role),
-     user_course_roles AS (SELECT c.id,
-                                  c.name,
-                                  c.semester_tag,
-                                  c.start_date,
-                                  c.end_date,
-                                  c.course_type,
-                                  c.student_readable_data,
-                                  c.restricted_data,
-                                  c.ects,
-                                  c.template,
-                                  c.short_description,
-                                  c.long_description,
-                                  pr.user_role
-                           FROM course c
-                                    INNER JOIN
-                                parsed_roles pr
-                                ON c.name = pr.course_name
-                                    AND c.semester_tag = pr.semester_tag
-                           WHERE c.template = TRUE)
-SELECT ucr.id,
-       ucr.name,
-       ucr.start_date,
-       ucr.end_date,
-       ucr.semester_tag,
-       ucr.course_type,
-       ucr.ects,
-       CASE
-           WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
-           ELSE ucr.restricted_data::jsonb
-           END AS restricted_data,
-       ucr.student_readable_data,
-       ucr.template,
-       ucr.short_description,
-       ucr.long_description
-FROM user_course_roles ucr
-GROUP BY ucr.id,
-         ucr.name,
-         ucr.semester_tag,
-         ucr.start_date,
-         ucr.end_date,
-         ucr.course_type,
-         ucr.student_readable_data,
-         ucr.ects,
-         ucr.restricted_data,
-         ucr.template,
-         ucr.short_description,
-         ucr.long_description
-ORDER BY ucr.semester_tag, ucr.name DESC
+WITH parsed_roles AS (
+  SELECT
+    split_part(role, '-', 1) AS semester_tag,
+    split_part(role, '-', 2) AS course_name,
+    split_part(role, '-', 3) AS user_role
+  FROM
+    unnest($1::text[]) AS role
+),
+user_course_roles AS (
+  SELECT
+    c.id,
+    c.name,
+    c.semester_tag,
+    c.start_date,
+    c.end_date,
+    c.course_type,
+    c.student_readable_data,
+    c.restricted_data,
+    c.ects,
+    c.template,
+    c.short_description,
+    c.long_description,
+    c.archived,
+    c.archived_on,
+    pr.user_role
+  FROM
+    course c
+  INNER JOIN
+    parsed_roles pr
+    ON c.name = pr.course_name
+    AND c.semester_tag = pr.semester_tag
+  WHERE
+    c.template = TRUE
+    AND c.archived = FALSE
+)
+SELECT
+  ucr.id,
+  ucr.name,
+  ucr.start_date,
+  ucr.end_date,
+  ucr.semester_tag,
+  ucr.course_type,
+  ucr.ects,
+  CASE 
+    WHEN COUNT(ucr.user_role) = 1 AND MAX(ucr.user_role) = 'Student' THEN '{}'::jsonb
+    ELSE ucr.restricted_data::jsonb
+  END AS restricted_data,
+  ucr.student_readable_data,
+  ucr.template,
+  ucr.short_description,
+  ucr.long_description,
+  ucr.archived,
+  ucr.archived_on
+FROM
+  user_course_roles ucr
+GROUP BY
+  ucr.id,
+  ucr.name,
+  ucr.semester_tag,
+  ucr.start_date,
+  ucr.end_date,
+  ucr.course_type,
+  ucr.student_readable_data,
+  ucr.ects,
+  ucr.restricted_data,
+  ucr.template,
+  ucr.short_description,
+  ucr.long_description,
+  ucr.archived,
+  ucr.archived_on
+ORDER BY
+  ucr.semester_tag, ucr.name DESC
 `
 
 type GetTemplateCoursesRestrictedRow struct {
-	ID                  uuid.UUID   `json:"id"`
-	Name                string      `json:"name"`
-	StartDate           pgtype.Date `json:"start_date"`
-	EndDate             pgtype.Date `json:"end_date"`
-	SemesterTag         pgtype.Text `json:"semester_tag"`
-	CourseType          CourseType  `json:"course_type"`
-	Ects                pgtype.Int4 `json:"ects"`
-	RestrictedData      []byte      `json:"restricted_data"`
-	StudentReadableData []byte      `json:"student_readable_data"`
-	Template            bool        `json:"template"`
-	ShortDescription    pgtype.Text `json:"short_description"`
-	LongDescription     pgtype.Text `json:"long_description"`
+	ID                  uuid.UUID          `json:"id"`
+	Name                string             `json:"name"`
+	StartDate           pgtype.Date        `json:"start_date"`
+	EndDate             pgtype.Date        `json:"end_date"`
+	SemesterTag         pgtype.Text        `json:"semester_tag"`
+	CourseType          CourseType         `json:"course_type"`
+	Ects                pgtype.Int4        `json:"ects"`
+	RestrictedData      []byte             `json:"restricted_data"`
+	StudentReadableData []byte             `json:"student_readable_data"`
+	Template            bool               `json:"template"`
+	ShortDescription    pgtype.Text        `json:"short_description"`
+	LongDescription     pgtype.Text        `json:"long_description"`
+	Archived            bool               `json:"archived"`
+	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }
 
 // struct: Course
@@ -185,6 +211,8 @@ func (q *Queries) GetTemplateCoursesRestricted(ctx context.Context, dollar_1 []s
 			&i.Template,
 			&i.ShortDescription,
 			&i.LongDescription,
+			&i.Archived,
+			&i.ArchivedOn,
 		); err != nil {
 			return nil, err
 		}
