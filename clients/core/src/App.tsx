@@ -22,6 +22,7 @@ import { CourseSettingsPage } from './managementConsole/courseSettings/CourseSet
 import { ActiveCoursesPage } from './managementConsole/pages/ActiveCoursesPage'
 import { TemplateCoursesPage } from './managementConsole/pages/TemplateCoursesPage'
 import { ArchivedCoursesPage } from './managementConsole/pages/ArchivedCoursesPage'
+import { StudentsPage } from './managementConsole/pages/StudentsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,6 +77,14 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <CourseOverview />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/students'
+              element={
+                <ManagementRoot>
+                  <StudentsPage />
                 </ManagementRoot>
               }
             />

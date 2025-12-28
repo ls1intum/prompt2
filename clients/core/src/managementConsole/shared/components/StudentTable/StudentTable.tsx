@@ -1,43 +1,42 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { getStudents } from '@core/network/queries/getStudents'
 import {
   ColumnDef,
-  SortingState,
-  getFilteredRowModel,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
+import { Student } from '@tumaet/prompt-shared-state'
 import {
+  Button,
+  Input,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  Input,
-  Button,
-  Checkbox,
 } from '@tumaet/prompt-ui-components'
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal, SearchIcon } from 'lucide-react'
-import { Course, CourseTypeDetails } from '@tumaet/prompt-shared-state'
-import { CourseActionsMenu } from './CourseActionsMenu'
-import DynamicIcon from '@/components/DynamicIcon'
-import { formatDate } from '@core/utils/formatDate'
+import { useEffect, useMemo, useState } from 'react'
 import { TableCheckbox } from '../TableCheckbox'
 
-interface CourseTableProps {
-  courses: Course[]
-}
-
-export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
-  const navigate = useNavigate()
+export const StudentTable = () => {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
 
-  const columns: ColumnDef<Course>[] = useMemo(
+  const [students, setStudents] = useState<Array<Student>>([])
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const s = await getStudents()
+      setStudents(s)
+    }
+    fetchStudents()
+  }, [])
+
+  const columns: ColumnDef<Student>[] = useMemo(
     () => [
       {
         id: 'select',
@@ -59,91 +58,31 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
         enableHiding: false,
       },
       {
-        id: 'icon',
-        header: 'Icon',
-        enableSorting: false,
-        cell: ({ row }) => {
-          const iconName = row.original.studentReadableData?.['icon'] || 'graduation-cap'
-          const bgColor = row.original.studentReadableData?.['bg-color'] || 'bg-gray-50'
-
-          return (
-            <div
-              className={`inline-flex items-center justify-center rounded-md ${bgColor}`}
-              style={{ width: 24, height: 24 }}
-            >
-              <DynamicIcon name={iconName} className='h-4 w-4' />
-            </div>
-          )
-        },
-        size: 80,
-      },
-      {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'firstName',
+        header: 'First Name',
         cell: (info) => info.getValue(),
       },
       {
-        accessorKey: 'semesterTag',
+        accessorKey: 'lastName',
+        header: 'Last Name',
+        cell: (info) => info.getValue(),
+      },
+      {
+        accessorKey: 'currentSemester',
         header: 'Semester',
         cell: (info) => info.getValue(),
       },
       {
-        accessorKey: 'courseType',
-        header: 'Course Type',
-        cell: (info) => CourseTypeDetails[info.getValue() as Course['courseType']].name,
-      },
-      {
-        accessorKey: 'startDate',
-        header: 'Start Date',
-        cell: (info) => formatDate(info.getValue() as string | Date),
-      },
-      {
-        accessorKey: 'endDate',
-        header: 'End Date',
-        cell: (info) => formatDate(info.getValue() as string | Date),
-      },
-      {
-        accessorKey: 'ects',
-        header: 'ECTS',
+        accessorKey: 'studyProgram',
+        header: 'Program',
         cell: (info) => info.getValue(),
-      },
-      {
-        id: 'status',
-        header: 'Status',
-        enableSorting: false,
-        cell: ({ row }) => {
-          if (row.original.template) return 'Template'
-          if (row.original.archived) return `Archived on ${formatDate(row.original.archivedOn!)}`
-          return 'Active'
-        },
-      },
-      {
-        id: 'rowActions',
-        header: '',
-        enableSorting: false,
-        enableHiding: false,
-        cell: ({ row }) => (
-          <div onClick={(e) => e.stopPropagation()} className='flex justify-end'>
-            <CourseActionsMenu
-              selected={[row.original]}
-              trigger={
-                <div
-                  className='h-4 w-4 transform scale-150 rounded-2xl hover:bg-gray-200 transition-all flex items-center justify-center'
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreHorizontal className='h-3 w-3' />
-                </div>
-              }
-            />
-          </div>
-        ),
       },
     ],
     [],
   )
 
   const table = useReactTable({
-    data: courses,
+    data: students,
     columns,
     state: {
       sorting,
@@ -153,33 +92,10 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     enableRowSelection: true,
-    getRowId: (row) => row.id,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const value = (filterValue as string).toLowerCase()
-      const course = row.original
-      const haystack = [
-        course.name,
-        course.semesterTag,
-        CourseTypeDetails[course.courseType].name,
-        course.startDate?.toString(),
-        course.endDate?.toString(),
-        course.ects?.toString(),
-        course.archived ? 'archived' : 'active',
-        course.template ? 'template' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-
-      return haystack.includes(value)
-    },
+    getRowId: (row) => row.id!,
+    getCoreRowModel: getCoreRowModel(),
   })
-
-  const onRowClick = (courseId: string) => navigate(`/management/course/${courseId}`)
 
   const selectedCourses = table.getSelectedRowModel().rows.map((r) => r.original)
   const selectedCount = selectedCourses.length
@@ -189,7 +105,7 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
       <div className='flex items-center justify-between gap-3 flex-wrap'>
         <div className='relative flex-1 min-w-0 overflow-hidden'>
           <Input
-            placeholder='Search courses...'
+            placeholder='Search students...'
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className='pl-10 w-full min-w-0'
@@ -197,15 +113,10 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
           <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500' />
         </div>
 
-        <CourseActionsMenu
-          selected={selectedCourses}
-          trigger={
-            <Button disabled={selectedCount === 0}>
-              <MoreHorizontal className='h-4 w-4' />
-              Actions
-            </Button>
-          }
-        />
+        <Button disabled={selectedCount === 0}>
+          <MoreHorizontal className='h-4 w-4' />
+          Actions
+        </Button>
       </div>
 
       <div className='flex gap-2 text-sm text-muted-foreground'>
@@ -257,7 +168,6 @@ export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() ? 'selected' : undefined}
-                  onClick={() => onRowClick(row.original.id)}
                   className='cursor-pointer'
                 >
                   {row.getVisibleCells().map((cell) => (
