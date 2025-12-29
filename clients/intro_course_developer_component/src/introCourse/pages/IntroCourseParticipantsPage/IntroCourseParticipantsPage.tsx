@@ -1,5 +1,5 @@
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
@@ -30,11 +30,9 @@ export const IntroCourseParticipantsPage = (): JSX.Element => {
       ) : (
         <>
           <ManagementPageHeader>Intro Course Participants</ManagementPageHeader>
-          <CoursePhaseParticipationsTablePage
+          <CoursePhaseParticipationsTable
+            phaseId={phaseId!}
             participants={coursePhaseParticipations?.participations ?? []}
-            prevDataKeys={[]}
-            restrictedDataKeys={[]}
-            studentReadableDataKeys={[]}
           />
         </>
       )}
