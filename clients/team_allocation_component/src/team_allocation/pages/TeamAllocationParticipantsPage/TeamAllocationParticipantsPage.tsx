@@ -4,16 +4,16 @@ import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 import { Team } from '@tumaet/prompt-shared-state'
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { getTeamAllocations } from '../../network/queries/getTeamAllocations'
 import { Allocation } from '../../interfaces/allocation'
 import { useEffect } from 'react'
 import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesToTeams'
 import { StudentName } from '../../interfaces/studentNameUpdateRequest'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const TeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -48,7 +48,7 @@ export const TeamAllocationParticipantsPage = (): JSX.Element => {
     queryFn: () => getTeamAllocations(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
     // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
@@ -134,11 +134,9 @@ export const TeamAllocationParticipantsPage = (): JSX.Element => {
         This table shows all participants and their allocated teams.
       </p>
       <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={coursePhaseParticipations.participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
           extraColumns={extraColumns}
         />
       </div>
