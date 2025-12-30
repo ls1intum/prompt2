@@ -23,6 +23,7 @@ import { ActiveCoursesPage } from './managementConsole/pages/ActiveCoursesPage'
 import { TemplateCoursesPage } from './managementConsole/pages/TemplateCoursesPage'
 import { ArchivedCoursesPage } from './managementConsole/pages/ArchivedCoursesPage'
 import { StudentsPage } from './managementConsole/pages/StudentsPage'
+import { StudentDetailPage } from './managementConsole/pages/StudentDetailPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,14 @@ export const App = (): JSX.Element => {
               element={
                 <ManagementRoot>
                   <StudentsPage />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/students/:studentId'
+              element={
+                <ManagementRoot>
+                  <StudentDetailPage />
                 </ManagementRoot>
               }
             />

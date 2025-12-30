@@ -65,3 +65,150 @@ WHERE email = ANY($1::text[]);
 SELECT id, university_login
 FROM student
 WHERE id = ANY($1::uuid[]);
+
+-- name: GetAllStudentsWithCourseParticipations :many
+SELECT
+  s.id AS student_id,
+  (s.first_name || ' ' || s.last_name)::text AS student_name,
+  s.current_semester,
+  s.study_program,
+  COALESCE(
+    jsonb_agg(
+      jsonb_build_object(
+        'courseId', c.id,
+        'courseName', c.name,
+        'studentReadableData', c.student_readable_data
+      )
+    ) FILTER (WHERE c.id IS NOT NULL),
+    '[]'::jsonb
+  )::jsonb AS courses
+FROM student s
+LEFT JOIN course_participation cp
+  ON cp.student_id = s.id
+LEFT JOIN course c
+  ON c.id = cp.course_id
+GROUP BY
+  s.id,
+  s.first_name,
+  s.last_name;
+
+-- name: GetStudentEnrollments :one
+WITH RECURSIVE
+course_participations AS (
+    SELECT
+        cp.id AS course_participation_id,
+        cp.student_id,
+        cp.course_id
+    FROM course_participation cp
+    WHERE cp.student_id = $1
+),
+phase_sequence AS (
+    SELECT
+        cph.id,
+        cph.course_id,
+        cph.name,
+        cph.is_initial_phase,
+        cph.course_phase_type_id,
+        1 AS sequence_order
+    FROM course_phase cph
+    WHERE cph.is_initial_phase = true
+    UNION ALL
+    SELECT
+        cph.id,
+        cph.course_id,
+        cph.name,
+        cph.is_initial_phase,
+        cph.course_phase_type_id,
+        ps.sequence_order + 1
+    FROM course_phase cph
+    INNER JOIN course_phase_graph g
+        ON g.to_course_phase_id = cph.id
+    INNER JOIN phase_sequence ps
+        ON g.from_course_phase_id = ps.id
+),
+course_phases AS (
+    SELECT
+        cp.student_id,
+        cp.course_id,
+        COALESCE(
+            jsonb_agg(
+                jsonb_build_object(
+                    'coursePhaseId', ps.id,
+                    'name', ps.name,
+                    'isInitialPhase', ps.is_initial_phase,
+                    'coursePhaseType', jsonb_build_object(
+                        'id', cpt.id,
+                        'name', cpt.name
+                    ),
+                    'passStatus', COALESCE(cpp.pass_status, 'not_assessed'),
+                    'lastModified', cpp.last_modified::text
+                )
+                ORDER BY ps.sequence_order
+            ),
+            '[]'::jsonb
+        ) AS course_phases
+    FROM course_participations cp
+    INNER JOIN phase_sequence ps
+        ON ps.course_id = cp.course_id
+    INNER JOIN course_phase_type cpt
+        ON ps.course_phase_type_id = cpt.id
+    LEFT JOIN course_phase_participation cpp
+        ON cpp.course_participation_id = cp.course_participation_id
+       AND cpp.course_phase_id = ps.id
+    GROUP BY cp.student_id, cp.course_id
+)
+SELECT
+    s.id AS student_id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender,
+    s.nationality,
+    s.study_program,
+    s.study_degree,
+    s.current_semester,
+    COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'courseId', c.id,
+                'name', c.name,
+                'semesterTag', c.semester_tag,
+                'courseType', c.course_type,
+                'ects', c.ects,
+                'startDate', to_char(
+                    c.start_date::timestamptz,
+                    'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+                ),
+                'endDate', to_char(
+                    c.end_date::timestamptz,
+                    'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+                ),
+                'longDescription', c.long_description,
+                'coursePhases', cp.course_phases
+            )
+            ORDER BY c.start_date DESC, c.name
+        ),
+        '[]'::jsonb
+    )::jsonb AS courses
+FROM student s
+LEFT JOIN course_phases cp
+    ON s.id = cp.student_id
+LEFT JOIN course c
+    ON cp.course_id = c.id
+WHERE s.id = $1
+GROUP BY
+    s.id,
+    s.first_name,
+    s.last_name,
+    s.email,
+    s.matriculation_number,
+    s.university_login,
+    s.has_university_account,
+    s.gender,
+    s.nationality,
+    s.study_program,
+    s.study_degree,
+    s.current_semester;
