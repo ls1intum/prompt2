@@ -1,6 +1,6 @@
 import { CoursePhaseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-import { Check, Clock, X } from 'lucide-react'
+import { Check, ChevronRight, ChevronsRight, Clock, X } from 'lucide-react'
 import { ReactElement } from 'react'
 
 export function parsePostgresTimestamp(ts: string): Date {
@@ -13,7 +13,7 @@ export function formatDateTime(ts: string | null): string {
   if (!ts) return ''
 
   const d = parsePostgresTimestamp(ts)
-  return d.toLocaleString('de-DE', {
+  return d.toLocaleString('us-US', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -40,7 +40,7 @@ function RoundLayout({
   )
 }
 
-function ProgressIndicator({ passStatus }: { passStatus: PassStatus }): ReactElement {
+function ProgressIndicator({ passStatus }: { passStatus: PassStatus | 'CURRENT' }): ReactElement {
   return (
     <>
       {passStatus == PassStatus.PASSED && (
@@ -54,8 +54,14 @@ function ProgressIndicator({ passStatus }: { passStatus: PassStatus }): ReactEle
         </RoundLayout>
       )}
       {passStatus == PassStatus.NOT_ASSESSED && (
+        <RoundLayout className='bg-gray-100 dark:bg-gray-900'>
+          <Clock className='w-4 h-4 text-gray-800 dark:text-gray-300' />
+        </RoundLayout>
+      )}
+      {passStatus == 'CURRENT' && (
         <RoundLayout className='bg-blue-100 dark:bg-blue-900'>
-          <Clock className='w-4 h-4 text-blue-800 dark:text-blue-300' />
+          {/* <img src='/prompt_logo.svg' alt='Prompt logo' className='size-6' /> */}
+          <ChevronsRight className='w-5 h-5 text-blue-800 dark:text-blue-300' />
         </RoundLayout>
       )}
     </>
@@ -65,9 +71,11 @@ function ProgressIndicator({ passStatus }: { passStatus: PassStatus }): ReactEle
 export function StudentCoursePhaseEnrollment({
   cpe,
   showLine,
+  current,
 }: {
   cpe: CoursePhaseEnrollment
   showLine?: boolean
+  current: boolean
 }) {
   return (
     <div className='flex gap-2' key={cpe.coursePhaseId}>
@@ -76,17 +84,18 @@ export function StudentCoursePhaseEnrollment({
           <div className='absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2' />
         )}
         <div className='relative z-10'>
-          <ProgressIndicator passStatus={cpe.passStatus} />
+          <ProgressIndicator passStatus={current ? 'CURRENT' : cpe.passStatus} />
         </div>
       </div>
       <div className='ml-2 mb-[0.85rem]'>
-        <div className='flex gap-2 items-center'>
+        <div className='flex gap-1 items-baseline'>
           <div className='font-semibold text-lg'>{cpe.name}</div>
-          <div>{cpe.coursePhaseType.name}</div>
+          <div className='text-sm text-muted-foreground'>{cpe.coursePhaseType.name}</div>
         </div>
         {cpe.passStatus !== PassStatus.NOT_ASSESSED && (
-          <div className='text-gray-700 text-sm'>
-            {cpe.passStatus} on {formatDateTime(cpe.lastModified)}
+          <div className='text-sm text-muted-foreground'>
+            <span className='font-semibold'>{cpe.passStatus}</span> on{' '}
+            {formatDateTime(cpe.lastModified)}
           </div>
         )}
       </div>

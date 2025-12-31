@@ -10,7 +10,7 @@ import { Button } from '@tumaet/prompt-ui-components'
 
 export function formatDate(date: string | null): string {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('de-DE', {
+  return new Date(date).toLocaleDateString('us-US', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -32,6 +32,9 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
   const futurePhases =
     firstNotAssessedIndex === -1 ? [] : sce.coursePhases.slice(firstNotAssessedIndex + 1)
 
+  const isCurrentElement = (id: string) =>
+    sce.coursePhases[firstNotAssessedIndex].coursePhaseId == id
+
   const isLastElement = (id: string) =>
     sce.coursePhases[sce.coursePhases.length - 1].coursePhaseId == id
 
@@ -43,14 +46,16 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
       />
       <div>
         <div>
-          <div className='flex gap-2'>
-            <h3 className='font-semibold text-xl'>{sce.name}</h3>
-            <h4 className='text-xl'>{sce.semesterTag}</h4>
+          <div className='flex items-baseline gap-1'>
+            <h3 className='font-semibold text-xl leading-tight'>{sce.name}</h3>
+            <span className='text-sm text-muted-foreground'>{sce.semesterTag}</span>
           </div>
-          <p>
-            {sce.courseType} · {sce.ects} ECTS
+
+          <p className='text-sm text-muted-foreground'>
+            <span className='capitalize'>{sce.courseType}</span> · {sce.ects} ECTS
           </p>
-          <p>
+
+          <p className='text-sm text-muted-foreground'>
             {formatDate(sce.startDate)} - {formatDate(sce.endDate)}
           </p>
         </div>
@@ -59,13 +64,14 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
             <StudentCoursePhaseEnrollment
               cpe={cp}
               key={cp.coursePhaseId}
-              showLine={isLastElement(cp.coursePhaseId)}
+              showLine={isLastElement(cp.coursePhaseId) || cp.passStatus == PassStatus.FAILED}
+              current={isCurrentElement(cp.coursePhaseId)}
             />
           ))}
           {!showFuturePhases && phasesUpUntilNow.length !== sce.coursePhases.length && (
             <Button
               variant='ghost'
-              className='transform -translate-x-9 -translate-y-3 text-blue-600 text-sm'
+              className='transform -translate-x-9 -translate-y-3 text-blue-600 text-xs'
               onClick={() => setShowFuturePhases(true)}
             >
               Show More
@@ -77,7 +83,8 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
                 <StudentCoursePhaseEnrollment
                   cpe={cp}
                   key={cp.coursePhaseId}
-                  showLine={isLastElement(cp.coursePhaseId)}
+                  showLine={isLastElement(cp.coursePhaseId) || cp.passStatus == PassStatus.FAILED}
+                  current={isCurrentElement(cp.coursePhaseId)}
                 />
               ))}
             </>
