@@ -1,5 +1,5 @@
 import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '@tumaet/prompt-ui-components'
-import { Archive, File, FileText } from 'lucide-react'
+import { Archive, File, FileText, Users } from 'lucide-react'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
 import { InsideSidebarVisualGroup } from './components/InsideSidebarHeading'
 
@@ -23,6 +23,13 @@ export const InsideGeneralSidebar = (): JSX.Element => {
               icon={<Archive />}
               goToPath={'/management/course_archive'}
               title='Archived Courses'
+            />
+          </InsideSidebarVisualGroup>
+          <InsideSidebarVisualGroup title='Students'>
+            <InsideSidebarMenuItem
+              icon={<Users />}
+              goToPath={'/management/students'}
+              title='Students'
             />
           </InsideSidebarVisualGroup>
         </SidebarGroupContent>

@@ -1,12 +1,12 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { StudentScoreBadge } from '../../components/badges'
 import { mapScoreLevelToNumber, ScoreLevel } from '@tumaet/prompt-shared-state'
 import { getLevelConfig } from '../../utils/getLevelConfig'
 import { ScoreLevelWithParticipation } from '../../../interfaces/scoreLevelWithParticipation'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const createScoreLevelColumn = (
   scoreLevels: ScoreLevelWithParticipation[],
-): ExtraParticipationTableColumn => {
+): ExtraParticipantColumn => {
   return {
     id: 'scoreLevel',
     header: 'Score Level',
