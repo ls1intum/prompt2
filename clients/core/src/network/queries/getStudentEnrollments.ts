@@ -17,6 +17,7 @@ export interface CoursePhaseEnrollment {
 
 export interface CourseEnrollment {
   courseId: string
+  studentReadableData: object
   name: string
   semesterTag: string
   courseType: string

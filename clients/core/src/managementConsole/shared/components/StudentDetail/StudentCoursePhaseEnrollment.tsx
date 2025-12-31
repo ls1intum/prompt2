@@ -10,7 +10,7 @@ export function parsePostgresTimestamp(ts: string): Date {
 }
 
 export function formatDateTime(ts: string | null): string {
-  if (!ts) return '—'
+  if (!ts) return ''
 
   const d = parsePostgresTimestamp(ts)
   return d.toLocaleString('de-DE', {
@@ -44,18 +44,18 @@ function ProgressIndicator({ passStatus }: { passStatus: PassStatus }): ReactEle
   return (
     <>
       {passStatus == PassStatus.PASSED && (
-        <RoundLayout className='bg-green-100'>
-          <Check className='w-4 h-4 text-green-800' />
+        <RoundLayout className='bg-green-100 dark:bg-green-900'>
+          <Check className='w-4 h-4 text-green-800 dark:text-green-300' />
         </RoundLayout>
       )}
       {passStatus == PassStatus.FAILED && (
-        <RoundLayout className='bg-red-100'>
-          <X className='w-4 h-4 text-red-800' />
+        <RoundLayout className='bg-red-100 dark:bg-red-900'>
+          <X className='w-4 h-4 text-red-800 dark:text-red-300' />
         </RoundLayout>
       )}
       {passStatus == PassStatus.NOT_ASSESSED && (
-        <RoundLayout className='bg-blue-100'>
-          <Clock className='w-4 h-4 text-blue-800' />
+        <RoundLayout className='bg-blue-100 dark:bg-blue-900'>
+          <Clock className='w-4 h-4 text-blue-800 dark:text-blue-300' />
         </RoundLayout>
       )}
     </>
@@ -75,7 +75,7 @@ export function StudentCoursePhaseEnrollment({
         {!showLine && (
           <div className='absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2' />
         )}
-        <div className='relative z-10 bg-white'>
+        <div className='relative z-10'>
           <ProgressIndicator passStatus={cpe.passStatus} />
         </div>
       </div>
@@ -84,9 +84,11 @@ export function StudentCoursePhaseEnrollment({
           <div className='font-semibold text-lg'>{cpe.name}</div>
           <div>{cpe.coursePhaseType.name}</div>
         </div>
-        <span className='text-gray-700 text-sm'>
-          {cpe.passStatus} on {formatDateTime(cpe.lastModified)}
-        </span>
+        {cpe.passStatus !== PassStatus.NOT_ASSESSED && (
+          <div className='text-gray-700 text-sm'>
+            {cpe.passStatus} on {formatDateTime(cpe.lastModified)}
+          </div>
+        )}
       </div>
     </div>
   )

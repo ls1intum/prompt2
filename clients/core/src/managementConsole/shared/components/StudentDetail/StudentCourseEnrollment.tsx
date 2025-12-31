@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { Button } from '@tumaet/prompt-ui-components'
 
 export function formatDate(date: string | null): string {
-  if (!date) return '—'
+  if (!date) return '-'
   return new Date(date).toLocaleDateString('de-DE', {
     year: 'numeric',
     month: 'short',
@@ -37,7 +37,10 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
 
   return (
     <>
-      <CourseAvatar bgColor='bg-gray-100' iconName='smartphone' />
+      <CourseAvatar
+        bgColor={sce.studentReadableData['bg-color']}
+        iconName={sce.studentReadableData['icon']}
+      />
       <div>
         <div>
           <div className='flex gap-2'>

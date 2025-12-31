@@ -16,23 +16,24 @@ type CoursePhaseTypeDTO struct {
 }
 
 type CoursePhaseEnrollmentDTO struct {
-	CoursePhaseID   uuid.UUID          `json:"coursePhaseId"`
-	Name            string             `json:"name"`
-	IsInitialPhase  bool               `json:"isInitialPhase"`
-	CoursePhaseType CoursePhaseTypeDTO `json:"coursePhaseType"`
-	PassStatus      *string            `json:"passStatus"`
-	LastModified    *string            `json:"lastModified"`
+	CoursePhaseID         uuid.UUID          `json:"coursePhaseId"`
+	Name                  string             `json:"name"`
+	IsInitialPhase        bool               `json:"isInitialPhase"`
+	CoursePhaseType       CoursePhaseTypeDTO `json:"coursePhaseType"`
+	PassStatus            *string            `json:"passStatus"`
+	LastModified          *string            `json:"lastModified"`
 }
 
 type CourseEnrollmentDTO struct {
-	CourseID        uuid.UUID                   `json:"courseId"`
-	Name            string                      `json:"name"`
-	SemesterTag     string                      `json:"semesterTag"`
-	CourseType      string                      `json:"courseType"`
-	Ects            int32                       `json:"ects"`
-	StartDate       *time.Time                  `json:"startDate"`
-	EndDate         *time.Time                  `json:"endDate"`
-	LongDescription *string                     `json:"longDescription"`
+	CourseID              uuid.UUID             `json:"courseId"`
+	Name                  string                `json:"name"`
+	SemesterTag           string                `json:"semesterTag"`
+	CourseType            string                `json:"courseType"`
+	Ects                  int32                 `json:"ects"`
+	StartDate             *time.Time            `json:"startDate"`
+	EndDate               *time.Time            `json:"endDate"`
+	LongDescription       *string               `json:"longDescription"`
+  StudentReadableData   json.RawMessage       `json:"studentReadableData"`
 	CoursePhases    []CoursePhaseEnrollmentDTO  `json:"coursePhases"`
 }
 

@@ -182,6 +182,7 @@ SELECT
                     c.start_date::timestamptz,
                     'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
                 ),
+                'studentReadableData', c.student_readable_data,
                 'endDate', to_char(
                     c.end_date::timestamptz,
                     'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'

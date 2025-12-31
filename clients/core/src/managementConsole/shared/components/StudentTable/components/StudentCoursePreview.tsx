@@ -8,7 +8,7 @@ export const StudentCoursePreview = ({
 }) => {
   return (
     <div
-      className={`flex items-center ${studentCourseParticipation.studentReadableData['bg-color']} rounded-lg gap-1 pr-2 font-semibold`}
+      className={`flex items-center ${studentCourseParticipation.studentReadableData['bg-color']} rounded-lg gap-1 pr-2 font-semibold text-black`}
     >
       <CourseAvatar
         bgColor={studentCourseParticipation.studentReadableData['bg-color']}
