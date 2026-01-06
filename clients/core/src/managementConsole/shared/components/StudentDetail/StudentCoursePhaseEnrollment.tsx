@@ -1,6 +1,6 @@
 import { CoursePhaseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-import { Check, ChevronRight, ChevronsRight, Clock, X } from 'lucide-react'
+import { Check, ChevronsRight, Clock, X } from 'lucide-react'
 import { ReactElement } from 'react'
 
 export function parsePostgresTimestamp(ts: string): Date {
