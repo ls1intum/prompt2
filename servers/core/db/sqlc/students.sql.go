@@ -376,18 +376,6 @@ course_phases AS (
     GROUP BY cp.student_id, cp.course_id
 )
 SELECT
-    s.id AS student_id,
-    s.first_name,
-    s.last_name,
-    s.email,
-    s.matriculation_number,
-    s.university_login,
-    s.has_university_account,
-    s.gender,
-    s.nationality,
-    s.study_program,
-    s.study_degree,
-    s.current_semester,
     COALESCE(
         jsonb_agg(
             jsonb_build_object(
@@ -418,56 +406,14 @@ LEFT JOIN course_phases cp
 LEFT JOIN course c
     ON cp.course_id = c.id
 WHERE s.id = $1
-GROUP BY
-    s.id,
-    s.first_name,
-    s.last_name,
-    s.email,
-    s.matriculation_number,
-    s.university_login,
-    s.has_university_account,
-    s.gender,
-    s.nationality,
-    s.study_program,
-    s.study_degree,
-    s.current_semester
+GROUP BY s.id
 `
 
-type GetStudentEnrollmentsRow struct {
-	StudentID            uuid.UUID   `json:"student_id"`
-	FirstName            pgtype.Text `json:"first_name"`
-	LastName             pgtype.Text `json:"last_name"`
-	Email                pgtype.Text `json:"email"`
-	MatriculationNumber  pgtype.Text `json:"matriculation_number"`
-	UniversityLogin      pgtype.Text `json:"university_login"`
-	HasUniversityAccount pgtype.Bool `json:"has_university_account"`
-	Gender               Gender      `json:"gender"`
-	Nationality          pgtype.Text `json:"nationality"`
-	StudyProgram         pgtype.Text `json:"study_program"`
-	StudyDegree          StudyDegree `json:"study_degree"`
-	CurrentSemester      pgtype.Int4 `json:"current_semester"`
-	Courses              []byte      `json:"courses"`
-}
-
-func (q *Queries) GetStudentEnrollments(ctx context.Context, id uuid.UUID) (GetStudentEnrollmentsRow, error) {
+func (q *Queries) GetStudentEnrollments(ctx context.Context, id uuid.UUID) ([]byte, error) {
 	row := q.db.QueryRow(ctx, getStudentEnrollments, id)
-	var i GetStudentEnrollmentsRow
-	err := row.Scan(
-		&i.StudentID,
-		&i.FirstName,
-		&i.LastName,
-		&i.Email,
-		&i.MatriculationNumber,
-		&i.UniversityLogin,
-		&i.HasUniversityAccount,
-		&i.Gender,
-		&i.Nationality,
-		&i.StudyProgram,
-		&i.StudyDegree,
-		&i.CurrentSemester,
-		&i.Courses,
-	)
-	return i, err
+	var courses []byte
+	err := row.Scan(&courses)
+	return courses, err
 }
 
 const getStudentUniversityLogins = `-- name: GetStudentUniversityLogins :many

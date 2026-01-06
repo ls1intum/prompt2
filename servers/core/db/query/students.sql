@@ -158,18 +158,6 @@ course_phases AS (
     GROUP BY cp.student_id, cp.course_id
 )
 SELECT
-    s.id AS student_id,
-    s.first_name,
-    s.last_name,
-    s.email,
-    s.matriculation_number,
-    s.university_login,
-    s.has_university_account,
-    s.gender,
-    s.nationality,
-    s.study_program,
-    s.study_degree,
-    s.current_semester,
     COALESCE(
         jsonb_agg(
             jsonb_build_object(
@@ -200,16 +188,4 @@ LEFT JOIN course_phases cp
 LEFT JOIN course c
     ON cp.course_id = c.id
 WHERE s.id = $1
-GROUP BY
-    s.id,
-    s.first_name,
-    s.last_name,
-    s.email,
-    s.matriculation_number,
-    s.university_login,
-    s.has_university_account,
-    s.gender,
-    s.nationality,
-    s.study_program,
-    s.study_degree,
-    s.current_semester;
+GROUP BY s.id;

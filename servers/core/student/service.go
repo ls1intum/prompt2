@@ -177,5 +177,5 @@ func GetStudentEnrollmentsByID(ctx context.Context, id uuid.UUID) (studentDTO.St
 		return studentDTO.StudentEnrollmentsDTO{}, err
 	}
 
-  return  studentDTO.GetStudentEnrollmentsFromDB(studentWithEnrollments)
+  return  studentDTO.GetStudentEnrollmentsDTOFromDB(studentWithEnrollments)
 }

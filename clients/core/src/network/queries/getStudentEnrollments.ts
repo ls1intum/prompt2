@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/network/configService'
-import { Gender, PassStatus, StudyDegree } from '@tumaet/prompt-shared-state'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export interface CoursePhaseType {
   id: string
@@ -29,18 +29,6 @@ export interface CourseEnrollment {
 }
 
 export interface StudentEnrollments {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  matriculationNumber: string
-  universityLogin: string
-  hasUniversityAccount: boolean
-  gender: Gender
-  nationality: string
-  studyProgram: string
-  studyDegree: StudyDegree
-  currentSemester: number | null
   courses: CourseEnrollment[]
 }
 
@@ -55,7 +43,6 @@ export const getStudentEnrollments = async (studentId: string): Promise<StudentE
     ).data
 
     console.log(d)
-
     return d
   } catch (err) {
     console.error(err)
