@@ -11,7 +11,7 @@
     "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.4",
+    "@dagrejs/dagre": "^1.1.8",
     "@sentry/react": "^10.22.0",
     "@xyflow/react": "^12.3.6",
     "date-fns-tz": "^3.2.0",
