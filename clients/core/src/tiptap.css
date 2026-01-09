@@ -1,3 +1,6 @@
+@config "../tailwind.config.js";
+@reference "tailwindcss";
+
 :root {
     --mt-overlay: rgba(251, 251, 251, 0.75);
     --mt-transparent-foreground: rgba(0, 0, 0, 0.4);

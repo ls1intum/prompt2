@@ -25,4 +25,4 @@ export const instructorDevProfile = z.object({
     .transform((val) => (val === '' ? undefined : val)),
 })
 
-export type InstructorDeveloperFormValues = z.infer<typeof instructorDevProfile>
+export type InstructorDeveloperFormValues = z.input<typeof instructorDevProfile>
