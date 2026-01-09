@@ -59,9 +59,9 @@
     "keycloak-js": "25.0.6",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.460.0",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.6",
     "postcss-loader": "8.2.0",
-    "postcss-preset-env": "^10.1.1",
+    "postcss-preset-env": "^10.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.2",
@@ -105,12 +105,12 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "html-webpack-plugin": "^5.6.5",
     "lerna": "^8.0.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.7.4",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.4.5",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.1"
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   },
   "packageManager": "yarn@4.1.0"
 }
