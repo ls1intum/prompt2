@@ -31,7 +31,7 @@ interface SurveyTimeframeSettingsProps {
 
 export const SurveyTimeframeSettings = ({
   surveyTimeframe,
-}: SurveyTimeframeSettingsProps): JSX.Element => {
+}: SurveyTimeframeSettingsProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 

@@ -31,7 +31,7 @@ interface StudentSearchProps {
 export const StudentSearch = ({
   onSelect,
   existingApplications,
-}: StudentSearchProps): JSX.Element => {
+}: StudentSearchProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [searchQuery, setSearchQuery] = useState('')
   const [enteredSearchString, setEnteredSearchString] = useState('')

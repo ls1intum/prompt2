@@ -23,7 +23,7 @@ interface MatchingResultsProps {
 function MatchingResults({
   matchedStudents,
   unmatchedStudents,
-}: MatchingResultsProps): JSX.Element {
+}: MatchingResultsProps) {
   return (
     <div className='space-y-8 mx-auto'>
       {[

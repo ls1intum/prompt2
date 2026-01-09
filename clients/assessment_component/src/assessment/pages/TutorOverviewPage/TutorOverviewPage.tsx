@@ -12,7 +12,7 @@ import {
 import { useTeamStore } from '../../zustand/useTeamStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
-export const TutorOverviewPage = (): JSX.Element => {
+export const TutorOverviewPage = () => {
   const navigate = useNavigate()
   const path = useLocation().pathname
 

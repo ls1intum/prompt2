@@ -1,7 +1,7 @@
 import { ChallengeStatus } from '../interfaces/challengeStatus'
 import { Badge } from '@tumaet/prompt-ui-components'
 
-export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
+export function getChallengeStatusBadgeFromString(status: string) {
   switch (status) {
     case 'passed':
       return (
@@ -24,7 +24,7 @@ export function getChallengeStatusBadgeFromString(status: string): JSX.Element {
   }
 }
 
-export function getChallengeStatusBadge(challengeStatus: ChallengeStatus | undefined): JSX.Element {
+export function getChallengeStatusBadge(challengeStatus: ChallengeStatus | undefined) {
   if (challengeStatus == ChallengeStatus.PASSED) {
     return getChallengeStatusBadgeFromString('passed')
   } else if (challengeStatus == ChallengeStatus.NOT_COMPLETED) {

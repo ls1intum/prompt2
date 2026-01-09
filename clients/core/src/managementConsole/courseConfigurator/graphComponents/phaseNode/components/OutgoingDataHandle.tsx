@@ -12,7 +12,7 @@ export const OutgoingDataHandle = ({
   phaseID,
   dto,
   type,
-}: OutgoingDataHandleProps): JSX.Element => {
+}: OutgoingDataHandleProps) => {
   const isParticipationEdge = type === 'participation-data'
   const handleName = isParticipationEdge
     ? `participation-data-out-phase-${phaseID}-dto-${dto.id}`

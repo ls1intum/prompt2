@@ -12,7 +12,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Github, ExternalLink, Clipboard, Check, AlertCircle } from 'lucide-react'
 
-export const RepositoryInformation = (): JSX.Element => {
+export const RepositoryInformation = () => {
   const developerQuery = useGetDeveloperProfile()
   const repoUrl = developerQuery.data?.repositoryUrl || ''
 

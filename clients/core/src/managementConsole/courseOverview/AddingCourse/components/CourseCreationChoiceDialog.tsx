@@ -17,7 +17,7 @@ interface CourseCreationChoiceDialogProps {
 
 export const CourseCreationChoiceDialog = ({
   children,
-}: CourseCreationChoiceDialogProps): JSX.Element => {
+}: CourseCreationChoiceDialogProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showAddCourse, setShowAddCourse] = useState(false)
   const [showTemplateSelection, setShowTemplateSelection] = useState(false)

@@ -11,7 +11,7 @@ interface PassStatusControlsProps {
 
 export const PassStatusControls = ({
   courseParticipationID,
-}: PassStatusControlsProps): JSX.Element | null => {
+}: PassStatusControlsProps) => {
   const { permissions } = useAuthStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(

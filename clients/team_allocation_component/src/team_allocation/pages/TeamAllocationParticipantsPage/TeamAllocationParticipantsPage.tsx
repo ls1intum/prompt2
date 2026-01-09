@@ -15,7 +15,7 @@ import { useEffect } from 'react'
 import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesToTeams'
 import { StudentName } from '../../interfaces/studentNameUpdateRequest'
 
-export const TeamAllocationParticipantsPage = (): JSX.Element => {
+export const TeamAllocationParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

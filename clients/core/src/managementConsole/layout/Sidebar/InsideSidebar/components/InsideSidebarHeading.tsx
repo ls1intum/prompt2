@@ -7,7 +7,7 @@ type InsideSidebarVisualGroupProps = PropsWithChildren<{
 export const InsideSidebarVisualGroup = ({
   title,
   children,
-}: InsideSidebarVisualGroupProps): JSX.Element => {
+}: InsideSidebarVisualGroupProps) => {
   return (
     <div className='flex flex-col gap-[1px]'>
       <h3 className='uppercase text-xs mt-1 mb-1 ml-2 transform translate-y-1'>{title}</h3>

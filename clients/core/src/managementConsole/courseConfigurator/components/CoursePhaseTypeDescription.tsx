@@ -12,7 +12,7 @@ const DISTANCE_HOVER_TOP = 36 + 10 // 36: touch lower edge of CPTItem, 10: extra
 export const CoursePhaseTypeDescription = ({
   title,
   description,
-}: CoursePhaseTypeDescriptionProps): JSX.Element => {
+}: CoursePhaseTypeDescriptionProps) => {
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState<'left' | 'right'>('right')
   const containerRef = useRef<HTMLDivElement>(null)

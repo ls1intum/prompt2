@@ -6,7 +6,7 @@ export const renderBadgeTooltipContent = (
   item: CoursePhaseTypeMetaDataItem,
   providedMetaData?: CoursePhaseTypeMetaDataItem[],
   errorTooltip?: string,
-): JSX.Element => {
+) => {
   // If an error tooltip message exists, use it
   if (errorTooltip) {
     return <p>{errorTooltip}</p>

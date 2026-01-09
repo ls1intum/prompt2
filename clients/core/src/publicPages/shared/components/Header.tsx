@@ -13,7 +13,7 @@ export const Header = ({
   withLoginButton = true,
   userName,
   onLogout,
-}: HeaderProps): JSX.Element => {
+}: HeaderProps) => {
   const navigate = useNavigate()
   const version = packageJSON.version
   return (

@@ -26,7 +26,7 @@ interface AddTemplateDialogProps {
 export const AddTemplateDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: AddTemplateDialogProps): JSX.Element => {
+}: AddTemplateDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [templatePropertiesFormValues, setTemplatePropertiesFormValues] =

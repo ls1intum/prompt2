@@ -6,7 +6,7 @@ import type { JSX } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@tumaet/prompt-ui-components'
 import { Loader2, Trophy, Users, AlertCircle } from 'lucide-react'
 
-export const PassCountIndicator = (): JSX.Element => {
+export const PassCountIndicator = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

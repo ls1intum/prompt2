@@ -23,7 +23,7 @@ interface GenderDiagramProps {
 export const GenderDiagram = ({
   participationsWithAssessment,
   showGrade = false,
-}: GenderDiagramProps): JSX.Element => {
+}: GenderDiagramProps) => {
   const data = Object.values(Gender).map((gender) => {
     const genderLabel =
       gender === Gender.PREFER_NOT_TO_SAY

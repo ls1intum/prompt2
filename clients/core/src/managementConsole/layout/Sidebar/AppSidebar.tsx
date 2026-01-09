@@ -6,7 +6,7 @@ import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
-export function AppSidebar({ ...props }: AppSidebarProps): JSX.Element {
+export function AppSidebar({ ...props }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible='icon'

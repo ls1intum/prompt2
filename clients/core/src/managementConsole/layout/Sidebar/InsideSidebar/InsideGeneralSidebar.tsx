@@ -3,7 +3,7 @@ import { Archive, File, FileText } from 'lucide-react'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
 import { InsideSidebarVisualGroup } from './components/InsideSidebarHeading'
 
-export const InsideGeneralSidebar = (): JSX.Element => {
+export const InsideGeneralSidebar = () => {
   return (
     <SidebarMenu>
       <SidebarGroup>

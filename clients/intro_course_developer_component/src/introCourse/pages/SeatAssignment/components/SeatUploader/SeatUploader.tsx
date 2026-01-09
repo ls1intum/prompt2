@@ -28,7 +28,7 @@ interface SeatUploaderProps {
   existingSeats: Seat[]
 }
 
-export const SeatUploader = ({ existingSeats }: SeatUploaderProps): JSX.Element => {
+export const SeatUploader = ({ existingSeats }: SeatUploaderProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)

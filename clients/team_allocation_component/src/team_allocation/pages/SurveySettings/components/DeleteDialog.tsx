@@ -28,7 +28,7 @@ export const DeleteDialog = ({
   name,
   disabled,
   onDelete,
-}: DeleteDialogProps): JSX.Element => {
+}: DeleteDialogProps) => {
   return (
     <AlertDialog>
       <TooltipProvider>

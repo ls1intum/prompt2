@@ -29,7 +29,7 @@ export const CategoryAssessment = ({
   peerEvaluationResults,
   selfEvaluationResults,
   hidePeerEvaluationDetails = false,
-}: CategoryAssessmentProps): JSX.Element => {
+}: CategoryAssessmentProps) => {
   const { courseParticipationID } = useParams<{
     courseParticipationID: string
   }>()

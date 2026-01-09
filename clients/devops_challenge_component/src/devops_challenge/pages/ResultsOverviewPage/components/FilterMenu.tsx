@@ -22,7 +22,7 @@ interface ColumnFiltersProps {
 export const FilterMenu = ({
   columnFilters,
   setColumnFilters,
-}: ColumnFiltersProps): JSX.Element => {
+}: ColumnFiltersProps) => {
   const isSelected = <T extends string>(id: string, value: T) => {
     return columnFilters.some(
       (filter) => filter.id === id && Array.isArray(filter.value) && filter.value.includes(value),

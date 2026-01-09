@@ -32,7 +32,7 @@ export const SeatTutorAssigner = ({
   seats,
   tutors,
   numberOfStudents,
-}: SeatTutorAssignerProps): JSX.Element => {
+}: SeatTutorAssignerProps) => {
   const [error, setError] = useState<string | null>(null)
   const [selectedSeatNames, setSelectedSeatNames] = useState<string[]>([])
   const [isCollapsed, setIsCollapsed] = useState(seats.some((seat) => seat.assignedTutor))

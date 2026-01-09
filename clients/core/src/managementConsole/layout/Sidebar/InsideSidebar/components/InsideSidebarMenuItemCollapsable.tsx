@@ -15,7 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 interface CollapsableSidebarMenuItemProps {
   goToPath: string
-  icon: JSX.Element
+  icon
   title: string
   subitems?: {
     goToPath: string
@@ -25,7 +25,7 @@ interface CollapsableSidebarMenuItemProps {
 
 export const InsideSidebarMenuItemCollapsable = (
   props: CollapsableSidebarMenuItemProps,
-): JSX.Element => {
+) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const pathname = useLocation().pathname

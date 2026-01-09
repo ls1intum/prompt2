@@ -22,7 +22,7 @@ export const TeamRanking = ({
   teams,
   setTeamRanking,
   disabled,
-}: TeamRankingProps): JSX.Element => {
+}: TeamRankingProps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     const newOrder = Array.from(teamRanking)

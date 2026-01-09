@@ -23,7 +23,7 @@ interface CategoryEvaluationProps {
 export const CategoryEvaluation = ({
   category,
   evaluations,
-}: CategoryEvaluationProps): JSX.Element => {
+}: CategoryEvaluationProps) => {
   const { teams } = useTeamStore()
 
   const getTeamMemberName = (authorCourseParticipationID: string) => {

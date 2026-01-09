@@ -20,7 +20,7 @@ interface AddCourseDialogProps {
 export const AddCourseDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: AddCourseDialogProps): JSX.Element => {
+}: AddCourseDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [coursePropertiesFormValues, setCoursePropertiesFormValues] =

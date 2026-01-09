@@ -19,7 +19,7 @@ interface RankingOptionsProps {
 export const RankingOptions = ({
   onRankingChange,
   useScoreAsRank = true,
-}: RankingOptionsProps): JSX.Element => {
+}: RankingOptionsProps) => {
   const handleChange = (value: string) => {
     const newValue = value === 'score'
     onRankingChange(newValue)
