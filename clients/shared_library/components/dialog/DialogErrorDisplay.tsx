@@ -5,10 +5,7 @@ interface DialogErrorDisplayProps {
   error: Error
 }
 
-export const DialogErrorDisplay = ({
-  customMessage,
-  error,
-}: DialogErrorDisplayProps) => {
+export const DialogErrorDisplay = ({ customMessage, error }: DialogErrorDisplayProps) => {
   return (
     <div className='flex flex-col items-center justify-center h-48'>
       <AlertCircle className='h-10 w-10 text-destructive' />

@@ -36,7 +36,11 @@ const updateCategorySchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   shortName: z.string().min(1, 'Short name is required').optional(),
   description: z.string().optional(),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100').optional(),
+  weight: z
+    .number()
+    .min(0, 'Weight must be positive')
+    .max(100, 'Weight cannot exceed 100')
+    .optional(),
   assessmentSchemaID: z.string(),
 })
 

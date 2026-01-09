@@ -42,7 +42,11 @@ const updateCompetencySchema = z.object({
   descriptionOk: z.string().min(1, 'OK level description is required').optional(),
   descriptionGood: z.string().min(1, 'Good level description is required').optional(),
   descriptionVeryGood: z.string().min(1, 'Very good level description is required').optional(),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100').optional(),
+  weight: z
+    .number()
+    .min(0, 'Weight must be positive')
+    .max(100, 'Weight cannot exceed 100')
+    .optional(),
 })
 
 interface EditCompetencyDialogProps {

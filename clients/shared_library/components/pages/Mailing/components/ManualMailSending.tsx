@@ -17,10 +17,7 @@ interface ManualMailSendingProps {
   isModified: boolean
 }
 
-export const ManualMailSending = ({
-  mailingMetaData,
-  isModified,
-}: ManualMailSendingProps) => {
+export const ManualMailSending = ({ mailingMetaData, isModified }: ManualMailSendingProps) => {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const [sendEmailType, setSendEmailType] = useState<PassStatus | null>(null)
 
