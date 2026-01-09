@@ -84,10 +84,8 @@ export const TutorOverviewPage = () => {
   )
 
   const handleRowClick = (tutor: CoursePhaseParticipationWithStudent) => {
-    {
-      coursePhaseConfig?.tutorEvaluationEnabled
-        ? navigate(`${path}/${tutor.courseParticipationID}`)
-        : undefined
+    if (coursePhaseConfig?.tutorEvaluationEnabled) {
+      navigate(`${path}/${tutor.courseParticipationID}`)
     }
   }
 

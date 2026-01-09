@@ -20,10 +20,7 @@ interface CategoryEvaluationProps {
   evaluations: Evaluation[]
 }
 
-export const CategoryEvaluation = ({
-  category,
-  evaluations,
-}: CategoryEvaluationProps) => {
+export const CategoryEvaluation = ({ category, evaluations }: CategoryEvaluationProps) => {
   const { teams } = useTeamStore()
 
   const getTeamMemberName = (authorCourseParticipationID: string) => {
