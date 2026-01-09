@@ -28,10 +28,7 @@ interface StudentSearchProps {
   existingApplications: ApplicationParticipation[]
 }
 
-export const StudentSearch = ({
-  onSelect,
-  existingApplications,
-}: StudentSearchProps) => {
+export const StudentSearch = ({ onSelect, existingApplications }: StudentSearchProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [searchQuery, setSearchQuery] = useState('')
   const [enteredSearchString, setEnteredSearchString] = useState('')

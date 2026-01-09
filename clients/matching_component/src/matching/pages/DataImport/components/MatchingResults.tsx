@@ -20,10 +20,7 @@ interface MatchingResultsProps {
   unmatchedStudents: UploadedStudent[]
 }
 
-function MatchingResults({
-  matchedStudents,
-  unmatchedStudents,
-}: MatchingResultsProps) {
+function MatchingResults({ matchedStudents, unmatchedStudents }: MatchingResultsProps) {
   return (
     <div className='space-y-8 mx-auto'>
       {[

@@ -13,9 +13,7 @@ interface DevOpsChallengeDataShellProps {
   children: React.ReactNode
 }
 
-export const DevOpsChallengeDataShell = ({
-  children,
-}: DevOpsChallengeDataShellProps) => {
+export const DevOpsChallengeDataShell = ({ children }: DevOpsChallengeDataShellProps) => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')

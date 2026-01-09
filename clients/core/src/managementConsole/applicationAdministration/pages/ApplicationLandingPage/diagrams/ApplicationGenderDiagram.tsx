@@ -14,9 +14,7 @@ interface GenderDistributionCardProps {
   applications: ApplicationParticipation[]
 }
 
-export const ApplicationGenderDiagram = ({
-  applications,
-}: GenderDistributionCardProps) => {
+export const ApplicationGenderDiagram = ({ applications }: GenderDistributionCardProps) => {
   const genderData = useMemo(() => {
     // Initialize counts for each gender
     const initialCounts: Record<Gender, { passed: number; failed: number; not_assessed: number }> =

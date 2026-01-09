@@ -15,10 +15,7 @@ interface TemplateSelectionDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export const TemplateSelectionDialog = ({
-  open,
-  onOpenChange,
-}: TemplateSelectionDialogProps) => {
+export const TemplateSelectionDialog = ({ open, onOpenChange }: TemplateSelectionDialogProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<Course | null>(null)
   const [showCopyDialog, setShowCopyDialog] = useState(false)
 

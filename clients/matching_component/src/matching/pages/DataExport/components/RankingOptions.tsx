@@ -9,17 +9,13 @@ import {
   TabsList,
   TabsTrigger,
 } from '@tumaet/prompt-ui-components'
-import type { JSX } from 'react/jsx-runtime'
 
 interface RankingOptionsProps {
   onRankingChange: (useScoreAsRank: boolean) => void
   useScoreAsRank: boolean
 }
 
-export const RankingOptions = ({
-  onRankingChange,
-  useScoreAsRank = true,
-}: RankingOptionsProps) => {
+export const RankingOptions = ({ onRankingChange, useScoreAsRank = true }: RankingOptionsProps) => {
   const handleChange = (value: string) => {
     const newValue = value === 'score'
     onRankingChange(newValue)

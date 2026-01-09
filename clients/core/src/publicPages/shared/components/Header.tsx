@@ -9,11 +9,7 @@ interface HeaderProps {
   onLogout?: () => void
 }
 
-export const Header = ({
-  withLoginButton = true,
-  userName,
-  onLogout,
-}: HeaderProps) => {
+export const Header = ({ withLoginButton = true, userName, onLogout }: HeaderProps) => {
   const navigate = useNavigate()
   const version = packageJSON.version
   return (

@@ -4,7 +4,7 @@ import { Sidebar } from '@tumaet/prompt-ui-components'
 import { InsideSidebar } from './InsideSidebar/InsideSidebar'
 import { CourseSwitchSidebar } from './CourseSwitchSidebar/CourseSwitchSidebar'
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
+type AppSidebarProps = React.ComponentProps<typeof Sidebar>
 
 export function AppSidebar({ ...props }: AppSidebarProps) {
   return (

@@ -16,9 +16,7 @@ interface StudyBackgroundCardProps {
   applications: ApplicationParticipation[]
 }
 
-export const ApplicationStudyBackgroundDiagram = ({
-  applications,
-}: StudyBackgroundCardProps) => {
+export const ApplicationStudyBackgroundDiagram = ({ applications }: StudyBackgroundCardProps) => {
   const studyData = useMemo(() => {
     // Use the complete list of programs including 'Other'
     const allPrograms = programsWithOther

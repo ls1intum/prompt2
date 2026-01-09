@@ -8,11 +8,7 @@ interface OutgoingDataHandleProps {
   type: 'participation-data' | 'phase-data'
 }
 
-export const OutgoingDataHandle = ({
-  phaseID,
-  dto,
-  type,
-}: OutgoingDataHandleProps) => {
+export const OutgoingDataHandle = ({ phaseID, dto, type }: OutgoingDataHandleProps) => {
   const isParticipationEdge = type === 'participation-data'
   const handleName = isParticipationEdge
     ? `participation-data-out-phase-${phaseID}-dto-${dto.id}`

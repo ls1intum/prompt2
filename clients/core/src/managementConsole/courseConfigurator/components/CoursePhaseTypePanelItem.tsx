@@ -7,10 +7,7 @@ interface CoursePhaseTypePanelItemProps {
   isDraggable: boolean
 }
 
-export const CoursePhaseTypePanelItem = ({
-  phase,
-  isDraggable,
-}: CoursePhaseTypePanelItemProps) => {
+export const CoursePhaseTypePanelItem = ({ phase, isDraggable }: CoursePhaseTypePanelItemProps) => {
   const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeType: string) => {
     event.dataTransfer.setData('application/@xyflow/react', nodeType)
     event.dataTransfer.effectAllowed = 'move'

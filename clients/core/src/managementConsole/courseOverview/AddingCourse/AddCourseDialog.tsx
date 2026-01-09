@@ -69,7 +69,6 @@ export const AddCourseDialog = ({
       ects: coursePropertiesFormValues?.ects || 0,
       semesterTag: coursePropertiesFormValues?.semesterTag || '',
       restrictedMetaData: {},
-      // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
       shortDescription: coursePropertiesFormValues?.shortDescription || '',
       longDescription: coursePropertiesFormValues?.longDescription || '',

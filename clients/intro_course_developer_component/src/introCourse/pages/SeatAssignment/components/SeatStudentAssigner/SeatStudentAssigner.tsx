@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { JSX } from 'react/jsx-runtime'
 import {
   ChevronDown,
   ChevronUp,
