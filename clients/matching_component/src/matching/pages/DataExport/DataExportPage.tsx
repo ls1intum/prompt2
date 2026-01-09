@@ -7,7 +7,7 @@ import MatchingResults from './components/MatchingResults'
 import { useState } from 'react'
 import { RankingOptions } from './components/RankingOptions'
 
-export const DataExportPage = (): JSX.Element => {
+export const DataExportPage = () => {
   const path = useLocation().pathname
   const navigate = useNavigate()
   const { uploadedData } = useMatchingStore()

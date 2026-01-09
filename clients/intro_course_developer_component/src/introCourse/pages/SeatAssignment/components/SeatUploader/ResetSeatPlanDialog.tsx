@@ -22,7 +22,7 @@ export const ResetSeatPlanDialog = ({
   isDeleting,
   isDialogOpen,
   setIsDialogOpen,
-}: ResetSeatPlanDialogProps): JSX.Element => {
+}: ResetSeatPlanDialogProps) => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>

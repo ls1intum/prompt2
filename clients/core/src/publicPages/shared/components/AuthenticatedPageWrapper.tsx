@@ -25,7 +25,7 @@ interface NonAuthenticatedPageWrapper {
 export const AuthenticatedPageWrapper = ({
   children,
   withLoginButton = true,
-}: NonAuthenticatedPageWrapper): JSX.Element => {
+}: NonAuthenticatedPageWrapper) => {
   const { keycloak } = useKeycloak()
   const { user, logout } = useAuthStore()
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)

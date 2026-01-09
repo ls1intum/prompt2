@@ -23,7 +23,7 @@ export const CourseActionsMenu = ({
   selected,
   trigger,
   disabled = false,
-}: CourseActionsMenuProps): JSX.Element => {
+}: CourseActionsMenuProps) => {
   const courseIds = selected.map((c) => c.id)
   const isSingle = courseIds.length === 1
   const canArchive = selected.some((c) => !c.archived)

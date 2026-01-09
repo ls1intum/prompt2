@@ -13,7 +13,7 @@ interface VisibilityMenuProps {
   columns: Column<CoursePhaseParticipationWithStudent, unknown>[]
 }
 
-export const VisibilityMenu = ({ columns }: VisibilityMenuProps): JSX.Element => {
+export const VisibilityMenu = ({ columns }: VisibilityMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

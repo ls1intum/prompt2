@@ -31,7 +31,7 @@ export const CopyCourseForm = ({
   onSubmit,
   onClose,
   useTemplateCopy,
-}: CopyCourseFormProps): JSX.Element => {
+}: CopyCourseFormProps) => {
   return (
     <>
       <DialogHeader>

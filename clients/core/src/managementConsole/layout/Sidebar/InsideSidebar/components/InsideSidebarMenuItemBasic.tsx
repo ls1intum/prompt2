@@ -3,11 +3,11 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 interface SidebarMenuItemProps {
   goToPath: string
-  icon: JSX.Element
+  icon
   title: string
 }
 
-export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps): JSX.Element => {
+export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps) => {
   const navigate = useNavigate()
   const location = useLocation()
 

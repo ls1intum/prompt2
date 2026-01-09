@@ -30,7 +30,7 @@ interface CourseTableProps {
   courses: Course[]
 }
 
-export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
+export const CourseTable = ({ courses }: CourseTableProps) => {
   const navigate = useNavigate()
   const [sorting, setSorting] = useState<SortingState>([{ id: 'name', desc: false }])
   const [globalFilter, setGlobalFilter] = useState('')

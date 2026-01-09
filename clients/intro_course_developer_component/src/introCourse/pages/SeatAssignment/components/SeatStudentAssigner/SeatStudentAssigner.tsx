@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { JSX } from 'react/jsx-runtime'
 import {
   ChevronDown,
   ChevronUp,
@@ -44,7 +43,7 @@ export const SeatStudentAssigner = ({
   seats,
   developerWithProfiles,
   tutors,
-}: SeatStudentAssignerProps): JSX.Element => {
+}: SeatStudentAssignerProps) => {
   const [error, setError] = useState<string | null>(null)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [assignmentStatus, setAssignmentStatus] = useState<'none' | 'partial' | 'complete'>('none')

@@ -4,7 +4,7 @@ import { InsideCourseSidebar } from './InsideCourseSidebar'
 import { InsideGeneralSidebar } from './InsideGeneralSidebar'
 import { PromptLogo } from './components/PromptLogo'
 
-export const InsideSidebar = (): JSX.Element => {
+export const InsideSidebar = () => {
   // set the correct header
   const location = useLocation()
   const isCourseSidebar = location.pathname.startsWith('/management/course/')

@@ -4,7 +4,7 @@ import { CourseCards } from '../shared/components/CourseCard/CourseCards'
 import { CourseTable } from '../shared/components/CourseTable/CourseTable'
 import { CourseViewMode, CourseViewToggle } from '../shared/components/CourseViewToggle'
 
-export const ArchivedCoursesPage = (): JSX.Element => {
+export const ArchivedCoursesPage = () => {
   const { courses } = useCourseStore()
   const [viewMode, setViewMode] = useState<CourseViewMode>('table')
 

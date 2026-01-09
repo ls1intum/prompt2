@@ -45,7 +45,7 @@ export const AssessmentDiagram = ({
   scoreLevels,
   completions,
   assessmentType = AssessmentType.ASSESSMENT,
-}: AssessmentDiagramProps): JSX.Element => {
+}: AssessmentDiagramProps) => {
   const { chartData, totalAssessments } = React.useMemo(() => {
     const completed = participations.filter((p) =>
       completions?.find((c) => c.courseParticipationID === p.courseParticipationID && c.completed),

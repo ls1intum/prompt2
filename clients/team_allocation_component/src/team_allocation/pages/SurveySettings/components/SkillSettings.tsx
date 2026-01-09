@@ -12,7 +12,7 @@ interface SkillSettingsProps {
   skills: Skill[]
 }
 
-export const SkillSettings = ({ skills }: SkillSettingsProps): JSX.Element => {
+export const SkillSettings = ({ skills }: SkillSettingsProps) => {
   // Use the same phaseId context if needed (or adjust as appropriate)
   const phaseId = useParams<{ phaseId: string }>().phaseId ?? ''
 

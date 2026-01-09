@@ -9,9 +9,7 @@ interface PassStatusControlsProps {
   courseParticipationID?: string
 }
 
-export const PassStatusControls = ({
-  courseParticipationID,
-}: PassStatusControlsProps): JSX.Element | null => {
+export const PassStatusControls = ({ courseParticipationID }: PassStatusControlsProps) => {
   const { permissions } = useAuthStore()
   const { participations } = useParticipationStore()
   const participant = participations.find(

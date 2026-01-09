@@ -25,7 +25,7 @@ import { useCourseStore, CourseMailingSettings } from '@tumaet/prompt-shared-sta
 import { type CourseMailingFormValues, courseMailingSchema } from '@core/validations/courseMailing'
 import { useSaveMailingData } from './hooks/useSaveMailingData'
 
-export const MailingConfigPage = (): JSX.Element => {
+export const MailingConfigPage = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const currentCourse = courses.find((course) => course.id === courseId)

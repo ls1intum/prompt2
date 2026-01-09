@@ -27,7 +27,7 @@ export const readCSVFile = (file: File): Promise<string[]> => {
         const content = e.target?.result as string
         const seatNames = parseCSV(content)
         resolve(seatNames)
-      } catch (error) {
+      } catch {
         reject(new Error('Failed to parse CSV file. Please check the format.'))
       }
     }

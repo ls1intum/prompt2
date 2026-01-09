@@ -22,7 +22,7 @@ import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevel
 import { CoursePhaseConfigSelection } from './components/CoursePhaseConfigSelection/CoursePhaseConfigSelection'
 import { CategoryList } from './components/CategoryList/CategoryList'
 
-export const SettingsPage = (): JSX.Element => {
+export const SettingsPage = () => {
   const [showReleaseDialog, setShowReleaseDialog] = useState(false)
   const { participations } = useParticipationStore()
   const { coursePhaseConfig: config } = useCoursePhaseConfigStore()

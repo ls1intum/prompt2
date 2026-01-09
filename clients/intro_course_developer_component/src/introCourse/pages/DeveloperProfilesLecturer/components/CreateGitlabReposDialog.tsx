@@ -26,7 +26,7 @@ interface CreateGitlabReposDialogProps {
 
 export const CreateGitlabReposDialog = ({
   participantsWithDevProfiles,
-}: CreateGitlabReposDialogProps): JSX.Element => {
+}: CreateGitlabReposDialogProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [successCount, setSuccessCount] = useState(0)
   const [errorCount, setErrorCount] = useState(0)

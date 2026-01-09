@@ -7,7 +7,7 @@ import { SortDropdownMenu } from '../../components/SortDropdownMenu'
 import { InterviewTimesDialog } from '../../components/InterviewTimesDialog'
 import { useSorting } from '../../hooks/useSorting'
 
-export const OverviewPage = (): JSX.Element => {
+export const OverviewPage = () => {
   const { interviewSlots } = useParticipationStore()
   const navigate = useNavigate()
   const path = useLocation().pathname

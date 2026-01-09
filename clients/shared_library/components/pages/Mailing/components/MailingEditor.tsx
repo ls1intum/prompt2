@@ -28,7 +28,7 @@ export const EmailTemplateEditor = ({
   subjectHTMLLabel,
   contentHTMLLabel,
   placeholders,
-}: EmailTemplateEditorProps): JSX.Element => {
+}: EmailTemplateEditorProps) => {
   // Local state to hold warning message
   const [subjectWarning, setSubjectWarning] = useState('')
 

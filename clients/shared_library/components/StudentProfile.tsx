@@ -18,7 +18,7 @@ interface StudentProfileProps {
   status: PassStatus
 }
 
-export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.Element => {
+export const StudentProfile = ({ student, status }: StudentProfileProps) => {
   return (
     <Card className='relative overflow-hidden'>
       {/* Status indicator */}

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import packageJSON from '../../../../package.json'
 
-export const Footer = (): JSX.Element => {
+export const Footer = () => {
   const version = packageJSON.version
   const navigate = useNavigate()
 

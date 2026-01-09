@@ -33,10 +33,15 @@ import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
 const updateCategorySchema = z.object({
   id: z.string(),
-  name: z.string().min(1, 'Name is required'),
-  shortName: z.string().min(1, 'Short name is required'),
+  name: z.string().min(1, 'Name is required').optional(),
+  shortName: z.string().min(1, 'Short name is required').optional(),
   description: z.string().optional(),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+  weight: z
+    .number()
+    .min(0, 'Weight must be positive')
+    .max(100, 'Weight cannot exceed 100')
+    .optional(),
+  assessmentSchemaID: z.string(),
 })
 
 interface EditCategoryDialogProps {

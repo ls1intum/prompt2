@@ -5,7 +5,7 @@ interface CourseTemplateIconProps {
   bgColor: string
 }
 
-export const CourseTemplateIcon = ({ iconName, bgColor }: CourseTemplateIconProps): JSX.Element => {
+export const CourseTemplateIcon = ({ iconName, bgColor }: CourseTemplateIconProps) => {
   return (
     <div
       className={`flex aspect-square items-center justify-center rounded-lg  text-gray-800 size-12 ${bgColor}`}

@@ -25,7 +25,7 @@ interface TutorAssignmentFilterProps {
 export const TutorAssignmentFilter = ({
   filterOptions,
   setFilterOptions,
-}: TutorAssignmentFilterProps): JSX.Element => {
+}: TutorAssignmentFilterProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -6,7 +6,7 @@ interface CourseStatusTagProps {
   course: Course
 }
 
-const CourseStatusTagLayout = ({ children }: PropsWithChildren): JSX.Element => {
+const CourseStatusTagLayout = ({ children }: PropsWithChildren) => {
   return <div className='flex items-center gap-1'>{children}</div>
 }
 

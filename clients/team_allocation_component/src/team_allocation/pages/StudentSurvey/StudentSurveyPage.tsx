@@ -18,7 +18,7 @@ import { getSurveyForm } from '../../network/queries/getSurveyForm'
 import { getSurveyOwnResponse } from '../../network/queries/getSurveyOwnResponse'
 import { SurveyFormComponent } from './components/SurveyForm'
 
-export const StudentSurveyPage = (): JSX.Element => {
+export const StudentSurveyPage = () => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')

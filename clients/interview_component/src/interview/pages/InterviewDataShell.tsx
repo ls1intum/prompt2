@@ -17,7 +17,7 @@ interface InterviewDataShellProps {
   children: React.ReactNode
 }
 
-export const InterviewDataShell = ({ children }: InterviewDataShellProps): JSX.Element => {
+export const InterviewDataShell = ({ children }: InterviewDataShellProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { setParticipations, setInterviewSlots } = useParticipationStore()
   const { setCoursePhase } = useCoursePhaseStore()

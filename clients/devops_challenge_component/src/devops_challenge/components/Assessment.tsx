@@ -38,7 +38,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
-export const Assessment = (): JSX.Element => {
+export const Assessment = () => {
   const [error, setError] = useState<string | null>(null)
   const [confirmedOwnWork, setConfirmedOwnWork] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)

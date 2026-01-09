@@ -6,7 +6,7 @@ import { getCoursePhase } from '@/network/queries/getCoursePhase'
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
 import { CoursePhaseMailing } from '@/components/pages/Mailing/CoursePhaseMailing'
 
-export const MailingPage = (): JSX.Element => {
+export const MailingPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

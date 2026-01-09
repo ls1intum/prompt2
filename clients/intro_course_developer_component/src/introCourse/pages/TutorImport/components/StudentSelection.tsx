@@ -13,7 +13,7 @@ export const StudentSelection = ({
   selectedStudents,
   onStudentToggle,
   onSelectAll,
-}: StudentSelectionProps): JSX.Element => {
+}: StudentSelectionProps) => {
   return (
     <div className='grid gap-2'>
       <div className='flex items-center justify-between'>

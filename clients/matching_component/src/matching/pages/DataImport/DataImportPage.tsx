@@ -13,7 +13,7 @@ import {
   AlertTitle,
 } from '@tumaet/prompt-ui-components'
 
-export const DataImportPage = (): JSX.Element => {
+export const DataImportPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const path = useLocation().pathname
   const navigate = useNavigate()

@@ -14,7 +14,7 @@ import { convertApplicationToCoursePhaseParticipation } from './utils/convertApp
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 import { getApplicationExtraColumns } from './components/table/extraColumns'
 
-export const ApplicationParticipantsPage = (): JSX.Element => {
+export const ApplicationParticipantsPage = () => {
   const { additionalScores, participations, coursePhase } = useApplicationStore()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCourseParticipationID, setSelectedCourseParticipationID] = useState<

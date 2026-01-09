@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
 import { Clock } from 'lucide-react'
 
-export const DeadlineInfo = ({ deadline }: { deadline: Date | string }): JSX.Element => {
+export const DeadlineInfo = ({ deadline }: { deadline: Date | string }) => {
   // Ensure deadline is a Date object (if it's a string, this converts it)
   const deadlineDate = new Date(deadline)
 

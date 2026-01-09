@@ -18,7 +18,7 @@ interface PermissionRestrictionProps {
 export const PermissionRestriction = ({
   requiredPermissions,
   children,
-}: PermissionRestrictionProps): JSX.Element => {
+}: PermissionRestrictionProps) => {
   const { permissions } = useAuthStore()
   const { courses, isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()

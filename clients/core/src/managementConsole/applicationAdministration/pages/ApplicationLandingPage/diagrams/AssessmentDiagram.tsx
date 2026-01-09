@@ -36,7 +36,7 @@ interface AssessmentDiagramProps {
   applications: ApplicationParticipation[]
 }
 
-export const AssessmentDiagram = ({ applications }: AssessmentDiagramProps): JSX.Element => {
+export const AssessmentDiagram = ({ applications }: AssessmentDiagramProps) => {
   const { chartData, totalApplications } = React.useMemo(() => {
     const notAssessed = applications.filter((app) => app.passStatus === 'not_assessed').length
     const accepted = applications.filter((app) => app.passStatus === 'passed').length

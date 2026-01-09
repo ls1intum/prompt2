@@ -15,7 +15,7 @@ interface SettingsCardProps {
   isModified: boolean
 }
 
-export const SettingsCard = ({ mailingMetaData, isModified }: SettingsCardProps): JSX.Element => {
+export const SettingsCard = ({ mailingMetaData, isModified }: SettingsCardProps) => {
   const someMailFunctionDisabled =
     isModified ||
     !mailingMetaData?.passedMailContent ||

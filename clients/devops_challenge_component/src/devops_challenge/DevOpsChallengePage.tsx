@@ -2,7 +2,7 @@ import { GithubUsernameInput } from './components/GithubUsernameInput'
 import { AssessmentPanel } from './components/AssessmentPanel'
 import { useDevOpsChallengeStore } from './zustand/useDevOpsChallengeStore'
 
-export const DevOpsChallengePage = (): JSX.Element => {
+export const DevOpsChallengePage = () => {
   const { developerProfile } = useDevOpsChallengeStore()
 
   return (

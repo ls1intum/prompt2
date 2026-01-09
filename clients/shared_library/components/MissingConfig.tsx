@@ -24,7 +24,7 @@ interface MissingConfigProps {
   elements: MissingConfigItem[]
 }
 
-export const MissingConfig = ({ elements }: MissingConfigProps): JSX.Element => {
+export const MissingConfig = ({ elements }: MissingConfigProps) => {
   const navigate = useNavigate()
 
   return (

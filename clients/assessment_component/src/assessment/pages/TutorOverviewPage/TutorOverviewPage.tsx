@@ -12,7 +12,7 @@ import {
 import { useTeamStore } from '../../zustand/useTeamStore'
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
-export const TutorOverviewPage = (): JSX.Element => {
+export const TutorOverviewPage = () => {
   const navigate = useNavigate()
   const path = useLocation().pathname
 
@@ -84,10 +84,8 @@ export const TutorOverviewPage = (): JSX.Element => {
   )
 
   const handleRowClick = (tutor: CoursePhaseParticipationWithStudent) => {
-    {
-      coursePhaseConfig?.tutorEvaluationEnabled
-        ? navigate(`${path}/${tutor.courseParticipationID}`)
-        : undefined
+    if (coursePhaseConfig?.tutorEvaluationEnabled) {
+      navigate(`${path}/${tutor.courseParticipationID}`)
     }
   }
 

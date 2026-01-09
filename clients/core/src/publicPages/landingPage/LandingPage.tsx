@@ -6,7 +6,7 @@ import { OpenApplicationDetails } from '@core/interfaces/application/openApplica
 import { getAllOpenApplications } from '@core/network/queries/openApplications'
 import { NonAuthenticatedPageWrapper } from '../shared/components/NonAuthenticatedPageWrapper'
 
-export function LandingPage(): JSX.Element {
+export function LandingPage() {
   const {
     data: openApplications,
     isPending,

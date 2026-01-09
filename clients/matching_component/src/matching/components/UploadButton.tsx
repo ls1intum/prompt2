@@ -19,7 +19,7 @@ export const UploadButton = ({
   onUploadFinish,
   onUploadFunction,
   acceptedFileTypes,
-}: UploadButtonProps): JSX.Element => {
+}: UploadButtonProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragActive, setDragActive] = useState(false)
   const [isUploading, setIsUploading] = useState(false)

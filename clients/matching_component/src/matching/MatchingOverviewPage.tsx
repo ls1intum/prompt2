@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 
-export const MatchingOverviewPage = (): JSX.Element => {
+export const MatchingOverviewPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname

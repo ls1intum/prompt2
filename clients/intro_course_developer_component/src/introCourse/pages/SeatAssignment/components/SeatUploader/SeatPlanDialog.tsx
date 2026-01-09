@@ -15,7 +15,7 @@ interface SeatPlanDialogProps {
   seatPlan: Seat[]
 }
 
-export const SeatPlanDialog = ({ seatPlan }: SeatPlanDialogProps): JSX.Element => {
+export const SeatPlanDialog = ({ seatPlan }: SeatPlanDialogProps) => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   return (

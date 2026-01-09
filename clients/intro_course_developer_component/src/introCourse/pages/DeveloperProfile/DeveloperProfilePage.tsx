@@ -12,7 +12,7 @@ interface DeveloperProfilePageProps {
   onContinue: () => void
 }
 
-export const DeveloperProfilePage = ({ onContinue }: DeveloperProfilePageProps): JSX.Element => {
+export const DeveloperProfilePage = ({ onContinue }: DeveloperProfilePageProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const { developerProfile } = useIntroCourseStore()

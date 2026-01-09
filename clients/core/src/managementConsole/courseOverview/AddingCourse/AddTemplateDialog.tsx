@@ -26,7 +26,7 @@ interface AddTemplateDialogProps {
 export const AddTemplateDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: AddTemplateDialogProps): JSX.Element => {
+}: AddTemplateDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [templatePropertiesFormValues, setTemplatePropertiesFormValues] =
@@ -87,7 +87,6 @@ export const AddTemplateDialog = ({
       ects: templatePropertiesFormValues?.ects || 0,
       semesterTag: templatePropertiesFormValues?.semesterTag || '',
       restrictedMetaData: {},
-      // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
       shortDescription: templatePropertiesFormValues?.shortDescription || '',
       longDescription: templatePropertiesFormValues?.longDescription || '',

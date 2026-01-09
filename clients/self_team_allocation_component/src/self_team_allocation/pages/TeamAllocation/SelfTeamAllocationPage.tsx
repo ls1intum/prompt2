@@ -14,7 +14,7 @@ import { getAllTeams } from '../../network/queries/getAllTeams'
 import { Timeframe } from '../../interfaces/timeframe'
 import { getTimeframe } from '../../network/queries/getSurveyTimeframe'
 
-export const SelfTeamAllocationPage = (): JSX.Element => {
+export const SelfTeamAllocationPage = () => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId = '', phaseId = '' } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId)

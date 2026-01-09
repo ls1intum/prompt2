@@ -17,7 +17,7 @@ interface CourseCardProps {
   courseDetails: OpenApplicationDetails
 }
 
-export const CourseCard = ({ courseDetails }: CourseCardProps): JSX.Element => {
+export const CourseCard = ({ courseDetails }: CourseCardProps) => {
   const navigate = useNavigate()
 
   return (

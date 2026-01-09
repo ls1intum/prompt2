@@ -24,10 +24,10 @@ interface ScoreLevelSelectorProps {
   assessmentType?: AssessmentType
   selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
-  selfEvaluationStudentAnswers?: (() => JSX.Element)[]
+  selfEvaluationStudentAnswers?: (() => React.ReactNode)[]
   peerEvaluationCompetency?: Competency
   peerEvaluationScoreLevel?: ScoreLevel
-  peerEvaluationStudentAnswers?: (() => JSX.Element)[]
+  peerEvaluationStudentAnswers?: (() => React.ReactNode)[]
 }
 
 export const ScoreLevelSelector = ({

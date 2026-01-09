@@ -20,7 +20,7 @@ import type { InterviewAnswer } from '../interfaces/InterviewAnswer'
 import { PassStatus, useAuthStore } from '@tumaet/prompt-shared-state'
 import { useUpdateCoursePhaseParticipation } from '@/hooks/useUpdateCoursePhaseParticipation'
 
-export const InterviewCard = (): JSX.Element => {
+export const InterviewCard = () => {
   const { studentId } = useParams<{ studentId: string }>()
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)

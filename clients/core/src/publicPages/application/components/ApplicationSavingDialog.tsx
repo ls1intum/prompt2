@@ -24,7 +24,7 @@ export const ApplicationSavingDialog = ({
   onNavigateBack,
   errorMessage,
   confirmationMailSent = false,
-}: ApplicationSavingDialogProps): JSX.Element => {
+}: ApplicationSavingDialogProps) => {
   const isOpen = showDialog !== null
 
   const getDialogContent = () => {

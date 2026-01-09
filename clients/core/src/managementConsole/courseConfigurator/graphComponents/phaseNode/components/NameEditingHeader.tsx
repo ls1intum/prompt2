@@ -15,7 +15,7 @@ interface NameEditingHeaderProps {
   phaseID: string
 }
 
-export const NameEditingHeader = ({ phaseID }: NameEditingHeaderProps): JSX.Element => {
+export const NameEditingHeader = ({ phaseID }: NameEditingHeaderProps) => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId)

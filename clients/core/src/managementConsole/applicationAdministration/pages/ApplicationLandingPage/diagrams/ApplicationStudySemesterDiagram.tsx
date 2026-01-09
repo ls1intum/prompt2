@@ -30,7 +30,7 @@ interface ApplicationStudySemesterDiagramProps {
 
 export const ApplicationStudySemesterDiagram = ({
   applications,
-}: ApplicationStudySemesterDiagramProps): JSX.Element => {
+}: ApplicationStudySemesterDiagramProps) => {
   const { semesterData } = useMemo(() => {
     const semesterCounts = applications.reduce(
       (acc, app) => {

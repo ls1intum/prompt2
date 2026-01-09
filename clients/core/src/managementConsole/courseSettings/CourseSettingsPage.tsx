@@ -3,7 +3,7 @@ import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { CourseTemplateToggle } from './components/CourseTemplateToggle'
 import { MailingConfigPage } from '../mailingConfig/MailingConfigPage'
 
-export const CourseSettingsPage = (): JSX.Element => {
+export const CourseSettingsPage = () => {
   const { courseId } = useParams<{ courseId: string }>()
 
   return (

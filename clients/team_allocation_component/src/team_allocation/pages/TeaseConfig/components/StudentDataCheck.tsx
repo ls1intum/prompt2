@@ -22,7 +22,7 @@ import {
   ErrorPage,
 } from '@tumaet/prompt-ui-components'
 
-export const StudentDataCheck = (): JSX.Element => {
+export const StudentDataCheck = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const [checks, setChecks] = useState<ValidationResult[] | null>(null)

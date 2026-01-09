@@ -13,7 +13,7 @@ import {
   Separator,
 } from '@tumaet/prompt-ui-components'
 
-export const GitLabHelperDialog = (): JSX.Element => {
+export const GitLabHelperDialog = () => {
   const [open, setOpen] = React.useState(false)
 
   return (

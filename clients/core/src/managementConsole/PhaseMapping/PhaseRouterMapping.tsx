@@ -25,7 +25,7 @@ const PhaseRouter: { [key: string]: React.FC } = {
   'Self Team Allocation': SelfTeamAllocationRoutes,
 }
 
-export const PhaseRouterMapping = (): JSX.Element => {
+export const PhaseRouterMapping = () => {
   const phaseId = useParams<{ phaseId: string }>().phaseId
   const courseId = useParams<{ courseId: string }>().courseId
   const { courses } = useCourseStore()

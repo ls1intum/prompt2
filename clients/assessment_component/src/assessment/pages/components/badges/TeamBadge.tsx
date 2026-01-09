@@ -1,6 +1,6 @@
 import { cn, Badge } from '@tumaet/prompt-ui-components'
 
-export const TeamBadge = ({ teamName }: { teamName: string }): JSX.Element => {
+export const TeamBadge = ({ teamName }: { teamName: string }) => {
   return (
     <Badge
       className={cn(

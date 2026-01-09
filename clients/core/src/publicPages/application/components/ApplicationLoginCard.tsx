@@ -20,7 +20,7 @@ export const ApplicationLoginCard = ({
   universityLoginAvailable,
   externalStudentsAllowed,
   onContinueWithoutLogin,
-}: ApplicationLoginCardProps): JSX.Element => {
+}: ApplicationLoginCardProps) => {
   const navigate = useNavigate()
   const path = window.location.pathname
 

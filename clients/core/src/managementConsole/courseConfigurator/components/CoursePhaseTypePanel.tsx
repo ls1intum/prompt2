@@ -6,7 +6,7 @@ interface CoursePhaseTypePanelProps {
   canEdit: boolean
 }
 
-export const CoursePhaseTypePanel = ({ canEdit }: CoursePhaseTypePanelProps): JSX.Element => {
+export const CoursePhaseTypePanel = ({ canEdit }: CoursePhaseTypePanelProps) => {
   const { coursePhaseTypes, coursePhases } = useCourseConfigurationState()
 
   const courseHasInitialPhase = coursePhases.some((phase) => phase.isInitialPhase)

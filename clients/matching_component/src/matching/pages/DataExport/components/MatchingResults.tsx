@@ -36,7 +36,7 @@ function MatchingResults({
   unmatchedApplications,
   unmatchedStudents,
   useScoreAsRank,
-}: MatchingResultsProps): JSX.Element {
+}: MatchingResultsProps) {
   const { generateAndDownloadFile } = useDataDownload()
 
   const matchedRankMissing =

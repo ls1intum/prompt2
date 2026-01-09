@@ -31,7 +31,7 @@ interface TeamAllocationSettingsProps {
 
 export const TeamAllocationTimeframeSettings = ({
   teamAllocationTimeframe,
-}: TeamAllocationSettingsProps): JSX.Element => {
+}: TeamAllocationSettingsProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
 

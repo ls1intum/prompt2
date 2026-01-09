@@ -13,7 +13,7 @@ import { CoursePhaseWithMetaData } from '@tumaet/prompt-shared-state'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
-export const MailingPage = (): JSX.Element => {
+export const MailingPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const location = window.location.pathname
 

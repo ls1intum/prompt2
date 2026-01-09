@@ -116,7 +116,7 @@ export const AssessmentCompletion = ({
           })
         }
         setDialogOpen(false)
-      } catch (err) {
+      } catch {
         setError('An error occurred while updating the assessment completion status.')
       }
     }

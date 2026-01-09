@@ -18,7 +18,7 @@ import { EditCourseDropdown } from './components/EditCourseDropdown'
 import { CourseStatusTag } from '../layout/Sidebar/CourseSwitchSidebar/components/CourseStatusTag'
 import type { Course } from '@tumaet/prompt-shared-state'
 
-export const CourseOverview = (): JSX.Element => {
+export const CourseOverview = () => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
   const course = courses.find((c) => c.id === courseId) as Course | undefined

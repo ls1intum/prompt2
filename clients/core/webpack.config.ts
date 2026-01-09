@@ -83,7 +83,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       publicPath: '/',
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx'],
+      extensions: ['.ts', '.tsx', '.js', '.mjs', '.jsx'],
       alias: {
         '@': path.resolve(__dirname, '../shared_library'),
         '@core': path.resolve(__dirname, 'src'),

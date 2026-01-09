@@ -26,7 +26,7 @@ interface NationalityDiagramProps {
 export const NationalityDiagram = ({
   participationsWithAssessment,
   showGrade = false,
-}: NationalityDiagramProps): JSX.Element => {
+}: NationalityDiagramProps) => {
   const data = Array.from(
     groupBy(participationsWithAssessment, (p) => p.participation.student.nationality || 'Unknown'),
   ).map(([nationality, participations]) => {
