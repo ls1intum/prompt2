@@ -33,16 +33,16 @@ import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
 const updateCompetencySchema = z.object({
   id: z.string(),
-  categoryID: z.string(),
-  name: z.string().min(1, 'Name is required'),
-  shortName: z.string().min(1, 'Short name is required'),
-  description: z.string().min(1, 'Description is required'),
-  descriptionVeryBad: z.string().min(1, 'Very bad level description is required'),
-  descriptionBad: z.string().min(1, 'Bad level description is required'),
-  descriptionOk: z.string().min(1, 'OK level description is required'),
-  descriptionGood: z.string().min(1, 'Good level description is required'),
-  descriptionVeryGood: z.string().min(1, 'Very good level description is required'),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+  categoryID: z.string().optional(),
+  name: z.string().min(1, 'Name is required').optional(),
+  shortName: z.string().min(1, 'Short name is required').optional(),
+  description: z.string().min(1, 'Description is required').optional(),
+  descriptionVeryBad: z.string().min(1, 'Very bad level description is required').optional(),
+  descriptionBad: z.string().min(1, 'Bad level description is required').optional(),
+  descriptionOk: z.string().min(1, 'OK level description is required').optional(),
+  descriptionGood: z.string().min(1, 'Good level description is required').optional(),
+  descriptionVeryGood: z.string().min(1, 'Very good level description is required').optional(),
+  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100').optional(),
 })
 
 interface EditCompetencyDialogProps {
