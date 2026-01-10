@@ -1,20 +1,19 @@
 import { Team } from '@tumaet/prompt-shared-state'
 
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
-
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
 
 import { PeerEvaluationCompletionBadge } from '../../components/badges'
 
 import { createEvaluationLookup, getEvaluationCounts } from '../utils/evaluationUtils'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const createPeerEvalStatusColumn = (
   peerEvaluationCompletions: EvaluationCompletion[] | undefined,
   teams: Team[],
   participations: AssessmentParticipationWithStudent[],
   isEnabled: boolean,
-): ExtraParticipationTableColumn | undefined => {
+): ExtraParticipantColumn | undefined => {
   if (!isEnabled) return undefined
 
   const evaluationLookup = createEvaluationLookup(peerEvaluationCompletions)

@@ -1,10 +1,10 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { GradeSuggestionBadge } from '../../components/badges'
 import { AssessmentCompletion } from '../../../interfaces/assessmentCompletion'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const createGradeSuggestionColumn = (
   assessmentCompletions: AssessmentCompletion[] | undefined,
-): ExtraParticipationTableColumn | undefined => {
+): ExtraParticipantColumn | undefined => {
   if (!assessmentCompletions) return undefined
 
   const completedGradings = assessmentCompletions.filter((a) => a.completed)
