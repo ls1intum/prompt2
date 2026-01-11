@@ -4,9 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 
 import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
-
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
@@ -30,6 +28,7 @@ import {
   createPeerEvalStatusColumn,
   createTutorEvalStatusColumn,
 } from './columns'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const AssessmentParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -88,7 +87,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     return completedGradings.map((completion) => completion.gradeSuggestion)
   }, [assessmentCompletions])
 
-  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
     if (!scoreLevels) return []
 
     const columns = [
@@ -152,14 +151,11 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
           extraColumns={extraColumns}
-          onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
-          key={JSON.stringify(scoreLevels)}
+          onClickRowAction={(row) => navigate(`${path}/${row.courseParticipationID}`)}
         />
       </div>
     </div>

@@ -1,11 +1,11 @@
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
 import { AssessmentStatusBadge } from '../../components/badges'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const createSelfEvalStatusColumn = (
   selfEvaluationCompletions: EvaluationCompletion[] | undefined,
   isEnabled: boolean,
-): ExtraParticipationTableColumn | undefined => {
+): ExtraParticipantColumn | undefined => {
   if (!isEnabled) return undefined
 
   return {
