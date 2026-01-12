@@ -1,9 +1,7 @@
 // Default values that shall be reused in every component
-import tailwindAnimate from 'tailwindcss-animate'
-import typography from '@tailwindcss/typography'
 
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   darkMode: ['class'],
   safelist: [
     'dark',
@@ -67,5 +65,5 @@ export default {
       },
     },
   },
-  plugins: [tailwindAnimate, typography],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 }
