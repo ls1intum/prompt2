@@ -1,7 +1,7 @@
 import { Badge } from '@tumaet/prompt-ui-components'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 
-export function getStatusBadge(status: PassStatus): JSX.Element {
+export function getStatusBadge(status: PassStatus) {
   switch (status) {
     case 'passed':
       return <Badge className='bg-green-500 hover:bg-green-500'>Accepted</Badge>

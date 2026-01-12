@@ -18,7 +18,7 @@ interface NavUserProps {
   onLogout: () => void
 }
 
-export function NavUserMenu({ onLogout }: NavUserProps): JSX.Element {
+export function NavUserMenu({ onLogout }: NavUserProps) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>

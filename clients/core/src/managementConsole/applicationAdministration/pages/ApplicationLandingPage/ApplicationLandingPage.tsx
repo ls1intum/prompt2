@@ -14,7 +14,7 @@ import { ApplicationGenderDiagram } from './diagrams/ApplicationGenderDiagram'
 import { ApplicationStudyBackgroundDiagram } from './diagrams/ApplicationStudyBackgroundDiagram'
 import { ApplicationStudySemesterDiagram } from './diagrams/ApplicationStudySemesterDiagram'
 
-export const ApplicationLandingPage = (): JSX.Element => {
+export const ApplicationLandingPage = () => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const { pathname } = useLocation()
   const { coursePhase, participations } = useApplicationStore()

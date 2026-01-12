@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
 
-export const ParticipantsPage = (): JSX.Element => {
+export const ParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

@@ -14,7 +14,7 @@ interface KeycloakGroupCreationProps {
   coursePhase: CoursePhaseWithMetaData
 }
 
-export function KeycloakGroupCreation({ coursePhase }: KeycloakGroupCreationProps): JSX.Element {
+export function KeycloakGroupCreation({ coursePhase }: KeycloakGroupCreationProps) {
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const [groupExists, setGroupExists] = useState<boolean | undefined>(undefined)
   const [isCreating, setIsCreating] = useState(false)

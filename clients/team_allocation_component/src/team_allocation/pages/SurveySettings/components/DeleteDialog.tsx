@@ -23,12 +23,7 @@ interface DeleteDialogProps {
   onDelete: () => void
 }
 
-export const DeleteDialog = ({
-  entityName,
-  name,
-  disabled,
-  onDelete,
-}: DeleteDialogProps): JSX.Element => {
+export const DeleteDialog = ({ entityName, name, disabled, onDelete }: DeleteDialogProps) => {
   return (
     <AlertDialog>
       <TooltipProvider>

@@ -23,7 +23,7 @@ import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
 import { NavUserMenu } from './layout/Sidebar/CourseSwitchSidebar/components/NavUserMenu'
 import { Footer } from '@core/publicPages/shared/components/Footer'
 
-export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
+export const ManagementRoot = ({ children }: { children?: React.ReactNode }) => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
   const { courseId } = useParams<{ courseId: string }>()

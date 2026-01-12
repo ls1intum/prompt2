@@ -13,7 +13,7 @@ interface ApplicationDataWrapperProps {
   children: React.ReactNode
 }
 
-export const ApplicationDataWrapper = ({ children }: ApplicationDataWrapperProps): JSX.Element => {
+export const ApplicationDataWrapper = ({ children }: ApplicationDataWrapperProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { setAdditionalScores, setParticipations, setCoursePhase } = useApplicationStore()
 

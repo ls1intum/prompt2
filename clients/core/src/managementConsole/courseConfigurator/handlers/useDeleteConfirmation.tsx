@@ -9,7 +9,7 @@ interface DeleteConfirmationReturn {
     nodes: any[] // TODO fix
     edges: any[]
   }) => Promise<false | { nodes: any[]; edges: any[] }>
-  DeleteConfirmationComponent: JSX.Element
+  DeleteConfirmationComponent
 }
 
 interface UseDeleteConfirmationProps {
