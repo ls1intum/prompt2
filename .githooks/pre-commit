@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${repo_root}"
+
+staged_files="$(git diff --cached --name-only)"
+if ! echo "${staged_files}" | grep -Eq '^servers/(core|template_server)/'; then
+  exit 0
+fi
+
+if ! command -v swag >/dev/null 2>&1; then
+  echo "Error: swag is not installed. Install with: go install github.com/swaggo/swag/cmd/swag@latest"
+  exit 1
+fi
+
+if echo "${staged_files}" | grep -Eq '^servers/core/'; then
+  ./scripts/generate-api-spec.sh core
+  git add servers/core/docs
+fi
+
+if echo "${staged_files}" | grep -Eq '^servers/template_server/'; then
+  ./scripts/generate-api-spec.sh template_server
+  git add servers/template_server/docs
+fi
