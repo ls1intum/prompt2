@@ -36,8 +36,6 @@ jobs:
             changed: ${{ needs.detect-changes.outputs.core-changed }}
           - directory: template_server
             changed: ${{ needs.detect-changes.outputs.template-server-changed }}
-        exclude:
-          - directory: ""
 
     steps:
       - uses: actions/checkout@v4
