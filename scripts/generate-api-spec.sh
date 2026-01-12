@@ -17,4 +17,8 @@ if [[ ! -d "${target_dir}" ]]; then
 fi
 
 cd "${target_dir}"
-swag init --output docs --parseDependency --parseInternal
+if [[ -n "${SWAG_BIN:-}" ]]; then
+  "${SWAG_BIN}" init --output docs --parseDependency --parseInternal
+else
+  swag init --output docs --parseDependency --parseInternal
+fi

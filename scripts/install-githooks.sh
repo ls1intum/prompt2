@@ -16,3 +16,4 @@ fi
 
 git config core.hooksPath .githooks
 echo "Git hooks path set to .githooks"
+echo "If you still see 'swag not installed', ensure your PATH includes \$(go env GOPATH)/bin (or \$(go env GOBIN))."
