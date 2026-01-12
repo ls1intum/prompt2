@@ -3,6 +3,9 @@ name: Lint Clients
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   set-matrix:
     runs-on: ubuntu-latest

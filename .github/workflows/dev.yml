@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml
