@@ -323,6 +323,43 @@ type CoursePhaseTypePhaseRequiredInputDto struct {
 	Specification     []byte    `json:"specification"`
 }
 
+type Note struct {
+	ID          uuid.UUID   `json:"id"`
+	ForStudent  uuid.UUID   `json:"for_student"`
+	Author      uuid.UUID   `json:"author"`
+	DateCreated pgtype.Date `json:"date_created"`
+	DateDeleted pgtype.Date `json:"date_deleted"`
+	DeletedBy   pgtype.UUID `json:"deleted_by"`
+}
+
+type NoteTag struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+type NoteTagRelation struct {
+	NoteID uuid.UUID `json:"note_id"`
+	TagID  uuid.UUID `json:"tag_id"`
+}
+
+type NoteVersion struct {
+	ID            uuid.UUID   `json:"id"`
+	Content       string      `json:"content"`
+	DateCreated   pgtype.Date `json:"date_created"`
+	VersionNumber int32       `json:"version_number"`
+	ForNote       uuid.UUID   `json:"for_note"`
+}
+
+type NoteWithVersion struct {
+	ID          uuid.UUID   `json:"id"`
+	Author      uuid.UUID   `json:"author"`
+	ForStudent  uuid.UUID   `json:"for_student"`
+	DateCreated pgtype.Date `json:"date_created"`
+	DateDeleted pgtype.Date `json:"date_deleted"`
+	DeletedBy   pgtype.UUID `json:"deleted_by"`
+	Versions    []byte      `json:"versions"`
+}
+
 type ParticipationDataDependencyGraph struct {
 	FromCoursePhaseID    uuid.UUID `json:"from_course_phase_id"`
 	ToCoursePhaseID      uuid.UUID `json:"to_course_phase_id"`

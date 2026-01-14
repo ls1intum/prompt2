@@ -149,3 +149,52 @@ func SearchStudents(ctx context.Context, searchString string) ([]studentDTO.Stud
 	}
 	return dtoStudents, nil
 }
+
+func instructorNotesFromDBModelToDTO(notes []db.NoteWithVersion) ([]studentDTO.InstructorNote, error) {
+	dtoInstructorNotes := make([]studentDTO.InstructorNote, 0, len(notes))
+	for _, iN := range notes {
+    dtoInstructorNote, err := studentDTO.GetInstructorNoteDTOFromDBModel(iN)
+    if err != nil {
+      return nil, err
+    }
+		dtoInstructorNotes = append(dtoInstructorNotes, dtoInstructorNote)
+	}
+  return dtoInstructorNotes, nil
+}
+
+
+func GetStudentNotes(ctx context.Context) ([]studentDTO.InstructorNote, error) {
+  instructorNotes, err := StudentServiceSingleton.queries.GetAllStudentNotes(ctx)
+  if err != nil {
+    return nil, err
+  }
+  return instructorNotesFromDBModelToDTO(instructorNotes)
+}
+
+func GetStudentNotesByID(ctx context.Context, id uuid.UUID) ([]studentDTO.InstructorNote, error) {
+  instructorNotes, err := StudentServiceSingleton.queries.GetStudentNotesForStudent(ctx, id)
+  if err != nil {
+    return nil, err
+  }
+  return instructorNotesFromDBModelToDTO(instructorNotes)
+}
+
+func NewStudentNote(ctx context.Context, params studentDTO.CreateInstructorNote) ([]studentDTO.InstructorNote, error) {
+
+  latestVersionNumber, err := StudentServiceSingleton.queries.GetLatestNoteVersionForNoteId(ctx, params.ForNote)
+
+  if err != nil {
+    return nil, err
+  }
+
+}
+
+
+
+
+
+
+
+
+
+

@@ -14,10 +14,13 @@ import (
 func setupStudentRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	student := router.Group("/students", authMiddleware())
 	student.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllStudents)
+	student.GET("/notes", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
 	student.GET("/:uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getStudentByID)
 	student.POST("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createStudent)
 	student.PUT("/:uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), updateStudent)
 	student.GET("/search/:searchString", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), searchStudents)
+	student.GET("/:uuid/notes", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
+	student.POST("/:uuid/notes", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
 }
 
 // getAllStudents godoc
@@ -166,4 +169,77 @@ func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, utils.ErrorResponse{
 		Error: err.Error(),
 	})
+}
+
+
+// getAllInstructorNotes godoc
+// @Summary Get all notes
+// @Description Get all instructor notes with note versions
+// @Tags students
+// @Produce json
+// @Success 200 {object} []studentDTO.InstructorNote 
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /students/notes [get]
+func getAllInstructorNotes(c *gin.Context) {
+
+	studentNotes, err := GetStudentNotes(c)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, studentNotes)
+}
+
+
+
+// getInstructorNoteForStudentByID godoc
+// @Summary Get all notes for a student
+// @Description Get all instructor notes with note versions for a specific student, provided the student ID
+// @Tags students
+// @Produce json
+// @Param uuid path string true "Student UUID"
+// @Success 200 {object} []studentDTO.InstructorNote 
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /students/{uuid}/notes [get]
+func getInstructorNoteForStudentByID(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	studentNotes, err := GetStudentNotesByID(c, id)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, studentNotes)
+}
+
+
+
+// createInstructorNoteForStudentByID godoc
+// @Summary Create an instructor Note for a student
+// @Description Create a new instructor note or a new edit for a specific student given its ID
+// @Tags students
+// @Produce json
+// @Success 200 {object} []studentDTO.InstructorNote 
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /students/{uuid}/notes [post]
+func createInstructorNoteForStudentByID(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	studentNotes, err := GetStudentNotesByID(c, id)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, studentNotes)
 }
