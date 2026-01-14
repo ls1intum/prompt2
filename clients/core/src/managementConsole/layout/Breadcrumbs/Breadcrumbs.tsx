@@ -41,6 +41,11 @@ export const Breadcrumbs: React.FC = () => {
         breadcrumbs.push({ title: 'Template Courses', path: '/management/course_templates' })
       } else if (pathSegments[1] === 'course_archive') {
         breadcrumbs.push({ title: 'Archived Courses', path: '/management/course_archive' })
+      } else if (pathSegments[1] === 'students') {
+        breadcrumbs.push({ title: 'Students', path: '/management/students' })
+        if (pathSegments.length > 2) {
+          breadcrumbs.push({ title: 'Student', path: '/management/students/' + pathSegments[2] })
+        }
       } else if (pathSegments[1] === 'course' && pathSegments.length >= 3) {
         const courseId = pathSegments[2]
         const course = courses.find((c) => c.id === courseId)

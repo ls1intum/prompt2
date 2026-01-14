@@ -21,7 +21,7 @@ import {
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useNavigate } from 'react-router-dom'
-import { archiveCourse, unarchiveCourse } from '@core/network/mutations/updateCourseArchiveStatus'
+import { archiveCourses, unarchiveCourses } from '@core/network/mutations/updateCourseArchiveStatus'
 import { formatDate } from '@core/utils/formatDate'
 
 type CourseMetaItemProps = {
@@ -50,9 +50,9 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 
   const handleArchive = async () => {
     if (course.archived) {
-      await unarchiveCourse(course.id)
+      await unarchiveCourses([course.id])
     } else {
-      await archiveCourse(course.id)
+      await archiveCourses([course.id])
     }
   }
 

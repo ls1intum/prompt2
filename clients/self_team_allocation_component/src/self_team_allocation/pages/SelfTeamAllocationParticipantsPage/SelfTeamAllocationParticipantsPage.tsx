@@ -8,10 +8,10 @@ import { CoursePhaseParticipationsWithResolution, Team } from '@tumaet/prompt-sh
 
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 
 import { getAllTeams } from '../../network/queries/getAllTeams'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -36,7 +36,7 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
     if (!teams) return []
 
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
@@ -96,11 +96,9 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
         This table shows all participants and their allocated teams.
       </p>
       <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={coursePhaseParticipations.participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
           extraColumns={extraColumns}
         />
       </div>

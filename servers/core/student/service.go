@@ -33,6 +33,27 @@ func GetAllStudents(ctx context.Context) ([]studentDTO.Student, error) {
 	return dtoStudents, nil
 }
 
+
+func GetAllStudentsWithCourses(ctx context.Context) ([]studentDTO.StudentWithCourseParticipationsDTO, error) {
+	studentsWithCourses, err := StudentServiceSingleton.queries.GetAllStudentsWithCourseParticipations(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoStudentsWithCourses := make( []studentDTO.StudentWithCourseParticipationsDTO, 0, len(studentsWithCourses))
+
+	for _, studentWithCourse := range studentsWithCourses {
+		dto, err := studentDTO.GetStudentWithCoursesFromDB(studentWithCourse)
+		if err != nil {
+			return nil, err
+		}
+		dtoStudentsWithCourses = append(dtoStudentsWithCourses, dto)
+	}
+
+	return dtoStudentsWithCourses, nil
+}
+
+
 func GetStudentByID(ctx context.Context, id uuid.UUID) (studentDTO.Student, error) {
 	student, err := StudentServiceSingleton.queries.GetStudent(ctx, id)
 	if err != nil {
@@ -191,10 +212,11 @@ func NewStudentNote(ctx context.Context, params studentDTO.CreateInstructorNote)
 
 
 
+func GetStudentEnrollmentsByID(ctx context.Context, id uuid.UUID) (studentDTO.StudentEnrollmentsDTO, error) {
+  studentWithEnrollments, err := StudentServiceSingleton.queries.GetStudentEnrollments(ctx, id)
+	if err != nil {
+		return studentDTO.StudentEnrollmentsDTO{}, err
+	}
 
-
-
-
-
-
-
+  return  studentDTO.GetStudentEnrollmentsDTOFromDB(studentWithEnrollments)
+}
