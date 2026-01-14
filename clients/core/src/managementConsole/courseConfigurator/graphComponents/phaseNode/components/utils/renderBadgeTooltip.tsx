@@ -6,7 +6,7 @@ export const renderBadgeTooltipContent = (
   item: CoursePhaseTypeMetaDataItem,
   providedMetaData?: CoursePhaseTypeMetaDataItem[],
   errorTooltip?: string,
-): JSX.Element => {
+) => {
   // If an error tooltip message exists, use it
   if (errorTooltip) {
     return <p>{errorTooltip}</p>
@@ -17,7 +17,7 @@ export const renderBadgeTooltipContent = (
       const questions = JSON.parse(item.type) as { key: string; type: string }[]
       const title = !providedMetaData ? 'Exported Questions' : 'Expected Questions'
       return renderTooltipList(title, questions)
-    } catch (error) {
+    } catch {
       return (
         <div>
           <span className='font-bold'>{item.name}:</span> {item.type}
@@ -32,7 +32,7 @@ export const renderBadgeTooltipContent = (
       const scores = JSON.parse(item.type) as string[]
       const title = !providedMetaData ? 'Exported Scores' : 'Expected Scores'
       return renderTooltipList(title, scores)
-    } catch (error) {
+    } catch {
       return (
         <div>
           <span className='font-bold'>{item.name}:</span> {item.type}

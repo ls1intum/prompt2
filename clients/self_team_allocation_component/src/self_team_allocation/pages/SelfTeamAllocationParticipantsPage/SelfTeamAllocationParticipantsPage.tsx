@@ -13,7 +13,7 @@ import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePha
 
 import { getAllTeams } from '../../network/queries/getAllTeams'
 
-export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
+export const SelfTeamAllocationParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

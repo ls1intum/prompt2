@@ -14,7 +14,7 @@ export const CopyCourseDialog = ({
   onClose,
   useTemplateCopy,
   createTemplate,
-}: CourseCopyDialogProps): JSX.Element => {
+}: CourseCopyDialogProps) => {
   const [currentStep, setCurrentStep] = useState<DialogStep>('form')
 
   const {

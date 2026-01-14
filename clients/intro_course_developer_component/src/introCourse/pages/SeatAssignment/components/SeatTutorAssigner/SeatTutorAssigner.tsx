@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { AlertCircle, UserCheck, X, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Seat } from '../../../../interfaces/Seat'
 import type { Tutor } from '../../../../interfaces/Tutor'
-import type { JSX } from 'react/jsx-runtime'
 import { SeatTutorTable } from './SeatTutorTable'
 import { useUpdateSeats } from '../../hooks/useUpdateSeats'
 import {
@@ -28,11 +27,7 @@ interface SeatTutorAssignerProps {
   numberOfStudents: number
 }
 
-export const SeatTutorAssigner = ({
-  seats,
-  tutors,
-  numberOfStudents,
-}: SeatTutorAssignerProps): JSX.Element => {
+export const SeatTutorAssigner = ({ seats, tutors, numberOfStudents }: SeatTutorAssignerProps) => {
   const [error, setError] = useState<string | null>(null)
   const [selectedSeatNames, setSelectedSeatNames] = useState<string[]>([])
   const [isCollapsed, setIsCollapsed] = useState(seats.some((seat) => seat.assignedTutor))

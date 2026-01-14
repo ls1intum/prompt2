@@ -11,7 +11,7 @@ import { getIsApplicationConfigured } from '../../utils/getApplicationIsConfigur
 import { useParseApplicationMetaData } from '../../hooks/useParseApplicationMetaData'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
 
-export const ApplicationConfiguration = (): JSX.Element => {
+export const ApplicationConfiguration = () => {
   const [applicationMetaData, setApplicationMetaData] = useState<ApplicationMetaData | null>(null)
   const { coursePhase } = useApplicationStore()
 

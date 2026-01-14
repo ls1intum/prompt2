@@ -14,7 +14,7 @@ export const CourseActionsMenuItemWithLoader = ({
   onClick,
   name,
   disabled = false,
-}: CourseActionsMenuItemWithLoaderProps): JSX.Element => {
+}: CourseActionsMenuItemWithLoaderProps) => {
   const [loading, setLoading] = useState(false)
 
   async function handleClick(event: any) {

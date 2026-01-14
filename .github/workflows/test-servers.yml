@@ -3,6 +3,9 @@ name: Test Go Servers
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   detect-changes:
     runs-on: ubuntu-latest

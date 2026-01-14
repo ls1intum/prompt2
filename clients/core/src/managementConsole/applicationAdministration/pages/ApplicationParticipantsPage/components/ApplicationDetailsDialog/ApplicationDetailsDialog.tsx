@@ -36,7 +36,7 @@ export const ApplicationDetailsDialog = ({
   score,
   restrictedData,
   onClose,
-}: ApplicationDetailsDialogProps): JSX.Element => {
+}: ApplicationDetailsDialogProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

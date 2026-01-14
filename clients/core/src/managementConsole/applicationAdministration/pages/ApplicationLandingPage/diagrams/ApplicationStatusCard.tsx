@@ -14,7 +14,7 @@ interface ApplicationStatusCardProps {
 export function ApplicationStatusCard({
   applicationMetaData,
   applicationPhaseIsConfigured,
-}: ApplicationStatusCardProps): JSX.Element {
+}: ApplicationStatusCardProps) {
   const status = getApplicationStatus(applicationMetaData, applicationPhaseIsConfigured)
   const startDate = applicationMetaData?.applicationStartDate
   const endDate = applicationMetaData?.applicationEndDate

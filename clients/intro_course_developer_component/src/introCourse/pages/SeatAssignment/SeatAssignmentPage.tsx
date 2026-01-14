@@ -16,7 +16,7 @@ import { SeatTutorAssigner } from './components/SeatTutorAssigner/SeatTutorAssig
 import { SeatStudentAssigner } from './components/SeatStudentAssigner/SeatStudentAssigner'
 import { useGetParticipationsWithDevProfile } from './hooks/useGetParticipationWithDevProfile'
 
-export const SeatAssignmentPage = (): JSX.Element => {
+export const SeatAssignmentPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   // Data fetching

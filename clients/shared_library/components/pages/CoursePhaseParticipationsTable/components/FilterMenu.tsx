@@ -29,7 +29,7 @@ export const FilterMenu = ({
   columnFilters,
   setColumnFilters,
   extraFilters = [],
-}: ColumnFiltersProps): JSX.Element => {
+}: ColumnFiltersProps) => {
   const isSelected = (id: string, value: string) =>
     columnFilters.some(
       (filter) => filter.id === id && Array.isArray(filter.value) && filter.value.includes(value),

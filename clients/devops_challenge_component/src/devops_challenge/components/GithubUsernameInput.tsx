@@ -14,7 +14,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Loader2, AlertCircle, User, ExternalLink } from 'lucide-react'
 
-export const GithubUsernameInput = (): JSX.Element => {
+export const GithubUsernameInput = () => {
   const [error, setError] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
   const repositoryMutation = useCreateRepository(setError)

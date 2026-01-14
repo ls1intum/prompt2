@@ -32,7 +32,7 @@ export const SkillRanking = ({
   skillRatings,
   setSkillRatings,
   disabled,
-}: SkillRankingProps): JSX.Element => {
+}: SkillRankingProps) => {
   const handleSkillRatingChange = (skillID: string, skillLevel: SkillLevel) => {
     setSkillRatings((prev) => ({ ...prev, [skillID]: skillLevel }))
   }

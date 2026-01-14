@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml
