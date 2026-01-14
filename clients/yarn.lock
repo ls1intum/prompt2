@@ -5531,12 +5531,12 @@ __metadata:
   linkType: hard
 
 "@tumaet/prompt-shared-state@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@tumaet/prompt-shared-state@npm:1.0.4"
+  version: 1.0.5
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.5"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.3"
-  checksum: 10c0/5b1076ffb339e982b7704a73287b3d5bff455fd6ddb173859a819a0486e2398d2a47646617a16d258d9740d389908d87a59e96ecf93f403939aabd2c30287387
+  checksum: 10c0/03e998167429d3570b09c1a7c1176fffd01db977f01798baabd554379b1124009996a2c16d24f0ed99d317df7f250d461f3e50943e775697e914a3f155ef76c5
   languageName: node
   linkType: hard
 
