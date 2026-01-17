@@ -100,11 +100,11 @@ func KeycloakMiddleware() gin.HandlerFunc {
 		}
 
 		// Store the extracted roles in the context
-		c.Set("userRoles", userRoles)
-		c.Set("userID", userID)
-		c.Set("userEmail", userEmail)
-		c.Set("matriculationNumber", matriculationNumber)
-		c.Set("universityLogin", universityLogin)
+		c.Set(CtxUserRoles, userRoles)
+		c.Set(CtxUserID, userID)
+		c.Set(CtxUserEmail, userEmail)
+		c.Set(CtxMatriculationNumber, matriculationNumber)
+		c.Set(CtxUniversityLogin, universityLogin)
 		c.Next()
 	}
 }

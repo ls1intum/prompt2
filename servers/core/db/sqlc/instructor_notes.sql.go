@@ -162,7 +162,7 @@ SELECT nv.version_number
 FROM note_version nv
 WHERE nv.for_note = $1
 ORDER BY nv.version_number DESC
-LIMIT(1)
+LIMIT 1
 `
 
 func (q *Queries) GetLatestNoteVersionForNoteId(ctx context.Context, forNote uuid.UUID) (int32, error) {
@@ -170,6 +170,24 @@ func (q *Queries) GetLatestNoteVersionForNoteId(ctx context.Context, forNote uui
 	var version_number int32
 	err := row.Scan(&version_number)
 	return version_number, err
+}
+
+const getSingleStudentNoteByID = `-- name: GetSingleStudentNoteByID :one
+SELECT id, for_student, author, date_created, date_deleted, deleted_by FROM note WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetSingleStudentNoteByID(ctx context.Context, id uuid.UUID) (Note, error) {
+	row := q.db.QueryRow(ctx, getSingleStudentNoteByID, id)
+	var i Note
+	err := row.Scan(
+		&i.ID,
+		&i.ForStudent,
+		&i.Author,
+		&i.DateCreated,
+		&i.DateDeleted,
+		&i.DeletedBy,
+	)
+	return i, err
 }
 
 const getStudentNotesForStudent = `-- name: GetStudentNotesForStudent :many

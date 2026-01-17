@@ -4,6 +4,9 @@ SELECT * FROM note_with_versions WHERE for_student = $1;
 -- name: GetAllStudentNotes :many
 SELECT * FROM note_with_versions;
 
+-- name: GetSingleStudentNoteByID :one
+SELECT * FROM note WHERE id = $1 LIMIT 1;
+
 -- name: GetAllStudentNotesGroupByStudent :many
 SELECT
   s.id,
@@ -27,8 +30,7 @@ SELECT nv.version_number
 FROM note_version nv
 WHERE nv.for_note = $1
 ORDER BY nv.version_number DESC
-LIMIT(1);
-
+LIMIT 1;
 
 -- name: CreateNoteVersion :one
 INSERT INTO note_version ( id, content, date_created, version_number, for_note )

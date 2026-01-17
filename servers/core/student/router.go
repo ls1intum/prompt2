@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
 	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
 	"github.com/ls1intum/prompt2/servers/core/utils"
@@ -193,26 +194,6 @@ func handleError(c *gin.Context, statusCode int, err error) {
 	})
 }
 
-
-// getAllInstructorNotes godoc
-// @Summary Get all notes
-// @Description Get all instructor notes with note versions
-// @Tags students
-// @Produce json
-// @Success 200 {object} []studentDTO.InstructorNote 
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
-// @Router /students/notes [get]
-func getAllInstructorNotes(c *gin.Context) {
-
-	studentNotes, err := GetStudentNotes(c)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.IndentedJSON(http.StatusOK, studentNotes)
-}
-
 // getStudentEnrollments godoc
 // @Summary Get student enrollments by ID
 // @Description Get all of a students enrollments, provide student UUID
@@ -230,6 +211,24 @@ func getStudentEnrollments(c *gin.Context) {
 
   studentEnrollments, err := GetStudentEnrollmentsByID(c, id)
 	c.IndentedJSON(http.StatusOK, studentEnrollments)
+}
+
+// getAllInstructorNotes godoc
+// @Summary Get all notes
+// @Description Get all instructor notes with note versions
+// @Tags students
+// @Produce json
+// @Success 200 {object} []studentDTO.InstructorNote 
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /students/notes [get]
+func getAllInstructorNotes(c *gin.Context) {
+	studentNotes, err := GetStudentNotes(c)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, studentNotes)
 }
 
 // getInstructorNoteForStudentByID godoc
@@ -274,6 +273,30 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
+	var newNote studentDTO.CreateInstructorNote
+	if err := c.BindJSON(&newNote); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+  userID, err := utils.GetUserUUIDFromContext(c)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// validate Request
+	if err := ValidateCreateNote(newNote); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := ValidateNoteAuthorship(newNote); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+  NewStudentNote(c, id, newNote, userID)
 
 	studentNotes, err := GetStudentNotesByID(c, id)
 	if err != nil {
