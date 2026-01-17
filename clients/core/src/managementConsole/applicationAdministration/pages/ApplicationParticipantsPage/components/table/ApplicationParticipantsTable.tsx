@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { PromptTable, TableFilter } from '@tumaet/prompt-ui-components'
 
 import { useDeleteApplications } from '../../hooks/useDeleteApplications'
@@ -17,7 +17,7 @@ export const ApplicationParticipantsTable = ({
 }: {
   phaseId: string
   openDialog: (row: ApplicationRow) => void
-}): JSX.Element => {
+}): ReactNode => {
   const { participations, additionalScores } = useApplicationStore()
   const { mutate: deleteApplications } = useDeleteApplications()
 
