@@ -1,25 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
 import type { AccessorFn, SortingFn, FilterFn } from '@tanstack/react-table'
-
-export interface ExtraParticipantColumn {
-  id: string
-  header: string
-
-  accessorFn?: AccessorFn<ParticipantRow>
-  cell?: ColumnDef<ParticipantRow>['cell']
-
-  enableSorting?: boolean
-  sortingFn?: SortingFn<ParticipantRow>
-
-  enableColumnFilter?: boolean
-  filterFn?: FilterFn<ParticipantRow>
-
-  extraData: {
-    courseParticipationID: string
-    value: React.ReactNode
-    stringValue?: string
-  }[]
-}
 import {
   CoursePhaseParticipationWithStudent,
   PassStatus,

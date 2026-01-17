@@ -45,7 +45,7 @@ export const ApplicationParticipantsTable = ({
           coursePhaseID: phaseId,
           courseParticipationID: r.courseParticipationID,
           passStatus: status,
-          restrictedData: {},
+          restrictedData: r.restrictedData ?? {},
           studentReadableData: {},
         })),
       )
