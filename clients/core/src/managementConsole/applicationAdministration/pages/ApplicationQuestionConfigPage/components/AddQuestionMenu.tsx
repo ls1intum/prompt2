@@ -20,7 +20,7 @@ interface AddQuestionMenuProps {
 export const AddQuestionMenu = ({
   setApplicationQuestions,
   applicationQuestions,
-}: AddQuestionMenuProps): JSX.Element => {
+}: AddQuestionMenuProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const handleAddNewQuestionText = () => {

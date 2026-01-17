@@ -56,6 +56,6 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
   },
 ]
 
-export const ApplicationRoutes = (): JSX.Element => {
+export const ApplicationRoutes = () => {
   return <ExternalRoutes routes={applicationRoutesObjects} />
 }

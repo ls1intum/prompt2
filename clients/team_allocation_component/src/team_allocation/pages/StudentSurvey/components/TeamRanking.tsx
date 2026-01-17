@@ -17,12 +17,7 @@ interface TeamRankingProps {
   disabled: boolean
 }
 
-export const TeamRanking = ({
-  teamRanking,
-  teams,
-  setTeamRanking,
-  disabled,
-}: TeamRankingProps): JSX.Element => {
+export const TeamRanking = ({ teamRanking, teams, setTeamRanking, disabled }: TeamRankingProps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     const newOrder = Array.from(teamRanking)

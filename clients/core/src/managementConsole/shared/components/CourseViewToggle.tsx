@@ -8,7 +8,7 @@ interface CourseViewToggleProps {
   onChange: (mode: CourseViewMode) => void
 }
 
-export const CourseViewToggle = ({ viewMode, onChange }: CourseViewToggleProps): JSX.Element => {
+export const CourseViewToggle = ({ viewMode, onChange }: CourseViewToggleProps) => {
   return (
     <div className='inline-flex rounded-md border p-1 bg-muted/40'>
       <Button

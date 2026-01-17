@@ -13,7 +13,7 @@ interface CourseTableProps {
   courses: Course[]
 }
 
-export const CourseTable = ({ courses }: CourseTableProps): JSX.Element => {
+export const CourseTable = ({ courses }: CourseTableProps) => {
   const navigate = useNavigate()
 
   const columns: ColumnDef<Course>[] = useMemo(() => CourseTableColumns, [])

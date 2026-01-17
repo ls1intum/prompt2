@@ -10,7 +10,7 @@ interface TeamSettingsProps {
   teams: Team[]
 }
 
-export const TeamSettings = ({ teams }: TeamSettingsProps): JSX.Element => {
+export const TeamSettings = ({ teams }: TeamSettingsProps) => {
   // Use the same phaseId context if needed (or adjust as appropriate)
   const phaseId = useParams<{ phaseId: string }>().phaseId ?? ''
 

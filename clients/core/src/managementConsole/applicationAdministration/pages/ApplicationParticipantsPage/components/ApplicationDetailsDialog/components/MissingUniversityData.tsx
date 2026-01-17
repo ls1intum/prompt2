@@ -27,7 +27,7 @@ interface MissingUniversityDataProps {
   student: Student
 }
 
-export const MissingUniversityData = ({ student }: MissingUniversityDataProps): JSX.Element => {
+export const MissingUniversityData = ({ student }: MissingUniversityDataProps) => {
   const [isAddingData, setIsAddingData] = React.useState(false)
   const queryClient = useQueryClient()
 

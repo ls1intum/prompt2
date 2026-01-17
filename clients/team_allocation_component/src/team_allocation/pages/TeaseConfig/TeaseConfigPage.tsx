@@ -1,7 +1,7 @@
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { StudentDataCheck } from './components/StudentDataCheck'
 
-export const TeaseConfigPage = (): JSX.Element => {
+export const TeaseConfigPage = () => {
   return (
     <>
       <ManagementPageHeader>TEASE Configuration</ManagementPageHeader>

@@ -21,7 +21,7 @@ interface GradeDistributionDiagramProps {
 export const GradeDistributionDiagram = ({
   participations,
   grades,
-}: GradeDistributionDiagramProps): JSX.Element => {
+}: GradeDistributionDiagramProps) => {
   const chartData = useMemo(() => {
     const gradeData = VALID_GRADE_VALUES.map((gradeValue) => {
       const count = grades.filter((grade) => Math.abs(grade - gradeValue) < 0.01).length

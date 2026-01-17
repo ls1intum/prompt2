@@ -57,6 +57,9 @@ on:
       SMTP_PASSWORD:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

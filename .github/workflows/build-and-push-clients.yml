@@ -39,6 +39,10 @@ on:
         description: "The tag of the self team allocation image that was built"
         value: ${{ jobs.self-team-allocation.outputs.image_tag }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   clients-base:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0

@@ -14,7 +14,7 @@ import { PhaseSidebarMapping } from '@managementConsole/PhaseMapping/PhaseSideba
 import { CourseConfiguratorSidebar } from '@managementConsole/PhaseMapping/ExternalSidebars/CourseConfiguratorSidebar'
 import { CourseSettingsSidebar } from '@managementConsole/PhaseMapping/ExternalSidebars/CourseSettingsSidebar'
 
-export const InsideCourseSidebar = (): JSX.Element => {
+export const InsideCourseSidebar = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
 

@@ -43,7 +43,7 @@ interface CourseEditDialogProps {
   onClose: () => void
 }
 
-export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JSX.Element => {
+export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseId) as Course | undefined

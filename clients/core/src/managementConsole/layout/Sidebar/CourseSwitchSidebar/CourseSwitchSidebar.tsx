@@ -13,7 +13,7 @@ import { Role } from '@tumaet/prompt-shared-state'
 import { useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 
-export const CourseSwitchSidebar = (): JSX.Element => {
+export const CourseSwitchSidebar = () => {
   const { courses } = useCourseStore()
   const { courseId: openCourseId } = useParams<{ courseId: string }>()
   const coursesToShow = courses
