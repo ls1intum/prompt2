@@ -56,12 +56,29 @@ export const CourseTableColumns: ColumnDef<Course>[] = [
   {
     id: 'status',
     header: 'Status',
-    enableSorting: false,
-    filterFn: 'arrIncludes',
-    cell: ({ row }) => {
-      if (row.original.template) return 'Template'
-      if (row.original.archived) return `Archived on ${formatDate(row.original.archivedOn!)}`
+    enableSorting: true,
+    accessorFn: (course) => {
+      if (course.template) return 'Template'
+      if (course.archived) return 'Archived'
       return 'Active'
+    },
+    sortingFn: (rowA, rowB) => {
+      const a = rowA.original.archivedOn
+      const b = rowB.original.archivedOn
+      if (a && b) {
+        return new Date(b).getTime() - new Date(a).getTime()
+      }
+      if (a && !b) return -1
+      if (!a && b) return 1
+      return 0
+    },
+    cell: (info) => {
+      const status = info.getValue<string>()
+      if (status === 'Archived') {
+        const archivedOn = info.row.original.archivedOn
+        return archivedOn ? `Archived on ${formatDate(archivedOn)}` : 'Archived'
+      }
+      return status
     },
   },
 ]

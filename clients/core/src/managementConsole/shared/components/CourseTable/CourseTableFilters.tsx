@@ -10,12 +10,6 @@ export const CourseTableFilters: TableFilter[] = [
     getDisplay: (value) => CourseTypeDetails[value as Course['courseType']].name,
   },
   {
-    type: 'select',
-    id: 'status',
-    label: 'Status',
-    options: ['Active', 'Archived', 'Template'],
-  },
-  {
     type: 'numericRange',
     id: 'ects',
     label: 'ECTS',
