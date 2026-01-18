@@ -1,7 +1,5 @@
 import { Row } from '@tanstack/table-core'
-import { CoursePhaseParticipationWithStudent, Team } from '@tumaet/prompt-shared-state'
-
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
+import { Team } from '@tumaet/prompt-shared-state'
 
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
@@ -9,13 +7,17 @@ import { EvaluationCompletion } from '../../../interfaces/evaluationCompletion'
 import { PeerEvaluationCompletionBadge } from '../../components/badges'
 
 import { createEvaluationLookup, getEvaluationCounts } from '../utils/evaluationUtils'
+import {
+  ExtraParticipantColumn,
+  ParticipantRow,
+} from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
 export const createTutorEvalStatusColumn = (
   tutorEvaluationCompletions: EvaluationCompletion[] | undefined,
   teams: Team[],
   participations: AssessmentParticipationWithStudent[],
   isEnabled: boolean,
-): ExtraParticipationTableColumn | undefined => {
+): ExtraParticipantColumn | undefined => {
   if (!isEnabled) return undefined
 
   const evaluationLookup = createEvaluationLookup(tutorEvaluationCompletions)
@@ -41,7 +43,7 @@ export const createTutorEvalStatusColumn = (
     },
     enableSorting: true,
     sortingFn: (rowA, rowB) => {
-      const getCompletionRatio = (row: Row<CoursePhaseParticipationWithStudent>) => {
+      const getCompletionRatio = (row: Row<ParticipantRow>) => {
         const team = teams.find((t) =>
           t.members.some((member) => member.id === row.original.courseParticipationID),
         )
