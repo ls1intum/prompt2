@@ -50,8 +50,8 @@ export function getParticipantActions(
           courseParticipationID: r.courseParticipationID,
           passStatus: r.passStatus,
           restrictedData: r.restrictedData,
-          studentReadableData: {},
-          prevData: {},
+          studentReadableData: r.studentReadableData ?? {},
+          prevData: r.prevData ?? {},
           student: r.student,
         }))
 

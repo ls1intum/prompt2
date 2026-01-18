@@ -19,7 +19,7 @@ interface ResetSeatAssignmentDialogProps {
 export const ResetSeatAssignmentDialog = ({
   disabled,
   onSuccess,
-}: ResetSeatAssignmentDialogProps): JSX.Element => {
+}: ResetSeatAssignmentDialogProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   return (

@@ -15,7 +15,7 @@ import { addStudentNamesToTeams } from '../../network/mutations/addStudentNamesT
 import { StudentName } from '../../interfaces/studentNameUpdateRequest'
 import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
-export const TeamAllocationParticipantsPage = (): JSX.Element => {
+export const TeamAllocationParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

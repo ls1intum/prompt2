@@ -8,7 +8,7 @@ interface CourseSidebarItemProps {
   course: Course
 }
 
-export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Element => {
+export const CourseSidebarItem = ({ course }: CourseSidebarItemProps) => {
   const { setOpen } = useSidebar()
   const navigate = useNavigate()
   const { courseId } = useParams<{ courseId: string }>()

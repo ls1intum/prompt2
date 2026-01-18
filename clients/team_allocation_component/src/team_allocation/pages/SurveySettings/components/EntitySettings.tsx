@@ -52,7 +52,7 @@ export const EntitySettings = <T extends Entity>({
   emptyIcon,
   emptyMessage,
   emptySubtext,
-}: EntitySettingsProps<T>): JSX.Element => {
+}: EntitySettingsProps<T>) => {
   const queryClient = useQueryClient()
 
   const invalidateCache = () => {

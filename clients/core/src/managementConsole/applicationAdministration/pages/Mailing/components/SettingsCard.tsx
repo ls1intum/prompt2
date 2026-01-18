@@ -27,7 +27,7 @@ export const SettingsCard = ({
   applicationMailingMetaData,
   handleSwitchChange,
   isModified,
-}: SettingsCardProps): JSX.Element => {
+}: SettingsCardProps) => {
   const courseMailingIsConfigured = useGetMailingIsConfigured()
   const automaticConfirmationMailEnabled =
     courseMailingIsConfigured &&

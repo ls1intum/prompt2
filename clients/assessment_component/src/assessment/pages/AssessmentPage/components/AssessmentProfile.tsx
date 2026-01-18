@@ -21,7 +21,7 @@ export const AssessmentProfile = ({
   participant,
   studentAssessment,
   remainingAssessments,
-}: AssessmentProfileProps): JSX.Element => {
+}: AssessmentProfileProps) => {
   return (
     <>
       <Card className='relative overflow-hidden'>

@@ -36,7 +36,7 @@ export const SeatTutorTable = ({
   setSelectedSeatNames,
   tutors,
   handleTutorAssignment,
-}: SeatTutorTableProps): JSX.Element => {
+}: SeatTutorTableProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null)
   const [filterOptions, setFilterOptions] = useState<TutorAssignmentFilterOptions>({

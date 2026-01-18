@@ -6,7 +6,7 @@ interface CourseCardsProps {
   courses: Course[]
 }
 
-export const CourseCards = ({ courses }: CourseCardsProps): JSX.Element => {
+export const CourseCards = ({ courses }: CourseCardsProps) => {
   return (
     <div className='container mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 items-start justify-start'>
       <AnimatePresence>

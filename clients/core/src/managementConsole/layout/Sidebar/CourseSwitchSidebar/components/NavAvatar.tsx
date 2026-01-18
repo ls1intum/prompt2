@@ -2,7 +2,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@tumaet/prompt-ui-component
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 
-export function NavAvatar(): JSX.Element {
+export function NavAvatar() {
   const { user } = useAuthStore()
 
   const userName = user?.firstName + ' ' + user?.lastName || ' Unknown User'

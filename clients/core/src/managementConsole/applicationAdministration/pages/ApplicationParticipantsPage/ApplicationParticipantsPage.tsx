@@ -1,6 +1,6 @@
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
 import { ApplicationParticipantsTable } from './components/table/ApplicationParticipantsTable'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { ApplicationDetailsDialog } from './components/ApplicationDetailsDialog/ApplicationDetailsDialog'
 import { ApplicationRow } from './components/table/applicationRow'
 import { useApplicationStore } from '../../zustand/useApplicationStore'
@@ -8,7 +8,7 @@ import AssessmentScoreUpload from './components/ScoreUpload/ScoreUpload'
 import { ApplicationManualAddingDialog } from './components/ApplicationManualAddingDialog/ApplicationManualAddingDialog'
 import { useParams } from 'react-router-dom'
 
-export const ApplicationParticipantsPage = (): JSX.Element => {
+export const ApplicationParticipantsPage = (): ReactNode => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedApplication, setSelectedApplication] = useState<ApplicationRow | null>(null)

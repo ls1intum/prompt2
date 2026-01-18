@@ -30,7 +30,7 @@ export const DeveloperProfileForm = ({
   developerProfile,
   status,
   onSubmit,
-}: DeveloperProfileFormProps): JSX.Element => {
+}: DeveloperProfileFormProps) => {
   const { width } = useScreenSize()
 
   const form = useForm<DeveloperFormValues>({

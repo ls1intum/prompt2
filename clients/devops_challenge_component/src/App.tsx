@@ -1,4 +1,4 @@
-export const App = (): JSX.Element => {
+export const App = () => {
   return (
     <>
       <h1>Prompt Devops Challenge Component</h1>

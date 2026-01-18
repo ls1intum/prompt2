@@ -27,7 +27,7 @@ export const MakeTemplateCourseForm = ({
   courseName,
   onSubmit,
   onClose,
-}: MakeTemplateCourseFormProps): JSX.Element => {
+}: MakeTemplateCourseFormProps) => {
   return (
     <>
       <DialogHeader>

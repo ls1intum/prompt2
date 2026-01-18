@@ -30,7 +30,7 @@ import {
 } from './columns'
 import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
-export const AssessmentParticipantsPage = (): JSX.Element => {
+export const AssessmentParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname

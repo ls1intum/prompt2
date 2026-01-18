@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { ManagementPageHeader } from '@tumaet/prompt-ui-components'
@@ -16,7 +16,7 @@ interface TutorRow {
   teamName: string
 }
 
-export const TutorOverviewPage = (): JSX.Element => {
+export const TutorOverviewPage = (): ReactNode => {
   const navigate = useNavigate()
   const path = useLocation().pathname
 
