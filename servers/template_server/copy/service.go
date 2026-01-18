@@ -27,6 +27,17 @@ var CopyServiceSingleton *CopyService
 
 type TemplateServerCopyHandler struct{}
 
+// HandlePhaseCopy godoc
+// @Summary Copy course phase data
+// @Description Copy template server data from a source course phase to a target course phase.
+// @Tags copy
+// @Accept json
+// @Produce json
+// @Param payload body promptTypes.PhaseCopyRequest true "Copy request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /copy [post]
 // HandlePhaseCopy is a placeholder implementation demonstrating the expected
 // method signature for phase copy handlers. It currently returns 404 until
 // the actual functionality is implemented.

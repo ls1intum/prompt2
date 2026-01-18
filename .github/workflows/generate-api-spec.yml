@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       core-changed: ${{ steps.changes.outputs.core }}
+      template-server-changed: ${{ steps.changes.outputs.template_server }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -22,40 +23,39 @@ jobs:
           filters: |
             core:
               - 'servers/core/**'
+            template_server:
+              - 'servers/template_server/**'
 
   generate-api-spec:
     runs-on: ubuntu-latest
     needs: detect-changes
     if: |
-      needs.detect-changes.outputs.core-changed       == 'true'
+      needs.detect-changes.outputs.core-changed == 'true' ||
+      needs.detect-changes.outputs.template-server-changed == 'true'
     strategy:
       matrix:
-        directory:
-          - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
-        exclude:
-          - directory: ""
+        include:
+          - directory: core
+            changed: ${{ needs.detect-changes.outputs.core-changed }}
+          - directory: template_server
+            changed: ${{ needs.detect-changes.outputs.template-server-changed }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-
+          cache-dependency-path: "**/*.sum"
       - name: Install swag
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
-
       - name: Generate API spec for ${{ matrix.directory }}
         run: |
-          cd servers/${{ matrix.directory }}
-          swag init --output docs/api --parseDependency --parseInternal
-
+          ./scripts/generate-api-spec.sh ${{ matrix.directory }}
       - name: Upload API spec artifact
         uses: actions/upload-artifact@v4
         with:
           name: api-spec-${{ matrix.directory }}
-          path: servers/${{ matrix.directory }}/docs/api/
+          path: servers/${{ matrix.directory }}/docs/
