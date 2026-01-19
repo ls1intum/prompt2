@@ -14,6 +14,8 @@ type CreateCourse struct {
 	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	ShortDescription    pgtype.Text   `json:"shortDescription" swaggertype:"string"`
+	LongDescription     pgtype.Text   `json:"longDescription" swaggertype:"string"`
 	CourseType          db.CourseType `json:"courseType"`
 	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 	Template            bool          `json:"template"`
@@ -39,6 +41,8 @@ func (c CreateCourse) GetDBModel() (db.CreateCourseParams, error) {
 		SemesterTag:         c.SemesterTag,
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
+		ShortDescription:    c.ShortDescription,
+		LongDescription:     c.LongDescription,
 		CourseType:          c.CourseType,
 		Ects:                c.Ects,
 		Template:            c.Template,

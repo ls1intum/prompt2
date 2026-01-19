@@ -27,7 +27,7 @@ export const TeamDiagram = ({
   participationsWithAssessment,
   teams,
   showGrade = false,
-}: TeamDiagramProps): JSX.Element => {
+}: TeamDiagramProps) => {
   // Create a map from teamID to team name for quick lookup
   const teamNameMap = new Map(teams.map((team) => [team.id, team.name]))
 

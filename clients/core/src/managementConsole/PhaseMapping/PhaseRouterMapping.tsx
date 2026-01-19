@@ -17,15 +17,15 @@ const PhaseRouter: { [key: string]: React.FC } = {
   Application: ApplicationRoutes,
   Interview: InterviewRoutes,
   Matching: MatchingRoutes,
-  IntroCourseDeveloper: IntroCourseDeveloperRoutes,
+  'Intro Course Developer': IntroCourseDeveloperRoutes,
   IntroCourseTutor: IntroCourseTutorRoutes,
   Assessment: AssessmentRoutes,
-  DevOpsChallenge: DevOpsChallengeRoutes,
+  'DevOps Challenge': DevOpsChallengeRoutes,
   'Team Allocation': TeamAllocationRoutes,
   'Self Team Allocation': SelfTeamAllocationRoutes,
 }
 
-export const PhaseRouterMapping = (): JSX.Element => {
+export const PhaseRouterMapping = () => {
   const phaseId = useParams<{ phaseId: string }>().phaseId
   const courseId = useParams<{ courseId: string }>().courseId
   const { courses } = useCourseStore()

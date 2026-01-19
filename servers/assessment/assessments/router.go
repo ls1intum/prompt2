@@ -7,7 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,6 +22,8 @@ func setupAssessmentRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getStudentAssessment)
 	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), listAssessmentsByStudentInPhase)
 	assessmentRouter.DELETE("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteAssessment)
+
+	assessmentRouter.GET("/my-results", authMiddleware(promptSDK.CourseStudent), getMyAssessmentResults)
 }
 
 func listAssessmentsByCoursePhase(c *gin.Context) {
@@ -72,6 +77,60 @@ func getStudentAssessment(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, studentAssessment)
+}
+
+func getMyAssessmentResults(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	config, err := coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Do not expose results before they are released
+	if !config.ResultsReleased {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	courseParticipationID, err := utils.GetUserCourseParticipationID(c)
+	if err != nil {
+		handleError(c, utils.GetUserCourseParticipationIDErrorStatus(err), err)
+		return
+	}
+
+	// Students can only see results after they have a completed assessment
+	exists, err := assessmentCompletion.CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !exists {
+		c.Status(http.StatusNoContent)
+		return
+	}
+	completion, err := assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	if !completion.Completed {
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	results, err := GetStudentAssessmentResults(c, coursePhaseID, courseParticipationID, config)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
 }
 
 func deleteAssessment(c *gin.Context) {

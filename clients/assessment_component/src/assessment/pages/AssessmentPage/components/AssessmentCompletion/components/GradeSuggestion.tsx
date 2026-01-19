@@ -23,14 +23,24 @@ import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
   onGradeSuggestionChange: (value: string) => void
+  readOnly?: boolean
 }
 
-export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
+export const GradeSuggestion = ({
+  onGradeSuggestionChange,
+  readOnly = false,
+}: GradeSuggestionProps) => {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
     useStudentAssessmentStore()
+  const showAverages = !readOnly && (coursePhaseConfig?.evaluationResultsVisible ?? false)
+  const isCompleted = readOnly || (assessmentCompletion?.completed ?? false)
+  const gradeSuggestionValue =
+    assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
+      ? assessmentCompletion.gradeSuggestion.toFixed(1)
+      : ''
 
   return (
     <Card>
@@ -70,7 +80,7 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
               </div>
             )
           })()}
-        {studentScore && studentScore.scoreNumeric > 0 && (
+        {showAverages && studentScore && studentScore.scoreNumeric > 0 && (
           <div className='flex flex-row items-center gap-2'>
             <p className='text-sm text-muted-foreground'>Your Assessment Average:</p>
             <StudentScoreBadge
@@ -85,15 +95,15 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
         <p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
           Your Grade Suggestion
         </p>
-        {coursePhaseConfig?.gradeSuggestionVisible && (
+        {!readOnly && coursePhaseConfig?.gradeSuggestionVisible && (
           <p className='text-xs text-gray-500 dark:text-gray-400 my-1'>
-            Your suggestion will be visible to the student after the assessment deadline.
+            Your suggestion will be visible to the student once results are released.
           </p>
         )}
         <Select
-          value={assessmentCompletion?.gradeSuggestion.toFixed(1) ?? ''}
+          value={gradeSuggestionValue}
           onValueChange={onGradeSuggestionChange}
-          disabled={assessmentCompletion?.completed ?? false}
+          disabled={isCompleted}
         >
           <SelectTrigger>
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />

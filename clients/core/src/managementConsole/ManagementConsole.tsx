@@ -2,7 +2,7 @@ import { useKeycloak } from '../keycloak/useKeycloak'
 import { useAuthStore, useCourseStore } from '@tumaet/prompt-shared-state'
 import UnauthorizedPage from '@/components/UnauthorizedPage'
 import { AppSidebar } from './layout/Sidebar/AppSidebar'
-import { WelcomePage } from './shared/components/WelcomePage'
+import { EmptyPage } from './shared/components/EmptyPage'
 import {
   SidebarInset,
   SidebarProvider,
@@ -23,7 +23,7 @@ import { getOwnCourseIDs } from '@core/network/queries/ownCourseIDs'
 import { NavUserMenu } from './layout/Sidebar/CourseSwitchSidebar/components/NavUserMenu'
 import { Footer } from '@core/publicPages/shared/components/Footer'
 
-export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JSX.Element => {
+export const ManagementRoot = ({ children }: { children?: React.ReactNode }) => {
   const { keycloak, logout } = useKeycloak()
   const { user, permissions } = useAuthStore()
   const { courseId } = useParams<{ courseId: string }>()
@@ -99,7 +99,14 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
       if (fetchedCourses.length === 1) {
         navigate(`/management/course/${fetchedCourses[0].id}`)
       }
-    } else if (path === '/management/general' || (courseId && !courseExists)) {
+    } else if (
+      [
+        '/management/courses',
+        '/management/course_templates',
+        '/management/course_archive',
+      ].includes(path) ||
+      (courseId && !courseExists)
+    ) {
       removeSelectedCourseID()
     } else if (courseId && courseExists) {
       setSelectedCourseID(courseId)
@@ -150,7 +157,7 @@ export const ManagementRoot = ({ children }: { children?: React.ReactNode }): JS
             id='management-children'
             className='flex flex-1 flex-col gap-4 p-6 pt-20 overflow-auto'
           >
-            {hasChildren ? children : <WelcomePage />}
+            {hasChildren ? children : <EmptyPage />}
           </div>
           <Footer />
         </SidebarInset>

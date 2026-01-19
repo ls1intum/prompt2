@@ -24,9 +24,7 @@ interface AssessmentScoreUploadProps {
   applications: ApplicationParticipation[]
 }
 
-export default function AssessmentScoreUpload({
-  applications,
-}: AssessmentScoreUploadProps): JSX.Element {
+export default function AssessmentScoreUpload({ applications }: AssessmentScoreUploadProps) {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const [state, setState] = useState({

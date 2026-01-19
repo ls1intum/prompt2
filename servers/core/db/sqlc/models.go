@@ -237,16 +237,20 @@ type ApplicationQuestionText struct {
 }
 
 type Course struct {
-	ID                  uuid.UUID   `json:"id"`
-	Name                string      `json:"name"`
-	StartDate           pgtype.Date `json:"start_date"`
-	EndDate             pgtype.Date `json:"end_date"`
-	SemesterTag         pgtype.Text `json:"semester_tag"`
-	CourseType          CourseType  `json:"course_type"`
-	Ects                pgtype.Int4 `json:"ects"`
-	RestrictedData      []byte      `json:"restricted_data"`
-	StudentReadableData []byte      `json:"student_readable_data"`
-	Template            bool        `json:"template"`
+	ID                  uuid.UUID          `json:"id"`
+	Name                string             `json:"name"`
+	StartDate           pgtype.Date        `json:"start_date"`
+	EndDate             pgtype.Date        `json:"end_date"`
+	SemesterTag         pgtype.Text        `json:"semester_tag"`
+	CourseType          CourseType         `json:"course_type"`
+	Ects                pgtype.Int4        `json:"ects"`
+	RestrictedData      []byte             `json:"restricted_data"`
+	StudentReadableData []byte             `json:"student_readable_data"`
+	Template            bool               `json:"template"`
+	ShortDescription    pgtype.Text        `json:"short_description"`
+	LongDescription     pgtype.Text        `json:"long_description"`
+	Archived            bool               `json:"archived"`
+	ArchivedOn          pgtype.Timestamptz `json:"archived_on"`
 }
 
 type CourseParticipation struct {
@@ -280,10 +284,11 @@ type CoursePhaseParticipation struct {
 }
 
 type CoursePhaseType struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	InitialPhase bool      `json:"initial_phase"`
-	BaseUrl      string    `json:"base_url"`
+	ID           uuid.UUID   `json:"id"`
+	Name         string      `json:"name"`
+	InitialPhase bool        `json:"initial_phase"`
+	BaseUrl      string      `json:"base_url"`
+	Description  pgtype.Text `json:"description"`
 }
 
 type CoursePhaseTypeParticipationProvidedOutputDto struct {

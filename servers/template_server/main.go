@@ -55,6 +55,13 @@ func initKeycloak(queries db.Queries) {
 	}
 }
 
+// @title           PROMPT Template API
+// @version         1.0
+// @description     This is the template server of PROMPT.
+// @host            localhost:8086
+// @BasePath        /template-service/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
 	// establish database connection
 	databaseURL := getDatabaseURL()
@@ -80,10 +87,7 @@ func main() {
 	api := router.Group("template-service/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello from the template service"})
-	})
+	api.GET("/hello", helloTemplateServer)
 
 	copyApi := router.Group("template-service/api")
 	copy.InitCopyModule(copyApi, *query, conn)
@@ -97,4 +101,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// helloTemplateServer godoc
+// @Summary Template server health check
+// @Description Returns a simple hello message from the template server.
+// @Tags template
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/hello [get]
+func helloTemplateServer(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Hello from the template service",
+	})
 }

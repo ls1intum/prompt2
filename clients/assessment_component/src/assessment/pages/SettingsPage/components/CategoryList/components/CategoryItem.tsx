@@ -14,6 +14,7 @@ interface CategoryItemProps {
   setCategoryToEdit: (category: CategoryWithCompetencies | undefined) => void
   setCategoryToDelete: (categoryID: string | undefined) => void
   assessmentType: AssessmentType
+  disabled?: boolean
 }
 
 export const CategoryItem = ({
@@ -21,6 +22,7 @@ export const CategoryItem = ({
   setCategoryToEdit,
   setCategoryToDelete,
   assessmentType,
+  disabled = false,
 }: CategoryItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showAddCompetencyForm, setShowAddCompetencyForm] = useState(false)
@@ -48,6 +50,7 @@ export const CategoryItem = ({
             className='h-7 w-7'
             onClick={() => setCategoryToEdit(category)}
             aria-label={`Edit ${category.name}`}
+            disabled={disabled}
           >
             <Edit size={16} />
           </Button>
@@ -57,6 +60,7 @@ export const CategoryItem = ({
             className='h-7 w-7'
             onClick={() => setCategoryToDelete(category.id)}
             aria-label={`Delete ${category.name}`}
+            disabled={disabled}
           >
             <Trash2 size={16} className='text-destructive' />
           </Button>
@@ -75,6 +79,7 @@ export const CategoryItem = ({
                   competency={competency}
                   categoryID={category.id}
                   assessmentType={assessmentType}
+                  disabled={disabled}
                 />
               ))}
             </div>
@@ -88,6 +93,7 @@ export const CategoryItem = ({
             ) : (
               <Button
                 variant='outline'
+                disabled={disabled}
                 className='w-full border-dashed flex items-center justify-center p-4 hover:bg-muted/50 transition-colors'
                 onClick={() => setShowAddCompetencyForm(true)}
               >

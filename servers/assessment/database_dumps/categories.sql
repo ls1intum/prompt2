@@ -85,6 +85,7 @@ CREATE TABLE public.assessment_schema (
     description text,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    source_phase_id uuid,
     CONSTRAINT assessment_schema_pkey PRIMARY KEY (id)
 );
 
@@ -108,6 +109,8 @@ CREATE TABLE public.course_phase_config (
     evaluation_results_visible boolean NOT NULL DEFAULT true,
     grade_suggestion_visible boolean NOT NULL DEFAULT true,
     action_items_visible boolean NOT NULL DEFAULT true,
+    results_released boolean NOT NULL DEFAULT false,
+    grading_sheet_visible boolean NOT NULL DEFAULT false,
     FOREIGN KEY (assessment_schema_id) REFERENCES assessment_schema (id) ON DELETE CASCADE,
     FOREIGN KEY (self_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
     FOREIGN KEY (peer_evaluation_schema) REFERENCES assessment_schema (id) ON DELETE RESTRICT,
@@ -128,6 +131,29 @@ CREATE TABLE public.competency (
     short_name character varying(10)
 );
 
+CREATE TABLE public.assessment (
+    id uuid NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    assessed_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    author text DEFAULT ''::text NOT NULL,
+    examples text DEFAULT '' NOT NULL
+);
+
+CREATE TABLE public.evaluation (
+    id uuid NOT NULL,
+    course_participation_id uuid NOT NULL,
+    course_phase_id uuid NOT NULL,
+    competency_id uuid NOT NULL,
+    score_level public.score_level NOT NULL,
+    comment text,
+    evaluated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    author text DEFAULT ''::text NOT NULL
+);
+
 CREATE TABLE public.schema_migrations (version bigint NOT NULL, dirty boolean NOT NULL);
 
 -- Insert the default assessment schema
@@ -139,8 +165,8 @@ INSERT INTO public.assessment_schema (id, name, description)
 VALUES ('d5e6f7a8-b9c0-1234-5678-90abcdef1234', 'Tutor Evaluation Schema', 'This is the default tutor evaluation schema.');
 
 -- Insert some sample course_phase_config records
-INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema)
-VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, '2024-01-01 00:00:00+00', '2025-12-31 23:59:59+00', 'd5e6f7a8-b9c0-1234-5678-90abcdef1234');
+INSERT INTO public.course_phase_config (assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible)
+VALUES ('550e8400-e29b-41d4-a716-446655440000', '4179d58a-d00d-4fa7-94a5-397bc69fab02', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', true, '550e8400-e29b-41d4-a716-446655440000', '2025-12-31 23:59:59+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', '2024-01-01 00:00:00+00', true, '2024-01-01 00:00:00+00', '2025-12-31 23:59:59+00', 'd5e6f7a8-b9c0-1234-5678-90abcdef1234', true, true, true, true, true);
 
 INSERT INTO public.category
 VALUES (
@@ -298,11 +324,23 @@ ADD CONSTRAINT category_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.competency
 ADD CONSTRAINT competency_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.assessment
+ADD CONSTRAINT assessment_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.evaluation
+ADD CONSTRAINT evaluation_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.schema_migrations
 ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
 ALTER TABLE ONLY public.competency
 ADD CONSTRAINT competency_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.category (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.assessment
+ADD CONSTRAINT assessment_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.evaluation
+ADD CONSTRAINT evaluation_competency_id_fkey FOREIGN KEY (competency_id) REFERENCES public.competency (id) ON DELETE CASCADE;
 
 --
 -- Competency Map Table (added for GetCategoriesWithCompetencies support)

@@ -13,7 +13,7 @@ export type SeatAssignment = {
   tutorEmail: string
 }
 
-export const StudentSeatAssignmentDisplay = (): JSX.Element => {
+export const StudentSeatAssignmentDisplay = () => {
   const { seatAssignment } = useIntroCourseStore()
 
   if (!seatAssignment) {

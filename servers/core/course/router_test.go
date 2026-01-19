@@ -126,6 +126,64 @@ func (suite *CourseRouterTestSuite) TestCreateCourse() {
 	assert.Equal(suite.T(), "practical course", createdCourse.CourseType, "Course type should match")
 }
 
+func (suite *CourseRouterTestSuite) TestArchiveCourse() {
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+
+	// Send archive request
+	updateRequest := courseDTO.CourseArchiveStatus{
+		Archived: true,
+	}
+	body, _ := json.Marshal(updateRequest)
+	req, _ := http.NewRequest("PUT", "/api/courses/"+courseID+"/archive", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+
+	// Verify DB state
+	courseUUID := uuid.MustParse(courseID)
+	updatedCourse, err := CourseServiceSingleton.queries.GetCourse(suite.ctx, courseUUID)
+	assert.NoError(suite.T(), err)
+	assert.True(suite.T(), updatedCourse.Archived, "Course should be archived")
+	assert.True(suite.T(), updatedCourse.ArchivedOn.Valid, "ArchivedOn should be set")
+}
+
+func (suite *CourseRouterTestSuite) TestUnarchiveCourse() {
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+
+	// FIRST archive the course
+	firstUpdate := courseDTO.CourseArchiveStatus{
+		Archived: true,
+	}
+	body1, _ := json.Marshal(firstUpdate)
+	req1, _ := http.NewRequest("PUT", "/api/courses/"+courseID+"/archive", bytes.NewBuffer(body1))
+	req1.Header.Set("Content-Type", "application/json")
+	resp1 := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp1, req1)
+	assert.Equal(suite.T(), http.StatusOK, resp1.Code)
+
+	// THEN unarchive it
+	secondUpdate := courseDTO.CourseArchiveStatus{
+		Archived: false,
+	}
+	body2, _ := json.Marshal(secondUpdate)
+	req2, _ := http.NewRequest("PUT", "/api/courses/"+courseID+"/archive", bytes.NewBuffer(body2))
+	req2.Header.Set("Content-Type", "application/json")
+	resp2 := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp2, req2)
+	assert.Equal(suite.T(), http.StatusOK, resp2.Code)
+
+	// Verify DB state
+	courseUUID := uuid.MustParse(courseID)
+	updatedCourse, err := CourseServiceSingleton.queries.GetCourse(suite.ctx, courseUUID)
+	assert.NoError(suite.T(), err)
+	assert.False(suite.T(), updatedCourse.Archived, "Course should be unarchived")
+	assert.False(suite.T(), updatedCourse.ArchivedOn.Valid, "ArchivedOn should be NULL")
+}
+
 func (suite *CourseRouterTestSuite) TestUpdateCoursePhaseOrder() {
 	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
 	firstUUID := uuid.MustParse("bd727106-2dc0-4c44-a804-2efde26101ae")

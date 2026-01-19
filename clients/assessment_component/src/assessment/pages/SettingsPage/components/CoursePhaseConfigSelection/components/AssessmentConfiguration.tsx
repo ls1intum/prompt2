@@ -7,8 +7,12 @@ import {
   SelectValue,
   Label,
   DatePickerWithRange,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
-import { FileText, Calendar } from 'lucide-react'
+import { FileText, Calendar, Lock } from 'lucide-react'
 
 import { AssessmentType } from '../../../../../interfaces/assessmentType'
 import { AssessmentSchema } from '../../../../../interfaces/assessmentSchema'
@@ -26,6 +30,7 @@ interface AsssessmentConfigurationProps {
   schemas: AssessmentSchema[]
   configMutation: any
   setError: (error: string | undefined) => void
+  hasAssessmentData?: boolean
 }
 
 export const AssessmentConfiguration = ({
@@ -39,6 +44,7 @@ export const AssessmentConfiguration = ({
   schemas,
   configMutation,
   setError,
+  hasAssessmentData = false,
 }: AsssessmentConfigurationProps) => {
   return (
     <div className='grid xl:grid-cols-3 gap-4'>
@@ -51,12 +57,24 @@ export const AssessmentConfiguration = ({
             {type === AssessmentType.TUTOR && 'Tutor Evaluation Schema'}
             {type === AssessmentType.ASSESSMENT && 'Assessment Schema'}
           </Label>
+          {hasAssessmentData && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Lock className='h-4 w-4 text-muted-foreground' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Cannot change schema - assessment or evaluation data exists</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <div className='flex gap-2'>
           <Select
             value={assessmentSchemaId}
             onValueChange={setAssessmentSchemaId}
-            disabled={configMutation.isPending}
+            disabled={configMutation.isPending || hasAssessmentData}
           >
             <SelectTrigger className='flex-1'>
               <SelectValue placeholder='Select a schema...' />
@@ -69,7 +87,7 @@ export const AssessmentConfiguration = ({
               ))}
             </SelectContent>
           </Select>
-          <CreateAssessmentSchemaDialog onError={setError} />
+          <CreateAssessmentSchemaDialog onError={setError} disabled={hasAssessmentData} />
         </div>
       </div>
 

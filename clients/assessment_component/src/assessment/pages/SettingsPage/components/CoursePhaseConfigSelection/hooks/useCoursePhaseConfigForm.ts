@@ -9,6 +9,7 @@ export interface MainConfigState {
   evaluationResultsVisible: boolean
   gradeSuggestionVisible: boolean
   actionItemsVisible: boolean
+  gradingSheetVisible: boolean
 }
 
 export const useCoursePhaseConfigForm = () => {
@@ -18,6 +19,7 @@ export const useCoursePhaseConfigForm = () => {
   const [evaluationResultsVisible, setEvaluationResultsVisible] = useState<boolean>(false)
   const [gradeSuggestionVisible, setGradeSuggestionVisible] = useState<boolean>(true)
   const [actionItemsVisible, setActionItemsVisible] = useState<boolean>(true)
+  const [gradingSheetVisible, setGradingSheetVisible] = useState<boolean>(false)
 
   const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
 
@@ -29,6 +31,7 @@ export const useCoursePhaseConfigForm = () => {
       setEvaluationResultsVisible(config.evaluationResultsVisible || false)
       setGradeSuggestionVisible(config.gradeSuggestionVisible ?? true)
       setActionItemsVisible(config.actionItemsVisible ?? true)
+      setGradingSheetVisible(config.gradingSheetVisible ?? false)
     }
   }, [config])
 
@@ -39,6 +42,7 @@ export const useCoursePhaseConfigForm = () => {
     evaluationResultsVisible,
     gradeSuggestionVisible,
     actionItemsVisible,
+    gradingSheetVisible,
   }
 
   const hasMainConfigChanges = (originalConfig?: CoursePhaseConfig) => {
@@ -52,7 +56,8 @@ export const useCoursePhaseConfigForm = () => {
         (originalConfig.deadline ? new Date(originalConfig.deadline).getTime() : undefined) ||
       evaluationResultsVisible !== (originalConfig.evaluationResultsVisible || false) ||
       gradeSuggestionVisible !== (originalConfig.gradeSuggestionVisible ?? true) ||
-      actionItemsVisible !== (originalConfig.actionItemsVisible ?? true)
+      actionItemsVisible !== (originalConfig.actionItemsVisible ?? true) ||
+      gradingSheetVisible !== (originalConfig.gradingSheetVisible ?? false)
     )
   }
 
@@ -69,6 +74,8 @@ export const useCoursePhaseConfigForm = () => {
     setGradeSuggestionVisible,
     actionItemsVisible,
     setActionItemsVisible,
+    gradingSheetVisible,
+    setGradingSheetVisible,
     mainConfigState,
     hasMainConfigChanges,
   }

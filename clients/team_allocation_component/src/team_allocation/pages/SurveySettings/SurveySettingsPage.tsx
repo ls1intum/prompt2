@@ -15,7 +15,7 @@ import { getConfig } from '../../network/queries/getConfig'
 import { MissingSettings, MissingSettingsItem } from '@/components/MissingSettings'
 import { useEffect, useState } from 'react'
 
-export const SurveySettingsPage = (): JSX.Element => {
+export const SurveySettingsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {

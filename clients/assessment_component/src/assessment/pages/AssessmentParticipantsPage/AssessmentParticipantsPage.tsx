@@ -13,11 +13,10 @@ import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
-import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+import { useGetAllAssessmentCompletions } from '../hooks/useGetAllAssessmentCompletions'
 import { getAllEvaluationCompletionsInPhase } from '../../network/queries/getAllEvaluationCompletionsInPhase'
 
 import { AssessmentType } from '../../interfaces/assessmentType'
-import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
@@ -32,7 +31,7 @@ import {
   createTutorEvalStatusColumn,
 } from './columns'
 
-export const AssessmentParticipantsPage = (): JSX.Element => {
+export const AssessmentParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
@@ -47,10 +46,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     isPending: isAssessmentCompletionsPending,
     isError: isAssessmentCompletionsError,
     refetch: refetchAssessmentCompletions,
-  } = useQuery<AssessmentCompletion[]>({
-    queryKey: ['assessmentCompletions', phaseId],
-    queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
-  })
+  } = useGetAllAssessmentCompletions()
 
   const {
     data: evaluationCompletions,

@@ -19,6 +19,13 @@ type AssessmentSchemaService struct {
 
 var AssessmentSchemaServiceSingleton *AssessmentSchemaService
 
+func NewAssessmentSchemaService(queries db.Queries, conn *pgxpool.Pool) *AssessmentSchemaService {
+	return &AssessmentSchemaService{
+		queries: queries,
+		conn:    conn,
+	}
+}
+
 func CreateAssessmentSchema(ctx context.Context, req assessmentSchemaDTO.CreateAssessmentSchemaRequest) (assessmentSchemaDTO.AssessmentSchema, error) {
 	tx, err := AssessmentSchemaServiceSingleton.conn.Begin(ctx)
 	if err != nil {
@@ -36,9 +43,10 @@ func CreateAssessmentSchema(ctx context.Context, req assessmentSchemaDTO.CreateA
 	}
 
 	err = qtx.CreateAssessmentSchema(ctx, db.CreateAssessmentSchemaParams{
-		ID:          schemaID,
-		Name:        req.Name,
-		Description: description,
+		ID:            schemaID,
+		Name:          req.Name,
+		Description:   description,
+		SourcePhaseID: pgtype.UUID{Valid: false},
 	})
 	if err != nil {
 		log.WithError(err).Error("Failed to create assessment schema")
@@ -143,4 +151,116 @@ func GetCoursePhasesByAssessmentSchema(ctx context.Context, assessmentSchemaID u
 	}
 
 	return coursePhaseIDs, nil
+}
+
+func CheckSchemaUsageInOtherPhases(ctx context.Context, schemaID uuid.UUID, currentCoursePhaseID uuid.UUID) (bool, error) {
+	used, err := AssessmentSchemaServiceSingleton.queries.CheckAssessmentSchemaUsageInOtherPhases(ctx, db.CheckAssessmentSchemaUsageInOtherPhasesParams{
+		AssessmentSchemaID: schemaID,
+		CoursePhaseID:      currentCoursePhaseID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to check schema usage in other phases")
+		return false, err
+	}
+
+	return used, nil
+}
+
+func CopyAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, courseIdentifierPrefix string) (assessmentSchemaDTO.AssessmentSchema, error) {
+	tx, err := AssessmentSchemaServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return assessmentSchemaDTO.AssessmentSchema{}, err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentSchemaServiceSingleton.queries.WithTx(tx)
+
+	copiedSchema, err := qtx.CopyAssessmentSchema(ctx, db.CopyAssessmentSchemaParams{
+		CoursePhaseID:          coursePhaseID,
+		CourseIdentifierPrefix: pgtype.Text{String: courseIdentifierPrefix, Valid: true},
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to copy assessment schema")
+		return assessmentSchemaDTO.AssessmentSchema{}, err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return assessmentSchemaDTO.AssessmentSchema{}, err
+	}
+
+	schema := assessmentSchemaDTO.MapDBAssessmentSchemaToDTOAssessmentSchema(db.AssessmentSchema(copiedSchema))
+
+	return schema, nil
+}
+
+func CheckSchemaOwnership(ctx context.Context, schemaID uuid.UUID, coursePhaseID uuid.UUID) (bool, error) {
+	isOwner, err := AssessmentSchemaServiceSingleton.queries.CheckSchemaOwnership(ctx, db.CheckSchemaOwnershipParams{
+		ID:            schemaID,
+		SourcePhaseID: pgtype.UUID{Bytes: coursePhaseID, Valid: true},
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to check schema ownership")
+		return false, err
+	}
+
+	return isOwner, nil
+}
+
+func GetConsumerPhases(ctx context.Context, schemaID uuid.UUID, ownerPhaseID uuid.UUID) ([]uuid.UUID, error) {
+	phases, err := AssessmentSchemaServiceSingleton.queries.GetConsumerPhases(ctx, db.GetConsumerPhasesParams{
+		AssessmentSchemaID: schemaID,
+		CoursePhaseID:      ownerPhaseID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to get consumer phases")
+		return nil, err
+	}
+
+	return phases, nil
+}
+
+func CheckPhaseHasAssessmentData(ctx context.Context, phaseID uuid.UUID, schemaID uuid.UUID) (bool, error) {
+	hasData, err := AssessmentSchemaServiceSingleton.queries.CheckPhaseHasAssessmentData(ctx, db.CheckPhaseHasAssessmentDataParams{
+		CoursePhaseID:      phaseID,
+		AssessmentSchemaID: schemaID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to check if phase has assessment data")
+		return false, err
+	}
+
+	return hasData.Bool, nil
+}
+
+func UpdateAssessmentAndEvaluationCompetencies(ctx context.Context, coursePhaseID uuid.UUID, oldCompetencyID uuid.UUID, newCompetencyID uuid.UUID) error {
+	tx, err := AssessmentSchemaServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := AssessmentSchemaServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.UpdateAssessmentCompetencies(ctx, db.UpdateAssessmentCompetenciesParams{
+		CoursePhaseID:  coursePhaseID,
+		CompetencyID:   oldCompetencyID,
+		CompetencyID_2: newCompetencyID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to update assessment competencies")
+		return err
+	}
+
+	err = qtx.UpdateEvaluationCompetencies(ctx, db.UpdateEvaluationCompetenciesParams{
+		CoursePhaseID:  coursePhaseID,
+		CompetencyID:   oldCompetencyID,
+		CompetencyID_2: newCompetencyID,
+	})
+	if err != nil {
+		log.WithError(err).Error("Failed to update evaluation competencies")
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

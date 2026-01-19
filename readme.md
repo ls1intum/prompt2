@@ -93,6 +93,16 @@ This section is for **developers and contributors** looking to run PROMPT locall
 - [Go](https://go.dev/)
 - [Docker](https://www.docker.com/)
 
+#### API Spec Generation (Swagger)
+
+We generate and commit swagger specs for the Go servers. To avoid forgetting this, install the repo-managed git hooks:
+
+```bash
+./scripts/install-githooks.sh
+```
+
+When you commit changes under `servers/core/` or `servers/template_server/`, the pre-commit hook regenerates and stages the swagger docs. Ensure `swag` is available on your PATH (`go install github.com/swaggo/swag/cmd/swag@latest`).
+
 #### Running the Clients
 
 1. Navigate to the client directory:

@@ -20,7 +20,7 @@ interface MissingSettingsProps {
   elements: MissingSettingsItem[]
 }
 
-export const MissingSettings = ({ elements }: MissingSettingsProps): JSX.Element => {
+export const MissingSettings = ({ elements }: MissingSettingsProps) => {
   return (
     <>
       {elements.length > 0 && (

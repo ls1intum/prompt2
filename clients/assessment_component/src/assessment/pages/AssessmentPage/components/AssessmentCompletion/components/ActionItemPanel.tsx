@@ -25,7 +25,12 @@ import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
 import { DeleteActionItemDialog } from './DeleteActionItemDialog'
 import { ItemRow } from '../../../../components/ItemRow'
 
-export function ActionItemPanel() {
+interface ActionItemPanelProps {
+  readOnly?: boolean
+  actionItems?: ActionItem[]
+}
+
+export function ActionItemPanel({ readOnly = false, actionItems }: ActionItemPanelProps) {
   const { phaseId, courseParticipationID } = useParams<{
     phaseId: string
     courseParticipationID: string
@@ -39,16 +44,17 @@ export function ActionItemPanel() {
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { assessmentCompletion } = useStudentAssessmentStore()
 
-  const completed = assessmentCompletion?.completed ?? false
+  const completed = readOnly || assessmentCompletion?.completed
 
   const {
-    data: actionItems = [],
+    data: fetchedActionItems = [],
     isPending: isGetActionItemsPending,
     isError,
     refetch,
   } = useQuery<ActionItem[]>({
     queryKey: ['actionItems', phaseId, courseParticipationID],
-    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ' '),
+    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ''),
+    enabled: !readOnly,
   })
 
   const { mutate: createActionItem, isPending: isCreatePending } = useCreateActionItem(setError)
@@ -57,6 +63,8 @@ export function ActionItemPanel() {
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
+
+  const resolvedActionItems = readOnly ? (actionItems ?? []) : fetchedActionItems
 
   const handleAddActionItem = async () => {
     if (completed) return
@@ -76,7 +84,7 @@ export function ActionItemPanel() {
   const handleTextBlur = (itemId: string) => {
     if (completed) return
 
-    const item = actionItems.find((it) => it.id === itemId)
+    const item = resolvedActionItems.find((it) => it.id === itemId)
     const value = itemValues[itemId]
 
     if (item && value !== undefined && value.trim() !== item.action.trim()) {
@@ -129,7 +137,7 @@ export function ActionItemPanel() {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
   }
 
-  if (isGetActionItemsPending) {
+  if (isGetActionItemsPending && !readOnly) {
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -142,14 +150,17 @@ export function ActionItemPanel() {
       <Card>
         <CardHeader>
           <CardTitle>Action Items</CardTitle>
-          {coursePhaseConfig?.actionItemsVisible && (
+          {coursePhaseConfig?.actionItemsVisible && !readOnly && (
             <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-              These action items will be visible to the student after the assessment deadline.
+              These action items will be visible to the student once results are released.
             </p>
           )}
         </CardHeader>
         <CardContent className='space-y-2'>
-          {actionItems.map((item) => (
+          {readOnly && resolvedActionItems.length === 0 && (
+            <div className='text-sm text-muted-foreground'>No action items available.</div>
+          )}
+          {resolvedActionItems.map((item) => (
             <ItemRow
               key={item.id}
               type='action'
@@ -160,28 +171,30 @@ export function ActionItemPanel() {
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
-              isDisabled={completed}
+              isDisabled={completed || readOnly}
             />
           ))}
 
-          <Button
-            variant='outline'
-            className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-            onClick={handleAddActionItem}
-            disabled={isPending || completed}
-            title={
-              completed
-                ? 'Assessment completed - cannot add new action items'
-                : 'Add new action item'
-            }
-          >
-            {isCreatePending ? (
-              <Loader2 className='h-5 w-5 mr-2 animate-spin text-muted-foreground' />
-            ) : (
-              <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
-            )}
-            <span className='text-muted-foreground'>Add Action Item</span>
-          </Button>
+          {!completed && (
+            <Button
+              variant='outline'
+              className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
+              onClick={handleAddActionItem}
+              disabled={isPending || completed}
+              title={
+                completed
+                  ? 'Assessment completed - cannot add new action items'
+                  : 'Add new action item'
+              }
+            >
+              {isCreatePending ? (
+                <Loader2 className='h-5 w-5 mr-2 animate-spin text-muted-foreground' />
+              ) : (
+                <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
+              )}
+              <span className='text-muted-foreground'>Add Action Item</span>
+            </Button>
+          )}
 
           {error && (
             <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>

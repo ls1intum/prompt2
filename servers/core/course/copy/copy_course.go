@@ -11,7 +11,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,6 +23,16 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 	sourceCourse, err := CourseCopyServiceSingleton.queries.GetCourse(c, sourceCourseID)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch source course: %w", err)
+	}
+
+	shortDescription := sourceCourse.ShortDescription
+	if courseVariables.ShortDescription.Valid {
+		shortDescription = courseVariables.ShortDescription
+	}
+
+	longDescription := sourceCourse.LongDescription
+	if courseVariables.LongDescription.Valid {
+		longDescription = courseVariables.LongDescription
 	}
 
 	restrictedData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.RestrictedData)
@@ -43,6 +53,8 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 			SemesterTag:         courseVariables.SemesterTag,
 			RestrictedData:      restrictedData,
 			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
 			CourseType:          sourceCourse.CourseType,
 			Ects:                sourceCourse.Ects,
 		}
@@ -54,6 +66,8 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 			SemesterTag:         courseVariables.SemesterTag,
 			RestrictedData:      restrictedData,
 			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
 			CourseType:          sourceCourse.CourseType,
 			Ects:                sourceCourse.Ects,
 		}
@@ -63,7 +77,7 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer utils.DeferRollback(tx, c)
+	defer promptSDK.DeferDBRollback(tx, c)
 	qtx := CourseCopyServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := newCourse.GetDBModel()

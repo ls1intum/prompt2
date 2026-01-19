@@ -59,12 +59,19 @@ func listCompetenciesByCategory(c *gin.Context) {
 }
 
 func createCompetency(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req competencyDTO.CreateCompetencyRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err := CreateCompetency(c, req)
+
+	err = CreateCompetency(c, coursePhaseID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -78,12 +85,20 @@ func updateCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req competencyDTO.UpdateCompetencyRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err = UpdateCompetency(c, competencyID, req)
+
+	err = UpdateCompetency(c, competencyID, coursePhaseID, req)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -97,7 +112,15 @@ func deleteCompetency(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	if err := DeleteCompetency(c, competencyID); err != nil {
+
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = DeleteCompetency(c, competencyID, coursePhaseID)
+	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import { LandingPage } from './publicPages/landingPage/LandingPage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { KeycloakProvider } from './keycloak/KeycloakProvider'
@@ -19,6 +19,9 @@ import { Role } from '@tumaet/prompt-shared-state'
 import { env } from '@/env'
 import { parseURL } from './utils/parseURL'
 import { CourseSettingsPage } from './managementConsole/courseSettings/CourseSettingsPage'
+import { ActiveCoursesPage } from './managementConsole/pages/ActiveCoursesPage'
+import { TemplateCoursesPage } from './managementConsole/pages/TemplateCoursesPage'
+import { ArchivedCoursesPage } from './managementConsole/pages/ArchivedCoursesPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +34,7 @@ const queryClient = new QueryClient({
 const keycloakUrl = parseURL(env.KEYCLOAK_HOST)
 const keycloakRealmName = env.KEYCLOAK_REALM_NAME
 
-export const App = (): JSX.Element => {
+export const App = () => {
   return (
     <KeycloakProvider keycloakRealmName={keycloakRealmName} keycloakUrl={keycloakUrl}>
       <QueryClientProvider client={queryClient}>
@@ -44,7 +47,30 @@ export const App = (): JSX.Element => {
             <Route path='/apply/:phaseId' element={<ApplicationLoginPage />} />
             <Route path='/apply/:phaseId/authenticated' element={<ApplicationAuthenticated />} />
             <Route path='/management' element={<ManagementRoot />} />
-            <Route path='/management/general' element={<ManagementRoot />} />
+            <Route
+              path='/management/courses'
+              element={
+                <ManagementRoot>
+                  <ActiveCoursesPage />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course_templates'
+              element={
+                <ManagementRoot>
+                  <TemplateCoursesPage />
+                </ManagementRoot>
+              }
+            />
+            <Route
+              path='/management/course_archive'
+              element={
+                <ManagementRoot>
+                  <ArchivedCoursesPage />
+                </ManagementRoot>
+              }
+            />
             <Route
               path='/management/course/:courseId'
               element={

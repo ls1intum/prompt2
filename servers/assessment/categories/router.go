@@ -1,6 +1,7 @@
 package categories
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func setupCategoryRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 	categoryRouter := routerGroup.Group("/category")
 
 	categoryRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllCategories)
-	categoryRouter.GET("/assessment/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getCategoriesWithCompetencies)
+	categoryRouter.GET("/assessment/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getCategoriesWithCompetencies)
 	categoryRouter.GET("/self/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getSelfEvaluationCategoriesWithCompetencies)
 	categoryRouter.GET("/peer/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getPeerEvaluationCategoriesWithCompetencies)
 	categoryRouter.GET("/tutor/with-competencies", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTutorEvaluationCategoriesWithCompetencies)
@@ -83,6 +84,12 @@ func updateCategory(c *gin.Context) {
 }
 
 func deleteCategory(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	categoryID, err := uuid.Parse(c.Param("categoryID"))
 	if err != nil {
 		log.Error("Error parsing categoryID: ", err)
@@ -90,7 +97,7 @@ func deleteCategory(c *gin.Context) {
 		return
 	}
 
-	err = DeleteCategory(c, categoryID)
+	err = DeleteCategory(c, categoryID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -109,6 +116,11 @@ func getCategoriesWithCompetencies(c *gin.Context) {
 	if err != nil {
 		log.Error("Error getting course phase config: ", err)
 		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	if isStudent(c) && (!config.ResultsReleased || !config.GradingSheetVisible) {
+		handleError(c, http.StatusForbidden, fmt.Errorf("assessment results are not released yet"))
 		return
 	}
 
@@ -192,4 +204,16 @@ func getTutorEvaluationCategoriesWithCompetencies(c *gin.Context) {
 
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, gin.H{"error": err.Error()})
+}
+
+func isStudent(c *gin.Context) bool {
+	userRolesRaw, exists := c.Get("userRoles")
+	if !exists {
+		return false
+	}
+	userRoles, ok := userRolesRaw.(map[string]bool)
+	if !ok {
+		return false
+	}
+	return userRoles[promptSDK.CourseStudent]
 }

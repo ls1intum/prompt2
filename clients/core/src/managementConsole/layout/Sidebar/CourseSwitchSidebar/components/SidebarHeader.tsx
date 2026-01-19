@@ -15,7 +15,7 @@ const SidebarHeaderComponent = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const isActive = location.pathname.startsWith('/management/general')
+  const isActive = location.pathname.startsWith('/management/courses')
 
   return (
     <SidebarHeader>
@@ -31,7 +31,7 @@ const SidebarHeaderComponent = () => {
             }}
             onClick={() => {
               setOpen(true)
-              navigate('/management/general')
+              navigate('/management/courses')
             }}
             isActive={isActive}
           >

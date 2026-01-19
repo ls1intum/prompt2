@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import {
   Button,
   Input,
+  Textarea,
   Form,
   FormControl,
   FormDescription,
@@ -41,6 +42,8 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
       courseType: initialValues?.courseType || '',
       ects: initialValues?.ects ?? undefined,
       semesterTag: initialValues?.semesterTag || '',
+      shortDescription: initialValues?.shortDescription || '',
+      longDescription: initialValues?.longDescription || '',
     },
   })
 
@@ -158,6 +161,38 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
               <FormDescription>
                 e.g. ios2425 or ws2425 (lowercase letters and numbers only)
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='shortDescription'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Short Description</FormLabel>
+              <FormControl>
+                <Input placeholder='One sentence summary' {...field} className='w-full' />
+              </FormControl>
+              <FormDescription>Shown in course listings (max. 255 characters).</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='longDescription'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Long Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Share more context about this course (optional)'
+                  className='w-full'
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

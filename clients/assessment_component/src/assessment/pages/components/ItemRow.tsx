@@ -86,16 +86,18 @@ export function ItemRow({
         />
       </div>
 
-      <Button
-        variant='ghost'
-        size='icon'
-        className=''
-        onClick={() => !isDisabled && onDelete(item.id)}
-        disabled={isPending || isDisabled}
-        title={getDeleteTitle()}
-      >
-        <Trash2 className='h-4 w-4 text-destructive' />
-      </Button>
+      {!isDisabled && (
+        <Button
+          variant='ghost'
+          size='icon'
+          className=''
+          onClick={() => onDelete(item.id)}
+          disabled={isPending}
+          title={getDeleteTitle()}
+        >
+          <Trash2 className='h-4 w-4 text-destructive' />
+        </Button>
+      )}
     </div>
   )
 }

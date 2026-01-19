@@ -16,6 +16,16 @@ func setupTemplateRouter(routerGroup *gin.RouterGroup, authMiddleware func(allow
 	templateRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTemplateInfo)
 }
 
+// getTemplateInfo godoc
+// @Summary Get template info
+// @Description Get template-specific info for a course phase.
+// @Tags template
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {string} string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/info [get]
 func getTemplateInfo(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

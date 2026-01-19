@@ -16,8 +16,9 @@ import { AssessmentProfile } from './components/AssessmentProfile'
 import { CategoryAssessment } from './components/CategoryAssessment'
 import { AssessmentCompletion } from './components/AssessmentCompletion/AssessmentCompletion'
 import { FeedbackItemsPanel } from './components/FeedbackItemsPanel/FeedbackItemsPanel'
+import { PassStatusControls } from './components/PassStatusControls'
 
-export const AssessmentPage = (): JSX.Element => {
+export const AssessmentPage = () => {
   const { courseParticipationID } = useParams<{ courseParticipationID: string }>()
 
   const { setStudentAssessment, setAssessmentParticipation } = useStudentAssessmentStore()
@@ -104,6 +105,8 @@ export const AssessmentPage = (): JSX.Element => {
       )}
 
       <AssessmentCompletion />
+
+      <PassStatusControls courseParticipationID={courseParticipationID} />
     </div>
   )
 }

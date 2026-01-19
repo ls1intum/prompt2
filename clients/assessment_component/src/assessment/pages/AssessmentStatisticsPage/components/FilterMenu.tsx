@@ -26,7 +26,7 @@ interface FilterMenuProps {
   teams: Team[]
 }
 
-export const FilterMenu = ({ filters, setFilters, teams }: FilterMenuProps): JSX.Element => {
+export const FilterMenu = ({ filters, setFilters, teams }: FilterMenuProps) => {
   const handleGenderFilterChange = (gender: Gender) => {
     setFilters((prevFilters) => {
       const currentGenders = prevFilters.genders || []

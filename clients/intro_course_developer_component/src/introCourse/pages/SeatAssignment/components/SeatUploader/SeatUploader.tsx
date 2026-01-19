@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, type ChangeEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react'
-import type { JSX } from 'react/jsx-runtime'
 import type { Seat } from '../../../../interfaces/Seat'
 import { createSeatPlan } from '../../../../network/mutations/createSeatPlan'
 import { deleteSeatPlan } from '../../../../network/mutations/deleteSeatPlan'
@@ -28,7 +27,7 @@ interface SeatUploaderProps {
   existingSeats: Seat[]
 }
 
-export const SeatUploader = ({ existingSeats }: SeatUploaderProps): JSX.Element => {
+export const SeatUploader = ({ existingSeats }: SeatUploaderProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -12,7 +13,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -152,7 +153,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
@@ -188,7 +189,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -288,7 +289,7 @@ func UpdateParticipationDataGraph(ctx context.Context, courseID uuid.UUID, graph
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -323,7 +324,7 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -351,6 +352,44 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	}
 	return nil
 
+}
+
+func UpdateCourseArchiveStatus(
+	ctx context.Context,
+	courseID uuid.UUID,
+	archived bool,
+) (courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	var archivedOn pgtype.Timestamptz
+	if archived {
+		archivedOn = pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+
+	res, err := CourseServiceSingleton.queries.ArchiveCourse(
+		ctxWithTimeout,
+		db.ArchiveCourseParams{
+			ID:         courseID,
+			Archived:   archived,
+			ArchivedOn: archivedOn,
+		},
+	)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to update course archive status")
+	}
+
+	course, err := courseDTO.GetCourseDTOFromDBModel(res)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to map course dto")
+	}
+
+	return course, nil
 }
 
 func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData courseDTO.UpdateCourseData) error {

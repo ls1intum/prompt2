@@ -18,7 +18,6 @@ import { EvaluationInfoHeader } from './components/EvaluationInfoHeader'
 import { SelfEvaluationStatusCard } from './components/SelfEvaluationStatusCard'
 import { PeerEvaluationStatusCard } from './components/PeerEvaluationStatusCard'
 import { TutorEvaluationStatusCard } from './components/TutorEvaluationStatusCard'
-import { ActionItemsAndGradeSuggestion } from './components/ActionItemsAndGradeSuggestion'
 import { TeamBadge } from '../components/badges'
 
 export const EvaluationOverviewPage = () => {
@@ -110,144 +109,137 @@ export const EvaluationOverviewPage = () => {
   const allEvaluationsCompleted =
     isSelfEvaluationCompleted && isPeerEvaluationCompleted && isTutorEvaluationCompleted
 
-  const isAssessmentDeadlinePassed = coursePhaseConfig?.deadline
-    ? now >= new Date(coursePhaseConfig.deadline)
-    : false
-
   return (
-    <div className='min-h-screen transition-colors'>
-      <div className='max-w-6xl mx-auto px-4 py-6'>
-        <ManagementPageHeader>
-          {isAssessmentDeadlinePassed ? 'Results' : 'Evaluation'}
-        </ManagementPageHeader>
+    <div className=''>
+      <div className='mx-auto px-4 py-6'>
+        <ManagementPageHeader>Assessment Results & Evaluation</ManagementPageHeader>
 
-        <EvaluationInfoHeader allEvaluationsCompleted={allEvaluationsCompleted} />
+        <EvaluationInfoHeader
+          allEvaluationsCompleted={allEvaluationsCompleted}
+          resultsLink={`${path}/results`}
+        />
 
-        {!isAssessmentDeadlinePassed && (
-          <div>
-            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8'>
-              {selfEvaluationStarted && (
-                <SelfEvaluationStatusCard isCompleted={isSelfEvaluationCompleted} />
-              )}
-
-              {peerEvaluationStarted && team && (
-                <PeerEvaluationStatusCard
-                  completedEvaluations={completedPeerEvaluations}
-                  totalEvaluations={totalPeerEvaluations}
-                  isCompleted={isPeerEvaluationCompleted}
-                />
-              )}
-
-              {tutorEvaluationStarted && team && (
-                <TutorEvaluationStatusCard
-                  completedEvaluations={completedTutorEvaluations}
-                  totalEvaluations={totalTutorEvaluations}
-                  isCompleted={isTutorEvaluationCompleted}
-                />
-              )}
-            </div>
-
+        <div>
+          <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8'>
             {selfEvaluationStarted && (
-              <div className='mb-8'>
-                <div className='flex items-center gap-3 mb-6'>
-                  <div className='flex items-center gap-2'>
-                    <User className='h-6 w-6 text-blue-600 dark:text-blue-400' />
-                    <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                      Self Evaluation
-                    </h1>
-                  </div>
-                </div>
-                <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
-                  <EvaluationInfoCard
-                    name='Self Evaluation'
-                    navigationPath={`${path}/self-evaluation`}
-                    competencyCount={selfEvaluationCompetencyCount}
-                    completed={isSelfEvaluationCompleted}
-                    evaluations={selfEvaluations}
-                  />
-                </Card>
-              </div>
+              <SelfEvaluationStatusCard isCompleted={isSelfEvaluationCompleted} />
             )}
 
             {peerEvaluationStarted && team && (
-              <div className='mb-8'>
-                <div className='flex items-center gap-3 mb-6'>
-                  <div className='flex items-center gap-2'>
-                    <Users className='h-6 w-6 text-green-600 dark:text-green-400' />
-                    <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                      Peer Evaluation
-                    </h1>
-                  </div>
-                  <TeamBadge teamName={team.name} />
-                </div>
-                <div className='space-y-4'>
-                  {team.members
-                    .filter((member) => member.id !== myParticipation?.courseParticipationID)
-                    .map((member) => (
-                      <Card
-                        key={member.id}
-                        className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
-                      >
-                        <EvaluationInfoCard
-                          name={member.firstName + ' ' + member.lastName}
-                          navigationPath={`${path}/peer-evaluation/${member?.id}`}
-                          competencyCount={peerEvaluationCompetencyCount}
-                          completed={
-                            peerEvaluationCompletions.find(
-                              (c) => c.courseParticipationID === member.id,
-                            )?.completed ?? false
-                          }
-                          evaluations={peerEvaluations.filter(
-                            (evaluation) => evaluation.courseParticipationID === member.id,
-                          )}
-                        />
-                      </Card>
-                    ))}
-                </div>
-              </div>
+              <PeerEvaluationStatusCard
+                completedEvaluations={completedPeerEvaluations}
+                totalEvaluations={totalPeerEvaluations}
+                isCompleted={isPeerEvaluationCompleted}
+              />
             )}
 
             {tutorEvaluationStarted && team && (
-              <div className='mb-8'>
-                <div className='flex items-center gap-3 mb-6'>
-                  <div className='flex items-center gap-2'>
-                    <GraduationCap className='h-6 w-6 text-purple-600 dark:text-purple-400' />
-                    <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
-                      Tutor Evaluation
-                    </h1>
-                  </div>
-                  <TeamBadge teamName={team.name} />
-                </div>
-                <div className='space-y-4'>
-                  {team.tutors
-                    .filter((tutor) => tutor.id !== myParticipation?.courseParticipationID)
-                    .map((tutor) => (
-                      <Card
-                        key={tutor.id}
-                        className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
-                      >
-                        <EvaluationInfoCard
-                          name={tutor.firstName + ' ' + tutor.lastName}
-                          navigationPath={`${path}/tutor-evaluation/${tutor?.id}`}
-                          competencyCount={tutorEvaluationCompetencyCount}
-                          completed={
-                            tutorEvaluationCompletions.find(
-                              (c) => c.courseParticipationID === tutor.id,
-                            )?.completed ?? false
-                          }
-                          evaluations={tutorEvaluations.filter(
-                            (evaluation) => evaluation.courseParticipationID === tutor.id,
-                          )}
-                        />
-                      </Card>
-                    ))}
-                </div>
-              </div>
+              <TutorEvaluationStatusCard
+                completedEvaluations={completedTutorEvaluations}
+                totalEvaluations={totalTutorEvaluations}
+                isCompleted={isTutorEvaluationCompleted}
+              />
             )}
           </div>
-        )}
 
-        {isAssessmentDeadlinePassed && <ActionItemsAndGradeSuggestion />}
+          {selfEvaluationStarted && (
+            <div className='mb-8'>
+              <div className='flex items-center gap-3 mb-6'>
+                <div className='flex items-center gap-2'>
+                  <User className='h-6 w-6 text-blue-600 dark:text-blue-400' />
+                  <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                    Self Evaluation
+                  </h1>
+                </div>
+              </div>
+              <Card className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'>
+                <EvaluationInfoCard
+                  name='Self Evaluation'
+                  navigationPath={`${path}/self-evaluation`}
+                  competencyCount={selfEvaluationCompetencyCount}
+                  completed={isSelfEvaluationCompleted}
+                  evaluations={selfEvaluations}
+                />
+              </Card>
+            </div>
+          )}
+
+          {peerEvaluationStarted && team && (
+            <div className='mb-8'>
+              <div className='flex items-center gap-3 mb-6'>
+                <div className='flex items-center gap-2'>
+                  <Users className='h-6 w-6 text-green-600 dark:text-green-400' />
+                  <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                    Peer Evaluation
+                  </h1>
+                </div>
+                <TeamBadge teamName={team.name} />
+              </div>
+              <div className='space-y-4'>
+                {team.members
+                  .filter((member) => member.id !== myParticipation?.courseParticipationID)
+                  .map((member) => (
+                    <Card
+                      key={member.id}
+                      className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
+                    >
+                      <EvaluationInfoCard
+                        name={member.firstName + ' ' + member.lastName}
+                        navigationPath={`${path}/peer-evaluation/${member?.id}`}
+                        competencyCount={peerEvaluationCompetencyCount}
+                        completed={
+                          peerEvaluationCompletions.find(
+                            (c) => c.courseParticipationID === member.id,
+                          )?.completed ?? false
+                        }
+                        evaluations={peerEvaluations.filter(
+                          (evaluation) => evaluation.courseParticipationID === member.id,
+                        )}
+                      />
+                    </Card>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {tutorEvaluationStarted && team && (
+            <div className='mb-8'>
+              <div className='flex items-center gap-3 mb-6'>
+                <div className='flex items-center gap-2'>
+                  <GraduationCap className='h-6 w-6 text-purple-600 dark:text-purple-400' />
+                  <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>
+                    Tutor Evaluation
+                  </h1>
+                </div>
+                <TeamBadge teamName={team.name} />
+              </div>
+              <div className='space-y-4'>
+                {team.tutors
+                  .filter((tutor) => tutor.id !== myParticipation?.courseParticipationID)
+                  .map((tutor) => (
+                    <Card
+                      key={tutor.id}
+                      className='border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
+                    >
+                      <EvaluationInfoCard
+                        name={tutor.firstName + ' ' + tutor.lastName}
+                        navigationPath={`${path}/tutor-evaluation/${tutor?.id}`}
+                        competencyCount={tutorEvaluationCompetencyCount}
+                        completed={
+                          tutorEvaluationCompletions.find(
+                            (c) => c.courseParticipationID === tutor.id,
+                          )?.completed ?? false
+                        }
+                        evaluations={tutorEvaluations.filter(
+                          (evaluation) => evaluation.courseParticipationID === tutor.id,
+                        )}
+                      />
+                    </Card>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
