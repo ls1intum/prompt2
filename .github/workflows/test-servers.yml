@@ -7,50 +7,35 @@ permissions:
   contents: read
 
 jobs:
-  detect-changes:
+  set-matrix:
     runs-on: ubuntu-latest
     outputs:
-      assessment-changed: ${{ steps.changes.outputs.assessment }}
-      core-changed: ${{ steps.changes.outputs.core }}
-      intro_course-changed: ${{ steps.changes.outputs.intro_course }}
-      team_allocation-changed: ${{ steps.changes.outputs.team_allocation }}
-      self_team_allocation-changed: ${{ steps.changes.outputs.self_team_allocation }}
+      directories: ${{ steps.set-matrix.outputs.directories }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
         with:
-          filters: |
-            assessment:
-              - 'servers/assessment/**'
-            core:
-              - 'servers/core/**'
-            intro_course:
-              - 'servers/intro_course/**'
-            self_team_allocation:
-              - 'servers/self_team_allocation/**'
-            team_allocation:
-              - 'servers/team_allocation/**'
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v45
+        id: changed
+        with:
+          files: servers/**/
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+      - id: set-matrix
+        run: |
+          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/")[1]]')
+          echo "directories<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIRS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   test:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.assessment-changed == 'true' ||
-      needs.detect-changes.outputs.core-changed       == 'true' ||
-      needs.detect-changes.outputs.intro_course-changed == 'true' ||
-      needs.detect-changes.outputs.self_team_allocation-changed == 'true' ||
-      needs.detect-changes.outputs.team_allocation-changed == 'true'
+    needs: set-matrix
+    if: needs.set-matrix.outputs.directories != '[]'
     strategy:
       matrix:
-        directory:
-          - ${{ needs.detect-changes.outputs.assessment-changed == 'true' && 'assessment' || '' }}
-          - ${{ needs.detect-changes.outputs.core-changed       == 'true' && 'core'       || '' }}
-          - ${{ needs.detect-changes.outputs.intro_course-changed == 'true' && 'intro_course' || '' }}
-          - ${{ needs.detect-changes.outputs.self_team_allocation-changed == 'true' && 'self_team_allocation' || '' }}
-          - ${{ needs.detect-changes.outputs.team_allocation-changed == 'true' && 'team_allocation' || '' }}
-        exclude:
-          - directory: ""
+        directory: ${{ fromJson(needs.set-matrix.outputs.directories) }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go

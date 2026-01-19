@@ -10,35 +10,35 @@ permissions:
   contents: read
 
 jobs:
-  detect-changes:
+  set-matrix:
     runs-on: ubuntu-latest
     outputs:
-      core-changed: ${{ steps.changes.outputs.core }}
-      template-server-changed: ${{ steps.changes.outputs.template_server }}
+      directories: ${{ steps.set-matrix.outputs.directories }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
         with:
-          filters: |
-            core:
-              - 'servers/core/**'
-            template_server:
-              - 'servers/template_server/**'
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v45
+        id: changed
+        with:
+          files: servers/**/
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+      - id: set-matrix
+        run: |
+          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/")[1]]')
+          echo "directories<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIRS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   generate-api-spec:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.core-changed == 'true' ||
-      needs.detect-changes.outputs.template-server-changed == 'true'
+    needs: set-matrix
+    if: needs.set-matrix.outputs.directories != '[]'
     strategy:
       matrix:
-        include:
-          - directory: core
-            changed: ${{ needs.detect-changes.outputs.core-changed }}
-          - directory: template_server
-            changed: ${{ needs.detect-changes.outputs.template-server-changed }}
+        directory: ${{ fromJson(needs.set-matrix.outputs.directories) }}
 
     steps:
       - uses: actions/checkout@v4
