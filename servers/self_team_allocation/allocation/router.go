@@ -25,6 +25,7 @@ func setupAllocationRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 // @Success 200 {array} allocationDTO.AllocationWithParticipation
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/allocation [get]
 func getAllAllocations(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -52,6 +53,7 @@ func getAllAllocations(c *gin.Context) {
 // @Success 200 {object} allocationDTO.AllocationWithParticipation
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/allocation/{courseParticipationID} [get]
 func getAllocationByCourseParticipationID(c *gin.Context) {
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))

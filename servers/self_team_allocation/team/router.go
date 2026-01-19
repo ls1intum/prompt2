@@ -40,6 +40,7 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 // @Success 200 {array} promptTypes.Team
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team [get]
 func getAllTeams(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -67,6 +68,7 @@ func getAllTeams(c *gin.Context) {
 // @Success 200 {object} promptTypes.Team
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID} [get]
 func getTeamByID(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -102,6 +104,7 @@ func getTeamByID(c *gin.Context) {
 // @Success 201
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team [post]
 func createTeams(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -147,6 +150,7 @@ func createTeams(c *gin.Context) {
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID} [put]
 func updateTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -197,6 +201,7 @@ func updateTeam(c *gin.Context) {
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID}/assignment [put]
 func assignTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -274,6 +279,7 @@ func assignTeam(c *gin.Context) {
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID}/assignment [delete]
 func leaveTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -325,6 +331,7 @@ func leaveTeam(c *gin.Context) {
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID} [delete]
 func deleteTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -360,6 +367,7 @@ func deleteTeam(c *gin.Context) {
 // @Success 201
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/tutors [post]
 func importTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -397,6 +405,7 @@ func importTutors(c *gin.Context) {
 // @Success 201
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/{teamID}/tutor [post]
 func createManualTutor(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -443,6 +452,7 @@ func createManualTutor(c *gin.Context) {
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/tutor/{tutorID} [delete]
 func deleteTutor(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -477,6 +487,7 @@ func deleteTutor(c *gin.Context) {
 // @Success 200 {array} promptTypes.Person
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/team/tutors [get]
 func getTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))

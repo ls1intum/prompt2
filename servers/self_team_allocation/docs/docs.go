@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/course_phase/{coursePhaseID}/allocation": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all team allocations for a course phase",
                 "produces": [
                     "application/json"
@@ -67,6 +72,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/allocation/{courseParticipationID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get the team allocation for a specific course participation",
                 "produces": [
                     "application/json"
@@ -121,6 +131,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all teams for a course phase",
                 "produces": [
                     "application/json"
@@ -169,6 +184,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create one or more new teams for a course phase",
                 "consumes": [
                     "application/json"
@@ -225,6 +245,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team/tutor/{tutorID}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete a tutor from the course phase",
                 "produces": [
                     "application/json"
@@ -276,6 +301,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team/tutors": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get all tutors for a course phase",
                 "produces": [
                     "application/json"
@@ -324,6 +354,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Import multiple tutors for the course phase",
                 "consumes": [
                     "application/json"
@@ -383,6 +418,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team/{teamID}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get a specific team by its ID",
                 "produces": [
                     "application/json"
@@ -435,6 +475,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update team name",
                 "consumes": [
                     "application/json"
@@ -496,6 +541,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete a team from the course phase",
                 "produces": [
                     "application/json"
@@ -547,6 +597,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team/{teamID}/assignment": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Assign the authenticated student to a team",
                 "produces": [
                     "application/json"
@@ -596,6 +651,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove the authenticated student from a team",
                 "produces": [
                     "application/json"
@@ -647,6 +707,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/team/{teamID}/tutor": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a manual tutor for a specific team",
                 "consumes": [
                     "application/json"
@@ -718,6 +783,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/timeframe": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get the timeframe for team self-assignment",
                 "produces": [
                     "application/json"
@@ -763,6 +833,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Set the timeframe during which students can self-assign to teams",
                 "consumes": [
                     "application/json"
@@ -913,6 +988,14 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Bearer token authentication. Use format: Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "externalDocs": {

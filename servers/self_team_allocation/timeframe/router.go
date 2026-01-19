@@ -26,6 +26,7 @@ func setupTimeframeRouter(routerGroup *gin.RouterGroup, authMiddleware func(allo
 // @Success 200 {object} timeframeDTO.Timeframe
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/timeframe [get]
 func getTimeframe(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
@@ -57,6 +58,7 @@ func getTimeframe(c *gin.Context) {
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/timeframe [put]
 func setTimeframe(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))

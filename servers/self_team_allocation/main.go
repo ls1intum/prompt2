@@ -40,6 +40,10 @@ func getDatabaseURL() string {
 // @BasePath        /self-team-allocation/api
 // @externalDocs.description  PROMPT Documentation
 // @externalDocs.url          https://ls1intum.github.io/prompt2/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Use format: Bearer {token}
 
 func runMigrations(databaseURL string) {
 	cmd := exec.Command("migrate", "-path", "./db/migration", "-database", databaseURL, "up")
