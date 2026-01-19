@@ -6206,7 +6206,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.2.7":
+"@types/react@npm:*, @types/react@npm:^19.2.8":
   version: 19.2.8
   resolution: "@types/react@npm:19.2.8"
   dependencies:
@@ -15662,7 +15662,7 @@ __metadata:
     "@types/dotenv-webpack": "npm:^7.0.8"
     "@types/eslint": "npm:^9.6.1"
     "@types/node": "npm:^25.0.9"
-    "@types/react": "npm:^19.2.7"
+    "@types/react": "npm:^19.2.8"
     "@types/react-beautiful-dnd": "npm:^13.1.8"
     "@types/react-dom": "npm:^19.2.3"
     "@typescript-eslint/eslint-plugin": "npm:^8.52.0"
