@@ -65,6 +65,8 @@ func initSentry() {
 		EnableLogs:       true,
 		AttachStacktrace: true,
 		SendDefaultPII:   true,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
 	}); err != nil {
 		log.Errorf("Sentry initialization failed: %v", err)
 		return
