@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'docs/**'
-      - '.github/workflows/build-docs.yml'
+      - "docs/**"
+      - ".github/workflows/build-docs.yml"
   # Allow manually triggering the workflow
   workflow_dispatch:
 
@@ -27,21 +27,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: docs/package-lock.json
-          # Change this line if you use pnpm or yarn
-          # cache: pnpm
-          # cache: yarn
+          cache: yarn
+          cache-dependency-path: docs/yarn.lock
 
       - name: Install dependencies
         run: |
           cd docs
-          npm ci
+          yarn install --frozen-lockfile
 
       - name: Build website
         run: |
           cd docs
-          npm run build
+          yarn build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
