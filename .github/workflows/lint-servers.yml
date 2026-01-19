@@ -24,8 +24,12 @@ jobs:
           json: true
       - id: set-matrix
         run: |
+          MODULES="[]"
+          for dir in $(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -r '.[]'); do
+            [ -f "$dir/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "$dir" '. += [$d]')
+          done
           echo "modules<<EOF" >> $GITHUB_OUTPUT
-          echo '${{ steps.changed.outputs.all_changed_files }}' >> $GITHUB_OUTPUT
+          echo "$MODULES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   lint-server:

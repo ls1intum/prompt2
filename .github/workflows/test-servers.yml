@@ -24,7 +24,11 @@ jobs:
           json: true
       - id: set-matrix
         run: |
-          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/")[1]]')
+          DIRS="[]"
+          for dir in $(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -r '.[]'); do
+            module=$(echo "$dir" | cut -d/ -f2)
+            [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && DIRS=$(echo "$DIRS" | jq --arg d "$module" 'if contains([$d]) then . else . + [$d] end')
+          done
           echo "directories<<EOF" >> $GITHUB_OUTPUT
           echo "$DIRS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

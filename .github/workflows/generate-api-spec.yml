@@ -27,7 +27,7 @@ jobs:
           json: true
       - id: set-matrix
         run: |
-          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/")[1]]')
+          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/") | select(length > 1) | .[1]] | unique')
           echo "directories<<EOF" >> $GITHUB_OUTPUT
           echo "$DIRS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
