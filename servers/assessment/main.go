@@ -48,7 +48,7 @@ func runMigrations(databaseURL string) {
 }
 
 func initSentry() {
-	sentryDsn := promptSDK.GetEnv("SENTRY_DSN_ASSESSMENT", "https://828a5a177a47c403ac84449f82a52070@sentry.aet.cit.tum.de/11")
+	sentryDsn := promptSDK.GetEnv("SENTRY_DSN_ASSESSMENT", "")
 	if sentryDsn == "" {
 		log.Info("Sentry DSN not configured, skipping initialization")
 		return
