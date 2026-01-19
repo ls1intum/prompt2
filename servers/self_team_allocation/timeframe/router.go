@@ -17,6 +17,16 @@ func setupTimeframeRouter(routerGroup *gin.RouterGroup, authMiddleware func(allo
 	teamRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), setTimeframe)
 }
 
+// getTimeframe godoc
+// @Summary Get timeframe
+// @Description Get the timeframe for team self-assignment
+// @Tags timeframe
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} timeframeDTO.Timeframe
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/timeframe [get]
 func getTimeframe(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -36,6 +46,18 @@ func getTimeframe(c *gin.Context) {
 	c.JSON(http.StatusOK, timeframe)
 }
 
+// setTimeframe godoc
+// @Summary Set timeframe
+// @Description Set the timeframe during which students can self-assign to teams
+// @Tags timeframe
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body timeframeDTO.Timeframe true "Timeframe start and end times"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/timeframe [put]
 func setTimeframe(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
