@@ -1736,6 +1736,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/{uuid}/archive": {
+            "put": {
+                "description": "Set archived=true (with archived_on=NOW()) or archived=false (with archived_on=NULL)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Archive or unarchive a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Archive status update",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CourseArchiveStatus"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated course",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{uuid}/copy": {
             "post": {
                 "description": "Copy a course by UUID",
@@ -3116,6 +3169,12 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
@@ -3324,6 +3383,12 @@ const docTemplate = `{
         "courseDTO.Course": {
             "type": "object",
             "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "archivedOn": {
+                    "type": "string"
+                },
                 "courseType": {
                     "type": "string"
                 },
@@ -3336,6 +3401,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3345,6 +3413,9 @@ const docTemplate = `{
                 "semesterTag": {
                     "type": "string"
                 },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
@@ -3352,6 +3423,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/meta.MetaData"
                 },
                 "template": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "courseDTO.CourseArchiveStatus": {
+            "type": "object",
+            "properties": {
+                "archived": {
                     "type": "boolean"
                 }
             }
@@ -3378,6 +3457,12 @@ const docTemplate = `{
         "courseDTO.CourseWithPhases": {
             "type": "object",
             "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "archivedOn": {
+                    "type": "string"
+                },
                 "coursePhases": {
                     "type": "array",
                     "items": {
@@ -3396,6 +3481,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3405,11 +3493,17 @@ const docTemplate = `{
                 "semesterTag": {
                     "type": "string"
                 },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
                 "studentReadableData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "template": {
+                    "type": "boolean"
                 }
             }
         },
@@ -3425,6 +3519,9 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3432,6 +3529,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/meta.MetaData"
                 },
                 "semesterTag": {
+                    "type": "string"
+                },
+                "shortDescription": {
                     "type": "string"
                 },
                 "startDate": {
@@ -3474,8 +3574,14 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "restrictedData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "shortDescription": {
+                    "type": "string"
                 },
                 "startDate": {
                     "type": "string"
@@ -3823,6 +3929,9 @@ const docTemplate = `{
                 "baseUrl": {
                     "type": "string"
                 },
+                "description": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4108,6 +4217,17 @@ const docTemplate = `{
         "meta.MetaData": {
             "type": "object",
             "additionalProperties": true
+        },
+        "pgtype.Text": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
         },
         "resolutionDTO.Resolution": {
             "type": "object",
