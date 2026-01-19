@@ -50,7 +50,7 @@ func initSentry() {
 		return
 	}
 
-	transport := sentry.NewHTTPSyncTransport()
+	transport := sentry.NewHTTPTransport()
 	transport.Timeout = 2 * time.Second
 
 	if err := sentry.Init(sentry.ClientOptions{
