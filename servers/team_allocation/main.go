@@ -60,7 +60,7 @@ func initSentry() {
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
 		Environment:      promptSDK.GetEnv("ENVIRONMENT", "development"),
-		Debug:            true,
+		Debug:            false,
 		Transport:        transport,
 		EnableLogs:       true,
 		AttachStacktrace: true,
