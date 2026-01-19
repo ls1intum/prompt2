@@ -10,6 +10,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
+	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
@@ -101,26 +102,53 @@ func initMailing(router *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool
 }
 
 func initSentry() {
-	sentryDsn := utils.GetEnv("SENTRY_DSN_CORE", "https://42d92ed0d386a0e76a3542cb9bc6c474@sentry.aet.cit.tum.de/9")
+	sentryDsn := utils.GetEnv("SENTRY_DSN_CORE", "")
 	if sentryDsn == "" {
-		log.Info("Sentry DSN not configured, skipping Sentry initialization")
+		log.Info("Sentry DSN not configured, skipping initialization")
 		return
 	}
-	environment := utils.GetEnv("ENVIRONMENT", "development")
 
-	sentrySyncTransport := sentry.NewHTTPSyncTransport()
-	sentrySyncTransport.Timeout = 2 * time.Second
+	transport := sentry.NewHTTPSyncTransport()
+	transport.Timeout = 2 * time.Second
 
-	err := sentry.Init(sentry.ClientOptions{
-		Dsn:         sentryDsn,
-		Environment: environment,
-		Debug:       true,
-		Transport:   sentrySyncTransport,
-		EnableLogs:  true,
-	})
-	if err != nil {
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              sentryDsn,
+		Environment:      utils.GetEnv("ENVIRONMENT", "development"),
+		Debug:            true,
+		Transport:        transport,
+		EnableLogs:       true,
+		AttachStacktrace: true,
+		SendDefaultPII:   true,
+	}); err != nil {
 		log.Errorf("Sentry initialization failed: %v", err)
+		return
 	}
+
+	client := sentry.CurrentHub().Client()
+	if client == nil {
+		log.Error("Sentry client is nil")
+		return
+	}
+
+	logHook := sentrylogrus.NewLogHookFromClient(
+		[]log.Level{log.InfoLevel, log.WarnLevel},
+		client,
+	)
+
+	eventHook := sentrylogrus.NewEventHookFromClient(
+		[]log.Level{log.ErrorLevel, log.FatalLevel, log.PanicLevel},
+		client,
+	)
+
+	log.AddHook(logHook)
+	log.AddHook(eventHook)
+
+	log.RegisterExitHandler(func() {
+		eventHook.Flush(5 * time.Second)
+		logHook.Flush(5 * time.Second)
+	})
+
+	log.Info("Sentry initialized successfully")
 }
 
 // @title           PROMPT Core API
@@ -192,6 +220,7 @@ func main() {
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
+	log.Info("Core Server started")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
