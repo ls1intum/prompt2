@@ -17,7 +17,13 @@ export function formatDate(date: string | null): string {
   })
 }
 
-export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
+export function StudentCourseEnrollment({
+  sce,
+  studentId,
+}: {
+  sce: CourseEnrollment
+  studentId: string
+}) {
   const [showFuturePhases, setShowFuturePhases] = useState(false)
 
   const firstNotAssessedIndex = sce.coursePhases.findIndex(
@@ -66,6 +72,8 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
               key={cp.coursePhaseId}
               showLine={isLastElement(cp.coursePhaseId) || cp.passStatus == PassStatus.FAILED}
               current={isCurrentElement(cp.coursePhaseId)}
+              studentId={studentId}
+              courseId={sce.courseId}
             />
           ))}
           {!showFuturePhases && phasesUpUntilNow.length !== sce.coursePhases.length && (
@@ -85,6 +93,8 @@ export function StudentCourseEnrollment({ sce }: { sce: CourseEnrollment }) {
                   key={cp.coursePhaseId}
                   showLine={isLastElement(cp.coursePhaseId) || cp.passStatus == PassStatus.FAILED}
                   current={isCurrentElement(cp.coursePhaseId)}
+                  studentId={studentId}
+                  courseId={sce.courseId}
                 />
               ))}
             </>

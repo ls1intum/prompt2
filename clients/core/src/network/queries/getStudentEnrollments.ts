@@ -42,7 +42,6 @@ export const getStudentEnrollments = async (studentId: string): Promise<StudentE
       })
     ).data
 
-    console.log(d)
     return d
   } catch (err) {
     console.error(err)

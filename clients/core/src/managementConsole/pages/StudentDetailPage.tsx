@@ -28,7 +28,7 @@ export const StudentDetailPage = () => {
           {enrollments.isSuccess &&
             enrollments.data?.courses.map((c: CourseEnrollment) => (
               <div className='flex gap-4' key={c.courseId}>
-                <StudentCourseEnrollment sce={c} />
+                <StudentCourseEnrollment sce={c} studentId={studentId!} />
               </div>
             ))}
         </div>
