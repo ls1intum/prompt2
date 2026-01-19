@@ -14955,7 +14955,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-preset-env@npm:^10.1.6, postcss-preset-env@npm:^10.6.0":
+"postcss-preset-env@npm:^10.1.6, postcss-preset-env@npm:^10.6.1":
   version: 10.6.1
   resolution: "postcss-preset-env@npm:10.6.1"
   dependencies:
@@ -15321,7 +15321,7 @@ __metadata:
     lucide-react: "npm:^0.562.0"
     postcss: "npm:^8.5.6"
     postcss-loader: "npm:8.2.0"
-    postcss-preset-env: "npm:^10.6.0"
+    postcss-preset-env: "npm:^10.6.1"
     prettier: "npm:^3.7.4"
     react: "npm:^19.2.3"
     react-dom: "npm:^19.2.3"
