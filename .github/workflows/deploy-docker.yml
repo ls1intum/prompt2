@@ -190,7 +190,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" > .env.prod
+            echo "ENVIRONMENT=${{ inputs.environment }}" > .env.prod
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod

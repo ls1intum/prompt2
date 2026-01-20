@@ -36,7 +36,6 @@ services:
       - SENDER_EMAIL
       - SENDER_NAME
       - SENTRY_DSN_CORE
-      - ENVIRONMENT
 
   server-intro-course:
     build:
@@ -65,7 +64,6 @@ services:
       - KEYCLOAK_CLIENT_ID
       - DEBUG
       - SENTRY_DSN_INTRO_COURSE
-      - ENVIRONMENT
 
   server-team-allocation:
     build:
@@ -91,7 +89,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
       - SENTRY_DSN_TEAM_ALLOCATION
-      - ENVIRONMENT
 
   server-self-team-allocation:
     build:
@@ -117,7 +114,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
       - SENTRY_DSN_SELF_TEAM_ALLOCATION
-      - ENVIRONMENT
 
   server-assessment:
     build:
@@ -143,7 +139,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
       - SENTRY_DSN_ASSESSMENT
-      - ENVIRONMENT
 
   # Template server (example service)
   server-template:
@@ -171,7 +166,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
       - SENTRY_DSN_TEMPLATE_SERVER
-      - ENVIRONMENT
 
   client-core:
     build:
