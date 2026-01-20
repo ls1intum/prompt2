@@ -1,6 +1,6 @@
-import { GradeSuggestionBadge } from '../../components/badges'
 import { AssessmentCompletion } from '../../../interfaces/assessmentCompletion'
 import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
+import { GradeSuggestionBadgeWithTooltip } from '../../components/badges'
 
 export const createGradeSuggestionColumn = (
   assessmentCompletions: AssessmentCompletion[] | undefined,
@@ -34,7 +34,7 @@ export const createGradeSuggestionColumn = (
     },
     extraData: completedGradings.map((s) => ({
       courseParticipationID: s.courseParticipationID,
-      value: <GradeSuggestionBadge gradeSuggestion={s.gradeSuggestion} text={false} />,
+      value: <GradeSuggestionBadgeWithTooltip gradeSuggestion={s.gradeSuggestion} text={false} />,
       stringValue: s.gradeSuggestion.toFixed(1),
     })),
   }
