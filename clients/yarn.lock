@@ -5490,8 +5490,8 @@ __metadata:
   linkType: hard
 
 "@tumaet/prompt-ui-components@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@tumaet/prompt-ui-components@npm:1.0.4"
+  version: 1.0.5
+  resolution: "@tumaet/prompt-ui-components@npm:1.0.5"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.2"
@@ -5515,6 +5515,7 @@ __metadata:
     "@radix-ui/react-toggle": "npm:^1.1.0"
     "@radix-ui/react-toggle-group": "npm:^1.1.0"
     "@radix-ui/react-tooltip": "npm:^1.1.4"
+    "@tanstack/react-table": "npm:^8.21.3"
     "@tiptap/core": "npm:^2.11.7"
     "@tiptap/extension-code-block": "npm:^2.11.7"
     "@tiptap/extension-code-block-lowlight": "npm:^2.11.7"
@@ -5550,7 +5551,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/2ab7333a7570725c561127aa530406a11d030e4ca89bacd1f0ac872b2826b0594d65c79dd6b2f0c366c22d1539fd92bfb1aca212ae7ba82eb0f286c8649aaa64
+  checksum: 10c0/2b64ebf2e064344512c0d9b053e0edd6b272ce360d6409b6a4f4e8c5f17ca265ab6785f3efe32966d7ffff738fd1f801cfbea0e3986c286eabb8c22bb446820c
   languageName: node
   linkType: hard
 
