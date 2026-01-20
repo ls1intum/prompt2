@@ -1,9 +1,7 @@
 name: Generate and Release API Spec
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_call:
   workflow_dispatch:
 
 permissions:

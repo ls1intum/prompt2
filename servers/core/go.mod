@@ -7,6 +7,7 @@ toolchain go1.24.4
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/coreos/go-oidc/v3 v3.17.0
+	github.com/getsentry/sentry-go/logrus v0.41.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0

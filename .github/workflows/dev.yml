@@ -9,6 +9,15 @@ permissions:
   packages: write
 
 jobs:
+  detect-migrations:
+    uses: ./.github/workflows/detect-migrations.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: write
+  generate-api-spec:
+    uses: ./.github/workflows/generate-api-spec.yml
+    secrets: inherit
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml
     secrets: inherit
