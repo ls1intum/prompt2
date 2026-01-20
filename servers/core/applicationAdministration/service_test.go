@@ -71,11 +71,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationForm_Success() 
 	// Verify QuestionsText
 	assert.Equal(suite.T(), 2, len(form.QuestionsText))
 	for _, question := range form.QuestionsText {
-		if question.Title == "Motivation" {
+		switch question.Title {
+		case "Motivation":
 			assert.Equal(suite.T(), 500, question.AllowedLength)
-		} else if question.Title == "Expierence" {
+		case "Expierence":
 			assert.Equal(suite.T(), 500, question.AllowedLength)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}
@@ -83,11 +84,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestGetApplicationForm_Success() 
 	// Verify QuestionsMultiSelect
 	assert.Equal(suite.T(), 2, len(form.QuestionsMultiSelect))
 	for _, question := range form.QuestionsMultiSelect {
-		if question.Title == "Taken Courses" {
+		switch question.Title {
+		case "Taken Courses":
 			assert.ElementsMatch(suite.T(), []string{"Ferienakademie", "Patterns", "Interactive Learning"}, question.Options)
-		} else if question.Title == "Available Devices" {
+		case "Available Devices":
 			assert.ElementsMatch(suite.T(), []string{"iPhone", "iPad", "MacBook", "Vision"}, question.Options)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}
@@ -135,11 +137,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationForm_Success
 	// Verify QuestionsText
 	assert.Equal(suite.T(), 2, len(form.QuestionsText))
 	for _, question := range form.QuestionsText {
-		if question.Title == "New Motivation" {
+		switch question.Title {
+		case "New Motivation":
 			assert.Equal(suite.T(), 300, question.AllowedLength)
-		} else if question.Title == "Expierence" {
+		case "Expierence":
 			assert.Equal(suite.T(), 500, question.AllowedLength)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}
@@ -147,11 +150,12 @@ func (suite *ApplicationAdminServiceTestSuite) TestUpdateApplicationForm_Success
 	// Verify QuestionsMultiSelect
 	assert.Equal(suite.T(), 2, len(form.QuestionsMultiSelect))
 	for _, question := range form.QuestionsMultiSelect {
-		if question.Title == "New Devices" {
+		switch question.Title {
+		case "New Devices":
 			assert.ElementsMatch(suite.T(), []string{"Option1", "Option2"}, question.Options)
-		} else if question.Title == "Taken Courses" {
+		case "Taken Courses":
 			assert.ElementsMatch(suite.T(), []string{"Ferienakademie", "Patterns", "Interactive Learning"}, question.Options)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}
