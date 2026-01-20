@@ -2,8 +2,8 @@ import {
   StudentCourseParticipation,
   StudentWithCourses,
 } from '@core/network/queries/getStudentsWithCourses'
-import { CellContext, ColumnDef, Row } from '@tanstack/react-table'
 import { StudentCoursePreview } from './components/StudentCoursePreview'
+import { ColumnDef, Row } from '@tanstack/react-table'
 
 export const studentTableColumns: ColumnDef<StudentWithCourses>[] = [
   {

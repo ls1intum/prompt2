@@ -31,14 +31,13 @@ export function CourseDetail({ children, studentCourseEnrollment }: CourseDetail
                 {studentCourseEnrollment.name}
               </h3>
             </LinkHeading>
-            <span className='text-sm text-muted-foreground'>
-              {studentCourseEnrollment.semesterTag}
-            </span>
           </div>
+          <p className='text-sm text-muted-foreground'></p>
 
           <p className='text-sm text-muted-foreground'>
+            <span>{studentCourseEnrollment.semesterTag}</span> ·{' '}
             <span className='capitalize'>{studentCourseEnrollment.courseType}</span> ·{' '}
-            {studentCourseEnrollment.ects} ECTS
+            <span>{studentCourseEnrollment.ects} ECTS</span>
           </p>
 
           <p className='text-sm text-muted-foreground'>

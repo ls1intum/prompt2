@@ -58,11 +58,10 @@ export function StudentCoursePhaseEnrollment({
         </div>
       </div>
       <div className='ml-2 mb-[0.85rem] group'>
-        <div className='flex gap-1 items-baseline'>
+        <div>
           <LinkHeading targetURL={`/management/course/${courseId}/${cpe.coursePhaseId}`}>
             <div className='font-semibold text-lg'>{cpe.name}</div>
           </LinkHeading>
-          <div className='text-sm text-muted-foreground'>{cpe.coursePhaseType.name}</div>
         </div>
         {PhaseDetail && (
           <div className='inline-block w-fit max-w-full py-2 px-3 border rounded-md empty:hidden'>

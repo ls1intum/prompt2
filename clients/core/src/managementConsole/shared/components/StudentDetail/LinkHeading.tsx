@@ -1,5 +1,5 @@
-import { PropsWithChildren } from 'react'
 import { ArrowUpRight } from 'lucide-react'
+import { PropsWithChildren } from 'react'
 import { Link } from 'react-router-dom'
 
 interface LinkHeadingProps extends PropsWithChildren {
@@ -8,9 +8,11 @@ interface LinkHeadingProps extends PropsWithChildren {
 
 export const LinkHeading = ({ children, targetURL }: LinkHeadingProps) => {
   return (
-    <Link to={targetURL} className='flex items-center hover:text-blue-500'>
-      {children}
-      <ArrowUpRight className='w-5 h-5' />
-    </Link>
+    <div className='hover:text-blue-500'>
+      <Link to={targetURL} className='flex items-center'>
+        {children}
+        <ArrowUpRight className='ml-1 w-4 h-4 ' />
+      </Link>
+    </div>
   )
 }
