@@ -19,15 +19,24 @@ jobs:
         with:
           fetch-depth: 0
       - uses: tj-actions/changed-files@v45
-        id: changed
+        id: changed-servers
         with:
           files: servers/**/
           dir_names: true
           dir_names_max_depth: 2
           json: true
+      - uses: tj-actions/changed-files@v45
+        id: changed-workflow
+        with:
+          files: .github/workflows/generate-api-spec.yml
       - id: set-matrix
         run: |
-          DIRS=$(echo '${{ steps.changed.outputs.all_changed_files }}' | jq -c '[.[] | split("/") | select(length > 1) | .[1]] | unique')
+          if [ "${{ steps.changed-workflow.outputs.any_changed }}" = "true" ]; then
+            DIRS=$(find servers -mindepth 1 -maxdepth 1 -type d | cut -d/ -f2 | jq -R -s -c 'split("\n")[:-1]')
+          else
+            DIRS=$(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -c '[.[] | split("/") | select(length > 1) | .[1]] | unique')
+          fi
+
           echo "directories<<EOF" >> $GITHUB_OUTPUT
           echo "$DIRS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
