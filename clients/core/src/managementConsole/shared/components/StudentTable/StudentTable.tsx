@@ -9,9 +9,12 @@ import { useNavigate } from 'react-router-dom'
 import { studentTableColumns } from './studentTableColumns'
 import { getStudentTableFilters } from './studentTableFilters'
 import { getStudentTableActions } from './studentTableActions'
+import { useStudentStore } from '../../store/student.store'
 
 export const StudentTable = () => {
   const [studentsWithCourses, setStudentsWithCourses] = useState<Array<StudentWithCourses>>([])
+
+  const { upsertStudents } = useStudentStore()
 
   const navigate = useNavigate()
   const openStudent = useCallback(
@@ -23,9 +26,10 @@ export const StudentTable = () => {
     const fetchStudents = async () => {
       const s = await getStudentsWithCourses()
       setStudentsWithCourses(s)
+      upsertStudents(s)
     }
     fetchStudents()
-  }, [])
+  }, [upsertStudents])
 
   const columns: ColumnDef<StudentWithCourses>[] = useMemo(() => studentTableColumns, [])
 

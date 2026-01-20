@@ -17,10 +17,13 @@ type StudentCourseParticipationDTO struct {
 }
 
 type StudentWithCourseParticipationsDTO struct {
-	ID              uuid.UUID    `json:"id"`
-	Name            string       `json:"name"`
-	CurrentSemester pgtype.Int4  `json:"currentSemester" swaggertype:"integer"`
-	StudyProgram    string       `json:"studyProgram"`
+	ID                       uuid.UUID    `json:"id"`
+	FirstName                string       `json:"firstName"`
+	LastName                 string       `json:"lastName"`
+  Email                    string       `json:"email"`
+  HasUniversityAccount     bool         `json:"hasUniversityAccount"`
+	CurrentSemester          pgtype.Int4  `json:"currentSemester" swaggertype:"integer"`
+	StudyProgram             string       `json:"studyProgram"`
 
 	Courses []StudentCourseParticipationDTO `json:"courses"`
 }
@@ -33,10 +36,13 @@ func GetStudentWithCoursesFromDB (row db.GetAllStudentsWithCourseParticipationsR
 	}
 
 	return StudentWithCourseParticipationsDTO{
-		ID:              row.StudentID,
-		Name:            row.StudentName,
-		CurrentSemester: row.CurrentSemester,
-		StudyProgram:    row.StudyProgram.String,
-		Courses:         courses,
+		ID:                     row.StudentID,
+		FirstName:              row.StudentFirstName.String,
+		LastName:               row.StudentLastName.String,
+		Email:                  row.StudentEmail.String,
+		HasUniversityAccount:   row.StudentHasUniversityAccount.Bool,
+		CurrentSemester:        row.CurrentSemester,
+		StudyProgram:           row.StudyProgram.String,
+		Courses:                courses,
 	}, nil
 }

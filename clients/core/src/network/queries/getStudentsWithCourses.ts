@@ -8,8 +8,11 @@ export interface StudentCourseParticipation {
 
 export interface StudentWithCourses {
   id: string
-  name: string
-  currentSemester: number | null
+  firstName: string
+  lastName: string
+  email: string
+  hasUniversityAccount: boolean
+  currentSemester?: number
   studyProgram: string
   courses: StudentCourseParticipation[]
 }

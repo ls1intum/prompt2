@@ -3,6 +3,8 @@ import { CoursePhaseEnrollment } from '@core/network/queries/getStudentEnrollmen
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
+import { LinkHeading } from './LinkHeading'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
 
 export function parsePostgresTimestamp(ts: string): Date {
   return new Date(ts.replace(' ', 'T') + 'Z')
@@ -42,21 +44,25 @@ export function StudentCoursePhaseEnrollment({
           <div className='absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2' />
         )}
         <div className='relative z-10'>
-          <ProgressIndicator passStatus={current ? 'CURRENT' : cpe.passStatus} />
-        </div>
-      </div>
-      <div className='ml-2 mb-[0.85rem] group'>
-        <div className='flex gap-1 items-baseline'>
-          <div className='font-semibold text-lg'>{cpe.name}</div>
-          <div className='text-sm text-muted-foreground'>{cpe.coursePhaseType.name}</div>
-          <div className='ml-4 opacity-0 group-hover:opacity-100 transition-opacity'>
-            {cpe.passStatus !== PassStatus.NOT_ASSESSED && (
+          <Tooltip>
+            <TooltipTrigger>
+              <ProgressIndicator passStatus={current ? 'CURRENT' : cpe.passStatus} />
+            </TooltipTrigger>
+            <TooltipContent>
               <div className='text-sm text-muted-foreground'>
                 <span className='font-semibold'>{cpe.passStatus}</span> on{' '}
                 {formatDateTime(cpe.lastModified)}
               </div>
-            )}
-          </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+      <div className='ml-2 mb-[0.85rem] group'>
+        <div className='flex gap-1 items-baseline'>
+          <LinkHeading targetURL={`/management/course/${courseId}/${cpe.coursePhaseId}`}>
+            <div className='font-semibold text-lg'>{cpe.name}</div>
+          </LinkHeading>
+          <div className='text-sm text-muted-foreground'>{cpe.coursePhaseType.name}</div>
         </div>
         {PhaseDetail && (
           <div className='inline-block w-fit max-w-full py-2 px-3 border rounded-md empty:hidden'>

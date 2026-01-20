@@ -108,7 +108,10 @@ func (q *Queries) GetAllStudents(ctx context.Context) ([]Student, error) {
 const getAllStudentsWithCourseParticipations = `-- name: GetAllStudentsWithCourseParticipations :many
 SELECT
   s.id AS student_id,
-  (s.first_name || ' ' || s.last_name)::text AS student_name,
+  s.first_name AS student_first_name,
+  s.last_name AS student_last_name,
+  s.email AS student_email,
+  s.has_university_account AS student_has_university_account,
   s.current_semester,
   s.study_program,
   COALESCE(
@@ -129,15 +132,20 @@ LEFT JOIN course c
 GROUP BY
   s.id,
   s.first_name,
-  s.last_name
+  s.last_name,
+  s.email,
+  s.has_university_account
 `
 
 type GetAllStudentsWithCourseParticipationsRow struct {
-	StudentID       uuid.UUID   `json:"student_id"`
-	StudentName     string      `json:"student_name"`
-	CurrentSemester pgtype.Int4 `json:"current_semester"`
-	StudyProgram    pgtype.Text `json:"study_program"`
-	Courses         []byte      `json:"courses"`
+	StudentID                   uuid.UUID   `json:"student_id"`
+	StudentFirstName            pgtype.Text `json:"student_first_name"`
+	StudentLastName             pgtype.Text `json:"student_last_name"`
+	StudentEmail                pgtype.Text `json:"student_email"`
+	StudentHasUniversityAccount pgtype.Bool `json:"student_has_university_account"`
+	CurrentSemester             pgtype.Int4 `json:"current_semester"`
+	StudyProgram                pgtype.Text `json:"study_program"`
+	Courses                     []byte      `json:"courses"`
 }
 
 func (q *Queries) GetAllStudentsWithCourseParticipations(ctx context.Context) ([]GetAllStudentsWithCourseParticipationsRow, error) {
@@ -151,7 +159,10 @@ func (q *Queries) GetAllStudentsWithCourseParticipations(ctx context.Context) ([
 		var i GetAllStudentsWithCourseParticipationsRow
 		if err := rows.Scan(
 			&i.StudentID,
-			&i.StudentName,
+			&i.StudentFirstName,
+			&i.StudentLastName,
+			&i.StudentEmail,
+			&i.StudentHasUniversityAccount,
 			&i.CurrentSemester,
 			&i.StudyProgram,
 			&i.Courses,

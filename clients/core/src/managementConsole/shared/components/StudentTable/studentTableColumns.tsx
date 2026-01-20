@@ -2,13 +2,23 @@ import {
   StudentCourseParticipation,
   StudentWithCourses,
 } from '@core/network/queries/getStudentsWithCourses'
-import { CellContext, Row } from '@tanstack/react-table'
+import { CellContext, ColumnDef, Row } from '@tanstack/react-table'
 import { StudentCoursePreview } from './components/StudentCoursePreview'
 
-export const studentTableColumns = [
+export const studentTableColumns: ColumnDef<StudentWithCourses>[] = [
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: 'firstName',
+    header: 'First Name',
+    cell: (info) => info.getValue(),
+  },
+  {
+    accessorKey: 'lastName',
+    header: 'Last Name',
+    cell: (info) => info.getValue(),
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email',
     cell: (info) => info.getValue(),
   },
   {
@@ -22,26 +32,24 @@ export const studentTableColumns = [
     cell: (info) => info.getValue(),
   },
   {
-    accessorKey: 'courses',
+    id: 'courses',
     header: 'Courses',
-    cell: (cellContext: CellContext<StudentWithCourses, unknown>) => (
+    enableSorting: false,
+
+    accessorFn: (row: StudentWithCourses) => row.courses.map((c) => c.courseName).join(' '),
+
+    cell: ({ row }) => (
       <div className='flex gap-2'>
-        {cellContext
-          .getValue<StudentCourseParticipation[]>()
-          .map((scp: StudentCourseParticipation) => (
-            <StudentCoursePreview
-              studentCourseParticipation={scp}
-              key={scp.courseId + cellContext.row.id}
-            />
-          ))}
+        {row.original.courses.map((scp: StudentCourseParticipation) => (
+          <StudentCoursePreview studentCourseParticipation={scp} key={scp.courseId + row.id} />
+        ))}
       </div>
     ),
-    filterFn: (row: Row<StudentWithCourses>, columnId: string, filterValue: string[]) => {
-      if (!filterValue || filterValue.length === 0) return true
 
-      const courses = row.getValue<StudentCourseParticipation[]>(columnId)
+    filterFn: (row: Row<StudentWithCourses>, _columnId, filterValue: string[]) => {
+      if (!filterValue?.length) return true
 
-      return courses.some((course) => filterValue.includes(course.courseName))
+      return row.original.courses.some((course) => filterValue.includes(course.courseName))
     },
   },
 ]

@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Team, CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
+import { Team, CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
 import { Allocation } from '../team_allocation/interfaces/allocation'
 import { getAllTeams } from '../team_allocation/network/queries/getAllTeams'
 import { getTeamAllocations } from '../team_allocation/network/queries/getTeamAllocations'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
+import { RenderStudents } from '@/components/StudentAvatar'
 
 export interface CoursePhaseStudentIdentifierProps {
   studentId: string
@@ -34,7 +35,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
     queryFn: () => getTeamAllocations(coursePhaseId),
   })
 
-  const studentTeam = useMemo(() => {
+  const studentTeamInfo = useMemo(() => {
     if (!coursePhaseParticipations || !teamAllocations || !teams) {
       return null
     }
@@ -50,6 +51,12 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
 
     const courseParticipationID = participation.courseParticipationID
 
+    // Map course participation IDs to students
+    const participationMap = new Map<string, Student>()
+    coursePhaseParticipations.participations.forEach((p) => {
+      participationMap.set(p.courseParticipationID, p.student)
+    })
+
     // Find the allocation that contains this course participation ID
     const allocation = teamAllocations.find((a) => a.students.includes(courseParticipationID))
 
@@ -60,7 +67,17 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
     // Find the team for this allocation
     const team = teams.find((t) => t.id === allocation.projectId)
 
-    return team || null
+    if (!team) {
+      return null
+    }
+
+    const members = allocation.students
+      .map((cpId) => participationMap.get(cpId))
+      .filter(Boolean) as Student[]
+
+    const tutors = team.tutors ?? []
+
+    return { team, members, tutors }
   }, [coursePhaseParticipations, teamAllocations, teams, studentId])
 
   const isPending = isTeamsPending || isAllocationsPending || isParticipationsPending
@@ -69,14 +86,25 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
     return null
   }
 
-  if (!studentTeam) {
+  if (!studentTeamInfo) {
     return null
   }
 
+  const { team, members, tutors } = studentTeamInfo
+
   return (
     <div className='text-sm'>
-      <span className='text-muted-foreground'>Team: </span>
-      <span className='font-medium'>{studentTeam.name}</span>
+      <h4 className='font-semibold text-lg'>{team.name}</h4>
+
+      <RenderStudents
+        students={tutors.map((tutor) => ({ ...tutor, email: 'no@mail.example' }))}
+        fallback={<p className='text-xs italic text-muted-foreground'>No tutors allocated</p>}
+      />
+
+      <RenderStudents
+        students={members}
+        fallback={<p className='text-xs italic text-muted-foreground'>No members allocated.</p>}
+      />
     </div>
   )
 }

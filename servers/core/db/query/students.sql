@@ -69,7 +69,10 @@ WHERE id = ANY($1::uuid[]);
 -- name: GetAllStudentsWithCourseParticipations :many
 SELECT
   s.id AS student_id,
-  (s.first_name || ' ' || s.last_name)::text AS student_name,
+  s.first_name AS student_first_name,
+  s.last_name AS student_last_name,
+  s.email AS student_email,
+  s.has_university_account AS student_has_university_account,
   s.current_semester,
   s.study_program,
   COALESCE(
@@ -90,7 +93,9 @@ LEFT JOIN course c
 GROUP BY
   s.id,
   s.first_name,
-  s.last_name;
+  s.last_name,
+  s.email,
+  s.has_university_account;
 
 -- name: GetStudentEnrollments :one
 WITH RECURSIVE
