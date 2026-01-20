@@ -36,6 +36,8 @@ jobs:
           else
             MODULES="[]"
             for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "servers/$module/" '. += [$d]')
             done
           fi
 
