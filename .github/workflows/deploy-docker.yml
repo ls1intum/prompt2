@@ -190,7 +190,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" > .env.prod
+            echo "ENVIRONMENT=${{ inputs.environment }}" > .env.prod
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
@@ -247,6 +247,12 @@ jobs:
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
             echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env.prod
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
+
+            echo "SENTRY_DSN_CORE=${{ vars.SENTRY_DSN_CORE }}" >> .env.prod
+            echo "SENTRY_DSN_INTRO_COURSE=${{ vars.SENTRY_DSN_INTRO_COURSE }}" >> .env.prod
+            echo "SENTRY_DSN_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_SELF_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_ASSESSMENT=${{ vars.SENTRY_DSN_ASSESSMENT }}" >> .env.prod
 
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
