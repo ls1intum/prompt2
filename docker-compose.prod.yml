@@ -94,6 +94,8 @@ services:
       - SMTP_PASSWORD
       - SENDER_EMAIL
       - SENDER_NAME
+      - SENTRY_DSN_CORE
+      - ENVIRONMENT
     networks:
       - prompt-network
 
@@ -127,6 +129,8 @@ services:
       - KEYCLOAK_AUTHORIZED_PARTY
       - KEYCLOAK_CLIENT_ID
       - GITLAB_ACCESS_TOKEN
+      - SENTRY_DSN_INTRO_COURSE
+      - ENVIRONMENT
     networks:
       - prompt-network
 
@@ -157,6 +161,8 @@ services:
       - DB_PASSWORD
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
+      - SENTRY_DSN_TEAM_ALLOCATION
+      - ENVIRONMENT
     networks:
       - prompt-network
 
@@ -187,6 +193,8 @@ services:
       - DB_PASSWORD
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
+      - SENTRY_DSN_SELF_TEAM_ALLOCATION
+      - ENVIRONMENT
     networks:
       - prompt-network
 
@@ -217,6 +225,8 @@ services:
       - DB_PASSWORD
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
+      - SENTRY_DSN_ASSESSMENT
+      - ENVIRONMENT
     networks:
       - prompt-network
 
