@@ -1,6 +1,6 @@
 module github.com/ls1intum/prompt2/servers/template_server
 
-go 1.24.1
+go 1.25.6
 
 require (
 	github.com/getsentry/sentry-go v0.41.0
