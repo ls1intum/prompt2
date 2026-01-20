@@ -27,10 +27,13 @@ jobs:
           cache: yarn
           cache-dependency-path: docs/yarn.lock
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
         run: |
           cd docs
-          yarn install --frozen-lockfile
+          yarn install --immutable
 
       - name: Build website
         run: |
