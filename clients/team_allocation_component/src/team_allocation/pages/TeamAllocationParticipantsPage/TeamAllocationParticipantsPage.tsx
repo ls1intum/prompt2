@@ -51,8 +51,17 @@ export const TeamAllocationParticipantsPage = () => {
   const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
-    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
+
+    const getTeamNameForParticipation = (courseParticipationID: string): string => {
+      const allocation = teamAllocations.find(({ students }) =>
+        students.includes(courseParticipationID),
+      )
+
+      if (!allocation) return 'No Team'
+
+      return teamNameById.get(allocation.projectId) ?? 'No Team'
+    }
 
     const teamNameExtraData = teamAllocations.flatMap(({ projectId, students }) => {
       const teamName = teamNameById.get(projectId) ?? 'No Team'
@@ -68,20 +77,27 @@ export const TeamAllocationParticipantsPage = () => {
       {
         id: 'allocatedTeam',
         header: 'Allocated Team',
-        extraData: teamNameExtraData,
+
+        accessorFn: (row) => getTeamNameForParticipation(row.courseParticipationID),
+
+        cell: ({ getValue }) => getValue(),
+
         enableSorting: true,
         sortingFn: (rowA, rowB) => {
           const a = rowA.getValue('allocatedTeam') as string
           const b = rowB.getValue('allocatedTeam') as string
           return a.localeCompare(b)
         },
+
         enableColumnFilter: true,
         filterFn: (row, columnId, filterValue) => {
           const value = String(row.getValue(columnId) ?? '').toLowerCase()
           if (!Array.isArray(filterValue)) return false
           return filterValue.map((v) => v.toLowerCase()).includes(value)
         },
-      },
+
+        extraData: teamNameExtraData,
+      } satisfies ExtraParticipantColumn<string>,
     ]
   }, [teams, teamAllocations])
 
