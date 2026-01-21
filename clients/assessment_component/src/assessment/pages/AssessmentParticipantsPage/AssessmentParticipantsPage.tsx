@@ -87,7 +87,7 @@ export const AssessmentParticipantsPage = () => {
     return completedGradings.map((completion) => completion.gradeSuggestion)
   }, [assessmentCompletions])
 
-  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!scoreLevels) return []
 
     const columns = [
@@ -112,7 +112,7 @@ export const AssessmentParticipantsPage = () => {
       ),
     ]
 
-    return columns.filter((column) => column !== undefined)
+    return columns.filter((column): column is ExtraParticipantColumn<any> => column !== undefined)
   }, [
     participations,
     teams,

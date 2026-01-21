@@ -6,7 +6,7 @@ import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipat
 export const createTeamColumn = (
   teams: Team[],
   participations: AssessmentParticipationWithStudent[],
-): ExtraParticipantColumn | undefined => {
+): ExtraParticipantColumn<string> | undefined => {
   if (teams.length === 0) return undefined
 
   return {

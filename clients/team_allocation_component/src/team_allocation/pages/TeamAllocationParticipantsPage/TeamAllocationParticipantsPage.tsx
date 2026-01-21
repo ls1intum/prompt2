@@ -48,7 +48,7 @@ export const TeamAllocationParticipantsPage = () => {
     queryFn: () => getTeamAllocations(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
     // Build a quick lookup so we don’t do an O(n²) “find” in the loop.

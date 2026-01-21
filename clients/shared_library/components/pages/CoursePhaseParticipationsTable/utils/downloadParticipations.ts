@@ -7,7 +7,7 @@ export const downloadParticipations = (
   prevDataKeys: string[],
   restrictedDataKeys: string[],
   studentReadableDataKeys: string[],
-  extraColumns: ExtraParticipantColumn[] = [],
+  extraColumns: ExtraParticipantColumn<any>[] = [],
   filename = 'participation-export.csv',
 ) => {
   if (!data || data.length === 0) {

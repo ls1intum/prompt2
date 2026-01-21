@@ -28,12 +28,12 @@ export interface ParticipantRow {
   [key: string]: unknown
 }
 
-export interface ExtraParticipantColumn {
+export interface ExtraParticipantColumn<TValue> {
   id: string
   header: string
 
-  accessorFn?: AccessorFn<ParticipantRow>
-  cell?: ColumnDef<ParticipantRow>['cell']
+  accessorFn?: AccessorFn<ParticipantRow, TValue>
+  cell?: ColumnDef<ParticipantRow, TValue>['cell']
 
   enableSorting?: boolean
   sortingFn?: SortingFn<ParticipantRow>
@@ -43,14 +43,14 @@ export interface ExtraParticipantColumn {
 
   extraData: {
     courseParticipationID: string
-    value: React.ReactNode
+    value: TValue
     stringValue?: string
   }[]
 }
 
 export function buildParticipantRows(
   participants: CoursePhaseParticipationWithStudent[],
-  extraColumns: ExtraParticipantColumn[],
+  extraColumns: ExtraParticipantColumn<any>[],
 ): ParticipantRow[] {
   return participants.map((p) => ({
     id: p.courseParticipationID,

@@ -36,7 +36,7 @@ export const SelfTeamAllocationParticipantsPage = () => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams) return []
 
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
