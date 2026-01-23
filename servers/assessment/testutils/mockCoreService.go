@@ -76,14 +76,14 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 	server := httptest.NewServer(router)
 
 	oldCoreHost := os.Getenv("SERVER_CORE_HOST")
-	os.Setenv("SERVER_CORE_HOST", server.URL)
+	_ = os.Setenv("SERVER_CORE_HOST", server.URL)
 
 	cleanup := func() {
 		server.Close()
 		if oldCoreHost != "" {
-			os.Setenv("SERVER_CORE_HOST", oldCoreHost)
+			_ = os.Setenv("SERVER_CORE_HOST", oldCoreHost)
 		} else {
-			os.Unsetenv("SERVER_CORE_HOST")
+			_ = os.Unsetenv("SERVER_CORE_HOST")
 		}
 	}
 

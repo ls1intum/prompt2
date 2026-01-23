@@ -35,6 +35,7 @@ services:
       - SMTP_PASSWORD
       - SENDER_EMAIL
       - SENDER_NAME
+      - SENTRY_DSN_CORE
 
   server-intro-course:
     build:
@@ -62,6 +63,7 @@ services:
       - KEYCLOAK_AUTHORIZED_PARTY
       - KEYCLOAK_CLIENT_ID
       - DEBUG
+      - SENTRY_DSN_INTRO_COURSE
 
   server-team-allocation:
     build:
@@ -86,6 +88,7 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - DEBUG
+      - SENTRY_DSN_TEAM_ALLOCATION
 
   server-self-team-allocation:
     build:
@@ -110,6 +113,7 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - DEBUG
+      - SENTRY_DSN_SELF_TEAM_ALLOCATION
 
   server-assessment:
     build:
@@ -134,6 +138,7 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - DEBUG
+      - SENTRY_DSN_ASSESSMENT
 
   # Template server (example service)
   server-template:
@@ -160,6 +165,7 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - DEBUG
+      - SENTRY_DSN_TEMPLATE_SERVER
 
   client-core:
     build:
@@ -384,7 +390,7 @@ services:
       - "5431:5432"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4.6
+    image: quay.io/keycloak/keycloak:26.4.7
     container_name: prompt-keycloak
     command:
       - start-dev
