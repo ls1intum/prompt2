@@ -53,6 +53,7 @@ export const CoursePhaseParticipationsTable = ({
       filters={filters}
       actions={actions}
       onRowClick={(row) => onClickRowAction?.(row)}
+      initialState={{ columnVisibility: { matriculationNumber: false, universityLogin: false } }}
     />
   )
 }
