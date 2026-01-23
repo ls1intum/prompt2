@@ -137,6 +137,7 @@ export const TeamAllocationParticipantsPage = () => {
   const isError = isParticipationsError || isTeamsError || isTeamAllocationsError
   const isPending = isCoursePhaseParticipationsPending || isTeamsPending || isTeamAllocationsPending
 
+  if (!phaseId) return <ErrorPage onRetry={refetch} description='Invalid course phase ID' />
   if (isError)
     return <ErrorPage onRetry={refetch} description='Could not fetch participants or teams' />
   if (isPending)
@@ -154,7 +155,7 @@ export const TeamAllocationParticipantsPage = () => {
       </p>
       <div className='w-full'>
         <CoursePhaseParticipationsTable
-          phaseId={phaseId!}
+          phaseId={phaseId}
           participants={coursePhaseParticipations.participations ?? []}
           extraColumns={extraColumns}
         />
