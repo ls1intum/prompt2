@@ -1,7 +1,7 @@
-import { getStatusBadge } from '@/utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { ApplicationRow } from './applicationRow'
 import { ColumnDef } from '@tanstack/react-table'
+import { getApplicationStatusBadge } from './getApplicationStatusBadge'
 
 export function getApplicationColumns(
   additionalScores?: { key: string; name: string }[],
@@ -19,7 +19,7 @@ export function getApplicationColumns(
     {
       accessorKey: 'passStatus',
       header: 'Status',
-      cell: (info) => getStatusBadge(info.getValue() as PassStatus),
+      cell: (info) => getApplicationStatusBadge(info.getValue() as PassStatus),
     },
     {
       accessorKey: 'score',

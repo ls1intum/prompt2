@@ -1,12 +1,6 @@
-import { getStatusBadge } from '@/utils/getStatusBadge'
+import { getStatusBadge, getStatusString } from '@/utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { TableFilter } from '@tumaet/prompt-ui-components'
-
-const passStatusDisplayName: Record<PassStatus, string> = {
-  [PassStatus.PASSED]: 'Passed',
-  [PassStatus.FAILED]: 'Failed',
-  [PassStatus.NOT_ASSESSED]: 'Not Assessed',
-}
 
 export function getParticipantFilters(extraFilters: TableFilter[] = []): TableFilter[] {
   return [
@@ -20,7 +14,7 @@ export function getParticipantFilters(extraFilters: TableFilter[] = []): TableFi
         label: 'Status',
         displayValue: function (filtervalue: unknown): string {
           const p = filtervalue as PassStatus
-          return passStatusDisplayName[p]
+          return getStatusString(p)
         },
       },
     },
