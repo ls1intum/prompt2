@@ -11,7 +11,20 @@ export function getApplicationFilters(
       id: 'passStatus',
       label: 'Status',
       options: Object.values(PassStatus),
-      getDisplay: (v) => getStatusBadge(v as PassStatus),
+      optionLabel: (v) => getStatusBadge(v as PassStatus),
+      badge: {
+        label: 'Application',
+        displayValue(filtervalue) {
+          switch (filtervalue as PassStatus) {
+            case PassStatus.PASSED:
+              return 'Accepted'
+            case PassStatus.FAILED:
+              return 'Rejected'
+            case PassStatus.NOT_ASSESSED:
+              return 'Not Assessed'
+          }
+        },
+      },
     },
     {
       type: 'select',
@@ -29,6 +42,10 @@ export function getApplicationFilters(
       type: 'numericRange' as const,
       id: s.key,
       label: s.name,
+      badge: {
+        label: s.name,
+        displayValue: (filtervalue) => `${filtervalue}`,
+      },
     })),
   ]
 }

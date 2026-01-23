@@ -52,31 +52,35 @@ export function buildParticipantRows(
   participants: CoursePhaseParticipationWithStudent[],
   extraColumns: ExtraParticipantColumn<any>[],
 ): ParticipantRow[] {
-  return participants.map((p) => ({
-    id: p.courseParticipationID,
+  return participants.map((p) => {
+    const extraValues: Record<string, unknown> = {}
 
-    coursePhaseID: p.coursePhaseID,
-    courseParticipationID: p.courseParticipationID,
-    passStatus: p.passStatus,
-
-    restrictedData: p.restrictedData,
-    studentReadableData: p.studentReadableData,
-    prevData: p.prevData,
-
-    student: p.student,
-
-    firstName: p.student.firstName,
-    lastName: p.student.lastName,
-    email: p.student.email,
-    matriculationNumber: p.student.matriculationNumber,
-    universityLogin: p.student.universityLogin,
-
-    ...Object.fromEntries(
-      extraColumns.map((col) => [
-        col.id,
+    for (const col of extraColumns) {
+      extraValues[col.id] =
         col.extraData.find((d) => d.courseParticipationID === p.courseParticipationID)?.value ??
-          null,
-      ]),
-    ),
-  }))
+        null
+    }
+
+    return {
+      id: p.courseParticipationID,
+
+      coursePhaseID: p.coursePhaseID,
+      courseParticipationID: p.courseParticipationID,
+      passStatus: p.passStatus,
+
+      restrictedData: p.restrictedData,
+      studentReadableData: p.studentReadableData,
+      prevData: p.prevData,
+
+      student: p.student,
+
+      firstName: p.student.firstName,
+      lastName: p.student.lastName,
+      email: p.student.email,
+      matriculationNumber: p.student.matriculationNumber,
+      universityLogin: p.student.universityLogin,
+
+      ...extraValues,
+    }
+  })
 }

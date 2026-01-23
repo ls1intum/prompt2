@@ -63,15 +63,18 @@ export const TeamAllocationParticipantsPage = () => {
       return teamNameById.get(allocation.projectId) ?? 'No Team'
     }
 
-    const teamNameExtraData = teamAllocations.flatMap(({ projectId, students }) => {
+    const teamNameExtraData: any[] = []
+    for (const { projectId, students } of teamAllocations) {
       const teamName = teamNameById.get(projectId) ?? 'No Team'
 
-      return students.map((courseParticipationID) => ({
-        courseParticipationID,
-        value: teamName,
-        stringValue: teamName,
-      }))
-    })
+      for (const courseParticipationID of students) {
+        teamNameExtraData.push({
+          courseParticipationID,
+          value: teamName,
+          stringValue: teamName,
+        })
+      }
+    }
 
     return [
       {

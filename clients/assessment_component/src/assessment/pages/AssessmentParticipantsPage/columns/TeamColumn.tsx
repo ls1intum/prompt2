@@ -30,6 +30,8 @@ export const createTeamColumn = (
 
     enableSorting: true,
 
+    enableColumnFilter: true,
+
     sortingFn: (rowA, rowB) =>
       getTeamName(rowA.original.courseParticipationID).localeCompare(
         getTeamName(rowB.original.courseParticipationID),

@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import { ManagementPageHeader, ErrorPage, TableFilter } from '@tumaet/prompt-ui-components'
 import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
@@ -124,6 +124,20 @@ export const AssessmentParticipantsPage = () => {
     tutorEvaluationCompletions,
   ])
 
+  const extraFilters: TableFilter[] = [
+    {
+      type: 'select',
+      id: 'team',
+      label: 'Team',
+      options: teams.map((team) => team.name),
+      optionLabel: (value) => <p>{value}</p>,
+      badge: {
+        label: 'Team',
+        displayValue: (filtervalue) => `${filtervalue}`,
+      },
+    },
+  ]
+
   if (isError) {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
   }
@@ -155,6 +169,7 @@ export const AssessmentParticipantsPage = () => {
           phaseId={phaseId!}
           participants={participations ?? []}
           extraColumns={extraColumns}
+          extraFilters={extraFilters}
           onClickRowAction={(row) => navigate(`${path}/${row.courseParticipationID}`)}
         />
       </div>
