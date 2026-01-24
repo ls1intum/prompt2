@@ -1,10 +1,9 @@
 package copy
 
 import (
-	"context"
-
-	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 )
 
@@ -13,15 +12,10 @@ type CopyService struct {
 	conn    *pgxpool.Pool
 }
 
-func NewCopyService(queries db.Queries, conn *pgxpool.Pool) *CopyService {
-	return &CopyService{
-		queries: queries,
-		conn:    conn,
-	}
-}
+var CopyServiceSingleton *CopyService
 
-func (s *CopyService) CopyData(ctx context.Context, sourceCoursePhaseID, targetCoursePhaseID uuid.UUID) error {
-	// Placeholder - copying not yet implemented
-	// Will copy interview slots from source to target phase
+type SelfTeamCopyHandler struct{}
+
+func (h *SelfTeamCopyHandler) HandlePhaseCopy(c *gin.Context, req promptTypes.PhaseCopyRequest) error {
 	return nil
 }

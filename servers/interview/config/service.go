@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 )
@@ -10,9 +11,10 @@ type ConfigService struct {
 	conn    *pgxpool.Pool
 }
 
-func NewConfigService(queries db.Queries, conn *pgxpool.Pool) *ConfigService {
-	return &ConfigService{
-		queries: queries,
-		conn:    conn,
-	}
+var ConfigServiceSingleton *ConfigService
+
+type ConfigHandler struct{}
+
+func (h *ConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]bool, err error) {
+	return nil, nil
 }
