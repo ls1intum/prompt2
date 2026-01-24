@@ -6,11 +6,26 @@ const interviewSidebarItems: SidebarMenuItemProps = {
   title: 'Interview',
   icon: <Mic />,
   goToPath: '',
-  requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  requiredPermissions: [
+    Role.PROMPT_ADMIN,
+    Role.COURSE_LECTURER,
+    Role.COURSE_EDITOR,
+    Role.COURSE_STUDENT,
+  ],
   subitems: [
     {
+      title: 'Manage Interviews',
+      goToPath: '/manage',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
+      title: 'Schedule',
+      goToPath: '/schedule',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
       title: 'Mailing',
-      goToPath: '/mailing',
+      goToPath: '/manage/mailing',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
