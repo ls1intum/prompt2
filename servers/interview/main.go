@@ -134,12 +134,12 @@ func main() {
 	router.Use(sentrygin.New(sentrygin.Options{}))
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
-	api := router.Group("interview-service/api/course_phase/:coursePhaseID")
+	api := router.Group("interview/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
 	api.GET("/hello", helloInterviewServer)
 
-	copyApi := router.Group("interview-service/api")
+	copyApi := router.Group("interview/api")
 	copy.InitCopyModule(copyApi, *query, conn)
 
 	config.InitConfigModule(api, *query, conn)

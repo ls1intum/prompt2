@@ -69,7 +69,7 @@ export const InterviewScheduleManagement = () => {
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
-        `interview-service/api/course_phase/${phaseId}/interview-slots`,
+        `interview/api/course_phase/${phaseId}/interview-slots`,
       )
       return response.data
     },
@@ -80,7 +80,7 @@ export const InterviewScheduleManagement = () => {
   const createSlotMutation = useMutation({
     mutationFn: async (data: SlotFormData) => {
       const response = await interviewAxiosInstance.post(
-        `interview-service/api/course_phase/${phaseId}/interview-slots`,
+        `interview/api/course_phase/${phaseId}/interview-slots`,
         {
           start_time: new Date(data.start_time).toISOString(),
           end_time: new Date(data.end_time).toISOString(),
@@ -101,7 +101,7 @@ export const InterviewScheduleManagement = () => {
   const updateSlotMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: SlotFormData }) => {
       const response = await interviewAxiosInstance.put(
-        `interview-service/api/course_phase/${phaseId}/interview-slots/${id}`,
+        `interview/api/course_phase/${phaseId}/interview-slots/${id}`,
         {
           start_time: new Date(data.start_time).toISOString(),
           end_time: new Date(data.end_time).toISOString(),
@@ -123,7 +123,7 @@ export const InterviewScheduleManagement = () => {
   const deleteSlotMutation = useMutation({
     mutationFn: async (slotId: string) => {
       await interviewAxiosInstance.delete(
-        `interview-service/api/course_phase/${phaseId}/interview-slots/${slotId}`,
+        `interview/api/course_phase/${phaseId}/interview-slots/${slotId}`,
       )
     },
     onSuccess: () => {

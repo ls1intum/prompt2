@@ -28,9 +28,9 @@ func initInterview() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
-		baseURL := "{CORE_HOST}/interview-service/api"
+		baseURL := "{CORE_HOST}/interview/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
-			baseURL = "http://localhost:8087/interview-service/api"
+			baseURL = "http://localhost:8087/interview/api"
 		}
 
 		newInterviewPhase := db.CreateCoursePhaseTypeParams{

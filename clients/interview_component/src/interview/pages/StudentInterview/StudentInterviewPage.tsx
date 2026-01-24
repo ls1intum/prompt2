@@ -47,7 +47,7 @@ export const StudentInterviewPage = () => {
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
-        `interview-service/api/course_phase/${phaseId}/interview-slots`,
+        `interview/api/course_phase/${phaseId}/interview-slots`,
       )
       return response.data
     },
@@ -59,7 +59,7 @@ export const StudentInterviewPage = () => {
     queryKey: ['myInterviewAssignment', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
-        `interview-service/api/course_phase/${phaseId}/interview-assignments/my-assignment`,
+        `interview/api/course_phase/${phaseId}/interview-assignments/my-assignment`,
       )
       return response.data
     },
@@ -71,7 +71,7 @@ export const StudentInterviewPage = () => {
   const bookSlotMutation = useMutation({
     mutationFn: async (slotId: string) => {
       const response = await interviewAxiosInstance.post(
-        `interview-service/api/course_phase/${phaseId}/interview-assignments`,
+        `interview/api/course_phase/${phaseId}/interview-assignments`,
         { interview_slot_id: slotId },
       )
       return response.data
@@ -87,7 +87,7 @@ export const StudentInterviewPage = () => {
   const cancelBookingMutation = useMutation({
     mutationFn: async (assignmentId: string) => {
       await interviewAxiosInstance.delete(
-        `interview-service/api/course_phase/${phaseId}/interview-assignments/${assignmentId}`,
+        `interview/api/course_phase/${phaseId}/interview-assignments/${assignmentId}`,
       )
     },
     onSuccess: () => {
