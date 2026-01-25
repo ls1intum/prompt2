@@ -7101,7 +7101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.12.0, axios@npm:^1.13.2":
+"axios@npm:^1.12.0, axios@npm:^1.13.3":
   version: 1.13.3
   resolution: "axios@npm:1.13.3"
   dependencies:
@@ -15373,7 +15373,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.52.0"
     "@typescript-eslint/parser": "npm:^8.53.1"
     autoprefixer: "npm:^10.4.23"
-    axios: "npm:^1.13.2"
+    axios: "npm:^1.13.3"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     css-loader: "npm:^7.1.2"
@@ -16227,9 +16227,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^3.6.0":
-  version: 3.6.0
-  resolution: "recharts@npm:3.6.0"
+"recharts@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "recharts@npm:3.7.0"
   dependencies:
     "@reduxjs/toolkit": "npm:1.x.x || 2.x.x"
     clsx: "npm:^2.1.1"
@@ -16246,7 +16246,7 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-is: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/39ef37ca93167bcf953b4d509fff992839dac6fb2681a5707085912eb425343063107ae3bdc9104a0c454852218e95a4fb3e64018b07347468879b806c8e9188
+  checksum: 10c0/ca59c1530983e8b6ce40652dd8c72e220c47c01fd35bca4d50791bf75f864a889adfb9adeac4a3cc8d3efa2e6b731462ad10a61887341870d7cc70feb862bd4e
   languageName: node
   linkType: hard
 
@@ -16951,7 +16951,7 @@ __metadata:
     i18n-iso-countries: "npm:^7.14.0"
     react-day-picker: "npm:9.13.0"
     react-hook-form: "npm:^7.71.1"
-    recharts: "npm:^3.6.0"
+    recharts: "npm:^3.7.0"
     tailwindcss: "npm:^4.1.18"
     zod: "npm:^4.3.6"
   languageName: unknown
