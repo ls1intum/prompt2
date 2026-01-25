@@ -29,10 +29,28 @@ jobs:
           files: .github/workflows/generate-api-spec.yml
       - id: set-matrix
         run: |
+          is_api_spec_module() {
+            local module="$1"
+            local modfile="servers/$module/go.mod"
+            [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"
+          }
+
           if [ "${{ steps.changed-workflow.outputs.any_changed }}" = "true" ]; then
-            DIRS=$(find servers -mindepth 1 -maxdepth 1 -type d | cut -d/ -f2 | jq -R -s -c 'split("\n")[:-1]')
+            DIRS="[]"
+            for dir in servers/*/; do
+              module=$(basename "$dir")
+              if is_api_spec_module "$module"; then
+                DIRS=$(echo "$DIRS" | jq --arg d "$module" 'if contains([$d]) then . else . + [$d] end')
+              fi
+            done
           else
-            DIRS=$(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -c '[.[] | split("/") | select(length > 1) | .[1]] | unique')
+            DIRS="[]"
+            for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              if [ -n "$module" ] && is_api_spec_module "$module"; then
+                DIRS=$(echo "$DIRS" | jq --arg d "$module" 'if contains([$d]) then . else . + [$d] end')
+              fi
+            done
           fi
 
           echo "directories<<EOF" >> $GITHUB_OUTPUT

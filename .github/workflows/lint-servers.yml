@@ -31,13 +31,13 @@ jobs:
           if [ "${{ steps.changed-workflow.outputs.any_changed }}" = "true" ]; then
             MODULES="[]"
             for dir in servers/*/; do
-              [ -f "$dir/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "$dir" '. += [$d]')
+              [ -f "$dir/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "$dir" 'if contains([$d]) then . else . + [$d] end')
             done
           else
             MODULES="[]"
             for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
               module=$(echo "$dir" | cut -d'/' -f2)
-              [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "servers/$module/" '. += [$d]')
+              [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && MODULES=$(echo "$MODULES" | jq --arg d "servers/$module/" 'if contains([$d]) then . else . + [$d] end')
             done
           fi
 

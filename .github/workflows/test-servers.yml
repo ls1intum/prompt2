@@ -37,6 +37,7 @@ jobs:
           else
             DIRS="[]"
             for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
               [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && DIRS=$(echo "$DIRS" | jq --arg d "$module" 'if contains([$d]) then . else . + [$d] end')
             done
           fi
