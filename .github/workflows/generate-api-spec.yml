@@ -8,41 +8,44 @@ permissions:
   contents: read
 
 jobs:
-  detect-changes:
+  set-matrix:
     runs-on: ubuntu-latest
     outputs:
-      core-changed: ${{ steps.changes.outputs.core }}
-      template-server-changed: ${{ steps.changes.outputs.template_server }}
-      self-team-allocation-changed: ${{ steps.changes.outputs.self_team_allocation }}
+      directories: ${{ steps.set-matrix.outputs.directories }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
         with:
-          filters: |
-            core:
-              - 'servers/core/**'
-            template_server:
-              - 'servers/template_server/**'
-            self_team_allocation:
-              - 'servers/self_team_allocation/**'
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v45
+        id: changed-servers
+        with:
+          files: servers/**/
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+      - uses: tj-actions/changed-files@v45
+        id: changed-workflow
+        with:
+          files: .github/workflows/generate-api-spec.yml
+      - id: set-matrix
+        run: |
+          if [ "${{ steps.changed-workflow.outputs.any_changed }}" = "true" ]; then
+            DIRS=$(find servers -mindepth 1 -maxdepth 1 -type d | cut -d/ -f2 | jq -R -s -c 'split("\n")[:-1]')
+          else
+            DIRS=$(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -c '[.[] | split("/") | select(length > 1) | .[1]] | unique')
+          fi
+
+          echo "directories<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIRS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   generate-api-spec:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: |
-      needs.detect-changes.outputs.core-changed == 'true' ||
-      needs.detect-changes.outputs.template-server-changed == 'true' ||
-      needs.detect-changes.outputs.self-team-allocation-changed == 'true'
+    needs: set-matrix
+    if: needs.set-matrix.outputs.directories != '[]'
     strategy:
       matrix:
-        include:
-          - directory: core
-            changed: ${{ needs.detect-changes.outputs.core-changed }}
-          - directory: template_server
-            changed: ${{ needs.detect-changes.outputs.template-server-changed }}
-          - directory: self_team_allocation
-            changed: ${{ needs.detect-changes.outputs.self-team-allocation-changed }}
+        directory: ${{ fromJson(needs.set-matrix.outputs.directories) }}
 
     steps:
       - uses: actions/checkout@v4
