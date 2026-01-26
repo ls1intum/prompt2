@@ -32,6 +32,20 @@ import {
 import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 
+interface StudentInfo {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+}
+
+interface AssignmentInfo {
+  id: string
+  course_participation_id: string
+  assigned_at: string
+  student?: StudentInfo
+}
+
 interface InterviewSlot {
   id: string
   course_phase_id: string
@@ -40,6 +54,7 @@ interface InterviewSlot {
   location: string | null
   capacity: number
   assigned_count: number
+  assignments: AssignmentInfo[]
   created_at: string
   updated_at: string
 }
@@ -331,6 +346,7 @@ export const InterviewScheduleManagement = () => {
                   <TableHead>Date & Time</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Capacity</TableHead>
+                  <TableHead>Assigned Students</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className='text-right'>Actions</TableHead>
                 </TableRow>
@@ -376,6 +392,21 @@ export const InterviewScheduleManagement = () => {
                             {slot.assigned_count} / {slot.capacity}
                           </span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {slot.assignments && slot.assignments.length > 0 ? (
+                          <div className='space-y-1'>
+                            {slot.assignments.map((assignment) => (
+                              <Badge key={assignment.id} variant='outline' className='mr-1'>
+                                {assignment.student
+                                  ? `${assignment.student.firstName} ${assignment.student.lastName}`
+                                  : assignment.course_participation_id}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className='text-muted-foreground text-sm'>No bookings yet</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {isPast ? (

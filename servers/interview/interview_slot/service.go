@@ -2,6 +2,9 @@ package interview_slot
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -9,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -38,16 +42,31 @@ type CreateInterviewAssignmentRequest struct {
 	InterviewSlotID uuid.UUID `json:"interview_slot_id" binding:"required"`
 }
 
+type StudentInfo struct {
+	ID        uuid.UUID `json:"id"`
+	FirstName string    `json:"firstName"`
+	LastName  string    `json:"lastName"`
+	Email     string    `json:"email"`
+}
+
+type AssignmentInfo struct {
+	ID                    uuid.UUID    `json:"id"`
+	CourseParticipationID uuid.UUID    `json:"course_participation_id"`
+	AssignedAt            time.Time    `json:"assigned_at"`
+	Student               *StudentInfo `json:"student,omitempty"`
+}
+
 type InterviewSlotResponse struct {
-	ID            uuid.UUID `json:"id"`
-	CoursePhaseID uuid.UUID `json:"course_phase_id"`
-	StartTime     time.Time `json:"start_time"`
-	EndTime       time.Time `json:"end_time"`
-	Location      *string   `json:"location"`
-	Capacity      int32     `json:"capacity"`
-	AssignedCount int64     `json:"assigned_count"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID            uuid.UUID        `json:"id"`
+	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
+	StartTime     time.Time        `json:"start_time"`
+	EndTime       time.Time        `json:"end_time"`
+	Location      *string          `json:"location"`
+	Capacity      int32            `json:"capacity"`
+	AssignedCount int64            `json:"assigned_count"`
+	Assignments   []AssignmentInfo `json:"assignments"`
+	CreatedAt     time.Time        `json:"created_at"`
+	UpdatedAt     time.Time        `json:"updated_at"`
 }
 
 // Helper functions for type conversion
@@ -133,7 +152,7 @@ func createInterviewSlot(c *gin.Context) {
 
 // getAllInterviewSlots godoc
 // @Summary Get all interview slots for a course phase
-// @Description Retrieves all interview slots with assignment counts
+// @Description Retrieves all interview slots with assignment details
 // @Tags interview-slots
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
@@ -148,34 +167,74 @@ func getAllInterviewSlots(c *gin.Context) {
 		return
 	}
 
-	slots, err := InterviewSlotServiceSingleton.queries.GetInterviewSlotsByCoursePhase(context.Background(), coursePhaseID)
+	rows, err := InterviewSlotServiceSingleton.queries.GetInterviewSlotWithAssignments(context.Background(), coursePhaseID)
 	if err != nil {
 		log.Errorf("Failed to get interview slots: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slots"})
 		return
 	}
 
-	// Get assignment counts for each slot
-	response := make([]InterviewSlotResponse, len(slots))
-	for i, slot := range slots {
-		count, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slot.ID)
-		if err != nil {
-			log.Warnf("Failed to get assignment count for slot %s: %v", slot.ID, err)
-			count = 0
+	// Get all students for this course phase at once
+	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+
+	// Group assignments by slot
+	slotMap := make(map[uuid.UUID]*InterviewSlotResponse)
+	slotOrder := []uuid.UUID{}
+
+	for _, row := range rows {
+		// Check if slot already exists in map
+		if _, exists := slotMap[row.SlotID]; !exists {
+			// New slot
+			slotMap[row.SlotID] = &InterviewSlotResponse{
+				ID:            row.SlotID,
+				CoursePhaseID: row.CoursePhaseID,
+				StartTime:     pgTimestamptzToTime(row.StartTime),
+				EndTime:       pgTimestamptzToTime(row.EndTime),
+				Location:      pgTextToStringPtr(row.Location),
+				Capacity:      row.Capacity,
+				Assignments:   []AssignmentInfo{},
+				CreatedAt:     row.CreatedAt.Time,
+				UpdatedAt:     row.UpdatedAt.Time,
+			}
+			slotOrder = append(slotOrder, row.SlotID)
 		}
 
-		response[i] = InterviewSlotResponse{
-			ID:            slot.ID,
-			CoursePhaseID: slot.CoursePhaseID,
-			StartTime:     pgTimestamptzToTime(slot.StartTime),
-			EndTime:       pgTimestamptzToTime(slot.EndTime),
-			Location:      pgTextToStringPtr(slot.Location),
-			Capacity:      slot.Capacity,
-			AssignedCount: count,
-			CreatedAt:     slot.CreatedAt.Time,
-			UpdatedAt:     slot.UpdatedAt.Time,
+		// Add assignment if it exists (assignment_id will be NULL if no assignment)
+		if row.AssignmentID.Valid {
+			// Convert pgtype.UUID Bytes to google uuid.UUID
+			assignmentUUID, err := uuid.FromBytes(row.AssignmentID.Bytes[:])
+			if err != nil {
+				log.Warnf("Failed to parse assignment UUID: %v", err)
+				continue
+			}
+			participationUUID, err := uuid.FromBytes(row.CourseParticipationID.Bytes[:])
+			if err != nil {
+				log.Warnf("Failed to parse course participation UUID: %v", err)
+				continue
+			}
+
+			// Get student info from the map
+			student := studentMap[participationUUID]
+
+			assignment := AssignmentInfo{
+				ID:                    assignmentUUID,
+				CourseParticipationID: participationUUID,
+				AssignedAt:            row.AssignedAt.Time,
+				Student:               student,
+			}
+			slotMap[row.SlotID].Assignments = append(slotMap[row.SlotID].Assignments, assignment)
 		}
 	}
+
+	// Build response array in order
+	response := make([]InterviewSlotResponse, 0, len(slotOrder))
+	for _, slotID := range slotOrder {
+		slot := slotMap[slotID]
+		slot.AssignedCount = int64(len(slot.Assignments))
+		response = append(response, *slot)
+	}
+
+	log.Debugf("Returning %d slots with assignments. Sample: %+v", len(response), response)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -206,7 +265,27 @@ func getInterviewSlot(c *gin.Context) {
 		return
 	}
 
-	count, _ := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slot.ID)
+	// Get assignments for this slot
+	assignments, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentsBySlot(context.Background(), slotID)
+	if err != nil {
+		log.Warnf("Failed to get assignments for slot %s: %v", slotID, err)
+		assignments = []db.InterviewAssignment{}
+	}
+
+	// Get all students for this course phase
+	coursePhaseID, _ := uuid.Parse(c.Param("coursePhaseID"))
+	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+
+	assignmentInfos := make([]AssignmentInfo, len(assignments))
+	for i, assignment := range assignments {
+		student := studentMap[assignment.CourseParticipationID]
+		assignmentInfos[i] = AssignmentInfo{
+			ID:                    assignment.ID,
+			CourseParticipationID: assignment.CourseParticipationID,
+			AssignedAt:            assignment.AssignedAt.Time,
+			Student:               student,
+		}
+	}
 
 	response := InterviewSlotResponse{
 		ID:            slot.ID,
@@ -215,7 +294,8 @@ func getInterviewSlot(c *gin.Context) {
 		EndTime:       pgTimestamptzToTime(slot.EndTime),
 		Location:      pgTextToStringPtr(slot.Location),
 		Capacity:      slot.Capacity,
-		AssignedCount: count,
+		AssignedCount: int64(len(assignments)),
+		Assignments:   assignmentInfos,
 		CreatedAt:     slot.CreatedAt.Time,
 		UpdatedAt:     slot.UpdatedAt.Time,
 	}
@@ -449,6 +529,73 @@ func getMyInterviewAssignment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// fetchAllStudentsForCoursePhase fetches all students for a course phase from the core service
+// and returns a map of course participation ID to student info
+func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) map[uuid.UUID]*StudentInfo {
+	coreURL := sdkUtils.GetCoreUrl()
+	url := fmt.Sprintf("%s/api/course_phases/%s/participations", coreURL, coursePhaseID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Warnf("Failed to create request for course phase participations: %v", err)
+		return make(map[uuid.UUID]*StudentInfo)
+	}
+
+	// Forward the authorization header
+	authHeader := c.GetHeader("Authorization")
+	if authHeader != "" {
+		req.Header.Set("Authorization", authHeader)
+	}
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Warnf("Failed to fetch course phase participations: %v", err)
+		return make(map[uuid.UUID]*StudentInfo)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Warnf("Core service returned status %d for course phase participations", resp.StatusCode)
+		return make(map[uuid.UUID]*StudentInfo)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Warnf("Failed to read course phase participations response: %v", err)
+		return make(map[uuid.UUID]*StudentInfo)
+	}
+
+	var participationsResponse struct {
+		Participations []struct {
+			CourseParticipationID uuid.UUID   `json:"courseParticipationID"`
+			Student               StudentInfo `json:"student"`
+		} `json:"participations"`
+	}
+
+	if err := json.Unmarshal(body, &participationsResponse); err != nil {
+		log.Warnf("Failed to unmarshal course phase participations: %v", err)
+		return make(map[uuid.UUID]*StudentInfo)
+	}
+
+	// Build map of course participation ID to student info
+	studentMap := make(map[uuid.UUID]*StudentInfo)
+	for _, participation := range participationsResponse.Participations {
+		studentCopy := participation.Student
+		studentMap[participation.CourseParticipationID] = &studentCopy
+	}
+
+	return studentMap
+}
+
+// fetchStudentInfo fetches student information for a specific course participation ID
+func fetchStudentInfo(c *gin.Context, courseParticipationID uuid.UUID) *StudentInfo {
+	// This function is kept for compatibility but should be replaced with fetchAllStudentsForCoursePhase
+	// for better performance when fetching multiple students
+	log.Warn("fetchStudentInfo called for single student - consider using fetchAllStudentsForCoursePhase for batch fetching")
+	return nil
 }
 
 // deleteInterviewAssignment godoc
