@@ -359,6 +359,7 @@ course_phases AS (
     SELECT
         cp.student_id,
         cp.course_id,
+        cp.course_participation_id,
         COALESCE(
             jsonb_agg(
                 jsonb_build_object(
@@ -384,13 +385,14 @@ course_phases AS (
     LEFT JOIN course_phase_participation cpp
         ON cpp.course_participation_id = cp.course_participation_id
        AND cpp.course_phase_id = ps.id
-    GROUP BY cp.student_id, cp.course_id
+    GROUP BY cp.student_id, cp.course_id, cp.course_participation_id
 )
 SELECT
     COALESCE(
         jsonb_agg(
             jsonb_build_object(
                 'courseId', c.id,
+                'courseParticipationId', cp.course_participation_id,
                 'name', c.name,
                 'semesterTag', c.semester_tag,
                 'courseType', c.course_type,

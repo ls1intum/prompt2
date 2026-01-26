@@ -1,5 +1,8 @@
 import { PhaseStudentDetailMapping } from '@core/managementConsole/PhaseMapping/PhaseStudentDetailMapping'
-import { CoursePhaseEnrollment } from '@core/network/queries/getStudentEnrollments'
+import {
+  CourseEnrollment,
+  CoursePhaseEnrollment,
+} from '@core/network/queries/getStudentEnrollments'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
@@ -24,21 +27,23 @@ export function formatDateTime(ts: string | null): string {
 }
 
 export function StudentCoursePhaseEnrollment({
-  cpe,
+  coursePhaseEnrollment,
+  courseEnrollment,
   showLine,
   current,
   studentId,
   courseId,
 }: {
-  cpe: CoursePhaseEnrollment
+  coursePhaseEnrollment: CoursePhaseEnrollment
+  courseEnrollment: CourseEnrollment
   showLine?: boolean
   current: boolean
   studentId: string
   courseId: string
 }) {
-  const PhaseDetail = PhaseStudentDetailMapping[cpe.coursePhaseType.name]
+  const PhaseDetail = PhaseStudentDetailMapping[coursePhaseEnrollment.coursePhaseType.name]
   return (
-    <div className='flex gap-2' key={cpe.coursePhaseId}>
+    <div className='flex gap-2' key={coursePhaseEnrollment.coursePhaseId}>
       <div className='relative flex flex-col'>
         {!showLine && (
           <div className='absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2' />
@@ -46,12 +51,14 @@ export function StudentCoursePhaseEnrollment({
         <div className='relative z-10'>
           <Tooltip>
             <TooltipTrigger>
-              <ProgressIndicator passStatus={current ? 'CURRENT' : cpe.passStatus} />
+              <ProgressIndicator
+                passStatus={current ? 'CURRENT' : coursePhaseEnrollment.passStatus}
+              />
             </TooltipTrigger>
             <TooltipContent>
               <div className='text-sm text-muted-foreground'>
-                <span className='font-semibold'>{cpe.passStatus}</span> on{' '}
-                {formatDateTime(cpe.lastModified)}
+                <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
+                {formatDateTime(coursePhaseEnrollment.lastModified)}
               </div>
             </TooltipContent>
           </Tooltip>
@@ -59,8 +66,10 @@ export function StudentCoursePhaseEnrollment({
       </div>
       <div className='ml-2 mb-[0.85rem] group'>
         <div>
-          <LinkHeading targetURL={`/management/course/${courseId}/${cpe.coursePhaseId}`}>
-            <div className='font-semibold text-lg'>{cpe.name}</div>
+          <LinkHeading
+            targetURL={`/management/course/${courseId}/${coursePhaseEnrollment.coursePhaseId}`}
+          >
+            <div className='font-semibold text-lg'>{coursePhaseEnrollment.name}</div>
           </LinkHeading>
         </div>
         {PhaseDetail && (
@@ -68,8 +77,9 @@ export function StudentCoursePhaseEnrollment({
             <Suspense fallback={null}>
               <PhaseDetail
                 studentId={studentId}
-                coursePhaseId={cpe.coursePhaseId}
+                coursePhaseId={coursePhaseEnrollment.coursePhaseId}
                 courseId={courseId}
+                courseParticipationId={courseEnrollment.courseParticipationId}
               />
             </Suspense>
           </div>

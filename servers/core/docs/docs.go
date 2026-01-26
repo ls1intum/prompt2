@@ -4322,6 +4322,9 @@ const docTemplate = `{
                 "courseId": {
                     "type": "string"
                 },
+                "courseParticipationId": {
+                    "type": "string"
+                },
                 "coursePhases": {
                     "type": "array",
                     "items": {

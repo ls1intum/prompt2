@@ -1,48 +1,31 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { CoursePhaseStudentIdentifierProps } from '@/interfaces/studentDetail'
 
-import type { AssessmentParticipationWithStudent } from '../assessment/interfaces/assessmentParticipationWithStudent'
 import type { StudentAssessment } from '../assessment/interfaces/studentAssessment'
 
-import { getCoursePhaseParticipations } from '../assessment/network/queries/getCoursePhaseParticipations'
 import { getStudentAssessment } from '../assessment/network/queries/getStudentAssessment'
 import { GradeSuggestionBadge } from '../assessment/pages/components/badges'
-
-export interface CoursePhaseStudentIdentifierProps {
-  studentId: string
-  coursePhaseId: string
-  courseId: string
-}
+import { Link } from 'react-router-dom'
 
 export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   studentId,
   coursePhaseId,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  courseId: _courseId,
+  courseId,
+  courseParticipationId,
 }) => {
-  const { data: participations, isPending: isParticipationsPending } = useQuery<
-    AssessmentParticipationWithStudent[]
-  >({
-    queryKey: ['participations', coursePhaseId],
-    queryFn: () => getCoursePhaseParticipations(coursePhaseId),
-  })
+  // Use the passed courseParticipationId directly instead of fetching participations
+  const courseParticipationID = courseParticipationId
 
-  const courseParticipationID = useMemo(() => {
-    if (!participations) return null
-    return participations.find((p) => p.student?.id === studentId)?.courseParticipationID ?? null
-  }, [participations, studentId])
-
-  const { data: studentAssessment, isPending: isAssessmentPending } = useQuery<StudentAssessment>({
+  const { data: studentAssessment, isPending } = useQuery<StudentAssessment>({
     queryKey: ['assessments', coursePhaseId, courseParticipationID],
-    queryFn: () => getStudentAssessment(coursePhaseId, courseParticipationID ?? ''),
+    queryFn: () => getStudentAssessment(coursePhaseId, courseParticipationID),
     enabled: Boolean(courseParticipationID),
   })
 
-  const isPending =
-    isParticipationsPending || (Boolean(courseParticipationID) && isAssessmentPending)
-
   if (isPending) return null
-  if (!courseParticipationID || !studentAssessment) return null
+  if (!studentAssessment) return null
 
   const completion = studentAssessment.assessmentCompletion
   const completionStatus = completion.completed ? 'Completed' : 'Not completed'
@@ -79,6 +62,12 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
           </div>
         </div>
       </div>
+      <Link
+        to={`/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationID}`}
+        className='mt-2 text-blue-600'
+      >
+        Open this Assessment
+      </Link>
     </div>
   )
 }

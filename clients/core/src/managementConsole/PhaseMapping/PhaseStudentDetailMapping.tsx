@@ -10,8 +10,9 @@ import { TeamAllocationStudentDetailComponent } from './ExternalStudentDetailCom
 
 export interface CoursePhaseStudentIdentifierProps {
   studentId: string
-  coursePhaseId: string
   courseId: string
+  coursePhaseId: string
+  courseParticipationId: string
 }
 
 function Fallback() {

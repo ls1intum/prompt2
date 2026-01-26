@@ -8,10 +8,12 @@ import { getApplicationParticipations } from '@core/network/queries/applicationP
 import { getStatusString } from '../../applicationAdministration/pages/ApplicationParticipantsPage/utils/getStatusBadge'
 
 export const ApplicationStudentDetailComponent: React.FC<CoursePhaseStudentIdentifierProps> = ({
-  studentId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  studentId: _studentId,
   coursePhaseId,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   courseId: _courseId,
+  courseParticipationId,
 }) => {
   const { data: participations, isPending } = useQuery<ApplicationParticipation[]>({
     // align with the key used in useGetApplicationParticipations() so we reuse cache
@@ -21,12 +23,8 @@ export const ApplicationStudentDetailComponent: React.FC<CoursePhaseStudentIdent
 
   const application = useMemo(() => {
     if (!participations) return null
-    return (
-      participations.find(
-        (p) => p.coursePhaseID === coursePhaseId && p.student?.id === studentId,
-      ) ?? null
-    )
-  }, [participations, coursePhaseId, studentId])
+    return participations.find((p) => p.courseParticipationID === courseParticipationId) ?? null
+  }, [participations, courseParticipationId])
 
   if (isPending || !application) return null
 

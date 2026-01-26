@@ -1,23 +1,20 @@
 import React, { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Team, CoursePhaseParticipationsWithResolution, Student } from '@tumaet/prompt-shared-state'
+import { CoursePhaseStudentIdentifierProps } from '@/interfaces/studentDetail'
 import { Allocation } from '../team_allocation/interfaces/allocation'
 import { getAllTeams } from '../team_allocation/network/queries/getAllTeams'
 import { getTeamAllocations } from '../team_allocation/network/queries/getTeamAllocations'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { RenderStudents } from '@/components/StudentAvatar'
 
-export interface CoursePhaseStudentIdentifierProps {
-  studentId: string
-  coursePhaseId: string
-  courseId: string
-}
-
 export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   studentId,
   coursePhaseId,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   courseId: _courseId,
+  courseParticipationId,
 }) => {
   const { data: teams, isPending: isTeamsPending } = useQuery<Team[]>({
     queryKey: ['team_allocation_team', coursePhaseId],
@@ -40,17 +37,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
       return null
     }
 
-    // Find the course participation ID for this student
-    const participation = coursePhaseParticipations.participations.find(
-      (p) => p.student?.id === studentId,
-    )
-
-    if (!participation) {
-      return null
-    }
-
-    const courseParticipationID = participation.courseParticipationID
-
+    // Use the passed courseParticipationId directly
     // Map course participation IDs to students
     const participationMap = new Map<string, Student>()
     coursePhaseParticipations.participations.forEach((p) => {
@@ -58,7 +45,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
     })
 
     // Find the allocation that contains this course participation ID
-    const allocation = teamAllocations.find((a) => a.students.includes(courseParticipationID))
+    const allocation = teamAllocations.find((a) => a.students.includes(courseParticipationId))
 
     if (!allocation) {
       return null
@@ -78,7 +65,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
     const tutors = team.tutors ?? []
 
     return { team, members, tutors }
-  }, [coursePhaseParticipations, teamAllocations, teams, studentId])
+  }, [coursePhaseParticipations, teamAllocations, teams, courseParticipationId])
 
   const isPending = isTeamsPending || isAllocationsPending || isParticipationsPending
 

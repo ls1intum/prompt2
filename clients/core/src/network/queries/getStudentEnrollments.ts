@@ -17,6 +17,7 @@ export interface CoursePhaseEnrollment {
 
 export interface CourseEnrollment {
   courseId: string
+  courseParticipationId: string
   studentReadableData: object
   name: string
   semesterTag: string
@@ -42,6 +43,7 @@ export const getStudentEnrollments = async (studentId: string): Promise<StudentE
       })
     ).data
 
+    console.log(d)
     return d
   } catch (err) {
     console.error(err)

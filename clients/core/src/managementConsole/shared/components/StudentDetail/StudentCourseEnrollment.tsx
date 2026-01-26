@@ -15,15 +15,15 @@ export function formatDate(date: string | null): string {
 }
 
 export function StudentCourseEnrollment({
-  sce,
+  courseEnrollment,
   studentId,
 }: {
-  sce: CourseEnrollment
+  courseEnrollment: CourseEnrollment
   studentId: string
 }) {
   const [showFuturePhases, setShowFuturePhases] = useState(false)
 
-  const phases = sce.coursePhases
+  const phases = courseEnrollment.coursePhases
 
   const failedIndex = phases.findIndex((cp) => cp.passStatus === PassStatus.FAILED)
 
@@ -39,15 +39,18 @@ export function StudentCourseEnrollment({
   const canShowMore = !hasFailed && futurePhases.length > 0
 
   return (
-    <CourseDetail studentCourseEnrollment={sce}>
-      {visiblePhases.map((cp, index) => (
+    <CourseDetail studentCourseEnrollment={courseEnrollment}>
+      {visiblePhases.map((courseParticipation, index) => (
         <StudentCoursePhaseEnrollment
-          key={cp.coursePhaseId}
-          cpe={cp}
+          key={courseParticipation.coursePhaseId}
+          coursePhaseEnrollment={courseParticipation}
+          courseEnrollment={courseEnrollment}
           studentId={studentId}
-          courseId={sce.courseId}
+          courseId={courseEnrollment.courseId}
           current={index === currentIndex}
-          showLine={index === phases.length - 1 || cp.passStatus === PassStatus.FAILED}
+          showLine={
+            index === phases.length - 1 || courseParticipation.passStatus === PassStatus.FAILED
+          }
         />
       ))}
 
@@ -63,15 +66,17 @@ export function StudentCourseEnrollment({
 
       {canShowMore &&
         showFuturePhases &&
-        futurePhases.map((cp, index) => (
+        futurePhases.map((courseParticipation, index) => (
           <StudentCoursePhaseEnrollment
-            key={cp.coursePhaseId}
-            cpe={cp}
+            key={courseParticipation.coursePhaseId}
+            coursePhaseEnrollment={courseParticipation}
+            courseEnrollment={courseEnrollment}
             studentId={studentId}
-            courseId={sce.courseId}
+            courseId={courseEnrollment.courseId}
             current={false}
             showLine={
-              cutoffIndex + index + 1 === phases.length - 1 || cp.passStatus === PassStatus.FAILED
+              cutoffIndex + index + 1 === phases.length - 1 ||
+              courseParticipation.passStatus === PassStatus.FAILED
             }
           />
         ))}

@@ -908,6 +908,8 @@ definitions:
     properties:
       courseId:
         type: string
+      courseParticipationId:
+        type: string
       coursePhases:
         items:
           $ref: '#/definitions/studentDTO.CoursePhaseEnrollmentDTO'

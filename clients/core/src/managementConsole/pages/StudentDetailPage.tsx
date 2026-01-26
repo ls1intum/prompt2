@@ -26,9 +26,9 @@ export const StudentDetailPage = () => {
         <div className='flex flex-col gap-5'>
           {enrollments.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
           {enrollments.isSuccess &&
-            enrollments.data?.courses.map((c: CourseEnrollment) => (
-              <div className='flex gap-4' key={c.courseId}>
-                <StudentCourseEnrollment sce={c} studentId={studentId!} />
+            enrollments.data?.courses.map((ce: CourseEnrollment) => (
+              <div className='flex gap-4' key={ce.courseId}>
+                <StudentCourseEnrollment courseEnrollment={ce} studentId={studentId!} />
               </div>
             ))}
         </div>
