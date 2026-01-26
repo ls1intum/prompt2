@@ -38,7 +38,7 @@ PROMPT lets you define courses by combining reusable “phases”:
 - Add application, interview, matching, and many more phases
 - Define prerequisites and outcomes for each phase
 
-![Screenshot: Course Configuration](docs/images/course-configurator.png)
+![Screenshot: Course Configuration](docs/static/img/course-configurator.png)
 
 ---
 
@@ -51,9 +51,9 @@ PROMPT provides powerful tools for handling student participation throughout you
 - Form teams and assign projects using manual or semi-automated workflows
 - Evaluate student performance on a **per-phase basis**, enabling you to decide who passes or fails at each stage of the course independently
 
-![Screenshot: Application Administration](docs/images/application-administration.png)
+![Screenshot: Application Administration](docs/static/img/application-administration.png)
 
-![Screenshot: Matching](docs/images/matching.png)
+![Screenshot: Matching](docs/static/img/matching.png)
 
 ---
 
@@ -92,6 +92,16 @@ This section is for **developers and contributors** looking to run PROMPT locall
 - [Yarn](https://yarnpkg.com/)
 - [Go](https://go.dev/)
 - [Docker](https://www.docker.com/)
+
+#### API Spec Generation (Swagger)
+
+We generate and commit swagger specs for the Go servers. To avoid forgetting this, install the repo-managed git hooks:
+
+```bash
+./scripts/install-githooks.sh
+```
+
+When you commit changes under `servers/core/` or `servers/template_server/`, the pre-commit hook regenerates and stages the swagger docs. Ensure `swag` is available on your PATH (`go install github.com/swaggo/swag/cmd/swag@latest`).
 
 #### Running the Clients
 

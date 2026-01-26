@@ -197,6 +197,10 @@ definitions:
         type: boolean
       id:
         type: string
+      longDescription:
+        type: string
+      shortDescription:
+        type: string
       startDate:
         type: string
       universityLoginAvailable:
@@ -335,6 +339,10 @@ definitions:
     type: object
   courseDTO.Course:
     properties:
+      archived:
+        type: boolean
+      archivedOn:
+        type: string
       courseType:
         type: string
       ects:
@@ -343,17 +351,26 @@ definitions:
         type: string
       id:
         type: string
+      longDescription:
+        type: string
       name:
         type: string
       restrictedData:
         $ref: '#/definitions/meta.MetaData'
       semesterTag:
         type: string
+      shortDescription:
+        type: string
       startDate:
         type: string
       studentReadableData:
         $ref: '#/definitions/meta.MetaData'
       template:
+        type: boolean
+    type: object
+  courseDTO.CourseArchiveStatus:
+    properties:
+      archived:
         type: boolean
     type: object
   courseDTO.CoursePhaseGraph:
@@ -370,6 +387,10 @@ definitions:
     type: object
   courseDTO.CourseWithPhases:
     properties:
+      archived:
+        type: boolean
+      archivedOn:
+        type: string
       coursePhases:
         items:
           $ref: '#/definitions/coursePhaseDTO.CoursePhaseSequence'
@@ -382,16 +403,22 @@ definitions:
         type: string
       id:
         type: string
+      longDescription:
+        type: string
       name:
         type: string
       restrictedData:
         $ref: '#/definitions/meta.MetaData'
       semesterTag:
         type: string
+      shortDescription:
+        type: string
       startDate:
         type: string
       studentReadableData:
         $ref: '#/definitions/meta.MetaData'
+      template:
+        type: boolean
     type: object
   courseDTO.CreateCourse:
     properties:
@@ -401,11 +428,15 @@ definitions:
         type: integer
       endDate:
         type: string
+      longDescription:
+        type: string
       name:
         type: string
       restrictedData:
         $ref: '#/definitions/meta.MetaData'
       semesterTag:
+        type: string
+      shortDescription:
         type: string
       startDate:
         type: string
@@ -433,8 +464,12 @@ definitions:
         type: integer
       endDate:
         type: string
+      longDescription:
+        type: string
       restrictedData:
         $ref: '#/definitions/meta.MetaData'
+      shortDescription:
+        type: string
       startDate:
         type: string
       studentReadableData:
@@ -662,6 +697,8 @@ definitions:
     properties:
       baseUrl:
         type: string
+      description:
+        $ref: '#/definitions/pgtype.Text'
       id:
         type: string
       initialPhase:
@@ -848,6 +885,13 @@ definitions:
     type: object
   meta.MetaData:
     additionalProperties: true
+    type: object
+  pgtype.Text:
+    properties:
+      string:
+        type: string
+      valid:
+        type: boolean
     type: object
   resolutionDTO.Resolution:
     properties:
@@ -2033,6 +2077,42 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Update course data
+      tags:
+      - courses
+  /courses/{uuid}/archive:
+    put:
+      consumes:
+      - application/json
+      description: Set archived=true (with archived_on=NOW()) or archived=false (with
+        archived_on=NULL)
+      parameters:
+      - description: Course UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: Archive status update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/courseDTO.CourseArchiveStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated course
+          schema:
+            $ref: '#/definitions/courseDTO.Course'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Archive or unarchive a course
       tags:
       - courses
   /courses/{uuid}/copy:

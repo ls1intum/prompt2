@@ -8,9 +8,9 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
-const IN_PROGRESS_LABEL_ID = 53319
-const IN_REVIEW_LABEL_ID = 53320
-const ASE_GROUP_ID = 186940
+const IN_PROGRESS_LABEL_ID int64 = 53319
+const IN_REVIEW_LABEL_ID int64 = 53320
+const ASE_GROUP_ID int64 = 186940
 
 func getClient() (*gitlab.Client, error) {
 	// Create a client
@@ -23,7 +23,7 @@ func getClient() (*gitlab.Client, error) {
 
 }
 
-func createCourseIterationGroup(courseIteration string, parentID int) (*gitlab.Group, error) {
+func createCourseIterationGroup(courseIteration string, parentID int64) (*gitlab.Group, error) {
 	// Create a top level group
 	git, err := getClient()
 	if err != nil {
@@ -56,16 +56,16 @@ func createCourseIterationGroup(courseIteration string, parentID int) (*gitlab.G
 	return group, nil
 }
 
-func createDeveloperTopLevelGroup(parentGroupID int) (*gitlab.Group, error) {
+func createDeveloperTopLevelGroup(parentGroupID int64) (*gitlab.Group, error) {
 	return createGitlabGroup(parentGroupID, "developer", gitlab.NoOneProjectCreation, gitlab.OwnerSubGroupCreationLevelValue)
 }
 
 // create Groups for tutors and coaches
-func createTeachingGroup(parentGroupID int, groupName string) (*gitlab.Group, error) {
+func createTeachingGroup(parentGroupID int64, groupName string) (*gitlab.Group, error) {
 	return createGitlabGroup(parentGroupID, groupName, gitlab.DeveloperProjectCreation, gitlab.OwnerSubGroupCreationLevelValue)
 }
 
-func createGitlabGroup(parentGroupID int, groupName string, projectCreationLevel gitlab.ProjectCreationLevelValue, subGroupCreationLevel gitlab.SubGroupCreationLevelValue) (*gitlab.Group, error) {
+func createGitlabGroup(parentGroupID int64, groupName string, projectCreationLevel gitlab.ProjectCreationLevelValue, subGroupCreationLevel gitlab.SubGroupCreationLevelValue) (*gitlab.Group, error) {
 	// Create a top level group
 	git, err := getClient()
 	if err != nil {
@@ -125,7 +125,7 @@ func getUserID(username string) (*gitlab.User, error) {
 	return users[0], nil
 }
 
-func CreateStudentProject(repoName string, devID, tutorID int, introCourseID, devGroupID int, studentName, submissionDeadline string) error {
+func CreateStudentProject(repoName string, devID, tutorID int64, introCourseID, devGroupID int64, studentName, submissionDeadline string) error {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get client: ", err)
@@ -167,9 +167,10 @@ func CreateStudentProject(repoName string, devID, tutorID int, introCourseID, de
 	}
 
 	// Add branch protection
-	_, _, err = git.Branches.ProtectBranch(project.ID, "main", &gitlab.ProtectBranchOptions{
-		DevelopersCanPush:  gitlab.Ptr(false),
-		DevelopersCanMerge: gitlab.Ptr(true),
+	_, _, err = git.ProtectedBranches.ProtectRepositoryBranches(project.ID, &gitlab.ProtectRepositoryBranchesOptions{
+		Name:             gitlab.Ptr("main"),
+		PushAccessLevel:  gitlab.Ptr(gitlab.MaintainerPermissions),
+		MergeAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions),
 	})
 	if err != nil {
 		log.Error("failed to add branch protect rules: ", err)
@@ -190,8 +191,8 @@ func CreateStudentProject(repoName string, devID, tutorID int, introCourseID, de
 	// Add MR approval rule
 	_, _, err = git.Projects.CreateProjectApprovalRule(project.ID, &gitlab.CreateProjectLevelRuleOptions{
 		Name:              gitlab.Ptr("Tutor Approval"),
-		ApprovalsRequired: gitlab.Ptr(1),
-		UserIDs:           gitlab.Ptr([]int{tutorID}),
+		ApprovalsRequired: gitlab.Ptr(int64(1)),
+		UserIDs:           gitlab.Ptr([]int64{tutorID}),
 	})
 	if err != nil {
 		log.Error("failed to add MR approval rule: ", err)
@@ -201,7 +202,7 @@ func CreateStudentProject(repoName string, devID, tutorID int, introCourseID, de
 	return nil
 }
 
-func addProjectMembers(git *gitlab.Client, projectID, tutorID, devID, devGroupID int) error {
+func addProjectMembers(git *gitlab.Client, projectID, tutorID, devID, devGroupID int64) error {
 	// Add student to the project
 	_, _, err := git.ProjectMembers.AddProjectMember(projectID, &gitlab.AddProjectMemberOptions{
 		UserID:      gitlab.Ptr(devID),
@@ -235,7 +236,7 @@ func addProjectMembers(git *gitlab.Client, projectID, tutorID, devID, devGroupID
 	return nil
 }
 
-func createIssueBoard(git *gitlab.Client, projectID int) error {
+func createIssueBoard(git *gitlab.Client, projectID int64) error {
 	// Setup issue board
 	issueBoard, _, err := git.Boards.CreateIssueBoard(projectID, &gitlab.CreateIssueBoardOptions{
 		Name: gitlab.Ptr("Issue Board"),
@@ -264,7 +265,7 @@ func createIssueBoard(git *gitlab.Client, projectID int) error {
 	return nil
 }
 
-func createProjectFiles(git *gitlab.Client, projectID int, studentName, submissionDeadline string) error {
+func createProjectFiles(git *gitlab.Client, projectID int64, studentName, submissionDeadline string) error {
 	// Add custom README
 	_, _, err := git.RepositoryFiles.CreateFile(projectID, "README.md", &gitlab.CreateFileOptions{
 		Branch:        gitlab.Ptr("main"),
@@ -301,7 +302,7 @@ func createProjectFiles(git *gitlab.Client, projectID int, studentName, submissi
 	return nil
 }
 
-func getSubGroup(groupName string, parentGroupID int) (*gitlab.Group, error) {
+func getSubGroup(groupName string, parentGroupID int64) (*gitlab.Group, error) {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get group: ", err)
@@ -324,7 +325,7 @@ func getSubGroup(groupName string, parentGroupID int) (*gitlab.Group, error) {
 	return nil, errors.New("subgroup not found")
 }
 
-func checkIfSubGroupExists(groupName string, parentGroupID int) (bool, *gitlab.Group, error) {
+func checkIfSubGroupExists(groupName string, parentGroupID int64) (bool, *gitlab.Group, error) {
 	git, err := getClient()
 	if err != nil {
 		log.Error("failed to get group: ", err)
