@@ -15,13 +15,10 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
   courseId,
   courseParticipationId,
 }) => {
-  // Use the passed courseParticipationId directly instead of fetching participations
-  const courseParticipationID = courseParticipationId
-
   const { data: studentAssessment, isPending } = useQuery<StudentAssessment>({
-    queryKey: ['assessments', coursePhaseId, courseParticipationID],
-    queryFn: () => getStudentAssessment(coursePhaseId, courseParticipationID),
-    enabled: Boolean(courseParticipationID),
+    queryKey: ['assessments', coursePhaseId, courseParticipationId],
+    queryFn: () => getStudentAssessment(coursePhaseId, courseParticipationId),
+    enabled: Boolean(courseParticipationId),
   })
 
   if (isPending) return null
@@ -63,7 +60,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
         </div>
       </div>
       <Link
-        to={`/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationID}`}
+        to={`/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationId}`}
         className='mt-2 text-blue-600'
       >
         Open this Assessment
