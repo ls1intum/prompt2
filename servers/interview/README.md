@@ -20,17 +20,17 @@ This microservice handles interview scheduling for the PROMPT platform.
 
 ### Interview Slots (Admin)
 
-- `POST /interview-service/api/course_phase/:coursePhaseID/interview-slots` - Create a new slot
-- `GET /interview-service/api/course_phase/:coursePhaseID/interview-slots` - List all slots
-- `GET /interview-service/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Get specific slot
-- `PUT /interview-service/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Update slot
-- `DELETE /interview-service/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Delete slot
+- `POST /interview/api/course_phase/:coursePhaseID/interview-slots` - Create a new slot
+- `GET /interview/api/course_phase/:coursePhaseID/interview-slots` - List all slots
+- `GET /interview/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Get specific slot
+- `PUT /interview/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Update slot
+- `DELETE /interview/api/course_phase/:coursePhaseID/interview-slots/:slotId` - Delete slot
 
 ### Interview Assignments (Students)
 
-- `POST /interview-service/api/course_phase/:coursePhaseID/interview-assignments` - Book a slot
-- `GET /interview-service/api/course_phase/:coursePhaseID/interview-assignments/my-assignment` - Get current booking
-- `DELETE /interview-service/api/course_phase/:coursePhaseID/interview-assignments/:assignmentId` - Cancel booking
+- `POST /interview/api/course_phase/:coursePhaseID/interview-assignments` - Book a slot
+- `GET /interview/api/course_phase/:coursePhaseID/interview-assignments/my-assignment` - Get current booking
+- `DELETE /interview/api/course_phase/:coursePhaseID/interview-assignments/:assignmentId` - Cancel booking
 
 ## Environment Variables
 
