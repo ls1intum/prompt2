@@ -14,6 +14,7 @@ jobs:
       core-changed: ${{ steps.changes.outputs.core }}
       template-server-changed: ${{ steps.changes.outputs.template_server }}
       self-team-allocation-changed: ${{ steps.changes.outputs.self_team_allocation }}
+      interview-changed: ${{ steps.changes.outputs.interview }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -26,6 +27,8 @@ jobs:
               - 'servers/template_server/**'
             self_team_allocation:
               - 'servers/self_team_allocation/**'
+            interview:
+              - 'servers/interview/**'
 
   generate-api-spec:
     runs-on: ubuntu-latest
@@ -33,7 +36,8 @@ jobs:
     if: |
       needs.detect-changes.outputs.core-changed == 'true' ||
       needs.detect-changes.outputs.template-server-changed == 'true' ||
-      needs.detect-changes.outputs.self-team-allocation-changed == 'true'
+      needs.detect-changes.outputs.self-team-allocation-changed == 'true' ||
+      needs.detect-changes.outputs.interview-changed == 'true'
     strategy:
       matrix:
         include:
@@ -43,6 +47,8 @@ jobs:
             changed: ${{ needs.detect-changes.outputs.template-server-changed }}
           - directory: self_team_allocation
             changed: ${{ needs.detect-changes.outputs.self-team-allocation-changed }}
+          - directory: interview
+            changed: ${{ needs.detect-changes.outputs.interview-changed }}
 
     steps:
       - uses: actions/checkout@v4
