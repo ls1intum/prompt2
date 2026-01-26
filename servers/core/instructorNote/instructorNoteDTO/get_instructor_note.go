@@ -1,4 +1,4 @@
-package studentDTO
+package instructorNoteDTO
 
 import (
 	"encoding/json"
@@ -58,4 +58,17 @@ func GetInstructorNoteDTOFromDBModel(model db.NoteWithVersion) (InstructorNote, 
 		DeletedBy:   deletedBy,
 		Versions:    versions,
 	}, nil
+}
+
+
+func InstructorNotesFromDBModelToDTO(notes []db.NoteWithVersion) ([]InstructorNote, error) {
+	dtoInstructorNotes := make([]InstructorNote, 0, len(notes))
+	for _, iN := range notes {
+    dtoInstructorNote, err := GetInstructorNoteDTOFromDBModel(iN)
+    if err != nil {
+      return nil, err
+    }
+		dtoInstructorNotes = append(dtoInstructorNotes, dtoInstructorNote)
+	}
+  return dtoInstructorNotes, nil
 }

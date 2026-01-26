@@ -822,6 +822,36 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
+  instructorNoteDTO.InstructorNote:
+    properties:
+      author:
+        type: string
+      dateCreated:
+        type: string
+      dateDeleted:
+        type: string
+      deletedBy:
+        type: string
+      forStudent:
+        type: string
+      id:
+        type: string
+      versions:
+        items:
+          $ref: '#/definitions/instructorNoteDTO.NoteVersion'
+        type: array
+    type: object
+  instructorNoteDTO.NoteVersion:
+    properties:
+      content:
+        type: string
+      dateCreated:
+        type: string
+      id:
+        type: string
+      versionNumber:
+        type: integer
+    type: object
   keycloakRealmDTO.AddStudentsToGroup:
     properties:
       studentsToAdd:
@@ -981,36 +1011,6 @@ definitions:
         type: string
       universityLogin:
         type: string
-    type: object
-  studentDTO.InstructorNote:
-    properties:
-      author:
-        type: string
-      dateCreated:
-        type: string
-      dateDeleted:
-        type: string
-      deletedBy:
-        type: string
-      forStudent:
-        type: string
-      id:
-        type: string
-      versions:
-        items:
-          $ref: '#/definitions/studentDTO.NoteVersion'
-        type: array
-    type: object
-  studentDTO.NoteVersion:
-    properties:
-      content:
-        type: string
-      dateCreated:
-        type: string
-      id:
-        type: string
-      versionNumber:
-        type: integer
     type: object
   studentDTO.Student:
     properties:
@@ -2672,6 +2672,59 @@ paths:
       summary: Get template courses
       tags:
       - courses
+  /instructor-notes/{student-uuid}:
+    get:
+      description: Get all instructor notes with note versions for a specific student,
+        provided the student ID
+      parameters:
+      - description: Student UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/instructorNoteDTO.InstructorNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all notes for a student
+      tags:
+      - students
+    post:
+      description: Create a new instructor note or a new edit for a specific student
+        given its ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/instructorNoteDTO.InstructorNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create an instructor Note for a student
+      tags:
+      - students
   /keycloak/{courseID}/group:
     put:
       consumes:
@@ -2986,82 +3039,6 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get student enrollments by ID
-      tags:
-      - students
-  /students/{uuid}/notes:
-    get:
-      description: Get all instructor notes with note versions for a specific student,
-        provided the student ID
-      parameters:
-      - description: Student UUID
-        in: path
-        name: uuid
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/studentDTO.InstructorNote'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Get all notes for a student
-      tags:
-      - students
-    post:
-      description: Create a new instructor note or a new edit for a specific student
-        given its ID
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/studentDTO.InstructorNote'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Create an instructor Note for a student
-      tags:
-      - students
-  /students/notes:
-    get:
-      description: Get all instructor notes with note versions
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/studentDTO.InstructorNote'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Get all notes
       tags:
       - students
   /students/search/{searchString}:

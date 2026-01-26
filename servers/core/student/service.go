@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -171,84 +170,6 @@ func SearchStudents(ctx context.Context, searchString string) ([]studentDTO.Stud
 	return dtoStudents, nil
 }
 
-func instructorNotesFromDBModelToDTO(notes []db.NoteWithVersion) ([]studentDTO.InstructorNote, error) {
-	dtoInstructorNotes := make([]studentDTO.InstructorNote, 0, len(notes))
-	for _, iN := range notes {
-    dtoInstructorNote, err := studentDTO.GetInstructorNoteDTOFromDBModel(iN)
-    if err != nil {
-      return nil, err
-    }
-		dtoInstructorNotes = append(dtoInstructorNotes, dtoInstructorNote)
-	}
-  return dtoInstructorNotes, nil
-}
-
-
-func GetStudentNotes(ctx context.Context) ([]studentDTO.InstructorNote, error) {
-  instructorNotes, err := StudentServiceSingleton.queries.GetAllStudentNotes(ctx)
-  if err != nil {
-    return nil, err
-  }
-  return instructorNotesFromDBModelToDTO(instructorNotes)
-}
-
-func GetStudentNotesByID(ctx context.Context, id uuid.UUID) ([]studentDTO.InstructorNote, error) {
-  instructorNotes, err := StudentServiceSingleton.queries.GetStudentNotesForStudent(ctx, id)
-  if err != nil {
-    return nil, err
-  }
-  return instructorNotesFromDBModelToDTO(instructorNotes)
-}
-
-func GetSingleNoteByID(ctx context.Context, id uuid.UUID) (db.Note, error) {
-  note, err := StudentServiceSingleton.queries.GetSingleStudentNoteByID(ctx, id)
-  if err != nil {
-    return db.Note{}, err
-  }
-  return note, nil
-}
-
-func NewStudentNote(ctx context.Context, studentID uuid.UUID, params studentDTO.CreateInstructorNote, signedInUserUUID uuid.UUID) ([]studentDTO.InstructorNote, error) {
-
-  versionNumber := 0
-  noteID := uuid.UUID{}
-  rightNow := pgtype.Date{Time: time.Now(), Valid: true}
-
-  if (params.New) {
-    newNoteId, err := uuid.NewRandom()
-    if err != nil {
-      return nil, err
-    }
-    StudentServiceSingleton.queries.CreateNote(ctx, db.CreateNoteParams{
-      ID: newNoteId,
-      ForStudent: studentID,
-      Author: signedInUserUUID,
-      DateCreated: rightNow,
-      DateDeleted: pgtype.Date{},
-      DeletedBy: pgtype.UUID{},
-    })
-    noteID = newNoteId
-  } else {
-    latestVersionNumber, err := StudentServiceSingleton.queries.GetLatestNoteVersionForNoteId(ctx, params.ForNote)
-    if err != nil {
-      return nil, err
-    }
-    versionNumber = int(latestVersionNumber) + 1
-  }
-
-  _, err := StudentServiceSingleton.queries.CreateNoteVersion(ctx, db.CreateNoteVersionParams{
-    ID: noteID,
-    Content: params.Content,
-    DateCreated: rightNow,
-    VersionNumber: int32(versionNumber),
-    ForNote: noteID,
-  })
-
-  if err != nil {
-    return nil, err
-  }
-
-}
 
 func GetStudentEnrollmentsByID(ctx context.Context, id uuid.UUID) (studentDTO.StudentEnrollmentsDTO, error) {
   studentWithEnrollments, err := StudentServiceSingleton.queries.GetStudentEnrollments(ctx, id)

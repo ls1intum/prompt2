@@ -1,4 +1,4 @@
-package studentDTO
+package instructorNoteDTO
 
 import (
 	"github.com/google/uuid"

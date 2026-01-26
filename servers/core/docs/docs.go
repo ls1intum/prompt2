@@ -2392,6 +2392,83 @@ const docTemplate = `{
                 }
             }
         },
+        "/instructor-notes/{student-uuid}": {
+            "get": {
+                "description": "Get all instructor notes with note versions for a specific student, provided the student ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all notes for a student",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/instructorNoteDTO.InstructorNote"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new instructor note or a new edit for a specific student given its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Create an instructor Note for a student",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/instructorNoteDTO.InstructorNote"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/keycloak/{courseID}/group": {
             "put": {
                 "description": "Create a new custom group for a course",
@@ -2736,41 +2813,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/students/notes": {
-            "get": {
-                "description": "Get all instructor notes with note versions",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "students"
-                ],
-                "summary": "Get all notes",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/studentDTO.InstructorNote"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/students/search/{searchString}": {
             "get": {
                 "description": "Search students by a search string",
@@ -2954,83 +2996,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/studentDTO.StudentEnrollmentsDTO"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/students/{uuid}/notes": {
-            "get": {
-                "description": "Get all instructor notes with note versions for a specific student, provided the student ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "students"
-                ],
-                "summary": "Get all notes for a student",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Student UUID",
-                        "name": "uuid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/studentDTO.InstructorNote"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new instructor note or a new edit for a specific student given its ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "students"
-                ],
-                "summary": "Create an instructor Note for a student",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/studentDTO.InstructorNote"
-                            }
                         }
                     },
                     "400": {
@@ -4301,6 +4266,52 @@ const docTemplate = `{
                 "StudyDegreeMaster"
             ]
         },
+        "instructorNoteDTO.InstructorNote": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "dateCreated": {
+                    "type": "string"
+                },
+                "dateDeleted": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "forStudent": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "versions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/instructorNoteDTO.NoteVersion"
+                    }
+                }
+            }
+        },
+        "instructorNoteDTO.NoteVersion": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "dateCreated": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "versionNumber": {
+                    "type": "integer"
+                }
+            }
+        },
         "keycloakRealmDTO.AddStudentsToGroup": {
             "type": "object",
             "properties": {
@@ -4544,52 +4555,6 @@ const docTemplate = `{
                 },
                 "universityLogin": {
                     "type": "string"
-                }
-            }
-        },
-        "studentDTO.InstructorNote": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "type": "string"
-                },
-                "dateCreated": {
-                    "type": "string"
-                },
-                "dateDeleted": {
-                    "type": "string"
-                },
-                "deletedBy": {
-                    "type": "string"
-                },
-                "forStudent": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "versions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/studentDTO.NoteVersion"
-                    }
-                }
-            }
-        },
-        "studentDTO.NoteVersion": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "dateCreated": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "versionNumber": {
-                    "type": "integer"
                 }
             }
         },

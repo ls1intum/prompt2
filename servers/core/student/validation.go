@@ -1,11 +1,9 @@
 package student
 
 import (
-	"context"
 	"errors"
 	"regexp"
 
-	"github.com/google/uuid"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
 	log "github.com/sirupsen/logrus"
@@ -85,26 +83,3 @@ func validateUniversityData(hasUniversityAccount bool, matriculationNumber, univ
 	return nil
 }
 
-
-func ValidateCreateNote(createNoteRequest studentDTO.CreateInstructorNote) error {
-  if !createNoteRequest.New && createNoteRequest.ForNote == uuid.Nil {
-    return errors.New("For editing existing notes, a note id must be provided")
-  }
-  return nil
-}
-
-
-func ValidateReferencedNote(createRequest studentDTO.CreateInstructorNote, ctx context.Context, SignedInUserID uuid.UUID) error {
-  // verify note that is referenced exists,  
-  // 'editing' a note should only be doable from the author
-  if !createRequest.New {
-    note, err := GetSingleNoteByID(ctx, createRequest.ForNote)
-    if err != nil {
-      return err
-    }
-    if note.Author != SignedInUserID {
-      return errors.New("The user that performed the request is not the author of the InstructorNote")
-    }
-  }
-  return nil
-}
