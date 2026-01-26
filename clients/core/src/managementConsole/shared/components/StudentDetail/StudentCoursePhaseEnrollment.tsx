@@ -3,7 +3,6 @@ import {
   CourseEnrollment,
   CoursePhaseEnrollment,
 } from '@core/network/queries/getStudentEnrollments'
-import { PassStatus } from '@tumaet/prompt-shared-state'
 import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
 import { LinkHeading } from './LinkHeading'
