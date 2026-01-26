@@ -222,13 +222,16 @@ func validateQuestionFileUpload(title, allowedFileTypes string, maxFileSizeMB in
 	}
 
 	// Validate max file size if provided
-	if maxFileSizeMB > 0 && maxFileSizeMB < 1 {
+	if maxFileSizeMB < 0 {
 		return errors.New("maximum file size must be at least 1 MB")
 	}
-
-	// Validate max file size doesn't exceed reasonable limit (e.g., 100MB)
-	if maxFileSizeMB > 100 {
-		return errors.New("maximum file size cannot exceed 100 MB")
+	if maxFileSizeMB > 0 {
+		if maxFileSizeMB < 1 {
+			return errors.New("maximum file size must be at least 1 MB")
+		}
+		if maxFileSizeMB > 100 {
+			return errors.New("maximum file size cannot exceed 100 MB")
+		}
 	}
 
 	err := validateExportSettings(accessibleForOtherPhases, accessKey)

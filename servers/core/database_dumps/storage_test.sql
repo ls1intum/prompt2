@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS applications (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Course phases table (minimal for FK constraints)
-CREATE TABLE IF NOT EXISTS course_phases (
+-- Course phase table (minimal for FK constraints)
+CREATE TABLE IF NOT EXISTS course_phase (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_iteration_id UUID NOT NULL REFERENCES course_iterations(id) ON DELETE CASCADE,
     phase_name VARCHAR(255) NOT NULL,
@@ -60,20 +60,19 @@ CREATE TABLE IF NOT EXISTS files (
     storage_provider VARCHAR(50) NOT NULL DEFAULT 'seaweedfs',
     uploaded_by_user_id VARCHAR(200) NOT NULL,
     uploaded_by_email VARCHAR(200),
-    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
-    course_phase_id UUID REFERENCES course_phases(id) ON DELETE CASCADE,
+    course_phase_id UUID,
     description TEXT,
     tags VARCHAR(100)[],
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
+    CONSTRAINT fk_files_course_phase FOREIGN KEY (course_phase_id) REFERENCES course_phase(id) ON DELETE SET NULL,
     CONSTRAINT fk_files_uploaded_by FOREIGN KEY (uploaded_by_user_id) REFERENCES users(keycloak_user_id) ON DELETE CASCADE
 );
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_files_storage_key ON files(storage_key);
 CREATE INDEX IF NOT EXISTS idx_files_uploaded_by ON files(uploaded_by_user_id);
-CREATE INDEX IF NOT EXISTS idx_files_application_id ON files(application_id) WHERE application_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_files_course_phase_id ON files(course_phase_id) WHERE course_phase_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_files_created_at ON files(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_files_deleted_at ON files(deleted_at) WHERE deleted_at IS NULL;
@@ -92,5 +91,5 @@ INSERT INTO course_iterations (id, course_id, semester_name) VALUES
 INSERT INTO applications (id, student_id, course_iteration_id) VALUES
 ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444444');
 
-INSERT INTO course_phases (id, course_iteration_id, phase_name) VALUES
+INSERT INTO course_phase (id, course_iteration_id, phase_name) VALUES
 ('55555555-5555-5555-5555-555555555555', '44444444-4444-4444-4444-444444444444', 'Test Phase');

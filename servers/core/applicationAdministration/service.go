@@ -69,6 +69,9 @@ func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answe
 		ApplicationQuestionID: answer.ApplicationQuestionID,
 		CourseParticipationID: courseParticipationID,
 	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	if err == nil {
 		if existingAnswer.FileID != answer.FileID {
 			// Existing answer found, delete the old file from storage
@@ -97,6 +100,9 @@ func createOrOverwriteFileUploadAnswer(ctx context.Context, qtx *db.Queries, ans
 		ApplicationQuestionID: answer.ApplicationQuestionID,
 		CourseParticipationID: courseParticipationID,
 	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	if err == nil {
 		if existingAnswer.FileID != answer.FileID {
 			// Existing answer found, delete the old file from storage

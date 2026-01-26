@@ -30,9 +30,15 @@ func InitStorageModule(queries db.Queries, conn *pgxpool.Pool) error {
 	region := utils.GetEnv("S3_REGION", "us-east-1")
 	endpoint := utils.GetEnv("S3_ENDPOINT", "http://localhost:8334") // Empty for AWS S3, set for SeaweedFS/MinIO
 	publicEndpoint := utils.GetEnv("S3_PUBLIC_ENDPOINT", "")
-	accessKey := utils.GetEnv("S3_ACCESS_KEY", "admin")
-	secretKey := utils.GetEnv("S3_SECRET_KEY", "admin123")
+	accessKey := utils.GetEnv("S3_ACCESS_KEY", "")
+	secretKey := utils.GetEnv("S3_SECRET_KEY", "")
 	forcePathStyle := utils.GetEnv("S3_FORCE_PATH_STYLE", "true") == "true" // Required for SeaweedFS/MinIO
+
+	lowerEndpoint := strings.ToLower(endpoint)
+	isLocalEndpoint := strings.Contains(lowerEndpoint, "localhost") || strings.Contains(lowerEndpoint, "127.0.0.1")
+	if !isLocalEndpoint && (accessKey == "" || secretKey == "") {
+		return fmt.Errorf("missing S3 credentials for non-local endpoint: set S3_ACCESS_KEY and S3_SECRET_KEY")
+	}
 
 	adapter, err := NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey, forcePathStyle)
 	if err != nil {

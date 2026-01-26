@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -57,16 +59,26 @@ func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey
 	})
 
 	if err != nil {
-		// Bucket doesn't exist, try to create it
-		log.WithField("bucket", bucket).Info("Bucket does not exist, attempting to create it")
-		_, createErr := client.CreateBucket(ctx, &s3.CreateBucketInput{
-			Bucket: aws.String(bucket),
-		})
-		if createErr != nil {
-			log.WithError(createErr).WithField("bucket", bucket).Warn("Failed to create bucket - it may need to be created manually")
-		} else {
-			log.WithField("bucket", bucket).Info("Bucket created successfully")
+		var notFoundErr *types.NotFound
+		if !errors.As(err, &notFoundErr) {
+			return nil, fmt.Errorf("failed to check bucket existence: %w", err)
 		}
+
+		log.WithField("bucket", bucket).Info("Bucket does not exist, attempting to create it")
+		createInput := &s3.CreateBucketInput{
+			Bucket: aws.String(bucket),
+		}
+		if region != "" && region != "us-east-1" {
+			createInput.CreateBucketConfiguration = &types.CreateBucketConfiguration{
+				LocationConstraint: types.BucketLocationConstraint(region),
+			}
+		}
+
+		if _, createErr := client.CreateBucket(ctx, createInput); createErr != nil {
+			return nil, fmt.Errorf("failed to create bucket: %w", createErr)
+		}
+
+		log.WithField("bucket", bucket).Info("Bucket created successfully")
 	}
 
 	log.WithFields(log.Fields{

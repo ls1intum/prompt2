@@ -552,6 +552,22 @@ CREATE TABLE IF NOT EXISTS application_question_file_upload (
 CREATE INDEX idx_application_question_file_upload_course_phase_id ON application_question_file_upload(course_phase_id);
 CREATE INDEX idx_application_question_file_upload_order_num ON application_question_file_upload(course_phase_id, order_num);
 
+-- Add application_answer_file_upload table for file upload answers
+CREATE TABLE IF NOT EXISTS application_answer_file_upload (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_question_id UUID NOT NULL,
+    course_participation_id UUID NOT NULL,
+    file_id UUID NOT NULL,
+    CONSTRAINT fk_application_answer_file_upload_question FOREIGN KEY (application_question_id) REFERENCES application_question_file_upload(id) ON DELETE CASCADE,
+    CONSTRAINT fk_application_answer_file_upload_participation FOREIGN KEY (course_participation_id) REFERENCES course_participation(id) ON DELETE CASCADE,
+    CONSTRAINT fk_application_answer_file_upload_file FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE,
+    CONSTRAINT unique_file_upload_answer UNIQUE (course_participation_id, application_question_id)
+);
+
+CREATE INDEX idx_application_answer_file_upload_question ON application_answer_file_upload(application_question_id);
+CREATE INDEX idx_application_answer_file_upload_participation ON application_answer_file_upload(course_participation_id);
+CREATE INDEX idx_application_answer_file_upload_file ON application_answer_file_upload(file_id);
+
 -- Add sample file upload question for testing
 INSERT INTO application_question_file_upload (id, course_phase_id, title, description, is_required, allowed_file_types, max_file_size_mb, order_num, accessible_for_other_phases, access_key)
 VALUES 
