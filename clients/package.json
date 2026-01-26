@@ -44,7 +44,7 @@
     "@tiptap/react": "^3.15.3",
     "@tiptap/starter-kit": "^3.15.3",
     "@tumaet/prompt-shared-state": "^1.0.5",
-    "@tumaet/prompt-ui-components": "^1.0.5",
+    "@tumaet/prompt-ui-components": "^1.0.6",
     "autoprefixer": "^10.4.23",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
