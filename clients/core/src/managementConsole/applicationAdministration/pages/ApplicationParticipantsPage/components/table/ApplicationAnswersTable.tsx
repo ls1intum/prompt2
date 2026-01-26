@@ -106,7 +106,13 @@ export const ApplicationAnswersTable = ({
                             <Button
                               variant='outline'
                               size='sm'
-                              onClick={() => openFileDownload(fileAnswer.fileID, fileAnswer.fileName)}
+                              onClick={() =>
+                                openFileDownload({
+                                  downloadUrl: fileAnswer.downloadUrl,
+                                  fileName: fileAnswer.fileName,
+                                })
+                              }
+                              disabled={!fileAnswer.downloadUrl}
                             >
                               <Download className='mr-2 h-4 w-4' />
                               Download

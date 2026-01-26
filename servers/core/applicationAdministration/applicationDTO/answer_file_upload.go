@@ -15,6 +15,7 @@ type AnswerFileUpload struct {
 	FileName              string    `json:"fileName"`
 	FileSize              int64     `json:"fileSize"`
 	UploadedAt            time.Time `json:"uploadedAt"`
+	DownloadURL           string    `json:"downloadUrl"`
 }
 
 func (a AnswerFileUpload) GetDBModel() db.ApplicationAnswerFileUpload {

@@ -32,10 +32,18 @@ export const uploadFile = async (params: FileUploadParams): Promise<FileResponse
   const contentType = params.file.type || 'application/octet-stream'
 
   try {
-    const presignResponse = await axiosInstance.post('/api/storage/presign-upload', {
+    if (!params.coursePhaseId) {
+      throw new Error('coursePhaseId is required for file uploads')
+    }
+
+    const isAuthenticated = !!localStorage.getItem('jwt_token')
+    const basePath = isAuthenticated
+      ? `/api/apply/authenticated/${params.coursePhaseId}`
+      : `/api/apply/${params.coursePhaseId}`
+
+    const presignResponse = await axiosInstance.post(`${basePath}/files/presign`, {
       filename: params.file.name,
       contentType,
-      coursePhaseId: params.coursePhaseId,
       description: params.description,
       tags: params.tags,
     })
@@ -49,11 +57,10 @@ export const uploadFile = async (params: FileUploadParams): Promise<FileResponse
       onUploadProgress: params.onUploadProgress,
     })
 
-    const completeResponse = await axiosInstance.post('/api/storage/complete-upload', {
+    const completeResponse = await axiosInstance.post(`${basePath}/files/complete`, {
       storageKey,
       originalFilename: params.file.name,
       contentType,
-      coursePhaseId: params.coursePhaseId,
       description: params.description,
       tags: params.tags,
     })

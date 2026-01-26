@@ -5,4 +5,5 @@ export interface ApplicationAnswerFileUpload {
   fileName: string
   fileSize: number
   uploadedAt: string
+  downloadUrl: string
 }

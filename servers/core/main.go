@@ -221,9 +221,9 @@ func main() {
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
-	
-	// Initialize storage module
-	if err := storage.InitStorageModule(api, *query, conn, keycloakTokenVerifier.KeycloakMiddleware, permissionValidation.CheckAccessControlByRole); err != nil {
+
+	// Initialize storage module (service only)
+	if err := storage.InitStorageModule(*query, conn); err != nil {
 		log.Fatalf("Failed to initialize storage module: %v", err)
 	}
 

@@ -28,6 +28,8 @@ definitions:
         type: string
       courseParticipationID:
         type: string
+      downloadUrl:
+        type: string
       fileID:
         type: string
       fileName:
@@ -920,9 +922,6 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
-  gin.H:
-    additionalProperties: {}
-    type: object
   keycloakRealmDTO.AddStudentsToGroup:
     properties:
       studentsToAdd:
@@ -1559,6 +1558,66 @@ paths:
       summary: Post an application (external)
       tags:
       - applications
+  /apply/{coursePhaseID}/files/complete:
+    post:
+      consumes:
+      - application/json
+      description: Registers an uploaded file after a presigned upload completes (external
+        applicants)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/storage.FileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Complete a presigned upload (external)
+      tags:
+      - applications
+  /apply/{coursePhaseID}/files/presign:
+    post:
+      consumes:
+      - application/json
+      description: Returns a presigned URL for uploading a file directly to storage
+        (external applicants)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/storage.PresignUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a presigned upload URL (external)
+      tags:
+      - applications
   /apply/authenticated/{coursePhaseID}:
     get:
       description: Get the application form for an authenticated user
@@ -1627,6 +1686,121 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Post an application (authenticated)
+      tags:
+      - applications
+  /apply/authenticated/{coursePhaseID}/files/{fileId}:
+    delete:
+      description: Deletes a file uploaded by the authenticated applicant for the
+        given course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: File UUID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete an uploaded application file (authenticated)
+      tags:
+      - applications
+  /apply/authenticated/{coursePhaseID}/files/complete:
+    post:
+      consumes:
+      - application/json
+      description: Registers an uploaded file after a presigned upload completes (authenticated
+        applicants)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/storage.FileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Complete a presigned upload (authenticated)
+      tags:
+      - applications
+  /apply/authenticated/{coursePhaseID}/files/presign:
+    post:
+      consumes:
+      - application/json
+      description: Returns a presigned URL for uploading a file directly to storage
+        (authenticated applicants)
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/storage.PresignUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a presigned upload URL (authenticated)
       tags:
       - applications
   /auth/course_phase/{coursePhaseID}/is_student:
@@ -2874,144 +3048,6 @@ paths:
       summary: Manually trigger status mail for a course phase
       tags:
       - mailing
-  /storage/complete-upload:
-    post:
-      consumes:
-      - application/json
-      description: Registers an uploaded file after a presigned upload completes
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/storage.FileResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Complete a presigned upload
-      tags:
-      - storage
-  /storage/course-phases/{coursePhaseId}/files:
-    get:
-      description: Get all files associated with a course phase
-      parameters:
-      - description: Course Phase ID
-        in: path
-        name: coursePhaseId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/storage.FileResponse'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Get files by course phase
-      tags:
-      - storage
-  /storage/files/{fileId}:
-    delete:
-      description: Delete a file from storage and database
-      parameters:
-      - description: File ID
-        in: path
-        name: fileId
-        required: true
-        type: string
-      - description: Hard delete (remove from storage)
-        in: query
-        name: hard
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Delete a file
-      tags:
-      - storage
-    get:
-      description: Get metadata for a specific file
-      parameters:
-      - description: File ID
-        in: path
-        name: fileId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/storage.FileResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Get file metadata
-      tags:
-      - storage
-  /storage/presign-upload:
-    post:
-      consumes:
-      - application/json
-      description: Returns a presigned URL for uploading a file directly to storage
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/storage.PresignUploadResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Create a presigned upload URL
-      tags:
-      - storage
   /students/:
     get:
       description: Get a list of all students

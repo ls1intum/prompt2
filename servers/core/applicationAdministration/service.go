@@ -42,15 +42,14 @@ func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnsw
 			FileID:                answer.FileID,
 		}
 
-		file, err := ApplicationServiceSingleton.queries.GetFileByID(ctx, answer.FileID)
+		file, err := storage.StorageServiceSingleton.GetFileByID(ctx, answer.FileID)
 		if err != nil {
 			log.WithError(err).WithField("fileId", answer.FileID).Warn("Failed to load file metadata for answer")
 		} else {
 			dto.FileName = file.OriginalFilename
 			dto.FileSize = file.SizeBytes
-			if file.CreatedAt.Valid {
-				dto.UploadedAt = file.CreatedAt.Time
-			}
+			dto.UploadedAt = file.CreatedAt
+			dto.DownloadURL = file.DownloadURL
 		}
 
 		answerDTOs = append(answerDTOs, dto)

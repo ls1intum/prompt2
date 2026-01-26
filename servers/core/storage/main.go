@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
-// InitStorageModule initializes the storage module with routes and service
-func InitStorageModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) error {
+// InitStorageModule initializes the storage module with service only (no public routes)
+func InitStorageModule(queries db.Queries, conn *pgxpool.Pool) error {
 	// Get storage configuration from environment
 	maxFileSizeMB := int64(50) // Default 50MB
-	
+
 	// Parse allowed file types
 	allowedTypesStr := utils.GetEnv("ALLOWED_FILE_TYPES", "")
 	var allowedTypes []string
@@ -34,12 +33,12 @@ func InitStorageModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *p
 	accessKey := utils.GetEnv("S3_ACCESS_KEY", "admin")
 	secretKey := utils.GetEnv("S3_SECRET_KEY", "admin123")
 	forcePathStyle := utils.GetEnv("S3_FORCE_PATH_STYLE", "true") == "true" // Required for SeaweedFS/MinIO
-	
+
 	adapter, err := NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey, forcePathStyle)
 	if err != nil {
 		return fmt.Errorf("failed to create S3 adapter: %w", err)
 	}
-	
+
 	log.WithFields(log.Fields{
 		"bucket":         bucket,
 		"region":         region,
@@ -49,14 +48,11 @@ func InitStorageModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *p
 
 	// Create storage service singleton
 	StorageServiceSingleton = NewStorageService(queries, conn, adapter, maxFileSizeMB, allowedTypes)
-	
+
 	log.WithFields(log.Fields{
 		"maxFileSizeMB": maxFileSizeMB,
 		"allowedTypes":  allowedTypes,
 	}).Info("Storage service initialized")
 
-	// Setup routes
-	setupStorageRouter(routerGroup, authMiddleware, permissionRoleMiddleware)
-	
 	return nil
 }
